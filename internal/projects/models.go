@@ -1,10 +1,14 @@
 package projects
 
+import "github.com/wtiger001/teststudio/internal/capture"
+
 type Project struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Archived    bool   `json:"archived"`
+	ID            string          `json:"id"`
+	Name          string          `json:"name"`
+	Description   string          `json:"description"`
+	Archived      bool            `json:"archived"`
+	Capture       *capture.Policy `json:"capture,omitempty"`
+	CaptureLimits *capture.Limits `json:"captureLimits,omitempty"`
 }
 
 type Application struct {
@@ -28,11 +32,12 @@ type Environment struct {
 }
 
 type Suite struct {
-	ID             string   `json:"id"`
-	Name           string   `json:"name"`
-	Description    string   `json:"description"`
-	Applications   []string `json:"applications"`
-	RequiresTarget bool     `json:"requiresTarget"`
-	ActiveRelease  string   `json:"activeReleaseId,omitempty"`
-	Archived       bool     `json:"archived"`
+	ID             string          `json:"id"`
+	Name           string          `json:"name"`
+	Description    string          `json:"description"`
+	Applications   []string        `json:"applications"`
+	RequiresTarget bool            `json:"requiresTarget"`
+	ActiveRelease  string          `json:"activeReleaseId,omitempty"`
+	Archived       bool            `json:"archived"`
+	Capture        *capture.Policy `json:"capture,omitempty"`
 }

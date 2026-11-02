@@ -7,9 +7,11 @@ import (
 	"sync"
 	"time"
 
+	capturepolicy "github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/evidence"
 	"github.com/wtiger001/teststudio/internal/execution"
+	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
 
@@ -107,6 +109,10 @@ func (s *Service) recoverExpired(ctx context.Context) {
 		return
 	}
 	for _, entry := range entries {
+		retention, err := storage.Put("evidence-retention-jobs", entry.ID, entry.Project, 0, evidence.RetentionJob{Project: entry.Project, Run: entry.ID})
+		if err != nil {
+			continue
+		}
 		_, _ = s.mutate(ctx, entry.Project, entry.ID, func(v *Run) error {
 			if v.State != "running" || v.LeaseUntil == nil || time.Now().Before(*v.LeaseUntil) {
 				return ErrLeaseLost
@@ -119,7 +125,7 @@ func (s *Service) recoverExpired(ctx context.Context) {
 			v.Error = "Execution worker stopped reporting before completion."
 			v.EvidenceState = "incomplete"
 			return nil
-		}, storage.Change{Record: entry, Delete: true})
+		}, storage.Change{Record: entry, Delete: true}, retention)
 	}
 }
 
@@ -181,9 +187,18 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 		if err := s.Evidence.Event(captureCtx, evidence.Event{Run: run.ID, Project: run.Project, Kind: kind, Test: test, Attempt: attempt, Message: message}); err != nil && len(evidenceErrors) < 20 {
 			evidenceErrors = append(evidenceErrors, err.Error())
 		}
-		if run.Capture.Logs {
+		policy := capturepolicy.Normalize(run.Capture)
+		if testPolicy, ok := run.TestCapture[test]; ok {
+			policy = capturepolicy.Normalize(testPolicy)
+		}
+		if policy.Logs {
 			sequence++
-			_, err := s.Evidence.Log(captureCtx, run.Project, run.ID, worker, "stdout", test, attempt, sequence, time.Now().UTC().Format(time.RFC3339Nano)+" "+message+"\n", run.Capture.MaxBytes)
+			limits := run.CaptureLimits
+			if limits.ProjectBytes == 0 {
+				limits = capturepolicy.DefaultLimits()
+			}
+			basePolicy := capturepolicy.Normalize(run.Capture)
+			_, err := s.Evidence.LogSegment(captureCtx, evidence.LogInput{Project: run.Project, Run: run.ID, Worker: worker, Stream: "stdout", Test: test, Attempt: attempt, Sequence: sequence, Text: time.Now().UTC().Format(time.RFC3339Nano) + " " + message + "\n", Policy: policy, Budget: evidence.Budget{RunBytes: basePolicy.MaxBytes, TestBytes: policy.MaxBytes, FileBytes: min(basePolicy.MaxFileBytes, policy.MaxFileBytes, limits.FileBytes), ProjectBytes: limits.ProjectBytes}})
 			if err != nil && len(evidenceErrors) < 20 {
 				evidenceErrors = append(evidenceErrors, err.Error())
 			}
@@ -296,6 +311,10 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 	if err != nil {
 		return
 	}
+	retention, err := storage.Put("evidence-retention-jobs", run.ID, run.Project, 0, evidence.RetentionJob{Project: run.Project, Run: run.ID})
+	if err != nil {
+		return
+	}
 	_, _ = s.mutate(finish, run.Project, run.ID, func(v *Run) error {
 		if err := owned(v, worker); err != nil {
 			return err
@@ -336,7 +355,7 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 			v.Error = "Selected checks did not produce complete results."
 		}
 		return nil
-	}, storage.Change{Record: lease, Delete: true})
+	}, storage.Change{Record: lease, Delete: true}, retention)
 }
 
 func (s *Service) attemptResult(ctx context.Context, run Run, worker string, result execution.Result) error {
@@ -377,7 +396,57 @@ func (s *Service) admitAttempt(ctx context.Context, run Run) error {
 	if err := s.Auth.Check(ctx, run.Actor, run.Project, "", "runs.create"); err != nil {
 		return errors.New("execution permission was revoked")
 	}
+	if run.Request.Capture != nil {
+		if err := s.Auth.Check(ctx, run.Actor, run.Project, "", "evidence.override-capture"); err != nil {
+			return errors.New("capture override permission was revoked")
+		}
+	}
+	projectRow, err := s.Store.Get(ctx, "projects", run.Project)
+	if err != nil {
+		return err
+	}
+	project, err := storage.Decode[projects.Project](projectRow)
+	if err != nil {
+		return err
+	}
+	if project.Archived {
+		return errors.New("project is archived")
+	}
+	limits := capturepolicy.ResolveLimits(project.CaptureLimits)
+	if err := capturepolicy.Validate(run.Capture, limits); err != nil {
+		return err
+	}
+	for _, policy := range run.TestCapture {
+		if err := capturepolicy.Validate(policy, limits); err != nil {
+			return err
+		}
+	}
+	suiteRow, err := s.Store.Get(ctx, projects.Bucket("suites", run.Project), run.Request.Suite)
+	if err != nil {
+		return err
+	}
+	suite, err := storage.Decode[projects.Suite](suiteRow)
+	if err != nil {
+		return err
+	}
+	if suite.Archived {
+		return errors.New("suite is archived")
+	}
 	protected := run.Environment != nil && run.Environment.Protected
+	if run.Environment != nil {
+		r, err := s.Store.Get(ctx, projects.Bucket("environments", run.Project), run.Environment.ID)
+		if err != nil {
+			return err
+		}
+		environment, err := storage.Decode[projects.Environment](r)
+		if err != nil {
+			return err
+		}
+		if environment.Disabled {
+			return errors.New("environment is disabled")
+		}
+		protected = protected || environment.Protected
+	}
 	if protected {
 		if err := s.Auth.Check(ctx, run.Actor, run.Project, "environment/"+run.Request.Environment, "runs.execute-protected"); err != nil {
 			return errors.New("protected execution permission was revoked")

@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/domain"
 )
 
@@ -32,6 +33,11 @@ func ValidateTest(t Test) error {
 	if t.TimeoutSeconds < 1 || t.TimeoutSeconds > 3600 {
 		return errors.New("timeout must be between 1 and 3600 seconds")
 	}
+	if t.Capture != nil {
+		if err := capture.Validate(*t.Capture, capture.DefaultLimits()); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -45,6 +51,9 @@ func Validate(d Draft) []Issue {
 	}
 	if len(d.Tests) > 1000 {
 		add("", "tests", "catalog exceeds 1000 entries")
+	}
+	if err := capture.Validate(d.Capture, capture.DefaultLimits()); err != nil {
+		add("", "capture", err.Error())
 	}
 	tests := map[string]Test{}
 	for _, t := range d.Tests {

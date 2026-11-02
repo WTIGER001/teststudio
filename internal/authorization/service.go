@@ -27,7 +27,7 @@ func PermissionNames() []string {
 	areas := map[string][]string{
 		"catalog":      {"read", "create", "update", "import", "export", "publish", "archive", "restore", "delete"},
 		"runs":         {"read", "create", "cancel", "execute-protected"},
-		"evidence":     {"read", "download", "retain", "delete"},
+		"evidence":     {"read", "download", "retain", "delete", "override-capture"},
 		"schedules":    {"read", "create", "update", "delete"},
 		"environments": {"read", "manage"}, "sources": {"read", "manage"}, "suites": {"read", "manage"},
 		"credentials": {"read", "manage"}, "notifications": {"read", "manage"}, "projects": {"read", "create", "manage"},

@@ -1,18 +1,14 @@
 package catalog
 
-import "time"
+import (
+	"github.com/wtiger001/teststudio/internal/capture"
+	"time"
+)
 
-type CapturePolicy struct {
-	Logs          bool   `json:"logs"`
-	Screenshots   string `json:"screenshots"`
-	Trace         string `json:"trace"`
-	Video         string `json:"video"`
-	MaxBytes      int64  `json:"maxBytes,omitempty"`
-	RetentionDays int    `json:"retentionDays,omitempty"`
-}
+type CapturePolicy = capture.Policy
 
 func DefaultCapture() CapturePolicy {
-	return CapturePolicy{Logs: true, Screenshots: "failure", Trace: "failure", Video: "off", MaxBytes: 100 << 20, RetentionDays: 30}
+	return capture.DefaultPolicy()
 }
 
 type HTTPCheck struct {

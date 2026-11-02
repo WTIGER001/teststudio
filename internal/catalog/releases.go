@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/storage"
@@ -51,6 +52,20 @@ func (s *Service) Publish(ctx context.Context, user, project, suite, id, key str
 	}
 	if d.PublishedRelease != "" {
 		return Release{}, errors.New("draft is already published")
+	}
+	_, limits, err := s.captureSettings(ctx, project, suite)
+	if err != nil {
+		return Release{}, err
+	}
+	if err := capture.Validate(d.Capture, limits); err != nil {
+		return Release{}, err
+	}
+	for _, test := range d.Tests {
+		if test.Capture != nil {
+			if err := capture.Validate(*test.Capture, limits); err != nil {
+				return Release{}, err
+			}
+		}
 	}
 	issues := Validate(d)
 	if len(issues) > 0 {

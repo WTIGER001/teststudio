@@ -14,7 +14,6 @@ import (
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
-	_ "modernc.org/sqlite"
 )
 
 var ErrConflict = errors.New("record revision conflict")
@@ -32,6 +31,7 @@ type Record struct {
 type Change struct {
 	Record
 	Delete bool
+	Assert bool
 }
 
 type Page struct {
@@ -65,15 +65,19 @@ func Open(ctx context.Context, dsn string) (*Store, error) {
 	}
 	if dialect == "sqlite" {
 		db.SetMaxOpenConns(1)
-		for _, statement := range []string{"PRAGMA journal_mode=WAL", "PRAGMA busy_timeout=5000", "PRAGMA foreign_keys=ON"} {
-			if _, err := db.ExecContext(ctx, statement); err != nil {
+		for _, statement := range []string{"PRAGMA busy_timeout=5000", "PRAGMA journal_mode=WAL", "PRAGMA foreign_keys=ON"} {
+			if err := retrySQLiteBusy(ctx, func() error { _, err := db.ExecContext(ctx, statement); return err }); err != nil {
 				db.Close()
 				return nil, err
 			}
 		}
 	}
 	s := &Store{DB: db, Dialect: dialect}
-	if err := s.migrate(ctx); err != nil {
+	migrate := func() error { return s.migrate(ctx) }
+	if dialect == "sqlite" {
+		migrate = func() error { return retrySQLiteBusy(ctx, func() error { return s.migrate(ctx) }) }
+	}
+	if err := migrate(); err != nil {
 		db.Close()
 		return nil, err
 	}
@@ -222,12 +226,14 @@ func (s *Store) Commit(ctx context.Context, changes ...Change) error {
 	seen := map[string]bool{}
 	for _, c := range changes {
 		key := c.Bucket + "\x00" + c.ID
-		if c.Bucket == "" || c.ID == "" || c.Revision < 0 || seen[key] || (!c.Delete && !json.Valid(c.Data)) {
+		if c.Bucket == "" || c.ID == "" || c.Revision < 0 || seen[key] || (!c.Delete && !c.Assert && !json.Valid(c.Data)) || (c.Assert && (c.Delete || c.Revision < 1)) {
 			return errors.New("invalid or duplicate transaction record")
 		}
 		seen[key] = true
 		var result sql.Result
-		if c.Delete {
+		if c.Assert {
+			result, err = tx.ExecContext(ctx, `UPDATE records SET revision=revision WHERE bucket=$1 AND id=$2 AND revision=$3`, c.Bucket, c.ID, c.Revision)
+		} else if c.Delete {
 			result, err = tx.ExecContext(ctx, `DELETE FROM records WHERE bucket=$1 AND id=$2 AND revision=$3`, c.Bucket, c.ID, c.Revision)
 		} else if c.Revision == 0 {
 			result, err = tx.ExecContext(ctx, `INSERT INTO records (bucket,id,project,revision,payload,updated_at) VALUES ($1,$2,$3,1,$4,$5) ON CONFLICT (bucket,id) DO NOTHING`, c.Bucket, c.ID, c.Project, string(c.Data), time.Now().UTC().Format(time.RFC3339Nano))

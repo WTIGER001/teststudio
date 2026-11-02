@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/wtiger001/teststudio/internal/authorization"
+	"github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
@@ -32,6 +33,9 @@ func (s *Service) SaveProject(ctx context.Context, user string, p Project, revis
 		permission, scope = "projects.create", ""
 	}
 	if err := s.Auth.Check(ctx, user, scope, "", permission); err != nil {
+		return err
+	}
+	if err := capture.Validate(capture.Resolve(p.Capture, nil), capture.ResolveLimits(p.CaptureLimits)); err != nil {
 		return err
 	}
 	return s.save(ctx, user, "projects", p.ID, p.ID, revision, p)
@@ -89,7 +93,15 @@ func (s *Service) SaveSuite(ctx context.Context, user, project string, v Suite, 
 	if !domain.ValidID(v.ID) || v.Name == "" {
 		return errors.New("valid suite identifier and name are required")
 	}
-	if _, err := s.Store.Get(ctx, "projects", project); err != nil {
+	projectRow, err := s.Store.Get(ctx, "projects", project)
+	if err != nil {
+		return err
+	}
+	p, err := storage.Decode[Project](projectRow)
+	if err != nil {
+		return err
+	}
+	if err := capture.Validate(capture.Resolve(p.Capture, v.Capture), capture.ResolveLimits(p.CaptureLimits)); err != nil {
 		return err
 	}
 	for _, app := range v.Applications {

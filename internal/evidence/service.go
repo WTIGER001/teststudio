@@ -8,10 +8,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/artifacts"
+	"github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
@@ -19,14 +22,20 @@ import (
 var ErrQuota = errors.New("run evidence exceeds its configured quota")
 
 type Service struct {
-	Store *storage.Store
-	Blobs artifacts.Store
+	Store           *storage.Store
+	Blobs           artifacts.Store
+	maintenanceMu   sync.Mutex
+	retentionCursor string
 }
 
 func Bucket(run string) string  { return "artifacts/" + run }
 func blobKey(a Artifact) string { return a.Project + "/" + a.Run + "/" + a.ID + "/" + a.Checksum }
 
 func (s *Service) SaveBytes(ctx context.Context, a Artifact, data []byte, limit int64) (Artifact, error) {
+	return s.Save(ctx, a, data, Budget{RunBytes: limit, TestBytes: limit, FileBytes: min(64<<20, limit), ProjectBytes: capture.DefaultLimits().ProjectBytes})
+}
+
+func (s *Service) Save(ctx context.Context, a Artifact, data []byte, budget Budget) (Artifact, error) {
 	if a.ID == "" {
 		a.ID = domain.NewID()
 	}
@@ -36,7 +45,7 @@ func (s *Service) SaveBytes(ctx context.Context, a Artifact, data []byte, limit 
 	if a.Filename == "" || len(a.Filename) > 255 || strings.ContainsAny(a.Filename, "/\\\x00\r\n") {
 		return a, errors.New("artifact filename is invalid")
 	}
-	if len(data) > 64<<20 || limit < 1 || limit > 1<<30 {
+	if budget.RunBytes < 1 || budget.RunBytes > 1<<30 || budget.TestBytes < 1 || budget.TestBytes > 1<<30 || budget.FileBytes < 1 || budget.FileBytes > 64<<20 || budget.ProjectBytes < 1 || int64(len(data)) > budget.FileBytes {
 		return a, ErrQuota
 	}
 	hash := sha256.Sum256(data)
@@ -47,7 +56,7 @@ func (s *Service) SaveBytes(ctx context.Context, a Artifact, data []byte, limit 
 	if a.ExpiresAt.IsZero() {
 		a.ExpiresAt = a.CreatedAt.Add(30 * 24 * time.Hour)
 	}
-	row, existing, err := s.admit(ctx, a, limit)
+	row, existing, err := s.admit(ctx, a, budget)
 	if err != nil {
 		return a, err
 	}
@@ -91,7 +100,7 @@ func (s *Service) SaveBytes(ctx context.Context, a Artifact, data []byte, limit 
 	return a, storage.ErrConflict
 }
 
-func (s *Service) admit(ctx context.Context, a Artifact, limit int64) (storage.Record, Artifact, error) {
+func (s *Service) admit(ctx context.Context, a Artifact, budget Budget) (storage.Record, Artifact, error) {
 	for range 8 {
 		row, err := s.Store.Get(ctx, Bucket(a.Run), a.ID)
 		if err == nil {
@@ -99,7 +108,7 @@ func (s *Service) admit(ctx context.Context, a Artifact, limit int64) (storage.R
 			if err != nil {
 				return row, a, err
 			}
-			if old.Project != a.Project || old.Run != a.Run || old.Checksum != a.Checksum || old.Size != a.Size || old.Kind != a.Kind || old.Test != a.Test || old.Attempt != a.Attempt || old.Worker != a.Worker || old.Sequence != a.Sequence || old.Stream != a.Stream || old.Filename != a.Filename || old.ContentType != a.ContentType {
+			if old.Project != a.Project || old.Run != a.Run || old.Checksum != a.Checksum || old.Size != a.Size || old.Kind != a.Kind || old.Test != a.Test || old.Attempt != a.Attempt || old.Worker != a.Worker || old.Sequence != a.Sequence || old.Stream != a.Stream || old.Filename != a.Filename || old.ContentType != a.ContentType || old.Step != a.Step || !reflect.DeepEqual(old.Policy, a.Policy) {
 				return row, a, storage.ErrConflict
 			}
 			if old.State == "expired" || old.State == "deleted" {
@@ -110,33 +119,16 @@ func (s *Service) admit(ctx context.Context, a Artifact, limit int64) (storage.R
 		if !errors.Is(err, storage.ErrNotFound) {
 			return row, a, err
 		}
-		quotaRow, err := s.Store.Get(ctx, "artifact-quotas", a.Run)
-		if err != nil && !errors.Is(err, storage.ErrNotFound) {
+		reservations, err := s.reservations(ctx, a, budget)
+		if err != nil {
 			return row, a, err
 		}
-		quota := Quota{Limit: limit}
-		if quotaRow.Revision > 0 {
-			quota, err = storage.Decode[Quota](quotaRow)
-			if err != nil {
-				return row, a, err
-			}
-			if quota.Limit != limit {
-				return row, a, errors.New("capture quota differs from the run snapshot")
-			}
-		}
-		if quota.Bytes+a.Size > quota.Limit {
-			return row, a, ErrQuota
-		}
-		quota.Bytes += a.Size
+		a.QuotaVersion = 1
 		entry, err := storage.Put(Bucket(a.Run), a.ID, a.Project, 0, a)
 		if err != nil {
 			return row, a, err
 		}
-		reservation, err := storage.Put("artifact-quotas", a.Run, a.Project, quotaRow.Revision, quota)
-		if err != nil {
-			return row, a, err
-		}
-		if err := s.Store.Commit(ctx, entry, reservation); errors.Is(err, storage.ErrConflict) {
+		if err := s.Store.Commit(ctx, append(reservations, entry)...); errors.Is(err, storage.ErrConflict) {
 			continue
 		} else if err != nil {
 			return row, a, err
@@ -148,12 +140,24 @@ func (s *Service) admit(ctx context.Context, a Artifact, limit int64) (storage.R
 }
 
 func (s *Service) Log(ctx context.Context, project, run, worker, stream, test string, attempt int, sequence int64, text string, limit int64) (Artifact, error) {
-	if len(text) > 64<<10 || sequence < 1 {
+	policy := capture.DefaultPolicy()
+	policy.MaxBytes = limit
+	policy.MaxFileBytes = min(limit, 64<<20)
+	return s.LogSegment(ctx, LogInput{Project: project, Run: run, Worker: worker, Stream: stream, Test: test, Attempt: attempt, Sequence: sequence, Text: text, Policy: policy, Budget: Budget{RunBytes: limit, TestBytes: limit, FileBytes: min(limit, 64<<20), ProjectBytes: capture.DefaultLimits().ProjectBytes}})
+}
+
+func (s *Service) LogSegment(ctx context.Context, input LogInput) (Artifact, error) {
+	if len(input.Text) > 64<<10 || input.Sequence < 1 || !domain.ValidID(input.Stream) || !domain.ValidID(input.Worker) {
 		return Artifact{}, errors.New("invalid log segment")
 	}
-	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%d", worker, stream, sequence)))
-	a := Artifact{ID: "log-" + hex.EncodeToString(hash[:]), Project: project, Run: run, Test: test, Attempt: attempt, Worker: worker, Sequence: sequence, Stream: stream, Kind: "log", Filename: fmt.Sprintf("%s-%06d.log", stream, sequence), ContentType: "text/plain; charset=utf-8"}
-	return s.SaveBytes(ctx, a, []byte(text), limit)
+	policy := capture.Normalize(input.Policy)
+	if err := capture.Validate(policy, capture.DefaultLimits()); err != nil {
+		return Artifact{}, err
+	}
+	hash := sha256.Sum256([]byte(fmt.Sprintf("%s:%s:%d", input.Worker, input.Stream, input.Sequence)))
+	a := Artifact{ID: "log-" + hex.EncodeToString(hash[:]), Project: input.Project, Run: input.Run, Test: input.Test, Attempt: input.Attempt, Worker: input.Worker, Sequence: input.Sequence, Stream: input.Stream, Kind: "log", Filename: fmt.Sprintf("%s-%06d.log", input.Stream, input.Sequence), ContentType: "text/plain; charset=utf-8", Policy: &policy}
+	a.ExpiresAt = capture.Expiry(time.Now().UTC(), policy, "log", "")
+	return s.Save(ctx, a, []byte(input.Text), input.Budget)
 }
 
 func (s *Service) Event(ctx context.Context, e Event) error {

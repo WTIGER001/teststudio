@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/authorization"
+	"github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/storage"
@@ -48,6 +49,15 @@ func (s *Service) SaveTest(ctx context.Context, user, project, suite string, t T
 	}
 	if err := ValidateTest(t); err != nil {
 		return err
+	}
+	if t.Capture != nil {
+		_, limits, err := s.captureSettings(ctx, project, suite)
+		if err != nil {
+			return err
+		}
+		if err := capture.Validate(*t.Capture, limits); err != nil {
+			return err
+		}
 	}
 	if t.Application != "" {
 		found := false
@@ -145,6 +155,9 @@ func (s *Service) Tests(ctx context.Context, user, project, suite string) ([]sto
 
 func (s *Service) CheckCurrentState(ctx context.Context, project, suite string, tests []Test, protected bool) error {
 	for _, t := range tests {
+		if protected && t.Safety != "safe" {
+			return fmt.Errorf("test %s is not labeled safe in the selected release", t.ID)
+		}
 		r, err := s.Store.Get(ctx, Bucket("tests", project, suite), t.ID)
 		if err != nil {
 			return err

@@ -228,3 +228,18 @@ An invalid external path produces a field error and cannot apply.
 Light, dark, and mobile views pass visual checks. The final browser page has no console errors or document overflow.
 The test browser, automation daemon, and local server stop after verification.
 Category trees, saved selections, source-owned metadata, full bulk metadata editing, and YAML remain pending.
+
+### Capture policies, shared quotas, and durable retention calculation
+
+Added project defaults, suite and test overrides, and permission-controlled run capture overrides.
+Runs freeze effective capture settings and current project limits.
+Added file, test, run, and shared project quotas with atomic reservations and idempotent retry accounting.
+Added non-mutating revision assertions for quota configuration guards.
+Added per-kind durations and longer retention for failed or flaky observations.
+Durable retention tasks page through manifests and resume after service restart.
+Completion and lost-worker recovery queue the same retention calculation.
+Dispatch checks current capture limits, archive states, environment protection, and override permission.
+Validation: targeted race tests pass on SQLite and local PostgreSQL for storage, evidence, runs, catalog, and HTTP API.
+Repeated SQLite startup checks pass after bounded lock retries. The Go executable builds.
+Tests cover shared quota contention, frozen policies, log opt-out, current limits, override revocation, and retention task resumption.
+Capture configuration screens, storage cleanup, evidence pins, browser media capture, and cloud artifact adapters remain pending.

@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/authorization"
+	"github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/evidence"
@@ -177,6 +178,28 @@ func (s *Service) Create(ctx context.Context, user, project string, req Request,
 	if err := s.Catalog.CheckCurrentState(ctx, project, req.Suite, tests, protected); err != nil {
 		return Run{}, err
 	}
+	policy := capture.Normalize(release.Draft.Capture)
+	limits := capture.ResolveLimits(p.CaptureLimits)
+	if req.Capture != nil {
+		if err := s.Auth.Check(ctx, user, project, "", "evidence.override-capture"); err != nil {
+			return Run{}, err
+		}
+		policy = capture.Normalize(*req.Capture)
+	}
+	if err := capture.Validate(policy, limits); err != nil {
+		return Run{}, err
+	}
+	testPolicies := map[string]capture.Policy{}
+	for _, test := range tests {
+		effective := capture.Normalize(policy)
+		if test.Capture != nil && req.Capture == nil {
+			effective = capture.Normalize(*test.Capture)
+		}
+		if err := capture.Validate(effective, limits); err != nil {
+			return Run{}, err
+		}
+		testPolicies[test.ID] = effective
+	}
 	for _, test := range tests {
 		if test.Runner != "http" || s.HTTP == nil {
 			return Run{}, fmt.Errorf("no compatible worker is configured for runner %s", test.Runner)
@@ -196,9 +219,9 @@ func (s *Service) Create(ctx context.Context, user, project string, req Request,
 	}
 	now := time.Now().UTC()
 	v := Run{ID: domain.NewID(), Project: project, Request: req, Release: release, Environment: environment, Tests: tests, Capture: release.Draft.Capture, Actor: user, Trigger: trigger, State: "requested", Outcome: "unknown", Phase: "queued", Counts: Counts{Total: len(tests)}, Results: []execution.Result{}, CreatedAt: now, UpdatedAt: now, Deadline: now.Add(time.Duration(req.TimeoutSeconds) * time.Second), EvidenceState: "pending", EvidenceErrors: []string{}}
-	if v.Capture.MaxBytes == 0 {
-		v.Capture = catalog.DefaultCapture()
-	}
+	v.Capture = policy
+	v.CaptureLimits = limits
+	v.TestCapture = testPolicies
 	run, err := storage.Put("runs", v.ID, project, 0, v)
 	if err != nil {
 		return v, err
@@ -215,7 +238,7 @@ func (s *Service) Create(ctx context.Context, user, project string, req Request,
 	if err != nil {
 		return v, err
 	}
-	err = s.Store.Commit(ctx, run, queued, idempotency, audit)
+	err = s.Store.Commit(ctx, run, queued, idempotency, audit, storage.Change{Record: projectRow, Assert: true})
 	if errors.Is(err, storage.ErrConflict) {
 		return s.Create(ctx, user, project, req, key, trigger)
 	}
