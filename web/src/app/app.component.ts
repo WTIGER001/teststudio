@@ -63,6 +63,7 @@ import { HelpComponent } from './features/help/help.component'
               <a [routerLink]="['/projects', app.workspace.projectId(), 'catalog']" routerLinkActive="active"><span aria-hidden="true">≡</span> Test catalog</a>
               <a [routerLink]="['/projects', app.workspace.projectId(), 'runs']" routerLinkActive="active"><span aria-hidden="true">▷</span> Test runs</a>
               <a [routerLink]="['/projects', app.workspace.projectId(), 'trends']" routerLinkActive="active"><span aria-hidden="true">▥</span> Trends</a>
+              @if (app.workspace.can('schedules.read')) { <a [routerLink]="['/projects', app.workspace.projectId(), 'schedules']" routerLinkActive="active"><span aria-hidden="true">◷</span> Schedules</a> }
               <a [routerLink]="['/projects', app.workspace.projectId(), 'configuration']" routerLinkActive="active"><span aria-hidden="true">⚙</span> Project settings</a>
             }
           </nav>

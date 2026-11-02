@@ -20,7 +20,7 @@ Focus returns to the Help button. Unsaved page fields remain in place.
 
 ## Guide coverage
 
-The guides cover sign-in, projects, the test catalog, project settings, test runs, run details, and trends.
+The guides cover sign-in, projects, the test catalog, project settings, test runs, run details, trends, and schedules.
 Sign-in help appears whenever the user has no active session.
 Signed-in pages select their guide from the route's `helpTopic` data.
 Unmapped routes use the projects guide after normal route handling.

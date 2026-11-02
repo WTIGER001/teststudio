@@ -38,6 +38,7 @@ import { RunRetentionService } from './run-retention.service'
           <dt>Suite</dt><dd>{{ run.request.suiteId }} · release <code>{{ run.release.id }}</code></dd><dt>Environment</dt><dd>{{ run.environment?.name || 'No target' }}{{ run.environment?.protected ? ' · Protected' : '' }}<span class="small muted"> {{ run.environment?.stage }}</span></dd>
           <dt>Selection</dt><dd>{{ run.request.testIds?.length ? 'Selected tests and dependencies' : 'Full eligible suite' }} · {{ run.tests.length }} tests</dd><dt>Location</dt><dd>{{ run.request.executionLocation }}</dd>
           <dt>Requested by</dt><dd>{{ run.actor }} · {{ run.trigger }}</dd><dt>Created</dt><dd><time [attr.datetime]="run.createdAt">{{ run.createdAt | date:'medium' }}</time></dd>
+          @if (run.schedule; as schedule) { <dt>Schedule</dt><dd><a [routerLink]="['/projects', run.projectId, 'schedules']">{{ schedule.id }}</a><span class="table-subtitle muted">Due <time [attr.datetime]="schedule.dueAt">{{ schedule.dueAt | date:'medium':'UTC' }} UTC</time></span></dd> }
           <dt>Finished</dt><dd>{{ run.finishedAt ? (run.finishedAt | date:'medium') : 'In progress' }}</dd><dt>Limits</dt><dd>{{ run.request.timeoutSeconds }} seconds · {{ run.request.retries ?? 0 }} retries per test</dd>
         </dl>
       </section>

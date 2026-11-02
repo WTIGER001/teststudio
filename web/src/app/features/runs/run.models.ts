@@ -22,6 +22,7 @@ export interface Attempt {
   go?: GoObservation
 }
 export interface Run {
+  schedule?: { id: string; firingId: string; dueAt: string }
   id: string; projectId: string; request: RunRequest; release: { id: string }; environment?: Environment; tests: TestDefinition[]
   timing?: TimingEstimate; currentTestStartedAt?: string; currentAttempt?: number
   actor: string; trigger: string; state: string; outcome: string; phase: string; currentTestId?: string; counts: Counts

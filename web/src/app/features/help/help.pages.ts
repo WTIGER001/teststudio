@@ -1,6 +1,21 @@
 import type { HelpPage } from './help.models'
 
 export const helpPages: Record<string, HelpPage> = {
+  schedules: {
+    id: 'schedules', title: 'Schedules',
+    introduction: ['Repeat published tests on an interval or cron timetable. Every triggered firing creates a normal run with frozen definitions, timing criteria, results, and evidence.'],
+    concepts: [
+      { title: 'Cadence and timezone', description: 'Intervals use UTC and accept five seconds through thirty days. Cron uses five fields and an explicit IANA timezone. Preview shows the next five occurrences in UTC. A repeated daylight-saving hour can contain two occurrences.' },
+      { title: 'Release and selection', description: 'Leave the release pin empty to follow the suite’s active release. A pin keeps a specific published release. Empty test identifiers select all eligible tests and normal dependencies.' },
+      { title: 'Execution owner', description: 'The creator or latest configuration editor becomes the execution owner. Every firing checks current execution permissions, target protection, catalog state, and worker availability.' },
+      { title: 'Overlap and missed ticks', description: 'Skip prevents overlap with the previous run from this schedule. Allow permits another run. After downtime, one firing represents missed occurrences and the next time moves into the future.' },
+      { title: 'Firing history', description: 'Triggered firings link to runs. Skipped and blocked firings retain their reasons. Archive keeps history. Restore leaves a schedule paused. Runtime firings do not invalidate configuration edits.' }
+    ],
+    tutorials: [
+      { title: 'Create a repeating check', steps: ['Select + New schedule and enter a name and permanent identifier.', 'Choose a published suite, its required target, and an execution location.', 'Optionally select test identifiers or pin a release.', 'Choose an interval or cron expression, timezone, overlap rule, run limit, and retries.', 'Select Preview schedule to inspect future times and timing readiness.', 'Select Enable this schedule when it should run, then Save schedule.'] },
+      { title: 'Investigate or pause a schedule', steps: ['Read the next occurrence and last firing on Project schedules.', 'Select History to inspect triggered, skipped, and blocked occurrences.', 'Follow a run link for attempts, timing, logs, and retained evidence.', 'Use Pause to stop future firings. Existing runs use their normal cancellation controls.', 'Use Edit to correct the selection or cadence. Configuration conflicts require an explicit reload.', 'Use Archive to remove normal scheduling while keeping its identifier and history. Include archived schedules to restore it.'] }
+    ]
+  },
   trends: {
     id: 'trends', title: 'Trends',
     introduction: ['Explore final logical results across finished runs. Stacked areas show passed, failed, timed-out, flaky, skipped, and unknown results together.'],

@@ -72,6 +72,7 @@ Use one scheduler implementation with durable claims and execution leases across
 Replicas can recover abandoned work without starting duplicate logical runs.
 Provider retries must reconcile an existing execution before starting another worker.
 Application schedules do not require EventBridge, Kubernetes CronJobs, or Azure timer functions.
+See [Durable schedules](schedules.md) for the implemented local scheduler, project interface, and atomic firing contract.
 Configure concurrency by project, execution location, and workload.
 Define environment exclusivity explicitly. Frequent health probes must not inherit a global browser-run lock.
 

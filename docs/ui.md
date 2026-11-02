@@ -105,3 +105,13 @@ Recovered attempts retain the original run outcome. Missing measurements show Du
 Resource references remain inside an expandable section. The worker table scrolls within narrow screens.
 Local browser checks verify interrupted-run diagnostics in light, dark, and mobile layouts.
 The checked views have no console errors or document overflow. Owned verification processes exit after checks.
+
+## Schedules
+
+The project schedule page provides interval and cron configuration, execution selection, release pins, timing previews, and firing history.
+Public configuration revisions stay stable during runtime polling.
+Unsaved fields remain intact while schedules fire. A project change closes the previous editor.
+Pause controls future firings. Archive preserves identifiers and history. Restore leaves the schedule paused.
+Triggered firings link to normal runs. Blocked and skipped firings retain their reasons.
+The page includes contextual help and supports light, dark, and narrow layouts.
+The focused self-test verifies the real local scheduler through TestStudio's publication, execution, timing, and evidence workflow.

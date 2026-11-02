@@ -127,3 +127,10 @@ bash scripts/test-go-self.sh
 ```
 
 See [Local Go suites](docs/go-testing.md) for the manifest, selectors, runtime profiles, diagnostics, and recovery contract.
+
+## Repeating runs
+
+Manage interval and cron schedules from the project Schedules page.
+Preview future times, select published tests, and inspect firing history and normal run evidence.
+The local server processes schedules by default.
+See [Durable schedules](docs/schedules.md) for permissions, release pins, overlap, downtime, and replica behavior.

@@ -64,6 +64,24 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Record feature commits and targeted validation here.
 
+### Schedule editor, previews, and firing history
+
+Added project navigation and focused schedule editor, listing, and firing-history components.
+The editor selects suites, targets, locations, release pins, tests, run limits, retries, cadence, timezones, and overlap behavior.
+Preview validates the normal execution selection and shows five future UTC times with timing readiness. It creates no run.
+Polling updates runtime state without changing unsaved editor fields or configuration revisions.
+Enable, pause, archive, and restore use the same scoped API and revision checks.
+Triggered firings open normal run details. Blocked and skipped firings retain visible reasons and coalescing notices.
+Run snapshots link back to their schedule and retain the original due time.
+Project changes close stale editors. Structured edits preserve request options and exclude server-owned state.
+Added Schedules help with Introduction, Concepts, and Tutorials.
+Validation: the Angular production build and focused form transformation checks pass.
+STUDIO-SCHEDULE-001 executes the real local scheduler through TestStudio's own Playwright runner.
+It verifies preview, firing, unsaved editing, stable revisions, pause across a due interval, normal timing and evidence, blocked catalog changes, archival, and restoration.
+It also verifies cron previews, preserved help edits, project changes, and light and dark mobile containment.
+The expanded contextual help workflow passes with the new page.
+Notification transports, environment exclusivity, provider execution adapters, and the remaining full plan remain pending.
+
 ### Durable schedule API and atomic run creation
 
 Added project schedules with bounded intervals, five-field cron expressions, explicit timezones, release pins, and overlap policies.

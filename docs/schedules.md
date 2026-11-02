@@ -81,4 +81,24 @@ The initial functional verification uses local databases and local test targets.
 
 Focused checks cover concurrent claims, restart recovery, release pins, permission changes, overlap, configuration revisions, and disable races.
 They also verify normal run snapshots, execution, timing, results, evidence, and project-scoped API access.
-The schedule interface and its browser workflow remain under implementation at this backend checkpoint.
+
+## Interface
+
+Open Schedules from the project navigation.
+Create or edit a definition with its suite, target, location, release pin, and explicit test identifiers.
+Preview shows five future occurrences and current timing readiness without creating a run.
+Form changes clear the previous preview. Polling preserves unsaved editor fields.
+Use Enable and Pause for future firings. Existing runs keep their normal cancellation controls.
+History shows the due time, observed time, coalescing notice, owner, and blocked or skipped reason.
+Run links open normal timing, result, attempt, and evidence views.
+Archive keeps firing history. Include archived schedules to restore a definition in the paused state.
+Configuration conflicts provide an explicit reload action.
+Changing projects closes the previous editor.
+The page has contextual Introduction, Concepts, and Tutorials help.
+The editor and history use shared light and dark theme tokens and contained mobile table scrolling.
+
+Run the focused browser workflow through TestStudio:
+
+```sh
+bash scripts/test-self.sh --test=STUDIO-SCHEDULE-001
+```
