@@ -79,6 +79,7 @@ func (s *Service) claim(ctx context.Context, entry storage.Record, worker string
 		v.State = "cancelled"
 		if !v.CancelRequested {
 			v.State = "timed-out"
+			v.Outcome = "timed-out"
 			v.Error = "Run deadline expired before execution."
 		}
 		v.Phase = "finished"
@@ -427,13 +428,21 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 			}
 			failedBefore = true
 		}
-		if executionError != "" || result.TestID == "" || ctx.Err() != nil {
+		deadlineResult := result.State == "timed-out" && errors.Is(ctx.Err(), context.DeadlineExceeded) && parent.Err() == nil
+		if executionError != "" || result.TestID == "" || (ctx.Err() != nil && !deadlineResult) {
 			break
 		}
 		result.TotalDurationMs = totalDuration
 		result.TimingRegressions = regressions
-		if err := s.finalResult(ctx, run, worker, result); err != nil {
-			executionError = "Finalize test: " + err.Error()
+		finalCtx := ctx
+		releaseFinal := func() {}
+		if deadlineResult {
+			finalCtx, releaseFinal = context.WithTimeout(context.WithoutCancel(parent), 5*time.Second)
+		}
+		finalErr := s.finalResult(finalCtx, run, worker, result)
+		releaseFinal()
+		if finalErr != nil {
+			executionError = "Finalize test: " + finalErr.Error()
 			break
 		}
 		completed[test.ID] = result.State
@@ -471,6 +480,8 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 		v.Outcome = "passed"
 		if v.Counts.Failed > 0 {
 			v.Outcome = "failed"
+		} else if v.Counts.TimedOut > 0 {
+			v.Outcome = "timed-out"
 		} else if v.Counts.Flaky > 0 {
 			v.Outcome = "flaky"
 		}
@@ -479,7 +490,7 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 			v.Outcome = "unknown"
 		} else if errors.Is(ctxErr, context.DeadlineExceeded) {
 			v.State = "timed-out"
-			v.Outcome = "unknown"
+			v.Outcome = "timed-out"
 		} else if parent.Err() != nil {
 			v.State = "incomplete"
 			v.Outcome = "unknown"
@@ -488,7 +499,7 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 			v.State = "blocked"
 			v.Outcome = "unknown"
 			v.Error = executionError
-		} else if v.Counts.Completed != v.Counts.Total || v.Counts.Passed+v.Counts.Failed+v.Counts.Flaky == 0 {
+		} else if v.Counts.Completed != v.Counts.Total || v.Counts.Passed+v.Counts.Failed+v.Counts.TimedOut+v.Counts.Flaky == 0 {
 			v.State = "incomplete"
 			v.Outcome = "unknown"
 			v.Error = "Selected checks did not produce complete results."

@@ -58,7 +58,7 @@ func TestHTTPDeadlineAndTLSVerification(t *testing.T) {
 	defer server.Close()
 	env := projects.Environment{Stage: "local", Endpoints: map[string]string{"api": server.URL}}
 	r := (&HTTP{}).Execute(t.Context(), definition("/slow"), env)
-	if r.FailureKind != "timeout" || r.DurationMs > 3000 {
+	if r.State != "timed-out" || r.FailureKind != "timeout" || r.DurationMs > 3000 {
 		t.Fatalf("timeout: %+v", r)
 	}
 	secure := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200) }))

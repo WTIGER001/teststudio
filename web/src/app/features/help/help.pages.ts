@@ -75,13 +75,13 @@ export const helpPages: Record<string, HelpPage> = {
     introduction: ['This page explains one run: what it used, what happened, how long tests took, and which evidence remains available.'],
     concepts: [
       { title: 'Run state and outcome', description: 'State describes execution progress. Outcome describes the result. An incomplete run retains uncertainty instead of becoming a pass.' },
-      { title: 'Results and attempts', description: 'Final counts use logical test results. Attempt history keeps each retry. A successful retry can leave a flaky result.' },
+      { title: 'Results and attempts', description: 'Final counts use logical test results. Attempt history keeps each retry. Timeouts have a separate timed-out status and count. A successful retry can leave a flaky result.' },
       { title: 'Test timing', description: 'Frozen predictions explain the criteria used for this run. Worker elapsed time includes coordination. Duration unavailable means no valid test measurement exists.' },
       { title: 'Evidence and retention', description: 'Logs and artifacts have capture and retention policies. Capture gaps do not erase test outcomes. Pins preserve evidence; deletion removes files while retaining results.' },
       { title: 'Worker recovery', description: 'After an interruption, recovery retains available diagnostics and removes owned resources. Recovered observations keep the original run outcome.' }
     ],
     tutorials: [
-      { title: 'Investigate a failed or incomplete run', steps: ['Read the run summary and any execution or capture warning.', 'Compare final results with Attempt history. Expand recorded steps when available.', 'Inspect Run logs and Execution events. Filter logs by stream or test identifier when needed.', 'Open retained screenshots or other artifacts. Check Worker resources for pending cleanup or recovery gaps.', 'Use the failure rerun action when available to start a separate run. The original record remains unchanged.'] },
+      { title: 'Investigate a failed or incomplete run', steps: ['Read the run summary and any execution or capture warning.', 'Compare final results with Attempt history. Expand recorded steps when available.', 'Inspect Run logs and Execution events. Filter logs by stream or test identifier when needed.', 'Open retained screenshots or other artifacts. Check Worker resources for pending cleanup or recovery gaps.', 'Use Rerun failures to repeat failed, timed-out, and flaky tests in a separate run. The original record remains unchanged.'] },
       { title: 'Understand timing and preserve evidence', steps: ['Review Test timing for the predictions and timeout criteria frozen when this run was queued.', 'Compare measured durations, expected values, and slowdown ratios. Functional outcomes remain visible beside timing failures.', 'Use the retention controls to pin evidence that needs further review.', 'If current timing history needs a reset, open Manage comparable timing history and provide a reason. Reset requires permission and does not change historical results.'] }
     ]
   }

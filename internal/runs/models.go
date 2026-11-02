@@ -26,6 +26,7 @@ type Counts struct {
 	Total     int `json:"total"`
 	Passed    int `json:"passed"`
 	Failed    int `json:"failed"`
+	TimedOut  int `json:"timedOut"`
 	Flaky     int `json:"flaky"`
 	Skipped   int `json:"skipped"`
 	Completed int `json:"completed"`
@@ -72,11 +73,14 @@ func Terminal(state string) bool {
 func Count(tests int, results []execution.Result) Counts {
 	c := Counts{Total: tests}
 	for _, r := range results {
+		r = execution.NormalizeTimeout(r)
 		switch r.State {
 		case "passed":
 			c.Passed++
 		case "failed":
 			c.Failed++
+		case "timed-out":
+			c.TimedOut++
 		case "flaky":
 			c.Flaky++
 		case "skipped":

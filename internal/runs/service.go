@@ -63,7 +63,7 @@ func (s *Service) Get(ctx context.Context, project, id string) (Run, storage.Rec
 	if err == nil && v.Project != project {
 		err = storage.ErrNotFound
 	}
-	return v, r, err
+	return NormalizeTimeouts(v), r, err
 }
 
 func (s *Service) Create(ctx context.Context, user, project string, req Request, key, trigger string) (Run, error) {

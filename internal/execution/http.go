@@ -27,6 +27,9 @@ func (e *HTTP) Execute(ctx context.Context, test catalog.Test, environment proje
 	var finalize func()
 	fail := func(kind string, err error) Result {
 		r.FailureKind = kind
+		if kind == "timeout" {
+			r.State = "timed-out"
+		}
 		r.Error = err.Error()
 		r.FinishedAt = time.Now().UTC()
 		r.DurationMs = float64(time.Since(start)) / float64(time.Millisecond)

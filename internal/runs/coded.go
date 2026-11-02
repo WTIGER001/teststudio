@@ -25,7 +25,7 @@ func (s *Service) captureCodedReport(parent context.Context, run Run, worker str
 	}
 	policy := capture.Normalize(run.TestCapture[result.TestID])
 	base := capture.Normalize(run.Capture)
-	failed := result.State == "failed" || result.State == "unknown" || failedBefore
+	failed := result.State == "failed" || result.State == "timed-out" || result.State == "unknown" || failedBefore
 	ctx, cancel := context.WithTimeout(context.WithoutCancel(parent), 10*time.Second)
 	defer cancel()
 	for index, file := range report.Attachments {

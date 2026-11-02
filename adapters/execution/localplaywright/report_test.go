@@ -65,6 +65,25 @@ func TestUndispatchedWorkerDoesNotInventExecutionDuration(t *testing.T) {
 	}
 }
 
+func TestWorkerContractReadsNewAndLegacyTimeoutsWithoutCallingThemFailures(t *testing.T) {
+	for _, state := range []string{"failed", "timed-out"} {
+		directory, input, report := contractFixture(t)
+		report.Result.State = state
+		report.Result.FailureKind = "timeout"
+		writeReport(t, directory, report)
+		parsed, err := readReport(directory, input, errors.New("worker timed out"))
+		if err != nil || parsed.Result.State != "timed-out" || parsed.Result.FailureKind != "timeout" {
+			t.Fatalf("timeout contract: %+v %v", parsed, err)
+		}
+		report.Result.State = "timed-out"
+		report.Result.FailureKind = ""
+		writeReport(t, directory, report)
+		if _, err := readReport(directory, input, nil); err == nil {
+			t.Fatal("timeout without a timeout reason was accepted")
+		}
+	}
+}
+
 func TestEvidenceImportRejectsEscapeLinksAndOversizeWithoutChangingResult(t *testing.T) {
 	directory, input, report := contractFixture(t)
 	input.Capture.MaxFileBytes = 8

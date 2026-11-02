@@ -41,6 +41,9 @@ func TestPredictionUsesCleanWindowAndBoundsAdaptiveTimeout(t *testing.T) {
 			t.Fatalf("interrupted timing: %+v", a)
 		}
 	}
+	if a := Assess(p, 3000, "timed-out", ""); a.Status != "censored" || !a.Censored {
+		t.Fatal("timeout status was treated as a complete timing observation")
+	}
 	if Assess(p, 0, "skipped", "").Status != "not-executed" {
 		t.Fatal("skipped test measured")
 	}

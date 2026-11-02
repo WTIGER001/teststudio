@@ -179,6 +179,9 @@ func (e *Executor) Execute(ctx context.Context, input execution.CodedInput) (rep
 		report = e.Recover(cleanupObservation, *ref, input)
 		cancelObservation()
 		report.Result.State = "unknown"
+		if kind == "timeout" {
+			report.Result.State = "timed-out"
+		}
 		report.Result.TestID = input.Test.ID
 		report.Result.FailureKind = kind
 		report.Result.Error = wall.Err().Error()

@@ -184,5 +184,17 @@ func (s *Server) record(w http.ResponseWriter, r *http.Request, bucket, id strin
 		return
 	}
 	w.Header().Set("ETag", fmt.Sprintf("\"%d\"", v.Revision))
+	if bucket == "runs" {
+		run, err := storage.Decode[runs.Run](v)
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		v.Data, err = json.Marshal(runs.NormalizeTimeouts(run))
+		if err != nil {
+			problem(w, err)
+			return
+		}
+	}
 	JSON(w, 200, v)
 }

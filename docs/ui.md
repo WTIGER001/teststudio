@@ -35,7 +35,8 @@ Guide structure and maintenance instructions are in `docs/help.md`.
 ## Trend chart contract
 
 Result-state trends use stacked area charts across overall, category, and test views.
-Stack passed, failed, flaky, skipped, and unknown or incomplete counts together.
+Stack passed, failed, timed-out, flaky, skipped, and unknown or incomplete counts together.
+Timeouts use a separate blue status color in both themes.
 Keep stack order and state colors consistent in light and dark themes.
 Use final logical results for counts. Retries do not add results to the chart.
 Show state counts and totals in tooltips and an accessible data table.
@@ -53,6 +54,8 @@ Run history provides environment, suite, state, and selection filters with bound
 The run form selects a published suite, environment, test identifiers, time limit, and retries.
 The time limit accepts 1 through 3600 seconds, consistent with the run API.
 Run details show the execution snapshot, progress, final counts, attempts, events, and filtered logs.
+Counts and status badges separate timed-out tests from failed tests.
+Rerun failures includes failed, timed-out, and flaky results.
 Active runs refresh every two seconds. Cancellation and failure reruns use explicit actions.
 Artifact previews support text, raster images, and video. Other content uses a download link.
 The browser retrieves artifact content through short-lived access links on a separate origin.

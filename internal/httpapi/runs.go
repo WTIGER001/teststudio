@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
@@ -137,7 +138,21 @@ func (s *Server) runRoutes(m *http.ServeMux) {
 						return
 					}
 					value.Claim = ""
+					if value.RecoveredResult != nil {
+						result := execution.NormalizeTimeout(*value.RecoveredResult)
+						value.RecoveredResult = &result
+					}
 					page.Items[i].Data, _ = json.Marshal(value)
+				}
+			}
+			if kind == "attempts" {
+				for i, row := range page.Items {
+					value, err := storage.Decode[execution.Result](row)
+					if err != nil {
+						problem(w, err)
+						return
+					}
+					page.Items[i].Data, _ = json.Marshal(execution.NormalizeTimeout(value))
 				}
 			}
 			JSON(w, 200, page)

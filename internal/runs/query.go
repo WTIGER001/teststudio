@@ -49,6 +49,7 @@ type Page struct {
 }
 
 func Summarize(v Run) Summary {
+	v = NormalizeTimeouts(v)
 	s := Summary{ID: v.ID, Project: v.Project, Suite: v.Request.Suite, Environment: v.Request.Environment, State: v.State, Outcome: v.Outcome, Phase: v.Phase, Counts: v.Counts, CreatedAt: v.CreatedAt, FinishedAt: v.FinishedAt, EvidenceState: v.EvidenceState, Actor: v.Actor, Trigger: v.Trigger, Selection: "full"}
 	if len(v.Request.IDs) > 0 {
 		s.Selection = "selection"

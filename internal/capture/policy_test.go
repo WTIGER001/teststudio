@@ -19,7 +19,7 @@ func TestPolicyBoundsAndKindRetention(t *testing.T) {
 	for _, test := range []struct {
 		kind, outcome string
 		days          int
-	}{{"video", "passed", 7}, {"trace", "passed", 14}, {"log", "passed", 30}, {"video", "failed", 90}, {"trace", "flaky", 90}} {
+	}{{"video", "passed", 7}, {"trace", "passed", 14}, {"log", "passed", 30}, {"video", "failed", 90}, {"trace", "flaky", 90}, {"trace", "timed-out", 90}} {
 		if expiry := capture.Expiry(created, p, test.kind, test.outcome); !expiry.Equal(created.Add(time.Duration(test.days) * 24 * time.Hour)) {
 			t.Fatalf("retention for %s/%s: %v", test.kind, test.outcome, expiry)
 		}

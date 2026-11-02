@@ -646,6 +646,10 @@ See [Test timing](timing.md) for the initial native HTTP policy and contracts.
 #### Attempts, steps, and capture
 
 Each test result has its own attempts, assertions, steps, timing, errors, and artifact links.
+Timeouts use a separate `timed-out` status and `timedOut` count across runners, API responses, and the UI.
+Rerun failures includes failed, timed-out, and flaky tests. Timeout evidence retains unsuccessful-attempt capture and retention rules.
+The run deadline preserves a known active-test timeout when the worker can save its result.
+See [Test results](results.md) for status, aggregation, compatibility, and rerun behavior.
 An explicit retry creates a separate attempt. A passing retry remains flaky.
 Keep setup, teardown, worker, and build diagnostics identifiable even when no test starts.
 Run-level output remains run-level when the adapter cannot attribute it reliably to a test.
@@ -1190,6 +1194,7 @@ The page inventory below does not require a separate sidebar item for every page
 
 Use neutral light backgrounds, white cards, dark text, subtle borders, and one navigation accent.
 Reserve green for success, red for failures, amber for flaky or incomplete results, and neutral colors for pending states.
+Use blue for timeout status. Keep timeout counts separate from assertion failures.
 Always show status text as well as color.
 Use readable body text, compact metadata, and consistent control heights.
 Keep desktop content gutters small and cards at the available content width.
@@ -1218,7 +1223,7 @@ Provide the timeline, live logs, screenshots, traces, and artifact states descri
 Test and category links open their history while retaining context.
 
 Trends use stacked area charts for result states. Retain failure and volatility rankings.
-Stack passed, failed, flaky, skipped, and unknown or incomplete counts within the same chart.
+Stack passed, failed, timed-out, flaky, skipped, and unknown or incomplete counts within the same chart.
 Use a stable stack order and consistent state colors across overall, category, and test views.
 The default vertical axis shows counts. Each run contributes one final logical result per selected test.
 Keep retries in attempt history. They do not add extra counts to the stacked areas.

@@ -36,9 +36,9 @@ func assertRemoved(t *testing.T, run string) {
 
 func TestContainerFailureAndTimeoutPreserveMediaAndSteps(t *testing.T) {
 	for _, tc := range []struct {
-		id, kind string
-		timeout  int
-	}{{"ADAPTER-FAIL", "assertion", 60000}, {"ADAPTER-TIMEOUT", "timeout", 3000}} {
+		id, kind, state string
+		timeout         int
+	}{{"ADAPTER-FAIL", "assertion", "failed", 60000}, {"ADAPTER-TIMEOUT", "timeout", "timed-out", 3000}} {
 		t.Run(tc.id, func(t *testing.T) {
 			executor, input := containerInput(t, tc.id, tc.timeout)
 			started := false
@@ -48,7 +48,7 @@ func TestContainerFailureAndTimeoutPreserveMediaAndSteps(t *testing.T) {
 				t.Error("worker did not report its real test start")
 			}
 			assertRemoved(t, input.RunID)
-			if report.Result.State != "failed" || report.Result.FailureKind != tc.kind || len(report.Result.Steps) == 0 || report.Result.DurationMs <= 0 || len(report.EvidenceErrors) != 0 {
+			if report.Result.State != tc.state || report.Result.FailureKind != tc.kind || len(report.Result.Steps) == 0 || report.Result.DurationMs <= 0 || len(report.EvidenceErrors) != 0 {
 				t.Fatalf("failure contract: %+v errors=%v", report.Result, report.EvidenceErrors)
 			}
 			kinds := map[string]int{}

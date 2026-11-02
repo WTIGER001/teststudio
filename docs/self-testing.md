@@ -18,7 +18,7 @@ It packages them with the pinned Playwright runtime and the new browser tests.
 An isolated controller registers the catalog, publishes an immutable local image ID, and starts a normal TestStudio run.
 Each test container starts a new TestStudio instance with its own SQLite database.
 The instances use loopback endpoints inside the container. They have no external network access.
-The suite tests themes, mobile layout, page help, catalog publication, native HTTP execution, timing history, and baseline reset.
+The suite tests themes, mobile layout, page help, catalog publication, native HTTP execution, timing history, baseline reset, and timeout reruns.
 Native check runs remain separate from the outer Playwright run. They cannot recurse into browser self-tests.
 
 The script stops its controller after verification. It preserves its database and private artifacts under `.data/selftest-verification.*`.
@@ -77,7 +77,8 @@ Run the intentional timeout separately:
 bash scripts/test-self.sh --timeout-probe
 ```
 
-These commands succeed only when TestStudio retains a failed result with the expected failure kind and diagnostic media.
+The assertion probe requires a failed result. The timeout probe requires a separate timed-out result and count.
+Both probes retain the expected diagnostic reason and media.
 They do not add intentional failures to the normal workflow suite.
 The adapter also has focused Docker checks for timeout, failure, real test-start events, and cancellation cleanup:
 

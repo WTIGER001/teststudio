@@ -116,7 +116,7 @@ func TestTimingPolicyModesRetriesAndFunctionalFailureRemainDistinct(t *testing.T
 		{"off", "off", []float64{2100}, []string{"passed"}, "", "passed", "disabled", 5, 0},
 		{"retry", "fail", []float64{2100, 1000}, []string{"passed", "passed"}, "", "flaky", "normal", 5, 1},
 		{"functional", "fail", []float64{2100}, []string{"failed"}, "assertion", "failed", "slow", 5, 1},
-		{"timeout", "fail", []float64{4000}, []string{"failed"}, "timeout", "failed", "censored", 5, 0},
+		{"timeout", "fail", []float64{4000}, []string{"failed"}, "timeout", "timed-out", "censored", 5, 0},
 		{"clean", "fail", []float64{1100}, []string{"passed"}, "", "passed", "normal", 6, 0},
 	}
 	for _, tc := range cases {

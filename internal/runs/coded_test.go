@@ -27,7 +27,7 @@ func (e *codedExecutor) Execute(ctx context.Context, input execution.CodedInput)
 }
 
 func TestIsolatedPlaywrightUsesNormalAttemptsTimingEvidenceAndTargetlessSelection(t *testing.T) {
-	for _, state := range []string{"passed", "failed", "unknown"} {
+	for _, state := range []string{"passed", "failed", "timed-out", "unknown"} {
 		t.Run(state, func(t *testing.T) {
 			s, p, _ := setup(t, nil)
 			suiteRow, err := s.Store.Get(t.Context(), projects.Bucket("suites", "project"), "health")
@@ -71,6 +71,9 @@ func TestIsolatedPlaywrightUsesNormalAttemptsTimingEvidenceAndTargetlessSelectio
 				t.Fatal("unconfigured Playwright admitted")
 			}
 			s.Playwright = &codedExecutor{report: execution.CodedReport{Result: execution.Result{State: state, Steps: []execution.Step{{Title: "Open page", Category: "test.step", DurationMs: 1000}}}, Attachments: []execution.Attachment{{Kind: "log", Stream: "playwright.stdout", Filename: "stdout.log", ContentType: "text/plain", Data: []byte("test log")}, {Kind: "screenshot", Filename: "page.png", ContentType: "image/png", Data: []byte("image")}, {Kind: "trace", Filename: "trace.zip", ContentType: "application/zip", Data: []byte("trace")}}}}
+			if state == "timed-out" {
+				s.Playwright.(*codedExecutor).report.Result.FailureKind = "timeout"
+			}
 			targeted := req
 			targeted.Environment = "local"
 			if _, err := s.Create(t.Context(), "admin", "project", targeted, "wrong-profile", "manual"); err == nil {
@@ -87,6 +90,9 @@ func TestIsolatedPlaywrightUsesNormalAttemptsTimingEvidenceAndTargetlessSelectio
 			v = finished(t, s, v.ID)
 			if len(v.Results) != 1 || v.Results[0].State != state || len(v.Results[0].Steps) != 1 {
 				t.Fatalf("coded reduction: %+v", v)
+			}
+			if state == "timed-out" && (v.Outcome != "timed-out" || v.Counts.TimedOut != 1 || v.Counts.Failed != 0) {
+				t.Fatalf("timeout reduction: %+v", v)
 			}
 			if state == "unknown" && v.Outcome != "unknown" {
 				t.Fatal("lost worker passed")

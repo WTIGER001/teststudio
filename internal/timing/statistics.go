@@ -71,7 +71,7 @@ func Assess(prediction Prediction, durationMs float64, observedState, failureKin
 		a.Status = "not-executed"
 		return a
 	}
-	if failureKind == "timeout" || failureKind == "cancelled" || observedState == "unknown" || !finite(durationMs) || durationMs < 0 {
+	if observedState == "timed-out" || failureKind == "timeout" || failureKind == "cancelled" || observedState == "unknown" || !finite(durationMs) || durationMs < 0 {
 		a.Status = "censored"
 		a.Censored = true
 		return a

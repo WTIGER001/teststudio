@@ -73,7 +73,7 @@ if (!current || !['completed', 'cancelled', 'timed-out', 'blocked', 'incomplete'
   await call('POST', `${base}/runs/${run.id}/cancel`, {})
   throw new Error('Self-test verification exceeded its deadline; cancellation was requested')
 }
-console.log(`${current.state}: ${current.outcome}; ${current.counts.passed} passed, ${current.counts.failed} failed`)
+console.log(`${current.state}: ${current.outcome}; ${current.counts.passed} passed, ${current.counts.failed} failed, ${current.counts.timedOut ?? 0} timed out`)
 const attempts = await call('GET', `${base}/runs/${run.id}/attempts`)
 const artifacts = await call('GET', `${base}/runs/${run.id}/artifacts`)
 const executions = await call('GET', `${base}/runs/${run.id}/executions`)
@@ -95,7 +95,8 @@ const remaining = execFileSync('docker', ['ps', '-a', '--filter', `label=teststu
 if (remaining) throw new Error('Self-test containers remain after completion: ' + remaining)
 if (diagnostic || timeoutProbe) {
   const expected = timeoutProbe ? 'timeout' : 'assertion'
-  if (current.state !== 'completed' || current.outcome !== 'failed' || current.results[0]?.failureKind !== expected) throw new Error('The intentional failure did not retain the expected outcome')
+  if (current.counts.failed !== (timeoutProbe ? 0 : 1) || current.counts.timedOut !== (timeoutProbe ? 1 : 0)) throw new Error('Timeouts and failures were not counted separately')
+  if (current.state !== 'completed' || current.outcome !== (timeoutProbe ? 'timed-out' : 'failed') || current.results[0]?.state !== (timeoutProbe ? 'timed-out' : 'failed') || current.results[0]?.failureKind !== expected) throw new Error('The intentional failure did not retain the expected outcome')
   if (!artifacts.items.some(item => item.data.kind === 'trace') || !artifacts.items.some(item => item.data.kind === 'screenshot')) throw new Error('Failure evidence is missing')
 } else if (current.state !== 'completed' || current.outcome !== 'passed' || current.evidenceState !== 'complete') {
   console.error(current.results.map(result => `${result.testId}: ${result.state} ${result.error ?? ''}`).join('\n'))

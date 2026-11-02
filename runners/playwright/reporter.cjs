@@ -24,8 +24,8 @@ class TestStudioReporter {
   onStdErr(chunk) { process.stderr.write(chunk) }
   onError(error) { this.problems.push(clean(error.message)) }
   onTestEnd(test, result) {
-    const state = result.status === 'skipped' ? 'skipped' : result.status === test.expectedStatus ? 'passed' : 'failed'
-    const failureKind = state === 'failed' ? result.status === 'timedOut' ? 'timeout' : result.status === 'interrupted' ? 'cancelled' : 'assertion' : undefined
+    const state = result.status === 'timedOut' ? 'timed-out' : result.status === 'skipped' ? 'skipped' : result.status === test.expectedStatus ? 'passed' : 'failed'
+    const failureKind = state === 'timed-out' ? 'timeout' : state === 'failed' ? result.status === 'interrupted' ? 'cancelled' : 'assertion' : undefined
     this.results.push({
       result: { testId: this.input.test.id, state, failureKind, error: clean(result.errors.map(error => error.message || error.value || '').join('\n')), startedAt: result.startTime.toISOString(), finishedAt: new Date(result.startTime.getTime() + result.duration).toISOString(), durationMs: Math.max(0, result.duration), runnerStatus: result.status, expectedStatus: test.expectedStatus, steps: this.steps },
       attachments: result.attachments
@@ -35,7 +35,7 @@ class TestStudioReporter {
   async onEnd(summary) {
     if (this.results.length !== 1 || this.problems.length) { console.error(this.problems.join('\n') || 'The selected test produced no unique result'); return }
     const { result, attachments } = this.results[0]
-    if (summary.status !== 'passed' && result.state !== 'failed') { console.error('The worker failed outside the selected test'); return }
+    if (summary.status !== 'passed' && result.state !== 'failed' && result.state !== 'timed-out') { console.error('The worker failed outside the selected test'); return }
     const failed = result.state !== 'passed' || this.input.failedBefore || (this.input.timingMode === 'fail' && this.input.slowThresholdMs != null && result.durationMs >= this.input.slowThresholdMs)
     const files = [], evidenceErrors = []
     for (const attachment of attachments) {

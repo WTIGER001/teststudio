@@ -63,12 +63,12 @@ func (s *Service) RerunFailures(ctx context.Context, user, project, id, key stri
 	}
 	ids := []string{}
 	for _, result := range parent.Results {
-		if result.State == "failed" || result.State == "flaky" {
+		if result.State == "failed" || result.State == "timed-out" || result.State == "flaky" {
 			ids = append(ids, result.TestID)
 		}
 	}
 	if len(ids) == 0 {
-		return Run{}, errors.New("run has no failed or flaky tests")
+		return Run{}, errors.New("run has no failed, timed-out, or flaky tests")
 	}
 	req := parent.Request
 	req.IDs = ids

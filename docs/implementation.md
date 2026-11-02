@@ -58,6 +58,7 @@ The full plan remains required scope. Check an item only after its implementatio
 - [ ] Provider credentials remain outside browser configuration and application logs.
 - [x] Light, dark, and system modes pass browser workflow and keyboard checks.
 - [x] Every current page provides a contextual help drawer with Introduction, Concepts, Tutorials, and verified keyboard and mobile behavior.
+- [x] Timeouts have a separate test status and count. Failure reruns include them alongside failed and flaky results.
 
 ## Feature log
 
@@ -377,4 +378,24 @@ The targeted Playwright workflow passes through normal TestStudio publication, e
 Checks cover all six guides, normal navigation, preserved edits, focus, dismissal, themes, mobile overflow, and reduced motion.
 The run retains complete evidence and a cleaned worker. Browser checks report no console errors.
 Owned verification browsers, controllers, and worker containers stop after checks.
+The remaining full plan stays pending.
+
+### Separate timeout results and inclusive failure reruns
+
+Added timed-out status for native HTTP, Playwright reports, worker deadlines, attempts, and final results.
+Counts expose timedOut separately from failed. Mixed runs retain both counts without retry inflation.
+A passing retry remains flaky. Timeout observations stay censored and do not train timing baselines.
+Run deadlines retain known active-test timeout results for later reruns.
+Failure reruns include failed, timed-out, and flaky tests through the API and UI.
+Older failed results with timeout reasons receive compatible read views without rewriting stored history.
+Timeouts retain unsuccessful-attempt media capture and failure retention extensions.
+Added separate timeout badges and counts, page help guidance, and the timeout layer in the stacked-area trend contract.
+Validation: focused race tests pass for runs, HTTP execution, API history, report contracts, timing, and retention rules.
+Timeout aggregation, deadlines, legacy reads, and reruns pass on SQLite and local PostgreSQL.
+The Angular build and rerun utility check pass.
+STUDIO-TIMEOUT-001 triggers a real local timeout, reruns it through the UI, and verifies a clean pass with original history retained.
+The intentional Playwright timeout probe retains zero failures, one timeout, complete evidence, and diagnostic media.
+Real container checks verify distinct assertion and timeout results with retained steps, screenshots, and traces.
+Mobile inspection verifies the separate timeout display without document overflow. Browser diagnostics contain no runtime errors.
+Owned verification controllers and browser containers stop after checks.
 The remaining full plan stays pending.

@@ -114,7 +114,7 @@ func Expiry(created time.Time, p Policy, kind, outcome string) time.Time {
 	if value, ok := p.KindRetention[kind]; ok {
 		days = value
 	}
-	if outcome == "failed" || outcome == "flaky" {
+	if outcome == "failed" || outcome == "timed-out" || outcome == "flaky" {
 		days = max(days, p.FailureRetentionDays)
 	}
 	return created.Add(time.Duration(days) * 24 * time.Hour)

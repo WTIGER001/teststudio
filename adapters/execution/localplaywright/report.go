@@ -50,17 +50,21 @@ func readReport(directory string, input execution.CodedInput, exitError error) (
 	if err := json.Unmarshal(data, &report); err != nil {
 		return report, errors.New("Playwright result is invalid")
 	}
+	report.Result = execution.NormalizeTimeout(report.Result)
 	result := report.Result
 	if report.Schema != "teststudio.playwright/v1" || report.TestID != input.Test.ID || report.Selector != input.Test.Selector || result.TestID != input.Test.ID {
 		return report, errors.New("Playwright result does not match the selected test")
 	}
-	if result.State != "passed" && result.State != "failed" && result.State != "skipped" {
+	if result.State != "passed" && result.State != "failed" && result.State != "timed-out" && result.State != "skipped" {
 		return report, errors.New("Playwright result has no supported terminal state")
+	}
+	if result.State == "timed-out" && result.FailureKind != "timeout" {
+		return report, errors.New("Playwright timeout requires a matching timeout reason")
 	}
 	if math.IsNaN(result.DurationMs) || math.IsInf(result.DurationMs, 0) || result.DurationMs < 0 || result.DurationMs > 3600000 || result.StartedAt.IsZero() || result.FinishedAt.Before(result.StartedAt) || result.FinishedAt.After(time.Now().Add(time.Minute)) {
 		return report, errors.New("Playwright timing is invalid")
 	}
-	if exitError != nil && (result.State != "failed" || result.FailureKind == "") {
+	if exitError != nil && ((result.State != "failed" && result.State != "timed-out") || result.FailureKind == "") {
 		return report, errors.New("Playwright process failed without a matching failed result")
 	}
 	if len(result.Steps) > 500 || len(report.Attachments) > 32 || len(report.EvidenceErrors) > 20 || len(result.Error) > 16384 {

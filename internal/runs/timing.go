@@ -73,6 +73,7 @@ func (s *Service) Estimate(ctx context.Context, user, project string, req Reques
 }
 
 func assessResult(run Run, result execution.Result) execution.Result {
+	result = execution.NormalizeTimeout(result)
 	result.ObservedState = result.State
 	if p, ok := run.Timing.Tests[result.TestID]; ok {
 		a := timing.Assess(p, result.DurationMs, result.State, result.FailureKind)

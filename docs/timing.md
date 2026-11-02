@@ -5,6 +5,9 @@ The final logical test also records total execution milliseconds across its atte
 Queue delay, evidence writes, and worker coordination do not enter this measurement.
 Interrupted attempts retain elapsed time. Their timing assessment has a censored status.
 Skipped tests have no measured execution duration.
+Timeouts use the separate `timed-out` result state and `timedOut` count.
+Their timing stays censored. Rerun failures includes them alongside failed and flaky results.
+The complete status contract is in `docs/results.md`.
 
 ## Comparable history
 
