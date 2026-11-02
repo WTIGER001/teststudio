@@ -94,7 +94,7 @@ func (s *Service) Logs(ctx context.Context, project, run, stream, test, cursor s
 		if a.State == "available" {
 			current, reader, err := s.Open(ctx, project, run, a.ID)
 			segment.Artifact = current
-			if err != nil && !errors.Is(err, artifacts.ErrNotFound) {
+			if err != nil && !errors.Is(err, artifacts.ErrNotFound) && !errors.Is(err, ErrUnavailable) {
 				return LogPage{}, err
 			}
 			if err == nil {

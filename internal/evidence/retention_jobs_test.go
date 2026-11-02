@@ -40,8 +40,10 @@ func TestRetentionJobsResumePagesAndApplyObservedFailureDurations(t *testing.T) 
 		t.Fatalf("retention cursor missing: %+v %v", queued, err)
 	}
 	restarted := &evidence.Service{Store: s.Store, Blobs: s.Blobs}
-	if err := restarted.ProcessRetention(t.Context(), 1); err != nil {
-		t.Fatal(err)
+	for range 2 {
+		if err := restarted.ProcessRetention(t.Context(), 1); err != nil {
+			t.Fatal(err)
+		}
 	}
 	if _, err := s.Store.Get(t.Context(), "evidence-retention-jobs", "run"); !errors.Is(err, storage.ErrNotFound) {
 		t.Fatal("finished retention job remains queued")

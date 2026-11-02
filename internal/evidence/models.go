@@ -26,6 +26,9 @@ type Artifact struct {
 	Step         string          `json:"stepId,omitempty"`
 	Policy       *capture.Policy `json:"capturePolicy,omitempty"`
 	QuotaVersion int             `json:"quotaVersion,omitempty"`
+	UploadToken  string          `json:"uploadToken,omitempty"`
+	UploadUntil  *time.Time      `json:"uploadUntil,omitempty"`
+	DeletedAt    *time.Time      `json:"deletedAt,omitempty"`
 }
 
 type Event struct {
@@ -63,4 +66,29 @@ type LogInput struct {
 	Text     string
 	Policy   capture.Policy
 	Budget   Budget
+}
+
+type Pin struct {
+	Project   string     `json:"projectId"`
+	Run       string     `json:"runId"`
+	Pinned    bool       `json:"pinned"`
+	Until     *time.Time `json:"until,omitempty"`
+	Reason    string     `json:"reason"`
+	Actor     string     `json:"actor"`
+	UpdatedAt time.Time  `json:"updatedAt"`
+	InFlight  int        `json:"deletionsInProgress"`
+}
+
+func (p Pin) Active(now time.Time) bool { return p.Pinned && (p.Until == nil || now.Before(*p.Until)) }
+
+type Expiration struct {
+	Project     string     `json:"projectId"`
+	Run         string     `json:"runId"`
+	Artifact    string     `json:"artifactId"`
+	Target      string     `json:"target"`
+	NextAttempt time.Time  `json:"nextAttempt"`
+	Token       string     `json:"token,omitempty"`
+	LeaseUntil  *time.Time `json:"leaseUntil,omitempty"`
+	Attempts    int        `json:"attempts"`
+	Error       string     `json:"error,omitempty"`
 }

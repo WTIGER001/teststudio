@@ -26,6 +26,8 @@ type Service struct {
 	Blobs           artifacts.Store
 	maintenanceMu   sync.Mutex
 	retentionCursor string
+	indexCursor     string
+	cleanupCursor   string
 }
 
 func Bucket(run string) string  { return "artifacts/" + run }
@@ -53,6 +55,10 @@ func (s *Service) Save(ctx context.Context, a Artifact, data []byte, budget Budg
 	a.Size = int64(len(data))
 	a.State = "pending"
 	a.CreatedAt = time.Now().UTC()
+	uploadToken := domain.NewID()
+	until := time.Now().UTC().Add(30 * time.Second)
+	a.UploadToken = uploadToken
+	a.UploadUntil = &until
 	if a.ExpiresAt.IsZero() {
 		a.ExpiresAt = a.CreatedAt.Add(30 * 24 * time.Hour)
 	}
@@ -64,7 +70,15 @@ func (s *Service) Save(ctx context.Context, a Artifact, data []byte, budget Budg
 	if a.State == "available" {
 		return a, nil
 	}
-	object, uploadErr := s.Blobs.Put(ctx, blobKey(a), bytes.NewReader(data), max(a.Size, 1))
+	if a.UploadToken != uploadToken {
+		return a, nil
+	}
+	uploadContext, cancelUpload := context.WithTimeout(ctx, 25*time.Second)
+	defer cancelUpload()
+	object, uploadErr := s.Blobs.Put(uploadContext, blobKey(a), bytes.NewReader(data), max(a.Size, 1))
+	if uploadErr == nil {
+		uploadErr = uploadContext.Err()
+	}
 	if uploadErr == nil && (object.Size != a.Size || object.Checksum != a.Checksum) {
 		uploadErr = errors.New("artifact size or checksum verification failed")
 	}
@@ -76,6 +90,7 @@ func (s *Service) Save(ctx context.Context, a Artifact, data []byte, budget Budg
 		a.Error = ""
 	}
 	for range 4 {
+		a.UploadUntil = nil
 		change, err := storage.Put(row.Bucket, row.ID, a.Project, row.Revision, a)
 		if err != nil {
 			return a, err
@@ -96,6 +111,17 @@ func (s *Service) Save(ctx context.Context, a Artifact, data []byte, budget Budg
 		if current.State == "available" && current.Checksum == a.Checksum {
 			return current, nil
 		}
+		if current.UploadToken != uploadToken || current.State != "pending" {
+			if current.State == "expired" || current.State == "deleted" || current.State == "deleting" {
+				cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
+				_ = s.Blobs.Delete(cleanup, blobKey(current))
+				cancel()
+			}
+			return current, ErrUnavailable
+		}
+		a.ExpiresAt = current.ExpiresAt
+		a.QuotaVersion = current.QuotaVersion
+		a.Policy = current.Policy
 	}
 	return a, storage.ErrConflict
 }
@@ -111,10 +137,27 @@ func (s *Service) admit(ctx context.Context, a Artifact, budget Budget) (storage
 			if old.Project != a.Project || old.Run != a.Run || old.Checksum != a.Checksum || old.Size != a.Size || old.Kind != a.Kind || old.Test != a.Test || old.Attempt != a.Attempt || old.Worker != a.Worker || old.Sequence != a.Sequence || old.Stream != a.Stream || old.Filename != a.Filename || old.ContentType != a.ContentType || old.Step != a.Step || !reflect.DeepEqual(old.Policy, a.Policy) {
 				return row, a, storage.ErrConflict
 			}
-			if old.State == "expired" || old.State == "deleted" {
+			if old.State == "expired" || old.State == "deleted" || old.State == "deleting" || old.State == "delete-pending" || old.State == "cleanup-failed" {
 				return row, a, errors.New("artifact retention has ended")
 			}
-			return row, old, nil
+			if old.State == "available" || (old.State == "pending" && old.UploadUntil != nil && time.Now().Before(*old.UploadUntil)) {
+				return row, old, nil
+			}
+			old.State = "pending"
+			old.UploadToken = a.UploadToken
+			old.UploadUntil = a.UploadUntil
+			old.Error = ""
+			change, err := storage.Put(row.Bucket, row.ID, old.Project, row.Revision, old)
+			if err != nil {
+				return row, old, err
+			}
+			if err := s.Store.Commit(ctx, change); errors.Is(err, storage.ErrConflict) {
+				continue
+			} else if err != nil {
+				return row, old, err
+			}
+			row, err = s.Store.Get(ctx, row.Bucket, row.ID)
+			return row, old, err
 		}
 		if !errors.Is(err, storage.ErrNotFound) {
 			return row, a, err
@@ -128,7 +171,11 @@ func (s *Service) admit(ctx context.Context, a Artifact, budget Budget) (storage
 		if err != nil {
 			return row, a, err
 		}
-		if err := s.Store.Commit(ctx, append(reservations, entry)...); errors.Is(err, storage.ErrConflict) {
+		index, err := s.expirationChange(ctx, a)
+		if err != nil {
+			return row, a, err
+		}
+		if err := s.Store.Commit(ctx, append(reservations, entry, index)...); errors.Is(err, storage.ErrConflict) {
 			continue
 		} else if err != nil {
 			return row, a, err
@@ -192,6 +239,14 @@ func (s *Service) Open(ctx context.Context, project, run, id string) (Artifact, 
 	}
 	if a.State != "available" {
 		return a, nil, errors.New("artifact is not available")
+	}
+	available, err := s.Available(ctx, a, time.Now())
+	if err != nil {
+		return a, nil, err
+	}
+	if !available {
+		a.State = "expired"
+		return a, nil, ErrUnavailable
 	}
 	reader, err := s.Blobs.Open(ctx, blobKey(a))
 	if errors.Is(err, artifacts.ErrNotFound) {

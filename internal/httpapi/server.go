@@ -63,6 +63,9 @@ func problem(w http.ResponseWriter, err error) {
 	if errors.Is(err, sessions.ErrUnauthenticated) {
 		status = http.StatusUnauthorized
 	}
+	if errors.Is(err, evidence.ErrUnavailable) {
+		status = http.StatusGone
+	}
 	JSON(w, status, map[string]any{"status": status, "message": err.Error()})
 }
 
@@ -123,6 +126,7 @@ func (s *Server) Handler() http.Handler {
 	s.catalogRoutes(mux)
 	s.catalogTransferRoutes(mux)
 	s.runRoutes(mux)
+	s.evidenceRetentionRoutes(mux)
 	mux.HandleFunc("GET /api/v1/me/capabilities", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		caps, err := s.Auth.Capabilities(r.Context(), actor(r), r.URL.Query().Get("project"))
 		if err != nil {

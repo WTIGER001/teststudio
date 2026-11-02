@@ -45,4 +45,30 @@ It updates expiry metadata in bounded pages and resumes from a saved cursor afte
 Failed or flaky observations can retain evidence longer than successful observations.
 Processing failures remain in retention status and retry after one minute.
 Retention state stays separate from test outcome and capture completeness.
-Storage cleanup, evidence pins, and capture configuration screens remain pending.
+
+## Pins and cleanup
+
+Use `GET /api/v1/projects/{projectId}/runs/{runId}/retention` for pin state, retention processing, capture settings, and quotas.
+Use `PUT /runs/{runId}/retention/pin` below the project prefix to pin or unpin evidence.
+Send `If-Match` with the pin revision and a reason. Pin creation requires `teststudio.evidence.retain`.
+A pin can have an expiry time or remain active until an authorized user removes it.
+Pins protect retained files. They cannot restore files that storage has already deleted.
+Pin creation waits until active deletion claims finish.
+
+Cleanup processes finished runs after retention calculation completes.
+It respects active pins and current upload leases.
+Competing cleanup instances claim each artifact through a durable deletion lease.
+Deletion failures use `cleanup-failed` state, retain their quota reservation, and retry after one minute.
+Successful deletion releases project, run, and test reservations in one transaction.
+The manifest remains with `expired` or `deleted` state and a deletion timestamp.
+Compact test results remain unchanged.
+
+Administrative deletion uses `DELETE /runs/{runId}/artifacts/{artifactId}` below the project prefix.
+It requires `teststudio.evidence.delete`, the artifact's `If-Match` revision, and a reason.
+Unpin the run before deleting evidence. The request queues deletion and returns `delete-pending` state.
+Access grants and deletion requests create audit records.
+
+Uploads use a bounded lease. Duplicate requests reuse pending or available manifests without another reservation.
+A stale upload cannot replace a manifest after cleanup claims it.
+Background indexing adds expiry records and project accounting to retained artifacts from earlier installations.
+Capture configuration screens, retention screens, and cloud artifact adapters remain pending.

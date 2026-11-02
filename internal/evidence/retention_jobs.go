@@ -19,9 +19,10 @@ type RetentionJob struct {
 }
 
 type RetentionStatus struct {
-	State     string    `json:"state"`
-	Error     string    `json:"error,omitempty"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	State        string    `json:"state"`
+	Error        string    `json:"error,omitempty"`
+	UpdatedAt    time.Time `json:"updatedAt"`
+	IndexVersion int       `json:"indexVersion"`
 }
 
 type runOutcome struct {
@@ -78,18 +79,25 @@ func (s *Service) retentionPage(ctx context.Context, jobRow storage.Record, job 
 	if run.Project != job.Project || run.FinishedAt == nil {
 		return errors.New("retention requires a finished run in the assigned project")
 	}
-	page, err := s.Store.List(ctx, Bucket(job.Run), job.Project, job.Cursor, 40)
+	page, err := s.Store.List(ctx, Bucket(job.Run), job.Project, job.Cursor, 20)
 	if err != nil {
 		return err
 	}
 	changes := []storage.Change{{Record: runRow, Assert: true}}
+	legacySizes := map[string]int64{}
 	for _, row := range page.Items {
 		a, err := storage.Decode[Artifact](row)
 		if err != nil {
 			return err
 		}
-		if a.Policy == nil {
+		if a.State == "expired" || a.State == "deleted" {
 			continue
+		}
+		changed := false
+		if a.QuotaVersion < 1 {
+			legacySizes[a.Test] += a.Size
+			a.QuotaVersion = 1
+			changed = true
 		}
 		outcome := run.Outcome
 		if a.Test != "" {
@@ -114,16 +122,31 @@ func (s *Service) retentionPage(ctx context.Context, jobRow storage.Record, job 
 				}
 			}
 		}
-		expires := capture.Expiry(a.CreatedAt, *a.Policy, a.Kind, outcome)
-		if !expires.Equal(a.ExpiresAt) {
-			a.ExpiresAt = expires
+		if a.Policy != nil {
+			expires := capture.Expiry(a.CreatedAt, *a.Policy, a.Kind, outcome)
+			if !expires.Equal(a.ExpiresAt) {
+				a.ExpiresAt = expires
+				changed = true
+			}
+		}
+		if changed {
 			change, err := storage.Put(row.Bucket, row.ID, job.Project, row.Revision, a)
 			if err != nil {
 				return err
 			}
 			changes = append(changes, change)
 		}
+		index, err := s.expirationChange(ctx, a)
+		if err != nil {
+			return err
+		}
+		changes = append(changes, index)
 	}
+	legacy, err := s.legacyQuotaChanges(ctx, job.Project, job.Run, legacySizes)
+	if err != nil {
+		return err
+	}
+	changes = append(changes, legacy...)
 	state := "pending"
 	if page.Cursor == "" {
 		changes = append(changes, storage.Change{Record: jobRow, Delete: true})
@@ -149,7 +172,7 @@ func (s *Service) retentionStatusChange(ctx context.Context, project, run, state
 	if err != nil && !errors.Is(err, storage.ErrNotFound) {
 		return storage.Change{}, err
 	}
-	return storage.Put("evidence-retention-status", run, project, r.Revision, RetentionStatus{State: state, Error: message, UpdatedAt: time.Now().UTC()})
+	return storage.Put("evidence-retention-status", run, project, r.Revision, RetentionStatus{State: state, Error: message, UpdatedAt: time.Now().UTC(), IndexVersion: 1})
 }
 
 func (s *Service) StartMaintenance(ctx context.Context, interval time.Duration) <-chan struct{} {
@@ -166,6 +189,8 @@ func (s *Service) StartMaintenance(ctx context.Context, interval time.Duration) 
 				return
 			}
 			_ = s.ProcessRetention(ctx, 10)
+			_ = s.EnsureRetentionIndex(ctx, 10)
+			_ = s.Sweep(ctx, 30)
 			select {
 			case <-ctx.Done():
 				return

@@ -243,3 +243,16 @@ Validation: targeted race tests pass on SQLite and local PostgreSQL for storage,
 Repeated SQLite startup checks pass after bounded lock retries. The Go executable builds.
 Tests cover shared quota contention, frozen policies, log opt-out, current limits, override revocation, and retention task resumption.
 Capture configuration screens, storage cleanup, evidence pins, browser media capture, and cloud artifact adapters remain pending.
+
+### Evidence pins, retryable cleanup, and upload leases
+
+Added durable run pins, timed pins, audited deletion requests, retention status, and quota reads.
+Short-lived artifact grants honor pins, current permissions, session state, and expiry.
+Cleanup skips active runs, pending retention tasks, pinned runs, and active uploads.
+Deletion claims survive restart. Failed storage deletion remains explicit and retries without changing observed results.
+Successful deletion preserves manifests and releases each quota reservation once.
+Uploads use a bounded lease. Duplicate requests do not create competing writers.
+Late upload completion cannot revive expired content. Legacy indexing preserves existing run accounting and adds project reservations once.
+Validation: targeted race tests pass for evidence and HTTP API on SQLite and local PostgreSQL.
+Tests cover pin access, explicit permission denies, deletion races, retry after restart, legacy indexing, quota release, and late uploads.
+The Go executable builds. Retention UI, capture configuration screens, media capture, and cloud artifact adapters remain pending.

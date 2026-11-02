@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/evidence"
 	"github.com/wtiger001/teststudio/internal/sessions"
 	"github.com/wtiger001/teststudio/internal/storage"
@@ -69,7 +70,12 @@ func (s *Server) artifactAccess(w http.ResponseWriter, r *http.Request) {
 		problem(w, storage.ErrNotFound)
 		return
 	}
-	if a.State != "available" || !time.Now().Before(a.ExpiresAt) {
+	available, err := s.Evidence.Available(r.Context(), a, time.Now())
+	if err != nil {
+		problem(w, err)
+		return
+	}
+	if !available {
 		JSON(w, 410, map[string]string{"message": "Artifact content is unavailable."})
 		return
 	}
@@ -84,8 +90,13 @@ func (s *Server) artifactAccess(w http.ResponseWriter, r *http.Request) {
 	token := sessions.Random()
 	grant := artifactGrant{Session: session.ID, User: session.UserID, Project: v.Project, Run: v.ID, Artifact: a.ID, Action: input.Action, ExpiresAt: expires}
 	change, err := storage.Put("artifact-access", sessions.Digest(token), v.Project, 0, grant)
+	if err != nil {
+		problem(w, err)
+		return
+	}
+	audit, err := domain.Audit(session.UserID, v.Project, "evidence.access", v.ID+"/"+a.ID, nil, map[string]any{"action": input.Action, "expiresAt": expires})
 	if err == nil {
-		err = s.Store.Commit(r.Context(), change)
+		err = s.Store.Commit(r.Context(), change, audit)
 	}
 	if err != nil {
 		problem(w, err)
@@ -145,10 +156,6 @@ func (s *Server) serveArtifact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer reader.Close()
-	if !time.Now().Before(a.ExpiresAt) {
-		JSON(w, 410, map[string]string{"message": "Artifact retention has ended."})
-		return
-	}
 	kind, _, _ := mime.ParseMediaType(a.ContentType)
 	inline := g.Action == "view" && (kind == "text/plain" || kind == "application/json" || kind == "image/png" || kind == "image/jpeg" || kind == "image/webp" || kind == "image/gif" || kind == "video/mp4" || kind == "video/webm")
 	disposition := "attachment"
