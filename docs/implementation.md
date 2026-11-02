@@ -177,3 +177,16 @@ Validation: targeted race tests pass for the HTTP API, evidence, runs, and sessi
 Storage pagination tests and the Go executable build pass.
 API tests execute a real local HTTP target and retrieve retained evidence through the artifact origin.
 Cloud artifact adapters, report viewers, complete log ingestion, and retention cleanup remain pending.
+
+### Run history and evidence UI
+
+Added run history filters, bounded pagination, and a run form for published suites and registered targets.
+Added live run details, execution snapshots, progress, final counts, raw attempts, events, and filtered log tails.
+Added cancellation, failure reruns, artifact previews, and explicit download links.
+Artifact previews support text, raster images, and video through separate-origin grants.
+Validation: the Angular production build passes.
+Local browser checks create a fresh project, application, environment, suite, test, and published release.
+Checks verify passing execution, failed execution, failure rerun recovery, cancellation, log preview, and file download.
+Light, dark, and narrow-screen views use the shared theme system. The final browser page has no console errors.
+The named browser, Chrome children, automation daemon, local target, and local TestStudio server stop after verification.
+Step timelines, coded runner evidence, trace viewing, and complete result comparison remain pending.

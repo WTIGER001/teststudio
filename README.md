@@ -33,7 +33,9 @@ The API provides run creation, progress, cancellation, failure reruns, logs, and
 The artifact listener uses `http://127.0.0.1:8041` by default.
 Keep the artifact directory outside the public UI directory.
 Use `--artifact-origin`, `--artifact-addr`, and `--artifact-directory` to change these settings.
-Run UI integration and other plan areas remain tracked in the acceptance ledger.
+Select Test runs to start a run, inspect progress, cancel execution, or rerun failed tests.
+The detail page shows attempts, filtered logs, events, and private artifact previews or downloads.
+Other plan areas remain tracked in the acceptance ledger.
 
 ## Authentication
 

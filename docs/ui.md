@@ -29,4 +29,11 @@ It validates and publishes a catalog release, then archives and restores the tes
 It verifies theme persistence, operating-system theme changes, visible keyboard focus, and a 390-pixel viewport.
 The final page has no console errors.
 The test browser and its automation process exit after verification.
-Run execution and evidence workflows remain separate pending acceptance items.
+Run history provides environment, suite, state, and selection filters with bounded pagination.
+The run form selects a published suite, environment, test identifiers, time limit, and retries.
+Run details show the execution snapshot, progress, final counts, attempts, events, and filtered logs.
+Active runs refresh every two seconds. Cancellation and failure reruns use explicit actions.
+Artifact previews support text, raster images, and video. Other content uses a download link.
+The browser retrieves artifact content through short-lived access links on a separate origin.
+Local browser checks verify successful runs, failure reruns, cancellation, text previews, and file downloads.
+The run pages support light and dark themes and a 390-pixel viewport without document overflow.
