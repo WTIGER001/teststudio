@@ -124,3 +124,9 @@ The user selects the MMDev account for AWS verification.
 Account and profile values remain external installation configuration.
 Azure verification credentials and a remote Kubernetes target remain unspecified.
 Local implementation and provider contract checks continue independently.
+
+### Bounded artifact filesystem
+
+Added a filesystem adapter with atomic writes, checksums, byte limits, and root-confined file access.
+Validation: `go test ./adapters/artifacts/filesystem -count=1` passes.
+Tests cover successful retrieval, oversized uploads, invalid paths, and escaping symlinks.
