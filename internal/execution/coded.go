@@ -54,3 +54,7 @@ type CodedExecutor interface {
 	Admit(context.Context, catalog.Test, catalog.Artifact) error
 	Execute(context.Context, CodedInput) CodedReport
 }
+
+type RuntimeProfiler interface {
+	TimingProfile(context.Context, catalog.Artifact) (string, error)
+}

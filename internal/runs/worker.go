@@ -285,7 +285,7 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 				now := time.Now().UTC()
 				v.CurrentTestStartedAt = &now
 				v.Phase = "execution"
-				if test.Runner == "playwright" {
+				if s.codedDriver(test.Runner) != nil {
 					v.CurrentTestStartedAt = nil
 					v.Phase = "preparation"
 				}
@@ -297,7 +297,7 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 				break
 			}
 			eventKind, eventMessage := "test.started", fmt.Sprintf("Starting %s, attempt %d.", test.ID, attempt)
-			if test.Runner == "playwright" {
+			if s.codedDriver(test.Runner) != nil {
 				eventKind = "test.preparing"
 				eventMessage = fmt.Sprintf("Preparing %s, attempt %d.", test.ID, attempt)
 			}
@@ -306,7 +306,7 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 			var report execution.CodedReport
 			recorded := false
 			executionID := ""
-			if test.Runner == "playwright" && s.Playwright != nil {
+			if coded := s.codedDriver(test.Runner); coded != nil {
 				policy := run.TestCapture[test.ID]
 				input := execution.CodedInput{RunID: run.ID, Test: test, Artifact: run.Release.Draft.Artifact, Capture: policy, TimeoutMs: test.TimeoutSeconds * 1000, FailedBefore: failedBefore}
 				input.OnStart = func(at time.Time) error {
@@ -330,7 +330,7 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 					input.SlowThresholdMs = p.ThresholdMs
 					input.TimingMode = p.Policy.Mode
 				}
-				if driver, ok := s.Playwright.(execution.ManagedExecutor); ok {
+				if driver, ok := coded.(execution.ManagedExecutor); ok {
 					ref, err := s.beginExecution(ctx, run, worker, test, attempt, driver)
 					if err != nil {
 						executionError = err.Error()
@@ -383,7 +383,7 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 						return (workerstate.Ledger{Store: s.Store}).Finish(metadataCtx, run.ID, ref.ID, "", cleanupErr)
 					}
 				}
-				report = s.Playwright.Execute(ctx, input)
+				report = coded.Execute(ctx, input)
 				result = report.Result
 			} else if test.Runner == "http" && run.Environment != nil && s.HTTP != nil {
 				attemptCtx := ctx
@@ -420,6 +420,13 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 				break
 			}
 			capture("test.finished", test.ID, attempt, fmt.Sprintf("%s: %s.", test.ID, result.State))
+			if test.Runner == "go" && result.State == "unknown" {
+				executionError = "Go execution did not produce a complete test observation: " + result.Error
+				break
+			}
+			if result.State == "skipped" {
+				break
+			}
 			if result.State == "passed" {
 				if failedBefore {
 					result.State = "flaky"

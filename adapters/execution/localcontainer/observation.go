@@ -1,4 +1,4 @@
-package localplaywright
+package localcontainer
 
 import (
 	"context"
@@ -13,13 +13,17 @@ func appendLogs(report *execution.CodedReport, input execution.CodedInput, stdou
 	if !input.Capture.Logs {
 		return
 	}
+	runner := "playwright"
+	if input.Test.Runner == "go" {
+		runner = "go"
+	}
 	for _, stream := range []struct {
 		name   string
 		output *boundedOutput
 	}{{"stdout", stdout}, {"stderr", stderr}} {
 		present := false
 		for _, file := range report.Attachments {
-			if file.Kind == "log" && file.Stream == "playwright."+stream.name {
+			if file.Kind == "log" && file.Stream == runner+"."+stream.name {
 				present = true
 			}
 		}
@@ -33,13 +37,13 @@ func appendLogs(report *execution.CodedReport, input execution.CodedInput, stdou
 		if stream.output.Truncated {
 			body = append(body, []byte("\n[output truncated at 2 MiB]\n")...)
 		}
-		report.Attachments = append(report.Attachments, execution.Attachment{Kind: "log", Stream: "playwright." + stream.name, Filename: "playwright-" + stream.name + ".log", ContentType: "text/plain; charset=utf-8", Data: body})
+		report.Attachments = append(report.Attachments, execution.Attachment{Kind: "log", Stream: runner + "." + stream.name, Filename: runner + "-" + stream.name + ".log", ContentType: "text/plain; charset=utf-8", Data: body})
 	}
 }
 func (e *Executor) collectReport(ctx context.Context, container string, input execution.CodedInput, exitErr error, logs bool) execution.CodedReport {
 	now := time.Now().UTC()
 	report := execution.CodedReport{Result: execution.Result{TestID: input.Test.ID, DurationUnavailable: true, State: "unknown", FailureKind: "worker-report", StartedAt: now, FinishedAt: now}}
-	directory, err := os.MkdirTemp("", "teststudio-playwright-")
+	directory, err := os.MkdirTemp("", "teststudio-worker-")
 	if err == nil {
 		defer os.RemoveAll(directory)
 		copyErr := e.collect(ctx, container, directory, input)

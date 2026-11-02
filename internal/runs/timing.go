@@ -39,8 +39,15 @@ func (s *Service) predictTiming(ctx context.Context, run *Run) error {
 			policy = timing.Normalize(*test.Timing)
 		}
 		scope := timingContext(*run, test)
-		if test.Runner == "playwright" && s.Playwright != nil {
-			scope.Profile = s.Playwright.Profile()
+		if driver := s.codedDriver(test.Runner); driver != nil {
+			scope.Profile = driver.Profile()
+			if profiler, ok := driver.(execution.RuntimeProfiler); ok {
+				profile, err := profiler.TimingProfile(ctx, run.Release.Draft.Artifact)
+				if err != nil {
+					return err
+				}
+				scope.Profile = profile
+			}
 		}
 		p, err := service.Prediction(ctx, scope, policy, test.TimeoutSeconds*1000, run.CreatedAt)
 		if err != nil {

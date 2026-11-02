@@ -39,10 +39,6 @@ func (s *Service) reconciliationLoop(ctx context.Context) {
 }
 
 func (s *Service) discoverExecutions(ctx context.Context) error {
-	driver := s.managedDriver()
-	if driver == nil {
-		return nil
-	}
 	ledger := workerstate.Ledger{Store: s.Store}
 	installation, err := ledger.Installation(ctx, false)
 	if errors.Is(err, storage.ErrNotFound) {
@@ -51,6 +47,15 @@ func (s *Service) discoverExecutions(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	var problems []error
+	for _, driver := range s.managedDrivers() {
+		problems = append(problems, s.discoverDriver(ctx, installation, driver))
+	}
+	return errors.Join(problems...)
+}
+
+func (s *Service) discoverDriver(ctx context.Context, installation string, driver execution.ManagedExecutor) error {
+	ledger := workerstate.Ledger{Store: s.Store}
 	scanCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	refs, err := driver.Inventory(scanCtx, installation)
@@ -70,7 +75,7 @@ func (s *Service) discoverExecutions(ctx context.Context) error {
 		}
 		valid := false
 		for _, test := range run.Tests {
-			if test.ID == ref.Test && test.Runner == "playwright" {
+			if test.ID == ref.Test && (test.Runner == "playwright" || test.Runner == "go") {
 				valid = true
 			}
 		}
@@ -139,10 +144,6 @@ func (s *Service) reconcilePage(ctx context.Context, cursor string) (string, err
 }
 
 func (s *Service) reconcileExecution(parent context.Context, jobRow storage.Record) error {
-	driver := s.managedDriver()
-	if driver == nil {
-		return nil
-	}
 	job, err := storage.Decode[workerstate.Job](jobRow)
 	if err != nil {
 		return err
@@ -157,6 +158,10 @@ func (s *Service) reconcileExecution(parent context.Context, jobRow storage.Reco
 		return err
 	}
 	ref := record.Reference
+	driver := s.managedDriver(ref.Profile)
+	if driver == nil {
+		return nil
+	}
 	if ref.Installation != installation || ref.Project != jobRow.Project || ref.Profile != driver.Profile() {
 		return errors.New("execution recovery ownership does not match this installation")
 	}

@@ -94,6 +94,7 @@ export const helpPages: Record<string, HelpPage> = {
       { title: 'Test timing', description: 'Frozen predictions explain the criteria used for this run. Worker elapsed time includes coordination. Duration unavailable means no valid test measurement exists.' },
       { title: 'Evidence and retention', description: 'Logs and artifacts have capture and retention policies. Capture gaps do not erase test outcomes. Pins preserve evidence; deletion removes files while retaining results.' },
       { title: 'HTTP diagnostics', description: 'Expand HTTP diagnostics in attempt history to inspect network phases and certificate data. Unavailable phases stay unavailable. Certificate lifetime uses the retained attempt finish time.' },
+      { title: 'Go diagnostics', description: 'Expand Go diagnostics for the selected package, test, toolchain, platform, build duration, and process exit codes. Build errors and missing selected tests retain unknown attempts and block the run. Recorded subtests remain steps within the registered logical test.' },
       { title: 'Worker recovery', description: 'After an interruption, recovery retains available diagnostics and removes owned resources. Recovered observations keep the original run outcome.' }
     ],
     tutorials: [

@@ -5,6 +5,9 @@ web/.angular
 !.data/selftest-build
 .data/selftest-build/*
 !.data/selftest-build/teststudio
+!.data/go-runner-build
+.data/go-runner-build/*
+!.data/go-runner-build/teststudio-go
 output
 .playwright-cli
 bin

@@ -61,6 +61,13 @@ Invalid new drafts cannot replace the active release.
 Opening or submitting another edit clears the previous success message.
 See [Native HTTP checks](http-checks.md) for definition fields, limits, diagnostics, and local verification.
 
+## Go definitions
+
+Go definitions use one explicit package and test path per permanent identifier.
+Register a parent aggregate or its independent child tests. Overlapping selectors block publication.
+The immutable image manifest and discovered selector map must match each published definition.
+See [Local Go suites](go-testing.md) for the source manifest and runtime contract.
+
 ## Timing policy
 
 Project and suite timing defaults flow into each new catalog draft.

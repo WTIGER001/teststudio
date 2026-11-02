@@ -1,4 +1,4 @@
-package localplaywright
+package localcontainer
 
 import (
 	"context"
@@ -32,8 +32,12 @@ type volumeInfo struct {
 }
 
 func (e *Executor) Reference(ref execution.Reference) execution.Reference {
-	ref.Container = "teststudio-pw-" + ref.ID
-	ref.Volume = "teststudio-pw-output-" + ref.ID
+	prefix := "pw"
+	if e.runner() == "go" {
+		prefix = "go"
+	}
+	ref.Container = "teststudio-" + prefix + "-" + ref.ID
+	ref.Volume = "teststudio-" + prefix + "-output-" + ref.ID
 	ref.Profile = e.Profile()
 	return ref
 }
@@ -100,6 +104,9 @@ func (e *Executor) volume(ctx context.Context, ref execution.Reference) (bool, e
 	return true, nil
 }
 func (e *Executor) Cleanup(ctx context.Context, ref execution.Reference) error {
+	if ref.Profile != e.Profile() {
+		return errors.New("worker cleanup profile does not match its durable reference")
+	}
 	container, exists, err := e.container(ctx, ref)
 	if err != nil {
 		return err
@@ -141,6 +148,9 @@ func (e *Executor) Recover(ctx context.Context, ref execution.Reference, input e
 	started := time.Now().UTC()
 	unknown := func(err error) execution.CodedReport {
 		return execution.CodedReport{RecoveryError: err, Result: execution.Result{TestID: ref.Test, DurationUnavailable: true, State: "unknown", FailureKind: "worker-lost", Error: err.Error(), StartedAt: started, FinishedAt: time.Now().UTC()}, EvidenceErrors: []string{"Worker recovery cannot prove a complete observation."}}
+	}
+	if ref.Profile != e.Profile() {
+		return unknown(errors.New("worker recovery profile does not match its durable reference"))
 	}
 	info, exists, err := e.container(ctx, ref)
 	if err != nil {

@@ -9,12 +9,39 @@ import (
 	"github.com/wtiger001/teststudio/internal/workerstate"
 )
 
-func (s *Service) managedDriver() execution.ManagedExecutor {
-	if s.RecoveryDriver != nil {
-		return s.RecoveryDriver
+func (s *Service) codedDriver(runner string) execution.CodedExecutor {
+	switch runner {
+	case "playwright":
+		return s.Playwright
+	case "go":
+		return s.Go
 	}
-	driver, _ := s.Playwright.(execution.ManagedExecutor)
-	return driver
+	return nil
+}
+func (s *Service) managedDrivers() []execution.ManagedExecutor {
+	drivers := []execution.ManagedExecutor{}
+	seen := map[string]bool{}
+	candidates := append([]execution.ManagedExecutor{s.RecoveryDriver}, s.RecoveryDrivers...)
+	for _, coded := range []execution.CodedExecutor{s.Playwright, s.Go} {
+		if driver, ok := coded.(execution.ManagedExecutor); ok {
+			candidates = append(candidates, driver)
+		}
+	}
+	for _, driver := range candidates {
+		if driver != nil && !seen[driver.Profile()] {
+			seen[driver.Profile()] = true
+			drivers = append(drivers, driver)
+		}
+	}
+	return drivers
+}
+func (s *Service) managedDriver(profiles ...string) execution.ManagedExecutor {
+	for _, driver := range s.managedDrivers() {
+		if len(profiles) == 0 || driver.Profile() == profiles[0] {
+			return driver
+		}
+	}
+	return nil
 }
 func (s *Service) beginExecution(ctx context.Context, run Run, worker string, test catalog.Test, attempt int, driver execution.ManagedExecutor) (execution.Reference, error) {
 	ledger := workerstate.Ledger{Store: s.Store}

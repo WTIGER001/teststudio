@@ -117,3 +117,13 @@ go test ./internal/httpapi -count=1
 
 Build the server with `go build -o bin/teststudio ./cmd/teststudio`.
 The user authorizes frequent feature commits. Remote pushes require a separate request.
+
+## Local Go source suites
+
+Run the new isolated Go suites through normal TestStudio publication, execution, timing, and evidence workflows:
+
+```sh
+bash scripts/test-go-self.sh
+```
+
+See [Local Go suites](docs/go-testing.md) for the manifest, selectors, runtime profiles, diagnostics, and recovery contract.

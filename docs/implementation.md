@@ -37,8 +37,8 @@ The full plan remains required scope. Check an item only after its implementatio
 - [ ] Go and browser runners apply the same timing contract across execution and deployment profiles.
 - [ ] HTTPS checks run manually and on schedules, with configurable assertions, TLS checks, response-time history, and normal result records.
 - [x] Adding an HTTPS check requires no browser or service deployment.
-- [ ] Go suites preserve test identities, disable cached execution, and distinguish build failures from test assertion failures.
-- [ ] Go unit suites run without artificial web targets or production credentials.
+- [x] Go suites preserve test identities, disable cached execution, and distinguish build failures from test assertion failures.
+- [x] Go unit suites run without artificial web targets or production credentials.
 - [ ] API suites run through guarded direct clients and produce the same history and trends as browser tests.
 - [ ] Package events, subtest aggregates, retries, and API steps do not inflate test counts.
 - [x] TestStudio executes its own new Playwright suite through normal publication, execution, timing, result, and evidence contracts.
@@ -63,6 +63,26 @@ The full plan remains required scope. Check an item only after its implementatio
 ## Feature log
 
 Record feature commits and targeted validation here.
+
+### Isolated local Go source runner
+
+Added an immutable Go image manifest with permanent identifiers and explicit package and test selectors.
+Publication rejects recursive packages, injected patterns, and overlapping parent and child registrations.
+Compilation stays separate from test duration. Execution disables result caching and records structured test events.
+Parent aggregates and independently registered child tests preserve logical counts. Dynamic descendants remain recorded steps.
+Assertions, panics, skips, timeouts, build failures, and missing tests retain distinct observations.
+Timeouts retain their separate status and count. Normal failure reruns include them.
+Preparation problems block the run without assertion retries or invented execution duration.
+Runtime labels separate toolchain and platform timing history without resetting compatible source revisions.
+The shared local container transport retains bounded evidence and selects recovery by the durable runner profile.
+Go diagnostics appear in attempt history with toolchain, platform, build duration, and available exit codes.
+Validation: focused race checks pass for selector rules, actual Go source execution, catalog publication, timing, runs, and transport contracts.
+Actual Docker checks pass for normal and diagnostic outcomes, cancellation, retained checkpoint recovery, ownership, and resource cleanup.
+Focused Go catalog, dispatch, timeout rerun, and recovery checks pass on SQLite and local PostgreSQL.
+The full API workflow publishes a new suite, runs four logical checks, learns timing, and verifies diagnostic selections and timeout reruns.
+The Angular production build passes. The existing Playwright timeout self-test passes through the shared transport.
+Local browser checks verify Go diagnostics in light and dark themes, mobile containment, unavailable build results, and clean browser logs.
+External Go targets, bindings, hosted workers, and source preparation screens remain pending.
 
 ### Shared native HTTP definition validation
 

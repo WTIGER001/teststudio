@@ -84,7 +84,7 @@ The adapter also has focused Docker checks for timeout, failure, real test-start
 
 ```sh
 teststudio_selftest_image=$(docker image inspect teststudio/selftests:local --format '{{.Id}}')
-TESTSTUDIO_PLAYWRIGHT_IMAGE="$teststudio_selftest_image" go test -race ./adapters/execution/localplaywright -run TestContainer
+TESTSTUDIO_PLAYWRIGHT_IMAGE="$teststudio_selftest_image" go test -race ./adapters/execution/localcontainer -run TestContainer
 ```
 
 ## Worker contract

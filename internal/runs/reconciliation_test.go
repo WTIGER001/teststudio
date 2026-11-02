@@ -46,7 +46,7 @@ func (e *recoveryExecutor) Recover(ctx context.Context, ref execution.Reference,
 	return e.codedExecutor.Execute(ctx, input)
 }
 
-func lostExecution(t *testing.T, s *runs.Service, driver *recoveryExecutor, live bool) (runs.Run, execution.Reference) {
+func lostExecution(t *testing.T, s *runs.Service, driver execution.ManagedExecutor, live bool) (runs.Run, execution.Reference) {
 	t.Helper()
 	v, err := s.Create(t.Context(), "admin", "project", runs.Request{Suite: "health", Environment: "local"}, fmt.Sprintf("lost-%d", time.Now().UnixNano()), "manual")
 	if err != nil {

@@ -101,3 +101,13 @@ Playwright failures, retries, and interruptions follow the same baseline trainin
 A missing worker report sets `durationUnavailable`. The interface shows Duration unavailable instead of zero milliseconds.
 Measured zero durations remain valid. Worker coordination time stays separate in `workerDurationMs` when available.
 Recovered observations retain the original run outcome and do not train timing baselines.
+
+## Go timing
+
+The local Go profile uses structured test durations and its image runtime label.
+Compilation duration stays separate from test execution.
+Source image revisions preserve comparable history when the runtime label and test definition remain compatible.
+Toolchain and platform changes require a new runtime label.
+Panics, timeouts, unknown observations, and interruptions remain censored.
+Build and discovery problems retain unavailable test durations and do not train history.
+See [Local Go suites](go-testing.md) for selectors, diagnostics, and local verification.

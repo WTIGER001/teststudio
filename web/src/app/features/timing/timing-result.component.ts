@@ -12,7 +12,7 @@ import type { Attempt } from '../runs/run.models'
       @if (result.timing; as timing) {
         <span class="table-subtitle" [class.warning]="timing.status === 'slow'">{{ timing.status }}@if (timing.ratio != null) { · {{ timing.ratio | number:'1.1-2' }}× expected }</span>
         <span class="table-subtitle muted">@if (timing.baseline.expectedMs != null) { Expected {{ timing.baseline.expectedMs | number:'1.0-1' }} ms · }{{ timing.baseline.sampleCount }} observations</span>
-        <span class="table-subtitle muted">Timeout {{ timing.timeoutMs / 1000 | number:'1.0-1' }} s@if (timing.censored) { · interrupted duration }</span>
+        <span class="table-subtitle muted">Timeout {{ timing.timeoutMs / 1000 | number:'1.0-1' }} s@if (timing.censored) { · excluded from duration learning }</span>
       }
       @if (result.attempt > 1 && result.totalDurationMs != null) { <span class="table-subtitle">All attempts: {{ result.totalDurationMs | number:'1.0-1' }} ms</span> }
       @if (result.timingRegressions) { <span class="table-subtitle">{{ result.timingRegressions }} slow {{ result.timingRegressions === 1 ? 'attempt' : 'attempts' }}</span> }

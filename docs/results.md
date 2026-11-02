@@ -10,12 +10,12 @@ Attempts and final logical test results use these states:
 | `failed` | A check or assertion fails. Duration regression failures also use this state. |
 | `timed-out` | The attempt exceeds its test or worker time limit. |
 | `flaky` | A later attempt passes after an unsuccessful attempt. |
-| `skipped` | The test does not execute because a dependency does not pass. |
+| `skipped` | A dependency prevents execution or the runner records an explicit skip. |
 | `unknown` | The worker cannot prove a complete result. |
 
 Timeout results retain `failureKind: timeout` for diagnostic compatibility.
 The state identifies the timeout separately from assertion failures.
-HTTP and Playwright attempts use the same status contract.
+HTTP, Playwright, and Go attempts use the same status contract.
 
 Run counts expose `timedOut` separately from `failed`.
 A timed-out logical test contributes one completed result, even when several attempts time out.

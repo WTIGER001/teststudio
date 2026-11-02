@@ -1,4 +1,4 @@
-package localplaywright
+package localcontainer
 
 import (
 	"bytes"
@@ -62,6 +62,33 @@ func TestUndispatchedWorkerDoesNotInventExecutionDuration(t *testing.T) {
 	report := (&Executor{}).Execute(t.Context(), input)
 	if report.Result.State != "unknown" || !report.Result.DurationUnavailable || report.Result.DurationMs != 0 || report.Result.WorkerDurationMs < 0 {
 		t.Fatalf("unmeasured execution duration: %+v", report.Result)
+	}
+}
+
+func TestGoPreparationReportsStayUnknownAndCannotHideAProcessFailure(t *testing.T) {
+	directory, input, report := contractFixture(t)
+	input.Test.Runner = "go"
+	input.Test.Selector = "./unit::TestFresh"
+	report.Schema = "teststudio.go/v1"
+	report.Selector = input.Test.Selector
+	report.Result.State = "unknown"
+	report.Result.FailureKind = "build"
+	report.Result.DurationUnavailable = true
+	report.Result.DurationMs = 0
+	writeReport(t, directory, report)
+	parsed, err := readReport(directory, input, errors.New("build failed"))
+	if err != nil || parsed.Result.State != "unknown" || !parsed.Result.DurationUnavailable {
+		t.Fatalf("Go build problem lost: %+v %v", parsed, err)
+	}
+	report.Result.State = "passed"
+	report.Result.FailureKind = ""
+	report.Result.DurationUnavailable = false
+	writeReport(t, directory, report)
+	if _, err := readReport(directory, input, errors.New("worker failed")); err == nil {
+		t.Fatal("Go worker exit became a pass")
+	}
+	if _, err := readReport(directory, input, nil); err == nil {
+		t.Fatal("Go result passed without runtime metadata")
 	}
 }
 

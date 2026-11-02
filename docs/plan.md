@@ -1083,6 +1083,8 @@ The UI groups Go results by category or package and shows test names, subtests, 
 Use the normal run cards, trends, rankings, schedules, and notifications.
 Go tests require no Playwright or Allure dependency to produce usable results.
 
+See [Local Go suites](go-testing.md) for the implemented source worker, manifest, timing, diagnostics, and verification contract.
+
 ### REST API test suites
 
 Use type `api` for API behavior checks, independently of implementation language.

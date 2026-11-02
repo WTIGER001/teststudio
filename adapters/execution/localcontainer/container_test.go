@@ -1,4 +1,4 @@
-package localplaywright
+package localcontainer
 
 import (
 	"context"

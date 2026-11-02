@@ -13,6 +13,18 @@ type HTTPObservation struct {
 	CertificateExpires *time.Time         `json:"certificateExpires,omitempty"`
 }
 
+type GoObservation struct {
+	Package         string  `json:"package"`
+	Test            string  `json:"test"`
+	Toolchain       string  `json:"toolchain"`
+	OS              string  `json:"os"`
+	Architecture    string  `json:"architecture"`
+	BuildDurationMs float64 `json:"buildDurationMs"`
+	BuildExitCode   *int    `json:"buildExitCode,omitempty"`
+	ExitCode        *int    `json:"exitCode,omitempty"`
+	OutputTruncated bool    `json:"outputTruncated,omitempty"`
+}
+
 type Result struct {
 	DurationUnavailable bool               `json:"durationUnavailable,omitempty"`
 	WorkerDurationMs    float64            `json:"workerDurationMs,omitempty"`
@@ -34,4 +46,5 @@ type Result struct {
 	FinishedAt          time.Time          `json:"finishedAt"`
 	DurationMs          float64            `json:"durationMs"`
 	HTTP                *HTTPObservation   `json:"http,omitempty"`
+	Go                  *GoObservation     `json:"go,omitempty"`
 }

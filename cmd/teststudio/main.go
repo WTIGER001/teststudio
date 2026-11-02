@@ -20,6 +20,7 @@ import (
 	permissions "github.com/wtiger001/go-permissions"
 	"github.com/wtiger001/teststudio/adapters/artifacts/filesystem"
 	authoidc "github.com/wtiger001/teststudio/adapters/auth/oidc"
+	"github.com/wtiger001/teststudio/adapters/execution/localcontainer"
 	"github.com/wtiger001/teststudio/adapters/execution/localplaywright"
 	permissionpg "github.com/wtiger001/teststudio/adapters/permissions/postgres"
 	permissionsqlite "github.com/wtiger001/teststudio/adapters/permissions/sqlite"
@@ -51,6 +52,7 @@ func run() error {
 	artifactDirectory := flag.String("artifact-directory", ".data/artifacts", "Private local artifact directory")
 	location := flag.String("execution-location", "local", "Execution location identifier")
 	playwrightImages := flag.String("playwright-images", "", "Comma-separated immutable local Playwright image references; enables the isolated local worker")
+	goImages := flag.String("go-images", "", "Comma-separated immutable local Go suite image references; enables the isolated local Go worker")
 	local := flag.Bool("local", false, "Enable explicit loopback-only local administrator sign-in")
 	providers := flag.String("oidc-config", "", "Initial JSON provider configuration file")
 	bootstrapIssuer := flag.String("bootstrap-issuer", "", "OIDC issuer for the initial installation administrator")
@@ -160,8 +162,12 @@ func run() error {
 	evidenceService := &evidence.Service{Store: db, Blobs: files}
 	runService := &runs.Service{Store: db, Auth: auth, Catalog: catalogService, Evidence: evidenceService, HTTP: &execution.HTTP{}, Location: *location}
 	runService.RecoveryDriver = &localplaywright.Executor{}
+	runService.RecoveryDrivers = []execution.ManagedExecutor{&localcontainer.Executor{Runner: "go"}}
 	if strings.TrimSpace(*playwrightImages) != "" {
 		runService.Playwright = &localplaywright.Executor{Images: strings.Split(*playwrightImages, ",")}
+	}
+	if strings.TrimSpace(*goImages) != "" {
+		runService.Go = &localcontainer.Executor{Runner: "go", Images: strings.Split(*goImages, ",")}
 	}
 	api := &httpapi.Server{Store: db, Auth: auth, Projects: &projects.Service{Store: db, Auth: auth}, Catalog: catalogService, Runs: runService, Evidence: evidenceService, ArtifactOrigin: *artifactOrigin, Sessions: sessionService, OIDC: oidc, LocalUser: localUser, UI: *ui}
 	server := &http.Server{Addr: *addr, Handler: api.Handler(), ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 30 * time.Second, WriteTimeout: 60 * time.Second, IdleTimeout: 90 * time.Second}

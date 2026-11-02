@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "teststudio.go.catalog/v1",
+  "tests": [
+    {"id": "GO-SUM-001", "package": "./unit", "test": "TestSum"},
+    {"id": "GO-ROWS-001", "package": "./unit", "test": "TestRows"},
+    {"id": "GO-CHILD-001", "package": "./unit", "test": "TestIndependent/first"},
+    {"id": "GO-CHILD-002", "package": "./unit", "test": "TestIndependent/second"},
+    {"id": "GO-FAIL-001", "package": "./diagnostics", "test": "TestAssertion"},
+    {"id": "GO-PANIC-001", "package": "./diagnostics", "test": "TestPanic"},
+    {"id": "GO-TIMEOUT-001", "package": "./diagnostics", "test": "TestTimeout"},
+    {"id": "GO-SKIP-001", "package": "./diagnostics", "test": "TestSkipped"},
+    {"id": "GO-MISSING-001", "package": "./diagnostics", "test": "TestMissing"},
+    {"id": "GO-BUILD-001", "package": "./broken", "test": "TestBuild"}
+  ]
+}

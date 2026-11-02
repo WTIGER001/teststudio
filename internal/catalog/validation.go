@@ -9,6 +9,7 @@ import (
 
 	"github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/domain"
+	"github.com/wtiger001/teststudio/internal/gosuite"
 	"github.com/wtiger001/teststudio/internal/timing"
 )
 
@@ -66,6 +67,7 @@ func Validate(d Draft) []Issue {
 		add("", "timing", err.Error())
 	}
 	tests := map[string]Test{}
+	goEntries := []gosuite.Entry{}
 	for _, t := range d.Tests {
 		if err := ValidateTest(t); err != nil {
 			add(t.ID, "definition", err.Error())
@@ -88,6 +90,18 @@ func Validate(d Draft) []Issue {
 				add(t.ID, issue.Field, issue.Message)
 			}
 		} else {
+			if t.Runner == "go" {
+				if t.Type != "unit" && t.Type != "integration" && t.Type != "api" {
+					add(t.ID, "type", "Go runner requires unit, integration, or API type")
+				}
+				entry, err := gosuite.Parse(t.Selector)
+				if err != nil {
+					add(t.ID, "selector", err.Error())
+				} else {
+					entry.ID = t.ID
+					goEntries = append(goEntries, entry)
+				}
+			}
 			if t.Source == "" || t.Selector == "" {
 				add(t.ID, "source", "coded tests require source and selector")
 			}
@@ -97,6 +111,11 @@ func Validate(d Draft) []Issue {
 			if d.Artifact.Discovered[t.ID] != t.Selector {
 				add(t.ID, "selector", "selector is absent from the discovered artifact catalog")
 			}
+		}
+	}
+	if len(goEntries) > 0 {
+		if err := gosuite.Validate(goEntries); err != nil {
+			add("", "selector", err.Error())
 		}
 	}
 	state := map[string]int{}

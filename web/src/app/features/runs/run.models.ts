@@ -10,11 +10,16 @@ export interface RunSummary {
 }
 export interface TestStep { title: string; category: string; durationMs: number; error?: string }
 export interface HTTPObservation { status: number; url: string; durationMs: number; timingsMs?: Record<string, number>; certificateExpires?: string }
+export interface GoObservation {
+  package: string; test: string; toolchain: string; os: string; architecture: string
+  buildDurationMs: number; buildExitCode?: number; exitCode?: number; outputTruncated?: boolean
+}
 export interface Attempt {
   executionId?: string; recovered?: boolean; durationUnavailable?: boolean; workerDurationMs?: number; steps?: TestStep[]; runnerStatus?: string; expectedStatus?: string
   testId: string; attempt: number; state: string; failureKind?: string; error?: string; startedAt: string; finishedAt: string; durationMs: number
   observedState?: string; totalDurationMs?: number; timingRegressions?: number; timing?: TimingAssessment
   http?: HTTPObservation
+  go?: GoObservation
 }
 export interface Run {
   id: string; projectId: string; request: RunRequest; release: { id: string }; environment?: Environment; tests: TestDefinition[]
