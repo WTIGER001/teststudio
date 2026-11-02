@@ -130,3 +130,12 @@ Local implementation and provider contract checks continue independently.
 Added a filesystem adapter with atomic writes, checksums, byte limits, and root-confined file access.
 Validation: `go test ./adapters/artifacts/filesystem -count=1` passes.
 Tests cover successful retrieval, oversized uploads, invalid paths, and escaping symlinks.
+
+### Native HTTP execution
+
+Added bounded GET and HEAD probes, response assertions, TLS checks, phase timing, deadlines, and cancellation.
+Redirects stay disabled. Target resolution validates network scope and rejects metadata endpoints.
+Private networks and plain HTTP require explicit environment conditions.
+Validation: `go test -race ./internal/execution -count=1` passes.
+Tests cover JSON and header assertions, redirect isolation, TLS trust, certificate lifetime, cancellation, timeouts, and metadata restrictions.
+Run coordination, response credentials, evidence indexing, and deployment workers remain pending.

@@ -14,15 +14,17 @@ type Application struct {
 }
 
 type Environment struct {
-	ID          string            `json:"id"`
-	Name        string            `json:"name"`
-	Application string            `json:"applicationId"`
-	Stage       string            `json:"stage"`
-	Protected   bool              `json:"protected"`
-	Disabled    bool              `json:"disabled"`
-	Endpoints   map[string]string `json:"endpoints"`
-	Credentials map[string]string `json:"credentialBindings,omitempty"`
-	Locations   []string          `json:"executionLocations,omitempty"`
+	ID           string            `json:"id"`
+	Name         string            `json:"name"`
+	Application  string            `json:"applicationId"`
+	Stage        string            `json:"stage"`
+	Protected    bool              `json:"protected"`
+	Disabled     bool              `json:"disabled"`
+	AllowHTTP    bool              `json:"allowHttp,omitempty"`
+	AllowPrivate bool              `json:"allowPrivateNetwork,omitempty"`
+	Endpoints    map[string]string `json:"endpoints"`
+	Credentials  map[string]string `json:"credentialBindings,omitempty"`
+	Locations    []string          `json:"executionLocations,omitempty"`
 }
 
 type Suite struct {
