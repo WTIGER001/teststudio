@@ -64,6 +64,21 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Record feature commits and targeted validation here.
 
+### Durable schedule API and atomic run creation
+
+Added project schedules with bounded intervals, five-field cron expressions, explicit timezones, release pins, and overlap policies.
+The service scheduler claims durable occurrences and recovers expired claims after restart.
+One transaction queues the normal run, checkpoints its firing, and advances the schedule.
+Configuration changes fence in-flight claims. Runtime updates preserve public configuration revisions for editors.
+Missed occurrences coalesce without a catch-up burst. Independent schedules retain independent overlap rules.
+Scheduled runs use current owner permissions and normal catalog, target, timing, evidence, and dispatch checks.
+Triggered, skipped, and blocked firings retain project-scoped history.
+Archival preserves identifiers and history. Restored schedules stay disabled.
+Validation: targeted race checks pass on SQLite and local PostgreSQL.
+Checks cover competing schedulers, restart recovery, disable races, stable editor revisions, release activation and pins, overlap, and revoked owners.
+API checks verify preview, revision conflicts, firing links, archival, project isolation, and object denies.
+The schedule interface, its browser workflow, and completion notifications remain pending at this backend checkpoint.
+
 ### Isolated local Go source runner
 
 Added an immutable Go image manifest with permanent identifiers and explicit package and test selectors.

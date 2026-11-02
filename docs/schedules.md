@@ -1,0 +1,84 @@
+# Durable schedules
+
+## Schedule definitions
+
+Schedules belong to one project and select a published suite through the normal run request contract.
+Each definition records its owner, enabled state, cadence, target, selected tests, release policy, time limits, and retries.
+The creator or latest configuration editor becomes the execution owner.
+Every firing checks the owner's current run permissions and target protection.
+The worker repeats normal dispatch checks before each attempt.
+
+Leave `releaseId` empty to follow the suite's active release at each firing.
+Set `releaseId` to pin a published release.
+The created run freezes its actual release, definitions, target, timing criteria, and capture settings.
+Disabled tests, unsafe dependencies, missing bindings, and unavailable profiles block normal run admission.
+The schedule records blocked firings with their reason. It tries again at its next due time.
+
+## Cadence and overlap
+
+Interval schedules accept 5 through 2592000 seconds and use UTC.
+Five-field cron schedules use an explicit IANA timezone. UTC is the default.
+Cron fields are minute, hour, day of month, month, and day of week.
+The preview returns the next five times and a normal run timing estimate.
+Cron parsing uses the pinned [robfig cron parser](https://pkg.go.dev/github.com/robfig/cron/v3).
+Nonexistent daylight-saving times do not fire. A repeated local hour can contain two distinct UTC occurrences.
+
+After downtime, one firing represents the earliest pending occurrence.
+The scheduler advances directly to the next future time and records whether it coalesces missed occurrences.
+Interval schedules preserve their original cadence phase.
+The scheduler does not create a burst of historical runs after a restart.
+
+The default overlap policy is `skip`.
+It skips a firing while the previous run from the same schedule remains active.
+The `allow` policy permits another run while that run remains active.
+Other schedules and manual runs do not inherit this overlap rule.
+Project and environment exclusivity controls remain separate implementation work.
+
+## Claims and transactions
+
+The service scheduler scans durable project work records. It requires no provider timer service.
+Each scheduler claims an occurrence with an atomic revision check and a 30-second lease.
+Expired claims can transfer to another scheduler instance.
+One transaction saves the firing, advances the schedule, queues the normal run, and records its idempotency receipt.
+Concurrent replicas cannot create duplicate logical runs for the same occurrence.
+Disabling, archiving, or editing a claimed schedule changes its revision and prevents the old claimant from committing a run.
+An interrupted transaction leaves no queued run or completed firing.
+
+Public revisions identify configuration changes.
+Internal revisions also protect claims and firing updates.
+Frequent runtime updates do not invalidate an editor's configuration revision.
+Competing configuration edits return a conflict.
+History keeps triggered, skipped, and blocked firings with their scheduled time, observation time, and run reference.
+
+## API
+
+Use these routes below `/api/v1/projects/{projectId}/schedules`:
+
+| Method | Route | Operation |
+| --- | --- | --- |
+| GET | `/` | List readable schedules with bounded pages. |
+| POST | `/` | Create a schedule. |
+| POST | `/preview` | Validate cadence and estimate the run selection. |
+| GET | `/{scheduleId}` | Read configuration and current execution state. |
+| PUT | `/{scheduleId}` | Update with a configuration `If-Match` revision. |
+| GET | `/{scheduleId}/firings` | Read bounded firing history. |
+| POST | `/{scheduleId}/archive` | Disable and archive with `If-Match`. |
+| POST | `/{scheduleId}/restore` | Restore with `If-Match`. The restored schedule stays disabled. |
+
+Schedule permissions control creation, updates, reads, and archival.
+Object denies also apply to listing and firing history.
+Archive preserves the identifier and history. Use `archived=true` to include archived definitions in lists.
+Notification delivery remains a separate completion workflow. Schedules do not imply that a notification transport is configured.
+
+## Local operation
+
+The local server processes schedules by default.
+Set `--scheduler=false` on instances that only serve requests or execute queued work.
+Keep at least one scheduler instance active for each database.
+SQLite supports one local service instance. Hosted replicas use PostgreSQL.
+The same scheduling implementation supports both databases.
+The initial functional verification uses local databases and local test targets.
+
+Focused checks cover concurrent claims, restart recovery, release pins, permission changes, overlap, configuration revisions, and disable races.
+They also verify normal run snapshots, execution, timing, results, evidence, and project-scoped API access.
+The schedule interface and its browser workflow remain under implementation at this backend checkpoint.

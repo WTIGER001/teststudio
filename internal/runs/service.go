@@ -69,6 +69,17 @@ func (s *Service) Get(ctx context.Context, project, id string) (Run, storage.Rec
 }
 
 func (s *Service) Create(ctx context.Context, user, project string, req Request, key, trigger string) (Run, error) {
+	return s.create(ctx, user, project, req, key, trigger, nil, nil)
+}
+
+func (s *Service) CreateScheduled(ctx context.Context, user, project string, req Request, key string, schedule ScheduleTrigger, commit func(Run) ([]storage.Change, error)) (Run, error) {
+	if commit == nil {
+		return Run{}, errors.New("scheduled runs require an atomic firing checkpoint")
+	}
+	return s.create(ctx, user, project, req, key, "schedule", &schedule, commit)
+}
+
+func (s *Service) create(ctx context.Context, user, project string, req Request, key, trigger string, schedule *ScheduleTrigger, checkpoint func(Run) ([]storage.Change, error)) (Run, error) {
 	if err := s.Auth.Check(ctx, user, project, "", "runs.create"); err != nil {
 		return Run{}, err
 	}
@@ -104,6 +115,7 @@ func (s *Service) Create(ctx context.Context, user, project string, req Request,
 		return Run{}, err
 	}
 	v.Trigger = trigger
+	v.Schedule = schedule
 	run, err := storage.Put("runs", v.ID, project, 0, v)
 	if err != nil {
 		return v, err
@@ -120,8 +132,19 @@ func (s *Service) Create(ctx context.Context, user, project string, req Request,
 	if err != nil {
 		return v, err
 	}
-	err = s.Store.Commit(ctx, run, queued, idempotency, audit, storage.Change{Record: projectRow, Assert: true})
+	changes := []storage.Change{run, queued, idempotency, audit, {Record: projectRow, Assert: true}}
+	if checkpoint != nil {
+		extra, err := checkpoint(v)
+		if err != nil {
+			return v, err
+		}
+		changes = append(changes, extra...)
+	}
+	err = s.Store.Commit(ctx, changes...)
 	if errors.Is(err, storage.ErrConflict) {
+		if checkpoint != nil {
+			return v, err
+		}
 		return s.Create(ctx, user, project, req, key, trigger)
 	}
 	return v, err

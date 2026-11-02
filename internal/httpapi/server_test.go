@@ -25,6 +25,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/identity"
 	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/runs"
+	"github.com/wtiger001/teststudio/internal/schedules"
 	"github.com/wtiger001/teststudio/internal/sessions"
 	"github.com/wtiger001/teststudio/internal/testkit"
 )
@@ -79,6 +80,7 @@ func fixture(t *testing.T) *client {
 	workersDone := runService.Start(workerContext)
 	t.Cleanup(func() { cancelWorkers(); <-workersDone })
 	api := &httpapi.Server{Store: db, Auth: auth, Projects: &projects.Service{Store: db, Auth: auth}, Catalog: &catalog.Service{Store: db, Auth: auth}, Sessions: sessions, OIDC: oidc, LocalUser: "admin", UI: uiRoot, Runs: runService, Evidence: evidenceService}
+	api.Schedules = &schedules.Service{Store: db, Auth: auth, Runs: runService}
 	artifactServer := httptest.NewServer(api.ArtifactHandler())
 	t.Cleanup(artifactServer.Close)
 	api.ArtifactOrigin = artifactServer.URL

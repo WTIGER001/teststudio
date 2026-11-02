@@ -33,6 +33,7 @@ type Counts struct {
 }
 
 type Run struct {
+	Schedule             *ScheduleTrigger          `json:"schedule,omitempty"`
 	ID                   string                    `json:"id"`
 	Project              string                    `json:"projectId"`
 	Request              Request                   `json:"request"`
@@ -64,6 +65,12 @@ type Run struct {
 	Error                string                    `json:"error,omitempty"`
 	EvidenceState        string                    `json:"evidenceState"`
 	EvidenceErrors       []string                  `json:"evidenceErrors"`
+}
+
+type ScheduleTrigger struct {
+	ID     string    `json:"id"`
+	Firing string    `json:"firingId"`
+	DueAt  time.Time `json:"dueAt"`
 }
 
 func Terminal(state string) bool {

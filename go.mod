@@ -5,6 +5,7 @@ go 1.26.2
 require (
 	github.com/coreos/go-oidc/v3 v3.21.0
 	github.com/jackc/pgx/v5 v5.9.2
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/wtiger001/go-permissions v0.0.31
 	golang.org/x/oauth2 v0.37.0
 	modernc.org/sqlite v1.61.1
