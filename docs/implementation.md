@@ -64,6 +64,19 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Record feature commits and targeted validation here.
 
+### Result-state trend data and rankings
+
+Added an authorized project trend API with bounded history pages and scoped cursors.
+Aggregates use immutable selected-test snapshots and final logical results. Retry attempts do not inflate counts.
+Passed, failed, timed-out, flaky, skipped, and unknown observations remain distinct.
+Missing selections create gaps. Missing final results remain unknown.
+Added separate failure and volatility rankings with explicit sample and comparison counts.
+Volatility compares adjacent known results within the same suite, target, and execution location.
+Per-run permission checks exclude denied observations and metadata.
+Validation: focused aggregation and API race tests pass on SQLite. API parity checks pass on local PostgreSQL.
+Checks cover counts, retries, ambiguity, gaps, comparison boundaries, filters, pagination, object denies, and permission revocation.
+Interface completion, cross-project rollups, and HTTPS timing charts remain pending at this checkpoint.
+
 ### Durable metadata storage
 
 Implemented versioned SQL records, atomic revision checks, scoped cursors, durable sequences, and SQLite WAL persistence.
