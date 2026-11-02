@@ -126,3 +126,32 @@ func TestCustomRolesInheritanceAndDisabledOverrides(t *testing.T) {
 		t.Fatalf("enabled overrides: %v %v", disabled, err)
 	}
 }
+
+func TestPrincipalLookupOmitsExpiredAndDeniedGrants(t *testing.T) {
+	db, err := storage.Open(t.Context(), filepath.Join(t.TempDir(), "principal.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	store := permissionstore.New(db)
+	expired := time.Now().Add(-time.Minute)
+	for _, owner := range []string{"active", "expired", "denied"} {
+		g := permissions.Grant{OwnerKind: permissions.PrincipalUser, OwnerID: owner, Effect: permissions.EffectAllow, TeamScope: "project", PermissionName: "teststudio.catalog.read"}
+		if owner == "expired" {
+			g.ExpiresAt = &expired
+		}
+		if err := store.CreateGrant(t.Context(), g); err != nil {
+			t.Fatal(err)
+		}
+		if owner == "denied" {
+			g.Effect = permissions.EffectDeny
+			if err := store.CreateGrant(t.Context(), g); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	hits, err := store.PrincipalsWithGrant(t.Context(), permissions.Request{TeamID: "project", Perm: "teststudio.catalog.read"})
+	if err != nil || len(hits) != 1 || hits[0].ID != "active" {
+		t.Fatalf("active principal hits: %+v %v", hits, err)
+	}
+}

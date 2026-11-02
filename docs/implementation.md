@@ -100,3 +100,9 @@ Added cookie authentication, mutation CSRF checks, revision headers, and API err
 Validation: `go test ./internal/httpapi -count=1` and `go build -o bin/teststudio ./cmd/teststudio` pass.
 API tests cover sign-in, project creation, catalog publication, stale edits, archive history, CSRF rejection, invalid JSON, and UI asset routes.
 Source publishing, execution, evidence APIs, access administration, and deployment verification remain pending.
+
+### Active principal reporting
+
+Aligned SQLite principal lookup with the selected library's PostgreSQL grant lookup.
+Expired grants and explicit denies no longer appear as active direct access.
+Validation: `go test ./adapters/permissions/sqlite -count=1` passes.

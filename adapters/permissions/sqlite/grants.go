@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	permissions "github.com/wtiger001/go-permissions"
 	"github.com/wtiger001/teststudio/internal/storage"
@@ -57,6 +58,9 @@ func (s *Store) GrantsForOwners(ctx context.Context, owners []permissions.Princi
 	}
 	result := []permissions.Grant{}
 	for _, g := range all {
+		if g.IsExpiredAt(time.Now()) {
+			continue
+		}
 		if !slices.Contains(owners, permissions.PrincipalRef{Kind: g.OwnerKind, ID: g.OwnerID}) {
 			continue
 		}
@@ -69,14 +73,36 @@ func (s *Store) GrantsForOwners(ctx context.Context, owners []permissions.Princi
 }
 
 func (s *Store) PrincipalsWithGrant(ctx context.Context, req permissions.Request) ([]permissions.PrincipalHit, error) {
+	if req.Perm == "" {
+		return nil, errors.New("permission is required")
+	}
 	all, err := values[permissions.Grant](ctx, s.db, "permission-grants")
 	if err != nil {
 		return nil, err
 	}
-	result := []permissions.PrincipalHit{}
+	matching := []permissions.Grant{}
+	denied := map[permissions.PrincipalRef]bool{}
+	now := time.Now()
 	for _, g := range all {
-		if g.PermissionName == req.Perm && (g.TeamScope == "*" || g.TeamScope == req.TeamID) && (g.ObjectScope == nil || *g.ObjectScope == "*" || *g.ObjectScope == req.Object) {
-			result = append(result, permissions.PrincipalHit{Kind: g.OwnerKind, ID: g.OwnerID, TeamScope: g.TeamScope, ObjectScope: g.ObjectScope, PermissionName: g.PermissionName})
+		if g.IsExpiredAt(now) || g.PermissionName != req.Perm || (g.TeamScope != "*" && g.TeamScope != req.TeamID) || (g.ObjectScope != nil && *g.ObjectScope != "*" && *g.ObjectScope != req.Object) {
+			continue
+		}
+		matching = append(matching, g)
+		if g.Effect == permissions.EffectDeny {
+			denied[permissions.PrincipalRef{Kind: g.OwnerKind, ID: g.OwnerID}] = true
+		}
+	}
+	result := []permissions.PrincipalHit{}
+	seen := map[string]bool{}
+	for _, g := range matching {
+		if g.Effect != permissions.EffectAllow || denied[permissions.PrincipalRef{Kind: g.OwnerKind, ID: g.OwnerID}] {
+			continue
+		}
+		hit := permissions.PrincipalHit{Kind: g.OwnerKind, ID: g.OwnerID, TeamScope: g.TeamScope, ObjectScope: g.ObjectScope, PermissionName: g.PermissionName}
+		identity := key(hit)
+		if !seen[identity] {
+			result = append(result, hit)
+			seen[identity] = true
 		}
 	}
 	return result, nil
