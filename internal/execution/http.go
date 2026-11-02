@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/catalog"
+	"github.com/wtiger001/teststudio/internal/networkguard"
 	"github.com/wtiger001/teststudio/internal/projects"
 )
 
@@ -63,7 +64,11 @@ func (e *HTTP) Execute(ctx context.Context, test catalog.Test, environment proje
 	}
 	ctx, cancel := context.WithTimeout(ctx, limit)
 	defer cancel()
-	transport := &http.Transport{DialContext: guardedDial(environment.AllowPrivate || environment.Stage == "local"), TLSClientConfig: &tls.Config{RootCAs: e.RootCAs, MinVersion: tls.VersionTLS12}, TLSHandshakeTimeout: 5 * time.Second, ResponseHeaderTimeout: limit, MaxResponseHeaderBytes: 32 << 10}
+	scope := networkguard.Public
+	if environment.AllowPrivate || environment.Stage == "local" {
+		scope = networkguard.Private
+	}
+	transport := &http.Transport{DialContext: networkguard.Dial(scope), TLSClientConfig: &tls.Config{RootCAs: e.RootCAs, MinVersion: tls.VersionTLS12}, TLSHandshakeTimeout: 5 * time.Second, ResponseHeaderTimeout: limit, MaxResponseHeaderBytes: 32 << 10}
 	defer transport.CloseIdleConnections()
 	client := &http.Client{Transport: transport, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
 	observation := &HTTPObservation{URL: base.Scheme + "://" + base.Host + base.EscapedPath(), Timings: map[string]float64{}}

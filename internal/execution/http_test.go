@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/catalog"
+	"github.com/wtiger001/teststudio/internal/networkguard"
 	"github.com/wtiger001/teststudio/internal/projects"
 )
 
@@ -115,15 +116,15 @@ func TestHTTPRejectsUnsupportedTargetsBeforeExecution(t *testing.T) {
 
 func TestNetworkScopeBlocksMetadataAndPrivateDefaults(t *testing.T) {
 	for _, address := range []string{"169.254.169.254", "169.254.170.2", "100.100.100.200", "168.63.129.16", "fd00:ec2::254", "::ffff:169.254.169.254"} {
-		if permittedAddress(net.ParseIP(address), true) {
+		if networkguard.PermittedAddress(net.ParseIP(address), networkguard.Private) {
 			t.Errorf("metadata address allowed: %s", address)
 		}
 	}
 	for _, address := range []string{"127.0.0.1", "10.0.0.1", "192.168.1.1", "::1"} {
-		if permittedAddress(net.ParseIP(address), false) {
+		if networkguard.PermittedAddress(net.ParseIP(address), networkguard.Public) {
 			t.Errorf("implicit private target allowed: %s", address)
 		}
-		if !permittedAddress(net.ParseIP(address), true) {
+		if !networkguard.PermittedAddress(net.ParseIP(address), networkguard.Private) {
 			t.Errorf("explicit private target rejected: %s", address)
 		}
 	}

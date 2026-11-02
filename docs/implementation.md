@@ -64,6 +64,17 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Record feature commits and targeted validation here.
 
+### Notification transports and scoped local secret bindings
+
+Added purpose-scoped environment and mounted-file secret bindings with project isolation and bounded reads.
+Reference listings expose identifiers and names without resolved values or source configuration.
+Native probes and notification senders share DNS and address policy checks.
+Added generic JSON and Discord webhook transports with stable delivery identifiers, confirmation, bounded requests, and redacted diagnostics.
+Discord delivery disables mentions and respects rate-limit responses.
+Validation: local race checks pass for secret resolution, network policies, webhook payloads, redirects, permanent failures, and rate-limit parsing.
+Existing native HTTP executor checks pass through the shared network guard.
+Durable delivery, API and UI workflows, hosted secret adapters, and the remaining full plan remain pending at this transport checkpoint.
+
 ### Schedule editor, previews, and firing history
 
 Added project navigation and focused schedule editor, listing, and firing-history components.
