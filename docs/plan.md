@@ -1370,3 +1370,14 @@ Use Angular ARIA for complex interaction patterns and CDK for accessibility util
 Support keyboard navigation, visible focus, reduced motion, and narrow viewports in both themes.
 Every status includes text or an icon as well as color.
 Verify complete catalog and run workflows in both themes.
+
+## Local-first verification
+
+Run initial functional testing locally.
+Use SQLite and a local PostgreSQL container for persistence and authorization checks.
+Use local application fixtures, browser sessions, workers, and artifact storage for complete workflows.
+Use provider contract tests and local container or Kubernetes checks for deployment adapters.
+Run targeted tests after changes. Add broader checks only when feature integration requires them.
+Use the MMDev account for a small AWS deployment smoke check after local workflows are stable.
+Keep account and profile values in installation configuration.
+Cloud smoke tests supplement local functional coverage. They do not replace it.

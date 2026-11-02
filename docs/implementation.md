@@ -139,3 +139,19 @@ Private networks and plain HTTP require explicit environment conditions.
 Validation: `go test -race ./internal/execution -count=1` passes.
 Tests cover JSON and header assertions, redirect isolation, TLS trust, certificate lifetime, cancellation, timeouts, and metadata restrictions.
 Run coordination, response credentials, evidence indexing, and deployment workers remain pending.
+
+### Verification scope
+
+The user requires almost all initial functional testing to run locally.
+Use SQLite, local PostgreSQL, real local browser workflows, local workers, and local artifact storage.
+Provider contract checks and local deployment packaging precede any cloud smoke check.
+MMDev remains the later AWS smoke target.
+
+### Durable evidence metadata and log ingestion
+
+Added provider-neutral artifact ports, persistent manifests, run quotas, checksums, ordered log metadata, and execution events.
+Duplicate segments are idempotent. Changed payloads conflict. Failed uploads remain explicit and can retry without rerunning a test.
+Missing content updates its manifest state. Blob files remain outside SQL rows.
+Validation: `go test -race ./internal/evidence -count=1` passes.
+Tests cover concurrent duplicate admission, byte quotas, retry recovery, project isolation, and missing content.
+Retention cleanup, complete streaming ingestion, and cloud blob adapters remain pending.

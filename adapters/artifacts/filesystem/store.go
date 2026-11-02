@@ -10,13 +10,11 @@ import (
 	"path"
 	"strings"
 
+	"github.com/wtiger001/teststudio/internal/artifacts"
 	"github.com/wtiger001/teststudio/internal/domain"
 )
 
-type Object struct {
-	Size     int64
-	Checksum string
-}
+type Object = artifacts.Object
 
 type Store struct{ root *os.Root }
 
@@ -84,7 +82,11 @@ func (s *Store) Open(ctx context.Context, key string) (io.ReadCloser, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	return s.root.Open(key)
+	f, err := s.root.Open(key)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, artifacts.ErrNotFound
+	}
+	return f, err
 }
 
 func (s *Store) Delete(ctx context.Context, key string) error {
