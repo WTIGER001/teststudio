@@ -1,0 +1,28 @@
+:host { display: inline-flex; }
+.help-symbol { display: inline-grid; place-items: center; width: 1rem; height: 1rem; border: 1px solid currentColor; border-radius: 50%; font-size: 10px; }
+.help-drawer { position: fixed; inset: 0 0 0 auto; margin: 0; padding: 0; width: min(32rem, 100%); max-width: 100%; height: 100dvh; max-height: none; border: 0; border-left: 1px solid var(--border); background: var(--surface); color: var(--text); box-shadow: -12px 0 48px #0002; opacity: 0; transform: translateX(100%); transition: transform 200ms ease, opacity 200ms ease, display 200ms allow-discrete, overlay 200ms allow-discrete; }
+.help-drawer[open] { display: grid; grid-template-rows: auto auto minmax(0, 1fr); opacity: 1; transform: translateX(0); }
+.help-drawer::backdrop { background: #0000; transition: background-color 200ms ease, display 200ms allow-discrete, overlay 200ms allow-discrete; }
+.help-drawer[open]::backdrop { background: #0005; }
+@starting-style { .help-drawer[open] { opacity: 0; transform: translateX(100%); } .help-drawer[open]::backdrop { background: #0000; } }
+.help-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 26px 26px 22px; border-bottom: 1px solid var(--border); }
+.help-header h2 { font-size: 23px; line-height: 1.25; margin: 6px 0 8px; }
+.help-header > div { min-width: 0; }
+.help-sections { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 20px; background: var(--surface-muted); border-bottom: 1px solid var(--border); }
+.help-sections button { padding: 7px 10px; border: 1px solid transparent; border-radius: 6px; color: var(--accent); background: transparent; font-size: 12px; font-weight: 600; }
+.help-sections button:hover { border-color: var(--border); background: var(--surface); }
+.help-content { padding: 26px; overflow: auto; overscroll-behavior: contain; overflow-wrap: anywhere; }
+.help-content section + section { margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--border); }
+.help-content h3 { font-size: 17px; margin-bottom: 14px; scroll-margin-top: 6px; }
+.help-content p, .help-content dd, .help-content li { font-size: 13px; line-height: 1.75; color: var(--muted); }
+.help-content p + p { margin-top: 12px; }
+.help-content dl { margin: 0; }
+.help-content dt { font-size: 13px; font-weight: 650; margin: 18px 0 5px; }
+.help-content dt:first-child { margin-top: 0; }
+.help-content dd { margin: 0; }
+.help-tutorial + .help-tutorial { margin-top: 24px; }
+.help-tutorial h4 { font-size: 13px; margin: 0 0 10px; }
+.help-tutorial ol { margin: 0; padding-left: 22px; }
+.help-tutorial li { padding-left: 4px; margin-bottom: 10px; }
+.help-tutorial li::marker { color: var(--accent); font-weight: 650; }
+@media (max-width: 540px) { .help-header { padding: 20px; } .help-content { padding: 22px 20px; } .help-sections { padding: 10px 12px; } }

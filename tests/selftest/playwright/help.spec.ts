@@ -1,0 +1,89 @@
+import { test, expect } from './fixtures'
+import type { Page } from '@playwright/test'
+
+async function openHelp(page: Page, title: string) {
+  const trigger = page.getByRole('button', { name: 'Help', exact: true })
+  await trigger.click()
+  const drawer = page.getByRole('dialog', { name: `${title} help`, exact: true })
+  await expect(drawer).toBeVisible()
+  await expect(drawer).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)')
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  for (const name of ['Introduction', 'Concepts', 'Tutorials']) await expect(drawer.getByRole('heading', { name, exact: true })).toBeVisible()
+  return drawer
+}
+
+test('Page help, keyboard access, and responsive drawer', { tag: '@STUDIO-HELP-001' }, async ({ page, api }, testInfo) => {
+  const { project, path } = await api.scaffold()
+  await api.createCheck(path)
+  const run = await api.run(path)
+
+  await test.step('Keep catalog edits and keyboard focus when help closes', async () => {
+    await page.goto(`/projects/${project}/catalog`)
+    await page.getByRole('button', { name: '+ Create test' }).click()
+    await page.getByLabel('Title', { exact: true }).fill('Unsaved help check')
+    const drawer = await openHelp(page, 'Test catalog')
+    const close = drawer.getByRole('button', { name: 'Close help' })
+    await expect(close).toBeFocused()
+    await page.keyboard.press('Shift+Tab')
+    await expect(drawer.getByRole('region', { name: 'Help content' })).toBeFocused()
+    await page.keyboard.press('Tab')
+    await expect(close).toBeFocused()
+    await drawer.getByRole('button', { name: 'Tutorials', exact: true }).click()
+    await expect(drawer.getByRole('heading', { name: 'Tutorials', exact: true })).toBeFocused()
+    await page.keyboard.press('Escape')
+    await expect(drawer).not.toBeVisible()
+    await expect(page.getByRole('button', { name: 'Help', exact: true })).toBeFocused()
+    await expect(page.getByLabel('Title', { exact: true })).toHaveValue('Unsaved help check')
+  })
+
+  await test.step('Follow the current page through normal navigation', async () => {
+    const navigation = page.getByRole('navigation', { name: 'Main navigation' })
+    await navigation.getByRole('link', { name: 'Project settings' }).click()
+    const settings = await openHelp(page, 'Project settings')
+    await expect(settings).toContainText('Environment and endpoint')
+    await page.mouse.click(10, 100)
+    await expect(settings).not.toBeVisible()
+    await navigation.getByRole('link', { name: 'Test runs' }).click()
+    const runs = await openHelp(page, 'Test runs')
+    await expect(runs).toContainText('Time limits and retries')
+    await runs.getByRole('button', { name: 'Close help' }).click()
+    await page.getByRole('link', { name: run.id, exact: true }).click()
+    const details = await openHelp(page, 'Run details')
+    await expect(details).toContainText('Worker recovery')
+    await details.getByRole('button', { name: 'Close help' }).click()
+  })
+
+  await test.step('Read the drawer in both themes on mobile with reduced motion', async () => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    for (const theme of ['dark', 'light']) {
+      await page.getByLabel('Color theme').selectOption(theme)
+      const drawer = await openHelp(page, 'Run details')
+      const bounds = await drawer.boundingBox()
+      expect(bounds?.x).toBeGreaterThanOrEqual(0)
+      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(391)
+      expect(await drawer.evaluate(element => element.scrollWidth <= element.clientWidth)).toBeTruthy()
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy()
+      expect(await drawer.evaluate(element => getComputedStyle(element).transitionDuration)).toBe('0s')
+      await drawer.getByRole('button', { name: 'Concepts', exact: true }).click()
+      await expect(drawer.getByRole('heading', { name: 'Concepts', exact: true })).toBeInViewport()
+      await drawer.getByRole('button', { name: 'Introduction', exact: true }).click()
+      await testInfo.attach(`help-mobile-${theme}`, { body: await page.screenshot(), contentType: 'image/png' })
+      await drawer.getByRole('button', { name: 'Close help' }).click()
+    }
+  })
+
+  await test.step('Offer the right guide before and after sign-in', async () => {
+    await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Projects', exact: true }).click()
+    const projects = await openHelp(page, 'Projects')
+    await projects.getByRole('button', { name: 'Close help' }).click()
+    await page.getByRole('button', { name: 'Sign out', exact: true }).click()
+    await expect(page.getByRole('button', { name: 'Open local workspace' })).toBeVisible()
+    const signin = await openHelp(page, 'Sign-in')
+    await signin.getByRole('button', { name: 'Close help' }).click()
+    await page.getByRole('button', { name: 'Open local workspace' }).click()
+    const reopened = await openHelp(page, 'Projects')
+    await reopened.getByRole('button', { name: 'Close help' }).click()
+    await expect(page.getByRole('button', { name: 'Help', exact: true })).toHaveAttribute('aria-expanded', 'false')
+  })
+})

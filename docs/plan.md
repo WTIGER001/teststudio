@@ -1233,6 +1233,17 @@ Persist shareable filters in URLs.
 Keep loading, empty, unavailable, and permission-denied states distinct.
 An unavailable API must not appear as an empty healthy project.
 
+#### Page help
+
+Provide Help in the shared header on every page, including sign-in.
+Open a drawer that slides in from the right and shows help for the current page.
+Each guide contains Introduction, Concepts, and Tutorials with numbered task steps.
+Keep guide content aligned with available controls and behavior.
+Support keyboard navigation, Escape dismissal, focus restoration, and independent content scrolling.
+Preserve unsaved page edits when opening and closing help.
+Use shared light and dark theme tokens. Respect reduced motion and narrow viewports.
+Verify the workflow through TestStudio's own Playwright suite.
+
 #### Hosting and delivery approach
 
 Build the UI as static assets with independent versioned releases.

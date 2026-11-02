@@ -3,11 +3,12 @@ import { FormsModule } from '@angular/forms'
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router'
 import { ApplicationService } from './core/application.service'
 import { ThemeService } from './core/theme.service'
+import { HelpComponent } from './features/help/help.component'
 
 @Component({
   selector: 'ts-root',
   standalone: true,
-  imports: [FormsModule, RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [FormsModule, RouterLink, RouterLinkActive, RouterOutlet, HelpComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <a class="skip-link" href="#main">Skip to content</a>
@@ -19,6 +20,7 @@ import { ThemeService } from './core/theme.service'
         <select id="theme" class="theme-select" [value]="theme.preference()" (change)="theme.set($any($event.target).value)">
           <option value="system">System theme</option><option value="light">Light theme</option><option value="dark">Dark theme</option>
         </select>
+        <ts-help />
         @if (app.session.user(); as user) {
           <span class="user-name">{{ user.name }}</span>
           <button type="button" class="button subtle" (click)="app.signOut()">Sign out</button>

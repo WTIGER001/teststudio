@@ -9,6 +9,8 @@ const image = process.env.TESTSTUDIO_SELFTEST_IMAGE
 if (!image || !/^sha256:[a-f0-9]{64}$/.test(image)) throw new Error('Set TESTSTUDIO_SELFTEST_IMAGE to the immutable local image ID')
 const diagnostic = process.argv.includes('--diagnostics')
 const timeoutProbe = process.argv.includes('--timeout-probe')
+const singleTest = process.argv.find(value => value.startsWith('--test='))?.slice(7)
+if (singleTest !== undefined && (!singleTest || diagnostic || timeoutProbe)) throw new Error('Use --test=ID with one normal self-test identifier')
 const catalog = JSON.parse(fs.readFileSync(new URL('../tests/selftest/catalog.json', import.meta.url), 'utf8'))
 class APIError extends Error { constructor(status, message) { super(message); this.status = status } }
 let cookie = '', csrf = ''
@@ -36,7 +38,8 @@ const previousSuite = suiteRows.items.find(item => item.id === suite)
 const suiteDescription = 'Managed by the TestStudio self-test registrar.'
 if (previousSuite && (previousSuite.data.archived || previousSuite.data.requiresTarget || previousSuite.data.description !== suiteDescription)) throw new Error('The existing self-test suite needs review before registration')
 if (!previousSuite) await call('PUT', `${base}/suites/${suite}`, { id: suite, name: suite === 'browser-workflows' ? 'TestStudio browser workflows' : 'Runner diagnostics', description: suiteDescription, applications: [], requiresTarget: false }, 0)
-const selected = diagnostic ? catalog.diagnostics.filter(test => test.id === 'ADAPTER-FAIL') : timeoutProbe ? catalog.diagnostics.filter(test => test.id === 'ADAPTER-TIMEOUT') : catalog.tests
+const selected = diagnostic ? catalog.diagnostics.filter(test => test.id === 'ADAPTER-FAIL') : timeoutProbe ? catalog.diagnostics.filter(test => test.id === 'ADAPTER-TIMEOUT') : catalog.tests.filter(test => !singleTest || test.id === singleTest)
+if (!selected.length) throw new Error('Unknown self-test identifier')
 const existing = (await call('GET', `${base}/suites/${suite}/tests`)).items
 const discovered = Object.fromEntries([...catalog.tests, ...catalog.diagnostics].map(test => [test.id, test.selector])), ids = []
 for (const definition of selected) {

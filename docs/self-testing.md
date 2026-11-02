@@ -18,13 +18,21 @@ It packages them with the pinned Playwright runtime and the new browser tests.
 An isolated controller registers the catalog, publishes an immutable local image ID, and starts a normal TestStudio run.
 Each test container starts a new TestStudio instance with its own SQLite database.
 The instances use loopback endpoints inside the container. They have no external network access.
-The suite tests theme persistence, mobile layout, catalog publication, native HTTP execution, timing history, and baseline reset.
+The suite tests themes, mobile layout, page help, catalog publication, native HTTP execution, timing history, and baseline reset.
 Native check runs remain separate from the outer Playwright run. They cannot recurse into browser self-tests.
 
 The script stops its controller after verification. It preserves its database and private artifacts under `.data/selftest-verification.*`.
 It saves a local result summary and downloaded screenshots and traces under `output/selftest/{runId}`.
 The printed installation path contains `installation.json` with its origins and immutable image reference.
 No cloud account or remote deployment is required.
+
+Use `--test=ID` to execute one normal workflow with its usual publication, execution, and evidence checks:
+
+```sh
+bash scripts/test-self.sh --test=STUDIO-HELP-001
+```
+
+The identifier must exist in the self-test catalog. Diagnostic flags use their separate selection.
 
 ## Reuse a local installation
 

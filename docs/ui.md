@@ -22,6 +22,16 @@ Status labels include text. Color is not the only signal.
 Visible focus and reduced-motion preferences apply in both themes.
 Narrow layouts wrap navigation and controls. Wide tables scroll inside their own container.
 
+## Page help
+
+The header provides Help on every page, including sign-in.
+A right-side drawer shows the current page's Introduction, Concepts, and Tutorials.
+The drawer keeps page edits intact and restores focus when closed.
+Close, Escape, and the desktop backdrop dismiss it.
+Section controls move keyboard focus into the chosen section. Help content scrolls independently.
+The drawer supports both themes, full-width mobile display, and reduced motion.
+Guide structure and maintenance instructions are in `docs/help.md`.
+
 ## Trend chart contract
 
 Result-state trends use stacked area charts across overall, category, and test views.

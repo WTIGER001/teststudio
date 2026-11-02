@@ -57,6 +57,7 @@ The full plan remains required scope. Check an item only after its implementatio
 - [ ] Test-only publication requires no API or UI deployment.
 - [ ] Provider credentials remain outside browser configuration and application logs.
 - [x] Light, dark, and system modes pass browser workflow and keyboard checks.
+- [x] Every current page provides a contextual help drawer with Introduction, Concepts, Tutorials, and verified keyboard and mobile behavior.
 
 ## Feature log
 
@@ -360,3 +361,20 @@ Validation: focused backend race tests and five timing utility checks pass. The 
 Local browser checks verify recovered diagnostics, light and dark themes, and the corrected mobile table.
 The checked views have no console errors or document overflow. Owned browser and controller processes exit after checks.
 Cloud profiles, trend implementation, and the remaining full plan stay pending.
+
+### Contextual help drawer
+
+Added Help to the shared header, including the sign-in screen.
+Route metadata selects guides for projects, the catalog, project settings, run history, and run details.
+Each guide provides Introduction, Concepts, and numbered Tutorials for current controls.
+The native dialog slides from the right, scrolls independently, and preserves unsaved page edits.
+Close, Escape, and the desktop backdrop dismiss help and restore focus.
+Explicit focus boundaries keep keyboard navigation inside the drawer across browser runtimes.
+Shared theme tokens, full-width mobile display, and reduced-motion support apply throughout.
+Added the permanent STUDIO-HELP-001 self-test and a targeted normal-workflow selector.
+Validation: the production Angular build and script syntax check pass.
+The targeted Playwright workflow passes through normal TestStudio publication, execution, timing, and evidence storage.
+Checks cover all six guides, normal navigation, preserved edits, focus, dismissal, themes, mobile overflow, and reduced motion.
+The run retains complete evidence and a cleaned worker. Browser checks report no console errors.
+Owned verification browsers, controllers, and worker containers stop after checks.
+The remaining full plan stays pending.
