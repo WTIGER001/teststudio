@@ -82,3 +82,12 @@ Protected selection validates dependencies. Dispatch checks current test state a
 Validation: `go test ./internal/catalog ./internal/projects -count=1` passes.
 Tests cover immutable catalogs, stale edits, invalid publication, authorization, unsafe dependencies, and native HTTP definitions.
 Catalog import, bulk changes, source preparation, and UI administration remain pending.
+
+### OIDC and server-managed sessions
+
+Added provider discovery, PKCE S256, state, nonce, token verification, replay protection, and provider group synchronization.
+Added issuer-subject identity links and opaque browser sessions with expiry, revocation, and CSRF checks.
+Provider tokens stay outside browser storage. Incomplete group claims remove previous external membership.
+Validation: `go test ./adapters/auth/oidc ./internal/sessions -count=1` passes.
+Tests use two newly written signed-token providers and cover identity isolation and invalid authentication responses.
+Provider administration, bootstrap recovery, account linking, and complete multi-instance authorization checks remain pending.
