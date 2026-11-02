@@ -23,7 +23,8 @@ export class CatalogService {
   readonly success = signal('')
   readonly query = signal('')
   readonly state = signal('active')
-  readonly visible = computed(() => filterCatalog(this.items(), this.query(), this.state()))
+  readonly suiteFilter = signal('')
+  readonly visible = computed(() => filterCatalog(this.items(), this.query(), this.state(),this.suiteFilter()))
   readonly counts = computed(() => catalogCounts(this.items()))
   readonly editorOpen = signal(false)
   readonly editing = signal<CatalogItem | null>(null)
@@ -44,7 +45,11 @@ export class CatalogService {
   private publicationKey = ''
 
   constructor() {
-    this.route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => { this.projectId.set(params.get('projectId') ?? ''); void this.load() })
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => {
+      this.projectId.set(params.get('projectId') ?? ''); this.suiteFilter.set(''); this.releaseSuite.set(''); this.draft.set(null)
+      this.editorOpen.set(false); this.editing.set(null); this.items.set([]); this.suites.set([]); this.success.set('')
+      void this.load()
+    })
   }
 
   async load(): Promise<void> {

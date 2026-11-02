@@ -38,3 +38,14 @@ Apply checks current permissions, suite revision, catalog revision, and each tes
 A changed catalog returns a conflict. Create a new preview before retrying.
 The transaction applies all changes or none. Repeating an applied plan does not add revisions.
 Publication remains a separate, explicit action.
+
+## Interface workflows
+
+The catalog table supports suite and lifecycle filters and explicit checkbox selection.
+Bulk actions preview one suite at a time. Review the proposed states before applying changes.
+The import panel loads a JSON file or accepts pasted definitions.
+Export fills the document field and provides a local JSON download.
+Validation errors identify the test and field. Invalid plans cannot apply.
+History shows retained definitions, actor, timestamp, and revision number.
+Duplicate asks for a new permanent identifier and creates a draft entry.
+Opening a preview or history panel moves keyboard focus to its heading.

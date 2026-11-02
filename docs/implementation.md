@@ -215,3 +215,16 @@ Concurrent apply retries return the same completed plan without duplicate revisi
 Validation: targeted race tests pass for catalog, HTTP API, and affected run behavior on SQLite and local PostgreSQL.
 Checks cover preview isolation, stale plans, complete rollback, authorization, invalid dependencies, duplicate identifiers, and retained run snapshots.
 The Go executable builds. Catalog transfer UI, YAML, source uploads, and complete bulk metadata edits remain pending.
+
+### Catalog transfer, selection, duplication, and history UI
+
+Added JSON file upload, export download, validation previews, before/after inspection, and explicit atomic apply.
+Added suite filtering, checkbox selection, and bulk lifecycle previews.
+Added independent duplication and revision history panels with complete retained definitions.
+Preview and history panels receive keyboard focus. Invalid plans disable apply.
+Validation: the Angular production build passes.
+Local browser checks verify upload, download, import application, disable, archive, restore, duplicate creation, and retained history.
+An invalid external path produces a field error and cannot apply.
+Light, dark, and mobile views pass visual checks. The final browser page has no console errors or document overflow.
+The test browser, automation daemon, and local server stop after verification.
+Category trees, saved selections, source-owned metadata, full bulk metadata editing, and YAML remain pending.

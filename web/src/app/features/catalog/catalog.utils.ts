@@ -1,12 +1,12 @@
 import type { CatalogItem } from './catalog.models'
 
-export function filterCatalog(items: CatalogItem[], query: string, state: string): CatalogItem[] {
+export function filterCatalog(items: CatalogItem[], query: string, state: string,suite=''): CatalogItem[] {
   const term = query.trim().toLowerCase()
   return items.filter(item => {
     const test = item.data
     const stateMatches = state === 'all' || (state === 'active' ? test.state !== 'archived' : test.state === state)
     const text = [test.id, test.title, test.description, test.category, item.suiteName, ...(test.tags || [])].join(' ').toLowerCase()
-    return stateMatches && (!term || text.includes(term))
+    return stateMatches && (!suite || item.suiteId===suite) && (!term || text.includes(term))
   }).sort((a, b) => a.data.title.localeCompare(b.data.title) || a.suiteId.localeCompare(b.suiteId) || a.id.localeCompare(b.id))
 }
 

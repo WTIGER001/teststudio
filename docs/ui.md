@@ -38,3 +38,9 @@ Artifact previews support text, raster images, and video. Other content uses a d
 The browser retrieves artifact content through short-lived access links on a separate origin.
 Local browser checks verify successful runs, failure reruns, cancellation, text previews, and file downloads.
 The run pages support light and dark themes and a 390-pixel viewport without document overflow.
+
+Catalog transfer supports JSON upload, export download, field-specific validation, and explicit preview application.
+Bulk controls select tests within one suite and preview disable, enable, archive, or restore actions.
+Duplicate creates a new draft identity. History displays retained definitions in revision order.
+Preview and detail headings receive keyboard focus when they open.
+Local browser checks verify these actions, invalid import rejection, theme rendering, downloads, and mobile overflow.

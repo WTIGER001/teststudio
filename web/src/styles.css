@@ -184,6 +184,17 @@ code.table-subtitle { color: var(--muted); }
 .artifact-preview > p, .artifact-preview details { margin-top: 14px; }
 .evidence-image, .evidence-video { display: block; max-width: 100%; max-height: 600px; margin: 0 auto; }
 progress { display: block; width: 100%; height: 12px; margin: 10px 0; accent-color: var(--accent); }
+.wrap-actions { flex-wrap: wrap; }
+.catalog-bulk { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 12px 0 20px; }
+.catalog-bulk select { font-size: 12px; }
+.table-checkbox { width: 16px; min-height: 16px; accent-color: var(--accent); }
+.catalog-transfer > summary { font-size: 15px; font-weight: 650; cursor: pointer; }
+.catalog-transfer > p { margin-top: 18px; }
+.code-input { font-family: ui-monospace, monospace; font-size: 12px; }
+.definition-comparison { display: grid; gap: 16px; padding: 16px 0; }
+.definition-comparison pre { max-width: 400px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 300px; overflow-y: auto; font-size: 11px; }
+.revision-entry { padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.revision-entry > pre { margin-top: 12px; }
 .signin { min-height: calc(100dvh - 76px); display: grid; place-items: center; padding: 40px 20px; background: radial-gradient(ellipse at 25% 20%, var(--accent-soft), transparent 60%); }
 .signin-card { max-width: 465px; width: 100%; padding: 45px; background: var(--surface); border: 1px solid var(--border); border-radius: 17px; box-shadow: var(--shadow); }
 .signin-card h1 { font-size: 40px; line-height: 1.15; margin: 16px 0; letter-spacing: -1.5px; }
