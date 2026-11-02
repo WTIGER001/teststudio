@@ -40,6 +40,19 @@ Select Test runs to start a run, inspect progress, cancel execution, or rerun fa
 The detail page shows attempts, filtered logs, events, and private artifact previews or downloads.
 Other plan areas remain tracked in the acceptance ledger.
 
+## TestStudio self-tests
+
+Run the new Playwright suite through TestStudio itself:
+
+```sh
+bash scripts/test-self.sh
+```
+
+The command needs Docker, Go, Node, and npm.
+It builds an immutable local image and starts disposable TestStudio instances.
+Results, steps, screenshots, traces, and logs use the normal run and private evidence contracts.
+See [Self-testing](docs/self-testing.md) for registration, retained history, and intentional failure checks.
+
 ## Authentication
 
 Hosted installations configure OIDC providers and use server-managed browser sessions.

@@ -90,6 +90,7 @@ Provide these generic workflows:
 - Application, environment, stage, category, test, and date filters.
 - Stacked area charts for per-run result states, with visible gaps for missing history and explicit incomplete results.
 - Most failed and most volatile test rankings.
+- TestStudio-owned Playwright self-tests that run through its normal catalog, release, execution, timing, and evidence workflows.
 - Durable completion notifications with retry handling.
 - Production safety labels, request guards, and analytics suppression.
 
@@ -736,6 +737,23 @@ Record access grants and administrative deletion actions in the audit history.
 Retention cleanup respects pins and uses retryable storage deletion with explicit database state.
 Report storage usage and quota failures without hiding the test outcome.
 
+### TestStudio self-testing
+
+Maintain a new Playwright suite in this repository. TestStudio runs this suite through its normal APIs and workers.
+Use permanent test identifiers and immutable releases. Preserve comparable timing history when the same installation runs a newer release.
+Cover catalog workflows, execution, evidence, timing controls, themes, and narrow layouts.
+Extend the suite as new product areas become available.
+Use separate intentional failures, timeouts, and cancellation checks to verify the runner contract.
+A failed worker or missing report must never become a passing test.
+
+Start with an explicitly enabled local container profile and disposable TestStudio instances.
+Each test owns its database and target process. Do not reuse MarketMaker tests, resources, or data.
+Keep self-test registration explicit. A normal installation starts with empty registries.
+The first profile accepts targetless images with internal fixtures and no external network access.
+Cloud and external-target profiles remain separate required work.
+Keep stored attempts, steps, screenshots, traces, logs, and capture gaps visible through the standard result and evidence views.
+See [Self-testing](self-testing.md) for local execution and retained verification output.
+
 ### Uploads, Git sources, and test management
 
 Support uploads and registered Git repositories through the same release lifecycle.
@@ -1329,6 +1347,7 @@ Verify schedule ownership, execution recovery, and notification retries when rep
 - Go unit suites run without artificial web targets or production credentials.
 - API suites run through guarded direct clients and produce the same history and trends as browser tests.
 - Package events, subtest aggregates, retries, and API steps do not inflate test counts.
+- TestStudio executes its own new Playwright suite through normal publication, execution, timing, result, and evidence contracts.
 - The Go service and UI build from this repository without MarketMaker imports, packages, shared resources, or sibling checkouts.
 - No existing tests, fixtures, catalog records, configuration, credentials, reports, or history are copied into the product.
 - Installation starts with empty registries and can load only explicitly selected new examples.

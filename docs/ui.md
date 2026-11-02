@@ -69,3 +69,8 @@ The catalog editor validates timing overrides and publishes them through the nor
 Baseline controls show current history and require a reason and revision for reset.
 Local browser checks verify a real slowdown failure, baseline reset, frozen historical criteria, policy editing, publication, and budget warnings.
 The checked timing views support light, dark, and mobile layouts without document overflow or console errors.
+
+Playwright attempts expose collapsible step lists with durations, categories, and errors.
+The list has a bounded scroll region. Native HTTP attempts keep their existing observation view.
+Local self-tests run through TestStudio and retain screenshots, browser diagnostics, logs, and failure traces.
+Browser inspection verifies the recorded-step view without console errors or mobile document overflow.

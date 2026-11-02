@@ -83,3 +83,15 @@ The interface shows pending, failed, expired, and deleted states without broken 
 The Capture summary records collection completeness. File retention remains separate.
 The artifact heading receives keyboard focus after a deletion request.
 Capture configuration screens and cloud artifact adapters remain pending.
+
+## Local Playwright evidence
+
+The isolated local Playwright worker stores media and diagnostics through the same private evidence service.
+Frozen capture rules control screenshot, trace, video, and log retention for each attempt.
+Failed functional tests, timing failures, and flaky retries retain configured failure evidence.
+Reporter output includes bounded steps, actual status, expected status, and framework duration.
+Worker stdout and stderr use separate `playwright.stdout` and `playwright.stderr` streams with ordered sequence metadata.
+The adapter validates identity, state, timing, attachment paths, file types, sizes, and transfer limits before import.
+Missing or malformed reports cannot produce a passing test.
+A transfer or storage gap stays visible beside the observed result.
+See [Self-testing](self-testing.md) for the local workflow and verified failure probes.

@@ -1,3 +1,4 @@
+import { RunStepsComponent } from './run-steps.component'
 import { TimingResultComponent } from '../timing/timing-result.component'
 import { DatePipe } from '@angular/common'
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
@@ -5,14 +6,14 @@ import { FormsModule } from '@angular/forms'
 import { RunEvidenceService } from './run-evidence.service'
 
 @Component({
-  selector: 'ts-run-evidence', standalone: true, imports: [DatePipe, FormsModule, TimingResultComponent], changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'ts-run-evidence', standalone: true, imports: [DatePipe, FormsModule, TimingResultComponent, RunStepsComponent], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (service.error()) { <p class="notice warning" role="alert">{{ service.error() }}</p> }
     <section class="panel" aria-labelledby="attempts-title">
       <div class="section-top"><h2 id="attempts-title">Attempt history</h2><span class="small muted">Retries remain separate from final test counts.</span></div>
       @if (service.attempts().length) {
         <div class="table-scroll"><table><caption class="sr-only">Every retained test attempt</caption><thead><tr><th scope="col">Test / attempt</th><th scope="col">Result</th><th scope="col">Duration</th><th scope="col">Observation</th><th scope="col">Started</th></tr></thead><tbody>
-          @for (item of service.attempts(); track item.id) { <tr><td><code>{{ item.data.testId }}</code><span class="table-subtitle muted">Attempt {{ item.data.attempt }}</span></td><td><span class="badge" [class.success]="item.data.state === 'passed'" [class.warning]="item.data.state !== 'passed'">{{ item.data.state }}</span><span class="table-subtitle">{{ item.data.failureKind }}</span>@if (item.data.observedState) { <span class="table-subtitle muted">Functional: {{ item.data.observedState }}</span> }</td><td><ts-timing-result [result]="item.data" /></td><td>@if (item.data.http; as http) { <span>HTTP {{ http.status || 'unavailable' }}</span><span class="table-subtitle wrap-anywhere">{{ http.url }}</span> } @if (item.data.error) { <span class="table-subtitle">{{ item.data.error }}</span> }</td><td><time [attr.datetime]="item.data.startedAt">{{ item.data.startedAt | date:'medium' }}</time></td></tr> }
+          @for (item of service.attempts(); track item.id) { <tr><td><code>{{ item.data.testId }}</code><span class="table-subtitle muted">Attempt {{ item.data.attempt }}</span></td><td><span class="badge" [class.success]="item.data.state === 'passed'" [class.warning]="item.data.state !== 'passed'">{{ item.data.state }}</span><span class="table-subtitle">{{ item.data.failureKind }}</span>@if (item.data.observedState) { <span class="table-subtitle muted">Functional: {{ item.data.observedState }}</span> }</td><td><ts-timing-result [result]="item.data" /></td><td>@if (item.data.http; as http) { <span>HTTP {{ http.status || 'unavailable' }}</span><span class="table-subtitle wrap-anywhere">{{ http.url }}</span> } @if (item.data.error) { <span class="table-subtitle">{{ item.data.error }}</span> }<ts-run-steps [steps]="item.data.steps ?? []" /></td><td><time [attr.datetime]="item.data.startedAt">{{ item.data.startedAt | date:'medium' }}</time></td></tr> }
         </tbody></table></div>
       } @else { <p class="small muted">No attempts are recorded yet.</p> }
       @if (service.cursors()['attempts']) { <button type="button" class="button secondary more-button" [disabled]="service.loading()" (click)="service.more('attempts')">Load more attempts</button> }

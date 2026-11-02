@@ -8,7 +8,9 @@ export interface RunSummary {
   id: string; projectId: string; suiteId: string; environmentId?: string; environmentName?: string; stage?: string; protected: boolean
   state: string; outcome: string; phase: string; counts: Counts; createdAt: string; finishedAt?: string; evidenceState: string; actor: string; trigger: string; selection: string
 }
+export interface TestStep { title: string; category: string; durationMs: number; error?: string }
 export interface Attempt {
+  steps?: TestStep[]; runnerStatus?: string; expectedStatus?: string
   testId: string; attempt: number; state: string; failureKind?: string; error?: string; startedAt: string; finishedAt: string; durationMs: number
   observedState?: string; totalDurationMs?: number; timingRegressions?: number; timing?: TimingAssessment
   http?: { status: number; url: string; durationMs: number; timingsMs?: Record<string, number>; certificateExpires?: string }

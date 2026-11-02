@@ -38,7 +38,11 @@ func (s *Service) predictTiming(ctx context.Context, run *Run) error {
 		if test.Timing != nil {
 			policy = timing.Normalize(*test.Timing)
 		}
-		p, err := service.Prediction(ctx, timingContext(*run, test), policy, test.TimeoutSeconds*1000, run.CreatedAt)
+		scope := timingContext(*run, test)
+		if test.Runner == "playwright" && s.Playwright != nil {
+			scope.Profile = s.Playwright.Profile()
+		}
+		p, err := service.Prediction(ctx, scope, policy, test.TimeoutSeconds*1000, run.CreatedAt)
 		if err != nil {
 			return err
 		}

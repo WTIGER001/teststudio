@@ -85,3 +85,12 @@ Invalid sample windows block saving. Publish a new release to activate changed t
 Use the run's timing history panel to inspect the current baseline and its revision.
 An authorized publisher can reset history with an explicit reason.
 The panel confirms the new generation. Historical predictions and results remain visible.
+
+## Playwright timing
+
+The isolated local Playwright profile uses framework durations and a separate runtime context.
+Container startup and service preparation do not train the execution baseline.
+A reporter event identifies the actual test start for progress updates.
+Adaptive timeouts constrain the framework test. A separate bounded worker deadline includes preparation and collection.
+The overall run deadline still limits the complete request.
+Playwright failures, retries, and interruptions follow the same baseline training rules as native checks.

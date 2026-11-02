@@ -41,6 +41,7 @@ The full plan remains required scope. Check an item only after its implementatio
 - [ ] Go unit suites run without artificial web targets or production credentials.
 - [ ] API suites run through guarded direct clients and produce the same history and trends as browser tests.
 - [ ] Package events, subtest aggregates, retries, and API steps do not inflate test counts.
+- [x] TestStudio executes its own new Playwright suite through normal publication, execution, timing, result, and evidence contracts.
 - [ ] The Go service and UI build from this repository without MarketMaker imports, packages, shared resources, or sibling checkouts.
 - [ ] No existing tests, fixtures, catalog records, configuration, credentials, reports, or history are copied into the product.
 - [ ] Installation starts with empty registries and can load only explicitly selected new examples.
@@ -311,3 +312,24 @@ Final logical results provide counts. Retry attempts do not inflate totals.
 State colors, stack order, accessible values, and missing-history gaps form part of acceptance.
 Validation: documentation consistency checks pass. No result-state chart implementation exists yet.
 Trend implementation and browser verification remain pending.
+
+### Local Playwright worker and TestStudio self-tests
+
+Added an explicitly enabled local container worker with permitted immutable images and targetless suite admission.
+Added bounded reporter contracts, real test-start progress, framework timing, steps, browser diagnostics, and private media capture.
+Unknown workers, missing reports, wrong identities, and unexplained process failures cannot produce passing results.
+Preparation stays separate from execution. Playwright uses a separate timing profile and normal retry reduction.
+Containers use no host mounts or external network. Cleanup removes the owned browser container and anonymous output volume.
+Added new TestStudio Playwright workflows for themes, mobile layout, catalog publication, HTTP runs, timing history, and reset.
+Added separate intentional failure and timeout probes, plus cancellation checks.
+Added explicit local registration, immutable publication, and a standalone verification command.
+Registration preserves permanent identities, lifecycle state, service-managed metadata, and comparable history.
+Added collapsible recorded steps to the standard attempt view.
+Validation: targeted race checks pass for the adapter, runs, catalog, and HTTP API.
+The coded worker storage checks pass on SQLite and local PostgreSQL.
+The normal self-test suite passes three workflows through TestStudio with complete evidence.
+A repeated registration reuses all three baselines. Intentional failure and timeout runs retain the expected failure kinds and media.
+Real container checks verify test-start events, timeout, failure, cancellation, and cleanup.
+The Angular build passes. Browser inspection verifies recorded steps without console errors or mobile document overflow.
+The owned browser, controller services, worker containers, and database container stop after verification.
+External target profiles, cloud execution, source screens, orphan reconciliation, and private trace viewing remain pending.

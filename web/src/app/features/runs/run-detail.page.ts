@@ -28,7 +28,7 @@ import { RunRetentionService } from './run-retention.service'
         <article class="metric"><span class="eyebrow">Results</span><strong>{{ run.counts.passed }}<small class="small muted"> passed</small></strong><span class="small muted">{{ run.counts.failed }} failed · {{ run.counts.flaky }} flaky · {{ run.counts.skipped }} skipped</span></article>
         <article class="metric"><span class="eyebrow">Capture</span><strong class="metric-status">{{ run.evidenceState }}</strong><span class="small muted">File retention is tracked separately.</span></article>
       </section>
-      @if (!service.finished()) { <div class="notice" role="status"><label for="run-progress">{{ run.currentTestId ? 'Running ' + run.currentTestId : 'Waiting for worker progress' }}</label><progress id="run-progress" [value]="run.counts.completed" [max]="run.counts.total || 1">{{ run.counts.completed }} / {{ run.counts.total }}</progress><span class="small muted">Updates every two seconds.</span></div> }
+      @if (!service.finished()) { <div class="notice" role="status"><label for="run-progress">{{ run.currentTestId ? (run.phase === 'preparation' ? 'Preparing ' : 'Running ') + run.currentTestId : 'Waiting for worker progress' }}</label><progress id="run-progress" [value]="run.counts.completed" [max]="run.counts.total || 1">{{ run.counts.completed }} / {{ run.counts.total }}</progress><span class="small muted">Updates every two seconds.</span></div> }
       @if (run.error) { <p class="notice error" role="alert">{{ run.error }}</p> }
       @for (error of run.evidenceErrors; track $index) { <p class="notice warning">Evidence: {{ error }}</p> }
       <section class="panel" aria-labelledby="snapshot-title">

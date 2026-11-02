@@ -14,6 +14,9 @@ type HTTPObservation struct {
 }
 
 type Result struct {
+	Steps             []Step             `json:"steps,omitempty"`
+	RunnerStatus      string             `json:"runnerStatus,omitempty"`
+	ExpectedStatus    string             `json:"expectedStatus,omitempty"`
 	ObservedState     string             `json:"observedState,omitempty"`
 	TotalDurationMs   float64            `json:"totalDurationMs"`
 	TimingRegressions int                `json:"timingRegressions"`

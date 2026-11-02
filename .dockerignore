@@ -1,0 +1,12 @@
+.git
+**/node_modules
+web/.angular
+.data/*
+!.data/selftest-build
+.data/selftest-build/*
+!.data/selftest-build/teststudio
+output
+.playwright-cli
+bin
+.env
+.env.*

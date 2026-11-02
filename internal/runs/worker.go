@@ -279,6 +279,11 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 				v.CurrentTest = test.ID
 				now := time.Now().UTC()
 				v.CurrentTestStartedAt = &now
+				v.Phase = "execution"
+				if test.Runner == "playwright" {
+					v.CurrentTestStartedAt = nil
+					v.Phase = "preparation"
+				}
 				v.CurrentAttempt = attempt
 				return nil
 			})
@@ -286,19 +291,56 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 				executionError = err.Error()
 				break
 			}
-			capture("test.started", test.ID, attempt, fmt.Sprintf("Starting %s, attempt %d.", test.ID, attempt))
-			if run.Environment == nil || s.HTTP == nil {
+			eventKind, eventMessage := "test.started", fmt.Sprintf("Starting %s, attempt %d.", test.ID, attempt)
+			if test.Runner == "playwright" {
+				eventKind = "test.preparing"
+				eventMessage = fmt.Sprintf("Preparing %s, attempt %d.", test.ID, attempt)
+			}
+			capture(eventKind, test.ID, attempt, eventMessage)
+
+			var report execution.CodedReport
+			if test.Runner == "playwright" && s.Playwright != nil {
+				policy := run.TestCapture[test.ID]
+				input := execution.CodedInput{RunID: run.ID, Test: test, Artifact: run.Release.Draft.Artifact, Capture: policy, TimeoutMs: test.TimeoutSeconds * 1000, FailedBefore: failedBefore}
+				input.OnStart = func(at time.Time) error {
+					progressCtx, cancelProgress := context.WithTimeout(context.WithoutCancel(parent), 5*time.Second)
+					defer cancelProgress()
+					_, err := s.mutate(progressCtx, run.Project, run.ID, func(v *Run) error {
+						if err := owned(v, worker); err != nil {
+							return err
+						}
+						v.Phase = "execution"
+						v.CurrentTestStartedAt = &at
+						return nil
+					})
+					if err == nil {
+						capture("test.started", test.ID, attempt, fmt.Sprintf("Starting %s, attempt %d.", test.ID, attempt))
+					}
+					return err
+				}
+				if p, ok := run.Timing.Tests[test.ID]; ok {
+					input.TimeoutMs = p.EffectiveTimeoutMs
+					input.SlowThresholdMs = p.ThresholdMs
+					input.TimingMode = p.Policy.Mode
+				}
+				report = s.Playwright.Execute(ctx, input)
+				result = report.Result
+			} else if test.Runner == "http" && run.Environment != nil && s.HTTP != nil {
+				attemptCtx := ctx
+				releaseAttempt := func() {}
+				if p, ok := run.Timing.Tests[test.ID]; ok {
+					attemptCtx, releaseAttempt = context.WithTimeout(ctx, time.Duration(p.EffectiveTimeoutMs)*time.Millisecond)
+				}
+				result = s.HTTP.Execute(attemptCtx, test, *run.Environment)
+				releaseAttempt()
+			} else {
 				executionError = "No compatible executor is configured."
 				break
 			}
-			attemptCtx := ctx
-			releaseAttempt := func() {}
-			if p, ok := run.Timing.Tests[test.ID]; ok {
-				attemptCtx, releaseAttempt = context.WithTimeout(ctx, time.Duration(p.EffectiveTimeoutMs)*time.Millisecond)
-			}
-			result = s.HTTP.Execute(attemptCtx, test, *run.Environment)
-			releaseAttempt()
 			result = assessResult(run, result)
+			result.Attempt = attempt
+			s.captureCodedReport(parent, run, worker, result, failedBefore, report, &evidenceErrors)
+
 			totalDuration += result.DurationMs
 			if result.Timing != nil && result.Timing.Status == "slow" {
 				regressions++

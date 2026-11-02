@@ -15,6 +15,8 @@ import (
 
 var imageDigest = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._:/-]*@sha256:[a-f0-9]{64}$`)
 
+var localImageDigest = regexp.MustCompile(`^sha256:[a-f0-9]{64}$`)
+
 func ValidateTest(t Test) error {
 	if !domain.ValidID(t.ID) || strings.TrimSpace(t.Title) == "" {
 		return errors.New("valid test identifier and title are required")
@@ -113,7 +115,7 @@ func Validate(d Draft) []Issue {
 			if t.Source == "" || t.Selector == "" {
 				add(t.ID, "source", "coded tests require source and selector")
 			}
-			if !imageDigest.MatchString(d.Artifact.Image) {
+			if !imageDigest.MatchString(d.Artifact.Image) && !localImageDigest.MatchString(d.Artifact.Image) {
 				add(t.ID, "artifact.image", "coded tests require an immutable image digest")
 			}
 			if d.Artifact.Discovered[t.ID] != t.Selector {

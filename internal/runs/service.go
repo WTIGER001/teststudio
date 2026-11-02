@@ -33,6 +33,7 @@ type Service struct {
 	Auth              *authorization.Service
 	Catalog           *catalog.Service
 	Evidence          *evidence.Service
+	Playwright        execution.CodedExecutor
 	HTTP              HTTPExecutor
 	Location          string
 	Concurrency       int
@@ -230,6 +231,18 @@ func (s *Service) prepare(ctx context.Context, user, project string, req Request
 		testPolicies[test.ID] = effective
 	}
 	for _, test := range tests {
+		if test.Runner == "playwright" && s.Playwright != nil {
+			if req.Location != "local" {
+				return Run{}, storage.Record{}, errors.New("the configured Playwright profile runs only at the local execution location")
+			}
+			if environment != nil || len(test.RequiredBindings) > 0 {
+				return Run{}, storage.Record{}, errors.New("the isolated local Playwright profile requires a targetless suite without external bindings")
+			}
+			if err := s.Playwright.Admit(ctx, test, release.Draft.Artifact); err != nil {
+				return Run{}, storage.Record{}, err
+			}
+			continue
+		}
 		if test.Runner != "http" || s.HTTP == nil {
 			return Run{}, storage.Record{}, fmt.Errorf("no compatible worker is configured for runner %s", test.Runner)
 		}

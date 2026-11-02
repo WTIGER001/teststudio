@@ -20,6 +20,7 @@ import (
 	permissions "github.com/wtiger001/go-permissions"
 	"github.com/wtiger001/teststudio/adapters/artifacts/filesystem"
 	authoidc "github.com/wtiger001/teststudio/adapters/auth/oidc"
+	"github.com/wtiger001/teststudio/adapters/execution/localplaywright"
 	permissionpg "github.com/wtiger001/teststudio/adapters/permissions/postgres"
 	permissionsqlite "github.com/wtiger001/teststudio/adapters/permissions/sqlite"
 	"github.com/wtiger001/teststudio/internal/authorization"
@@ -49,6 +50,7 @@ func run() error {
 	artifactOrigin := flag.String("artifact-origin", "http://127.0.0.1:8041", "Separate public artifact origin")
 	artifactDirectory := flag.String("artifact-directory", ".data/artifacts", "Private local artifact directory")
 	location := flag.String("execution-location", "local", "Execution location identifier")
+	playwrightImages := flag.String("playwright-images", "", "Comma-separated immutable local Playwright image references; enables the isolated local worker")
 	local := flag.Bool("local", false, "Enable explicit loopback-only local administrator sign-in")
 	providers := flag.String("oidc-config", "", "Initial JSON provider configuration file")
 	bootstrapIssuer := flag.String("bootstrap-issuer", "", "OIDC issuer for the initial installation administrator")
@@ -157,6 +159,9 @@ func run() error {
 	catalogService := &catalog.Service{Store: db, Auth: auth}
 	evidenceService := &evidence.Service{Store: db, Blobs: files}
 	runService := &runs.Service{Store: db, Auth: auth, Catalog: catalogService, Evidence: evidenceService, HTTP: &execution.HTTP{}, Location: *location}
+	if strings.TrimSpace(*playwrightImages) != "" {
+		runService.Playwright = &localplaywright.Executor{Images: strings.Split(*playwrightImages, ",")}
+	}
 	api := &httpapi.Server{Store: db, Auth: auth, Projects: &projects.Service{Store: db, Auth: auth}, Catalog: catalogService, Runs: runService, Evidence: evidenceService, ArtifactOrigin: *artifactOrigin, Sessions: sessionService, OIDC: oidc, LocalUser: localUser, UI: *ui}
 	server := &http.Server{Addr: *addr, Handler: api.Handler(), ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 30 * time.Second, WriteTimeout: 60 * time.Second, IdleTimeout: 90 * time.Second}
 	artifactServer := &http.Server{Addr: *artifactAddr, Handler: api.ArtifactHandler(), ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 30 * time.Second, IdleTimeout: 90 * time.Second}
