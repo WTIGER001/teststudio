@@ -1,0 +1,96 @@
+package catalog
+
+import (
+	"context"
+	"errors"
+	"reflect"
+
+	"github.com/wtiger001/teststudio/internal/domain"
+	"github.com/wtiger001/teststudio/internal/storage"
+)
+
+func (s *Service) CreateDraft(ctx context.Context, user, project, suite string, artifact Artifact) (Draft, error) {
+	if err := s.Auth.Check(ctx, user, project, "suite/"+suite, "catalog.update"); err != nil {
+		return Draft{}, err
+	}
+	rows, err := s.Tests(ctx, user, project, suite)
+	if err != nil {
+		return Draft{}, err
+	}
+	d := Draft{ID: domain.NewID(), Tests: []Test{}, Artifact: artifact, Capture: DefaultCapture()}
+	for _, row := range rows {
+		t, err := storage.Decode[Test](row)
+		if err != nil {
+			return Draft{}, err
+		}
+		if t.State != "archived" {
+			d.Tests = append(d.Tests, t)
+		}
+	}
+	return d, s.SaveDraft(ctx, user, project, suite, d, 0)
+}
+
+func (s *Service) SaveDraft(ctx context.Context, user, project, suite string, d Draft, revision int64) error {
+	if err := s.Auth.Check(ctx, user, project, "suite/"+suite, "catalog.update"); err != nil {
+		return err
+	}
+	if _, _, err := s.suite(ctx, project, suite); err != nil {
+		return err
+	}
+	if !domain.ValidID(d.ID) || len(d.Tests) > 1000 {
+		return errors.New("invalid draft identifier or catalog size")
+	}
+	if d.PublishedRelease != "" {
+		return errors.New("published draft is immutable")
+	}
+	if revision > 0 {
+		r, err := s.Store.Get(ctx, Bucket("drafts", project, suite), d.ID)
+		if err != nil {
+			return err
+		}
+		old, err := storage.Decode[Draft](r)
+		if err != nil {
+			return err
+		}
+		if old.PublishedRelease != "" {
+			return errors.New("published draft is immutable")
+		}
+	}
+	for _, t := range d.Tests {
+		r, err := s.Store.Get(ctx, Bucket("tests", project, suite), t.ID)
+		if err != nil {
+			return err
+		}
+		current, err := storage.Decode[Test](r)
+		if err != nil {
+			return err
+		}
+		if !reflect.DeepEqual(current, t) {
+			return errors.New("save test edits before updating the catalog draft")
+		}
+	}
+	c, err := storage.Put(Bucket("drafts", project, suite), d.ID, project, revision, d)
+	if err != nil {
+		return err
+	}
+	audit, err := domain.Audit(user, project, "catalog.draft.save", suite+"/"+d.ID, nil, d)
+	if err != nil {
+		return err
+	}
+	return s.Store.Commit(ctx, c, audit)
+}
+
+func (s *Service) ValidateDraft(ctx context.Context, user, project, suite, id string) ([]Issue, error) {
+	if err := s.Auth.Check(ctx, user, project, "suite/"+suite, "catalog.read"); err != nil {
+		return nil, err
+	}
+	r, err := s.Store.Get(ctx, Bucket("drafts", project, suite), id)
+	if err != nil {
+		return nil, err
+	}
+	d, err := storage.Decode[Draft](r)
+	if err != nil {
+		return nil, err
+	}
+	return Validate(d), nil
+}

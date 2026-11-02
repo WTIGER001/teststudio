@@ -98,6 +98,9 @@ func (s *Service) Check(ctx context.Context, user, project, object, name string)
 	if !strings.HasPrefix(name, "teststudio.") {
 		name = "teststudio." + name
 	}
+	if project != "" && object != "" {
+		object = project + "/" + object
+	}
 	ok, err := s.Engine.HasPermission(ctx, permissions.Request{UserID: user, TeamID: project, Object: object, Perm: name})
 	if err != nil {
 		return err

@@ -73,3 +73,12 @@ All authorization checks use the library evaluator.
 Validation: `go test ./adapters/permissions/sqlite ./internal/identity ./internal/authorization -count=1` passes.
 Tests cover two project bindings, deny precedence, expired grants, revocation, inheritance cycles, and reopened database access.
 Administrative API workflows, OIDC sessions, and PostgreSQL permission parity remain pending.
+
+### Catalog drafts and immutable releases
+
+Added project, application, environment, and suite services with atomic audit records.
+Added permanent test identities, retained revisions, lifecycle actions, catalog drafts, validation, immutable publication, activation, and idempotency.
+Protected selection validates dependencies. Dispatch checks current test state against retained releases.
+Validation: `go test ./internal/catalog ./internal/projects -count=1` passes.
+Tests cover immutable catalogs, stale edits, invalid publication, authorization, unsafe dependencies, and native HTTP definitions.
+Catalog import, bulk changes, source preparation, and UI administration remain pending.
