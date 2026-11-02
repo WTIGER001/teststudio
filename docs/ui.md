@@ -44,3 +44,10 @@ Bulk controls select tests within one suite and preview disable, enable, archive
 Duplicate creates a new draft identity. History displays retained definitions in revision order.
 Preview and detail headings receive keyboard focus when they open.
 Local browser checks verify these actions, invalid import rejection, theme rendering, downloads, and mobile overflow.
+
+Run retention shows pins, expiry, processing state, storage usage, and the frozen capture policy.
+Pin forms preserve unsaved edits while polling. Revision conflicts provide a reload action.
+Artifact deletion uses an explicit reason form and shows cleanup state without changing test outcomes.
+Completed deletion returns keyboard focus to the artifact heading.
+Local browser checks verify pin creation, timed update, removal, deletion, quota reduction, and retained results.
+Light, dark, and mobile retention views pass visual checks without document overflow.

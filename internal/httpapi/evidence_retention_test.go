@@ -77,7 +77,7 @@ func TestEvidencePinsAccessAndAdministrativeDeletionThroughAPI(t *testing.T) {
 		t.Fatalf("deleted access: %d", status)
 	}
 	status, result := c.call("GET", base+"/retention", nil, nil)
-	if status != 200 || result["pin"].(map[string]any)["deletionsInProgress"] != float64(0) || result["status"].(map[string]any)["state"] != "ready" {
+	if status != 200 || result["finished"] != true || result["pin"].(map[string]any)["deletionsInProgress"] != float64(0) || result["status"].(map[string]any)["state"] != "ready" {
 		t.Fatalf("retention read: %d %v", status, result)
 	}
 }

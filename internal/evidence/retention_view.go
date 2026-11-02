@@ -11,6 +11,7 @@ import (
 )
 
 type RetentionView struct {
+	Finished     bool            `json:"finished"`
 	Pin          Pin             `json:"pin"`
 	Revision     int64           `json:"revision"`
 	Status       RetentionStatus `json:"status"`
@@ -38,6 +39,7 @@ func (s *Service) Retention(ctx context.Context, project, run string) (Retention
 	if snapshot.Project != project {
 		return v, storage.ErrNotFound
 	}
+	v.Finished = snapshot.FinishedAt != nil
 	v.Capture = capture.Normalize(snapshot.Capture)
 	v.Limits = snapshot.Limits
 	if v.Limits.ProjectBytes == 0 {

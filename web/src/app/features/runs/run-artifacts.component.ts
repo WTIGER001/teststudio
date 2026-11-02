@@ -1,17 +1,19 @@
 import { DatePipe, DecimalPipe } from '@angular/common'
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
+import { ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } from '@angular/core'
 import { ArtifactViewService } from './artifact-view.service'
+import { ArtifactDeletionComponent } from './artifact-deletion.component'
 
 @Component({
-  selector: 'ts-run-artifacts', standalone: true, imports: [DatePipe, DecimalPipe], providers: [ArtifactViewService], changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'ts-run-artifacts', standalone: true, imports: [DatePipe, DecimalPipe, ArtifactDeletionComponent], providers: [ArtifactViewService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="panel" aria-labelledby="artifacts-title">
-      <div class="section-top"><h2 id="artifacts-title">Run artifacts</h2><span class="small muted">Private evidence with retention and checksums.</span></div>
+      <div class="section-top"><h2 #heading tabindex="-1" id="artifacts-title">Run artifacts</h2><span class="small muted">Private evidence with retention and checksums.</span></div>
       @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }
+      <ts-artifact-deletion (deleted)="deleted()" />
       @if (service.loading()) { <p role="status" class="small muted">Preparing artifact access…</p> }
       @if (service.evidence.artifacts().length) {
         <div class="table-scroll"><table><caption class="sr-only">Logs, screenshots, traces, videos, and other retained evidence</caption><thead><tr><th scope="col">Artifact</th><th scope="col">Test / attempt</th><th scope="col">Size</th><th scope="col">State / expiry</th><th scope="col">Actions</th></tr></thead><tbody>
-          @for (item of service.evidence.artifacts(); track item.id) { <tr><td><strong class="wrap-anywhere">{{ item.data.filename }}</strong><span class="table-subtitle muted">{{ item.data.kind }}</span></td><td>{{ item.data.testId || 'Run' }}<span class="table-subtitle muted">{{ item.data.attempt ? 'Attempt ' + item.data.attempt : '' }}</span></td><td>{{ item.data.size | number }} bytes</td><td>{{ item.data.state }}<time class="table-subtitle muted" [attr.datetime]="item.data.expiresAt">{{ item.data.expiresAt | date:'mediumDate' }}</time>@if (item.data.error) { <span class="table-subtitle">{{ item.data.error }}</span> }</td><td><div class="row-actions">@if (item.data.state === 'available') { @if (service.workspace.can('evidence.read')) { <button class="button small subtle" type="button" [disabled]="service.loading()" (click)="service.open(item.data, 'view')">View</button> }@if (service.workspace.can('evidence.download')) { <button class="button small subtle" type="button" [disabled]="service.loading()" (click)="service.open(item.data, 'download')">Download</button> } }</div></td></tr> }
+          @for (item of service.evidence.artifacts(); track item.id) { <tr><td><strong class="wrap-anywhere">{{ item.data.filename }}</strong><span class="table-subtitle muted">{{ item.data.kind }}</span></td><td>{{ item.data.testId || 'Run' }}<span class="table-subtitle muted">{{ item.data.attempt ? 'Attempt ' + item.data.attempt : '' }}</span></td><td>{{ item.data.size | number }} bytes</td><td>{{ service.retention.artifactState(item.data) }}<time class="table-subtitle muted" [attr.datetime]="item.data.expiresAt">{{ item.data.expiresAt | date:'mediumDate' }}</time>@if (item.data.error) { <span class="table-subtitle">{{ item.data.error }}</span> }</td><td><div class="row-actions">@if (service.retention.artifactState(item.data) === 'available') { @if (service.workspace.can('evidence.read')) { <button class="button small subtle" type="button" [disabled]="service.loading()" (click)="service.open(item.data, 'view')">View</button> }@if (service.workspace.can('evidence.download')) { <button class="button small subtle" type="button" [disabled]="service.loading()" (click)="service.open(item.data, 'download')">Download</button> } }@if (service.workspace.can('evidence.delete') && item.data.state !== 'deleted' && item.data.state !== 'expired') { <button class="button small subtle" type="button" [disabled]="!service.retention.view()?.finished || service.retention.busy() || service.retention.pinned() || item.data.state === 'pending' || item.data.state === 'deleting' || item.data.state === 'delete-pending'" (click)="service.retention.beginDelete(item)">Delete</button> }</div></td></tr> }
         </tbody></table></div>
       } @else { <p class="small muted">No artifacts are recorded yet.</p> }
       @if (service.evidence.cursors()['artifacts']) { <button type="button" class="button secondary more-button" [disabled]="service.evidence.loading()" (click)="service.evidence.more('artifacts')">Load more artifacts</button> }
@@ -31,4 +33,8 @@ import { ArtifactViewService } from './artifact-view.service'
     </section>
   `
 })
-export class RunArtifactsComponent { readonly service = inject(ArtifactViewService) }
+export class RunArtifactsComponent {
+  readonly service = inject(ArtifactViewService)
+  private readonly heading = viewChild<ElementRef<HTMLHeadingElement>>('heading')
+  deleted(): void { this.service.close(); this.heading()?.nativeElement.focus() }
+}

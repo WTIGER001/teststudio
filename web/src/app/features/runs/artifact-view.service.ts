@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router'
 import { ApiService } from '../../core/api.service'
 import { WorkspaceService } from '../../core/workspace.service'
 import { RunEvidenceService } from './run-evidence.service'
+import { RunRetentionService } from './run-retention.service'
 import type { Artifact } from './run.models'
 import { errorMessage, previewKind } from './run.utils'
 
@@ -14,6 +15,7 @@ export class ArtifactViewService {
   private readonly api = inject(ApiService)
   readonly evidence = inject(RunEvidenceService)
   readonly workspace = inject(WorkspaceService)
+  readonly retention = inject(RunRetentionService)
   readonly preview = signal<Preview | null>(null)
   readonly loading = signal(false)
   readonly error = signal('')

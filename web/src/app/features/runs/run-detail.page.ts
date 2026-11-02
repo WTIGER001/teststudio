@@ -5,9 +5,11 @@ import { RunDetailService } from './run-detail.service'
 import { RunEvidenceService } from './run-evidence.service'
 import { RunEvidenceComponent } from './run-evidence.component'
 import { RunArtifactsComponent } from './run-artifacts.component'
+import { RunRetentionComponent } from './run-retention.component'
+import { RunRetentionService } from './run-retention.service'
 
 @Component({
-  standalone: true, imports: [DatePipe, DecimalPipe, RouterLink, RunEvidenceComponent, RunArtifactsComponent], providers: [RunDetailService, RunEvidenceService], changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true, imports: [DatePipe, DecimalPipe, RouterLink, RunEvidenceComponent, RunArtifactsComponent, RunRetentionComponent], providers: [RunDetailService, RunEvidenceService, RunRetentionService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <a class="small" [routerLink]="['/projects', service.projectId(), 'runs']">← Run history</a>
     <div class="page-heading run-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Run details</h1><code class="small muted wrap-anywhere">{{ service.runId() }}</code></div><div class="row-actions">
@@ -21,7 +23,7 @@ import { RunArtifactsComponent } from './run-artifacts.component'
         <article class="metric"><span class="eyebrow">State</span><strong class="metric-status">{{ run.state }}</strong><span class="small muted">{{ run.phase }}{{ run.cancelRequested ? ' · Cancellation requested' : '' }}</span></article>
         <article class="metric"><span class="eyebrow">Outcome</span><strong class="metric-status">{{ run.outcome }}</strong><span class="small muted">{{ run.counts.completed }} / {{ run.counts.total }} tests complete</span></article>
         <article class="metric"><span class="eyebrow">Results</span><strong>{{ run.counts.passed }}<small class="small muted"> passed</small></strong><span class="small muted">{{ run.counts.failed }} failed · {{ run.counts.flaky }} flaky · {{ run.counts.skipped }} skipped</span></article>
-        <article class="metric"><span class="eyebrow">Evidence</span><strong class="metric-status">{{ run.evidenceState }}</strong><span class="small muted">Capture is tracked independently.</span></article>
+        <article class="metric"><span class="eyebrow">Capture</span><strong class="metric-status">{{ run.evidenceState }}</strong><span class="small muted">File retention is tracked separately.</span></article>
       </section>
       @if (!service.finished()) { <div class="notice" role="status"><label for="run-progress">{{ run.currentTestId ? 'Running ' + run.currentTestId : 'Waiting for worker progress' }}</label><progress id="run-progress" [value]="run.counts.completed" [max]="run.counts.total || 1">{{ run.counts.completed }} / {{ run.counts.total }}</progress><span class="small muted">Updates every two seconds.</span></div> }
       @if (run.error) { <p class="notice error" role="alert">{{ run.error }}</p> }
@@ -40,7 +42,7 @@ import { RunArtifactsComponent } from './run-artifacts.component'
         </tbody></table></div>
       </section>
       <ts-run-evidence />
-      @if (service.workspace.can('evidence.read')) { <ts-run-artifacts /> }
+      @if (service.workspace.can('evidence.read')) { <ts-run-retention /><ts-run-artifacts /> }
     } @else if (service.loading()) { <p class="loading-state" role="status">Loading run details…</p> }
   `
 })

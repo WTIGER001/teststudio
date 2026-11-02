@@ -256,3 +256,16 @@ Late upload completion cannot revive expired content. Legacy indexing preserves 
 Validation: targeted race tests pass for evidence and HTTP API on SQLite and local PostgreSQL.
 Tests cover pin access, explicit permission denies, deletion races, retry after restart, legacy indexing, quota release, and late uploads.
 The Go executable builds. Retention UI, capture configuration screens, media capture, and cloud artifact adapters remain pending.
+
+### Retention controls and storage visibility UI
+
+Added retention status, pin state, storage usage, captured policy details, and periodic reconciliation views.
+Added reasoned pin creation, timed updates, removal, and explicit artifact deletion forms.
+Pin editing retains its revision while dirty. Conflict messages support reload and review.
+Expired and deleted content has no active access controls. Active pins disable deletion controls.
+The Capture summary remains separate from file retention. Test outcomes remain unchanged after deletion.
+Validation: the Angular production build and the targeted retention API check pass.
+Local browser checks verify pins, timed expiry, pin removal, deletion, manifest retention, and exact quota reduction.
+Keyboard focus returns to the artifact heading. The final page has no console errors or document overflow.
+Light, dark, and mobile views pass visual inspection. Test browser, daemon, server, and database containers stop after checks.
+Editable capture settings, media capture, cloud adapters, and remaining plan areas remain pending.

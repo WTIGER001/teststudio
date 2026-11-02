@@ -71,4 +71,15 @@ Access grants and deletion requests create audit records.
 Uploads use a bounded lease. Duplicate requests reuse pending or available manifests without another reservation.
 A stale upload cannot replace a manifest after cleanup claims it.
 Background indexing adds expiry records and project accounting to retained artifacts from earlier installations.
-Capture configuration screens, retention screens, and cloud artifact adapters remain pending.
+
+## Retention interface
+
+Run details show pin state, retention processing, run usage, project usage, and the captured policy.
+Authorized users can create, update, or remove an evidence pin with a reason and optional expiry.
+Polling preserves unsaved pin edits. A stale edit requires reload and review.
+Pinned files keep their access controls. Active pins disable deletion controls.
+Deletion uses a separate form with the artifact filename and a required reason.
+The interface shows pending, failed, expired, and deleted states without broken access links.
+The Capture summary records collection completeness. File retention remains separate.
+The artifact heading receives keyboard focus after a deletion request.
+Capture configuration screens and cloud artifact adapters remain pending.
