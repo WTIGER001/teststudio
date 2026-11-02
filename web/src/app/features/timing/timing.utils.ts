@@ -1,5 +1,5 @@
 import type { TimingEstimate, TimingPolicy, TimingPrediction } from './timing.models'
-import type { Run } from '../runs/run.models'
+import type { Run, Attempt } from '../runs/run.models'
 
 export function defaultTimingPolicy(): TimingPolicy {
   return { mode: 'fail', slowdownFactor: 2, minimumIncreaseMs: 100, minimumSamples: 5, window: 50, maxAgeDays: 30, timeoutMode: 'adaptive', timeoutFactor: 3, timeoutMarginMs: 250, minimumTimeoutMs: 1000 }
@@ -29,4 +29,9 @@ export function liveTiming(run: Run | null, now: number): { elapsedMs: number | 
   const overdue = current?.expectedMs != null && currentElapsed > current.expectedMs
   if (overdue) return { elapsedMs, remainingMs: null, overdue: true }
   return { elapsedMs, remainingMs: Math.max(0, remainingMs - currentElapsed), overdue: false }
+}
+
+export function measuredAttemptDuration(result: Attempt | undefined): number | undefined {
+  if (!result || result.durationUnavailable || (result.recovered && result.state === 'unknown' && result.durationMs === 0)) return undefined
+  return result.durationMs
 }

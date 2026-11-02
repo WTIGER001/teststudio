@@ -14,22 +14,24 @@ type HTTPObservation struct {
 }
 
 type Result struct {
-	ExecutionID       string             `json:"executionId,omitempty"`
-	Recovered         bool               `json:"recovered,omitempty"`
-	Steps             []Step             `json:"steps,omitempty"`
-	RunnerStatus      string             `json:"runnerStatus,omitempty"`
-	ExpectedStatus    string             `json:"expectedStatus,omitempty"`
-	ObservedState     string             `json:"observedState,omitempty"`
-	TotalDurationMs   float64            `json:"totalDurationMs"`
-	TimingRegressions int                `json:"timingRegressions"`
-	Timing            *timing.Assessment `json:"timing,omitempty"`
-	TestID            string             `json:"testId"`
-	Attempt           int                `json:"attempt"`
-	State             string             `json:"state"`
-	FailureKind       string             `json:"failureKind,omitempty"`
-	Error             string             `json:"error,omitempty"`
-	StartedAt         time.Time          `json:"startedAt"`
-	FinishedAt        time.Time          `json:"finishedAt"`
-	DurationMs        float64            `json:"durationMs"`
-	HTTP              *HTTPObservation   `json:"http,omitempty"`
+	DurationUnavailable bool               `json:"durationUnavailable,omitempty"`
+	WorkerDurationMs    float64            `json:"workerDurationMs,omitempty"`
+	ExecutionID         string             `json:"executionId,omitempty"`
+	Recovered           bool               `json:"recovered,omitempty"`
+	Steps               []Step             `json:"steps,omitempty"`
+	RunnerStatus        string             `json:"runnerStatus,omitempty"`
+	ExpectedStatus      string             `json:"expectedStatus,omitempty"`
+	ObservedState       string             `json:"observedState,omitempty"`
+	TotalDurationMs     float64            `json:"totalDurationMs"`
+	TimingRegressions   int                `json:"timingRegressions"`
+	Timing              *timing.Assessment `json:"timing,omitempty"`
+	TestID              string             `json:"testId"`
+	Attempt             int                `json:"attempt"`
+	State               string             `json:"state"`
+	FailureKind         string             `json:"failureKind,omitempty"`
+	Error               string             `json:"error,omitempty"`
+	StartedAt           time.Time          `json:"startedAt"`
+	FinishedAt          time.Time          `json:"finishedAt"`
+	DurationMs          float64            `json:"durationMs"`
+	HTTP                *HTTPObservation   `json:"http,omitempty"`
 }

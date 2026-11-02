@@ -94,3 +94,7 @@ A reporter event identifies the actual test start for progress updates.
 Adaptive timeouts constrain the framework test. A separate bounded worker deadline includes preparation and collection.
 The overall run deadline still limits the complete request.
 Playwright failures, retries, and interruptions follow the same baseline training rules as native checks.
+
+A missing worker report sets `durationUnavailable`. The interface shows Duration unavailable instead of zero milliseconds.
+Measured zero durations remain valid. Worker coordination time stays separate in `workerDurationMs` when available.
+Recovered observations retain the original run outcome and do not train timing baselines.

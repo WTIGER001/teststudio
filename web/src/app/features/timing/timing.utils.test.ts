@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import type { Run } from '../runs/run.models'
-import { defaultTimingPolicy, liveTiming, timingPolicyIssue } from './timing.utils.ts'
+import type { Run, Attempt } from '../runs/run.models'
+import { defaultTimingPolicy, liveTiming, timingPolicyIssue, measuredAttemptDuration } from './timing.utils.ts'
 
 function activeRun(): Run {
   return {
@@ -35,4 +35,11 @@ test('policy window must contain its minimum observation count', () => {
   assert.equal(timingPolicyIssue(policy), '')
   policy.window = policy.minimumSamples - 1
   assert.notEqual(timingPolicyIssue(policy), '')
+})
+
+test('missing recovered durations remain unavailable while measured zeros remain valid', () => {
+  assert.equal(measuredAttemptDuration({ state: 'unknown', recovered: true, durationMs: 0 } as Attempt), undefined)
+  assert.equal(measuredAttemptDuration({ state: 'unknown', durationUnavailable: true, durationMs: 0 } as Attempt), undefined)
+  assert.equal(measuredAttemptDuration({ state: 'passed', durationMs: 0 } as Attempt), 0)
+  assert.equal(measuredAttemptDuration({ state: 'failed', durationMs: 123 } as Attempt), 123)
 })

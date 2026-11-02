@@ -38,7 +38,7 @@ func appendLogs(report *execution.CodedReport, input execution.CodedInput, stdou
 }
 func (e *Executor) collectReport(ctx context.Context, container string, input execution.CodedInput, exitErr error, logs bool) execution.CodedReport {
 	now := time.Now().UTC()
-	report := execution.CodedReport{Result: execution.Result{TestID: input.Test.ID, State: "unknown", FailureKind: "worker-report", StartedAt: now, FinishedAt: now}}
+	report := execution.CodedReport{Result: execution.Result{TestID: input.Test.ID, DurationUnavailable: true, State: "unknown", FailureKind: "worker-report", StartedAt: now, FinishedAt: now}}
 	directory, err := os.MkdirTemp("", "teststudio-playwright-")
 	if err == nil {
 		defer os.RemoveAll(directory)

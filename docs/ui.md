@@ -74,3 +74,10 @@ Playwright attempts expose collapsible step lists with durations, categories, an
 The list has a bounded scroll region. Native HTTP attempts keep their existing observation view.
 Local self-tests run through TestStudio and retain screenshots, browser diagnostics, logs, and failure traces.
 Browser inspection verifies the recorded-step view without console errors or mobile document overflow.
+
+Run details show worker resource state, saved checkpoints, recovered observations, and explicit capture gaps.
+Pending cleanup refreshes every five seconds. Worker records use bounded pagination.
+Recovered attempts retain the original run outcome. Missing measurements show Duration unavailable.
+Resource references remain inside an expandable section. The worker table scrolls within narrow screens.
+Local browser checks verify interrupted-run diagnostics in light, dark, and mobile layouts.
+The checked views have no console errors or document overflow. Owned verification processes exit after checks.

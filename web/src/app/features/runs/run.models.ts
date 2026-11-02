@@ -10,7 +10,7 @@ export interface RunSummary {
 }
 export interface TestStep { title: string; category: string; durationMs: number; error?: string }
 export interface Attempt {
-  steps?: TestStep[]; runnerStatus?: string; expectedStatus?: string
+  executionId?: string; recovered?: boolean; durationUnavailable?: boolean; workerDurationMs?: number; steps?: TestStep[]; runnerStatus?: string; expectedStatus?: string
   testId: string; attempt: number; state: string; failureKind?: string; error?: string; startedAt: string; finishedAt: string; durationMs: number
   observedState?: string; totalDurationMs?: number; timingRegressions?: number; timing?: TimingAssessment
   http?: { status: number; url: string; durationMs: number; timingsMs?: Record<string, number>; certificateExpires?: string }

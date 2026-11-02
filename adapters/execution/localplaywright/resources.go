@@ -140,7 +140,7 @@ func (e *Executor) prepareVolume(ctx context.Context, ref execution.Reference) e
 func (e *Executor) Recover(ctx context.Context, ref execution.Reference, input execution.CodedInput) execution.CodedReport {
 	started := time.Now().UTC()
 	unknown := func(err error) execution.CodedReport {
-		return execution.CodedReport{RecoveryError: err, Result: execution.Result{TestID: ref.Test, State: "unknown", FailureKind: "worker-lost", Error: err.Error(), StartedAt: started, FinishedAt: time.Now().UTC()}, EvidenceErrors: []string{"Worker recovery cannot prove a complete observation."}}
+		return execution.CodedReport{RecoveryError: err, Result: execution.Result{TestID: ref.Test, DurationUnavailable: true, State: "unknown", FailureKind: "worker-lost", Error: err.Error(), StartedAt: started, FinishedAt: time.Now().UTC()}, EvidenceErrors: []string{"Worker recovery cannot prove a complete observation."}}
 	}
 	info, exists, err := e.container(ctx, ref)
 	if err != nil {

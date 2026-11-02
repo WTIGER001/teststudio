@@ -349,3 +349,14 @@ The hard-stop check kills its own active controller and restarts the same instal
 The check verifies incomplete outcome, recovered diagnostics, and removal of the owned browser container and output volume.
 The focused checks pass on SQLite and local PostgreSQL. Recovery status UI verification remains pending at this checkpoint.
 Cloud worker profiles and the remaining full plan stay pending.
+
+### Worker recovery status and unavailable timing UI
+
+Added paginated worker records with checkpoint, recovery, cleanup, and capture-gap details.
+Pending resources refresh every five seconds. Access failures stop automatic requests.
+Recovered attempt labels preserve the original run outcome. Missing durations remain unavailable instead of zero.
+Worker coordination time stays separate from test execution duration.
+Validation: focused backend race tests and five timing utility checks pass. The Angular production build passes.
+Local browser checks verify recovered diagnostics, light and dark themes, and the corrected mobile table.
+The checked views have no console errors or document overflow. Owned browser and controller processes exit after checks.
+Cloud profiles, trend implementation, and the remaining full plan stay pending.

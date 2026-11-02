@@ -89,7 +89,7 @@ func (b *boundedOutput) Write(p []byte) (int, error) {
 func (e *Executor) Execute(ctx context.Context, input execution.CodedInput) (report execution.CodedReport) {
 	started := time.Now()
 	fail := func(kind string, err error) execution.CodedReport {
-		report.Result = execution.Result{TestID: input.Test.ID, State: "unknown", FailureKind: kind, Error: err.Error(), StartedAt: started.UTC(), FinishedAt: time.Now().UTC(), DurationMs: float64(time.Since(started)) / float64(time.Millisecond)}
+		report.Result = execution.Result{TestID: input.Test.ID, State: "unknown", FailureKind: kind, Error: err.Error(), StartedAt: started.UTC(), FinishedAt: time.Now().UTC(), DurationUnavailable: true, WorkerDurationMs: float64(time.Since(started)) / float64(time.Millisecond)}
 		return report
 	}
 	if err := e.Admit(ctx, input.Test, input.Artifact); err != nil {
@@ -185,7 +185,10 @@ func (e *Executor) Execute(ctx context.Context, input execution.CodedInput) (rep
 		if report.Result.StartedAt.IsZero() {
 			report.Result.StartedAt = started.UTC()
 			report.Result.FinishedAt = time.Now().UTC()
-			report.Result.DurationMs = float64(time.Since(started)) / float64(time.Millisecond)
+			report.Result.DurationUnavailable = true
+		}
+		if report.Result.DurationUnavailable {
+			report.Result.WorkerDurationMs = float64(time.Since(started)) / float64(time.Millisecond)
 		}
 	} else {
 

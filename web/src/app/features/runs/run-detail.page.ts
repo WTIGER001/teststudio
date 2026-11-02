@@ -1,3 +1,5 @@
+import { RunWorkersComponent } from './run-workers.component'
+import { RunWorkersService } from './run-workers.service'
 import { RunTimingComponent } from '../timing/run-timing.component'
 import { RunTimingService } from '../timing/run-timing.service'
 import { TimingResultComponent } from '../timing/timing-result.component'
@@ -12,7 +14,7 @@ import { RunRetentionComponent } from './run-retention.component'
 import { RunRetentionService } from './run-retention.service'
 
 @Component({
-  standalone: true, imports: [DatePipe, RouterLink, RunEvidenceComponent, RunArtifactsComponent, RunRetentionComponent, RunTimingComponent, TimingResultComponent], providers: [RunDetailService, RunTimingService, RunEvidenceService, RunRetentionService], changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true, imports: [DatePipe, RouterLink, RunEvidenceComponent, RunArtifactsComponent, RunRetentionComponent, RunTimingComponent, TimingResultComponent, RunWorkersComponent], providers: [RunDetailService, RunWorkersService, RunTimingService, RunEvidenceService, RunRetentionService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <a class="small" [routerLink]="['/projects', service.projectId(), 'runs']">← Run history</a>
     <div class="page-heading run-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Run details</h1><code class="small muted wrap-anywhere">{{ service.runId() }}</code></div><div class="row-actions">
@@ -45,7 +47,7 @@ import { RunRetentionService } from './run-retention.service'
           @for (result of run.results; track result.testId) { <tr><td><code>{{ result.testId }}</code></td><td><span class="badge" [class.success]="result.state === 'passed'" [class.warning]="result.state === 'flaky' || result.state === 'failed'">{{ result.state }}</span></td><td>{{ result.attempt }}</td><td><ts-timing-result [result]="result" /></td><td>@if (result.observedState) { <span class="table-subtitle">Functional: {{ result.observedState }}</span> }{{ result.error || result.failureKind || '—' }}</td></tr> } @empty { <tr><td colspan="5">No final results are recorded yet.</td></tr> }
         </tbody></table></div>
       </section>
-      <ts-run-evidence />
+      <ts-run-workers /><ts-run-evidence />
       @if (service.workspace.can('evidence.read')) { <ts-run-retention /><ts-run-artifacts /> }
     } @else if (service.loading()) { <p class="loading-state" role="status">Loading run details…</p> }
   `

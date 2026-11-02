@@ -236,3 +236,7 @@ ts-timing-estimate { display: block; margin-top: 1rem; }
 .attempt-step-list { max-height: 24rem; max-width: 40rem; overflow: auto; margin: .5rem 0; padding-left: 1.3rem; }
 .attempt-step-list li { padding: .3rem 0; }
 .step-error { white-space: pre-wrap; color: var(--error); font: inherit; }
+
+.worker-table { min-width: 50rem; }
+.worker-table td { vertical-align: top; }
+.worker-table td:last-child { min-width: 20rem; max-width: 32rem; }

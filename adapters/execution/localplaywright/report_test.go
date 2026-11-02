@@ -57,6 +57,14 @@ func TestWorkerContractCannotPassMissingWrongOrCrashingTests(t *testing.T) {
 	}
 }
 
+func TestUndispatchedWorkerDoesNotInventExecutionDuration(t *testing.T) {
+	_, input, _ := contractFixture(t)
+	report := (&Executor{}).Execute(t.Context(), input)
+	if report.Result.State != "unknown" || !report.Result.DurationUnavailable || report.Result.DurationMs != 0 || report.Result.WorkerDurationMs < 0 {
+		t.Fatalf("unmeasured execution duration: %+v", report.Result)
+	}
+}
+
 func TestEvidenceImportRejectsEscapeLinksAndOversizeWithoutChangingResult(t *testing.T) {
 	directory, input, report := contractFixture(t)
 	input.Capture.MaxFileBytes = 8
