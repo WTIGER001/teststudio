@@ -97,3 +97,32 @@ func TestCursorScopeAndDurability(t *testing.T) {
 		t.Fatalf("sequence: %d %d %v", first, second, err)
 	}
 }
+
+func TestNewestPaginationAndEmptyDatabaseRejection(t *testing.T) {
+	if s, err := storage.Open(t.Context(), ""); err == nil {
+		s.Close()
+		t.Fatal("empty configuration created an ephemeral database")
+	}
+	s, err := storage.Open(t.Context(), filepath.Join(t.TempDir(), "newest.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+	for _, id := range []string{"a", "b", "c"} {
+		c, _ := storage.Put("runs", id, "project", 0, id)
+		if err := s.Commit(t.Context(), c); err != nil {
+			t.Fatal(err)
+		}
+	}
+	page, err := s.ListNewest(t.Context(), "runs", "project", "", 2)
+	if err != nil || len(page.Items) != 2 || page.Items[0].ID != "c" || page.Items[1].ID != "b" {
+		t.Fatalf("newest page: %+v %v", page, err)
+	}
+	if _, err := s.List(t.Context(), "runs", "project", page.Cursor, 2); err == nil {
+		t.Fatal("cursor crossed sort directions")
+	}
+	next, err := s.ListNewest(t.Context(), "runs", "project", page.Cursor, 2)
+	if err != nil || len(next.Items) != 1 || next.Items[0].ID != "a" {
+		t.Fatalf("newest continuation: %+v %v", next, err)
+	}
+}

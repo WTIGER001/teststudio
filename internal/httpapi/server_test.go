@@ -2,6 +2,7 @@ package httpapi_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -11,15 +12,20 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	permissions "github.com/wtiger001/go-permissions"
+	"github.com/wtiger001/teststudio/adapters/artifacts/filesystem"
 	authoidc "github.com/wtiger001/teststudio/adapters/auth/oidc"
 	permissionstore "github.com/wtiger001/teststudio/adapters/permissions/sqlite"
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/catalog"
+	"github.com/wtiger001/teststudio/internal/evidence"
+	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/httpapi"
 	"github.com/wtiger001/teststudio/internal/identity"
 	"github.com/wtiger001/teststudio/internal/projects"
+	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/sessions"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
@@ -29,11 +35,16 @@ type client struct {
 	origin string
 	csrf   string
 	t      *testing.T
+	api    *httpapi.Server
 }
 
 func fixture(t *testing.T) *client {
 	t.Helper()
 	root := t.TempDir()
+	uiRoot := filepath.Join(root, "ui")
+	if err := os.Mkdir(uiRoot, 0700); err != nil {
+		t.Fatal(err)
+	}
 	db, err := storage.Open(t.Context(), filepath.Join(root, "api.db"))
 	if err != nil {
 		t.Fatal(err)
@@ -52,13 +63,26 @@ func fixture(t *testing.T) *client {
 	}
 	sessions := &sessions.Service{Store: db, Directory: dir}
 	oidc := &authoidc.Service{Store: db, Directory: dir, Sessions: sessions}
-	if err := os.WriteFile(filepath.Join(root, "index.html"), []byte("<!doctype html><html lang=\"en\"><title>TestStudio</title><main>TestStudio</main></html>"), 0600); err != nil {
+	if err := os.WriteFile(filepath.Join(uiRoot, "index.html"), []byte("<!doctype html><html lang=\"en\"><title>TestStudio</title><main>TestStudio</main></html>"), 0600); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(root, "theme.js"), []byte("document.documentElement.dataset.theme='dark'"), 0600); err != nil {
+	if err := os.WriteFile(filepath.Join(uiRoot, "theme.js"), []byte("document.documentElement.dataset.theme='dark'"), 0600); err != nil {
 		t.Fatal(err)
 	}
-	api := &httpapi.Server{Store: db, Auth: auth, Projects: &projects.Service{Store: db, Auth: auth}, Catalog: &catalog.Service{Store: db, Auth: auth}, Sessions: sessions, OIDC: oidc, LocalUser: "admin", UI: root}
+	files, err := filesystem.New(filepath.Join(root, "private-artifacts"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { files.Close() })
+	evidenceService := &evidence.Service{Store: db, Blobs: files}
+	runService := &runs.Service{Store: db, Auth: auth, Catalog: &catalog.Service{Store: db, Auth: auth}, Evidence: evidenceService, HTTP: &execution.HTTP{}, Location: "local", PollInterval: 5 * time.Millisecond}
+	workerContext, cancelWorkers := context.WithCancel(t.Context())
+	workersDone := runService.Start(workerContext)
+	t.Cleanup(func() { cancelWorkers(); <-workersDone })
+	api := &httpapi.Server{Store: db, Auth: auth, Projects: &projects.Service{Store: db, Auth: auth}, Catalog: &catalog.Service{Store: db, Auth: auth}, Sessions: sessions, OIDC: oidc, LocalUser: "admin", UI: uiRoot, Runs: runService, Evidence: evidenceService}
+	artifactServer := httptest.NewServer(api.ArtifactHandler())
+	t.Cleanup(artifactServer.Close)
+	api.ArtifactOrigin = artifactServer.URL
 	server := httptest.NewServer(api.Handler())
 	t.Cleanup(server.Close)
 	sessions.Origin = server.URL
@@ -67,7 +91,7 @@ func fixture(t *testing.T) *client {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return &client{http: &http.Client{Jar: jar}, origin: server.URL, t: t}
+	return &client{http: &http.Client{Jar: jar}, origin: server.URL, t: t, api: api}
 }
 
 func (c *client) call(method, path string, value any, headers map[string]string) (int, map[string]any) {

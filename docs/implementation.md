@@ -164,3 +164,16 @@ Each attempt remains separate from the final test count. Capture completeness re
 Validation: `go test -race ./internal/runs -count=1` passes.
 Tests cover environment changes, competing workers, flaky reduction, cancellation, worker loss, permission revocation, and capture failures.
 Coded suite workers, complete execution profiles, scheduling, and run UI integration remain pending.
+
+### Run API and private evidence delivery
+
+Added authenticated run creation, bounded history filters, attempt pages, event pages, cancellation, and failure reruns.
+Added bounded log pages and a tail view. Continuation cursors bind the selection and collection version.
+Added short-lived evidence grants on a separate HTTP origin. Grants recheck sessions and current permissions.
+Logout, permission revocation, expired links, and missing content prevent access.
+HTML and other active content download as attachments. The artifact response uses a sandbox content policy.
+The executable starts the native worker pool and a separate artifact listener.
+Validation: targeted race tests pass for the HTTP API, evidence, runs, and sessions.
+Storage pagination tests and the Go executable build pass.
+API tests execute a real local HTTP target and retrieve retained evidence through the artifact origin.
+Cloud artifact adapters, report viewers, complete log ingestion, and retention cleanup remain pending.

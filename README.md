@@ -28,7 +28,12 @@ Data stays under `.data/` by default.
 
 Create a project, application, suite, and environment through the UI.
 Add native HTTPS checks, save catalog changes, validate a draft, and publish a release.
-Execution workers and other plan areas remain tracked in the acceptance ledger.
+Native HTTP runs use durable local workers and retained attempt records.
+The API provides run creation, progress, cancellation, failure reruns, logs, and private evidence access.
+The artifact listener uses `http://127.0.0.1:8041` by default.
+Keep the artifact directory outside the public UI directory.
+Use `--artifact-origin`, `--artifact-addr`, and `--artifact-directory` to change these settings.
+Run UI integration and other plan areas remain tracked in the acceptance ledger.
 
 ## Authentication
 
@@ -40,6 +45,7 @@ Set the initial administrator through explicit issuer and subject identifiers:
 
 ```sh
 go run ./cmd/teststudio --public-url https://tests.example.com --addr 127.0.0.1:8040 \
+  --artifact-origin https://evidence.example.com --artifact-addr 127.0.0.1:8041 \
   --oidc-config config/oidc.example.json \
   --bootstrap-issuer https://identity.example.com --bootstrap-subject SUBJECT
 ```

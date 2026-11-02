@@ -16,5 +16,5 @@ func NewID() string {
 	if _, err := rand.Read(bytes[:]); err != nil {
 		panic(err)
 	}
-	return time.Now().UTC().Format("20060102T150405") + "-" + hex.EncodeToString(bytes[:])
+	return time.Now().UTC().Format("20060102T150405.000000000") + "-" + hex.EncodeToString(bytes[:])
 }

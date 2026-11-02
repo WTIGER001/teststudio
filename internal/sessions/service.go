@@ -130,6 +130,37 @@ func (s *Service) Read(ctx context.Context, r *http.Request) (Session, error) {
 	return Session{}, ErrUnauthenticated
 }
 
+func (s *Service) Validate(ctx context.Context, id string) (Session, error) {
+	record, err := s.Store.Get(ctx, "sessions", id)
+	if errors.Is(err, storage.ErrNotFound) {
+		return Session{}, ErrUnauthenticated
+	}
+	if err != nil {
+		return Session{}, err
+	}
+	v, err := storage.Decode[Session](record)
+	if err != nil {
+		return Session{}, err
+	}
+	v.ID = record.ID
+	now := time.Now().UTC()
+	idle := s.IdleTimeout
+	if idle == 0 {
+		idle = time.Hour
+	}
+	if !now.Before(v.ExpiresAt) || !now.Before(v.AuthenticationUntil) || now.Sub(v.LastSeen) > idle {
+		return Session{}, ErrUnauthenticated
+	}
+	u, err := s.Directory.User(ctx, v.UserID)
+	if err != nil {
+		return Session{}, err
+	}
+	if u.Disabled {
+		return Session{}, ErrUnauthenticated
+	}
+	return v, nil
+}
+
 func (s *Service) CheckMutation(r *http.Request, v Session) error {
 	if r.Header.Get("Origin") != s.Origin {
 		return errors.New("request origin is not allowed")

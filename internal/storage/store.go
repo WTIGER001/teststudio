@@ -45,6 +45,9 @@ type Store struct {
 }
 
 func Open(ctx context.Context, dsn string) (*Store, error) {
+	if dsn == "" {
+		return nil, errors.New("database connection or local file path is required")
+	}
 	driver, dialect := "sqlite", "sqlite"
 	if strings.HasPrefix(dsn, "postgres://") || strings.HasPrefix(dsn, "postgresql://") {
 		driver, dialect = "pgx", "postgres"
@@ -118,6 +121,18 @@ func (s *Store) Get(ctx context.Context, bucket, id string) (Record, error) {
 }
 
 func (s *Store) List(ctx context.Context, bucket, project, cursor string, limit int) (Page, error) {
+	return s.list(ctx, bucket, project, cursor, limit, false)
+}
+
+func (s *Store) ListNewest(ctx context.Context, bucket, project, cursor string, limit int) (Page, error) {
+	return s.list(ctx, bucket, project, cursor, limit, true)
+}
+
+func (s *Store) list(ctx context.Context, bucket, project, cursor string, limit int, newest bool) (Page, error) {
+	order, comparison := "asc", ">"
+	if newest {
+		order, comparison = "desc", "<"
+	}
 	if limit < 1 || limit > 1000 {
 		return Page{}, errors.New("limit must be between 1 and 1000")
 	}
@@ -128,12 +143,12 @@ func (s *Store) List(ctx context.Context, bucket, project, cursor string, limit 
 			return Page{}, errors.New("invalid cursor")
 		}
 		values, err := url.ParseQuery(string(decoded))
-		if err != nil || values.Get("bucket") != bucket || values.Get("project") != project || values.Get("after") == "" {
+		if err != nil || values.Get("bucket") != bucket || values.Get("project") != project || values.Get("after") == "" || (values.Get("order") != "" && values.Get("order") != order) {
 			return Page{}, errors.New("cursor does not match the query")
 		}
 		after = values.Get("after")
 	}
-	rows, err := s.DB.QueryContext(ctx, `SELECT id, project, revision, payload, updated_at FROM records WHERE bucket=$1 AND ($2='' OR project=$2) AND id>$3 ORDER BY id LIMIT $4`, bucket, project, after, limit+1)
+	rows, err := s.DB.QueryContext(ctx, fmt.Sprintf(`SELECT id, project, revision, payload, updated_at FROM records WHERE bucket=$1 AND ($2='' OR project=$2) AND ($3='' OR id%s$3) ORDER BY id %s LIMIT $4`, comparison, order), bucket, project, after, limit+1)
 	if err != nil {
 		return Page{}, err
 	}
@@ -156,7 +171,7 @@ func (s *Store) List(ctx context.Context, bucket, project, cursor string, limit 
 		return Page{}, err
 	}
 	if len(page.Items) > limit {
-		values := url.Values{"bucket": {bucket}, "project": {project}, "after": {page.Items[limit-1].ID}}
+		values := url.Values{"bucket": {bucket}, "project": {project}, "after": {page.Items[limit-1].ID}, "order": {order}}
 		page.Cursor = base64.RawURLEncoding.EncodeToString([]byte(values.Encode()))
 		page.Items = page.Items[:limit]
 	}

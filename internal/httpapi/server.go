@@ -15,20 +15,25 @@ import (
 	authoidc "github.com/wtiger001/teststudio/adapters/auth/oidc"
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/catalog"
+	"github.com/wtiger001/teststudio/internal/evidence"
 	"github.com/wtiger001/teststudio/internal/projects"
+	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/sessions"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
 
 type Server struct {
-	Store     *storage.Store
-	Auth      *authorization.Service
-	Projects  *projects.Service
-	Catalog   *catalog.Service
-	Sessions  *sessions.Service
-	OIDC      *authoidc.Service
-	LocalUser string
-	UI        string
+	Store          *storage.Store
+	Auth           *authorization.Service
+	Projects       *projects.Service
+	Catalog        *catalog.Service
+	Runs           *runs.Service
+	Evidence       *evidence.Service
+	ArtifactOrigin string
+	Sessions       *sessions.Service
+	OIDC           *authoidc.Service
+	LocalUser      string
+	UI             string
 }
 
 type sessionKey struct{}
@@ -116,6 +121,7 @@ func (s *Server) Handler() http.Handler {
 	s.authRoutes(mux)
 	s.projectRoutes(mux)
 	s.catalogRoutes(mux)
+	s.runRoutes(mux)
 	mux.HandleFunc("GET /api/v1/me/capabilities", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		caps, err := s.Auth.Capabilities(r.Context(), actor(r), r.URL.Query().Get("project"))
 		if err != nil {
@@ -141,7 +147,11 @@ func (s *Server) Handler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
-		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'")
+		artifactSource := ""
+		if validOrigin(s.ArtifactOrigin) {
+			artifactSource = " " + s.ArtifactOrigin
+		}
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:"+artifactSource+"; media-src 'self'"+artifactSource+"; connect-src 'self'"+artifactSource+"; object-src 'none'; base-uri 'self'; frame-ancestors 'none'")
 		mux.ServeHTTP(w, r)
 	})
 }
