@@ -204,3 +204,14 @@ Validation: the local PostgreSQL functional profile passes with race checks.
 Targeted SQLite and PostgreSQL checks pass for concurrent migration and opposing inheritance writes.
 The Go executable builds. Test containers and browser processes are absent after cleanup.
 SQLite-to-PostgreSQL transfer, complete administrative workflows, and cloud deployment verification remain pending.
+
+### Catalog transfer and atomic bulk API
+
+Added versioned JSON exports, native HTTP import previews, revision guards, bounded atomic apply, and duplicate identities.
+Added lifecycle bulk previews with explicit per-test revisions and current permission checks.
+Plans retain before values and field errors. Catalog changes invalidate unapplied previews.
+Definitions, revisions, audit records, plan completion, and guards commit in one transaction.
+Concurrent apply retries return the same completed plan without duplicate revisions.
+Validation: targeted race tests pass for catalog, HTTP API, and affected run behavior on SQLite and local PostgreSQL.
+Checks cover preview isolation, stale plans, complete rollback, authorization, invalid dependencies, duplicate identifiers, and retained run snapshots.
+The Go executable builds. Catalog transfer UI, YAML, source uploads, and complete bulk metadata edits remain pending.

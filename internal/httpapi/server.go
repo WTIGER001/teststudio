@@ -121,6 +121,7 @@ func (s *Server) Handler() http.Handler {
 	s.authRoutes(mux)
 	s.projectRoutes(mux)
 	s.catalogRoutes(mux)
+	s.catalogTransferRoutes(mux)
 	s.runRoutes(mux)
 	mux.HandleFunc("GET /api/v1/me/capabilities", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		caps, err := s.Auth.Capabilities(r.Context(), actor(r), r.URL.Query().Get("project"))

@@ -91,7 +91,7 @@ func (s *Service) SaveTest(ctx context.Context, user, project, suite string, t T
 	if err != nil {
 		return err
 	}
-	return s.Store.Commit(ctx, c, history, audit)
+	return s.commitTests(ctx, project, suite, c, history, audit)
 }
 
 func (s *Service) ChangeState(ctx context.Context, user, project, suite, id, state string, revision int64) error {
@@ -130,7 +130,7 @@ func (s *Service) ChangeState(ctx context.Context, user, project, suite, id, sta
 	if err != nil {
 		return err
 	}
-	return s.Store.Commit(ctx, c, history, audit)
+	return s.commitTests(ctx, project, suite, c, history, audit)
 }
 
 func (s *Service) Tests(ctx context.Context, user, project, suite string) ([]storage.Record, error) {
