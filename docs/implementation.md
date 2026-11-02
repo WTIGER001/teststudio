@@ -57,3 +57,10 @@ The full plan remains required scope. Check an item only after its implementatio
 ## Feature log
 
 Record feature commits and targeted validation here.
+
+### Durable metadata storage
+
+Implemented versioned SQL records, atomic revision checks, scoped cursors, durable sequences, and SQLite WAL persistence.
+The PostgreSQL dialect uses the pgx driver. Hosted validation remains pending.
+Validation: `go test ./internal/storage -count=1` passes.
+Tests cover competing writers, transaction rollback, cursor isolation, and reopening a database.
