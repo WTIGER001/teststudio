@@ -92,7 +92,40 @@ Screenshots, traces, video, browser diagnostics, and process output use the exis
 Worker output, file transfers, attachment counts, file sizes, and total evidence bytes have bounds.
 The worker uses no host mounts. File transfer accepts regular files through a bounded archive reader.
 The container has a read-only image, an unprivileged user, resource limits, and no external network.
-Completion, failure, timeout, and cancellation remove the owned container and its anonymous output volume.
+Completion, failure, timeout, and cancellation remove the owned container and its installation-scoped output volume.
 A worker-side deadline also bounds execution after a controller disconnect.
 
-External target networking, cloud Playwright execution, source preparation screens, orphan reconciliation after abrupt process loss, and private trace viewing remain pending.
+External target networking, cloud Playwright execution, source preparation screens, and private trace viewing remain pending.
+
+## Restart and cleanup recovery
+
+The controller stores an installation identity and an execution reference before launching a container.
+Containers and named output volumes carry installation, execution, run, test, attempt, and worker labels.
+Normal execution saves the observation and available evidence before removing these resources.
+A failed checkpoint leaves resources available for recovery.
+
+A replacement controller marks expired worker leases incomplete and reconciles their references.
+It stops abandoned browser work, imports available diagnostics, and removes only resources with matching ownership labels.
+Recovery retains the original run outcome. It cannot turn an incomplete run into a passing run or launch a replacement test.
+Healthy worker leases remain active. Another installation's resources remain untouched.
+Recovery claims prevent concurrent controllers from processing the same reference.
+Inventory checks find late resources associated with completed references.
+Cleanup and transient evidence failures retain retry state across restart.
+Capture retries have a three-attempt limit. Permanent gaps remain explicit after resource removal.
+
+Worker cleanup remains available when new Playwright dispatch is disabled.
+The authenticated `/api/v1/projects/{projectId}/runs/{runId}/executions` route exposes paginated status and recovered observations.
+Internal claim tokens stay outside API responses.
+
+Verify a hard controller stop and restart against an existing self-test image:
+
+```sh
+go build -o bin/teststudio ./cmd/teststudio
+teststudio_selftest_image=$(docker image inspect teststudio/selftests:local --format '{{.Id}}')
+TESTSTUDIO_SELFTEST_IMAGE="$teststudio_selftest_image" TESTSTUDIO_RECOVERY_SERVER=bin/teststudio node scripts/test-worker-recovery.mjs
+```
+
+The check kills only the controller that it starts.
+It waits for the normal worker lease to expire and restarts the same installation with dispatch disabled.
+It verifies an incomplete outcome, recovered diagnostics, and removal of the owned container and volume.
+The check stops its replacement controller and preserves verification data under `.data/worker-recovery-*` and `output/worker-recovery/`.

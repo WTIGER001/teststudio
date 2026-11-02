@@ -73,7 +73,9 @@ if (!current || !['completed', 'cancelled', 'timed-out', 'blocked', 'incomplete'
 console.log(`${current.state}: ${current.outcome}; ${current.counts.passed} passed, ${current.counts.failed} failed`)
 const attempts = await call('GET', `${base}/runs/${run.id}/attempts`)
 const artifacts = await call('GET', `${base}/runs/${run.id}/artifacts`)
-const summary = { url, run: current, attempts: attempts.items, artifacts: artifacts.items }
+const executions = await call('GET', `${base}/runs/${run.id}/executions`)
+if (executions.items.length !== ids.length || executions.items.some(item => item.data.state !== 'cleaned' || !item.data.resultSaved || !item.data.evidenceComplete || item.data.recovered)) throw new Error('A normal self-test execution was not checkpointed and cleaned')
+const summary = { url, run: current, attempts: attempts.items, artifacts: artifacts.items, executions: executions.items }
 const output = path.resolve('output/selftest', run.id)
 fs.mkdirSync(output, { recursive: true })
 fs.writeFileSync(path.join(output, 'summary.json'), JSON.stringify(summary, null, 2))

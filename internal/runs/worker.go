@@ -13,6 +13,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/storage"
+	"github.com/wtiger001/teststudio/internal/workerstate"
 )
 
 func (s *Service) Start(ctx context.Context) <-chan struct{} {
@@ -22,6 +23,9 @@ func (s *Service) Start(ctx context.Context) <-chan struct{} {
 		concurrency = 2
 	}
 	var workers sync.WaitGroup
+	if s.managedDriver() != nil {
+		workers.Go(func() { s.reconciliationLoop(ctx) })
+	}
 	for range concurrency {
 		workers.Go(func() { s.loop(ctx, domain.NewID()) })
 	}
@@ -299,6 +303,8 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 			capture(eventKind, test.ID, attempt, eventMessage)
 
 			var report execution.CodedReport
+			recorded := false
+			executionID := ""
 			if test.Runner == "playwright" && s.Playwright != nil {
 				policy := run.TestCapture[test.ID]
 				input := execution.CodedInput{RunID: run.ID, Test: test, Artifact: run.Release.Draft.Artifact, Capture: policy, TimeoutMs: test.TimeoutSeconds * 1000, FailedBefore: failedBefore}
@@ -323,6 +329,59 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 					input.SlowThresholdMs = p.ThresholdMs
 					input.TimingMode = p.Policy.Mode
 				}
+				if driver, ok := s.Playwright.(execution.ManagedExecutor); ok {
+					ref, err := s.beginExecution(ctx, run, worker, test, attempt, driver)
+					if err != nil {
+						executionError = err.Error()
+						break
+					}
+					executionID = ref.ID
+					input.Reference = &ref
+					input.BeforeDispatch = func() error {
+						current, _, err := s.Get(ctx, run.Project, run.ID)
+						if err != nil {
+							return err
+						}
+						return owned(&current, worker)
+					}
+					input.BeforeCleanup = func(observation execution.CodedReport) error {
+						if observation.RecoveryError != nil {
+							return observation.RecoveryError
+						}
+						checkpointCtx, cancelCheckpoint := context.WithTimeout(context.WithoutCancel(parent), 20*time.Second)
+						defer cancelCheckpoint()
+						current, _, err := s.Get(checkpointCtx, run.Project, run.ID)
+						if err != nil {
+							return err
+						}
+						if err := owned(&current, worker); err != nil {
+							return err
+						}
+						observed := assessResult(run, observation.Result)
+						observed.Attempt = attempt
+						observed.ExecutionID = ref.ID
+						problems := []string{}
+						retryable := s.captureCodedReport(checkpointCtx, run, worker, observed, failedBefore, observation, &problems)
+						for _, problem := range problems {
+							if len(evidenceErrors) < 20 {
+								evidenceErrors = append(evidenceErrors, problem)
+							}
+						}
+						if err := s.checkpointExecution(checkpointCtx, run, worker, ref, observed, problems, !retryable); err != nil {
+							return err
+						}
+						recorded = true
+						if len(problems) > 0 && retryable {
+							return errors.New("execution evidence remains incomplete")
+						}
+						return nil
+					}
+					input.AfterCleanup = func(cleanupErr error) error {
+						metadataCtx, cancelMetadata := context.WithTimeout(context.WithoutCancel(parent), 5*time.Second)
+						defer cancelMetadata()
+						return (workerstate.Ledger{Store: s.Store}).Finish(metadataCtx, run.ID, ref.ID, "", cleanupErr)
+					}
+				}
 				report = s.Playwright.Execute(ctx, input)
 				result = report.Result
 			} else if test.Runner == "http" && run.Environment != nil && s.HTTP != nil {
@@ -338,8 +397,11 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 				break
 			}
 			result = assessResult(run, result)
+			result.ExecutionID = executionID
 			result.Attempt = attempt
-			s.captureCodedReport(parent, run, worker, result, failedBefore, report, &evidenceErrors)
+			if !recorded {
+				s.captureCodedReport(parent, run, worker, result, failedBefore, report, &evidenceErrors)
+			}
 
 			totalDuration += result.DurationMs
 			if result.Timing != nil && result.Timing.Status == "slow" {
@@ -347,7 +409,10 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 			}
 			result.Attempt = attempt
 			recordCtx, releaseRecord := context.WithTimeout(context.WithoutCancel(parent), 5*time.Second)
-			recordErr := s.attemptResult(recordCtx, run, worker, result)
+			var recordErr error
+			if !recorded {
+				recordErr = s.attemptResult(recordCtx, run, worker, result)
+			}
 			releaseRecord()
 			if recordErr != nil {
 				executionError = "Record attempt: " + recordErr.Error()
@@ -432,13 +497,13 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 	}, storage.Change{Record: lease, Delete: true}, retention)
 }
 
-func (s *Service) attemptResult(ctx context.Context, run Run, worker string, result execution.Result) error {
+func (s *Service) attemptResult(ctx context.Context, run Run, worker string, result execution.Result, extra ...storage.Change) error {
 	id := fmt.Sprintf("%s.%04d", result.TestID, result.Attempt)
 	change, err := storage.Put("attempts/"+run.ID, id, run.Project, 0, result)
 	if err != nil {
 		return err
 	}
-	_, err = s.mutate(ctx, run.Project, run.ID, func(v *Run) error { return owned(v, worker) }, change)
+	_, err = s.mutate(ctx, run.Project, run.ID, func(v *Run) error { return owned(v, worker) }, append([]storage.Change{change}, extra...)...)
 	return err
 }
 

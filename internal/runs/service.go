@@ -34,6 +34,8 @@ type Service struct {
 	Catalog           *catalog.Service
 	Evidence          *evidence.Service
 	Playwright        execution.CodedExecutor
+	RecoveryDriver    execution.ManagedExecutor
+	RecoveryInterval  time.Duration
 	HTTP              HTTPExecutor
 	Location          string
 	Concurrency       int

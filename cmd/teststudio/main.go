@@ -159,6 +159,7 @@ func run() error {
 	catalogService := &catalog.Service{Store: db, Auth: auth}
 	evidenceService := &evidence.Service{Store: db, Blobs: files}
 	runService := &runs.Service{Store: db, Auth: auth, Catalog: catalogService, Evidence: evidenceService, HTTP: &execution.HTTP{}, Location: *location}
+	runService.RecoveryDriver = &localplaywright.Executor{}
 	if strings.TrimSpace(*playwrightImages) != "" {
 		runService.Playwright = &localplaywright.Executor{Images: strings.Split(*playwrightImages, ",")}
 	}

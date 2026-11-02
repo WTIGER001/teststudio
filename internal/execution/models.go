@@ -14,6 +14,8 @@ type HTTPObservation struct {
 }
 
 type Result struct {
+	ExecutionID       string             `json:"executionId,omitempty"`
+	Recovered         bool               `json:"recovered,omitempty"`
 	Steps             []Step             `json:"steps,omitempty"`
 	RunnerStatus      string             `json:"runnerStatus,omitempty"`
 	ExpectedStatus    string             `json:"expectedStatus,omitempty"`

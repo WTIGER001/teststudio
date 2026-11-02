@@ -333,3 +333,19 @@ Real container checks verify test-start events, timeout, failure, cancellation, 
 The Angular build passes. Browser inspection verifies recorded steps without console errors or mobile document overflow.
 The owned browser, controller services, worker containers, and database container stop after verification.
 External target profiles, cloud execution, source screens, orphan reconciliation, and private trace viewing remain pending.
+
+### Durable local worker recovery and scoped cleanup
+
+Added persistent installation identity, execution references, pre-launch records, and installation-scoped container and volume labels.
+Normal workers checkpoint observations and evidence before removing resources.
+Expired worker leases retain incomplete outcomes while recovery imports available diagnostics.
+Recovery does not launch replacement tests or rewrite existing attempts and final results.
+Durable claims prevent competing controllers from processing one reference.
+Inventory checks reopen cleanup for late resources. Healthy workers and other installations remain untouched.
+Cleanup retries and bounded evidence retries survive restart. Artifact identity and log sequence remain stable during replay.
+Added paginated authorized execution history. Responses omit internal claim tokens.
+Validation: focused race checks pass for worker identity, checkpoints, lost leases, competing claims, cleanup retries, and evidence replay.
+The hard-stop check kills its own active controller and restarts the same installation with new dispatch disabled.
+The check verifies incomplete outcome, recovered diagnostics, and removal of the owned browser container and output volume.
+The focused checks pass on SQLite and local PostgreSQL. Recovery status UI verification remains pending at this checkpoint.
+Cloud worker profiles and the remaining full plan stay pending.

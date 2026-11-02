@@ -1,11 +1,14 @@
 package httpapi
 
 import (
+	"encoding/json"
+	"github.com/wtiger001/teststudio/internal/workerstate"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/runs"
+	"github.com/wtiger001/teststudio/internal/storage"
 )
 
 func pageLimit(r *http.Request, defaultLimit int) (int, error) {
@@ -105,11 +108,11 @@ func (s *Server) runRoutes(m *http.ServeMux) {
 		}
 		s.record(w, r, "runs", child.ID)
 	}))
-	for _, kind := range []string{"attempts", "events", "artifacts"} {
+	for _, kind := range []string{"attempts", "events", "artifacts", "executions"} {
 		kind := kind
 		m.HandleFunc("GET "+base+"/{run}/"+kind, s.authorized(func(w http.ResponseWriter, r *http.Request) {
 			permission := "runs.read"
-			if kind != "attempts" {
+			if kind == "events" || kind == "artifacts" {
 				permission = "evidence.read"
 			}
 			v, ok := s.authorizedRun(w, r, permission)
@@ -125,6 +128,17 @@ func (s *Server) runRoutes(m *http.ServeMux) {
 			if err != nil {
 				problem(w, err)
 				return
+			}
+			if kind == "executions" {
+				for i, row := range page.Items {
+					value, err := storage.Decode[workerstate.Record](row)
+					if err != nil {
+						problem(w, err)
+						return
+					}
+					value.Claim = ""
+					page.Items[i].Data, _ = json.Marshal(value)
+				}
 			}
 			JSON(w, 200, page)
 		}))

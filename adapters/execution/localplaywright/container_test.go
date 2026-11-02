@@ -2,6 +2,7 @@ package localplaywright
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/catalog"
@@ -102,4 +103,49 @@ func TestContainerCancellationCannotPassAndRemovesItsBrowser(t *testing.T) {
 		t.Fatal("cancelled worker did not stop")
 	}
 	assertRemoved(t, input.RunID)
+}
+
+func TestContainerCheckpointFailureLeavesScopedResourcesForRecovery(t *testing.T) {
+	executor, input := containerInput(t, "ADAPTER-FAIL", 60000)
+	ref := executor.Reference(execution.Reference{ID: domain.NewID(), Installation: "installation-" + domain.NewID(), Project: "project", Run: input.RunID, Test: input.Test.ID, Attempt: 1, Worker: "worker"})
+	input.Reference = &ref
+	t.Cleanup(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		defer cancel()
+		if err := executor.Cleanup(ctx, ref); err != nil {
+			t.Error(err)
+		}
+	})
+	input.BeforeCleanup = func(report execution.CodedReport) error { return errors.New("simulate lost checkpoint") }
+	report := executor.Execute(t.Context(), input)
+	if report.Result.State != "failed" || len(report.EvidenceErrors) == 0 {
+		t.Fatal("checkpoint failure lost the observed assertion failure")
+	}
+	refs, err := executor.Inventory(t.Context(), ref.Installation)
+	if err != nil || len(refs) != 1 || refs[0].ID != ref.ID {
+		t.Fatalf("scoped inventory: %+v %v", refs, err)
+	}
+	foreign := ref
+	foreign.Installation = "another-installation"
+	if err := executor.Cleanup(t.Context(), foreign); err == nil {
+		t.Fatal("cleanup accepted another installation's resource reference")
+	}
+	refs, err = executor.Inventory(t.Context(), ref.Installation)
+	if err != nil || len(refs) != 1 {
+		t.Fatal("foreign cleanup removed the owned resources")
+	}
+	input.BeforeCleanup = nil
+	recovered := executor.Recover(t.Context(), ref, input)
+	if recovered.RecoveryError != nil || recovered.Result.State != "failed" || recovered.Result.FailureKind != "assertion" || len(recovered.Attachments) == 0 {
+		t.Fatalf("recovered observation: %+v", recovered)
+	}
+	if err := executor.Cleanup(t.Context(), ref); err != nil {
+		t.Fatal(err)
+	}
+	if refs, err := executor.Inventory(t.Context(), ref.Installation); err != nil || len(refs) != 0 {
+		t.Fatalf("cleanup left owned resources: %+v %v", refs, err)
+	}
+	if err := executor.Cleanup(t.Context(), ref); err != nil {
+		t.Fatal("idempotent cleanup failed", err)
+	}
 }

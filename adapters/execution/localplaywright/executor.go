@@ -5,11 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/execution"
-	"os"
 	"os/exec"
 	"regexp"
 	"slices"
@@ -97,25 +95,56 @@ func (e *Executor) Execute(ctx context.Context, input execution.CodedInput) (rep
 	if err := e.Admit(ctx, input.Test, input.Artifact); err != nil {
 		return fail("configuration", err)
 	}
-	directory, err := os.MkdirTemp("", "teststudio-playwright-")
-	if err != nil {
-		return fail("worker", err)
+
+	ref := input.Reference
+	if ref == nil {
+		value := e.Reference(execution.Reference{ID: domain.NewID(), Installation: "standalone-" + domain.NewID(), Run: input.RunID, Test: input.Test.ID, Attempt: 1, Worker: "standalone"})
+		ref = &value
 	}
-	defer os.RemoveAll(directory)
-	name := "teststudio-pw-" + domain.NewID()
+	input.Reference = ref
 	defer func() {
-		cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
-		defer cancel()
-		if output, err := exec.CommandContext(cleanup, e.binary(), "rm", "--force", "--volumes", name).CombinedOutput(); err != nil {
-			if !strings.Contains(strings.ToLower(string(output)), "no such container") {
-				report = fail("worker-cleanup", fmt.Errorf("Playwright container cleanup failed: %s", string(output)))
+		if input.BeforeCleanup != nil {
+			if err := input.BeforeCleanup(report); err != nil {
+				report.EvidenceErrors = append(report.EvidenceErrors, "Result checkpoint failed; resources remain for recovery: "+err.Error())
+				return
 			}
 		}
+		cleanup, cancelCleanup := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+		defer cancelCleanup()
+		cleanupErr := e.Cleanup(cleanup, *ref)
+		if input.AfterCleanup != nil {
+			if err := input.AfterCleanup(cleanupErr); err != nil {
+				report.EvidenceErrors = append(report.EvidenceErrors, "Worker cleanup metadata: "+err.Error())
+			}
+		}
+		if cleanupErr != nil {
+			report = fail("worker-cleanup", cleanupErr)
+		}
 	}()
+	if input.BeforeDispatch != nil {
+		if err := input.BeforeDispatch(); err != nil {
+			return fail("worker-lease", err)
+		}
+	}
+	volumeCtx, cancelVolume := context.WithTimeout(ctx, 5*time.Second)
+	volumeErr := e.prepareVolume(volumeCtx, *ref)
+	cancelVolume()
+	if volumeErr != nil {
+		return fail("worker", volumeErr)
+	}
+	if input.BeforeDispatch != nil {
+		if err := input.BeforeDispatch(); err != nil {
+			return fail("worker-lease", err)
+		}
+	}
 	payload, _ := json.Marshal(input)
 	wall, cancel := context.WithTimeout(ctx, time.Duration(input.TimeoutMs)*time.Millisecond+60*time.Second)
 	defer cancel()
-	command := exec.CommandContext(wall, e.binary(), "run", "--pull=never", "--name", name, "--label", "teststudio.worker=playwright-local-isolated-v1", "--label", "teststudio.run="+input.RunID, "--init", "--network=none", "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges", "--pids-limit=256", "--memory=2g", "--cpus=2", "--shm-size=256m", "--tmpfs", "/tmp:rw,nosuid,size=536870912", "--user", "1000:1000", "--env", "HOME=/tmp", "--mount", "type=volume,dst=/output", "-i", input.Artifact.Image)
+	command := exec.CommandContext(wall, e.binary(), "run", "--pull=never", "--name", ref.Container, "--init", "--network=none", "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges", "--pids-limit=256", "--memory=2g", "--cpus=2", "--shm-size=256m", "--tmpfs", "/tmp:rw,nosuid,size=536870912", "--user", "1000:1000", "--env", "HOME=/tmp", "--mount", "type=volume,src="+ref.Volume+",dst=/output", "-i", input.Artifact.Image)
+	for key, value := range labels(*ref) {
+		args := []string{"--label", key + "=" + value}
+		command.Args = append(command.Args[:2], append(args, command.Args[2:]...)...)
+	}
 	command.Stdin = bytes.NewReader(payload)
 	var stdout, stderr boundedOutput
 	var progressError error
@@ -146,37 +175,28 @@ func (e *Executor) Execute(ctx context.Context, input execution.CodedInput) (rep
 		if errors.Is(wall.Err(), context.DeadlineExceeded) {
 			kind = "timeout"
 		}
-		report = fail(kind, wall.Err())
+		cleanupObservation, cancelObservation := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+		report = e.Recover(cleanupObservation, *ref, input)
+		cancelObservation()
+		report.Result.State = "unknown"
+		report.Result.TestID = input.Test.ID
+		report.Result.FailureKind = kind
+		report.Result.Error = wall.Err().Error()
+		if report.Result.StartedAt.IsZero() {
+			report.Result.StartedAt = started.UTC()
+			report.Result.FinishedAt = time.Now().UTC()
+			report.Result.DurationMs = float64(time.Since(started)) / float64(time.Millisecond)
+		}
 	} else {
+
 		copyCtx, releaseCopy := context.WithTimeout(context.WithoutCancel(ctx), 15*time.Second)
-		copyErr := e.collect(copyCtx, name, directory, input)
+		report = e.collectReport(copyCtx, ref.Container, input, exitErr, false)
 		releaseCopy()
-		parsed, err := readReport(directory, input, exitErr)
-		if copyErr != nil && err == nil {
-			parsed.EvidenceErrors = append(parsed.EvidenceErrors, copyErr.Error())
-		}
-		if err != nil {
-			report = fail("worker-report", err)
-		} else {
-			report = parsed
-		}
+
 	}
 	if progressError != nil {
 		report.EvidenceErrors = append(report.EvidenceErrors, "Playwright progress update: "+progressError.Error())
 	}
-	if input.Capture.Logs {
-		for _, stream := range []struct {
-			name   string
-			output *boundedOutput
-		}{{"stdout", &stdout}, {"stderr", &stderr}} {
-			if stream.output.Len() > 0 {
-				body := slices.Clone(stream.output.Bytes())
-				if stream.output.Truncated {
-					body = append(body, []byte("\n[output truncated at 2 MiB]\n")...)
-				}
-				report.Attachments = append(report.Attachments, execution.Attachment{Kind: "log", Stream: "playwright." + stream.name, Filename: "playwright-" + stream.name + ".log", ContentType: "text/plain; charset=utf-8", Data: body})
-			}
-		}
-	}
+	appendLogs(&report, input, &stdout, &stderr)
 	return report
 }

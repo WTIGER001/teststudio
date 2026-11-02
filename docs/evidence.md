@@ -95,3 +95,13 @@ The adapter validates identity, state, timing, attachment paths, file types, siz
 Missing or malformed reports cannot produce a passing test.
 A transfer or storage gap stays visible beside the observed result.
 See [Self-testing](self-testing.md) for the local workflow and verified failure probes.
+
+## Recovery checkpoints
+
+Managed worker attempts save their observations and available evidence before resource removal.
+Artifact identities include the execution context and content checksum. Replaying a checkpoint does not reserve bytes twice.
+Log streams retain their sequence during replay.
+Recovered observations remain separate from the run's original final outcome.
+An incomplete run remains incomplete after diagnostics become available.
+Transient evidence errors retain the worker volume for bounded retries. Permanent capture gaps remain visible.
+The execution history route reports checkpoint, recovery, retry, and cleanup status.
