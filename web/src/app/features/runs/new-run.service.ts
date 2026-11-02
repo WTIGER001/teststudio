@@ -18,7 +18,7 @@ export class NewRunService {
   readonly form = new FormGroup({
     suite: new FormControl('', { nonNullable: true, validators: Validators.required }),
     environment: new FormControl('', { nonNullable: true }), tests: new FormControl('', { nonNullable: true }),
-    timeout: new FormControl(900, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(86400)] }),
+    timeout: new FormControl(900, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(3600)] }),
     retries: new FormControl(0, { nonNullable: true, validators: [Validators.required, Validators.min(0), Validators.max(2)] })
   })
   private key = crypto.randomUUID()

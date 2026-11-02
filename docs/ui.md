@@ -31,6 +31,7 @@ The final page has no console errors.
 The test browser and its automation process exit after verification.
 Run history provides environment, suite, state, and selection filters with bounded pagination.
 The run form selects a published suite, environment, test identifiers, time limit, and retries.
+The time limit accepts 1 through 3600 seconds, consistent with the run API.
 Run details show the execution snapshot, progress, final counts, attempts, events, and filtered logs.
 Active runs refresh every two seconds. Cancellation and failure reruns use explicit actions.
 Artifact previews support text, raster images, and video. Other content uses a download link.
