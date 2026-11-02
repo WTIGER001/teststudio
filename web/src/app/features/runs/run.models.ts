@@ -1,3 +1,4 @@
+import type { TimingEstimate, TimingAssessment } from '../timing/timing.models'
 import type { TestDefinition } from '../catalog/catalog.models'
 import type { Environment } from '../configuration/configuration.service'
 
@@ -9,10 +10,12 @@ export interface RunSummary {
 }
 export interface Attempt {
   testId: string; attempt: number; state: string; failureKind?: string; error?: string; startedAt: string; finishedAt: string; durationMs: number
+  observedState?: string; totalDurationMs?: number; timingRegressions?: number; timing?: TimingAssessment
   http?: { status: number; url: string; durationMs: number; timingsMs?: Record<string, number>; certificateExpires?: string }
 }
 export interface Run {
   id: string; projectId: string; request: RunRequest; release: { id: string }; environment?: Environment; tests: TestDefinition[]
+  timing?: TimingEstimate; currentTestStartedAt?: string; currentAttempt?: number
   actor: string; trigger: string; state: string; outcome: string; phase: string; currentTestId?: string; counts: Counts
   results: Attempt[]; createdAt: string; updatedAt: string; startedAt?: string; finishedAt?: string; deadline: string; workerId?: string
   cancelRequested: boolean; error?: string; evidenceState: string; evidenceErrors: string[]

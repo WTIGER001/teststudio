@@ -1,3 +1,5 @@
+import { TimingPolicyEditorComponent } from '../timing/timing-policy-editor.component'
+import { TimingPolicyEditorService } from '../timing/timing-policy-editor.service'
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterLink } from '@angular/router'
@@ -12,8 +14,8 @@ import { CatalogTransferComponent } from './catalog-transfer.component'
 
 @Component({
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, RouterLink, CatalogEntryComponent, CatalogPlanComponent, CatalogBulkComponent, CatalogTransferComponent],
-  providers: [CatalogService, CatalogEntryService, CatalogPlanService, CatalogSelectionService],
+  imports: [FormsModule, ReactiveFormsModule, RouterLink, CatalogEntryComponent, CatalogPlanComponent, CatalogBulkComponent, CatalogTransferComponent, TimingPolicyEditorComponent],
+  providers: [TimingPolicyEditorService, CatalogService, CatalogEntryService, CatalogPlanService, CatalogSelectionService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Test catalog</h1><p class="muted">Know what you test. Keep every release accountable.</p></div>
@@ -42,10 +44,12 @@ import { CatalogTransferComponent } from './catalog-transfer.component'
               <div class="field"><label for="test-endpoint">Registered endpoint</label><input id="test-endpoint" formControlName="endpoint" required><small>Use the endpoint name from the target environment.</small></div>
               <div class="field"><label for="test-path">Relative path</label><input id="test-path" formControlName="path" required placeholder="/healthz"><small>The check sends GET and expects HTTP 200.</small></div>
             }
+            <div class="field"><label for="test-timeout">Catalog timeout ceiling (seconds)</label><input id="test-timeout" type="number" formControlName="timeout" min="1" max="3600" step="1" required><small>Adaptive timeouts cannot exceed this ceiling.</small></div>
             <div class="field"><label for="test-safety">Production-safety label</label><select id="test-safety" formControlName="safety"><option value="needs-review">Needs review</option><option value="safe">Safe</option><option value="unsafe">Unsafe</option></select></div>
             <div class="field"><label for="test-rationale">Safety rationale</label><textarea id="test-rationale" formControlName="rationale" rows="2" required placeholder="Describe requests, side effects, and required conditions."></textarea></div>
           </div>
-          <button class="button primary" type="submit" [disabled]="service.saving() || service.form.invalid">{{ service.saving() ? 'Saving…' : 'Save draft changes' }}</button>
+          <ts-timing-policy-editor />
+          <button class="button primary" type="submit" [disabled]="service.saving() || service.form.invalid || !service.timingEditor.valid()">{{ service.saving() ? 'Saving…' : 'Save draft changes' }}</button>
         </form>
       </section>
     }

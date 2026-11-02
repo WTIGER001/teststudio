@@ -301,3 +301,78 @@ func TestConcurrentRunsRetainEachCleanTimingSample(t *testing.T) {
 		t.Fatalf("lost concurrent run samples: %+v %v", e, err)
 	}
 }
+
+func TestTimingDefaultsFreezeAtPublicationAndTestsCanOverride(t *testing.T) {
+	s, p, _ := setup(t, nil)
+	projectPolicy := timing.DefaultPolicy()
+	projectPolicy.Mode = "warn"
+	projectPolicy.MinimumSamples = 8
+	if err := p.SaveProject(t.Context(), "admin", projects.Project{ID: "project", Name: "Project", Timing: &projectPolicy}, 1); err != nil {
+		t.Fatal(err)
+	}
+	projectDraft, err := s.Catalog.CreateDraft(t.Context(), "admin", "project", "health", catalog.Artifact{})
+	if err != nil || projectDraft.Timing.Mode != "warn" || projectDraft.Timing.MinimumSamples != 8 {
+		t.Fatalf("project timing: %+v %v", projectDraft.Timing, err)
+	}
+	suiteRow, err := s.Store.Get(t.Context(), projects.Bucket("suites", "project"), "health")
+	if err != nil {
+		t.Fatal(err)
+	}
+	suite, err := storage.Decode[projects.Suite](suiteRow)
+	if err != nil {
+		t.Fatal(err)
+	}
+	suitePolicy := timing.DefaultPolicy()
+	suitePolicy.MinimumSamples = 3
+	suite.Timing = &suitePolicy
+	if err := p.SaveSuite(t.Context(), "admin", "project", suite, suiteRow.Revision); err != nil {
+		t.Fatal(err)
+	}
+	draft, err := s.Catalog.CreateDraft(t.Context(), "admin", "project", "health", catalog.Artifact{})
+	if err != nil || draft.Timing.MinimumSamples != 3 {
+		t.Fatalf("suite timing: %+v %v", draft.Timing, err)
+	}
+	if _, err := s.Catalog.Publish(t.Context(), "admin", "project", "health", draft.ID, "suite-policy", 1, true); err != nil {
+		t.Fatal(err)
+	}
+	suiteRow, err = s.Store.Get(t.Context(), suiteRow.Bucket, suiteRow.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	suitePolicy.Mode = "warn"
+	suite.Timing = &suitePolicy
+	if err := p.SaveSuite(t.Context(), "admin", "project", suite, suiteRow.Revision); err != nil {
+		t.Fatal(err)
+	}
+	req := runs.Request{Suite: "health", Environment: "local"}
+	e, err := s.Estimate(t.Context(), "admin", "project", req)
+	if err != nil || e.Tests["HEALTH-1"].Policy.Mode != "fail" || e.Tests["HEALTH-1"].Policy.MinimumSamples != 3 {
+		t.Fatal("suite update rewrote published rules")
+	}
+	row, err := s.Store.Get(t.Context(), catalog.Bucket("tests", "project", "health"), "HEALTH-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	test, err := storage.Decode[catalog.Test](row)
+	if err != nil {
+		t.Fatal(err)
+	}
+	testPolicy := timing.DefaultPolicy()
+	testPolicy.Mode = "off"
+	testPolicy.MinimumSamples = 4
+	test.Timing = &testPolicy
+	if err := s.Catalog.SaveTest(t.Context(), "admin", "project", "health", test, row.Revision); err != nil {
+		t.Fatal(err)
+	}
+	d, err := s.Catalog.CreateDraft(t.Context(), "admin", "project", "health", catalog.Artifact{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.Catalog.Publish(t.Context(), "admin", "project", "health", d.ID, "test-policy", 1, true); err != nil {
+		t.Fatal(err)
+	}
+	e, err = s.Estimate(t.Context(), "admin", "project", req)
+	if err != nil || e.Tests[test.ID].Policy.Mode != "off" || e.Tests[test.ID].Policy.MinimumSamples != 4 {
+		t.Fatal("test override was ignored")
+	}
+}

@@ -49,3 +49,11 @@ Validation errors identify the test and field. Invalid plans cannot apply.
 History shows retained definitions, actor, timestamp, and revision number.
 Duplicate asks for a new permanent identifier and creates a draft entry.
 Opening a preview or history panel moves keyboard focus to its heading.
+
+## Timing policy
+
+Project and suite timing defaults flow into each new catalog draft.
+Each test can override these defaults through the API or catalog editor.
+Timing rules and timeout ceilings enter immutable releases with the test definition.
+Publication activates changes for future runs. Existing runs keep their captured timing criteria.
+See [Test timing](timing.md) for baseline scope, adaptive timeouts, estimates, and reset contracts.

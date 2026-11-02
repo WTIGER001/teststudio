@@ -51,3 +51,11 @@ Artifact deletion uses an explicit reason form and shows cleanup state without c
 Completed deletion returns keyboard focus to the artifact heading.
 Local browser checks verify pin creation, timed update, removal, deletion, quota reduction, and retained results.
 Light, dark, and mobile retention views pass visual checks without document overflow.
+
+Timing estimates show expected execution, baseline readiness, slowdown thresholds, attempt timeouts, and retry timeout budgets.
+Changing a run request clears its stale estimate. Incomplete history remains explicit.
+Run details compare actual and expected durations while retaining functional outcomes and cumulative retry time.
+The catalog editor validates timing overrides and publishes them through the normal release workflow.
+Baseline controls show current history and require a reason and revision for reset.
+Local browser checks verify a real slowdown failure, baseline reset, frozen historical criteria, policy editing, publication, and budget warnings.
+The checked timing views support light, dark, and mobile layouts without document overflow or console errors.

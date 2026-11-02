@@ -1,4 +1,7 @@
-import { DatePipe, DecimalPipe } from '@angular/common'
+import { RunTimingComponent } from '../timing/run-timing.component'
+import { RunTimingService } from '../timing/run-timing.service'
+import { TimingResultComponent } from '../timing/timing-result.component'
+import { DatePipe } from '@angular/common'
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { RouterLink } from '@angular/router'
 import { RunDetailService } from './run-detail.service'
@@ -9,7 +12,7 @@ import { RunRetentionComponent } from './run-retention.component'
 import { RunRetentionService } from './run-retention.service'
 
 @Component({
-  standalone: true, imports: [DatePipe, DecimalPipe, RouterLink, RunEvidenceComponent, RunArtifactsComponent, RunRetentionComponent], providers: [RunDetailService, RunEvidenceService, RunRetentionService], changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true, imports: [DatePipe, RouterLink, RunEvidenceComponent, RunArtifactsComponent, RunRetentionComponent, RunTimingComponent, TimingResultComponent], providers: [RunDetailService, RunTimingService, RunEvidenceService, RunRetentionService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <a class="small" [routerLink]="['/projects', service.projectId(), 'runs']">← Run history</a>
     <div class="page-heading run-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Run details</h1><code class="small muted wrap-anywhere">{{ service.runId() }}</code></div><div class="row-actions">
@@ -36,9 +39,10 @@ import { RunRetentionService } from './run-retention.service'
           <dt>Finished</dt><dd>{{ run.finishedAt ? (run.finishedAt | date:'medium') : 'In progress' }}</dd><dt>Limits</dt><dd>{{ run.request.timeoutSeconds }} seconds · {{ run.request.retries ?? 0 }} retries per test</dd>
         </dl>
       </section>
+      <ts-run-timing />
       <section class="panel" aria-labelledby="results-title"><h2 id="results-title">Final test results</h2>
         <div class="table-scroll"><table><caption class="sr-only">One final result for each completed test</caption><thead><tr><th scope="col">Test</th><th scope="col">State</th><th scope="col">Last attempt</th><th scope="col">Duration</th><th scope="col">Details</th></tr></thead><tbody>
-          @for (result of run.results; track result.testId) { <tr><td><code>{{ result.testId }}</code></td><td><span class="badge" [class.success]="result.state === 'passed'" [class.warning]="result.state === 'flaky' || result.state === 'failed'">{{ result.state }}</span></td><td>{{ result.attempt }}</td><td>{{ result.durationMs | number:'1.0-1' }} ms</td><td>{{ result.error || result.failureKind || '—' }}</td></tr> } @empty { <tr><td colspan="5">No final results are recorded yet.</td></tr> }
+          @for (result of run.results; track result.testId) { <tr><td><code>{{ result.testId }}</code></td><td><span class="badge" [class.success]="result.state === 'passed'" [class.warning]="result.state === 'flaky' || result.state === 'failed'">{{ result.state }}</span></td><td>{{ result.attempt }}</td><td><ts-timing-result [result]="result" /></td><td>@if (result.observedState) { <span class="table-subtitle">Functional: {{ result.observedState }}</span> }{{ result.error || result.failureKind || '—' }}</td></tr> } @empty { <tr><td colspan="5">No final results are recorded yet.</td></tr> }
         </tbody></table></div>
       </section>
       <ts-run-evidence />

@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
+	"time"
+
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/storage"
 	"github.com/wtiger001/teststudio/internal/timing"
-	"slices"
-	"time"
 )
 
 func timingContext(run Run, test catalog.Test) timing.Context {
@@ -28,6 +29,7 @@ func timingContext(run Run, test catalog.Test) timing.Context {
 	}
 	return timing.Context{Project: run.Project, Suite: run.Request.Suite, Test: test.ID, Environment: run.Request.Environment, Location: run.Request.Location, Runner: test.Runner, Profile: "native-http-v1", Definition: fingerprint(definition), Target: fingerprint(target)}
 }
+
 func (s *Service) predictTiming(ctx context.Context, run *Run) error {
 	service := timing.Service{Store: s.Store}
 	predictions := map[string]timing.Prediction{}
@@ -45,6 +47,7 @@ func (s *Service) predictTiming(ctx context.Context, run *Run) error {
 	run.Timing = timing.Summarize(predictions, run.Request.Retries, run.Request.TimeoutSeconds)
 	return nil
 }
+
 func (s *Service) Estimate(ctx context.Context, user, project string, req Request) (timing.Estimate, error) {
 	if err := s.Auth.Check(ctx, user, project, "", "runs.create"); err != nil {
 		return timing.Estimate{}, err
@@ -64,6 +67,7 @@ func (s *Service) Estimate(ctx context.Context, user, project string, req Reques
 	v, _, err := s.prepare(ctx, user, project, req)
 	return v.Timing, err
 }
+
 func assessResult(run Run, result execution.Result) execution.Result {
 	result.ObservedState = result.State
 	if p, ok := run.Timing.Tests[result.TestID]; ok {
@@ -77,6 +81,7 @@ func assessResult(run Run, result execution.Result) execution.Result {
 	}
 	return result
 }
+
 func (s *Service) finalResult(ctx context.Context, run Run, worker string, result execution.Result) error {
 	for range 20 {
 		v, r, err := s.Get(ctx, run.Project, run.ID)

@@ -1,3 +1,4 @@
+import type { TimingPolicy } from '../timing/timing.models'
 import type { RecordValue } from '../../core/api.service'
 
 export interface TestDefinition {
@@ -14,6 +15,7 @@ export interface TestDefinition {
   rationale: string
   dependencies: string[]
   requiredBindings: string[]
+  timing?: TimingPolicy
   timeoutSeconds: number
   source?: string
   selector?: string

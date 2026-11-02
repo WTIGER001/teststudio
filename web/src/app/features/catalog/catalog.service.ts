@@ -6,6 +6,7 @@ import { ApiService, type Page, type RecordValue } from '../../core/api.service'
 import { WorkspaceService } from '../../core/workspace.service'
 import type { Suite } from '../configuration/configuration.service'
 import type { CatalogItem, Draft, Issue, TestDefinition } from './catalog.models'
+import { TimingPolicyEditorService } from '../timing/timing-policy-editor.service'
 import { catalogCounts, filterCatalog } from './catalog.utils'
 
 @Injectable()
@@ -14,6 +15,7 @@ export class CatalogService {
   private readonly route = inject(ActivatedRoute)
   private readonly destroy = inject(DestroyRef)
   readonly workspace = inject(WorkspaceService)
+  readonly timingEditor = inject(TimingPolicyEditorService)
   readonly projectId = signal('')
   readonly items = signal<CatalogItem[]>([])
   readonly suites = signal<RecordValue<Suite>[]>([])
@@ -38,6 +40,7 @@ export class CatalogService {
     category: new FormControl('Availability', { nonNullable: true, validators: Validators.required }),
     endpoint: new FormControl('api', { nonNullable: true, validators: Validators.required }),
     path: new FormControl('/healthz', { nonNullable: true, validators: Validators.required }),
+    timeout: new FormControl(10, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(3600), Validators.pattern(/^\d+$/)] }),
     safety: new FormControl('needs-review', { nonNullable: true }),
     rationale: new FormControl('', { nonNullable: true, validators: Validators.required })
   })
@@ -70,28 +73,30 @@ export class CatalogService {
 
   create(): void {
     this.editing.set(null)
-    this.form.reset({ suite: this.suites()[0]?.id ?? '', id: '', title: '', category: 'Availability', endpoint: 'api', path: '/healthz', safety: 'needs-review', rationale: '' })
+    this.timingEditor.reset()
+    this.form.reset({ suite: this.suites()[0]?.id ?? '', id: '', title: '', category: 'Availability', timeout: 10, endpoint: 'api', path: '/healthz', safety: 'needs-review', rationale: '' })
     this.form.controls.id.enable(); this.form.controls.suite.enable()
     this.editorOpen.set(true); this.error.set('')
   }
 
   edit(item: CatalogItem): void {
     this.editing.set(item)
-    this.form.reset({ suite: item.suiteId, id: item.id, title: item.data.title, category: item.data.category, endpoint: item.data.check?.endpoint ?? 'api', path: item.data.check?.path ?? '/healthz', safety: item.data.safety, rationale: item.data.rationale })
+    this.timingEditor.reset(item.data.timing)
+    this.form.reset({ suite: item.suiteId, id: item.id, title: item.data.title, category: item.data.category, timeout: item.data.timeoutSeconds, endpoint: item.data.check?.endpoint ?? 'api', path: item.data.check?.path ?? '/healthz', safety: item.data.safety, rationale: item.data.rationale })
     this.form.controls.id.disable(); this.form.controls.suite.disable()
     this.editorOpen.set(true); this.error.set('')
   }
 
   async save(): Promise<void> {
     this.form.markAllAsTouched()
-    if (this.form.invalid || this.saving()) return
+    if (this.form.invalid || !this.timingEditor.valid() || this.saving()) return
     this.saving.set(true); this.error.set('')
     try {
       const value = this.form.getRawValue()
       const existing = this.editing()
       const test: TestDefinition = {
         ...(existing?.data ?? { description: '', tags: [], dependencies: [], requiredBindings: [], type: 'https', runner: 'http', state: 'enabled', timeoutSeconds: 10 }),
-        id: value.id, title: value.title, category: value.category, safety: value.safety, rationale: value.rationale
+        id: value.id, title: value.title, category: value.category, timeoutSeconds: value.timeout, timing: this.timingEditor.policy(), safety: value.safety, rationale: value.rationale
       }
       if (!existing || test.runner === 'http') test.check = { ...(test.check ?? { method: 'GET', statusCodes: [200] }), endpoint: value.endpoint, path: value.path }
       const base = `/api/v1/projects/${this.projectId()}/suites/${value.suite}/tests`

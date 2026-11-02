@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { ReactiveFormsModule } from '@angular/forms'
+import { TimingEstimateComponent } from '../timing/timing-estimate.component'
 import { NewRunService } from './new-run.service'
 
 @Component({
-  selector: 'ts-new-run', standalone: true, imports: [ReactiveFormsModule], providers: [NewRunService], changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'ts-new-run', standalone: true, imports: [ReactiveFormsModule, TimingEstimateComponent], providers: [NewRunService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="panel" aria-labelledby="new-run-title">
       <h2 id="new-run-title">Start a run</h2><p class="small muted">Use the active published release and a registered environment. Definitions and settings are captured when the run starts.</p>
@@ -17,7 +18,8 @@ import { NewRunService } from './new-run.service'
           <div class="field"><label for="run-retries">Retries per test</label><select id="run-retries" formControlName="retries"><option [ngValue]="0">No retries</option><option [ngValue]="1">1 retry</option><option [ngValue]="2">2 retries</option></select></div>
         </div>
         <p class="small muted">Execution location: local worker</p>
-        <button class="button primary" type="submit" [disabled]="service.form.invalid || service.saving()">{{ service.saving() ? 'Starting…' : 'Start run' }}</button>
+        <div class="row-actions"><button class="button secondary" type="button" [disabled]="service.form.invalid || service.estimating() || service.saving()" (click)="service.estimateTiming()">{{ service.estimating() ? 'Estimating…' : 'Estimate timing' }}</button><button class="button primary" type="submit" [disabled]="service.form.invalid || service.saving()">{{ service.saving() ? 'Starting…' : 'Start run' }}</button></div>
+        <ts-timing-estimate [estimate]="service.estimate()" />
       </form>
     </section>
   `

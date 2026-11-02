@@ -32,6 +32,8 @@ The full plan remains required scope. Check an item only after its implementatio
 - [ ] Runs retain their release across updates, activation changes, and rollbacks.
 - [ ] Removed tests and archived suites retain their history and required artifacts.
 - [ ] Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
+- [x] Native HTTP attempts support comparable timing history, bounded adaptive timeouts, slowdown criteria, and API and UI estimates.
+- [ ] Go and browser runners apply the same timing contract across execution and deployment profiles.
 - [ ] HTTPS checks run manually and on schedules, with configurable assertions, TLS checks, response-time history, and normal result records.
 - [ ] Adding an HTTPS check requires no browser or service deployment.
 - [ ] Go suites preserve test identities, disable cached execution, and distinguish build failures from test assertion failures.
@@ -283,3 +285,19 @@ Final results and observations commit atomically. Worker heartbeat reads avoid u
 Validation: targeted race tests pass on SQLite and local PostgreSQL for timing, runs, catalog, and HTTP API.
 Checks cover actual local HTTP slowdowns and adaptive cancellation, policy modes, retry totals, context changes, concurrency, permissions, and resets.
 Timing UI integration and browser verification remain pending at this checkpoint.
+
+### Timing estimates, result comparison, and baseline controls UI
+
+Added pre-run estimates with readiness, expected duration, thresholds, attempt timeouts, and complete retry timeout budgets.
+Changed requests clear stale estimates. Unknown history stays explicit and short run deadlines show a warning.
+Run details show worker elapsed time, estimated remaining execution, actual durations, slowdown ratios, and cumulative retry time.
+Functional results remain visible beside duration regression failures.
+Added complete test timing overrides, timeout ceiling editing, field validation, and normal release publication.
+Added current baseline inspection and revision-controlled resets with reasons.
+Reset confirmation preserves the selected run's original predictions and results.
+Validation: the Angular production build and four focused timing utility tests pass.
+New default inheritance checks pass with race detection on SQLite and local PostgreSQL.
+Local browser checks verify five clean observations, estimates, a real slowdown failure, baseline reset, policy editing, publication, and budget warnings.
+The checked views have no console errors or document overflow. Light, dark, and mobile views pass visual inspection.
+The owned browser, automation daemon, local service, target server, and database containers stop after checks.
+Coded runner timing, deployment profiles, editable capture settings, and the remaining full plan stay pending.

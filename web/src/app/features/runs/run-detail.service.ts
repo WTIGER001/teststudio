@@ -1,3 +1,4 @@
+import { liveTiming } from '../timing/timing.utils'
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { ActivatedRoute, Router } from '@angular/router'
@@ -24,6 +25,8 @@ export class RunDetailService {
   readonly canCancel = computed(() => { const run = this.run(); return !!run && !terminal(run.state) && !run.cancelRequested && this.workspace.can('runs.cancel') })
   readonly canRerun = computed(() => { const run = this.run(); return !!run && canRerun(run) && this.workspace.can('runs.create') })
   readonly finished = computed(() => { const run = this.run(); return !!run && terminal(run.state) })
+  readonly observedAt = signal(Date.now())
+  readonly timingProgress = computed(() => liveTiming(this.run(), this.observedAt()))
   private generation = 0
   private timer: ReturnType<typeof setTimeout> | undefined
   private rerunKey = crypto.randomUUID()
@@ -46,7 +49,7 @@ export class RunDetailService {
     try {
       const row = await this.api.request<RecordValue<Run>>(this.evidence.base())
       if (generation !== this.generation) return
-      this.run.set(row.data)
+      this.run.set(row.data); this.observedAt.set(Date.now())
       await this.evidence.load()
     } catch (error) { if (generation === this.generation) this.error.set(errorMessage(error, 'The run could not be loaded.')) }
     finally {

@@ -1,4 +1,6 @@
-import { inject, Injectable, signal } from '@angular/core'
+import { DestroyRef, inject, Injectable, signal } from '@angular/core'
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
+import type { TimingEstimate } from '../timing/timing.models'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
 import { ApiService, type RecordValue } from '../../core/api.service'
@@ -14,6 +16,10 @@ export class NewRunService {
   readonly workspace = inject(WorkspaceService)
   readonly lookups = inject(RunLookupsService)
   readonly saving = signal(false)
+  readonly estimating = signal(false)
+  readonly estimate = signal<TimingEstimate | undefined>(undefined)
+  private estimateGeneration = 0
+  private readonly destroy = inject(DestroyRef)
   readonly error = signal('')
   readonly form = new FormGroup({
     suite: new FormControl('', { nonNullable: true, validators: Validators.required }),
@@ -23,6 +29,22 @@ export class NewRunService {
   })
   private key = crypto.randomUUID()
   private fingerprint = ''
+
+  constructor() {
+    this.form.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(() => { this.estimateGeneration++; this.estimate.set(undefined); this.estimating.set(false) })
+    this.destroy.onDestroy(() => { this.estimateGeneration++ })
+  }
+
+  async estimateTiming(): Promise<void> {
+    if (this.form.invalid || this.estimating() || this.saving()) return
+    const generation = ++this.estimateGeneration
+    this.estimating.set(true); this.error.set('')
+    try {
+      const estimate = await this.api.request<TimingEstimate>(`/api/v1/projects/${encodeURIComponent(this.workspace.projectId())}/runs/estimate`, 'POST', requestFromForm(this.form.getRawValue()))
+      if (generation === this.estimateGeneration) this.estimate.set(estimate)
+    } catch (error) { if (generation === this.estimateGeneration) this.error.set(errorMessage(error, 'Timing could not be estimated.')) }
+    finally { if (generation === this.estimateGeneration) this.estimating.set(false) }
+  }
 
   async create(): Promise<void> {
     if (this.form.invalid || this.saving()) return

@@ -70,3 +70,18 @@ Use these routes below `/api/v1/projects/{projectId}`:
 A reset increments the baseline generation and records an audit event.
 Previously queued runs keep their original criteria. They cannot repopulate a reset baseline.
 A reset does not change historical results or their frozen predictions.
+
+## Interface
+
+Use Estimate timing on the run form before starting a run.
+Changing the request clears its estimate. Starting the run freezes a new prediction from current history.
+The run detail page shows the frozen prediction, actual duration, slowdown ratio, and functional result.
+Attempt history retains separate retry durations. Final results also show the sum across attempts.
+Live remaining execution stays unavailable when history is missing or the current attempt exceeds its typical duration.
+Worker elapsed time includes coordination and evidence capture. It does not replace per-test execution timing.
+
+The catalog editor supports timeout ceilings and complete timing policy overrides.
+Invalid sample windows block saving. Publish a new release to activate changed timing rules.
+Use the run's timing history panel to inspect the current baseline and its revision.
+An authorized publisher can reset history with an explicit reason.
+The panel confirms the new generation. Historical predictions and results remain visible.
