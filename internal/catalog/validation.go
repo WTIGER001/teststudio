@@ -3,7 +3,6 @@ package catalog
 import (
 	"errors"
 	"fmt"
-	"net/url"
 	"regexp"
 	"slices"
 	"strings"
@@ -85,31 +84,8 @@ func Validate(d Draft) []Issue {
 			if t.Type != "https" && t.Type != "api" {
 				add(t.ID, "runner", "HTTP runner requires HTTPS or API type")
 			}
-			if t.Check == nil {
-				add(t.ID, "check", "HTTP definition is required")
-				continue
-			}
-			c := t.Check
-			u, err := url.Parse(c.Path)
-			if err != nil || u.IsAbs() || u.Host != "" || !strings.HasPrefix(c.Path, "/") || strings.HasPrefix(c.Path, "//") || u.Fragment != "" {
-				add(t.ID, "check.path", "use a relative path beginning with one slash")
-			}
-			if !domain.ValidID(c.Endpoint) {
-				add(t.ID, "check.endpoint", "registered endpoint name is required")
-			}
-			if c.Method != "GET" && c.Method != "HEAD" {
-				add(t.ID, "check.method", "native health checks support GET and HEAD")
-			}
-			if c.Method == "HEAD" && (c.RequiredText != "" || c.ForbiddenText != "" || len(c.JSON) > 0) {
-				add(t.ID, "check", "HEAD cannot assert response bodies")
-			}
-			if len(c.StatusCodes) == 0 {
-				add(t.ID, "check.statusCodes", "accepted status codes are required")
-			}
-			for _, status := range c.StatusCodes {
-				if status < 100 || status > 599 {
-					add(t.ID, "check.statusCodes", "invalid HTTP status")
-				}
+			for _, issue := range ValidateHTTPCheck(t.Check) {
+				add(t.ID, issue.Field, issue.Message)
 			}
 		} else {
 			if t.Source == "" || t.Selector == "" {

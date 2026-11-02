@@ -64,6 +64,16 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Record feature commits and targeted validation here.
 
+### Shared native HTTP definition validation
+
+Added shared publication and execution validation for HTTP methods, statuses, response assertions, and numeric thresholds.
+Limits bound text, headers, JSON paths, and expected JSON content.
+HEAD body assertions remain invalid. Header names stay unique without case differences.
+Invalid new drafts cannot replace an active release.
+Validation: catalog and HTTP executor race checks pass, including real HEAD requests and response-time failures.
+Publication and activation checks pass on SQLite and local PostgreSQL.
+The HTTPS editor and diagnostics interface remain under verification at this checkpoint.
+
 ### Result-state trend data and rankings
 
 Added an authorized project trend API with bounded history pages and scoped cursors.

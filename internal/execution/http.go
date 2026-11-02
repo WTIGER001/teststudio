@@ -41,19 +41,10 @@ func (e *HTTP) Execute(ctx context.Context, test catalog.Test, environment proje
 		}
 		return r
 	}
-	if test.Check == nil {
-		return fail("configuration", errors.New("HTTP definition is missing"))
+	if issues := catalog.ValidateHTTPCheck(test.Check); len(issues) > 0 {
+		return fail("configuration", errors.New(issues[0].Message))
 	}
 	check := test.Check
-	if check.MinCertificateDays < 0 || check.MinCertificateDays > 36500 || check.MaxResponseMs < 0 {
-		return fail("configuration", errors.New("HTTP response and certificate thresholds are invalid"))
-	}
-	if check.Method == "HEAD" && (check.RequiredText != "" || check.ForbiddenText != "" || len(check.JSON) > 0) {
-		return fail("configuration", errors.New("HEAD cannot assert response bodies"))
-	}
-	if check.Method != "GET" && check.Method != "HEAD" {
-		return fail("configuration", errors.New("HTTP executor accepts GET and HEAD only"))
-	}
 	base, err := url.Parse(environment.Endpoints[check.Endpoint])
 	if err != nil || base.Hostname() == "" || base.User != nil {
 		return fail("configuration", errors.New("registered endpoint is invalid or missing"))
@@ -61,10 +52,7 @@ func (e *HTTP) Execute(ctx context.Context, test catalog.Test, environment proje
 	if base.Scheme != "https" && !(base.Scheme == "http" && (environment.Stage == "local" || environment.AllowHTTP)) {
 		return fail("configuration", errors.New("plain HTTP requires an explicit permitted environment"))
 	}
-	relative, err := url.Parse(check.Path)
-	if err != nil || relative.IsAbs() || relative.Host != "" || !strings.HasPrefix(check.Path, "/") || strings.HasPrefix(check.Path, "//") {
-		return fail("configuration", errors.New("check path must stay within the registered endpoint"))
-	}
+	relative, _ := url.Parse(check.Path)
 	base.Path = strings.TrimRight(base.Path, "/") + relative.Path
 	base.RawPath = ""
 	base.RawQuery = relative.RawQuery
@@ -136,9 +124,6 @@ func (e *HTTP) Execute(ctx context.Context, test catalog.Test, environment proje
 		if response.Header.Get(name) != expected {
 			return fail("assertion", fmt.Errorf("response header %s did not match", name))
 		}
-	}
-	if check.Method == "HEAD" && (check.RequiredText != "" || check.ForbiddenText != "" || len(check.JSON) > 0) {
-		return fail("configuration", errors.New("HEAD cannot assert response bodies"))
 	}
 	if check.RequiredText != "" || check.ForbiddenText != "" || len(check.JSON) > 0 {
 		body, err := io.ReadAll(io.LimitReader(response.Body, (1<<20)+1))
