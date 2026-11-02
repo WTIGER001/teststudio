@@ -11,11 +11,13 @@ import { CatalogPlanComponent } from './catalog-plan.component'
 import { CatalogSelectionService } from './catalog-selection.service'
 import { CatalogBulkComponent } from './catalog-bulk.component'
 import { CatalogTransferComponent } from './catalog-transfer.component'
+import { HTTPCheckEditorComponent } from './http-check-editor.component'
+import { HTTPCheckEditorService } from './http-check-editor.service'
 
 @Component({
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, RouterLink, CatalogEntryComponent, CatalogPlanComponent, CatalogBulkComponent, CatalogTransferComponent, TimingPolicyEditorComponent],
-  providers: [TimingPolicyEditorService, CatalogService, CatalogEntryService, CatalogPlanService, CatalogSelectionService],
+  imports: [FormsModule, ReactiveFormsModule, RouterLink, CatalogEntryComponent, CatalogPlanComponent, CatalogBulkComponent, CatalogTransferComponent, TimingPolicyEditorComponent, HTTPCheckEditorComponent],
+  providers: [HTTPCheckEditorService, TimingPolicyEditorService, CatalogService, CatalogEntryService, CatalogPlanService, CatalogSelectionService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Test catalog</h1><p class="muted">Know what you test. Keep every release accountable.</p></div>
@@ -40,16 +42,13 @@ import { CatalogTransferComponent } from './catalog-transfer.component'
             <div class="field"><label for="test-id">Permanent identifier</label><input id="test-id" formControlName="id" required pattern="[A-Za-z0-9](?:[A-Za-z0-9._]|-){0,127}" placeholder="HEALTH-001"></div>
             <div class="field"><label for="test-title">Title</label><input id="test-title" formControlName="title" required></div>
             <div class="field"><label for="test-category">Category</label><input id="test-category" formControlName="category" required></div>
-            @if (!service.editing() || service.editing()?.data?.runner === 'http') {
-              <div class="field"><label for="test-endpoint">Registered endpoint</label><input id="test-endpoint" formControlName="endpoint" required><small>Use the endpoint name from the target environment.</small></div>
-              <div class="field"><label for="test-path">Relative path</label><input id="test-path" formControlName="path" required placeholder="/healthz"><small>The check sends GET and expects HTTP 200.</small></div>
-            }
             <div class="field"><label for="test-timeout">Catalog timeout ceiling (seconds)</label><input id="test-timeout" type="number" formControlName="timeout" min="1" max="3600" step="1" required><small>Adaptive timeouts cannot exceed this ceiling.</small></div>
             <div class="field"><label for="test-safety">Production-safety label</label><select id="test-safety" formControlName="safety"><option value="needs-review">Needs review</option><option value="safe">Safe</option><option value="unsafe">Unsafe</option></select></div>
             <div class="field"><label for="test-rationale">Safety rationale</label><textarea id="test-rationale" formControlName="rationale" rows="2" required placeholder="Describe requests, side effects, and required conditions."></textarea></div>
           </div>
+          @if (service.editingHTTP()) { <ts-http-check-editor /> }
           <ts-timing-policy-editor />
-          <button class="button primary" type="submit" [disabled]="service.saving() || service.form.invalid || !service.timingEditor.valid()">{{ service.saving() ? 'Saving…' : 'Save draft changes' }}</button>
+          <button class="button primary" type="submit" [disabled]="service.saving() || service.form.invalid || !service.timingEditor.valid() || (service.editingHTTP() && !service.checkEditor.valid())">{{ service.saving() ? 'Saving…' : 'Save draft changes' }}</button>
         </form>
       </section>
     }
@@ -59,6 +58,7 @@ import { CatalogTransferComponent } from './catalog-transfer.component'
         <div class="search-field"><label class="sr-only" for="catalog-search">Search tests</label><span aria-hidden="true">⌕</span><input id="catalog-search" type="search" placeholder="Search by name, identifier, category, or tag…" [ngModel]="service.query()" (ngModelChange)="service.query.set($event)"></div>
         <label class="sr-only" for="catalog-suite-filter">Filter by suite</label><select id="catalog-suite-filter" [ngModel]="service.suiteFilter()" (ngModelChange)="service.suiteFilter.set($event)"><option value="">All suites</option>@for (suite of service.suites(); track suite.id) { <option [value]="suite.id">{{ suite.data.name }}</option> }</select>
         <label class="sr-only" for="catalog-state">Lifecycle state</label><select id="catalog-state" [ngModel]="service.state()" (ngModelChange)="service.state.set($event)"><option value="active">Active catalog</option><option value="enabled">Enabled</option><option value="disabled">Disabled</option><option value="archived">Archived</option><option value="all">All states</option></select>
+        <label class="sr-only" for="catalog-type">Filter by type</label><select id="catalog-type" [ngModel]="service.typeFilter()" (ngModelChange)="service.typeFilter.set($event)"><option value="">All types</option>@for (type of service.types(); track type.value) { <option [value]="type.value">{{ type.label }}</option> }</select>
       </div>
       <ts-catalog-bulk />
       @if (service.loading()) { <p class="loading-state" role="status">Loading the catalog…</p> }

@@ -36,7 +36,7 @@ The full plan remains required scope. Check an item only after its implementatio
 - [x] Native HTTP attempts support comparable timing history, bounded adaptive timeouts, slowdown criteria, and API and UI estimates.
 - [ ] Go and browser runners apply the same timing contract across execution and deployment profiles.
 - [ ] HTTPS checks run manually and on schedules, with configurable assertions, TLS checks, response-time history, and normal result records.
-- [ ] Adding an HTTPS check requires no browser or service deployment.
+- [x] Adding an HTTPS check requires no browser or service deployment.
 - [ ] Go suites preserve test identities, disable cached execution, and distinguish build failures from test assertion failures.
 - [ ] Go unit suites run without artificial web targets or production credentials.
 - [ ] API suites run through guarded direct clients and produce the same history and trends as browser tests.
@@ -73,6 +73,24 @@ Invalid new drafts cannot replace an active release.
 Validation: catalog and HTTP executor race checks pass, including real HEAD requests and response-time failures.
 Publication and activation checks pass on SQLite and local PostgreSQL.
 The HTTPS editor and diagnostics interface remain under verification at this checkpoint.
+
+### Declarative HTTP editor and retained network diagnostics
+
+Added focused request, status, body, header, JSON, response-time, and certificate-lifetime controls to the native check editor.
+Pure parsers validate field values and preserve exact body text and structured JSON values.
+HEAD conflicts remain visible. Users clear body assertions explicitly instead of losing fields when changing the method.
+Metadata-only edits retain assertions. New publications keep earlier run snapshots unchanged.
+Catalog filters now include test type independently of the runner.
+New catalog actions clear previous success messages before reporting their own result.
+Attempt details show retained probe timing, network phases, certificate expiry, and lifetime at observation.
+Missing phases stay unavailable. Measured zeros remain valid.
+Validation: the Angular production build and six focused editor, filtering, and diagnostics utility checks pass.
+The HTTP self-test creates, validates, publishes, edits, and executes checks through the existing API and UI.
+Checks cover rejected fields, retained assertions, HEAD conflicts, real GET and HEAD requests, and immutable earlier results.
+The existing basic catalog publication and native execution workflow also passes.
+Local screenshots verify light diagnostics and the dark mobile editor without document overflow or browser runtime errors.
+Both workflows retain complete evidence and cleaned worker records. Owned containers, volumes, and controllers stop after checks.
+Scheduled checks, credential bindings, project trust settings, response excerpts, and response-time history remain pending.
 
 ### Result-state trend data and rankings
 

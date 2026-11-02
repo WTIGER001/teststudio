@@ -1,0 +1,110 @@
+import { createServer } from 'node:http'
+import { test, expect } from './fixtures'
+
+test('Declarative HTTP assertions, HEAD edits, and retained diagnostics', { tag: '@STUDIO-HTTPS-001' }, async ({ page, api }, testInfo) => {
+  const requests: string[] = []
+  const target = createServer((request, response) => {
+    requests.push(`${request.method} ${request.url}`)
+    response.setHeader('X-Ready', 'yes')
+    if (request.url === '/head' && request.method === 'HEAD') { response.statusCode = 204; response.end(); return }
+    response.setHeader('Content-Type', 'application/json')
+    response.end(JSON.stringify({ status: 'up', items: [{ id: 7 }], feature: true }))
+  })
+  await new Promise<void>(resolve => target.listen(0, '127.0.0.1', resolve))
+  try {
+    const address = target.address()
+    if (!address || typeof address === 'string') throw new Error('HTTP assertion target did not start')
+    const { project, path } = await api.scaffold()
+    await api.call('PUT', `${path}/environments/local`, { id: 'local', name: 'HTTP assertion target', applicationId: 'app', stage: 'local', endpoints: { api: `http://127.0.0.1:${address.port}` } }, 1)
+    const definitionPath = `${path}/suites/health/tests/HTTP-ASSERT-1`
+    const publish = async () => {
+      await page.getByRole('button', { name: 'Validate and preview', exact: true }).click()
+      await page.getByRole('button', { name: 'Publish and activate', exact: true }).click()
+      await expect(page.getByRole('status').filter({ hasText: /^Release published/ })).toBeVisible()
+    }
+    let original: any, originalRun: any
+
+    await test.step('Create a structured GET check and reject invalid fields locally', async () => {
+      await page.goto(`/projects/${project}/catalog`)
+      await page.getByRole('button', { name: '+ Create test', exact: true }).click()
+      await page.getByLabel('Permanent identifier', { exact: true }).fill('HTTP-ASSERT-1')
+      await page.getByLabel('Title', { exact: true }).fill('Structured health')
+      await page.getByLabel('Relative path', { exact: true }).fill('/health')
+      await page.getByLabel('Production-safety label').selectOption('safe')
+      await page.getByLabel('Safety rationale').fill('Reads an isolated local endpoint')
+      await page.getByLabel('Accepted status codes', { exact: true }).fill('200.5')
+      await expect(page.getByRole('button', { name: 'Save draft changes', exact: true })).toBeDisabled()
+      await expect(page.getByLabel('Accepted status codes', { exact: true })).toHaveAttribute('aria-invalid', 'true')
+      await page.getByLabel('Accepted status codes', { exact: true }).fill('200, 204')
+      await page.getByLabel('Expected response headers (JSON)', { exact: true }).fill('{"X-Ready":true}')
+      await expect(page.getByRole('button', { name: 'Save draft changes', exact: true })).toBeDisabled()
+      await page.getByLabel('Expected response headers (JSON)', { exact: true }).fill('{"X-Ready":"yes","Content-Type":"application/json"}')
+      await page.getByLabel('Required response text', { exact: true }).fill('up')
+      await page.getByLabel('Forbidden response text', { exact: true }).fill('down')
+      await page.getByLabel('Expected JSON fields', { exact: true }).fill('{"status":"up","items.0.id":7,"feature":true}')
+      await page.getByLabel('Maximum response time (ms)', { exact: true }).fill('1000')
+      await page.getByRole('button', { name: 'Save draft changes', exact: true }).click()
+      await expect(page.getByRole('status').filter({ hasText: /^Draft changes saved\./ })).toBeVisible()
+      await page.getByLabel('Filter by type', { exact: true }).selectOption('https')
+      await expect(page.getByRole('table', { name: 'Tests in this project' }).getByRole('row')).toHaveCount(2)
+      original = (await api.call('GET', definitionPath)).data.check
+      expect(original).toMatchObject({ method: 'GET', statusCodes: [200, 204], requiredText: 'up', forbiddenText: 'down', headers: { 'X-Ready': 'yes', 'Content-Type': 'application/json' }, json: { status: 'up', 'items.0.id': 7, feature: true }, maxResponseMs: 1000 })
+      expect(requests).toEqual([])
+      await publish()
+      originalRun = await api.run(path)
+      expect(requests).toEqual(['GET /health'])
+    })
+
+    await test.step('Inspect retained HTTP phases without inventing TLS measurements', async () => {
+      await page.goto(`/projects/${project}/runs/${originalRun.id}`)
+      const details = page.locator('ts-http-observation')
+      await details.locator('summary').click()
+      await expect(details).toContainText('HTTP 200')
+      await expect(details).toContainText('Probe duration')
+      await expect(details).toContainText('Time to first byte')
+      await expect(details).toContainText('Certificate expiry')
+      await expect(details).toContainText('Unavailable')
+      expect(originalRun.results[0].http.timingsMs.firstByte).toBeGreaterThan(0)
+      await testInfo.attach('http-diagnostics-light', { body: await details.screenshot(), contentType: 'image/png' })
+    })
+
+    await test.step('Preserve assertions on metadata edits and keep HEAD conflicts explicit', async () => {
+      await page.goto(`/projects/${project}/catalog`)
+      await page.getByRole('row').filter({ hasText: 'HTTP-ASSERT-1' }).getByRole('button', { name: 'Edit', exact: true }).click()
+      await expect(page.getByLabel('Required response text', { exact: true })).toHaveValue('up')
+      await expect(page.getByLabel('Maximum response time (ms)', { exact: true })).toHaveValue('1000')
+      await page.getByLabel('Title', { exact: true }).fill('Updated structured health')
+      await page.getByRole('button', { name: 'Save draft changes', exact: true }).click()
+      await expect(page.getByRole('status').filter({ hasText: /^Draft changes saved\./ })).toBeVisible()
+      expect((await api.call('GET', definitionPath)).data.check).toEqual(original)
+      await page.getByRole('row').filter({ hasText: 'HTTP-ASSERT-1' }).getByRole('button', { name: 'Edit', exact: true }).click()
+      await page.getByLabel('Request method', { exact: true }).selectOption('HEAD')
+      await expect(page.getByRole('button', { name: 'Save draft changes', exact: true })).toBeDisabled()
+      await expect(page.getByText('HEAD cannot assert a response body. Clear body assertions or choose GET.', { exact: true })).toBeVisible()
+      await expect(page.getByLabel('Required response text', { exact: true })).toHaveValue('up')
+      await page.getByLabel('Required response text', { exact: true }).fill('')
+      await page.getByLabel('Forbidden response text', { exact: true }).fill('')
+      await page.getByLabel('Expected JSON fields', { exact: true }).fill('')
+      await page.getByLabel('Expected response headers (JSON)', { exact: true }).fill('{"X-Ready":"yes"}')
+      await page.getByLabel('Accepted status codes', { exact: true }).fill('204')
+      await page.getByLabel('Relative path', { exact: true }).fill('/head')
+      await page.getByLabel('Maximum response time (ms)', { exact: true }).fill('0')
+      await page.getByLabel('Color theme').selectOption('dark')
+      await page.setViewportSize({ width: 390, height: 844 })
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy()
+      await testInfo.attach('head-editor-mobile-dark', { body: await page.locator('ts-http-check-editor').screenshot(), contentType: 'image/png' })
+      await page.getByRole('button', { name: 'Save draft changes', exact: true }).click()
+      await expect(page.getByRole('status').filter({ hasText: /^Draft changes saved\./ })).toBeVisible()
+      await publish()
+      const headRun = await api.run(path)
+      expect(headRun.results[0].http.status).toBe(204)
+      expect(requests).toEqual(['GET /health', 'HEAD /head'])
+      const retained = (await api.call('GET', `${path}/runs/${originalRun.id}`)).data
+      expect(retained.release.catalog.tests[0].check).toEqual(original)
+      expect(retained.results[0].http.status).toBe(200)
+    })
+  } finally {
+    target.closeAllConnections()
+    await new Promise<void>((resolve, reject) => target.close(error => error ? reject(error) : resolve()))
+  }
+})

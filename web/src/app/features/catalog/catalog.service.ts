@@ -7,7 +7,8 @@ import { WorkspaceService } from '../../core/workspace.service'
 import type { Suite } from '../configuration/configuration.service'
 import type { CatalogItem, Draft, Issue, TestDefinition } from './catalog.models'
 import { TimingPolicyEditorService } from '../timing/timing-policy-editor.service'
-import { catalogCounts, filterCatalog } from './catalog.utils'
+import { catalogCounts, catalogTypes, filterCatalog } from './catalog.utils'
+import { HTTPCheckEditorService } from './http-check-editor.service'
 
 @Injectable()
 export class CatalogService {
@@ -16,6 +17,7 @@ export class CatalogService {
   private readonly destroy = inject(DestroyRef)
   readonly workspace = inject(WorkspaceService)
   readonly timingEditor = inject(TimingPolicyEditorService)
+  readonly checkEditor = inject(HTTPCheckEditorService)
   readonly projectId = signal('')
   readonly items = signal<CatalogItem[]>([])
   readonly suites = signal<RecordValue<Suite>[]>([])
@@ -26,10 +28,13 @@ export class CatalogService {
   readonly query = signal('')
   readonly state = signal('active')
   readonly suiteFilter = signal('')
-  readonly visible = computed(() => filterCatalog(this.items(), this.query(), this.state(),this.suiteFilter()))
+  readonly typeFilter = signal('')
+  readonly types = computed(() => catalogTypes(this.items()))
+  readonly visible = computed(() => filterCatalog(this.items(), this.query(), this.state(), this.suiteFilter(), this.typeFilter()))
   readonly counts = computed(() => catalogCounts(this.items()))
   readonly editorOpen = signal(false)
   readonly editing = signal<CatalogItem | null>(null)
+  readonly editingHTTP = computed(() => !this.editing() || this.editing()?.data.runner === 'http')
   readonly releaseSuite = signal('')
   readonly draft = signal<RecordValue<Draft> | null>(null)
   readonly issues = signal<Issue[]>([])
@@ -38,8 +43,6 @@ export class CatalogService {
     id: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/)] }),
     title: new FormControl('', { nonNullable: true, validators: Validators.required }),
     category: new FormControl('Availability', { nonNullable: true, validators: Validators.required }),
-    endpoint: new FormControl('api', { nonNullable: true, validators: Validators.required }),
-    path: new FormControl('/healthz', { nonNullable: true, validators: Validators.required }),
     timeout: new FormControl(10, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(3600), Validators.pattern(/^\d+$/)] }),
     safety: new FormControl('needs-review', { nonNullable: true }),
     rationale: new FormControl('', { nonNullable: true, validators: Validators.required })
@@ -49,7 +52,7 @@ export class CatalogService {
 
   constructor() {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => {
-      this.projectId.set(params.get('projectId') ?? ''); this.suiteFilter.set(''); this.releaseSuite.set(''); this.draft.set(null)
+      this.projectId.set(params.get('projectId') ?? ''); this.suiteFilter.set(''); this.typeFilter.set(''); this.releaseSuite.set(''); this.draft.set(null)
       this.editorOpen.set(false); this.editing.set(null); this.items.set([]); this.suites.set([]); this.success.set('')
       void this.load()
     })
@@ -74,23 +77,26 @@ export class CatalogService {
   create(): void {
     this.editing.set(null)
     this.timingEditor.reset()
-    this.form.reset({ suite: this.suites()[0]?.id ?? '', id: '', title: '', category: 'Availability', timeout: 10, endpoint: 'api', path: '/healthz', safety: 'needs-review', rationale: '' })
+    this.checkEditor.reset()
+    this.form.reset({ suite: this.suites()[0]?.id ?? '', id: '', title: '', category: 'Availability', timeout: 10, safety: 'needs-review', rationale: '' })
     this.form.controls.id.enable(); this.form.controls.suite.enable()
-    this.editorOpen.set(true); this.error.set('')
+    this.editorOpen.set(true); this.error.set(''); this.success.set('')
   }
 
   edit(item: CatalogItem): void {
     this.editing.set(item)
     this.timingEditor.reset(item.data.timing)
-    this.form.reset({ suite: item.suiteId, id: item.id, title: item.data.title, category: item.data.category, timeout: item.data.timeoutSeconds, endpoint: item.data.check?.endpoint ?? 'api', path: item.data.check?.path ?? '/healthz', safety: item.data.safety, rationale: item.data.rationale })
+    this.checkEditor.reset(item.data.check)
+    this.form.reset({ suite: item.suiteId, id: item.id, title: item.data.title, category: item.data.category, timeout: item.data.timeoutSeconds, safety: item.data.safety, rationale: item.data.rationale })
     this.form.controls.id.disable(); this.form.controls.suite.disable()
-    this.editorOpen.set(true); this.error.set('')
+    this.editorOpen.set(true); this.error.set(''); this.success.set('')
   }
 
   async save(): Promise<void> {
     this.form.markAllAsTouched()
-    if (this.form.invalid || !this.timingEditor.valid() || this.saving()) return
-    this.saving.set(true); this.error.set('')
+    this.checkEditor.form.markAllAsTouched()
+    if (this.form.invalid || !this.timingEditor.valid() || (this.editingHTTP() && !this.checkEditor.valid()) || this.saving()) return
+    this.saving.set(true); this.error.set(''); this.success.set('')
     try {
       const value = this.form.getRawValue()
       const existing = this.editing()
@@ -98,7 +104,7 @@ export class CatalogService {
         ...(existing?.data ?? { description: '', tags: [], dependencies: [], requiredBindings: [], type: 'https', runner: 'http', state: 'enabled', timeoutSeconds: 10 }),
         id: value.id, title: value.title, category: value.category, timeoutSeconds: value.timeout, timing: this.timingEditor.policy(), safety: value.safety, rationale: value.rationale
       }
-      if (!existing || test.runner === 'http') test.check = { ...(test.check ?? { method: 'GET', statusCodes: [200] }), endpoint: value.endpoint, path: value.path }
+      if (this.editingHTTP()) test.check = { ...test.check, ...this.checkEditor.check()! }
       const base = `/api/v1/projects/${this.projectId()}/suites/${value.suite}/tests`
       await this.api.request(existing ? `${base}/${value.id}` : base, existing ? 'PUT' : 'POST', test, existing?.revision)
       this.editorOpen.set(false); this.success.set('Draft changes saved. Publish a release to use the updated definition.')
@@ -109,7 +115,7 @@ export class CatalogService {
   }
 
   async action(item: CatalogItem, action: 'disable' | 'enable' | 'archive' | 'restore'): Promise<void> {
-    this.saving.set(true); this.error.set('')
+    this.saving.set(true); this.error.set(''); this.success.set('')
     try {
       await this.api.request(`/api/v1/projects/${this.projectId()}/suites/${item.suiteId}/tests/${item.id}/actions/${action}`, 'POST', {}, item.revision)
       this.success.set('Test state updated. Retained releases and history remain available.')
@@ -121,7 +127,7 @@ export class CatalogService {
 
   async prepareRelease(): Promise<void> {
     if (!this.releaseSuite() || this.saving()) return
-    this.saving.set(true); this.error.set('')
+    this.saving.set(true); this.error.set(''); this.success.set('')
     try {
       const base = `/api/v1/projects/${this.projectId()}/suites/${this.releaseSuite()}/catalog-drafts`
       const draft = await this.api.request<RecordValue<Draft>>(base, 'POST', {})
@@ -134,7 +140,7 @@ export class CatalogService {
   async publish(): Promise<void> {
     const draft = this.draft()
     if (!draft || this.issues().length || this.saving()) return
-    this.saving.set(true); this.error.set('')
+    this.saving.set(true); this.error.set(''); this.success.set('')
     try {
       await this.api.request(`/api/v1/projects/${this.projectId()}/suites/${this.releaseSuite()}/catalog-drafts/${draft.id}/publish`, 'POST', { activate: true }, draft.revision, this.publicationKey)
       this.draft.set(null); this.success.set('Release published and activated. Existing run snapshots retain their original definitions.')

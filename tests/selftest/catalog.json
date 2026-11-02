@@ -2,6 +2,7 @@
   "schemaVersion": "teststudio.selftest/v1",
   "source": "teststudio-selftests",
   "tests": [
+    { "id": "STUDIO-HTTPS-001", "title": "Declarative HTTP assertions, HEAD edits, and retained diagnostics", "selector": "@STUDIO-HTTPS-001", "category": "Catalog" },
     { "id": "STUDIO-TRENDS-001", "title": "Stacked result trends, selection gaps, and rankings", "selector": "@STUDIO-TRENDS-001", "category": "Trends" },
     { "id": "STUDIO-TIMEOUT-001", "title": "Timeout status and failure rerun", "selector": "@STUDIO-TIMEOUT-001", "category": "Timing" },
     { "id": "STUDIO-HELP-001", "title": "Page help, keyboard access, and responsive drawer", "selector": "@STUDIO-HELP-001", "category": "Interface" },

@@ -60,6 +60,8 @@ Run history provides environment, suite, state, and selection filters with bound
 The run form selects a published suite, environment, test identifiers, time limit, and retries.
 The time limit accepts 1 through 3600 seconds, consistent with the run API.
 Run details show the execution snapshot, progress, final counts, attempts, events, and filtered logs.
+HTTP attempts expose expandable network phases and certificate observations.
+Missing phases remain unavailable. Certificate lifetime uses the retained observation time.
 Counts and status badges separate timed-out tests from failed tests.
 Rerun failures includes failed, timed-out, and flaky results.
 Active runs refresh every two seconds. Cancellation and failure reruns use explicit actions.
@@ -85,6 +87,9 @@ Timing estimates show expected execution, baseline readiness, slowdown threshold
 Changing a run request clears its stale estimate. Incomplete history remains explicit.
 Run details compare actual and expected durations while retaining functional outcomes and cumulative retry time.
 The catalog editor validates timing overrides and publishes them through the normal release workflow.
+Its native HTTP controls support GET, HEAD, statuses, text, headers, JSON fields, response-time limits, and certificate lifetime thresholds.
+Field errors block saving. Changing to HEAD preserves conflicting body fields for explicit correction.
+The type filter separates HTTPS, API, browser, and other definitions independently of their runners.
 Baseline controls show current history and require a reason and revision for reset.
 Local browser checks verify a real slowdown failure, baseline reset, frozen historical criteria, policy editing, publication, and budget warnings.
 The checked timing views support light, dark, and mobile layouts without document overflow or console errors.

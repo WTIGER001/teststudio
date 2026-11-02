@@ -42,6 +42,7 @@ Publication remains a separate, explicit action.
 ## Interface workflows
 
 The catalog table supports suite and lifecycle filters and explicit checkbox selection.
+It also filters by test type. Type remains separate from the execution runner.
 Bulk actions preview one suite at a time. Review the proposed states before applying changes.
 The import panel loads a JSON file or accepts pasted definitions.
 Export fills the document field and provides a local JSON download.
@@ -49,6 +50,16 @@ Validation errors identify the test and field. Invalid plans cannot apply.
 History shows retained definitions, actor, timestamp, and revision number.
 Duplicate asks for a new permanent identifier and creates a draft entry.
 Opening a preview or history panel moves keyboard focus to its heading.
+
+## Native HTTP editor
+
+The editor supports GET, HEAD, accepted statuses, response text, exact headers, JSON fields, response-time limits, and certificate lifetime thresholds.
+Field errors block saving. HEAD body assertions remain visible until the user corrects them.
+Metadata-only edits preserve all assertion settings.
+Validation and publication use the same HTTP definition checks as execution.
+Invalid new drafts cannot replace the active release.
+Opening or submitting another edit clears the previous success message.
+See [Native HTTP checks](http-checks.md) for definition fields, limits, diagnostics, and local verification.
 
 ## Timing policy
 

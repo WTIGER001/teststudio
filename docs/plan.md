@@ -1038,6 +1038,7 @@ Add this type during contract and registry work, before the deployment acceptanc
 Verify successful responses, unexpected status codes, timeouts, redirects, invalid TLS, approaching certificate expiry, and body assertion failures.
 Verify that manual and scheduled checks produce the same run, result, trend, and notification records.
 Adding or editing a health check requires no API deployment, browser image build, or service rollout.
+See [Native HTTP checks](http-checks.md) for the implemented editor, assertion limits, publication rules, and retained diagnostics.
 
 ### Go test suites
 

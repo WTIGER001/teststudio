@@ -1,6 +1,13 @@
 import type { TimingPolicy } from '../timing/timing.models'
 import type { RecordValue } from '../../core/api.service'
 
+export type JSONValue = string | number | boolean | null | JSONValue[] | { [key: string]: JSONValue }
+export interface HTTPCheck {
+  endpoint: string; path: string; method: string; statusCodes: number[]
+  requiredText?: string; forbiddenText?: string; headers?: Record<string, string>; json?: Record<string, JSONValue>
+  maxResponseMs?: number; minCertificateDays?: number
+}
+
 export interface TestDefinition {
   id: string
   title: string
@@ -19,7 +26,7 @@ export interface TestDefinition {
   timeoutSeconds: number
   source?: string
   selector?: string
-  check?: { endpoint: string; path: string; method: string; statusCodes: number[] }
+  check?: HTTPCheck
 }
 
 export interface CatalogItem extends RecordValue<TestDefinition> { suiteId: string; suiteName: string }

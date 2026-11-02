@@ -9,11 +9,12 @@ export interface RunSummary {
   state: string; outcome: string; phase: string; counts: Counts; createdAt: string; finishedAt?: string; evidenceState: string; actor: string; trigger: string; selection: string
 }
 export interface TestStep { title: string; category: string; durationMs: number; error?: string }
+export interface HTTPObservation { status: number; url: string; durationMs: number; timingsMs?: Record<string, number>; certificateExpires?: string }
 export interface Attempt {
   executionId?: string; recovered?: boolean; durationUnavailable?: boolean; workerDurationMs?: number; steps?: TestStep[]; runnerStatus?: string; expectedStatus?: string
   testId: string; attempt: number; state: string; failureKind?: string; error?: string; startedAt: string; finishedAt: string; durationMs: number
   observedState?: string; totalDurationMs?: number; timingRegressions?: number; timing?: TimingAssessment
-  http?: { status: number; url: string; durationMs: number; timingsMs?: Record<string, number>; certificateExpires?: string }
+  http?: HTTPObservation
 }
 export interface Run {
   id: string; projectId: string; request: RunRequest; release: { id: string }; environment?: Environment; tests: TestDefinition[]

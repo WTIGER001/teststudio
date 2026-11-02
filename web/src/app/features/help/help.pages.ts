@@ -48,11 +48,12 @@ export const helpPages: Record<string, HelpPage> = {
       { title: 'Test identity and lifecycle', description: 'A permanent identifier connects a test to its history. Enabled tests can be selected. Disabled and archived tests retain their definitions.' },
       { title: 'Draft and release', description: 'Editing changes the draft. Publication freezes a release. Validation checks definitions; it does not execute tests or prove they pass.' },
       { title: 'Safety', description: 'Each test has a safety label and rationale. Protected targets require safe definitions and the required permissions.' },
+      { title: 'HTTP assertions', description: 'Native checks support GET, HEAD, accepted statuses, exact response headers, body text, JSON fields, response-time limits, and certificate lifetime. Redirects stay disabled. Expected headers describe responses, not authentication credentials.' },
       { title: 'Timing policy', description: 'Comparable clean runs build a duration baseline. Timing rules can warn or fail on slow execution and recommend bounded timeouts.' },
       { title: 'Catalog transfer', description: 'Import validates a JSON catalog before changes are applied. Export downloads definitions. Neither action executes tests.' }
     ],
     tutorials: [
-      { title: 'Create and publish an HTTPS check', steps: ['Create a suite in Project settings if none exists.', 'Select + Create test. Choose the suite and enter an identifier, title, and category.', 'Enter the registered endpoint name and relative path. The editor creates a GET check that expects HTTP 200.', 'Set the timeout ceiling, safety label, and rationale. Select Save draft changes.', 'Choose the suite under Publish a release. Select Validate and preview, review the result, then Publish and activate.'] },
+      { title: 'Create and publish an HTTPS check', steps: ['Create a suite in Project settings if none exists.', 'Select + Create test. Choose the suite and enter an identifier, title, and category.', 'Enter the registered endpoint name and relative path. Choose GET or HEAD and the accepted status codes.', 'Add optional text, response header, JSON field, response-time, and certificate lifetime assertions. HEAD cannot assert response bodies.', 'Set the timeout ceiling, safety label, and rationale. Select Save draft changes.', 'Choose the suite under Publish a release. Select Validate and preview, review the result, then Publish and activate.'] },
       { title: 'Find and maintain a test', steps: ['Search by title, identifier, category, or tag. Use suite and lifecycle filters to narrow the list.', 'Use History to inspect retained definitions, or Edit to change the draft.', 'Use Archive to remove a test from normal selection. Choose Archived in the lifecycle filter to find and restore it.', 'Publish a new release when draft changes should apply to future runs.'] }
     ]
   },
@@ -92,6 +93,7 @@ export const helpPages: Record<string, HelpPage> = {
       { title: 'Results and attempts', description: 'Final counts use logical test results. Attempt history keeps each retry. Timeouts have a separate timed-out status and count. A successful retry can leave a flaky result.' },
       { title: 'Test timing', description: 'Frozen predictions explain the criteria used for this run. Worker elapsed time includes coordination. Duration unavailable means no valid test measurement exists.' },
       { title: 'Evidence and retention', description: 'Logs and artifacts have capture and retention policies. Capture gaps do not erase test outcomes. Pins preserve evidence; deletion removes files while retaining results.' },
+      { title: 'HTTP diagnostics', description: 'Expand HTTP diagnostics in attempt history to inspect network phases and certificate data. Unavailable phases stay unavailable. Certificate lifetime uses the retained attempt finish time.' },
       { title: 'Worker recovery', description: 'After an interruption, recovery retains available diagnostics and removes owned resources. Recovered observations keep the original run outcome.' }
     ],
     tutorials: [

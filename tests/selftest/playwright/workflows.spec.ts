@@ -26,10 +26,10 @@ test('Publish a catalog and inspect an executed check', { tag: '@STUDIO-CATALOG-
     await page.getByLabel('Production-safety label').selectOption('safe')
     await page.getByLabel('Safety rationale').fill('Reads this isolated TestStudio instance')
     await page.getByRole('button', { name: 'Save draft changes' }).click()
-    await expect(page.getByRole('status')).toContainText('Draft changes saved')
+    await expect(page.getByRole('status').filter({ hasText: /^Draft changes saved\./ })).toBeVisible()
     await page.getByRole('button', { name: 'Validate and preview' }).click()
     await page.getByRole('button', { name: 'Publish and activate' }).click()
-    await expect(page.getByRole('status')).toContainText('Release published')
+    await expect(page.getByRole('status').filter({ hasText: /^Release published/ })).toBeVisible()
   })
   await test.step('Start a run and inspect retained evidence', async () => {
     await page.goto(`/projects/${project}/runs`)

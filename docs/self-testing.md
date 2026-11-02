@@ -18,7 +18,7 @@ It packages them with the pinned Playwright runtime and the new browser tests.
 An isolated controller registers the catalog, publishes an immutable local image ID, and starts a normal TestStudio run.
 Each test container starts a new TestStudio instance with its own SQLite database.
 The instances use loopback endpoints inside the container. They have no external network access.
-The suite tests themes, mobile layout, page help, catalog publication, native HTTP execution, timing history, baseline reset, timeout reruns, and trends.
+The suite tests themes, mobile layout, page help, catalog publication, HTTP assertions, native execution, timing, baseline reset, timeout reruns, and trends.
 Native check runs remain separate from the outer Playwright run. They cannot recurse into browser self-tests.
 
 The script stops its controller after verification. It preserves its database and private artifacts under `.data/selftest-verification.*`.
