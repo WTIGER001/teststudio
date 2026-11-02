@@ -1,0 +1,14 @@
+node_modules/
+web/dist/
+web/.angular/
+.data/
+.env
+.env.*
+!.env.example
+output/
+*.db
+*.db-shm
+*.db-wal
+.DS_Store
+bin/
+coverage/
