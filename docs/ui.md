@@ -22,6 +22,16 @@ Status labels include text. Color is not the only signal.
 Visible focus and reduced-motion preferences apply in both themes.
 Narrow layouts wrap navigation and controls. Wide tables scroll inside their own container.
 
+## Trend chart contract
+
+Result-state trends use stacked area charts across overall, category, and test views.
+Stack passed, failed, flaky, skipped, and unknown or incomplete counts together.
+Keep stack order and state colors consistent in light and dark themes.
+Use final logical results for counts. Retries do not add results to the chart.
+Show state counts and totals in tooltips and an accessible data table.
+Missing history creates visible gaps. Incomplete results do not become passing observations.
+Trend implementation and browser verification remain pending.
+
 ## Verified local workflows
 
 A browser check creates a new generic project, application, suite, environment, and HTTPS definition.

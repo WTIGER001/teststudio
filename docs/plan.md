@@ -88,7 +88,7 @@ Provide these generic workflows:
 - Private artifacts, screenshots, result details, and access checks on every deployment target.
 - Full-width result cards under collapsible categories.
 - Application, environment, stage, category, test, and date filters.
-- Per-run pass, failure, and flaky charts, with visible gaps for incomplete runs.
+- Stacked area charts for per-run result states, with visible gaps for missing history and explicit incomplete results.
 - Most failed and most volatile test rankings.
 - Durable completion notifications with retry handling.
 - Production safety labels, request guards, and analytics suppression.
@@ -1199,7 +1199,13 @@ Keep attempts and error output readable across the card width.
 Provide the timeline, live logs, screenshots, traces, and artifact states described in the evidence contract.
 Test and category links open their history while retaining context.
 
-Trends retain the current line charts and failure and volatility rankings.
+Trends use stacked area charts for result states. Retain failure and volatility rankings.
+Stack passed, failed, flaky, skipped, and unknown or incomplete counts within the same chart.
+Use a stable stack order and consistent state colors across overall, category, and test views.
+The default vertical axis shows counts. Each run contributes one final logical result per selected test.
+Keep retries in attempt history. They do not add extra counts to the stacked areas.
+Show each state's count and the total in the tooltip and an accessible data table.
+Missing history creates visible gaps. Do not interpolate missing observations or count incomplete results as passed.
 Project and environment scope, period, sample counts, and partial-history notices remain visible.
 HTTPS check views add response-time history and certificate information.
 
@@ -1235,7 +1241,7 @@ Proposed navigation:
 | Run tests | Project, application, suite, environment, test tree, and execution target selection. |
 | Runs | All authorized runs, newest first, with project and environment filters. |
 | Run details | Progress, cards grouped by category, attempts, errors, cancellation, reruns, and reports. |
-| Trends | Overall, category, and test charts with failure and volatility rankings. |
+| Trends | Overall, category, and test stacked area charts with failure and volatility rankings. |
 | Schedules | Project schedules, target selection, enabled state, and next execution. |
 | Environments | Application targets, named endpoints, stages, protection, and credential references. |
 | Sources | Uploads, repository registration, connection status, synchronization, and source versions. |
@@ -1316,6 +1322,7 @@ Verify schedule ownership, execution recovery, and notification retries when rep
 - Runs retain their release across updates, activation changes, and rollbacks.
 - Removed tests and archived suites retain their history and required artifacts.
 - Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
+- Result-state trends use stacked area charts with consistent state colors, final logical counts, accessible values, and visible missing-history gaps.
 - HTTPS checks run manually and on schedules, with configurable assertions, TLS checks, response-time history, and normal result records.
 - Adding an HTTPS check requires no browser or service deployment.
 - Go suites preserve test identities, disable cached execution, and distinguish build failures from test assertion failures.

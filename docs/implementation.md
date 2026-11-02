@@ -32,6 +32,7 @@ The full plan remains required scope. Check an item only after its implementatio
 - [ ] Runs retain their release across updates, activation changes, and rollbacks.
 - [ ] Removed tests and archived suites retain their history and required artifacts.
 - [ ] Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
+- [ ] Result-state trends use stacked area charts with consistent state colors, final logical counts, accessible values, and visible missing-history gaps.
 - [x] Native HTTP attempts support comparable timing history, bounded adaptive timeouts, slowdown criteria, and API and UI estimates.
 - [ ] Go and browser runners apply the same timing contract across execution and deployment profiles.
 - [ ] HTTPS checks run manually and on schedules, with configurable assertions, TLS checks, response-time history, and normal result records.
@@ -301,3 +302,12 @@ Local browser checks verify five clean observations, estimates, a real slowdown 
 The checked views have no console errors or document overflow. Light, dark, and mobile views pass visual inspection.
 The owned browser, automation daemon, local service, target server, and database containers stop after checks.
 Coded runner timing, deployment profiles, editable capture settings, and the remaining full plan stay pending.
+
+### Stacked area trend design
+
+Updated the plan and interface contract to use stacked area charts for result states.
+The chart stacks passed, failed, flaky, skipped, and unknown or incomplete counts.
+Final logical results provide counts. Retry attempts do not inflate totals.
+State colors, stack order, accessible values, and missing-history gaps form part of acceptance.
+Validation: documentation consistency checks pass. No result-state chart implementation exists yet.
+Trend implementation and browser verification remain pending.
