@@ -1,12 +1,16 @@
 package projects
 
-import "github.com/wtiger001/teststudio/internal/capture"
+import (
+	"github.com/wtiger001/teststudio/internal/capture"
+	"github.com/wtiger001/teststudio/internal/timing"
+)
 
 type Project struct {
 	ID            string          `json:"id"`
 	Name          string          `json:"name"`
 	Description   string          `json:"description"`
 	Archived      bool            `json:"archived"`
+	Timing        *timing.Policy  `json:"timing,omitempty"`
 	Capture       *capture.Policy `json:"capture,omitempty"`
 	CaptureLimits *capture.Limits `json:"captureLimits,omitempty"`
 }
@@ -39,5 +43,6 @@ type Suite struct {
 	RequiresTarget bool            `json:"requiresTarget"`
 	ActiveRelease  string          `json:"activeReleaseId,omitempty"`
 	Archived       bool            `json:"archived"`
+	Timing         *timing.Policy  `json:"timing,omitempty"`
 	Capture        *capture.Policy `json:"capture,omitempty"`
 }

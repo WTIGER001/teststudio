@@ -126,6 +126,7 @@ func (s *Server) Handler() http.Handler {
 	s.catalogRoutes(mux)
 	s.catalogTransferRoutes(mux)
 	s.runRoutes(mux)
+	s.timingRoutes(mux)
 	s.evidenceRetentionRoutes(mux)
 	mux.HandleFunc("GET /api/v1/me/capabilities", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		caps, err := s.Auth.Capabilities(r.Context(), actor(r), r.URL.Query().Get("project"))

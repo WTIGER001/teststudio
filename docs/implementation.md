@@ -269,3 +269,17 @@ Local browser checks verify pins, timed expiry, pin removal, deletion, manifest 
 Keyboard focus returns to the artifact heading. The final page has no console errors or document overflow.
 Light, dark, and mobile views pass visual inspection. Test browser, daemon, server, and database containers stop after checks.
 Editable capture settings, media capture, cloud adapters, and remaining plan areas remain pending.
+
+### Timing baselines, adaptive timeouts, and slowdown failures
+
+Added project and suite timing defaults, test overrides, and immutable release and run timing snapshots.
+Native HTTP attempts use monotonic elapsed time. Logical results retain cumulative retry duration and separate functional state.
+Comparable baselines isolate definition, target, environment, location, and runtime context.
+Clean first-attempt results train bounded history. Slow, failed, retried, and interrupted attempts do not train history.
+Five observations enable default slowdown failures and bounded adaptive timeouts.
+Added side-effect-free run estimates, authorized baseline reads, and audited revision-controlled baseline resets.
+Generation checks prevent old queued work from repopulating reset baselines.
+Final results and observations commit atomically. Worker heartbeat reads avoid unnecessary lease revision contention.
+Validation: targeted race tests pass on SQLite and local PostgreSQL for timing, runs, catalog, and HTTP API.
+Checks cover actual local HTTP slowdowns and adaptive cancellation, policy modes, retry totals, context changes, concurrency, permissions, and resets.
+Timing UI integration and browser verification remain pending at this checkpoint.

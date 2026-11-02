@@ -149,7 +149,19 @@ func (s *Service) heartbeat(ctx context.Context, run Run, worker string, cancel 
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			_, err := s.mutate(ctx, run.Project, run.ID, func(v *Run) error {
+			current, _, err := s.Get(ctx, run.Project, run.ID)
+			if err != nil || owned(&current, worker) != nil {
+				cancel()
+				return
+			}
+			if current.CancelRequested {
+				cancel()
+				return
+			}
+			if time.Until(*current.LeaseUntil) > 20*time.Second {
+				continue
+			}
+			_, err = s.mutate(ctx, run.Project, run.ID, func(v *Run) error {
 				if err := owned(v, worker); err != nil {
 					return err
 				}
@@ -239,7 +251,7 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 		}
 		if skip {
 			now := time.Now().UTC()
-			result := execution.Result{TestID: test.ID, State: "skipped", Error: "A dependency did not pass.", StartedAt: now, FinishedAt: now}
+			result := assessResult(run, execution.Result{TestID: test.ID, State: "skipped", Error: "A dependency did not pass.", StartedAt: now, FinishedAt: now})
 			if err := s.finalResult(ctx, run, worker, result); err != nil {
 				executionError = err.Error()
 				break
@@ -250,6 +262,8 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 		}
 		var result execution.Result
 		failedBefore := false
+		var totalDuration float64
+		regressions := 0
 		for attempt := 1; attempt <= run.Request.Retries+1; attempt++ {
 			if ctx.Err() != nil {
 				break
@@ -263,6 +277,9 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 					return err
 				}
 				v.CurrentTest = test.ID
+				now := time.Now().UTC()
+				v.CurrentTestStartedAt = &now
+				v.CurrentAttempt = attempt
 				return nil
 			})
 			if err != nil {
@@ -274,13 +291,24 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 				executionError = "No compatible executor is configured."
 				break
 			}
-			result = s.HTTP.Execute(ctx, test, *run.Environment)
+			attemptCtx := ctx
+			releaseAttempt := func() {}
+			if p, ok := run.Timing.Tests[test.ID]; ok {
+				attemptCtx, releaseAttempt = context.WithTimeout(ctx, time.Duration(p.EffectiveTimeoutMs)*time.Millisecond)
+			}
+			result = s.HTTP.Execute(attemptCtx, test, *run.Environment)
+			releaseAttempt()
+			result = assessResult(run, result)
+			totalDuration += result.DurationMs
+			if result.Timing != nil && result.Timing.Status == "slow" {
+				regressions++
+			}
 			result.Attempt = attempt
 			recordCtx, releaseRecord := context.WithTimeout(context.WithoutCancel(parent), 5*time.Second)
 			recordErr := s.attemptResult(recordCtx, run, worker, result)
 			releaseRecord()
 			if recordErr != nil {
-				executionError = recordErr.Error()
+				executionError = "Record attempt: " + recordErr.Error()
 				break
 			}
 			capture("test.finished", test.ID, attempt, fmt.Sprintf("%s: %s.", test.ID, result.State))
@@ -295,8 +323,10 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 		if executionError != "" || result.TestID == "" || ctx.Err() != nil {
 			break
 		}
+		result.TotalDurationMs = totalDuration
+		result.TimingRegressions = regressions
 		if err := s.finalResult(ctx, run, worker, result); err != nil {
-			executionError = err.Error()
+			executionError = "Finalize test: " + err.Error()
 			break
 		}
 		completed[test.ID] = result.State
@@ -323,6 +353,8 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 		v.FinishedAt = &now
 		v.Phase = "finished"
 		v.CurrentTest = ""
+		v.CurrentTestStartedAt = nil
+		v.CurrentAttempt = 0
 		v.EvidenceErrors = evidenceErrors
 		v.EvidenceState = "complete"
 		if len(evidenceErrors) > 0 {
@@ -365,23 +397,6 @@ func (s *Service) attemptResult(ctx context.Context, run Run, worker string, res
 		return err
 	}
 	_, err = s.mutate(ctx, run.Project, run.ID, func(v *Run) error { return owned(v, worker) }, change)
-	return err
-}
-
-func (s *Service) finalResult(ctx context.Context, run Run, worker string, result execution.Result) error {
-	_, err := s.mutate(ctx, run.Project, run.ID, func(v *Run) error {
-		if err := owned(v, worker); err != nil {
-			return err
-		}
-		for _, old := range v.Results {
-			if old.TestID == result.TestID {
-				return errors.New("test result already exists")
-			}
-		}
-		v.Results = append(v.Results, result)
-		v.Counts = Count(len(v.Tests), v.Results)
-		return nil
-	})
 	return err
 }
 

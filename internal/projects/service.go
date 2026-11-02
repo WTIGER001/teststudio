@@ -10,6 +10,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/storage"
+	"github.com/wtiger001/teststudio/internal/timing"
 )
 
 type Service struct {
@@ -36,6 +37,9 @@ func (s *Service) SaveProject(ctx context.Context, user string, p Project, revis
 		return err
 	}
 	if err := capture.Validate(capture.Resolve(p.Capture, nil), capture.ResolveLimits(p.CaptureLimits)); err != nil {
+		return err
+	}
+	if err := timing.Validate(timing.Resolve(p.Timing, nil)); err != nil {
 		return err
 	}
 	return s.save(ctx, user, "projects", p.ID, p.ID, revision, p)
@@ -102,6 +106,9 @@ func (s *Service) SaveSuite(ctx context.Context, user, project string, v Suite, 
 		return err
 	}
 	if err := capture.Validate(capture.Resolve(p.Capture, v.Capture), capture.ResolveLimits(p.CaptureLimits)); err != nil {
+		return err
+	}
+	if err := timing.Validate(timing.Resolve(p.Timing, v.Timing)); err != nil {
 		return err
 	}
 	for _, app := range v.Applications {

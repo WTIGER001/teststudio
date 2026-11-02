@@ -22,14 +22,14 @@ import (
 type HTTP struct{ RootCAs *x509.CertPool }
 
 func (e *HTTP) Execute(ctx context.Context, test catalog.Test, environment projects.Environment) Result {
-	start := time.Now().UTC()
-	r := Result{TestID: test.ID, Attempt: 1, State: "failed", StartedAt: start}
+	start := time.Now()
+	r := Result{TestID: test.ID, Attempt: 1, State: "failed", StartedAt: start.UTC()}
 	var finalize func()
 	fail := func(kind string, err error) Result {
 		r.FailureKind = kind
 		r.Error = err.Error()
 		r.FinishedAt = time.Now().UTC()
-		r.DurationMs = float64(r.FinishedAt.Sub(start)) / float64(time.Millisecond)
+		r.DurationMs = float64(time.Since(start)) / float64(time.Millisecond)
 		if r.HTTP != nil {
 			r.HTTP.DurationMs = r.DurationMs
 		}
@@ -156,6 +156,6 @@ func (e *HTTP) Execute(ctx context.Context, test catalog.Test, environment proje
 	finalize()
 	r.State = "passed"
 	r.FinishedAt = time.Now().UTC()
-	r.DurationMs = float64(r.FinishedAt.Sub(start)) / float64(time.Millisecond)
+	r.DurationMs = float64(time.Since(start)) / float64(time.Millisecond)
 	return r
 }

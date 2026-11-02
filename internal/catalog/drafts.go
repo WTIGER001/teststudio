@@ -8,6 +8,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/storage"
+	"github.com/wtiger001/teststudio/internal/timing"
 )
 
 func (s *Service) CreateDraft(ctx context.Context, user, project, suite string, artifact Artifact) (Draft, error) {
@@ -22,7 +23,11 @@ func (s *Service) CreateDraft(ctx context.Context, user, project, suite string, 
 	if err != nil {
 		return Draft{}, err
 	}
-	d := Draft{ID: domain.NewID(), Tests: []Test{}, Artifact: artifact, Capture: policy}
+	timingPolicy, err := s.timingSettings(ctx, project, suite)
+	if err != nil {
+		return Draft{}, err
+	}
+	d := Draft{Timing: timingPolicy, ID: domain.NewID(), Tests: []Test{}, Artifact: artifact, Capture: policy}
 	for _, row := range rows {
 		t, err := storage.Decode[Test](row)
 		if err != nil {
@@ -51,6 +56,17 @@ func (s *Service) SaveDraft(ctx context.Context, user, project, suite string, d 
 	_, limits, err := s.captureSettings(ctx, project, suite)
 	if err != nil {
 		return err
+	}
+	d.Timing = timing.Normalize(d.Timing)
+	if err := timing.Validate(d.Timing); err != nil {
+		return err
+	}
+	for _, t := range d.Tests {
+		if t.Timing != nil {
+			if err := timing.Validate(*t.Timing); err != nil {
+				return err
+			}
+		}
 	}
 	d.Capture = capture.Normalize(d.Capture)
 	if err := capture.Validate(d.Capture, limits); err != nil {

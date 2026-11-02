@@ -2,6 +2,7 @@ package catalog
 
 import (
 	"github.com/wtiger001/teststudio/internal/capture"
+	"github.com/wtiger001/teststudio/internal/timing"
 	"time"
 )
 
@@ -44,6 +45,7 @@ type Test struct {
 	Source           string         `json:"source,omitempty"`
 	Selector         string         `json:"selector,omitempty"`
 	Check            *HTTPCheck     `json:"check,omitempty"`
+	Timing           *timing.Policy `json:"timing,omitempty"`
 	Capture          *CapturePolicy `json:"capture,omitempty"`
 }
 
@@ -57,6 +59,7 @@ type Draft struct {
 	ID               string        `json:"id"`
 	Tests            []Test        `json:"tests"`
 	Artifact         Artifact      `json:"artifact"`
+	Timing           timing.Policy `json:"timing"`
 	Capture          CapturePolicy `json:"capture"`
 	PublishedRelease string        `json:"publishedReleaseId,omitempty"`
 }

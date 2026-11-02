@@ -10,6 +10,7 @@ import (
 
 	"github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/domain"
+	"github.com/wtiger001/teststudio/internal/timing"
 )
 
 var imageDigest = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._:/-]*@sha256:[a-f0-9]{64}$`)
@@ -33,6 +34,11 @@ func ValidateTest(t Test) error {
 	if t.TimeoutSeconds < 1 || t.TimeoutSeconds > 3600 {
 		return errors.New("timeout must be between 1 and 3600 seconds")
 	}
+	if t.Timing != nil {
+		if err := timing.Validate(*t.Timing); err != nil {
+			return err
+		}
+	}
 	if t.Capture != nil {
 		if err := capture.Validate(*t.Capture, capture.DefaultLimits()); err != nil {
 			return err
@@ -54,6 +60,9 @@ func Validate(d Draft) []Issue {
 	}
 	if err := capture.Validate(d.Capture, capture.DefaultLimits()); err != nil {
 		add("", "capture", err.Error())
+	}
+	if err := timing.Validate(d.Timing); err != nil {
+		add("", "timing", err.Error())
 	}
 	tests := map[string]Test{}
 	for _, t := range d.Tests {

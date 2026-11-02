@@ -626,6 +626,22 @@ Store credential references and binding names without storing resolved secret va
 Distinguish queue, preparation, execution, reporting, and artifact upload durations.
 Use timestamps from the service and worker with clear clock origin. Do not imply a precise global ordering across workers.
 
+#### Predictive timing and regression criteria
+
+Time every test attempt and retain total execution time across retries.
+Keep functional outcomes separate from duration regression assessments.
+Compare only matching tests, environments, execution locations, runtime profiles, definitions, and target configurations.
+Use clean first-attempt passes to estimate typical durations and guide bounded adaptive timeouts.
+Keep slow, failed, retried, and interrupted observations outside the baseline.
+Require enough comparable observations before enforcing slowdown rules.
+Default to a failure at twice the median, with an absolute noise guard and a historical tail guard.
+Support configurable warning, failure, and disabled modes, sample windows, history age, and timeout controls.
+Freeze predictions and thresholds when each run enters the queue.
+Show pre-run estimates, baseline readiness, attempt durations, slowdown ratios, and timeout budgets through the API and UI.
+Make incomplete predictions explicit. Keep queue, preparation, and capture time separate.
+Support audited baseline resets with revisions and generation guards for queued work.
+See [Test timing](timing.md) for the initial native HTTP policy and contracts.
+
 #### Attempts, steps, and capture
 
 Each test result has its own attempts, assertions, steps, timing, errors, and artifact links.
