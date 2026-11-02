@@ -64,3 +64,12 @@ Implemented versioned SQL records, atomic revision checks, scoped cursors, durab
 The PostgreSQL dialect uses the pgx driver. Hosted validation remains pending.
 Validation: `go test ./internal/storage -count=1` passes.
 Tests cover competing writers, transaction rollback, cursor isolation, and reopening a database.
+
+### Persistent identities and scoped permissions
+
+Pinned `go-permissions` v0.0.31 and added its complete SQLite store interface.
+Added persistent users, local and expiring external memberships, group archival, and scoped built-in roles.
+All authorization checks use the library evaluator.
+Validation: `go test ./adapters/permissions/sqlite ./internal/identity ./internal/authorization -count=1` passes.
+Tests cover two project bindings, deny precedence, expired grants, revocation, inheritance cycles, and reopened database access.
+Administrative API workflows, OIDC sessions, and PostgreSQL permission parity remain pending.
