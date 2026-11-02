@@ -1231,6 +1231,7 @@ Show each state's count and the total in the tooltip and an accessible data tabl
 Missing history creates visible gaps. Do not interpolate missing observations or count incomplete results as passed.
 Project and environment scope, period, sample counts, and partial-history notices remain visible.
 HTTPS check views add response-time history and certificate information.
+See [Result trends](trends.md) for paging, logical counts, gaps, rankings, and the current project trend API.
 
 Use separate routes for complex editing, including sources, environments, native checks, and schedules.
 Use dialogs for short actions such as rename or confirmation.

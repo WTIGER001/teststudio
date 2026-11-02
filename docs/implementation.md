@@ -32,7 +32,7 @@ The full plan remains required scope. Check an item only after its implementatio
 - [ ] Runs retain their release across updates, activation changes, and rollbacks.
 - [ ] Removed tests and archived suites retain their history and required artifacts.
 - [ ] Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
-- [ ] Result-state trends use stacked area charts with consistent state colors, final logical counts, accessible values, and visible missing-history gaps.
+- [x] Result-state trends use stacked area charts with consistent state colors, final logical counts, accessible values, and visible missing-history gaps.
 - [x] Native HTTP attempts support comparable timing history, bounded adaptive timeouts, slowdown criteria, and API and UI estimates.
 - [ ] Go and browser runners apply the same timing contract across execution and deployment profiles.
 - [ ] HTTPS checks run manually and on schedules, with configurable assertions, TLS checks, response-time history, and normal result records.
@@ -76,6 +76,25 @@ Per-run permission checks exclude denied observations and metadata.
 Validation: focused aggregation and API race tests pass on SQLite. API parity checks pass on local PostgreSQL.
 Checks cover counts, retries, ambiguity, gaps, comparison boundaries, filters, pagination, object denies, and permission revocation.
 Interface completion, cross-project rollups, and HTTPS timing charts remain pending at this checkpoint.
+
+### Stacked area trends and ranking interface
+
+Added project navigation and a focused Trends page with persisted UTC period and resource filters.
+Connected stacked areas show final states with a separate timeout layer and consistent light and dark colors.
+Selection gaps break each path. Missing observations remain unknown instead of passing.
+Hover and keyboard focus expose exact state counts. Accessible tables link to original run records.
+Failure and volatility rankings show sample and comparison counts with category and permanent-test history links.
+Bounded history pages expose partial coverage. Errors remain distinct from valid empty scopes.
+Added Trends page help and extended the shared help workflow to cover the new route.
+Validation: the Angular production build and three chart and scope utility checks pass.
+The chart geometry check verifies area totals and missing-history breaks.
+STUDIO-TRENDS-001 creates real passes, failures, timeouts, a successful retry, and a run deadline through TestStudio.
+It verifies logical counts, selection gaps, volatility, ranking links, preserved filters, original runs, themes, and mobile layout.
+The workflow also verifies unavailable history errors and valid empty scopes.
+The focused help workflow passes with the new guide. Browser checks report no runtime errors.
+Local visual checks verify light and dark rendering and keyboard values without document overflow.
+Owned browsers and verification controllers stop after checks. Worker containers and output volumes are removed.
+Cross-project rollups, HTTPS timing history, and the remaining full plan stay pending.
 
 ### Durable metadata storage
 

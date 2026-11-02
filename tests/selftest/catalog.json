@@ -2,6 +2,7 @@
   "schemaVersion": "teststudio.selftest/v1",
   "source": "teststudio-selftests",
   "tests": [
+    { "id": "STUDIO-TRENDS-001", "title": "Stacked result trends, selection gaps, and rankings", "selector": "@STUDIO-TRENDS-001", "category": "Trends" },
     { "id": "STUDIO-TIMEOUT-001", "title": "Timeout status and failure rerun", "selector": "@STUDIO-TIMEOUT-001", "category": "Timing" },
     { "id": "STUDIO-HELP-001", "title": "Page help, keyboard access, and responsive drawer", "selector": "@STUDIO-HELP-001", "category": "Interface" },
     { "id": "STUDIO-UI-001", "title": "Theme persistence and mobile layout", "selector": "@STUDIO-UI-001", "category": "Interface" },

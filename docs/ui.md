@@ -41,7 +41,13 @@ Keep stack order and state colors consistent in light and dark themes.
 Use final logical results for counts. Retries do not add results to the chart.
 Show state counts and totals in tooltips and an accessible data table.
 Missing history creates visible gaps. Incomplete results do not become passing observations.
-Trend implementation and browser verification remain pending.
+The project Trends page provides overall, category, and permanent-test views with shareable UTC filters.
+The chart uses connected stacked areas and breaks paths at selection gaps.
+Hover and keyboard focus expose state counts. An accessible values table links to original runs.
+Failure and volatility rankings retain sample counts and link to test and category history.
+History pages expose partial coverage. Request failures remain distinct from valid empty scopes.
+Local self-tests verify real outcome history, gaps, ranking links, URL persistence, themes, and mobile overflow.
+Cross-project rollups and HTTPS response-time and certificate history remain pending.
 
 ## Verified local workflows
 

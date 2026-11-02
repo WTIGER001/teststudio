@@ -1,6 +1,20 @@
 import type { HelpPage } from './help.models'
 
 export const helpPages: Record<string, HelpPage> = {
+  trends: {
+    id: 'trends', title: 'Trends',
+    introduction: ['Explore final logical results across finished runs. Stacked areas show passed, failed, timed-out, flaky, skipped, and unknown results together.'],
+    concepts: [
+      { title: 'History scope', description: 'Dates use UTC and select runs by creation time. Filter by suite, environment, category, permanent test identifier, or execution location. Test identifiers require a suite.' },
+      { title: 'Logical counts and gaps', description: 'Retries remain separate attempts and do not inflate counts. Unknown results remain unknown. Striped gaps mark runs that did not select a matching test or have no usable selection snapshot.' },
+      { title: 'History pages', description: 'Each page scans a bounded portion of project history. Counts and rankings cover only that page. Use Older history to continue or Newest history to return.' },
+      { title: 'Failure and volatility rankings', description: 'Failure rankings combine failures and timeouts while displaying their separate counts. Volatility measures state changes between adjacent known results for the same target and location. Gaps, skipped results, and unknowns break comparisons.' }
+    ],
+    tutorials: [
+      { title: 'Explore a category or test', steps: ['Set From date and Through date, then enter any suite or environment identifiers.', 'Enter a Category for category history. For one test, enter its suite and Permanent test identifier.', 'Select Apply scope. The URL preserves the chosen filters.', 'Focus or hover a run in the stacked chart to inspect its values. Select it to open run details.', 'Open View chart values for the accessible table and direct run links.'] },
+      { title: 'Investigate recurring problems', steps: ['Review Most failed tests for repeated failures and timeouts.', 'Follow a test link to its history, or a category link to its category view.', 'Review Most volatile tests and its changes and comparisons before interpreting the percentage.', 'Check history-page notices and sample counts. Browse older history when the page does not cover the complete period.'] }
+    ]
+  },
   signin: {
     id: 'signin', title: 'Sign-in',
     introduction: ['Sign in to open your TestStudio workspace. Your installation controls which sign-in options appear.'],

@@ -6,6 +6,7 @@ export const routes: Routes = [
   { path: 'projects/:projectId/catalog', data: { helpTopic: 'catalog' }, loadComponent: () => import('./features/catalog/catalog.page').then(m => m.CatalogPage) },
   { path: 'projects/:projectId/configuration', data: { helpTopic: 'configuration' }, loadComponent: () => import('./features/configuration/configuration.page').then(m => m.ConfigurationPage) },
   { path: 'projects/:projectId/runs', data: { helpTopic: 'runs' }, loadComponent: () => import('./features/runs/run-list.page').then(m => m.RunListPage) },
+  { path: 'projects/:projectId/trends', data: { helpTopic: 'trends' }, loadComponent: () => import('./features/trends/trends.page').then(m => m.TrendsPage) },
   { path: 'projects/:projectId/runs/:runId', data: { helpTopic: 'run' }, loadComponent: () => import('./features/runs/run-detail.page').then(m => m.RunDetailPage) },
   { path: '**', redirectTo: 'projects' }
 ]
