@@ -155,3 +155,12 @@ Missing content updates its manifest state. Blob files remain outside SQL rows.
 Validation: `go test -race ./internal/evidence -count=1` passes.
 Tests cover concurrent duplicate admission, byte quotas, retry recovery, project isolation, and missing content.
 Retention cleanup, complete streaming ingestion, and cloud blob adapters remain pending.
+
+### Durable native run coordination
+
+Added immutable execution snapshots, idempotent run requests, transactional queue claims, worker leases, progress counts, and retries.
+Added queued and running cancellation, lost-worker recovery, dispatch authorization checks, and failure reruns.
+Each attempt remains separate from the final test count. Capture completeness remains separate from test outcome.
+Validation: `go test -race ./internal/runs -count=1` passes.
+Tests cover environment changes, competing workers, flaky reduction, cancellation, worker loss, permission revocation, and capture failures.
+Coded suite workers, complete execution profiles, scheduling, and run UI integration remain pending.
