@@ -91,3 +91,12 @@ Provider tokens stay outside browser storage. Incomplete group claims remove pre
 Validation: `go test ./adapters/auth/oidc ./internal/sessions -count=1` passes.
 Tests use two newly written signed-token providers and cover identity isolation and invalid authentication responses.
 Provider administration, bootstrap recovery, account linking, and complete multi-instance authorization checks remain pending.
+
+### Local service and authenticated catalog API
+
+Added the Go executable, explicit local authentication, OIDC bootstrap, PostgreSQL permission schema, and static UI hosting.
+Added versioned project, application, environment, suite, catalog, draft, revision, publication, and activation routes.
+Added cookie authentication, mutation CSRF checks, revision headers, and API error responses.
+Validation: `go test ./internal/httpapi -count=1` and `go build -o bin/teststudio ./cmd/teststudio` pass.
+API tests cover sign-in, project creation, catalog publication, stale edits, archive history, CSRF rejection, invalid JSON, and UI asset routes.
+Source publishing, execution, evidence APIs, access administration, and deployment verification remain pending.
