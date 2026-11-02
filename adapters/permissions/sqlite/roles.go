@@ -90,19 +90,39 @@ func (s *Store) AddRoleInheritance(ctx context.Context, parent, child string) er
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	expanded, err := s.ExpandRoles(ctx, []string{child})
-	if err != nil {
-		return err
-	}
-	if slices.Contains(expanded, parent) {
-		return errors.New("role inheritance cycle")
-	}
 	e := edge{Parent: parent, Child: child}
-	err = s.create(ctx, "permission-inheritance", key(e), e)
-	if errors.Is(err, storage.ErrConflict) {
-		return nil
+	for range 8 {
+		graph, err := s.db.Get(ctx, "permission-graph", "inheritance")
+		if err != nil && !errors.Is(err, storage.ErrNotFound) {
+			return err
+		}
+		if _, err := s.db.Get(ctx, "permission-inheritance", key(e)); err == nil {
+			return nil
+		} else if !errors.Is(err, storage.ErrNotFound) {
+			return err
+		}
+		expanded, err := s.ExpandRoles(ctx, []string{child})
+		if err != nil {
+			return err
+		}
+		if slices.Contains(expanded, parent) {
+			return errors.New("role inheritance cycle")
+		}
+		entry, err := storage.Put("permission-inheritance", key(e), "", 0, e)
+		if err != nil {
+			return err
+		}
+		version, err := storage.Put("permission-graph", "inheritance", "", graph.Revision, graph.Revision+1)
+		if err != nil {
+			return err
+		}
+		if err := s.db.Commit(ctx, entry, version); err == nil {
+			return nil
+		} else if !errors.Is(err, storage.ErrConflict) {
+			return err
+		}
 	}
-	return err
+	return storage.ErrConflict
 }
 
 func (s *Store) ExpandRoles(ctx context.Context, ids []string) ([]string, error) {

@@ -12,6 +12,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/artifacts"
 	"github.com/wtiger001/teststudio/internal/evidence"
 	"github.com/wtiger001/teststudio/internal/storage"
+	"github.com/wtiger001/teststudio/internal/testkit"
 )
 
 type failing struct{ artifacts.Store }
@@ -59,7 +60,7 @@ func TestMissingContentHasAnExplicitMetadataState(t *testing.T) {
 func fixture(t *testing.T) (*evidence.Service, *filesystem.Store) {
 	t.Helper()
 	root := t.TempDir()
-	db, err := storage.Open(t.Context(), filepath.Join(root, "evidence.db"))
+	db, err := testkit.Open(t, filepath.Join(root, "evidence.db"))
 	if err != nil {
 		t.Fatal(err)
 	}

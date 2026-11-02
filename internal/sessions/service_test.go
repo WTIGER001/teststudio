@@ -9,11 +9,11 @@ import (
 
 	"github.com/wtiger001/teststudio/internal/identity"
 	"github.com/wtiger001/teststudio/internal/sessions"
-	"github.com/wtiger001/teststudio/internal/storage"
+	"github.com/wtiger001/teststudio/internal/testkit"
 )
 
 func TestSessionCSRFRevocationAndUserDisabling(t *testing.T) {
-	db, err := storage.Open(t.Context(), filepath.Join(t.TempDir(), "session.db"))
+	db, err := testkit.Open(t, filepath.Join(t.TempDir(), "session.db"))
 	if err != nil {
 		t.Fatal(err)
 	}

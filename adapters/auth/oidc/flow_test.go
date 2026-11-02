@@ -19,6 +19,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/identity"
 	"github.com/wtiger001/teststudio/internal/sessions"
 	"github.com/wtiger001/teststudio/internal/storage"
+	"github.com/wtiger001/teststudio/internal/testkit"
 )
 
 type issuer struct {
@@ -75,7 +76,7 @@ func newIssuer(t *testing.T) *issuer {
 
 func fixture(t *testing.T) (*authoidc.Service, *storage.Store) {
 	t.Helper()
-	db, err := storage.Open(t.Context(), filepath.Join(t.TempDir(), "auth.db"))
+	db, err := testkit.Open(t, filepath.Join(t.TempDir(), "auth.db"))
 	if err != nil {
 		t.Fatal(err)
 	}

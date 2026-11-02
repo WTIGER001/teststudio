@@ -17,11 +17,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	permissions "github.com/wtiger001/go-permissions"
-	permissionpg "github.com/wtiger001/go-permissions/postgres"
 	"github.com/wtiger001/teststudio/adapters/artifacts/filesystem"
 	authoidc "github.com/wtiger001/teststudio/adapters/auth/oidc"
+	permissionpg "github.com/wtiger001/teststudio/adapters/permissions/postgres"
 	permissionsqlite "github.com/wtiger001/teststudio/adapters/permissions/sqlite"
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/catalog"
@@ -91,23 +90,11 @@ func run() error {
 	defer db.Close()
 	var permissionStore permissions.PermissionStore = permissionsqlite.New(db)
 	if db.Dialect == "postgres" {
-		if _, err := db.DB.ExecContext(ctx, "CREATE SCHEMA IF NOT EXISTS teststudio_permissions"); err != nil {
-			return err
-		}
-		cfg, err := pgxpool.ParseConfig(*dsn)
+		pg, err := permissionpg.Open(ctx, *dsn)
 		if err != nil {
 			return err
 		}
-		cfg.ConnConfig.RuntimeParams["search_path"] = "teststudio_permissions"
-		pool, err := pgxpool.NewWithConfig(ctx, cfg)
-		if err != nil {
-			return err
-		}
-		defer pool.Close()
-		pg := permissionpg.NewStore(pool)
-		if err := pg.EnsureSchema(ctx); err != nil {
-			return err
-		}
+		defer pg.Close()
 		permissionStore = pg
 	}
 	directory := &identity.Directory{Store: db}

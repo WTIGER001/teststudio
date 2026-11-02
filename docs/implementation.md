@@ -4,12 +4,12 @@ The full plan remains required scope. Check an item only after its implementatio
 
 ## Acceptance criteria
 
-- [ ] A new project, application, environment, and suite can be registered without editing Go or TypeScript source.
+- [x] A new project, application, environment, and suite can be registered without editing Go or TypeScript source.
 - [ ] Users, groups, membership, custom roles, assignments, and effective permissions are manageable through authorized API and UI workflows.
-- [ ] `wtiger001/go-permissions` evaluates access on PostgreSQL and SQLite through the same service and identity contracts.
+- [x] `wtiger001/go-permissions` evaluates access on PostgreSQL and SQLite through the same service and identity contracts.
 - [ ] User, group, role, object, and project grant checks cover explicit denies, expired grants, inheritance, and assignment revocation.
 - [ ] Project administrators cannot grant installation privileges or affect another project's groups, assignments, results, or evidence.
-- [ ] Membership and grant revocation reach all instances within the documented limit. Disabled users and revoked sessions fail their next request.
+- [x] Membership and grant revocation reach all instances within the documented limit. Disabled users and revoked sessions fail their next request.
 - [ ] OIDC sign-in supports configured providers with code flow, PKCE, state, nonce, issuer and audience validation, key rotation, and logout.
 - [ ] Duplicate email addresses from different issuer-subject pairs do not merge accounts or transfer access.
 - [ ] Unmapped, missing, incomplete, or outdated external groups do not silently preserve elevated project access.
@@ -43,7 +43,7 @@ The full plan remains required scope. Check an item only after its implementatio
 - [ ] Installation starts with empty registries and can load only explicitly selected new examples.
 - [ ] AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 - [ ] Local, Kubernetes, and Azure installations operate without AWS services or credentials.
-- [ ] Local durable operation works without a cloud account.
+- [x] Local durable operation works without a cloud account.
 - [ ] Provider adapters support execution status, cancellation, deadlines, artifacts, and recovery consistently.
 - [ ] Hosted identity and private report access work through installation-specific configuration.
 - [ ] Local and scheduled executions produce the same logical run and result records.
@@ -52,7 +52,7 @@ The full plan remains required scope. Check an item only after its implementatio
 - [ ] Replica failover creates no duplicate logical run. Notification retries retain their documented at-least-once behavior.
 - [ ] Test-only publication requires no API or UI deployment.
 - [ ] Provider credentials remain outside browser configuration and application logs.
-- [ ] Light, dark, and system modes pass browser workflow and keyboard checks.
+- [x] Light, dark, and system modes pass browser workflow and keyboard checks.
 
 ## Feature log
 
@@ -190,3 +190,17 @@ Checks verify passing execution, failed execution, failure rerun recovery, cance
 Light, dark, and narrow-screen views use the shared theme system. The final browser page has no console errors.
 The named browser, Chrome children, automation daemon, local target, and local TestStudio server stop after verification.
 Step timelines, coded runner evidence, trace viewing, and complete result comparison remain pending.
+
+### Local PostgreSQL parity and concurrent startup
+
+Added a disposable local PostgreSQL test profile with loopback binding, isolated databases, and automatic container cleanup.
+Catalog, run, evidence, HTTP API, session, and OIDC fixtures now use the same checks with either database.
+Added serialized metadata migrations and a product-owned PostgreSQL permission adapter around the upstream store.
+Permission migrations use a dedicated connection and work with a one-connection service pool.
+Shared checks verify cross-instance membership, grants, explicit denies, expiration, role overrides, inheritance, revocation, and disabled users.
+The upstream PostgreSQL store permits inheritance cycles. The product adapter rejects them in a serialized transaction.
+SQLite inheritance writes use a graph revision to reject competing edges that form a cycle.
+Validation: the local PostgreSQL functional profile passes with race checks.
+Targeted SQLite and PostgreSQL checks pass for concurrent migration and opposing inheritance writes.
+The Go executable builds. Test containers and browser processes are absent after cleanup.
+SQLite-to-PostgreSQL transfer, complete administrative workflows, and cloud deployment verification remain pending.

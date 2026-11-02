@@ -88,6 +88,11 @@ func (s *Store) migrate(ctx context.Context) error {
 		return err
 	}
 	defer tx.Rollback()
+	if s.Dialect == "postgres" {
+		if _, err := tx.ExecContext(ctx, "SELECT pg_advisory_xact_lock(884190211)"); err != nil {
+			return err
+		}
+	}
 	statements := []string{
 		`CREATE TABLE IF NOT EXISTS schema_migrations (version BIGINT PRIMARY KEY, applied_at TEXT NOT NULL)`,
 		`CREATE TABLE IF NOT EXISTS records (bucket TEXT NOT NULL, id TEXT NOT NULL, project TEXT NOT NULL DEFAULT '', revision BIGINT NOT NULL, payload TEXT NOT NULL, updated_at TEXT NOT NULL, PRIMARY KEY (bucket, id))`,

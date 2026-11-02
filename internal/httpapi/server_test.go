@@ -17,7 +17,6 @@ import (
 	permissions "github.com/wtiger001/go-permissions"
 	"github.com/wtiger001/teststudio/adapters/artifacts/filesystem"
 	authoidc "github.com/wtiger001/teststudio/adapters/auth/oidc"
-	permissionstore "github.com/wtiger001/teststudio/adapters/permissions/sqlite"
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/evidence"
@@ -27,7 +26,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/sessions"
-	"github.com/wtiger001/teststudio/internal/storage"
+	"github.com/wtiger001/teststudio/internal/testkit"
 )
 
 type client struct {
@@ -45,7 +44,7 @@ func fixture(t *testing.T) *client {
 	if err := os.Mkdir(uiRoot, 0700); err != nil {
 		t.Fatal(err)
 	}
-	db, err := storage.Open(t.Context(), filepath.Join(root, "api.db"))
+	db, err := testkit.Open(t, filepath.Join(root, "api.db"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +53,7 @@ func fixture(t *testing.T) *client {
 	if err := dir.SaveUser(t.Context(), identity.User{ID: "admin", Name: "Administrator"}, 0); err != nil {
 		t.Fatal(err)
 	}
-	auth, err := authorization.New(t.Context(), permissionstore.New(db), dir)
+	auth, err := authorization.New(t.Context(), testkit.PermissionStore(t, db), dir)
 	if err != nil {
 		t.Fatal(err)
 	}

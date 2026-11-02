@@ -14,7 +14,6 @@ import (
 
 	permissions "github.com/wtiger001/go-permissions"
 	"github.com/wtiger001/teststudio/adapters/artifacts/filesystem"
-	permissionstore "github.com/wtiger001/teststudio/adapters/permissions/sqlite"
 	"github.com/wtiger001/teststudio/internal/artifacts"
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/catalog"
@@ -24,12 +23,13 @@ import (
 	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/storage"
+	"github.com/wtiger001/teststudio/internal/testkit"
 )
 
 func setup(t *testing.T, handler http.Handler) (*runs.Service, *projects.Service, *atomic.Int32) {
 	t.Helper()
 	root := t.TempDir()
-	db, err := storage.Open(t.Context(), filepath.Join(root, "runs.db"))
+	db, err := testkit.Open(t, filepath.Join(root, "runs.db"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,7 +42,7 @@ func setup(t *testing.T, handler http.Handler) (*runs.Service, *projects.Service
 	if err := dir.SaveUser(t.Context(), identity.User{ID: "admin", Name: "Administrator"}, 0); err != nil {
 		t.Fatal(err)
 	}
-	auth, err := authorization.New(t.Context(), permissionstore.New(db), dir)
+	auth, err := authorization.New(t.Context(), testkit.PermissionStore(t, db), dir)
 	if err != nil {
 		t.Fatal(err)
 	}

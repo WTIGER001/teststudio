@@ -3,21 +3,18 @@ package storage_test
 import (
 	"context"
 	"errors"
-	"os"
+	"fmt"
 	"path/filepath"
 	"sync"
 	"sync/atomic"
 	"testing"
 
 	"github.com/wtiger001/teststudio/internal/storage"
+	"github.com/wtiger001/teststudio/internal/testkit"
 )
 
 func TestStoreTransactions(t *testing.T) {
-	dsn := os.Getenv("TESTSTUDIO_TEST_DATABASE")
-	if dsn == "" {
-		dsn = filepath.Join(t.TempDir(), "test.db")
-	}
-	s, err := storage.Open(t.Context(), dsn)
+	s, err := testkit.Open(t, filepath.Join(t.TempDir(), "test.db"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +56,7 @@ func TestStoreTransactions(t *testing.T) {
 
 func TestCursorScopeAndDurability(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "test.db")
-	s, err := storage.Open(t.Context(), path)
+	s, err := testkit.Open(t, path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,6 +73,7 @@ func TestCursorScopeAndDurability(t *testing.T) {
 	if _, err := s.List(t.Context(), "catalog", "other", page.Cursor, 2); err == nil {
 		t.Fatal("cursor crossed projects")
 	}
+	path = testkit.ConnectionString(t, s, path)
 	if err := s.Close(); err != nil {
 		t.Fatal(err)
 	}
@@ -103,7 +101,7 @@ func TestNewestPaginationAndEmptyDatabaseRejection(t *testing.T) {
 		s.Close()
 		t.Fatal("empty configuration created an ephemeral database")
 	}
-	s, err := storage.Open(t.Context(), filepath.Join(t.TempDir(), "newest.db"))
+	s, err := testkit.Open(t, filepath.Join(t.TempDir(), "newest.db"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -125,4 +123,38 @@ func TestNewestPaginationAndEmptyDatabaseRejection(t *testing.T) {
 	if err != nil || len(next.Items) != 1 || next.Items[0].ID != "a" {
 		t.Fatalf("newest continuation: %+v %v", next, err)
 	}
+}
+
+func TestConcurrentSchemaStartup(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "startup.db")
+	initial, err := testkit.Open(t, path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	path = testkit.ConnectionString(t, initial, path)
+	for _, table := range []string{"records", "schema_migrations", "counters"} {
+		if _, err := initial.DB.ExecContext(t.Context(), "DROP TABLE "+table); err != nil {
+			t.Fatal(err)
+		}
+	}
+	initial.Close()
+	var workers sync.WaitGroup
+	for i := range 4 {
+		workers.Go(func() {
+			db, err := storage.Open(t.Context(), path)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			defer db.Close()
+			change, err := storage.Put("startup", fmt.Sprintf("writer-%d", i), "project", 0, i)
+			if err == nil {
+				err = db.Commit(t.Context(), change)
+			}
+			if err != nil {
+				t.Error(err)
+			}
+		})
+	}
+	workers.Wait()
 }

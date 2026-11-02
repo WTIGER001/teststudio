@@ -62,6 +62,30 @@ SQLite is the default for a single local service.
 Use `--database postgres://USER:PASSWORD@HOST/DATABASE` for PostgreSQL.
 Use a protected configuration mechanism for production database credentials.
 The permission engine uses a separate `teststudio_permissions` schema in PostgreSQL.
+Metadata and permission migrations serialize concurrent startup within the database.
+
+## Local PostgreSQL checks
+
+Run the shared functional checks against a disposable local PostgreSQL container:
+
+```sh
+bash scripts/test-postgres.sh
+```
+
+The script uses a loopback port, temporary data, generated credentials, and isolated databases.
+It removes its own container after success, failure, or interruption.
+Pass package names to run a smaller check:
+
+```sh
+bash scripts/test-postgres.sh ./internal/storage ./internal/authorization
+```
+
+The same feature tests use SQLite when `TESTSTUDIO_TEST_DATABASE` is unset.
+Database contract checks reject remote PostgreSQL addresses.
+Initial functional checks require no cloud account.
+
+Memberships, assignments, direct grants, user status, and sessions use current database records.
+Built-in role overrides invalidate the local engine immediately and reach another engine within five seconds.
 
 ## Validation
 
