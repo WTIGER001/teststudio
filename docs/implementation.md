@@ -106,3 +106,21 @@ Source publishing, execution, evidence APIs, access administration, and deployme
 Aligned SQLite principal lookup with the selected library's PostgreSQL grant lookup.
 Expired grants and explicit denies no longer appear as active direct access.
 Validation: `go test ./adapters/permissions/sqlite -count=1` passes.
+
+### Angular catalog UI and theme modes
+
+Added an independent Angular 22 application with project setup, application and environment forms, suites, and catalog workflows.
+Added test editing, search, lifecycle filters, archive and restore, draft validation, and explicit release publication.
+Added light, dark, and system themes with preference persistence and semantic HTML.
+Validation: `npm --prefix web run build` passes.
+Browser verification covers new generic records, publication, archive and restoration, theme persistence, system changes, keyboard focus, and narrow-screen overflow.
+Captured light, dark, and mobile screenshots under ignored `output/playwright/`.
+Verified that the named browser, Chrome children, and automation daemon exit after cleanup.
+Run pages, evidence views, catalog imports, complete access administration, and advanced catalog workflows remain pending.
+
+### Deployment verification targets
+
+The user selects the MMDev account for AWS verification.
+Account and profile values remain external installation configuration.
+Azure verification credentials and a remote Kubernetes target remain unspecified.
+Local implementation and provider contract checks continue independently.
