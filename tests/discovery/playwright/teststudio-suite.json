@@ -1,0 +1,1 @@
+{"schemaVersion":1,"suiteId":"discovery-browser","type":"browser","runner":"playwright","applications":[],"moduleRoot":"app","tests":{"project":"chromium","config":"playwright.config.ts"},"catalog":"testing/catalog.yaml","buildProfile":"playwright-node"}

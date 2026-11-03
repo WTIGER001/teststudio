@@ -2,6 +2,10 @@
 
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
+Implementation resumes at the user's request on 2026-11-03.
+The acceptance count remains 22 verified of 57.
+Focus on implementation and targeted local checks. Cloud verification remains separate work.
+
 ## Acceptance criteria
 
 - [x] A new project, application, environment, and suite can be registered without editing Go or TypeScript source.
@@ -66,6 +70,27 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
+
+### Prepared suite manifests and isolated artifact inspection
+
+Added versioned suite and source-origin schemas and shared bounded document decoding.
+The local artifact inspection port reads immutable Go and Playwright images in separate preparation namespaces.
+Go discovery compiles source declarations without executing initialization or test bodies.
+It distinguishes runnable declarations from helpers, TestMain, and non-running examples.
+Dynamic Go child paths retain explicit parent-only verification.
+Playwright discovery preserves exact project selection, inherited tags, and source locations.
+Both prepared formats execute through the existing managed runners.
+
+The local CLI provides inspect and cleanup operations with private files and saved resource references.
+It does not yet publish to the server.
+The inspection interface remains separate from future source builders.
+
+Targeted package checks and real local inspection checks pass before the shutdown checkpoint.
+The latest retained fixture results are `.data/discovery-verification.WqyUvr/go.json` and `playwright.json`.
+Both contain two inspected entries. Owned fixture resources are absent after those checks.
+Queued server preparation, prebuilt publication, CLI server authentication, and their interface remain pending.
+Remaining cancellation and recovery scenarios belong to that integration work.
+The complete acceptance ledger remains required.
 
 ### Native source uploads and atomic release publication
 

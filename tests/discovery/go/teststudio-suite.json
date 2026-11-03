@@ -1,0 +1,1 @@
+{"schemaVersion":1,"suiteId":"discovery-go","type":"unit","runner":"go","applications":[],"moduleRoot":"module","tests":{"packages":["./checks"]},"catalog":"testing/catalog.json","buildProfile":"go-module"}

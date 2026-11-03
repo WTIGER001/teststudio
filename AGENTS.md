@@ -12,7 +12,10 @@ Keep the complete acceptance ledger in `docs/implementation.md`.
 - Use PostgreSQL for hosted deployments and SQLite for single-instance local deployments.
 - Add no code comments unless the user requests them.
 - Write new tests and examples. Copy no existing application tests, data, or infrastructure configuration.
-- Run targeted tests after feature changes. Commit verified features frequently, as the user requests.
+- Focus on implementation, then run targeted local tests for changed behavior.
+- Do not run AWS, Kubernetes, or Azure tests in this work session.
+- Do not repeat broad suites or fixture builds without a concrete unresolved concern.
+- Commit verified features frequently, as the user requests.
 - Do not push without an explicit request.
 - Close every browser session started for verification and verify shutdown. Preserve unrelated browser windows.
 - Use short, active sentences in documentation.

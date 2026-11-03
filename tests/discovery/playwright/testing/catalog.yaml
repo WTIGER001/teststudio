@@ -1,0 +1,24 @@
+schemaVersion: teststudio.catalog/v1
+tests:
+  - id: PREBUILT-BROWSER-1
+    title: First browser discovery check
+    category: Browser
+    type: browser
+    runner: playwright
+    state: enabled
+    safety: safe
+    rationale: Runs only in its isolated worker
+    timeoutSeconds: 10
+    source: app/fresh.spec.ts
+    selector: '@PREBUILT-BROWSER-1'
+  - id: PREBUILT-BROWSER-2
+    title: Second browser discovery check
+    category: Browser
+    type: browser
+    runner: playwright
+    state: enabled
+    safety: safe
+    rationale: Runs only in its isolated worker
+    timeoutSeconds: 10
+    source: app/fresh.spec.ts
+    selector: '@PREBUILT-BROWSER-2'

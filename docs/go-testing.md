@@ -7,6 +7,8 @@ Unit suites need no target, browser, network access, or application credentials.
 The installation administrator enables exact images through `--go-images`.
 Publication and execution use the normal catalog, release, run, timing, and evidence APIs.
 External targets, dependency bindings, hosted Go workers, and source preparation screens remain pending.
+Prepared manifests can now declare a module root and catalog for isolated discovery and normal execution.
+See [Prepared suite inspection](prepared-suites.md) for that contract and its local CLI.
 
 ## Catalog and selectors
 

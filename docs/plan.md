@@ -1,7 +1,103 @@
 # TestStudio implementation plan
 
-Status: Implementation authorized. Track verified delivery in `implementation.md`.
+Status: Resumed at the user's request on 2026-11-03. Implementation remains authorized.
+Track verified delivery in `implementation.md`.
 The user authorizes targeted tests and frequent feature commits. Remote pushes remain separate operations.
+
+## Current execution direction
+
+The user resumes implementation on 2026-11-03.
+Focus on implementation, then targeted tests for the changed behavior.
+Run tests only locally. AWS, Kubernetes, and Azure verification are separate work.
+Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
+The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
+
+## Historical shutdown checkpoint and continuation
+
+The user requests the earlier pause to power off the computer.
+The user resumes this task with the implementation-first direction above.
+The complete product plan and all acceptance criteria remain required.
+
+### Checkout and verified completion
+
+- Repository: `/Users/johnbauer/Dev/Personal/teststudio`.
+- Branch: `codex/implementation`.
+- Latest committed milestone: `0451138`, native JSON/YAML uploads with atomic catalog publication and retained source snapshots.
+- Acceptance ledger: **22 verified, 35 pending, 57 total** in `implementation.md`.
+- The inspection work below remains intentionally uncommitted. Preserve it when resuming.
+- The environment can open in the Mapag checkout. Always use the explicit TestStudio working directory.
+
+### Current saved work
+
+The working tree contains a prepared-suite inspection milestone:
+
+- `internal/definitions`: shared bounded JSON/YAML decoding. JSON scanning rejects duplicate keys before typed decoding.
+- `internal/suitespec`: versioned manifests, origin metadata, safe file reads, catalog matching, and discovery report validation.
+- `contracts/suite.schema.json` and `contracts/source-origin.schema.json`: canonical manifest and provenance schemas.
+- `internal/preparation`: an artifact inspection port separate from test scheduling and future source builds.
+- `adapters/execution/localcontainer/discovery.go`: isolated inspection, bounded report collection, ownership checks, and scoped cleanup.
+- Go runtime discovery: compile declared packages and inspect runnable source declarations without executing initialization, `TestMain`, or test bodies.
+- Go discovery marks dynamic child selectors as `parentOnly`. Execution must still prove that the selected child exists.
+- Go normal execution accepts prepared module roots and retains the existing catalog format for earlier TestStudio suites.
+- Playwright discovery: list tests through a dedicated reporter, retain inherited tags, and select one exact project.
+- Playwright normal execution uses the prepared module and configuration when a suite manifest exists.
+- `cmd/teststudio-publish`: local `inspect` and `cleanup` commands. Server publication is **not implemented** by this CLI yet.
+- The CLI saves private cleanup references before dispatch. Inspection results use new private files and never overwrite existing paths.
+- New independent fixture images and `scripts/test-discovery.sh` exercise both runtimes and their normal execution paths.
+- `.dockerignore`, the self-test image, README, and prepared-suite guides contain the related updates.
+
+The local inspector accepts only enabled immutable images already present in Docker.
+It supports `go-module` and `playwright-node` without request policies or execution bindings.
+It does not pull images, install dependencies, or build containers inside the API.
+Image-provided source provenance is recorded, not independently attested against a remote repository.
+The API does not call the inspection port yet.
+
+### Verification evidence
+
+These checks pass for the saved work:
+
+```sh
+go test -race ./internal/definitions ./internal/suitespec ./internal/sources ./runners/go/runner ./cmd/teststudio-publish ./adapters/execution/localcontainer
+bash scripts/test-discovery.sh
+```
+
+The standalone Go command skips container checks unless the fixture image variables are set.
+The discovery script builds the fixture images and runs those container checks with actual workers.
+It verifies both runners, module roots, source locations, project selection, isolation, failure cleanup, and CLI output privacy.
+It also executes inspected Go and Playwright fixtures through the existing managed execution contract.
+Go checks reject missing declarations, lower-case helper names, `TestMain`, non-running examples, and compilation failures.
+
+Latest retained CLI evidence:
+
+- `.data/discovery-verification.WqyUvr/go.json`: `inspected`, two catalog entries.
+- `.data/discovery-verification.WqyUvr/playwright.json`: `inspected`, two catalog entries.
+- Both inspection runs finish successfully on 2026-11-03.
+
+At shutdown, no owned inspection processes, discovery containers, or discovery volumes remain.
+The checks include the `discovery-tests` and `cli-discovery-checks` project labels.
+No remote push or cloud deployment occurs in this checkpoint.
+
+### Exact continuation steps
+
+1. Read this checkpoint and `AGENTS.md`. Check the working tree before editing. Preserve all saved inspection files.
+2. Add a real in-progress cancellation check. Current cancellation coverage includes cancellation before dispatch.
+3. Verify that a duplicate inspection reference cannot stop or remove an existing inspection owned by the first caller.
+4. Run the smallest checks for any changes. Use `scripts/test-discovery.sh` for real container verification and scoped cleanup.
+5. Run the existing source workflow regression: `bash scripts/test-self.sh --test=STUDIO-SOURCES-001`.
+6. Verify native source and transfer API behavior after the shared decoder extraction, including local PostgreSQL where relevant.
+7. Update `implementation.md` with the completed inspection milestone and precise evidence. Commit verified work locally; do not push.
+8. Implement durable prebuilt preparation jobs, cancellation, recovery, project-scoped artifact admission, and retained diagnostics.
+9. Connect successful server inspection to the existing immutable source snapshot, catalog, release, and explicit activation contracts.
+10. Add actual CLI publication and the corresponding API/UI workflows. Do not treat client inspection files as trusted server verification.
+11. Allow test-only publication without restarting or deploying the API/UI for each image. Keep artifact authority scoped to its project.
+12. Continue ZIP and GitHub preparation through a separate isolated build backend. The inspector itself is not a source builder.
+13. Continue the full acceptance ledger, including metadata ownership, evidence, timing parity, database transfer, authorization, recovery, and deployment targets.
+
+Keep initial functional verification local.
+Use the authorized MMDev account for later AWS verification.
+AWS ECS/CloudFront, Kubernetes, Azure Container Apps, and local-server acceptance remain required.
+Do not mark broad source, deployment, or independence criteria complete from the inspection checks alone.
+
 
 TestStudio is an independent testing product for teams with multiple projects.
 The repository name is `github.com/wtiger001/teststudio`. Private visibility remains the proposal.

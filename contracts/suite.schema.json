@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:teststudio:suite:v1",
+  "title": "TestStudio prepared suite manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "suiteId": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "type": {
+      "enum": [
+        "unit",
+        "integration",
+        "api",
+        "browser",
+        "accessibility",
+        "visual",
+        "performance"
+      ]
+    },
+    "runner": {
+      "enum": [
+        "go",
+        "playwright"
+      ]
+    },
+    "applications": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+      },
+      "uniqueItems": true
+    },
+    "moduleRoot": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^(?!/)(?!.*\\\\)(?!.*:)(?!.*(?:^|/)\\.\\.(?:/|$))[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "tests": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "packages": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string",
+            "maxLength": 512
+          },
+          "maxItems": 100,
+          "uniqueItems": true
+        },
+        "project": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+            },
+            {
+              "const": ""
+            }
+          ]
+        },
+        "config": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^(?!/)(?!.*\\\\)(?!.*:)(?!.*(?:^|/)\\.\\.(?:/|$))[^\\u0000-\\u001f\\u007f]+$"
+            },
+            {
+              "const": ""
+            }
+          ]
+        }
+      }
+    },
+    "catalog": {
+      "allOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "pattern": "^(?!/)(?!.*\\\\)(?!.*:)(?!.*(?:^|/)\\.\\.(?:/|$))[^\\u0000-\\u001f\\u007f]+$"
+        },
+        {
+          "pattern": "\\.(json|yaml|yml)$"
+        }
+      ]
+    },
+    "requestPolicy": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^(?!/)(?!.*\\\\)(?!.*:)(?!.*(?:^|/)\\.\\.(?:/|$))[^\\u0000-\\u001f\\u007f]+$"
+    },
+    "requiredBindings": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+      },
+      "uniqueItems": true
+    },
+    "buildProfile": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "suiteId",
+    "type",
+    "runner",
+    "applications",
+    "moduleRoot",
+    "tests",
+    "catalog",
+    "buildProfile"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "runner": {
+            "const": "go"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "type": {
+            "enum": [
+              "unit",
+              "integration",
+              "api"
+            ]
+          },
+          "tests": {
+            "required": [
+              "packages"
+            ],
+            "properties": {
+              "packages": {
+                "type": "array",
+                "minItems": 1
+              },
+              "project": {
+                "const": ""
+              },
+              "config": {
+                "const": ""
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "type": {
+            "enum": [
+              "browser",
+              "api",
+              "accessibility",
+              "visual",
+              "performance"
+            ]
+          },
+          "tests": {
+            "properties": {
+              "packages": {
+                "maxItems": 0
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

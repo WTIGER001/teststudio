@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -29,20 +28,8 @@ func Execute(ctx context.Context, input Input, suite, outputDirectory string) Re
 	if input.TimeoutMs < 1 || input.TimeoutMs > 3600000 {
 		return fail("configuration", errors.New("Go timeout must be between 1 and 3600000 milliseconds"))
 	}
-	manifestFile, err := os.Open(filepath.Join(suite, "teststudio-go.json"))
+	suite, manifest, err := loadCatalog(suite)
 	if err != nil {
-		return fail("configuration", errors.New("Go catalog manifest is unavailable"))
-	}
-	data, err := io.ReadAll(io.LimitReader(manifestFile, (512<<10)+1))
-	manifestFile.Close()
-	if err != nil || len(data) > 512<<10 {
-		return fail("configuration", errors.New("Go catalog manifest is unavailable or exceeds its byte limit"))
-	}
-	var manifest gosuite.Manifest
-	if json.Unmarshal(data, &manifest) != nil || manifest.Schema != "teststudio.go.catalog/v1" {
-		return fail("configuration", errors.New("Go catalog manifest is invalid"))
-	}
-	if err := gosuite.Validate(manifest.Tests); err != nil {
 		return fail("configuration", err)
 	}
 	var selected *gosuite.Entry

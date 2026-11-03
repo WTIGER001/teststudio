@@ -6,6 +6,7 @@ Use project settings to create a suite when required.
 
 This release does not prepare ZIP bundles, Git repositories, or prebuilt images.
 Those workflows remain required by the product plan.
+The [prepared suite inspector](prepared-suites.md) validates local immutable Go and Playwright images before server registration becomes available.
 
 ## Review and publication
 
