@@ -268,5 +268,9 @@ func (s *Server) accessRoutes(m *http.ServeMux) {
 }
 
 func (s *Server) accessService() *access.Service {
-	return &access.Service{Store: s.Store, Auth: s.Auth, LocalUser: s.LocalUser, LocalAccounts: s.LocalAccounts != nil, SessionIdleTimeout: s.Sessions.IdleTimeout}
+	service := &access.Service{Store: s.Store, Auth: s.Auth, LocalUser: s.LocalUser, LocalAccounts: s.LocalAccounts != nil, SessionIdleTimeout: s.Sessions.IdleTimeout, AuthOrigin: s.Sessions.Origin}
+	if s.OIDC != nil {
+		service.ProviderSecretRefs = s.OIDC.SecretRefs
+	}
+	return service
 }

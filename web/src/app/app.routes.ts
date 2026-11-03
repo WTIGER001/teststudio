@@ -1,6 +1,8 @@
 import type { Routes } from '@angular/router'
 
 export const routes: Routes = [
+  { path: 'settings/providers', data: { helpTopic: 'providers' }, loadComponent: () => import('./features/access/providers.page').then(m => m.ProvidersPage) },
+  { path: 'settings/providers/:providerId', data: { helpTopic: 'provider' }, loadComponent: () => import('./features/access/provider-detail.page').then(m => m.ProviderDetailPage) },
   { path: '', pathMatch: 'full', redirectTo: 'projects' },
   { path: 'account', data: { helpTopic: 'account' }, loadComponent: () => import('./features/account/account.page').then(m => m.AccountPage) },
   { path: 'account/access', data: { helpTopic: 'effective-permissions' }, loadComponent: () => import('./features/access/permission-explanation.page').then(m => m.PermissionExplanationPage) },

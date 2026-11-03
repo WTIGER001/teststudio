@@ -2,8 +2,11 @@ import { createServer } from 'node:http'
 import { execFile, spawn } from 'node:child_process'
 import { randomBytes } from 'node:crypto'
 import { writeFile, unlink } from 'node:fs/promises'
+import { createOIDCFixture } from './oidc-fixture.mjs'
 
 const localWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-LOCAL-001'
+const providerWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-PROVIDERS-001'
+const oidcSecret = randomBytes(24).toString('hex'), oidcFixture = providerWorkflow ? createOIDCFixture(oidcSecret) : null
 const token = randomBytes(24).toString('hex'), requests = [], counts = new Map()
 const bindingsPath = '/tmp/teststudio-notification-bindings.json'
 const providerPath = '/tmp/teststudio-password-provider.json'
@@ -14,6 +17,7 @@ const helpers = new Set()
 const server = createServer(async (request, response) => {
   try {
     if (stopping) { response.writeHead(503).end(); return }
+    if (oidcFixture && await oidcFixture(request, response)) return
     if (request.method === 'GET' && request.url === '/state') {
       response.setHeader('Content-Type', 'application/json'); response.end(JSON.stringify({ requests })); return
     }
@@ -92,8 +96,8 @@ async function stop(code) {
 }
 
 function startChild() {
-  child = spawn('/app/teststudio', [...(development ? ['--local'] : []), ...(passwords ? ['--local-accounts'] : []), ...(localWorkflow ? ['--oidc-config', providerPath] : []), '--database', '/tmp/teststudio-selftest.db', '--artifact-directory', '/tmp/teststudio-artifacts', '--ui', '/app/ui', '--secret-bindings', bindingsPath], {
-    env: { PATH: process.env.PATH, TMPDIR: '/tmp', ...Object.fromEntries(kinds.map(kind => [`TESTSTUDIO_SELFTEST_${kind.toUpperCase()}`, `http://127.0.0.1:8050/receiver/${token}/${kind}`])) }, stdio: ['ignore', 'inherit', 'inherit']
+  child = spawn('/app/teststudio', [...(development ? ['--local'] : []), ...(passwords ? ['--local-accounts'] : []), ...(localWorkflow ? ['--oidc-config', providerPath] : []), ...(providerWorkflow ? ['--oidc-secret-refs', 'env:TESTSTUDIO_SELFTEST_OIDC_SECRET'] : []), '--database', '/tmp/teststudio-selftest.db', '--artifact-directory', '/tmp/teststudio-artifacts', '--ui', '/app/ui', '--secret-bindings', bindingsPath], {
+    env: { PATH: process.env.PATH, TMPDIR: '/tmp', ...(providerWorkflow ? { TESTSTUDIO_SELFTEST_OIDC_SECRET: oidcSecret } : {}), ...Object.fromEntries(kinds.map(kind => [`TESTSTUDIO_SELFTEST_${kind.toUpperCase()}`, `http://127.0.0.1:8050/receiver/${token}/${kind}`])) }, stdio: ['ignore', 'inherit', 'inherit']
   })
   child.once('error', () => { void stop(1) })
   child.once('exit', code => { if (!stopping && !restarting) void stop(code || 1) })

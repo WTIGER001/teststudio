@@ -73,6 +73,12 @@ try {
   const firstPage = await request('GET', '/api/v1/groups?project=access-example&limit=1')
   assert.equal(firstPage.items[0].id, 'reviewers')
   assert.equal(typeof firstPage.cursor, 'string')
+  const providerDefinition = { id: 'directory-provider', name: 'Directory provider', issuer: 'https://identity.example.test', clientId: 'teststudio', scopes: ['openid'], disabled: true, autoProvision: false, groupClaim: 'groups', groupMappings: {}, membershipTtlSeconds: 900, reason: 'Verify durable provider configuration' }
+  const provider = await request('POST', '/api/v1/identity-providers', providerDefinition)
+  assert.equal(provider.data.callbackUrl, origin + '/auth/callback/directory-provider')
+  await request('POST', '/api/v1/groups', { id: 'zz-provider-reviewers', name: 'Provider reviewers', projectId: 'access-example', managedBy: 'oidc:directory-provider' })
+  providerDefinition.groupMappings = { reviewers: 'zz-provider-reviewers' }
+  const mappedProvider = await request('PUT', '/api/v1/identity-providers/directory-provider', providerDefinition, provider.revision)
   await request('PUT', '/api/v1/groups/reviewers/members/pending-reviewer', {}, 0)
   const membership = await request('GET', '/api/v1/groups/reviewers/members')
   assert.equal(membership.items[0].data.source, 'local')
@@ -124,6 +130,12 @@ try {
   await start()
   const restored = await request('GET', '/auth/session', undefined, undefined, 200, oldCookie)
   assert.equal(restored.user.sessionEpoch, 1)
+  const retainedProvider = await request('GET', '/api/v1/identity-providers/directory-provider')
+  assert.equal(retainedProvider.revision, mappedProvider.revision)
+  assert.equal(retainedProvider.data.disabled, true)
+  assert.deepEqual(retainedProvider.data.groupMappings, providerDefinition.groupMappings)
+  assert.equal((await request('GET', '/api/v1/groups/zz-provider-reviewers')).data.managedBy, 'oidc:directory-provider')
+  await request('PUT', '/api/v1/identity-providers/directory-provider', providerDefinition, provider.revision, 409)
   assert.equal((await request('GET', '/api/v1/groups/reviewers/members')).items.length, 1)
   const retainedOperator = await request('GET', operatorRolePath)
   assert.equal(retainedOperator.revision, disabledOperator.revision)
@@ -222,7 +234,7 @@ try {
     const code = await new Promise((resolve, reject) => { child.once('exit', resolve); child.once('error', reject) })
     assert.equal(code, 1, 'Recovery accepted an invalid listen mode')
   }
-  const summary = { permissionExplanationsPreserved: true, inactiveInheritedAccessExplained: true, ownExactObjectExplanationVerified: true, builtinOverridesPreserved: true, retainedBuiltinAccessRestored: true, ordinaryStartupPreservesDisabledBuiltin: true, explicitRecoveryRestoresBuiltinAdministrator: true, builtinRecoveryAdvancesRevision: true, directGrantsPreserved: true, directDenyPrecedenceVerified: true, expiredDeniesPreserved: true, directRevocationVerified: true, recreatedDirectRevisionAdvanced: true, customRoleRulesPreserved: true, customRoleInheritancePreserved: true, exactObjectAccessVerified: true, disabledInheritedAccessPreserved: true, enabledInheritedAccessRestored: true, assignmentsPreserved: true, assignmentRevocationPreserved: true, recreatedAssignmentRevisionAdvanced: true, usersPreserved: true, membershipsPreserved: true, paginationSurvivedRestart: true, oldSessionSurvivedOrdinaryRestart: true, oldSessionRejectedAfterRecovery: true, lastAdministratorRemovalRejected: true, recoveryRequiresLoopbackLocalMode: true, ownedControllersExited: true }
+  const summary = { providerConfigurationPreserved: true, providerGroupOwnershipPreserved: true, providerRevisionProtected: true, permissionExplanationsPreserved: true, inactiveInheritedAccessExplained: true, ownExactObjectExplanationVerified: true, builtinOverridesPreserved: true, retainedBuiltinAccessRestored: true, ordinaryStartupPreservesDisabledBuiltin: true, explicitRecoveryRestoresBuiltinAdministrator: true, builtinRecoveryAdvancesRevision: true, directGrantsPreserved: true, directDenyPrecedenceVerified: true, expiredDeniesPreserved: true, directRevocationVerified: true, recreatedDirectRevisionAdvanced: true, customRoleRulesPreserved: true, customRoleInheritancePreserved: true, exactObjectAccessVerified: true, disabledInheritedAccessPreserved: true, enabledInheritedAccessRestored: true, assignmentsPreserved: true, assignmentRevocationPreserved: true, recreatedAssignmentRevisionAdvanced: true, usersPreserved: true, membershipsPreserved: true, paginationSurvivedRestart: true, oldSessionSurvivedOrdinaryRestart: true, oldSessionRejectedAfterRecovery: true, lastAdministratorRemovalRejected: true, recoveryRequiresLoopbackLocalMode: true, ownedControllersExited: true }
   const output = path.resolve('output/access', path.basename(root))
   mkdirSync(output, { recursive: true })
   writeFileSync(path.join(output, 'summary.json'), JSON.stringify(summary, null, 2))

@@ -1,8 +1,8 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio identity and access administration"
-  "version": "0.8.1"
-  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
+  "version": "0.9.0"
+  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
     "url": "/"
@@ -10,6 +10,137 @@
   -
     "SessionCookie": []
 "paths":
+  "/api/v1/identity-providers":
+    "get":
+      "operationId": "listIdentityProviders"
+      "summary": "Inspect bounded provider configuration pages and operator-approved credential references. Exact object denies filter rows."
+      "parameters":
+        -
+          "name": "limit"
+          "in": "query"
+          "schema":
+            "type": "integer"
+            "minimum": 1
+            "maximum": 1000
+            "default": 30
+        -
+          "name": "cursor"
+          "in": "query"
+          "schema":
+            "type": "string"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ProviderPage"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+    "post":
+      "operationId": "createIdentityProvider"
+      "summary": "Register a provider. Requires explicit state and a reason. No secret values or implicit group ownership changes."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ProviderRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/ProviderMutation"
+  "/api/v1/identity-providers/{provider}":
+    "get":
+      "operationId": "readIdentityProvider"
+      "summary": "Inspect a provider and current management capability."
+      "parameters":
+        -
+          "name": "provider"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ProviderRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+    "put":
+      "operationId": "editIdentityProvider"
+      "summary": "Save provider configuration at its current revision. Invalidates earlier authentication. Preserves usable administration."
+      "parameters":
+        -
+          "name": "provider"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ProviderRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/ProviderMutation"
   "/api/v1/me":
     "get":
       "operationId": "currentProfile"
@@ -2152,6 +2283,9 @@
         "projectId":
           "type": "string"
           "description": "Permanent ownership scope. Empty or omitted means installation ownership."
+        "managedBy":
+          "type": "string"
+          "description": "Optional oidc:PROVIDER owner on creation. Requires installation provider management. Membership ownership remains permanent."
       "required":
         - "id"
         - "name"
@@ -3388,3 +3522,167 @@
         - "partial"
         - "canInspectOthers"
         - "permissions"
+
+    "ProviderMappings":
+      "type": "object"
+      "additionalProperties":
+        "type": "string"
+      "maxProperties": 40
+      "description": "Exact external claim values mapped to groups owned by oidc:PROVIDER. No wildcard expansion."
+    "ProviderMutation":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        "name":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 200
+        "issuer":
+          "type": "string"
+          "maxLength": 2048
+          "description": "Exact HTTPS issuer, or loopback HTTP for local providers."
+        "clientId":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 512
+        "secretRef":
+          "type": "string"
+          "description": "Operator-approved env:VARIABLE reference. Credential values are never accepted or returned."
+        "scopes":
+          "type": "array"
+          "maxItems": 32
+          "uniqueItems": true
+          "items":
+            "type": "string"
+            "maxLength": 256
+        "disabled":
+          "type": "boolean"
+        "autoProvision":
+          "type": "boolean"
+        "groupClaim":
+          "type": "string"
+          "maxLength": 256
+        "groupMappings":
+          "$ref": "#/components/schemas/ProviderMappings"
+        "membershipTtlSeconds":
+          "type": "integer"
+          "minimum": 0
+          "maximum": 3600
+          "description": "Zero uses 1800 seconds. Validated group membership expires no later than the token."
+        "reason":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 1024
+      "required":
+        - "id"
+        - "name"
+        - "issuer"
+        - "clientId"
+        - "scopes"
+        - "disabled"
+        - "autoProvision"
+        - "groupMappings"
+        - "membershipTtlSeconds"
+        - "reason"
+      "additionalProperties": false
+    "Provider":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        "name":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 200
+        "issuer":
+          "type": "string"
+          "maxLength": 2048
+          "description": "Exact HTTPS issuer, or loopback HTTP for local providers."
+        "clientId":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 512
+        "secretRef":
+          "type": "string"
+          "description": "Operator-approved env:VARIABLE reference. Credential values are never accepted or returned."
+        "scopes":
+          "type": "array"
+          "maxItems": 32
+          "uniqueItems": true
+          "items":
+            "type": "string"
+            "maxLength": 256
+        "disabled":
+          "type": "boolean"
+        "autoProvision":
+          "type": "boolean"
+        "groupClaim":
+          "type": "string"
+          "maxLength": 256
+        "groupMappings":
+          "$ref": "#/components/schemas/ProviderMappings"
+        "membershipTtlSeconds":
+          "type": "integer"
+          "minimum": 0
+          "maximum": 3600
+          "description": "Zero uses 1800 seconds. Validated group membership expires no later than the token."
+        "canManage":
+          "type": "boolean"
+        "callbackUrl":
+          "type": "string"
+      "required":
+        - "id"
+        - "name"
+        - "issuer"
+        - "clientId"
+        - "scopes"
+        - "disabled"
+        - "autoProvision"
+        - "groupMappings"
+        - "membershipTtlSeconds"
+        - "canManage"
+        - "callbackUrl"
+    "ProviderRecord":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        "revision":
+          "type": "integer"
+          "minimum": 1
+        "updatedAt":
+          "type": "string"
+          "format": "date-time"
+        "data":
+          "$ref": "#/components/schemas/Provider"
+      "required":
+        - "id"
+        - "revision"
+        - "updatedAt"
+        - "data"
+    "ProviderPage":
+      "type": "object"
+      "properties":
+        "items":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/ProviderRecord"
+        "cursor":
+          "type": "string"
+        "partial":
+          "type": "boolean"
+        "canCreate":
+          "type": "boolean"
+        "credentialRefs":
+          "type": "array"
+          "items":
+            "type": "string"
+      "required":
+        - "items"
+        - "partial"
+        - "canCreate"
+        - "credentialRefs"

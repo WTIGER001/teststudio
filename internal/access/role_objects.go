@@ -19,7 +19,7 @@ func validPolicyObject(object string) bool {
 	if len(parts) == 3 && parts[0] != "test" {
 		return false
 	}
-	if len(parts) == 2 && !strings.Contains("|suite|test|run|environment|application|group|user|role|grant|", "|"+parts[0]+"|") {
+	if len(parts) == 2 && !strings.Contains("|suite|test|run|environment|application|group|user|role|grant|provider|", "|"+parts[0]+"|") {
 		return false
 	}
 	if parts[0] == "test" && len(parts) != 3 {
@@ -45,6 +45,11 @@ func (s *Service) checkPolicyObject(ctx context.Context, project, object string)
 	var row storage.Record
 	var err error
 	switch kind {
+	case "provider":
+		if project != "" {
+			return errors.New("provider objects require installation scope")
+		}
+		row, err = s.Store.Get(ctx, "providers", id)
 	case "grant":
 		value, stored, loadErr := s.loadGrant(ctx, project, id)
 		if loadErr != nil {

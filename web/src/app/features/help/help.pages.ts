@@ -1,6 +1,35 @@
 import type { HelpPage } from './help.models'
 
 export const helpPages: Record<string, HelpPage> = {
+  providers: {
+    id: 'providers', title: 'Identity providers',
+    introduction: ['Configure installation OpenID Connect providers. Sign-in establishes a user identity. Project roles and group assignments remain separate.'],
+    concepts: [
+      { title: 'Stored configuration', description: 'Providers have permanent identifiers and exact issuer URLs. The callback URL follows the installation origin. Disabled providers do not start sign-in.' },
+      { title: 'Credentials stay on the server', description: 'Select an operator-approved credential reference. Public clients can use no client secret. The UI accepts no credential values.' },
+      { title: 'Authentication changes', description: 'Every save invalidates earlier provider transactions, sessions, and memberships. Fresh validated sign-in is required. The last usable administrator remains protected.' },
+      { title: 'Bounded directory', description: 'More providers continues a bounded scan. Exact provider read denies filter rows. A filtered page can be empty while more readable records remain.' }
+    ],
+    tutorials: [
+      { title: 'Register a provider', steps: ['Select + Register provider.', 'Enter Provider name, Provider identifier, Exact issuer URL, and Client identifier.', 'Select Credential reference and Requested scopes. Keep Provider disabled while preparing group mappings.', 'Choose whether first sign-in creates pending profiles. Enter Provider change reason and select Register provider.', 'Open the saved provider to copy its Callback URL and create provider groups.'] },
+      { title: 'Review configuration changes', steps: ['Open a provider from the directory and select Edit provider.', 'Review the impact of invalidating earlier authentication. Enter a reason and select Save provider.', 'A conflict preserves your fields. Select Reload stored provider to review the current revision before another save.'] }
+    ]
+  },
+  provider: {
+    id: 'provider', title: 'Identity provider',
+    introduction: ['Inspect one provider, manage its exact configuration, and prepare groups populated from validated claims.'],
+    concepts: [
+      { title: 'Exact identity', description: 'Issuer and subject identify external accounts. Changing the issuer does not transfer existing accounts or their roles. Matching email addresses never link accounts.' },
+      { title: 'Provider-owned groups', description: 'Create an empty group with this provider as its permanent membership owner. Groups can belong to the installation or an existing project. Ordinary membership editors remain read-only.' },
+      { title: 'Claim mappings', description: 'Map exact external group values to existing groups owned by this provider. Managing a mapping requires authority over its destination group and membership. An unmapped value grants no access.' },
+      { title: 'Maximum membership age', description: 'Membership lifetime is at most 3600 seconds and never exceeds token expiry. Zero uses 1800 seconds. Incomplete group claims withdraw provider access.' },
+      { title: 'Current revision', description: 'Refresh provider updates the stored view without replacing an opened editor revision. Every save requires a reason and current revision. Failed authorization clears private editors.' }
+    ],
+    tutorials: [
+      { title: 'Connect external group access', steps: ['Use Create a provider group. Enter New group identifier, New group name, and an optional Group project identifier.', 'Select Create provider group. The new group has no roles or memberships.', 'Select Edit provider. Enter Group claim name and select + Add group mapping.', 'Enter the exact External group value and Destination group identifier. Set Membership lifetime in seconds.', 'Clear Provider disabled when ready, enter Provider change reason, and select Save provider.', 'Assign appropriate roles to the group through Project access or Installation access. Verify with a fresh provider sign-in.'] },
+      { title: 'Disable or restore sign-in', steps: ['Select Edit provider. Set or clear Provider disabled.', 'Review group mappings and enter Provider change reason. Select Save provider.', 'Disabling withdraws provider sessions and memberships. Restoration requires fresh validated sign-in and does not revive earlier cookies.'] }
+    ]
+  },
   'effective-permissions': {
     id: 'effective-permissions', title: 'Explain access',
     introduction: ['Check a registered permission for yourself or an authorized user. Inspect the current decision and its direct grants, groups, and inherited role paths.'],

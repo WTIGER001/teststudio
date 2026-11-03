@@ -24,6 +24,7 @@ The guides cover sign-in, projects, the test catalog, project settings, test run
 Users, User details, Groups, Group details, Project access, and Installation access provide administration guides.
 Your account, required password changes, role pages, Project permissions, and Installation permissions also provide contextual guides.
 Explain project access and Explain installation access share a guide for decisions, source scans, privacy, and changed access.
+Identity providers and Identity provider provide guides for credentials, permanent group ownership, exact mappings, and fresh authentication.
 Sign-in help appears whenever the user has no active session.
 Signed-in pages select their guide from the route's `helpTopic` data.
 Unmapped routes use the projects guide after normal route handling.

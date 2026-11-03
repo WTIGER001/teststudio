@@ -18,6 +18,8 @@ type Service struct {
 	LocalUser          string
 	LocalAccounts      bool
 	SessionIdleTimeout time.Duration
+	ProviderSecretRefs []string
+	AuthOrigin         string
 }
 
 type Page struct {

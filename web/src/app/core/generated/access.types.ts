@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.8.1"
+export const accessContractVersion = "0.9.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -15,7 +15,7 @@ export type GrantUpdate = { "expiresAt"?: string | null; "reason": string }
 export type GrantView = { "canRemove": boolean; "canUpdate": boolean; "effect": "allow" | "deny"; "expired": boolean; "expiresAt"?: string | null; "object"?: string; "permission": string; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "projectId": string }
 export type GrantsPage = { "canCreate": boolean; "cursor"?: string; "items": (GrantRecord)[]; "partial": boolean }
 export type Group = { "archived": boolean; "description": string; "id": string; "managedBy"?: string; "name": string; "projectId"?: string }
-export type GroupDefinition = { "description"?: string; "id": string; "name": string; "projectId"?: string }
+export type GroupDefinition = { "description"?: string; "id": string; "managedBy"?: string; "name": string; "projectId"?: string }
 export type GroupPage = { "cursor"?: string; "items": (GroupRecord)[]; "partial": boolean }
 export type GroupRecord = { "data": Group; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
 export type LocalCredential = { "canManage": boolean; "configured": boolean; "createdAt"?: string; "disabled": boolean; "localAccountsEnabled": boolean; "mustChangePassword": boolean; "updatedAt"?: string; "userId": string }
@@ -41,6 +41,11 @@ export type PredefinedRoleRecord = { "data": PredefinedRole; "id": string; "revi
 export type PredefinedRoleUpdate = { "disabled": boolean; "reason": string }
 export type Problem = { "message": string; "status"?: number }
 export type Profile = { "identities": ExternalIdentityPage; "localAccount": boolean; "user": User }
+export type Provider = { "autoProvision": boolean; "callbackUrl": string; "canManage": boolean; "clientId": string; "disabled": boolean; "groupClaim"?: string; "groupMappings": ProviderMappings; "id": string; "issuer": string; "membershipTtlSeconds": number; "name": string; "scopes": (string)[]; "secretRef"?: string }
+export type ProviderMappings = Record<string, string>
+export type ProviderMutation = { "autoProvision": boolean; "clientId": string; "disabled": boolean; "groupClaim"?: string; "groupMappings": ProviderMappings; "id": string; "issuer": string; "membershipTtlSeconds": number; "name": string; "reason": string; "scopes": (string)[]; "secretRef"?: string }
+export type ProviderPage = { "canCreate": boolean; "credentialRefs": (string)[]; "cursor"?: string; "items": (ProviderRecord)[]; "partial": boolean }
+export type ProviderRecord = { "data": Provider; "id": string; "revision": number; "updatedAt": string }
 export type Reason = { "reason": string }
 export type Revoked = { "revoked": boolean }
 export type Role = { "builtIn": boolean; "delegatable": boolean; "disabled": boolean; "id": string; "name": string; "permissions": (string)[]; "scope": "project" | "installation" }
@@ -74,6 +79,10 @@ export interface AccessRequests {
   readGroupMember: { "group": string; "user": string; query?: { "source"?: string } }
   saveLocalMembership: { "user": string; "group": string; revision: number; body: MembershipDefinition }
   restoreGroup: { "group": string; revision: number; body: Reason }
+  listIdentityProviders: { query?: { "limit"?: number; "cursor"?: string } }
+  createIdentityProvider: { body: ProviderMutation }
+  readIdentityProvider: { "provider": string }
+  editIdentityProvider: { "provider": string; revision: number; body: ProviderMutation }
   currentProfile: { query?: { "limit"?: number; "cursor"?: string } }
   explainOwnPermission: { query: { "project"?: string; "object"?: string; "permission": string; "limit"?: number; "cursor"?: string } }
   readOwnLocalCredential: {  }
@@ -136,6 +145,10 @@ export interface AccessResponses {
   readGroupMember: MembershipRecord
   saveLocalMembership: Saved
   restoreGroup: GroupRecord
+  listIdentityProviders: ProviderPage
+  createIdentityProvider: ProviderRecord
+  readIdentityProvider: ProviderRecord
+  editIdentityProvider: ProviderRecord
   currentProfile: Profile
   explainOwnPermission: PermissionExplanation
   readOwnLocalCredential: LocalCredentialRecord
@@ -198,6 +211,10 @@ export const accessOperations = {
   readGroupMember: { method: "GET", path: "/api/v1/groups/{group}/members/{user}" },
   saveLocalMembership: { method: "PUT", path: "/api/v1/groups/{group}/members/{user}" },
   restoreGroup: { method: "POST", path: "/api/v1/groups/{group}/restore" },
+  listIdentityProviders: { method: "GET", path: "/api/v1/identity-providers" },
+  createIdentityProvider: { method: "POST", path: "/api/v1/identity-providers" },
+  readIdentityProvider: { method: "GET", path: "/api/v1/identity-providers/{provider}" },
+  editIdentityProvider: { method: "PUT", path: "/api/v1/identity-providers/{provider}" },
   currentProfile: { method: "GET", path: "/api/v1/me" },
   explainOwnPermission: { method: "GET", path: "/api/v1/me/effective-permissions" },
   readOwnLocalCredential: { method: "GET", path: "/api/v1/me/local-credential" },

@@ -177,3 +177,26 @@ The check kills only the controller that it starts.
 It waits for the normal worker lease to expire and restarts the same installation with dispatch disabled.
 It verifies an incomplete outcome, recovered diagnostics, and removal of the owned container and volume.
 The check stops its replacement controller and preserves verification data under `.data/worker-recovery-*` and `output/worker-recovery/`.
+
+
+## Managed provider and OIDC workflow
+
+Run the provider workflow through the normal publication and execution path:
+
+```sh
+bash scripts/test-self.sh --test=STUDIO-PROVIDERS-001
+```
+
+The isolated test wrapper hosts two new loopback issuers.
+They use discovery, RSA-signed tokens, one-time codes, PKCE, and a separate approval form.
+A private client checks an operator-approved server credential. The public client uses no client secret.
+The credential exists only in the wrapper and its owned Go process environment.
+The product server exposes no fixture routes.
+
+The browser registers both providers through the UI.
+It creates a provider-owned project group, configures exact claims, and verifies real project access.
+Equal emails and subjects at different issuers produce separate users. The second user receives no transferred project access.
+Provider edits invalidate earlier sessions and memberships. Fresh validated sign-in restores the permitted group path.
+Self-provider edits refresh public sign-in choices after authentication expires.
+The workflow also checks conflicts, unconfirmed saves, revoked management, retained read-only views, help, and both themes.
+The wrapper and all fixture state end with the owned test container.

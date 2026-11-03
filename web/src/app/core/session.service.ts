@@ -23,11 +23,13 @@ export class SessionService {
   readonly providers = signal<ProviderList>({ providers: [], localEnabled: false, localAccountsEnabled: false })
   onAuthenticationChanged: (() => void) | undefined
   private generation = 0
+  private providerGeneration = 0
 
   constructor() {
     this.api.onUnauthenticated = csrf => {
       if (csrf !== this.api.csrf() || this.authenticating()) return
       this.generation++; this.clear(); this.error.set('Your session has expired. Sign in again to continue.')
+      void this.loadProviders().catch(() => {})
     }
   }
   private clear(): void { this.api.csrf.set(''); this.user.set(null); this.mustChangePassword.set(false); this.authenticationMethod.set(''); this.onAuthenticationChanged?.() }
@@ -37,7 +39,7 @@ export class SessionService {
     catch (error) { if (!(error instanceof ApiError && error.status === 401)) this.error.set(error instanceof Error ? error.message : 'Sign-in could not be loaded.') }
     finally { this.loading.set(false) }
   }
-  async loadProviders(): Promise<void> { this.providers.set(await this.api.request<ProviderList>('/auth/providers')) }
+  async loadProviders(): Promise<void> { const generation = ++this.providerGeneration, providers = await this.api.request<ProviderList>('/auth/providers'); if (generation === this.providerGeneration) this.providers.set(providers) }
   async refresh(): Promise<void> {
     const generation = ++this.generation
     const response = await this.api.request<SessionResponse>('/auth/session')
@@ -57,6 +59,7 @@ export class SessionService {
     } finally { this.authenticating.set(false) }
   }
   signInLocally(): Promise<void> { return this.authenticate(() => this.api.request('/auth/local', 'POST', {})) }
+  guardProviderNavigation(event: Event): void { if (this.authenticating()) event.preventDefault() }
   signInWithPassword(body: PasswordLogin): Promise<void> { return this.authenticate(() => this.client.call('signInWithPassword', { body })) }
   changePassword(body: PasswordChange): Promise<void> { return this.authenticate(() => this.client.call('changeLocalPassword', { body })) }
   async signOut(): Promise<void> { await this.authenticate(() => this.api.request('/auth/logout', 'POST', {})); await this.loadProviders() }

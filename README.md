@@ -70,6 +70,10 @@ go run ./cmd/teststudio --public-url https://tests.example.com --addr 127.0.0.1:
 
 Register the callback `/auth/callback/PROVIDER_ID` at the identity provider.
 Provider secret references use `env:VARIABLE_NAME` for local configuration.
+Use `--oidc-secret-refs` to approve references for API and UI selection.
+References declared in the operator-supplied initial provider file are also approved.
+Manage configuration, provider-owned groups, and exact mappings through Identity providers.
+The [provider guide](docs/providers.md) describes setup, authority, lifecycle changes, and local verification.
 The browser receives no provider tokens or client secret.
 
 ## Databases

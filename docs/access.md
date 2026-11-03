@@ -9,6 +9,7 @@ Managed custom role APIs support scoped rules, inheritance, disabled state, and 
 Custom role screens use the same typed API, scope checks, and revision guards.
 Direct permission screens manage user and group rules through the same generated client.
 Explain access screens show current decisions and authorized source details through the same permission evaluator.
+Identity provider screens manage sign-in configuration and exact group mappings.
 Identity linking and pending project access remain pending.
 The full acceptance ledger remains in [Implementation verification](implementation.md).
 The [OpenAPI contract](../contracts/openapi.yaml) describes identity, role policy, direct grants, permission catalog, and assignment routes. Other route families remain pending.
@@ -23,7 +24,7 @@ go run ./cmd/teststudio-client --check
 ```
 
 Run these commands from the repository root.
-The generated module contains all 59 implemented identity and access operations, including explanations, predefined role state, grants, previews, and custom assignment choices.
+The generated module contains 63 identity and access operations, including providers, explanations, role state, grants, previews, and custom assignment choices.
 The shared client adapter supplies same-origin sessions, request-forgery protection, and revision headers.
 The client escapes path identifiers and preserves explicit query values.
 Generator checks reject stale output. Nullable expiry and required fields retain their contract types.
@@ -868,4 +869,5 @@ Pending login transactions without a provider revision also require a new sign-i
 
 Focused loopback provider tests use actual discovery, signed tokens, state, nonce, and PKCE exchanges.
 They verify changes during discovery and exchange without external provider accounts.
-Provider administration, explicit fresh-authentication account linking, provider logout, and complete provider acceptance remain pending.
+The [provider guide](providers.md) describes managed provider configuration.
+Explicit fresh-authentication account linking, provider logout, and complete provider acceptance remain pending.

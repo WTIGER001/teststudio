@@ -15,13 +15,14 @@ import (
 )
 
 type schema struct {
-	Ref        string             `yaml:"$ref"`
-	Type       any                `yaml:"type"`
-	Properties map[string]*schema `yaml:"properties"`
-	Required   []string           `yaml:"required"`
-	Items      *schema            `yaml:"items"`
-	Enum       []any              `yaml:"enum"`
-	OneOf      []*schema          `yaml:"oneOf"`
+	Ref                  string             `yaml:"$ref"`
+	Type                 any                `yaml:"type"`
+	Properties           map[string]*schema `yaml:"properties"`
+	AdditionalProperties yaml.Node          `yaml:"additionalProperties"`
+	Required             []string           `yaml:"required"`
+	Items                *schema            `yaml:"items"`
+	Enum                 []any              `yaml:"enum"`
+	OneOf                []*schema          `yaml:"oneOf"`
 }
 type parameter struct {
 	Ref      string  `yaml:"$ref"`
@@ -121,6 +122,17 @@ func schemaType(value *schema) (string, error) {
 		t, err := schemaType(value.Items)
 		return "(" + t + ")[]", err
 	case "object":
+		if value.AdditionalProperties.Kind == yaml.MappingNode {
+			if len(value.Properties) != 0 {
+				return "", errors.New("mixed fixed and dictionary properties require an explicit schema")
+			}
+			var item schema
+			if err := value.AdditionalProperties.Decode(&item); err != nil {
+				return "", err
+			}
+			t, err := schemaType(&item)
+			return "Record<string, " + t + ">", err
+		}
 		fields := []string{}
 		for _, name := range keys(value.Properties) {
 			t, err := schemaType(value.Properties[name])

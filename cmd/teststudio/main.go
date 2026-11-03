@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"slices"
 	"strings"
 	"syscall"
 	"time"
@@ -65,6 +66,7 @@ func run() error {
 	local := flag.Bool("local", false, "Enable explicit loopback-only local administrator sign-in")
 	recoverLocal := flag.Bool("recover-local-admin", false, "Reenable the loopback local administrator and invalidate its earlier sessions; requires --local")
 	providers := flag.String("oidc-config", "", "Initial JSON provider configuration file")
+	oidcSecretRefs := flag.String("oidc-secret-refs", "", "Comma-separated server credential references approved for OIDC provider configuration")
 	bootstrapIssuer := flag.String("bootstrap-issuer", "", "OIDC issuer for the initial installation administrator")
 	bootstrapSubject := flag.String("bootstrap-subject", "", "Exact OIDC subject for the initial installation administrator")
 	flag.Parse()
@@ -143,6 +145,19 @@ func run() error {
 			return err
 		}
 	}
+	approvedOIDCSecrets := []string{}
+	for _, value := range strings.Split(*oidcSecretRefs, ",") {
+		value = strings.TrimSpace(value)
+		if value == "" {
+			continue
+		}
+		if !authoidc.ValidSecretReference(value) {
+			return errors.New("OIDC credential references require env:VARIABLE names")
+		}
+		if !slices.Contains(approvedOIDCSecrets, value) {
+			approvedOIDCSecrets = append(approvedOIDCSecrets, value)
+		}
+	}
 	if *providers != "" {
 		data, err := os.ReadFile(*providers)
 		if err != nil {
@@ -156,6 +171,9 @@ func run() error {
 			if err := authoidc.ValidateProvider(p); err != nil {
 				return err
 			}
+			if p.SecretRef != "" && !slices.Contains(approvedOIDCSecrets, p.SecretRef) {
+				approvedOIDCSecrets = append(approvedOIDCSecrets, p.SecretRef)
+			}
 			c, err := storage.Put("providers", p.ID, "", 0, p)
 			if err != nil {
 				return err
@@ -166,7 +184,7 @@ func run() error {
 		}
 	}
 	sessionService := &sessions.Service{LocalAccounts: *localAccounts, Store: db, Directory: directory, Origin: *public, Secure: parsed.Scheme == "https"}
-	oidc := &authoidc.Service{Store: db, Directory: directory, Sessions: sessionService, Origin: *public}
+	oidc := &authoidc.Service{Store: db, Directory: directory, Sessions: sessionService, Origin: *public, SecretRefs: approvedOIDCSecrets}
 	files, err := filesystem.New(*artifactDirectory)
 	if err != nil {
 		return err

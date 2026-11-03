@@ -16,6 +16,7 @@ type GroupDefinition struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Project     string `json:"projectId"`
+	ManagedBy   string `json:"managedBy,omitempty"`
 }
 
 func (s *Service) ListGroups(ctx context.Context, actor, project, cursor string, limit int, archived bool) (Page, error) {
@@ -77,6 +78,9 @@ func (s *Service) SaveGroup(ctx context.Context, actor string, d GroupDefinition
 		if old.Project != d.Project || old.Project != r.Project {
 			return errors.New("group ownership scope is permanent")
 		}
+		if d.ManagedBy != "" && d.ManagedBy != old.ManagedBy {
+			return errors.New("group membership ownership is permanent")
+		}
 	}
 	if err := s.Auth.Check(ctx, actor, d.Project, "group/"+d.ID, "groups.manage"); err != nil {
 		return err
@@ -92,6 +96,13 @@ func (s *Service) SaveGroup(ctx context.Context, actor string, d GroupDefinition
 		return errors.New("restore the archived group before editing")
 	}
 	changes := []storage.Change{}
+	if r.Revision == 0 && d.ManagedBy != "" {
+		provider, err := s.providerGroupOwner(ctx, actor, d.ManagedBy)
+		if err != nil {
+			return err
+		}
+		changes = append(changes, storage.Change{Record: provider, Assert: true})
+	}
 	if d.Project != "" {
 		project, err := s.Store.Get(ctx, "projects", d.Project)
 		if err != nil {
@@ -110,6 +121,9 @@ func (s *Service) SaveGroup(ctx context.Context, actor string, d GroupDefinition
 	}
 	v := old
 	v.ID, v.Name, v.Description, v.Project = d.ID, d.Name, d.Description, d.Project
+	if r.Revision == 0 {
+		v.ManagedBy = d.ManagedBy
+	}
 	c, err := storage.Put("groups", d.ID, d.Project, revision, v)
 	if err != nil {
 		return err

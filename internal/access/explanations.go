@@ -91,7 +91,7 @@ func (s *Service) explanationAuthority(ctx context.Context, actor, user string, 
 		err := s.Auth.Check(ctx, actor, q.Project, q.Object, "permissions.read")
 		if errors.Is(err, authorization.ErrForbidden) {
 			parts := splitPolicyObject(q.Object)
-			action := map[string]string{"suite": "catalog.read", "test": "catalog.read", "run": "runs.read", "environment": "environments.read", "application": "projects.read", "group": "groups.read", "user": "users.read", "role": "roles.read", "grant": "permissions.read"}[parts[0]]
+			action := map[string]string{"suite": "catalog.read", "test": "catalog.read", "run": "runs.read", "environment": "environments.read", "application": "projects.read", "group": "groups.read", "user": "users.read", "role": "roles.read", "grant": "permissions.read", "provider": "providers.read"}[parts[0]]
 			if !(q.Project == "" && q.Object == "user/"+actor) {
 				err = s.Auth.Check(ctx, actor, q.Project, q.Object, action)
 			} else {

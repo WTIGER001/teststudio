@@ -13,7 +13,7 @@ The full plan remains required scope. Check an item only after its implementatio
 - [x] Local accounts, OIDC accounts, and mixed sign-in work through the same directory, permission checks, and managed sessions.
 - [x] Local credential changes, resets, disabling, and recovery preserve audit records and the last usable administrator.
 - [ ] OIDC sign-in supports configured providers with code flow, PKCE, state, nonce, issuer and audience validation, key rotation, and logout.
-- [ ] Duplicate email addresses from different issuer-subject pairs do not merge accounts or transfer access.
+- [x] Duplicate email addresses from different issuer-subject pairs do not merge accounts or transfer access.
 - [ ] Unmapped, missing, incomplete, or outdated external groups do not silently preserve elevated project access.
 - [ ] Browser sessions keep provider tokens server-side. Expiry, revocation, callback rejection, and request-forgery protection pass focused checks.
 - [x] SQLite restarts preserve users, memberships, assignments, custom grants, disabled roles, and sessions without a PostgreSQL service.
@@ -65,6 +65,56 @@ The full plan remains required scope. Check an item only after its implementatio
 ## Feature log
 
 Record feature commits and targeted validation here.
+
+### Managed providers, permanent group ownership, and browser sign-in
+
+Added installation provider list, registration, detail, and revision-controlled configuration APIs.
+Exact provider-object denies remain authoritative. Project administration grants no installation provider management.
+Configuration changes share one permission and metadata transaction with audit, directory revision, and administrator protection.
+Disabling or changing the only usable issuer rolls back configuration, revision, and audit changes.
+
+Provider settings include exact issuer, client identifier, provisioning, scopes, claim mappings, membership lifetime, and explicit disabled state.
+Duplicate scopes, invalid references, invalid mapping values, missing explicit state, and stale revisions fail without changes.
+Enabling requires active mapped groups and projects.
+Mapped destinations require their actual group and membership management authority. Exact membership denies remain effective.
+Provider ownership can be declared only when creating a new group through the canonical group API.
+Ownership remains permanent. Ordinary local membership edits reject provider-managed groups.
+
+Operator-approved credential references use the new `--oidc-secret-refs` flag.
+References in an operator-supplied initial provider file are also approved.
+The management API accepts references without resolving their values. Runtime sign-in rejects unapproved reference resolution.
+Provider responses and audit records contain no resolved credentials.
+The OpenAPI 0.9 contract and generated client contain 63 operations.
+String dictionary schemas retain their value type. Empty mappings and zero lifetime remain explicit in responses.
+
+Identity providers and provider details provide focused registration, editing, group creation, mapping, and read-only workflows.
+Conflicts and unconfirmed responses preserve fields and block repeat submission until explicit state review.
+Revoked management clears private edits and views. Retained reading permits an explicit read-only refresh.
+Contextual help, keyboard controls, shared themes, and narrow-screen layouts accompany both pages.
+
+The real browser workflow found and fixed provider links that Angular canceled because their handler returned false.
+The navigation guard now returns no value while preserving the concurrent-authentication check.
+Saving the current sign-in provider clears private pages and refreshes public provider choices after session invalidation.
+Users without project access receive an explicit Access not granted state.
+
+The self-test wrapper provides two new loopback issuers with discovery, RSA signatures, one-time codes, PKCE, and approval pages.
+The browser registers both providers through the UI and completes private-client and public-client sign-in.
+It verifies exact mapped project access, invalidation after provider edits, and restoration through fresh claims.
+Equal email and subject values at different issuers remain separate users. The second user receives no transferred project access.
+A signed-token test also verifies equal emails with different subjects at one issuer and retains the first user's grants.
+This evidence completes the duplicate-email identity-isolation acceptance item.
+
+Full HTTP, access, OIDC, client, and startup suites pass with race detection on SQLite.
+Focused provider, OIDC, mapping, and administrator checks pass on disposable PostgreSQL with native permission storage.
+Generated-client checks, targeted vet checks, five pure utility checks, TypeScript checks, and production builds pass.
+The final provider workflow passes: `20261103T084637.615214000-2a2d5073c236199857963814`.
+Help and new navigation pass: `20261103T082839.290013000-75b8061caf2929159ccf9c42`.
+The shared local-account regression passes: `20261103T083955.845681000-63851417aac7effa2121790f`.
+Actual restart verification preserves provider settings, provider-group ownership, and revision guards: `output/access/access-verification.GQRpsL/summary.json`.
+Visual review confirms loaded editor fields and controls in light mode and at 390 pixels in dark mode without document overflow.
+Owned resource cleanup is verified before the feature commit.
+
+Explicit fresh-authentication account linking, pending project access, provider logout, source releases, hosted profiles, and the remaining plan stay pending.
 
 ### Provider-bound authentication and membership state
 

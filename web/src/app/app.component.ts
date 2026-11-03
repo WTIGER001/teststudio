@@ -41,7 +41,7 @@ import { HelpComponent } from './features/help/help.component'
           @if (app.session.providers().localAccountsEnabled) { <ts-password-signin /> }
           @if (app.message()) { <p class="notice success" role="status">{{ app.message() }}</p> }
           @for (provider of app.session.providers().providers; track provider.id) {
-            <a class="button primary full" [href]="'/auth/login/' + provider.id" [attr.aria-disabled]="app.session.authenticating()" (click)="app.session.authenticating() && $event.preventDefault()">Continue with {{ provider.name }}</a>
+            <a class="button primary full" [href]="'/auth/login/' + provider.id" [attr.aria-disabled]="app.session.authenticating()" (click)="app.session.guardProviderNavigation($event)">Continue with {{ provider.name }}</a>
           }
           @if (app.session.providers().localEnabled) {
             <button type="button" class="button primary full" [disabled]="app.session.authenticating()" (click)="app.signInLocally()">Open local workspace <span aria-hidden="true">→</span></button>
@@ -83,6 +83,7 @@ import { HelpComponent } from './features/help/help.component'
             @if (app.workspace.canInstallation('members.read') && app.workspace.canInstallation('permissions.read')) { <a routerLink="/settings/access" routerLinkActive="active"><span aria-hidden="true">♧</span> Installation access</a> }
             @if (app.workspace.canInstallation('members.read') && app.workspace.canInstallation('permissions.read')) { <a routerLink="/settings/permissions" routerLinkActive="active"><span aria-hidden="true">♧</span> Installation permissions</a> }
             @if (app.workspace.canInstallation('users.read')) { <a routerLink="/settings/users" routerLinkActive="active"><span aria-hidden="true">♙</span> Users</a> }
+            @if (app.workspace.canInstallation('providers.read')) { <a routerLink="/settings/providers" routerLinkActive="active"><span aria-hidden="true">♧</span> Identity providers</a> }
             @if (app.workspace.canInstallation('groups.read')) { <a routerLink="/settings/groups" routerLinkActive="active"><span aria-hidden="true">♧</span> Installation groups</a> }
             @if (app.workspace.canInstallation('roles.read')) { <a routerLink="/settings/roles" routerLinkActive="active"><span aria-hidden="true">♧</span> Installation roles</a> }
           </nav>

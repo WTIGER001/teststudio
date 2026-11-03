@@ -64,3 +64,14 @@ func TestIdentityClientRequiresTheQueryForMandatoryPermissionInputs(t *testing.T
 		}
 	}
 }
+
+func TestIdentityClientPreservesStringDictionaryValues(t *testing.T) {
+	var value schema
+	if err := yaml.Unmarshal([]byte("type: object\nadditionalProperties: {type: string}\n"), &value); err != nil {
+		t.Fatal(err)
+	}
+	result, err := schemaType(&value)
+	if err != nil || result != "Record<string, string>" {
+		t.Fatal("dictionary values lost their type", result, err)
+	}
+}
