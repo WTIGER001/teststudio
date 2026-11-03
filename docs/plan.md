@@ -174,9 +174,15 @@ Do not link accounts automatically because their email addresses match.
 Store display name, email verification state, lifecycle state, creation time, and last sign-in time.
 Disabling a user blocks new requests and sessions while preserving ownership, run history, and audit records.
 
-Support administrator-created pending users or invitations and configurable provisioning at first OIDC sign-in.
+Use direct project membership instead of invitation messages, acceptance links, or invitation expiry.
+Project owners with membership authority add existing users and choose permitted project roles.
+Support pending project access for users who have not signed in.
+A pending access record stores an allowed provider, verified email requirement, project, and permitted role.
+Apply pending access only after that provider confirms the verified email during sign-in.
+Do not use pending access to link existing internal accounts or grant installation administration.
+Audit pending access creation, cancellation, activation, and the resulting role assignments.
+Support configurable user provisioning at first OIDC sign-in.
 Successful sign-in alone grants no project access.
-An invitation binds to an allowed provider and a verified identity before applying its explicitly scoped assignments.
 Do not grant installation administration from an email domain or first-login order.
 
 Groups have permanent identifiers, names, descriptions, ownership scope, lifecycle state, and membership provenance.
@@ -272,7 +278,7 @@ Restrict inspection of another user's effective access to authorized access mana
 
 | Route family | Purpose |
 | --- | --- |
-| `/api/v1/users` | List, invite, inspect, disable, and restore users with installation authority. |
+| `/api/v1/users` | List, create, inspect, disable, and restore users with installation authority. |
 | `/api/v1/groups` | Manage permitted groups and their local memberships. Show synchronized membership separately. |
 | `/api/v1/roles` | List predefined roles and manage authorized custom roles. |
 | `/api/v1/projects/{projectId}/members` | Inspect project access and manage scoped member or group assignments. |

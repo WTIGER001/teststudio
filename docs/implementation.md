@@ -90,6 +90,15 @@ STUDIO-NOTIFY-001 passes again after the shared fixture and shutdown changes.
 Owned verification controllers and browser containers stop after checks. The disposable PostgreSQL service also stops.
 Invitations, identity linking, personal profile UI, role and grant editors, deployment verification, and the remaining full plan stay pending.
 
+### Direct project membership decision
+
+Use owner-managed project membership instead of invitations.
+Existing users receive explicitly scoped role assignments from an authorized project owner.
+Pending access requires an allowed provider and a verified email before activation.
+Pending access cannot merge accounts or grant installation administration.
+Invitation delivery, acceptance links, and invitation expiry are outside the initial plan.
+Assignment administration and pending access activation remain incomplete.
+
 ### Generated identity client and direct membership reads
 
 Added deterministic TypeScript request types, response types, operation methods, and route templates from the identity OpenAPI contract.
@@ -122,7 +131,7 @@ Checks cover cross-project and installation boundaries, source ownership, object
 Existing OIDC and permission checks pass after the shared directory and session changes.
 The built-service smoke verifies actual SQLite restarts, persisted profiles and membership, cursor continuity, ordinary session continuity, explicit recovery invalidation, and loopback restrictions.
 Owned controllers and the disposable PostgreSQL service stop after verification.
-Users and Groups screens, invitations, identity linking, role and grant administration, hosted verification, and the remaining full plan stay pending.
+At this stage, Users and Groups screens, identity linking, role and grant administration, hosted verification, and the remaining full plan stay pending.
 
 ### Notification configuration and delivery interface
 
