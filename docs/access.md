@@ -10,7 +10,7 @@ Custom role screens use the same typed API, scope checks, and revision guards.
 Direct permission screens manage user and group rules through the same generated client.
 Explain access screens show current decisions and authorized source details through the same permission evaluator.
 Identity provider screens manage sign-in configuration and exact group mappings.
-Identity linking and pending project access remain pending.
+User-owned identity linking and project-owned pending access use explicit, audited workflows.
 The full acceptance ledger remains in [Implementation verification](implementation.md).
 The [OpenAPI contract](../contracts/openapi.yaml) describes identity, role policy, direct grants, permission catalog, and assignment routes. Other route families remain pending.
 
@@ -579,7 +579,7 @@ Open Your account from navigation on desktop or mobile.
 The page shows your own profile, local credential state, and bounded external identity pages.
 These reads require no installation directory authority.
 An enabled credential provides a password-change form that requires the current password.
-Identity linking and personal profile editing remain pending.
+Your account also supports explicit identity linking. Personal profile editing remains pending.
 
 Authorized User details provide credential provisioning, reset, disabling, and enabling.
 Credential reads expose no password or hash.
@@ -870,7 +870,7 @@ Pending login transactions without a provider revision also require a new sign-i
 Focused loopback provider tests use actual discovery, signed tokens, state, nonce, and PKCE exchanges.
 They verify changes during discovery and exchange without external provider accounts.
 The [provider guide](providers.md) describes managed provider configuration.
-Explicit fresh-authentication account linking, provider logout, and complete provider acceptance remain pending.
+Provider logout and complete provider acceptance remain pending.
 
 ## Explicit identity linking
 
@@ -929,3 +929,75 @@ The existing `/auth/callback/{provider}` route handles purpose-bound linking cal
 No HTTP operation accepts an arbitrary issuer and subject as a linking mutation.
 JSON operation responses contain no session identifiers, protocol secrets, provider credentials, or passwords.
 OpenAPI 0.10 and the generated identity client include the five JSON operations.
+
+
+## Pending project access
+
+Project owners can prepare access before a user signs in.
+Open Project access and select + Prepare project access.
+Choose Allowed sign-in provider, enter Required verified email, and select a permitted project role.
+Enter Pending access reason and select Prepare access.
+The operation creates no user, password, external identity, or invitation message.
+
+The record stores the exact project, provider identifier, issuer, provider revision, email, role, owner, reason, and creation time.
+Email matching preserves the exact mailbox before `@` and ignores domain letter case.
+The allowed provider must confirm `email_verified: true` for that address during normal OIDC sign-in.
+Internal profile email or verification fields cannot activate pending access.
+Pending access cannot link identities, merge accounts, or grant installation administration.
+Explicit identity-linking proof does not activate pending access.
+
+The configured provider controls first-sign-in profile provisioning.
+When automatic provisioning is disabled, sign-in requires an existing exact identity link.
+An authenticated user can add that link through Your account.
+Preparing project access does not override that configuration.
+
+Activation checks the current provider revision and exact external identity owner.
+It checks the project, the approving owner’s active account and current delegation authority, the role, and the actual recipient.
+The approved role fingerprint includes inherited policy revisions and predefined role state revisions.
+Provider or role changes block the old approval. Restoring a changed definition does not silently restore its approval.
+An archived project or lost owner authority also blocks activation.
+
+The permission library assigns the normal project-bound role through the same transaction used for direct assignments.
+Assignment metadata, activation records, match-index removal, and audit events commit together.
+A failed batch rolls back native roles and activation metadata.
+Concurrent cancellation and sign-in cannot produce an activated role with a cancelled approval.
+Existing exact assignments are retained without duplicate assignment events.
+
+Successful activation consumes the pending match and records the permanent user and assignment identifiers.
+Later role revocation remains effective after another sign-in. A consumed approval cannot restore it.
+The activated record remains in history. Remove the resulting role through Role assignments.
+Cancel pending access removes only a pending or blocked approval. It requires the current positive record revision and a reason.
+A new approval creates a separate record. Cancelled and blocked history remains available.
+
+A provider and email permit at most 100 pending project-role matches across the installation.
+One project, provider, email, and role permit only one pending approval at a time.
+The bound prevents silent truncation during sign-in.
+
+### Pending access API and interface
+
+All routes require an active session and the route’s exact project authority.
+Mutations require the configured Origin and current request-forgery token.
+
+| Method | Route | Behavior |
+| --- | --- | --- |
+| GET | `/api/v1/projects/{project}/pending-access/providers` | Read enabled provider choices without credentials or installation provider management. |
+| GET, POST | `/api/v1/projects/{project}/pending-access` | Scan readable approvals or prepare project access. |
+| GET | `/api/v1/projects/{project}/pending-access/{access}` | Read one approval and its retained state. |
+| POST | `/api/v1/projects/{project}/pending-access/{access}/cancel` | Cancel pending or blocked access with positive `If-Match` and a reason. |
+
+Creation accepts `providerId`, `providerRevision`, `email`, `roleId`, and `reason`.
+Verified email is mandatory and cannot be disabled in the request.
+Read authority requires project membership and permission inspection. Management requires membership management and delegation.
+Exact `pending-access/{id}`, role, and activated-recipient denies remain authoritative.
+Project access managers can read curated provider choices without installation directory or provider authority.
+Choices contain names, issuers, revisions, and provisioning mode. They contain no client credentials or secret references.
+Cursor values bind to the reader and exact project. Unreadable rows can leave an empty page with a continuation cursor.
+
+The interface retains the provider revision captured when its editor opens.
+Refresh pending access updates records and available choices without replacing that opened revision.
+After a conflict or unconfirmed response, repeated submission stays disabled.
+Use Review pending records and reload choices to review current records and explicitly adopt current provider choices.
+Cancel stale approvals before replacing them.
+The interface clears private edits after revoked access and supports read-only project inspection.
+Contextual help covers preparation, verification, blocked states, cancellation, and ordinary role revocation.
+OpenAPI 0.11 and the generated identity client include 73 JSON operations.

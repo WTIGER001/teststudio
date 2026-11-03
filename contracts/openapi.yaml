@@ -1,8 +1,8 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio identity and access administration"
-  "version": "0.10.0"
-  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
+  "version": "0.11.0"
+  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
     "url": "/"
@@ -2249,6 +2249,203 @@
           "SessionCookie": []
           "CSRFToken": []
 
+  "/api/v1/projects/{project}/pending-access/providers":
+    "get":
+      "operationId": "pendingAccessProviders"
+      "summary": "Read enabled provider identifiers, issuers, revisions, and provisioning mode for project access preparation. Requires project membership management and delegation. Provider credentials remain private."
+      "parameters":
+        -
+          "name": "project"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/PendingProviderChoices"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+        "503":
+          "$ref": "#/components/responses/Problem"
+  "/api/v1/projects/{project}/pending-access":
+    "get":
+      "operationId": "listPendingAccess"
+      "summary": "Read a bounded project-owned pending-access page. Exact pending-record and role denies filter rows."
+      "parameters":
+        -
+          "name": "project"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        -
+          "$ref": "#/components/parameters/Limit"
+        -
+          "$ref": "#/components/parameters/Cursor"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/PendingAccessPage"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+        "503":
+          "$ref": "#/components/responses/Problem"
+    "post":
+      "operationId": "createPendingAccess"
+      "summary": "Prepare project access for one allowed provider and verified email. Creates no user or credential and sends no invitation. The same project, provider, email, and role permit only one pending record."
+      "parameters":
+        -
+          "name": "project"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/PendingAccessRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+        "503":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/PendingAccessInput"
+  "/api/v1/projects/{project}/pending-access/{access}":
+    "get":
+      "operationId": "readPendingAccess"
+      "summary": "Inspect the pending approval or its retained cancellation, blocking, or activation record."
+      "parameters":
+        -
+          "name": "project"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        -
+          "name": "access"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/PendingAccessRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+        "503":
+          "$ref": "#/components/responses/Problem"
+  "/api/v1/projects/{project}/pending-access/{access}/cancel":
+    "post":
+      "operationId": "cancelPendingAccess"
+      "summary": "Cancel a pending or blocked approval with its current revision. Activated roles use ordinary assignment revocation."
+      "parameters":
+        -
+          "name": "project"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        -
+          "name": "access"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "$ref": "#/components/parameters/Revision"
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/PendingAccessRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+        "503":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/Reason"
+
 "components":
   "securitySchemes":
     "SessionCookie":
@@ -2389,6 +2586,164 @@
           "schema":
             "$ref": "#/components/schemas/Problem"
   "schemas":
+    "PendingProviderChoice":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+        "name":
+          "type": "string"
+        "issuer":
+          "type": "string"
+        "revision":
+          "type": "integer"
+          "minimum": 1
+        "autoProvision":
+          "type": "boolean"
+      "required":
+        - "id"
+        - "name"
+        - "issuer"
+        - "revision"
+        - "autoProvision"
+      "additionalProperties": false
+    "PendingProviderChoices":
+      "type": "object"
+      "properties":
+        "items":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/PendingProviderChoice"
+      "required":
+        - "items"
+      "additionalProperties": false
+    "PendingAccessInput":
+      "type": "object"
+      "properties":
+        "providerId":
+          "type": "string"
+        "providerRevision":
+          "type": "integer"
+          "minimum": 1
+        "email":
+          "type": "string"
+          "format": "email"
+          "maxLength": 254
+        "roleId":
+          "type": "string"
+        "reason":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 1024
+      "required":
+        - "providerId"
+        - "providerRevision"
+        - "email"
+        - "roleId"
+        - "reason"
+      "additionalProperties": false
+    "PendingAccess":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "providerId":
+          "type": "string"
+        "providerName":
+          "type": "string"
+        "providerRevision":
+          "type": "integer"
+          "minimum": 1
+        "issuer":
+          "type": "string"
+        "email":
+          "type": "string"
+        "requireVerifiedEmail":
+          "type": "boolean"
+          "const": true
+        "roleId":
+          "type": "string"
+        "roleName":
+          "type": "string"
+        "approvedBy":
+          "type": "string"
+        "reason":
+          "type": "string"
+        "state":
+          "type": "string"
+          "enum":
+            - "pending"
+            - "activated"
+            - "cancelled"
+            - "blocked"
+        "createdAt":
+          "type": "string"
+          "format": "date-time"
+        "activatedAt":
+          "type": "string"
+          "format": "date-time"
+        "activatedUserId":
+          "type": "string"
+        "assignmentId":
+          "type": "string"
+        "blockReason":
+          "type": "string"
+          "enum":
+            - "provider-changed"
+            - "role-changed"
+            - "authority-changed"
+            - "project-unavailable"
+        "canCancel":
+          "type": "boolean"
+      "required":
+        - "id"
+        - "projectId"
+        - "providerId"
+        - "providerName"
+        - "providerRevision"
+        - "issuer"
+        - "email"
+        - "requireVerifiedEmail"
+        - "roleId"
+        - "roleName"
+        - "approvedBy"
+        - "reason"
+        - "state"
+        - "createdAt"
+        - "canCancel"
+      "additionalProperties": false
+    "PendingAccessRecord":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+        "revision":
+          "type": "integer"
+          "minimum": 1
+        "data":
+          "$ref": "#/components/schemas/PendingAccess"
+      "required":
+        - "id"
+        - "revision"
+        - "data"
+      "additionalProperties": false
+    "PendingAccessPage":
+      "type": "object"
+      "properties":
+        "items":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/PendingAccessRecord"
+        "cursor":
+          "type": "string"
+        "partial":
+          "type": "boolean"
+      "required":
+        - "items"
+        - "partial"
+      "additionalProperties": false
     "IdentityLinkProvider":
       "type": "object"
       "properties":

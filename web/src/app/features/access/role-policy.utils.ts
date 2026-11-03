@@ -15,7 +15,7 @@ export function roleExpiryValid(value?: string | null): boolean {
   if (!value) return true
   return /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d{1,9})?(?:Z|[+-]\d\d:\d\d)$/.test(value) && Number(value.slice(11, 13)) < 24 && Number.isFinite(Date.parse(value)) && new Date(value).getUTCFullYear() >= 1 && new Date(value).getUTCFullYear() <= 9999 && new Date(`${value.slice(0, 10)}T00:00:00Z`).toISOString().slice(0, 10) === value.slice(0, 10)
 }
-export function roleObjectValid(value: string): boolean { const parts = value.split('/'); return !value || (parts[0] === 'test' ? parts.length === 3 : parts.length === 2 && ['suite', 'run', 'environment', 'application', 'group', 'user', 'role', 'grant', 'provider'].includes(parts[0])) && parts.slice(1).every(id => identifier.test(id)) }
+export function roleObjectValid(value: string): boolean { const parts = value.split('/'); return !value || (parts[0] === 'test' ? parts.length === 3 : parts.length === 2 && ['suite', 'run', 'environment', 'application', 'group', 'user', 'role', 'grant', 'provider', 'pending-access'].includes(parts[0])) && parts.slice(1).every(id => identifier.test(id)) }
 export function rolePolicyValidation(value: RolePolicyMutation, permissions: PermissionChoice[], requireReason = true): string {
   if (!identifier.test(value.id) || value.id.startsWith('builtin.') || ['custom', 'choices'].includes(value.id) || !value.name || bytes(value.name) > 200 || bytes(value.description ?? '') > 4096) return 'Enter a valid custom identifier, a name up to 200 bytes, and a description up to 4096 bytes.'
   if ((value.rules?.length ?? 0) > 100 || (value.inherits?.length ?? 0) > 16) return 'Use at most 100 rules and 16 directly inherited roles.'

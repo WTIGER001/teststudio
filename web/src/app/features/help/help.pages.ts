@@ -87,15 +87,17 @@ export const helpPages: Record<string, HelpPage> = {
   },
   'project-access': {
     id: 'project-access', title: 'Project access',
-    introduction: ['Review role assignments and manage access for registered users and groups in this project. Local and OIDC identities use the same internal user identifiers.'],
+    introduction: ['Manage this project’s roles for existing users and groups. Prepare pending access for users who have not signed in. No invitation is required.'],
     concepts: [
       { title: 'Exact scope', description: 'The project route supplies the exact project binding. Project administrators can delegate permitted predefined project roles. Installation administration does not appear in these project choices.' },
+      { title: 'Pending project access', description: 'Prepare one allowed provider, verified email, and project role. Only provider-confirmed email at sign-in activates access. Configuration, inherited roles, and owner authority are checked again. Pending access never merges accounts or grants installation administration.' },
       { title: 'Delegation and group ownership', description: 'Role choices come from the server. Shared installation groups require installation group management authority. A visible assignment can remain read-only.' },
       { title: 'Retained access', description: 'Removing one assignment can leave access through other roles or groups. Inactive principals and disabled roles remain visible for review. The last usable installation administrator remains protected.' },
       { title: 'Conflicts and bounded pages', description: 'Removal uses the revision displayed when the action opens. Cancel stale actions, refresh access, and review the current assignment before reopening. More assignments can continue a bounded scan even when its first page is empty.' }
     ],
     tutorials: [
       { title: 'Add a role', steps: ['Inspect Role choices and expand View permissions for the intended role.', 'Select + Add role. Choose User or Group and enter the registered principal identifier.', 'Select the role and enter an Assignment reason. Review the displayed scope.', 'Select Assign role. The new permissions apply without another sign-in. This action creates no credentials or identity links.'] },
+      { title: 'Prepare access before sign-in', steps: ['Select + Prepare project access. Choose Allowed sign-in provider and inspect its exact issuer.', 'Enter Required verified email. The mailbox before @ must match exactly; domain letters ignore case.', 'Choose Pending project role and enter Pending access reason. Select Prepare access.', 'After provider sign-in, select Refresh pending access. Read activated user details or the reason an approval is blocked.', 'Cancel stale or incorrect approvals with a reason, then prepare a new approval after review. Activated roles use ordinary assignment removal.'] },
       { title: 'Remove and review access', steps: ['Find the exact principal and role in Role assignments. Use More assignments to continue a bounded scan.', 'Select Remove role on the intended row and review the target and scope.', 'Enter a reason and select Confirm action. Cancel the action if its target is incorrect.', 'If a conflict appears, cancel, use Refresh access, inspect the current assignment, and open a new action. Other role and group access can still apply.'] }
     ]
   },

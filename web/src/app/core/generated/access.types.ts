@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.10.0"
+export const accessContractVersion = "0.11.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -34,6 +34,12 @@ export type PasswordChange = { "currentPassword": string; "newPassword": string 
 export type PasswordChanged = { "changed": boolean }
 export type PasswordLogin = { "password": string; "userId": string }
 export type PasswordSignedIn = { "mustChangePassword": boolean; "signedIn": boolean }
+export type PendingAccess = { "activatedAt"?: string; "activatedUserId"?: string; "approvedBy": string; "assignmentId"?: string; "blockReason"?: "provider-changed" | "role-changed" | "authority-changed" | "project-unavailable"; "canCancel": boolean; "createdAt": string; "email": string; "id": string; "issuer": string; "projectId": string; "providerId": string; "providerName": string; "providerRevision": number; "reason": string; "requireVerifiedEmail": boolean; "roleId": string; "roleName": string; "state": "pending" | "activated" | "cancelled" | "blocked" }
+export type PendingAccessInput = { "email": string; "providerId": string; "providerRevision": number; "reason": string; "roleId": string }
+export type PendingAccessPage = { "cursor"?: string; "items": (PendingAccessRecord)[]; "partial": boolean }
+export type PendingAccessRecord = { "data": PendingAccess; "id": string; "revision": number }
+export type PendingProviderChoice = { "autoProvision": boolean; "id": string; "issuer": string; "name": string; "revision": number }
+export type PendingProviderChoices = { "items": (PendingProviderChoice)[] }
 export type PermissionCatalog = { "items": (PermissionChoice)[] }
 export type PermissionChoice = { "action": string; "area": string; "canGrant": boolean; "description": string; "id": string; "installationOnly": boolean }
 export type PermissionComparison = { "after": boolean; "before": boolean; "permission": string }
@@ -105,6 +111,11 @@ export interface AccessRequests {
   listPredefinedRoles: {  }
   readPredefinedRole: { "role": string }
   setPredefinedRoleState: { "role": string; revision: number; body: PredefinedRoleUpdate }
+  listPendingAccess: { "project": string; query?: { "limit"?: number; "cursor"?: string } }
+  createPendingAccess: { "project": string; body: PendingAccessInput }
+  pendingAccessProviders: { "project": string }
+  readPendingAccess: { "project": string; "access": string }
+  cancelPendingAccess: { "project": string; "access": string; revision: number; body: Reason }
   listProjectGrants: { "project": string; query?: { "limit"?: number; "cursor"?: string } }
   createProjectGrant: { "project": string; body: GrantDefinition }
   removeProjectGrant: { "project": string; "grant": string; revision: number; body: Reason }
@@ -176,6 +187,11 @@ export interface AccessResponses {
   listPredefinedRoles: PredefinedRolePage
   readPredefinedRole: PredefinedRoleRecord
   setPredefinedRoleState: PredefinedRoleRecord
+  listPendingAccess: PendingAccessPage
+  createPendingAccess: PendingAccessRecord
+  pendingAccessProviders: PendingProviderChoices
+  readPendingAccess: PendingAccessRecord
+  cancelPendingAccess: PendingAccessRecord
   listProjectGrants: GrantsPage
   createProjectGrant: GrantRecord
   removeProjectGrant: GrantRemoved
@@ -247,6 +263,11 @@ export const accessOperations = {
   listPredefinedRoles: { method: "GET", path: "/api/v1/predefined-roles" },
   readPredefinedRole: { method: "GET", path: "/api/v1/predefined-roles/{role}" },
   setPredefinedRoleState: { method: "PUT", path: "/api/v1/predefined-roles/{role}" },
+  listPendingAccess: { method: "GET", path: "/api/v1/projects/{project}/pending-access" },
+  createPendingAccess: { method: "POST", path: "/api/v1/projects/{project}/pending-access" },
+  pendingAccessProviders: { method: "GET", path: "/api/v1/projects/{project}/pending-access/providers" },
+  readPendingAccess: { method: "GET", path: "/api/v1/projects/{project}/pending-access/{access}" },
+  cancelPendingAccess: { method: "POST", path: "/api/v1/projects/{project}/pending-access/{access}/cancel" },
   listProjectGrants: { method: "GET", path: "/api/v1/projects/{project}/permissions" },
   createProjectGrant: { method: "POST", path: "/api/v1/projects/{project}/permissions" },
   removeProjectGrant: { method: "DELETE", path: "/api/v1/projects/{project}/permissions/{grant}" },

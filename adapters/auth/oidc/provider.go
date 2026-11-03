@@ -37,6 +37,7 @@ type Provider struct {
 }
 
 type Service struct {
+	ProjectAccess ProjectAccess
 	Links         *accountlinks.Service
 	Store         *storage.Store
 	Directory     *identity.Directory

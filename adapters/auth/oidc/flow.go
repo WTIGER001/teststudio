@@ -156,6 +156,11 @@ func (s *Service) Callback(w http.ResponseWriter, r *http.Request, id string) er
 			return err
 		}
 	}
+	if s.ProjectAccess != nil {
+		if err := s.ProjectAccess.ApplyPendingAccess(ctx, SignInIdentity{UserID: user.ID, ProviderID: p.ID, ProviderRevision: v.ProviderRevision, Issuer: verified.Issuer, Subject: verified.Subject, Email: text("email"), EmailVerified: emailVerified, ExpiresAt: verified.Expiry}); err != nil {
+			return err
+		}
+	}
 	if _, err := s.Sessions.CreateOIDC(ctx, w, user.ID, p.ID, v.ProviderRevision, authUntil); err != nil {
 		return err
 	}

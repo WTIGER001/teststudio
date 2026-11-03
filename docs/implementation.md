@@ -65,6 +65,48 @@ The full plan remains required scope. Check an item only after its implementatio
 ## Feature log
 
 Record feature commits and targeted validation here.
+Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
+
+### Pending project access without invitations
+
+Added project-owned pending access preparation, curated enabled provider choices, bounded reads, and revision-controlled cancellation.
+Records bind an allowed provider revision and issuer, mandatory verified email, exact project, permitted role, approving owner, and audit reason.
+Preparation creates no user or sign-in identity and sends no invitation.
+Project managers require no installation directory or provider management authority.
+Provider choices contain no client credentials or secret references.
+
+Normal OIDC sign-in supplies verified provider claims through a focused activation port.
+Activation rechecks provider configuration, identity ownership, the project, current owner authority, and the actual recipient.
+Role fingerprints retain predefined state and inherited custom policy revisions.
+Changed approvals become blocked and require explicit new preparation. Email matching never merges internal accounts.
+Identity-linking proof does not apply pending access.
+Configured first-sign-in provisioning remains authoritative.
+
+Refactored direct role changes into a shared transaction-bound helper.
+Pending activation uses the same permission service and exact project assignment contract.
+Native assignments, metadata, activation, match removal, and audit commit together.
+Consumed approvals cannot regrant a subsequently revoked role.
+Cancelled, blocked, and activated history remains readable within its exact authority.
+Exact pending-object, role, and activated-recipient denies remain effective.
+
+Project access provides focused preparation, history, cancellation, and read-only components.
+Editors retain their opened provider revision across ordinary refreshes.
+Conflicts and unreadable responses block repeat submission until explicit state and choice review.
+Revoked authority clears private edits. Contextual help, shared themes, mobile layouts, and keyboard submission accompany the workflow.
+OpenAPI 0.11 and the generated identity client contain 73 JSON operations.
+
+The new STUDIO-PENDING-001 self-test runs through normal TestStudio publication and execution.
+It covers a project-only manager, stale provider revisions, stale cancellation, unconfirmed preparation, two real local OIDC issuers, and mandatory verified email.
+It verifies activation without merging accounts, later revocation, provider-change blocking, read-only recovery, private-edit clearing, keyboard submission, both themes, and mobile layout.
+Run `20261103T095240.042580000-d952f2d4955758b43dc8116f` passes with complete evidence and cleaned execution resources.
+Desktop and mobile screenshots were inspected. Mobile headings use a stacked layout.
+Account-linking regression run `20261103T095157.662269000-9e854c6640282437e7e1aae0` also passes.
+
+Focused API, assignment, identity, and generated-client checks pass on SQLite and local PostgreSQL with race detection.
+Additional checks verify inherited-role changes, cross-instance cancellation races, exact recipient privacy, and native-role rollback after a late batch failure.
+The UI build and pure pending-access and shared resource-validation checks pass.
+
+Remaining OIDC acceptance, source management, execution parity, deployment verification, and the remaining full plan stay required.
 
 ### Fresh account proof and explicit identity linking
 

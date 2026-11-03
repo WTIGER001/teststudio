@@ -1,6 +1,7 @@
 package oidc_test
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -13,6 +14,17 @@ import (
 	"github.com/wtiger001/teststudio/internal/sessions"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
+
+type projectAccessObserver struct {
+	calls int
+	last  authoidc.SignInIdentity
+}
+
+func (o *projectAccessObserver) ApplyPendingAccess(_ context.Context, proof authoidc.SignInIdentity) error {
+	o.calls++
+	o.last = proof
+	return nil
+}
 
 func signIn(t *testing.T, s *authoidc.Service, i *issuer, id string) (sessions.Session, *http.Cookie) {
 	t.Helper()
@@ -65,6 +77,8 @@ func TestOIDCLinkProvesCurrentAndTargetBeforeExplicitConfirmation(t *testing.T) 
 	register(t, s, source, "source")
 	register(t, s, target, "target")
 	s.Links = &accountlinks.Service{Store: db, Sessions: s.Sessions}
+	observer := &projectAccessObserver{}
+	s.ProjectAccess = observer
 	current, cookie := signIn(t, s, source, "source")
 	op, err := s.Links.Start(t.Context(), current.ID, accountlinks.StartInput{ProviderID: "target", Reason: "Use another provider"}, "127.0.0.1")
 	if err != nil || op.State != "authenticate-source" {
@@ -99,6 +113,9 @@ func TestOIDCLinkProvesCurrentAndTargetBeforeExplicitConfirmation(t *testing.T) 
 			t.Fatal("proof callback replay accepted")
 		}
 	}
+	if observer.calls != 1 {
+		t.Fatal("linking proof applied pending project access", observer.calls)
+	}
 	users, err := db.All(t.Context(), "users", "")
 	if err != nil || len(users) != 1 {
 		t.Fatal("proof provisioned a second user", len(users), err)
@@ -115,6 +132,9 @@ func TestOIDCLinkProvesCurrentAndTargetBeforeExplicitConfirmation(t *testing.T) 
 		t.Fatal("confirmation changed user or active provider", err)
 	}
 	targetSession, _ := signIn(t, s, target, "target")
+	if observer.calls != 2 || observer.last.UserID != current.UserID || observer.last.ProviderID != "target" || !observer.last.EmailVerified || observer.last.Subject != target.subject {
+		t.Fatal("normal sign-in did not deliver verified pending access context", observer.calls)
+	}
 	if targetSession.UserID != current.UserID {
 		t.Fatal("linked provider did not sign in to the same account")
 	}

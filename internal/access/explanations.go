@@ -91,7 +91,7 @@ func (s *Service) explanationAuthority(ctx context.Context, actor, user string, 
 		err := s.Auth.Check(ctx, actor, q.Project, q.Object, "permissions.read")
 		if errors.Is(err, authorization.ErrForbidden) {
 			parts := splitPolicyObject(q.Object)
-			action := map[string]string{"suite": "catalog.read", "test": "catalog.read", "run": "runs.read", "environment": "environments.read", "application": "projects.read", "group": "groups.read", "user": "users.read", "role": "roles.read", "grant": "permissions.read", "provider": "providers.read"}[parts[0]]
+			action := map[string]string{"suite": "catalog.read", "test": "catalog.read", "run": "runs.read", "environment": "environments.read", "application": "projects.read", "group": "groups.read", "user": "users.read", "role": "roles.read", "grant": "permissions.read", "provider": "providers.read", "pending-access": "members.read"}[parts[0]]
 			if !(q.Project == "" && q.Object == "user/"+actor) {
 				err = s.Auth.Check(ctx, actor, q.Project, q.Object, action)
 			} else {
@@ -116,6 +116,13 @@ func (s *Service) explanationAuthority(ctx context.Context, actor, user string, 
 		if row.Project != q.Project || value.ID != q.Project {
 			return storage.ErrNotFound
 		}
+	}
+	if q.Object != "" && splitPolicyObject(q.Object)[0] == "pending-access" {
+		value, _, err := s.loadPendingAccess(ctx, q.Project, splitPolicyObject(q.Object)[1])
+		if err != nil {
+			return err
+		}
+		return s.pendingReadAuthority(ctx, actor, value)
 	}
 	return s.checkPolicyObject(ctx, q.Project, q.Object)
 }
