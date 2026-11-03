@@ -223,7 +223,35 @@ Its transaction adapter supports assignment changes and rejects other policy wri
 SQLite uses transaction-bound record storage.
 An exact revocation removes one role and binding combination.
 An empty binding map does not remove assignments with project bindings.
-The assignment API and interface use this transaction. Custom policy transactions remain pending.
+The assignment API and interface use this transaction. Custom policy storage uses the separate transaction described below.
+
+## Atomic policy storage
+
+`authorization.Service.WithPolicyTransaction` binds directory metadata and the complete permission store to one database transaction.
+It advances the shared directory revision before authorization reads and policy changes.
+Custom roles, grants, inheritance, assignments, role overrides, and audit records share that transaction.
+The permission service evaluates pending writes against the transaction-bound directory and store.
+Rejected changes roll back all policy writes, metadata, and the directory revision.
+Competing changes through independent database connections produce a revision conflict instead of partial policy state.
+
+PostgreSQL uses the native permission tables in `teststudio_permissions` through the metadata transaction.
+SQLite uses its existing permission records through the same bound storage transaction.
+No alternate permission evaluator is introduced.
+Both stores require existing custom inheritance endpoints and reject cycles.
+Custom role display names can repeat. Permanent identifiers remain unique.
+Grant inspection includes literal project and object scopes on both databases.
+The permission library still evaluates exact scope, explicit denies, disabled roles, and expiry.
+
+The pinned library has no single-grant removal or inheritance removal service operation.
+TestStudio supplies these storage operations through `authorization.Service.RemovePolicyGrant` and `RemoveRoleInheritance`.
+Both operations require an active policy transaction.
+Single-grant removal preserves other grant identifiers.
+Inheritance removal preserves alternate paths and rebuilds PostgreSQL closure within the transaction.
+All access decisions continue through the permission library.
+
+Focused SQLite and local PostgreSQL checks cover pending evaluation, complete rollback, exact object boundaries, direct reports, and grant pagination.
+They also cover disabled overrides, expired denies, independent connections, retained grant identifiers, and alternate inheritance paths.
+These checks establish the storage foundation. Custom policy APIs, authorized delegation, editor workflows, and effective-access explanations remain pending.
 
 ## Predefined role assignments
 

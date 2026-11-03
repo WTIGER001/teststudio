@@ -9,6 +9,10 @@ import (
 )
 
 func (s *Store) WithAssignmentTransaction(ctx context.Context, metadata *storage.Store, fn func(*storage.Store, permissions.PermissionStore) error) error {
+	return s.WithPolicyTransaction(ctx, metadata, fn)
+}
+
+func (s *Store) WithPolicyTransaction(ctx context.Context, metadata *storage.Store, fn func(*storage.Store, permissions.PermissionStore) error) error {
 	if metadata.DB != s.db.DB || metadata.Dialect != "sqlite" {
 		return errors.New("assignment transaction requires the same SQLite database")
 	}

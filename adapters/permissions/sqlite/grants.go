@@ -130,6 +130,9 @@ func (s *Store) DeleteGrantsForOwner(ctx context.Context, kind permissions.Princ
 }
 
 func (s *Store) RemoveGrant(ctx context.Context, id int64) error {
+	if id < 1 {
+		return errors.New("a positive grant identifier is required")
+	}
 	return s.delete(ctx, "permission-grants", grantID(id))
 }
 

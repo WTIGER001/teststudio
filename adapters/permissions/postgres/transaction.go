@@ -23,15 +23,22 @@ func (s *Store) WithAssignmentTransaction(ctx context.Context, metadata *storage
 		return errors.New("assignment transaction requires PostgreSQL")
 	}
 	return metadata.Transaction(ctx, func(bound *storage.Store, tx *sql.Tx) error {
-		var database string
-		if err := tx.QueryRowContext(ctx, "SELECT current_database()").Scan(&database); err != nil {
+		if err := s.sameDatabase(ctx, tx); err != nil {
 			return err
-		}
-		if database != s.pool.Config().ConnConfig.Database {
-			return errors.New("assignment transaction requires the same PostgreSQL database")
 		}
 		return fn(bound, &assignmentTransaction{assignmentReads: assignmentReads{PermissionStore: s}, tx: tx})
 	})
+}
+
+func (s *Store) sameDatabase(ctx context.Context, tx *sql.Tx) error {
+	var database string
+	if err := tx.QueryRowContext(ctx, "SELECT current_database()").Scan(&database); err != nil {
+		return err
+	}
+	if database != s.pool.Config().ConnConfig.Database {
+		return errors.New("permission transaction requires the same PostgreSQL database")
+	}
+	return nil
 }
 
 func (s *assignmentTransaction) validate(ctx context.Context, principal permissions.PrincipalRef, role string, builtins []permissions.Role) error {
@@ -64,23 +71,26 @@ func (s *assignmentTransaction) AssignRole(ctx context.Context, principal permis
 	if err := s.validate(ctx, principal, role, builtins); err != nil {
 		return err
 	}
-	raw, err := assignmentBindings(bindings)
-	if err != nil {
-		return err
-	}
-	_, err = s.tx.ExecContext(ctx, `INSERT INTO teststudio_permissions.principal_roles (principal_kind,principal_id,role_id,binding_values) VALUES ($1,$2,$3,$4::jsonb) ON CONFLICT (principal_kind,principal_id,role_id,binding_values) DO NOTHING`, string(principal.Kind), principal.ID, role, raw)
-	return err
+	return writeAssignment(ctx, s.tx, principal, role, bindings, false)
 }
 
 func (s *assignmentTransaction) UnassignRole(ctx context.Context, principal permissions.PrincipalRef, role string, builtins []permissions.Role, bindings map[string]any) error {
 	if err := s.validate(ctx, principal, role, builtins); err != nil {
 		return err
 	}
+	return writeAssignment(ctx, s.tx, principal, role, bindings, true)
+}
+
+func writeAssignment(ctx context.Context, tx *sql.Tx, principal permissions.PrincipalRef, role string, bindings map[string]any, remove bool) error {
 	raw, err := assignmentBindings(bindings)
 	if err != nil {
 		return err
 	}
-	_, err = s.tx.ExecContext(ctx, `DELETE FROM teststudio_permissions.principal_roles WHERE principal_kind=$1 AND principal_id=$2 AND role_id=$3 AND binding_values=$4::jsonb`, string(principal.Kind), principal.ID, role, raw)
+	statement := `INSERT INTO teststudio_permissions.principal_roles (principal_kind,principal_id,role_id,binding_values) VALUES ($1,$2,$3,$4::jsonb) ON CONFLICT (principal_kind,principal_id,role_id,binding_values) DO NOTHING`
+	if remove {
+		statement = `DELETE FROM teststudio_permissions.principal_roles WHERE principal_kind=$1 AND principal_id=$2 AND role_id=$3 AND binding_values=$4::jsonb`
+	}
+	_, err = tx.ExecContext(ctx, statement, string(principal.Kind), principal.ID, role, raw)
 	return err
 }
 

@@ -53,5 +53,9 @@ func (s *Store) migrate(ctx context.Context, cfg *pgx.ConnConfig) error {
 	if _, err := conn.Exec(ctx, "CREATE SCHEMA IF NOT EXISTS teststudio_permissions"); err != nil {
 		return err
 	}
-	return s.EnsureSchema(ctx)
+	if err := s.EnsureSchema(ctx); err != nil {
+		return err
+	}
+	_, err = conn.Exec(ctx, "ALTER TABLE teststudio_permissions.roles DROP CONSTRAINT IF EXISTS roles_code_key")
+	return err
 }

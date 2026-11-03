@@ -13,8 +13,9 @@ import (
 var ErrForbidden = errors.New("permission denied")
 
 type Service struct {
-	Engine    *permissions.Service
-	Directory *identity.Directory
+	Engine            *permissions.Service
+	Directory         *identity.Directory
+	policyTransaction bool
 }
 
 type RoleDefinition struct {

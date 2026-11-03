@@ -66,6 +66,27 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Record feature commits and targeted validation here.
 
+### Atomic custom policy storage
+
+Added a separate policy transaction without widening the existing PostgreSQL assignment-only transaction contract.
+Custom role definitions, grants, inheritance, assignments, disabled overrides, and metadata now share a transaction on SQLite and PostgreSQL.
+The shared directory revision locks before authorization and rejects competing changes through independent connections.
+The permission library evaluates pending policy writes. Rejection rolls back policy, audit, and directory state together.
+Added transaction-only single-grant removal and inheritance removal for operations absent from the pinned service interface.
+Removal preserves unrelated grant identifiers and alternate inheritance paths.
+PostgreSQL closure rebuilds in the same transaction as direct-edge removal.
+Both stores reject missing inheritance endpoints, cycles, and reserved custom role definitions.
+PostgreSQL role display names can repeat, matching SQLite. Permanent role identifiers remain unique.
+Literal project and object grants remain visible in PostgreSQL inspection outside a transaction.
+The library still evaluates scope, expiry, explicit denies, and role lifecycle state.
+
+Focused race checks pass on SQLite and disposable local PostgreSQL.
+They verify pending role and grant reads, complete rollback, exact object boundaries, grant pagination, and concurrent policy conflicts.
+They also verify retained grant identifiers, alternate inheritance paths, and removal rollback.
+Existing assignment, administrator guard, and managed local-account checks pass on both databases.
+No acceptance item is closed by storage work alone.
+Custom policy APIs, delegated administration, effective-access explanations, interfaces, and the remaining full plan stay pending.
+
 ### Managed local account interface and browser acceptance
 
 Added managed password sign-in beside configured OIDC choices and the separate explicit loopback development action.

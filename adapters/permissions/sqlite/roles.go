@@ -31,7 +31,10 @@ func (s *Store) CreateRole(ctx context.Context, role permissions.Role) error {
 	if err := role.Validate(); err != nil {
 		return err
 	}
-	if strings.HasPrefix(role.ID, "builtin.") {
+	if strings.TrimSpace(role.Name) == "" {
+		return errors.New("role name is required")
+	}
+	if strings.HasPrefix(role.ID, "builtin.") || role.BuiltIn {
 		return errors.New("built-in roles belong to the permission service")
 	}
 	return s.create(ctx, "permission-roles", role.ID, role)
@@ -41,7 +44,10 @@ func (s *Store) UpdateRole(ctx context.Context, role permissions.Role) error {
 	if err := role.Validate(); err != nil {
 		return err
 	}
-	if strings.HasPrefix(role.ID, "builtin.") {
+	if strings.TrimSpace(role.Name) == "" {
+		return errors.New("role name is required")
+	}
+	if strings.HasPrefix(role.ID, "builtin.") || role.BuiltIn {
 		return errors.New("built-in roles are immutable")
 	}
 	r, err := s.db.Get(ctx, "permission-roles", role.ID)
@@ -85,8 +91,13 @@ func (s *Store) DeleteRole(ctx context.Context, id string) error {
 }
 
 func (s *Store) AddRoleInheritance(ctx context.Context, parent, child string) error {
-	if parent == "" || child == "" || parent == child {
+	if parent == "" || child == "" || parent == child || strings.HasPrefix(parent, "builtin.") || strings.HasPrefix(child, "builtin.") {
 		return errors.New("invalid role inheritance")
+	}
+	for _, id := range []string{parent, child} {
+		if _, err := s.RoleDefinition(ctx, id); err != nil {
+			return err
+		}
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
