@@ -1,8 +1,8 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio identity and access administration"
-  "version": "0.6.0"
-  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
+  "version": "0.7.0"
+  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
     "url": "/"
@@ -1764,6 +1764,90 @@
             "schema":
               "$ref": "#/components/schemas/Reason"
 
+  "/api/v1/predefined-roles":
+    "get":
+      "operationId": "listPredefinedRoles"
+      "summary": "Inspect code-managed predefined roles and their installation-wide disabled state. Installation role read authority is required. The fixed catalog has six definitions."
+      "parameters": []
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/PredefinedRolePage"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+  "/api/v1/predefined-roles/{role}":
+    "get":
+      "operationId": "readPredefinedRole"
+      "summary": "Inspect code-managed predefined roles and their installation-wide disabled state. Installation role read authority is required. The fixed catalog has six definitions."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/AssignmentRole"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/PredefinedRoleRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+    "put":
+      "operationId": "setPredefinedRoleState"
+      "summary": "Change only persistent disabled state with installation system, role management, delegation, and current default-action authority. Preserve the last usable administrator."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/AssignmentRole"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/PredefinedRoleRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/PredefinedRoleUpdate"
+
 "components":
   "securitySchemes":
     "SessionCookie":
@@ -2989,3 +3073,74 @@
           "type": "boolean"
       "required":
         - "removed"
+
+    "PredefinedRole":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "id":
+          "type": "string"
+        "name":
+          "type": "string"
+        "permissions":
+          "type": "array"
+          "items":
+            "type": "string"
+        "scope":
+          "type": "string"
+          "enum":
+            - "project"
+            - "installation"
+        "disabled":
+          "type": "boolean"
+        "canManage":
+          "type": "boolean"
+      "required":
+        - "id"
+        - "name"
+        - "permissions"
+        - "scope"
+        - "disabled"
+        - "canManage"
+    "PredefinedRoleRecord":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "id":
+          "type": "string"
+        "revision":
+          "type": "integer"
+          "minimum": 1
+          "description": "Current positive revision, including a virtual revision for unmanaged native state. Never use a storage row revision."
+        "updatedAt":
+          "type": "string"
+          "format": "date-time"
+        "data":
+          "$ref": "#/components/schemas/PredefinedRole"
+      "required":
+        - "id"
+        - "revision"
+        - "data"
+    "PredefinedRolePage":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "items":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/PredefinedRoleRecord"
+      "required":
+        - "items"
+    "PredefinedRoleUpdate":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "disabled":
+          "type": "boolean"
+        "reason":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 1024
+      "required":
+        - "disabled"
+        - "reason"

@@ -22,7 +22,7 @@ go run ./cmd/teststudio-client --check
 ```
 
 Run these commands from the repository root.
-The generated module contains all 54 implemented identity and access operations, including direct grants, policy previews, and custom assignment choices.
+The generated module contains all 57 implemented identity and access operations, including predefined role state, direct grants, previews, and custom assignment choices.
 The shared client adapter supplies same-origin sessions, request-forgery protection, and revision headers.
 The client escapes path identifiers and preserves explicit query values.
 Generator checks reject stale output. Nullable expiry and required fields retain their contract types.
@@ -112,6 +112,7 @@ Cursors cannot reveal filtered identifiers or move between query contexts.
 
 Ordinary account disabling, group archival, membership removal, and installation role revocation preserve the last usable installation administrator.
 Managed installation role and direct grant changes use the same protection.
+Predefined role overrides also use this protection.
 Usable administration requires system management, user management, permission inspection and delegation, role inspection and management, and membership inspection and management.
 The check evaluates the proposed directory state through the same permission library and built-in definitions used for requests.
 Explicit denies and active membership remain authoritative. Alternate group paths can preserve access.
@@ -134,6 +135,8 @@ go run ./cmd/teststudio --local --recover-local-admin \
 
 The command requires explicit local mode and a loopback listen address.
 It enables the dedicated local administrator, restores its administrator assignment, advances its session generation, and records the recovery action.
+It also enables the predefined installation administrator role when disabled and advances its managed override revision.
+Ordinary startup preserves disabled predefined roles.
 These changes share one database transaction.
 Select Open local workspace to create a fresh session.
 After recovery, stop this process and return to the installation's normal startup command.
@@ -174,6 +177,8 @@ Keep operator access to the database and host under installation control.
 | GET | `/api/v1/roles/choices?project={project}` | Scan custom assignment choices with current delegation authority. |
 | POST | `/api/v1/roles/preview` | Compare current and proposed user access without committing policy changes. |
 | GET, PUT | `/api/v1/roles/{role}` | Read or update a custom role with its current revision. |
+| GET | `/api/v1/predefined-roles` | Inspect all readable predefined definitions and their installation-wide state. |
+| GET, PUT | `/api/v1/predefined-roles/{role}` | Inspect or change predefined disabled state with its current positive revision. |
 | GET | `/api/v1/permissions?project={project}&object={object}` | Read action descriptions and current grantability for an exact context. |
 | GET, POST | `/api/v1/projects/{project}/role-assignments` | Scan or create predefined and managed custom project assignments. |
 | GET, DELETE | `/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}` | Read or revoke one exact project assignment. |
@@ -318,7 +323,8 @@ The service checks stored object ownership and current delegation and action per
 Custom role details return server-computed `canManage` and `delegatable` values.
 Catalog pages return `canCreate` for the current scope. Archived projects suppress mutation capabilities.
 Custom assignment choice pages use a separate actor-bound cursor and current delegation checks.
-Direct principal grants, built-in role override administration, and complete effective-access explanations remain pending.
+Direct principal grants and predefined role overrides use their dedicated administration routes.
+Complete effective-access explanations remain pending.
 
 ## Proposed policy preview
 
@@ -705,4 +711,68 @@ Run the pure form utility checks:
 
 ```sh
 node scripts/test-ui-utils.mjs web/src/app/features/access/grant.utils.test.ts
+```
+
+## Predefined role state administration
+
+Open Installation roles to inspect all six predefined definitions and their current disabled state.
+Project roles shows the predefined project choices and current state without global mutation controls.
+Definitions remain code managed. State changes retain permissions, role identifiers, and existing assignments.
+Disabling applies across this installation, including assignments in every project.
+Enabling can restore access through retained assignments.
+
+The predefined-role API requires installation role read authority at the scope and the selected role object.
+The fixed catalog filters unreadable definitions. It requires no continuation cursor.
+State mutation requires installation system management, role management, permission delegation, and authority for every default action.
+Exact role-object denies remain authoritative. Project administration cannot change installation-wide role state.
+The server returns `canManage` for each readable definition. Inspection alone does not grant state-management authority.
+
+Use `PUT /api/v1/predefined-roles/{role}` with explicit `disabled`, a reason, and the current positive `If-Match` revision.
+The API rejects definition edits, missing state, unknown identifiers, and stale revisions.
+Public revisions include unmanaged native state. Enabling and disabling retain managed history and advance the public revision.
+The response omits a managed timestamp until the first managed state change.
+Inconsistent managed metadata and native state produce a conflict instead of silent adoption.
+
+Native overrides, metadata, audit reasons, and directory revisions share one policy transaction.
+The administrator guard evaluates the proposed state through the permission library.
+Two accounts assigned the same predefined administrator role are both affected by disabling that role.
+A complete custom administrator can retain an independent administration path.
+Competing role disabling and account removal cannot remove both usable paths.
+
+Every permission check reads current native predefined state before using an evaluation engine.
+The engine receives that immutable disabled-role set for its cached library lookups.
+A state change therefore reaches existing service instances on their next check.
+A storage error prevents evaluation from reusing an earlier allowed state.
+Role choices, assignment state, and administrator guards use the same fresh state.
+All permission decisions still use the common permission library.
+
+Reason forms retain the role revision captured when opened.
+Refresh predefined roles updates visible cards without replacing a pending action's revision or reason.
+Conflicts and unconfirmed responses block repeat submission until cancellation, refresh, and a new action.
+Authority loss clears private controls and refreshes the page's capabilities.
+Introduction, Concepts, and Tutorials help explains the global effect while preserving pending reasons.
+
+Explicit loopback recovery enables the predefined installation administrator role when required.
+It advances override metadata, records recovery, restores the administrator assignment, and invalidates earlier local administrator sessions atomically.
+Ordinary startup does not enable disabled roles or overwrite override metadata.
+The built-service access verifier checks this behavior across actual SQLite restarts and rejects a pre-recovery override revision.
+
+Run the focused browser workflow:
+
+```sh
+bash scripts/test-self.sh --test=STUDIO-BUILTIN-001
+```
+
+Run the focused database and recovery checks:
+
+```sh
+go test -race ./internal/access ./internal/httpapi ./internal/authorization ./cmd/teststudio \
+  -run 'TestBuiltinRole|TestLocalRecovery' -count=1
+```
+
+Use the disposable PostgreSQL profile for the same contract:
+
+```sh
+bash scripts/test-postgres.sh ./internal/access ./internal/httpapi ./internal/authorization ./cmd/teststudio \
+  -run 'TestBuiltinRole|TestLocalRecovery'
 ```

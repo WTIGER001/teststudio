@@ -119,6 +119,10 @@ func (s *Service) ListRoles(ctx context.Context, actor, project string) ([]RoleV
 		return nil, err
 	}
 	roles := []RoleView{}
+	engine, err := s.Auth.CurrentEngine(ctx)
+	if err != nil {
+		return nil, err
+	}
 	for _, definition := range authorization.BuiltInRoles() {
 		if _, ok := builtinRole(project, definition.ID); !ok {
 			continue
@@ -129,7 +133,7 @@ func (s *Service) ListRoles(ctx context.Context, actor, project string) ([]RoleV
 			}
 			return nil, err
 		}
-		role, err := s.Auth.Engine.RoleDefinition(ctx, definition.ID)
+		role, err := engine.RoleDefinition(ctx, definition.ID)
 		if err != nil {
 			return nil, err
 		}

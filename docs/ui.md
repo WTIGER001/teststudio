@@ -162,6 +162,15 @@ Each page includes contextual help and uses shared light and dark tokens.
 Narrow screens keep readable table columns inside a keyboard-focusable horizontal scroll region.
 The focused self-test exercises real project-administrator and read-only sessions, mutations, conflicts, pagination, help, and administrator protection.
 
+## Predefined role state
+
+Installation roles also provides state controls for all six predefined roles.
+These controls change disabled state across the installation. Project role pages remain read-only for predefined state.
+The server supplies current management capability and checks installation authority, delegation, and every default action.
+Reason forms identify the global impact and retain their opened revision through refreshes.
+Conflicts and unconfirmed responses require explicit state review before another submission.
+Revoked authority clears private controls. Contextual help explains disabling, restoration, and retained assignments.
+
 ## Direct permission grants
 
 Project permissions and Installation permissions provide scoped direct user and group grant administration.

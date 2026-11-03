@@ -7,7 +7,6 @@ import (
 	"time"
 
 	permissions "github.com/wtiger001/go-permissions"
-	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/identity"
 	"github.com/wtiger001/teststudio/internal/passwords"
 	"github.com/wtiger001/teststudio/internal/storage"
@@ -87,7 +86,7 @@ func (s *Service) administratorState(ctx context.Context) (*permissions.Service,
 			}
 		}
 	}
-	engine, err := authorization.NewEngine(ctx, s.Auth.Engine.GetStore(), v)
+	engine, err := s.Auth.CurrentEngineWithIdentity(ctx, v)
 	if err != nil {
 		return nil, nil, nil, err
 	}

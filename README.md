@@ -161,5 +161,7 @@ Custom role APIs support exact scoped rules, inheritance, disabled state, and ma
 The permission catalog exposes registered descriptions and current grantability. See [Identity administration](docs/access.md).
 Open Project roles or Installation roles to edit custom policies, inspect inheritance, and preview proposed access without saving changes.
 Run `bash scripts/test-self.sh --test=STUDIO-POLICY-001` for the guarded custom-policy browser workflow.
+Installation roles also manages installation-wide predefined role disabling and restoration while retaining assignments and code-managed definitions.
+Run `bash scripts/test-self.sh --test=STUDIO-BUILTIN-001` for the predefined role browser workflow.
 Open Project permissions or Installation permissions to manage direct user and group allow and deny rules, precise expiry, and reason-based removal.
 Run `bash scripts/test-self.sh --test=STUDIO-GRANTS-001` for the direct grant browser workflow.

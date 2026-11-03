@@ -5,6 +5,7 @@ import (
 	"errors"
 	"slices"
 	"strings"
+	"sync"
 
 	permissions "github.com/wtiger001/go-permissions"
 	"github.com/wtiger001/teststudio/internal/identity"
@@ -16,6 +17,10 @@ type Service struct {
 	Engine            *permissions.Service
 	Directory         *identity.Directory
 	policyTransaction bool
+	evaluationMu      sync.Mutex
+	evaluationOrigin  *permissions.Service
+	evaluationState   string
+	evaluationEngine  *permissions.Service
 }
 
 type RoleDefinition struct {
@@ -110,7 +115,11 @@ func (s *Service) Check(ctx context.Context, user, project, object, name string)
 	if project != "" && object != "" {
 		object = project + "/" + object
 	}
-	ok, err := s.Engine.HasPermission(ctx, permissions.Request{UserID: user, TeamID: project, Object: object, Perm: name})
+	engine, err := s.CurrentEngine(ctx)
+	if err != nil {
+		return err
+	}
+	ok, err := engine.HasPermission(ctx, permissions.Request{UserID: user, TeamID: project, Object: object, Perm: name})
 	if err != nil {
 		return err
 	}

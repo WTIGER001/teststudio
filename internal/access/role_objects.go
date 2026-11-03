@@ -56,6 +56,10 @@ func (s *Service) checkPolicyObject(ctx context.Context, project, object string)
 		row = stored
 	case "role":
 		if strings.HasPrefix(id, "builtin.") {
+			if project == "" {
+				_, err := predefinedRole(id)
+				return err
+			}
 			if _, ok := builtinRole(project, id); !ok {
 				return storage.ErrNotFound
 			}

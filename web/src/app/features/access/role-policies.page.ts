@@ -7,10 +7,11 @@ import { RolePermissionCatalog } from './role-permissions.service'
 import { RolePreviewService } from './role-preview.service'
 import { RoleEditorComponent } from './role-editor.component'
 import { RoleDefinitionsComponent } from './role-definitions.component'
+import { BuiltinRolesComponent } from './builtin-roles.component'
 import { roleRoute } from './role-policy.utils'
 
 @Component({
-  standalone: true, imports: [RouterLink, RoleEditorComponent, RoleDefinitionsComponent], providers: [RolePoliciesService, RoleEditorService, RolePermissionCatalog, RolePreviewService, AccessActionService], changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true, imports: [RouterLink, RoleEditorComponent, RoleDefinitionsComponent, BuiltinRolesComponent], providers: [RolePoliciesService, RoleEditorService, RolePermissionCatalog, RolePreviewService, AccessActionService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-heading access-heading"><div><span class="eyebrow wrap-anywhere">{{ service.projectId() ? 'Project · ' + service.projectId() : 'Installation administration' }}</span><h1 id="roles-heading" tabindex="-1">Roles and permissions</h1><p class="muted">Manage exact scoped policies and inspect predefined definitions.</p></div><div class="row-actions wrap-actions"><button type="button" class="button secondary" [disabled]="service.loading() || editor.busy()" (click)="service.refresh()">Refresh roles</button>@if (service.canCreate()) { <button type="button" class="button primary" [disabled]="service.loading() || editor.busy()" (click)="editor.open()">+ Create role</button> }</div></div>
     @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }
@@ -25,9 +26,10 @@ import { roleRoute } from './role-policy.utils'
       </section>
       @if (service.permissions.error()) { <p class="notice error" role="alert">{{ service.permissions.error() }}</p> }
       @if (service.builtin.error()) { <p class="notice error" role="alert">{{ service.builtin.error() }}</p> }
-      <ts-role-definitions [roles]="service.builtin.items()" [permissions]="service.permissions.items()" />
+      @if (service.projectId()) { <ts-role-definitions [roles]="service.builtin.items()" [permissions]="service.permissions.items()" /> } @else { <ts-builtin-roles [permissions]="service.permissions.items()" /> }
     }
   `,
-  styleUrl: './access-detail.css'
+  styleUrl: './access-detail.css',
+  styles: `.table-scroll table { min-width: 680px; } th[scope="row"] { min-width: 230px; }`
 })
 export class RolePoliciesPage { readonly service = inject(RolePoliciesService); readonly editor = inject(RoleEditorService); readonly route = roleRoute }

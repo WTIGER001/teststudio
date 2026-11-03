@@ -79,6 +79,10 @@ try {
   const assignmentBase = '/api/v1/projects/access-example/role-assignments'
   const assignmentPath = assignmentBase + '/user/pending-reviewer/builtin.teststudio.editor'
   const assigned = await request('POST', assignmentBase, { principalKind: 'user', principalId: 'pending-reviewer', roleId: 'builtin.teststudio.editor', reason: 'Verify durable scoped access' })
+  await request('POST', assignmentBase, { principalKind: 'user', principalId: 'pending-reviewer', roleId: 'builtin.teststudio.operator', reason: 'Verify retained predefined execution authority' })
+  const operatorRolePath = '/api/v1/predefined-roles/builtin.teststudio.operator'
+  const operatorDefault = await request('GET', operatorRolePath)
+  const disabledOperator = await request('PUT', operatorRolePath, { disabled: true, reason: 'Verify a durable installation-wide disabled override' }, operatorDefault.revision)
   for (const id of ['health', 'another']) await request('PUT', '/api/v1/projects/access-example/suites/' + id, { id, name: id, applications: [], requiresTarget: false }, 0)
   const role = { id: 'health-reader', name: 'Health reader', description: 'New exact-object verification', projectId: 'access-example', disabled: false, rules: [{ permission: 'teststudio.catalog.read', effect: 'allow', object: 'suite/health' }], inherits: [], reason: 'Verify durable object rules' }
   const reader = await request('POST', '/api/v1/roles', role)
@@ -104,12 +108,17 @@ try {
   await request('POST', '/auth/password/change', { currentPassword: reviewerInitial, newPassword: reviewerPassword })
   const reviewerCookie = cookie
   cookie = rootCookie; csrf = rootCSRF
+  assert.equal((await request('GET', '/api/v1/me/capabilities?project=access-example', undefined, undefined, 200, reviewerCookie))['teststudio.runs.cancel'], false)
   await stop()
 
   await start()
   const restored = await request('GET', '/auth/session', undefined, undefined, 200, oldCookie)
   assert.equal(restored.user.sessionEpoch, 1)
   assert.equal((await request('GET', '/api/v1/groups/reviewers/members')).items.length, 1)
+  const retainedOperator = await request('GET', operatorRolePath)
+  assert.equal(retainedOperator.revision, disabledOperator.revision)
+  assert.equal(retainedOperator.data.disabled, true)
+  assert.equal((await request('GET', '/api/v1/me/capabilities?project=access-example', undefined, undefined, 200, reviewerCookie))['teststudio.runs.cancel'], false)
   const continued = await request('GET', '/api/v1/groups?project=access-example&limit=1&cursor=' + encodeURIComponent(firstPage.cursor))
   assert.equal(continued.items[0].id, 'watchers')
   const retainedAssignment = await request('GET', assignmentPath)
@@ -163,6 +172,30 @@ try {
   await request('DELETE', assignmentPath, { reason: 'Remove the current assignment' }, recreated.revision)
   const users = await request('GET', '/api/v1/users')
   assert.equal(users.items.some(item => item.id === 'pending-reviewer'), true)
+  await request('PUT', operatorRolePath, { disabled: false, reason: 'Restore retained predefined execution access after restart' }, retainedOperator.revision)
+  assert.equal((await request('GET', '/api/v1/me/capabilities?project=access-example', undefined, undefined, 200, reviewerCookie))['teststudio.runs.cancel'], true)
+  const completePermissions = (await request('GET', '/api/v1/permissions')).items.map(item => ({ permission: item.id, effect: 'allow' }))
+  await request('POST', '/api/v1/roles', { id: 'complete-recovery-administrator', name: 'Complete recovery administrator', projectId: '', rules: completePermissions, reason: 'Retain a usable local account while testing predefined administrator recovery' })
+  await request('POST', '/api/v1/role-assignments', { principalKind: 'user', principalId: 'pending-reviewer', roleId: 'complete-recovery-administrator', reason: 'Retain complete alternate administration' })
+  const builtinAdminPath = '/api/v1/predefined-roles/builtin.teststudio.installation-admin'
+  const builtinAdmin = await request('GET', builtinAdminPath)
+  const disabledAdmin = await request('PUT', builtinAdminPath, { disabled: true, reason: 'Verify explicit operator recovery of a disabled administrator role' }, builtinAdmin.revision)
+  assert.equal(disabledAdmin.data.canManage, false)
+  const beforeRoleRecoveryCookie = cookie
+  assert.equal((await request('GET', '/api/v1/me/capabilities'))['teststudio.system.manage'], false)
+  await stop()
+
+  await start()
+  assert.equal((await request('GET', '/api/v1/me/capabilities'))['teststudio.system.manage'], false)
+  await stop()
+
+  await start(true)
+  assert.equal((await request('GET', '/auth/session', undefined, undefined, 200, beforeRoleRecoveryCookie)).user, null)
+  assert.equal((await signIn()).user.sessionEpoch, 3)
+  const recoveredAdmin = await request('GET', builtinAdminPath)
+  assert.equal(recoveredAdmin.data.disabled, false)
+  assert.ok(recoveredAdmin.revision > disabledAdmin.revision)
+  await request('PUT', builtinAdminPath, { disabled: false, reason: 'Reject a stale role override revision after explicit recovery' }, disabledAdmin.revision, 409)
   await stop()
 
   for (const args of [['--recover-local-admin'], ['--local', '--recover-local-admin', '--addr', '0.0.0.0:8040']]) {
@@ -170,7 +203,7 @@ try {
     const code = await new Promise((resolve, reject) => { child.once('exit', resolve); child.once('error', reject) })
     assert.equal(code, 1, 'Recovery accepted an invalid listen mode')
   }
-  const summary = { directGrantsPreserved: true, directDenyPrecedenceVerified: true, expiredDeniesPreserved: true, directRevocationVerified: true, recreatedDirectRevisionAdvanced: true, customRoleRulesPreserved: true, customRoleInheritancePreserved: true, exactObjectAccessVerified: true, disabledInheritedAccessPreserved: true, enabledInheritedAccessRestored: true, assignmentsPreserved: true, assignmentRevocationPreserved: true, recreatedAssignmentRevisionAdvanced: true, usersPreserved: true, membershipsPreserved: true, paginationSurvivedRestart: true, oldSessionSurvivedOrdinaryRestart: true, oldSessionRejectedAfterRecovery: true, lastAdministratorRemovalRejected: true, recoveryRequiresLoopbackLocalMode: true, ownedControllersExited: true }
+  const summary = { builtinOverridesPreserved: true, retainedBuiltinAccessRestored: true, ordinaryStartupPreservesDisabledBuiltin: true, explicitRecoveryRestoresBuiltinAdministrator: true, builtinRecoveryAdvancesRevision: true, directGrantsPreserved: true, directDenyPrecedenceVerified: true, expiredDeniesPreserved: true, directRevocationVerified: true, recreatedDirectRevisionAdvanced: true, customRoleRulesPreserved: true, customRoleInheritancePreserved: true, exactObjectAccessVerified: true, disabledInheritedAccessPreserved: true, enabledInheritedAccessRestored: true, assignmentsPreserved: true, assignmentRevocationPreserved: true, recreatedAssignmentRevisionAdvanced: true, usersPreserved: true, membershipsPreserved: true, paginationSurvivedRestart: true, oldSessionSurvivedOrdinaryRestart: true, oldSessionRejectedAfterRecovery: true, lastAdministratorRemovalRejected: true, recoveryRequiresLoopbackLocalMode: true, ownedControllersExited: true }
   const output = path.resolve('output/access', path.basename(root))
   mkdirSync(output, { recursive: true })
   writeFileSync(path.join(output, 'summary.json'), JSON.stringify(summary, null, 2))

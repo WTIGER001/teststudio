@@ -118,7 +118,11 @@ func (s *Service) assignmentRecord(ctx context.Context, project string, key assi
 	if err != nil {
 		return AssignmentRecord{}, metadata, err
 	}
-	role, err := s.Auth.Engine.RoleDefinition(ctx, key.RoleID)
+	engine, err := s.Auth.CurrentEngine(ctx)
+	if err != nil {
+		return AssignmentRecord{}, metadata, err
+	}
+	role, err := engine.RoleDefinition(ctx, key.RoleID)
 	if err != nil {
 		return AssignmentRecord{}, metadata, err
 	}
@@ -192,7 +196,11 @@ func (s *Service) changeAssignment(ctx context.Context, actor, project string, d
 			}
 		}
 		if !remove {
-			role, err := auth.Engine.RoleDefinition(ctx, key.RoleID)
+			engine, err := auth.CurrentEngine(ctx)
+			if err != nil {
+				return err
+			}
+			role, err := engine.RoleDefinition(ctx, key.RoleID)
 			if err != nil {
 				return err
 			}

@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.6.0"
+export const accessContractVersion = "0.7.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -32,6 +32,10 @@ export type PasswordSignedIn = { "mustChangePassword": boolean; "signedIn": bool
 export type PermissionCatalog = { "items": (PermissionChoice)[] }
 export type PermissionChoice = { "action": string; "area": string; "canGrant": boolean; "description": string; "id": string; "installationOnly": boolean }
 export type PermissionComparison = { "after": boolean; "before": boolean; "permission": string }
+export type PredefinedRole = { "canManage": boolean; "disabled": boolean; "id": string; "name": string; "permissions": (string)[]; "scope": "project" | "installation" }
+export type PredefinedRolePage = { "items": (PredefinedRoleRecord)[] }
+export type PredefinedRoleRecord = { "data": PredefinedRole; "id": string; "revision": number; "updatedAt"?: string }
+export type PredefinedRoleUpdate = { "disabled": boolean; "reason": string }
 export type Problem = { "message": string; "status"?: number }
 export type Profile = { "identities": ExternalIdentityPage; "localAccount": boolean; "user": User }
 export type Reason = { "reason": string }
@@ -75,6 +79,9 @@ export interface AccessRequests {
   removeInstallationGrant: { "grant": string; revision: number; body: Reason }
   readInstallationGrant: { "grant": string }
   updateInstallationGrant: { "grant": string; revision: number; body: GrantUpdate }
+  listPredefinedRoles: {  }
+  readPredefinedRole: { "role": string }
+  setPredefinedRoleState: { "role": string; revision: number; body: PredefinedRoleUpdate }
   listProjectGrants: { "project": string; query?: { "limit"?: number; "cursor"?: string } }
   createProjectGrant: { "project": string; body: GrantDefinition }
   removeProjectGrant: { "project": string; "grant": string; revision: number; body: Reason }
@@ -132,6 +139,9 @@ export interface AccessResponses {
   removeInstallationGrant: GrantRemoved
   readInstallationGrant: GrantRecord
   updateInstallationGrant: GrantRecord
+  listPredefinedRoles: PredefinedRolePage
+  readPredefinedRole: PredefinedRoleRecord
+  setPredefinedRoleState: PredefinedRoleRecord
   listProjectGrants: GrantsPage
   createProjectGrant: GrantRecord
   removeProjectGrant: GrantRemoved
@@ -189,6 +199,9 @@ export const accessOperations = {
   removeInstallationGrant: { method: "DELETE", path: "/api/v1/permissions/grants/{grant}" },
   readInstallationGrant: { method: "GET", path: "/api/v1/permissions/grants/{grant}" },
   updateInstallationGrant: { method: "PUT", path: "/api/v1/permissions/grants/{grant}" },
+  listPredefinedRoles: { method: "GET", path: "/api/v1/predefined-roles" },
+  readPredefinedRole: { method: "GET", path: "/api/v1/predefined-roles/{role}" },
+  setPredefinedRoleState: { method: "PUT", path: "/api/v1/predefined-roles/{role}" },
   listProjectGrants: { method: "GET", path: "/api/v1/projects/{project}/permissions" },
   createProjectGrant: { method: "POST", path: "/api/v1/projects/{project}/permissions" },
   removeProjectGrant: { method: "DELETE", path: "/api/v1/projects/{project}/permissions/{grant}" },

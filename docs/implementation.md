@@ -16,7 +16,7 @@ The full plan remains required scope. Check an item only after its implementatio
 - [ ] Duplicate email addresses from different issuer-subject pairs do not merge accounts or transfer access.
 - [ ] Unmapped, missing, incomplete, or outdated external groups do not silently preserve elevated project access.
 - [ ] Browser sessions keep provider tokens server-side. Expiry, revocation, callback rejection, and request-forgery protection pass focused checks.
-- [ ] SQLite restarts preserve users, memberships, assignments, custom grants, disabled roles, and sessions without a PostgreSQL service.
+- [x] SQLite restarts preserve users, memberships, assignments, custom grants, disabled roles, and sessions without a PostgreSQL service.
 - [ ] Two newly configured OIDC providers work with the same internal directory and project-scoped permissions across deployment profiles.
 - [ ] Catalog creation, editing, validation, publication, import, export, bulk actions, archive, and restoration work through both API and UI.
 - [ ] Concurrent catalog edits produce explicit conflicts. Source synchronization preserves service-managed metadata.
@@ -65,6 +65,50 @@ The full plan remains required scope. Check an item only after its implementatio
 ## Feature log
 
 Record feature commits and targeted validation here.
+
+### Predefined role overrides and fresh authorization state
+
+Added inspection and revision-controlled state changes for all six predefined roles.
+Definitions remain code managed. Disabling applies across the installation while retaining assignments and default permissions.
+Management requires installation system and role authority, delegation, and current authority for every default action.
+Exact role-object denies and project boundaries remain authoritative.
+Public revisions represent native state before its first managed change and advance through subsequent changes and recovery.
+Native overrides, management metadata, reasons, audit, and directory revisions share one policy transaction.
+The last-administrator guard rejects disabling the only usable administration path.
+Independent connection checks prevent competing role disabling and alternate account removal from removing both usable paths.
+
+Authorization now reads current predefined state before using a library evaluation engine.
+The engine receives an immutable disabled-role set. Its internal cache cannot retain an older role state across later checks.
+Storage errors prevent reuse of an earlier allowed decision.
+Role choices, assignment inspection, and administrator guards use the same fresh state.
+Permission decisions still use the permission library.
+
+Installation roles provides global state controls, default permission inspection, managed timestamps, and current revision values.
+Project role pages retain read-only predefined state.
+Reason forms preserve their opened revision during visible refresh. Conflicts and unconfirmed responses block repeat submission.
+Revoked controls clear private state. Users with retained inspection authority can explicitly refresh a read-only view.
+Contextual help includes state-change tutorials. Catalog columns retain readable identifiers on narrow screens.
+
+Explicit loopback recovery now restores disabled predefined administration, updates override metadata, and invalidates earlier administrator sessions atomically.
+Ordinary startup preserves disabled roles.
+The built-service verifier passes across actual SQLite restarts with users, memberships, assignments, direct grants, disabled custom roles, predefined overrides, and sessions.
+It also verifies retained access restoration, ordinary startup behavior, explicit recovery, and stale post-recovery revision rejection.
+Its summary is retained in `output/access/access-verification.kOrzP6/summary.json`.
+This evidence closes the SQLite restart-persistence acceptance item.
+
+Focused override, immediate state, fail-closed, recovery, bootstrap, assignment, custom policy, and administrator guard race checks pass on SQLite and disposable PostgreSQL.
+The OpenAPI 0.7 contract and generated client contain 57 identity and access operations.
+Generated-client checks, targeted vet checks, four form utility checks, and production Angular builds pass.
+STUDIO-BUILTIN-001 verifies real cross-project access withdrawal and restoration, retained assignments, code definition stability, and disabled assignment choices.
+It verifies conflict reasons, unconfirmed responses, read-only inspection, lost management with retained reads, complete read revocation, help, and administrator protection.
+The final workflow passes with complete evidence: `20261103T061102.231047000-236701edf597558d334165a3`.
+The final custom-policy regression passes: `20261103T060841.568656000-2b23ec72ec1e773361e901a7`.
+Help passes: `20261103T060302.025951000-e57122d704c6a612817185e0`.
+Assignment administration passes: `20261103T060318.354154000-4c5c5955b3533d676fd0b480`.
+Visual review confirms loaded role cards and confirmation forms in both themes and at 390 pixels, with no document overflow or unexpected browser errors.
+Owned controllers, browser containers, output volumes, and disposable database containers exit after verification.
+
+Complete effective-access source explanations, identity and provider workflows, source releases, hosted profiles, and the remaining full plan stay pending.
 
 ### Direct user and group grant interface
 

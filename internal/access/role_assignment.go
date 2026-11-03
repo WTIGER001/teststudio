@@ -14,7 +14,11 @@ func (s *Service) roleForScope(ctx context.Context, project, id string) (permiss
 		if _, ok := builtinRole(project, id); !ok {
 			return permissions.Role{}, errors.New("choose a predefined role for this scope")
 		}
-		return s.Auth.Engine.RoleDefinition(ctx, id)
+		engine, err := s.Auth.CurrentEngine(ctx)
+		if err != nil {
+			return permissions.Role{}, err
+		}
+		return engine.RoleDefinition(ctx, id)
 	}
 	value, _, err := s.loadRolePolicy(ctx, id)
 	if err != nil {

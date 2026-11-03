@@ -60,7 +60,11 @@ func seedAdministrator(ctx context.Context, auth *authorization.Service, key str
 				return err
 			}
 		}
-		err := auth.WithAssignmentTransaction(ctx, func(bound *authorization.Service) error {
+		transaction := auth.WithAssignmentTransaction
+		if recover {
+			transaction = auth.WithPolicyTransaction
+		}
+		err := transaction(ctx, func(bound *authorization.Service) error {
 			marker, err := bound.Directory.Store.Get(ctx, "identity-bootstrap", key)
 			if err != nil && !errors.Is(err, storage.ErrNotFound) {
 				return err
@@ -73,6 +77,9 @@ func seedAdministrator(ctx context.Context, auth *authorization.Service, key str
 				return err
 			}
 			if recover {
+				if err := recoverBuiltinAdministrator(ctx, bound); err != nil {
+					return err
+				}
 				if err := recoverLocalAdministrator(ctx, bound.Directory, user.ID); err != nil {
 					return err
 				}
