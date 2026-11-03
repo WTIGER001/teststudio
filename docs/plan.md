@@ -12,9 +12,23 @@ Run tests only locally. AWS, Kubernetes, and Azure verification are separate wor
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
+## Immediate delivery: usable local demonstration
+
+The user prioritizes a usable, demonstrable application on 2026-11-03.
+Finish a small local demo delivery before adding more features from the complete product backlog.
+The full objective and all 57 acceptance items remain required. They do not all gate the first local demonstration.
+See demo-readiness.md for the immediate delivery checklist.
+
+Item **01** now passes a build from an isolated copy of the current source tree.
+Go uses no workspace or local module replacements. A clean offline npm installation and Angular build also pass.
+Evidence and cleanup are recorded in implementation.md.
+The suite settings and lifecycle UI work remains uncommitted. Preserve these changes.
+The isolated Go and Angular builds include them, but targeted functional validation remains pending.
+Do not expand this feature while preparing the demonstration. Finish only necessary integration or park it explicitly.
+
 ## Current implementation checkpoint
 
-The acceptance ledger has **25 verified, 32 open, 57 total** items.
+The acceptance ledger has **26 verified, 31 open, 57 total** items.
 Item **23** now passes a real local repository snapshot with two suites beside shared application source.
 Both suites build separate images, publish, and pass normal runs with one result and complete evidence.
 Item **24** previously passes two-image publication and execution without restarting the server.

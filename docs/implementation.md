@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 25 verified of 57.
+The acceptance count is 26 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -11,7 +11,7 @@ Focus on implementation and targeted local checks. Cloud verification remains se
 These stable numbers match the priority list supplied to the user.
 Report progress against these numbers. Keep broad criteria unchecked until their full scope is verified.
 
-- [ ] **01.** The Go service and UI build from this repository without MarketMaker imports, packages, shared resources, or sibling checkouts.
+- [x] **01.** The Go service and UI build from this repository without MarketMaker imports, packages, shared resources, or sibling checkouts.
 - [ ] **02.** No existing tests, fixtures, catalog records, configuration, credentials, reports, or history are copied into the product.
 - [ ] **03.** Installation starts with empty registries and can load only explicitly selected new examples.
 - [x] **04.** Local durable operation works without a cloud account.
@@ -73,6 +73,23 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
+
+### Independent repository build
+
+Item **01** passes an isolated build of the current TestStudio source tree.
+The copy contains 733 repository source files and excludes ignored dependencies, generated outputs, and sibling checkouts.
+The Go server builds with workspace mode disabled, read-only module metadata, and network module access disabled.
+All 459 compiled package dependencies resolve inside the temporary copy, the Go toolchain, or the ordinary published-module cache.
+There are no module replacements, MarketMaker or Mapag package imports, or external source directories.
+A clean offline npm installation and Angular production build pass inside the same temporary copy.
+The npm lockfile contains no local-path dependencies. Installed package links remain inside the isolated copy.
+Evidence is .data/independent-build._o3cvq4v/result.json and package-dependencies.json.
+The temporary source, dependency installation, and build outputs are removed after verification.
+No tests, browser matrix, or cloud checks run for this build-only acceptance item.
+The ledger is **26 verified, 31 open, 57 total**.
+
+The user prioritizes a usable local demonstration over further feature expansion.
+The complete 57-item plan remains required later scope. The immediate delivery follows demo-readiness.md.
 
 ### Retained release comparison, activation, and rollback
 
