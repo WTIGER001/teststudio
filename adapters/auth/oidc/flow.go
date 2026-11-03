@@ -11,19 +11,21 @@ import (
 	"time"
 
 	coreoidc "github.com/coreos/go-oidc/v3/oidc"
+	"github.com/wtiger001/teststudio/internal/accountlinks"
 	"github.com/wtiger001/teststudio/internal/sessions"
 	"github.com/wtiger001/teststudio/internal/storage"
 	"golang.org/x/oauth2"
 )
 
 type transaction struct {
-	ProviderRevision int64     `json:"providerRevision"`
-	Provider         string    `json:"provider"`
-	State            string    `json:"state"`
-	Nonce            string    `json:"nonce"`
-	Verifier         string    `json:"verifier"`
-	ReturnTo         string    `json:"returnTo"`
-	ExpiresAt        time.Time `json:"expiresAt"`
+	Account          *accountlinks.ProofRequest `json:"account,omitempty"`
+	ProviderRevision int64                      `json:"providerRevision"`
+	Provider         string                     `json:"provider"`
+	State            string                     `json:"state"`
+	Nonce            string                     `json:"nonce"`
+	Verifier         string                     `json:"verifier"`
+	ReturnTo         string                     `json:"returnTo"`
+	ExpiresAt        time.Time                  `json:"expiresAt"`
 }
 
 func returnPath(value string) string {
@@ -70,10 +72,16 @@ func (s *Service) Callback(w http.ResponseWriter, r *http.Request, id string) er
 	if v.Provider != id || !time.Now().Before(v.ExpiresAt) || subtle.ConstantTimeCompare([]byte(v.State), []byte(r.URL.Query().Get("state"))) != 1 {
 		return errors.New("sign-in state is invalid or expired")
 	}
+	if v.Account != nil && (v.Account.ProviderID != id || v.Account.TransactionID != record.ID) {
+		return errors.New("identity proof transaction is invalid")
+	}
 	if err := s.Store.Commit(r.Context(), storage.Change{Record: record, Delete: true}); err != nil {
 		return errors.New("sign-in transaction was already used")
 	}
 	http.SetCookie(w, &http.Cookie{Name: "teststudio_login", Value: "", Path: "/auth", HttpOnly: true, Secure: s.Sessions.Secure, SameSite: http.SameSiteLaxMode, MaxAge: -1})
+	if v.Account != nil {
+		return s.accountCallback(w, r, v)
+	}
 	if r.URL.Query().Get("error") != "" {
 		return errors.New("sign-in was cancelled or denied")
 	}
@@ -95,34 +103,11 @@ func (s *Service) Callback(w http.ResponseWriter, r *http.Request, id string) er
 	if s.Client != nil {
 		ctx = coreoidc.ClientContext(ctx, s.Client)
 	}
-	token, err := cfg.Exchange(ctx, r.URL.Query().Get("code"), oauth2.VerifierOption(v.Verifier))
+	identity, err := s.exchangeIdentity(ctx, p, remote, cfg, v, r.URL.Query().Get("code"))
 	if err != nil {
-		return errors.New("authorization code exchange failed")
-	}
-	raw, ok := token.Extra("id_token").(string)
-	if !ok {
-		return errors.New("identity token is missing")
-	}
-	verified, err := remote.Verifier(&coreoidc.Config{ClientID: p.ClientID}).Verify(ctx, raw)
-	if err != nil {
-		return errors.New("identity token verification failed")
-	}
-	if verified.Subject == "" || verified.IssuedAt.After(time.Now().Add(time.Minute)) || subtle.ConstantTimeCompare([]byte(verified.Nonce), []byte(v.Nonce)) != 1 {
-		return errors.New("identity token nonce, subject, or issue time is invalid")
-	}
-	var claims map[string]json.RawMessage
-	if err := verified.Claims(&claims); err != nil {
 		return err
 	}
-	text := func(name string) string { var value string; _ = json.Unmarshal(claims[name], &value); return value }
-	if len(verified.Audience) > 1 && text("azp") != p.ClientID {
-		return errors.New("authorized party is invalid")
-	}
-	if verified.AccessTokenHash != "" {
-		if err := verified.VerifyAccessToken(token.AccessToken); err != nil {
-			return errors.New("access token binding is invalid")
-		}
-	}
+	verified, claims, text := identity.Token, identity.Claims, identity.text
 	var emailVerified bool
 	_ = json.Unmarshal(claims["email_verified"], &emailVerified)
 	if err := s.currentProvider(ctx, id, v.ProviderRevision); err != nil {

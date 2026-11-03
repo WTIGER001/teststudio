@@ -120,3 +120,22 @@ func (s *Service) Login(ctx context.Context, user, password, peer, previous stri
 	}
 	return session, cookie, err
 }
+
+func (s *Service) VerifyCurrent(ctx context.Context, current sessions.Session, password, peer string) error {
+	active, err := s.Sessions.Validate(ctx, current.ID)
+	if err != nil {
+		return err
+	}
+	if active.UserID != current.UserID || active.AuthenticationMethod != "password" || active.MustChangePassword {
+		return sessions.ErrUnauthenticated
+	}
+	row, err := s.verify(ctx, active.UserID, password, peer)
+	if err != nil {
+		return err
+	}
+	if row.Revision != active.CredentialRevision {
+		return sessions.ErrUnauthenticated
+	}
+	_, err = s.Sessions.Validate(ctx, active.ID)
+	return err
+}

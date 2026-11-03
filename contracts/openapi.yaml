@@ -1,8 +1,8 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio identity and access administration"
-  "version": "0.9.0"
-  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
+  "version": "0.10.0"
+  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
     "url": "/"
@@ -2072,6 +2072,183 @@
         "422":
           "$ref": "#/components/responses/Problem"
 
+  "/api/v1/me/identity-linking":
+    "get":
+      "operationId": "identityLinkOptions"
+      "summary": "Read enabled target providers and the current source authentication method. No provider credentials are returned."
+      "parameters": []
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/IdentityLinkOptions"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+        "429":
+          "$ref": "#/components/responses/Problem"
+        "503":
+          "$ref": "#/components/responses/Problem"
+  "/api/v1/me/identity-links":
+    "post":
+      "operationId": "startIdentityLink"
+      "summary": "Start a five-minute link operation bound to this browser session. Require current password or explicit loopback confirmation. OIDC accounts require a fresh source proof."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/IdentityLinkOperation"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+        "429":
+          "$ref": "#/components/responses/Problem"
+        "503":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/IdentityLinkStart"
+  "/api/v1/me/identity-links/{operation}":
+    "get":
+      "operationId": "readIdentityLink"
+      "summary": "Read only a link operation owned by this exact active session. Expired or changed-provider operations expose no pending proof."
+      "parameters":
+        -
+          "name": "operation"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/IdentityLinkOperation"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+        "429":
+          "$ref": "#/components/responses/Problem"
+        "503":
+          "$ref": "#/components/responses/Problem"
+  "/api/v1/me/identity-links/{operation}/confirm":
+    "post":
+      "operationId": "confirmIdentityLink"
+      "summary": "Confirm the exact proven issuer and subject. Never merge or transfer identities. Atomically link, audit, revoke older sessions, and rotate this session without extending authentication deadlines."
+      "parameters":
+        -
+          "name": "operation"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "$ref": "#/components/parameters/Revision"
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/IdentityLinkOperation"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+        "429":
+          "$ref": "#/components/responses/Problem"
+        "503":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+  "/api/v1/me/identity-links/{operation}/cancel":
+    "post":
+      "operationId": "cancelIdentityLink"
+      "summary": "Cancel a current operation and discard its pending proof."
+      "parameters":
+        -
+          "name": "operation"
+          "in": "path"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "$ref": "#/components/parameters/Revision"
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/IdentityLinkOperation"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+        "429":
+          "$ref": "#/components/responses/Problem"
+        "503":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+
 "components":
   "securitySchemes":
     "SessionCookie":
@@ -2212,6 +2389,111 @@
           "schema":
             "$ref": "#/components/schemas/Problem"
   "schemas":
+    "IdentityLinkProvider":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+        "name":
+          "type": "string"
+        "issuer":
+          "type": "string"
+          "format": "uri"
+        "revision":
+          "type": "integer"
+          "minimum": 1
+      "required":
+        - "id"
+        - "name"
+        - "issuer"
+        - "revision"
+      "additionalProperties": false
+    "IdentityLinkProof":
+      "type": "object"
+      "properties":
+        "issuer":
+          "type": "string"
+        "subject":
+          "type": "string"
+      "required":
+        - "issuer"
+        - "subject"
+      "additionalProperties": false
+    "IdentityLinkOptions":
+      "type": "object"
+      "properties":
+        "sourceMethod":
+          "type": "string"
+        "canStart":
+          "type": "boolean"
+        "providers":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/IdentityLinkProvider"
+      "required":
+        - "sourceMethod"
+        - "canStart"
+        - "providers"
+      "additionalProperties": false
+    "IdentityLinkStart":
+      "type": "object"
+      "properties":
+        "providerId":
+          "type": "string"
+        "reason":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 1024
+        "password":
+          "type": "string"
+          "writeOnly": true
+          "maxLength": 1024
+        "confirmLocal":
+          "type": "boolean"
+      "required":
+        - "providerId"
+        - "reason"
+      "additionalProperties": false
+    "IdentityLinkOperation":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+        "revision":
+          "type": "integer"
+          "minimum": 1
+        "state":
+          "type": "string"
+          "enum":
+            - "authenticate-source"
+            - "prove-target"
+            - "review"
+            - "complete"
+            - "cancelled"
+            - "failed"
+            - "expired"
+        "sourceMethod":
+          "type": "string"
+        "sourceProvider":
+          "$ref": "#/components/schemas/IdentityLinkProvider"
+        "targetProvider":
+          "$ref": "#/components/schemas/IdentityLinkProvider"
+        "identity":
+          "$ref": "#/components/schemas/IdentityLinkProof"
+        "reason":
+          "type": "string"
+        "expiresAt":
+          "type": "string"
+          "format": "date-time"
+      "required":
+        - "id"
+        - "revision"
+        - "state"
+        - "sourceMethod"
+        - "targetProvider"
+        - "reason"
+        - "expiresAt"
+      "additionalProperties": false
     "UserDefinition":
       "type": "object"
       "properties":

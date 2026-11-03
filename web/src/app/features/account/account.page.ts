@@ -1,10 +1,11 @@
 import { DatePipe } from '@angular/common'
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
+import { IdentityLinkComponent } from './identity-link.component'
 import { AccountService } from './account.service'
 import { PasswordChangeComponent } from '../auth/password-change.component'
 
 @Component({
-  standalone: true, imports: [DatePipe, PasswordChangeComponent], providers: [AccountService], changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true, imports: [DatePipe, PasswordChangeComponent, IdentityLinkComponent], providers: [AccountService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-heading"><div><span class="eyebrow">Personal settings</span><h1>Your account</h1><p class="muted">Review your identity and manage your local password.</p></div><button type="button" class="button secondary" [disabled]="service.loading()" (click)="service.refresh()">Refresh account</button></div>
     @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }
@@ -19,6 +20,7 @@ import { PasswordChangeComponent } from '../auth/password-change.component'
           @else { <p class="small muted">{{ item.data.mustChangePassword ? 'A password change is required before password sign-in opens the workspace.' : 'Local password sign-in is enabled.' }}</p><ts-password-change (changed)="service.refresh()" /> }
         </section>
       }
+      <ts-identity-link />
       <section class="panel" aria-labelledby="own-identities-heading"><h2 id="own-identities-heading">Your linked identities</h2><p class="small muted">These exact issuer and subject pairs identify your external sign-in accounts.</p>
         @if (service.identities.error()) { <p class="notice error" role="alert">{{ service.identities.error() }}</p> }
         <div class="table-scroll"><table><caption class="sr-only">Your external identities</caption><thead><tr><th scope="col">Issuer</th><th scope="col">Subject</th></tr></thead><tbody>@for (item of service.identities.items(); track item.id) { <tr><td class="wrap-anywhere">{{ item.data.issuer }}</td><td><code class="wrap-anywhere">{{ item.data.subject }}</code></td></tr> } @empty { <tr><td colspan="2">No external identities in this page.</td></tr> }</tbody></table></div>

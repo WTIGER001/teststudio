@@ -1,6 +1,7 @@
 package sessions_test
 
 import (
+	"database/sql"
 	"errors"
 	"net/http/httptest"
 	"path/filepath"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/wtiger001/teststudio/internal/identity"
 	"github.com/wtiger001/teststudio/internal/sessions"
+	"github.com/wtiger001/teststudio/internal/storage"
 	"github.com/wtiger001/teststudio/internal/testkit"
 )
 
@@ -70,5 +72,44 @@ func TestSessionCSRFRevocationAndUserDisabling(t *testing.T) {
 	}
 	if _, err := s.Read(t.Context(), r); !errors.Is(err, sessions.ErrUnauthenticated) {
 		t.Fatalf("revoked session survived: %v", err)
+	}
+}
+
+func TestRotationRollsBackWithItsOwningTransaction(t *testing.T) {
+	db, err := testkit.Open(t, filepath.Join(t.TempDir(), "rotation.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	directory := &identity.Directory{Store: db}
+	if err := directory.SaveUser(t.Context(), identity.User{ID: "user", Name: "User"}, 0); err != nil {
+		t.Fatal(err)
+	}
+	service := &sessions.Service{Store: db, Directory: directory}
+	original, err := service.Create(t.Context(), httptest.NewRecorder(), "user", "local", time.Now().Add(time.Hour))
+	if err != nil {
+		t.Fatal(err)
+	}
+	rollback := errors.New("reject owning identity change")
+	var nextID string
+	err = db.Transaction(t.Context(), func(bound *storage.Store, _ *sql.Tx) error {
+		local := *service
+		local.Store, local.Directory = bound, &identity.Directory{Store: bound}
+		next, _, err := local.Rotate(t.Context(), original.ID)
+		if err != nil {
+			return err
+		}
+		nextID = next.ID
+		return rollback
+	})
+	if !errors.Is(err, rollback) {
+		t.Fatal("transaction did not reach rotation", err)
+	}
+	current, err := service.Validate(t.Context(), original.ID)
+	if err != nil || current.UserEpoch != original.UserEpoch {
+		t.Fatal("rolled-back rotation invalidated session", err)
+	}
+	if _, err := service.Validate(t.Context(), nextID); !errors.Is(err, sessions.ErrUnauthenticated) {
+		t.Fatal("rolled-back replacement survived", err)
 	}
 }

@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.9.0"
+export const accessContractVersion = "0.10.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -18,6 +18,11 @@ export type Group = { "archived": boolean; "description": string; "id": string; 
 export type GroupDefinition = { "description"?: string; "id": string; "managedBy"?: string; "name": string; "projectId"?: string }
 export type GroupPage = { "cursor"?: string; "items": (GroupRecord)[]; "partial": boolean }
 export type GroupRecord = { "data": Group; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type IdentityLinkOperation = { "expiresAt": string; "id": string; "identity"?: IdentityLinkProof; "reason": string; "revision": number; "sourceMethod": string; "sourceProvider"?: IdentityLinkProvider; "state": "authenticate-source" | "prove-target" | "review" | "complete" | "cancelled" | "failed" | "expired"; "targetProvider": IdentityLinkProvider }
+export type IdentityLinkOptions = { "canStart": boolean; "providers": (IdentityLinkProvider)[]; "sourceMethod": string }
+export type IdentityLinkProof = { "issuer": string; "subject": string }
+export type IdentityLinkProvider = { "id": string; "issuer": string; "name": string; "revision": number }
+export type IdentityLinkStart = { "confirmLocal"?: boolean; "password"?: string; "providerId": string; "reason": string }
 export type LocalCredential = { "canManage": boolean; "configured": boolean; "createdAt"?: string; "disabled": boolean; "localAccountsEnabled": boolean; "mustChangePassword": boolean; "updatedAt"?: string; "userId": string }
 export type LocalCredentialRecord = { "data": LocalCredential; "id": string; "revision": number }
 export type LocalPasswordDefinition = { "password": string; "reason": string }
@@ -85,6 +90,11 @@ export interface AccessRequests {
   editIdentityProvider: { "provider": string; revision: number; body: ProviderMutation }
   currentProfile: { query?: { "limit"?: number; "cursor"?: string } }
   explainOwnPermission: { query: { "project"?: string; "object"?: string; "permission": string; "limit"?: number; "cursor"?: string } }
+  identityLinkOptions: {  }
+  startIdentityLink: { body: IdentityLinkStart }
+  readIdentityLink: { "operation": string }
+  cancelIdentityLink: { "operation": string; revision: number }
+  confirmIdentityLink: { "operation": string; revision: number }
   readOwnLocalCredential: {  }
   permissionCatalog: { query?: { "project"?: string; "object"?: string } }
   listInstallationGrants: { query?: { "limit"?: number; "cursor"?: string } }
@@ -151,6 +161,11 @@ export interface AccessResponses {
   editIdentityProvider: ProviderRecord
   currentProfile: Profile
   explainOwnPermission: PermissionExplanation
+  identityLinkOptions: IdentityLinkOptions
+  startIdentityLink: IdentityLinkOperation
+  readIdentityLink: IdentityLinkOperation
+  cancelIdentityLink: IdentityLinkOperation
+  confirmIdentityLink: IdentityLinkOperation
   readOwnLocalCredential: LocalCredentialRecord
   permissionCatalog: PermissionCatalog
   listInstallationGrants: GrantsPage
@@ -217,6 +232,11 @@ export const accessOperations = {
   editIdentityProvider: { method: "PUT", path: "/api/v1/identity-providers/{provider}" },
   currentProfile: { method: "GET", path: "/api/v1/me" },
   explainOwnPermission: { method: "GET", path: "/api/v1/me/effective-permissions" },
+  identityLinkOptions: { method: "GET", path: "/api/v1/me/identity-linking" },
+  startIdentityLink: { method: "POST", path: "/api/v1/me/identity-links" },
+  readIdentityLink: { method: "GET", path: "/api/v1/me/identity-links/{operation}" },
+  cancelIdentityLink: { method: "POST", path: "/api/v1/me/identity-links/{operation}/cancel" },
+  confirmIdentityLink: { method: "POST", path: "/api/v1/me/identity-links/{operation}/confirm" },
   readOwnLocalCredential: { method: "GET", path: "/api/v1/me/local-credential" },
   permissionCatalog: { method: "GET", path: "/api/v1/permissions" },
   listInstallationGrants: { method: "GET", path: "/api/v1/permissions/grants" },

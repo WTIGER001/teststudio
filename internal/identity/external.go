@@ -25,6 +25,8 @@ func externalID(issuer, subject string) string {
 	return hex.EncodeToString(h[:])
 }
 
+func ExternalIdentityID(issuer, subject string) string { return externalID(issuer, subject) }
+
 func (d *Directory) ExternalLink(ctx context.Context, issuer, subject string) (ExternalIdentity, error) {
 	if issuer == "" || subject == "" {
 		return ExternalIdentity{}, errors.New("issuer and subject are required")

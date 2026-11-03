@@ -871,3 +871,61 @@ Focused loopback provider tests use actual discovery, signed tokens, state, nonc
 They verify changes during discovery and exchange without external provider accounts.
 The [provider guide](providers.md) describes managed provider configuration.
 Explicit fresh-authentication account linking, provider logout, and complete provider acceptance remain pending.
+
+## Explicit identity linking
+
+Open Your account and use Link another sign-in.
+Choose an enabled provider and enter an audit reason.
+The request belongs to the current browser session. It expires after five minutes.
+
+Password sign-in requires the current password again. The durable sign-in limiter also applies to this verification.
+OIDC sign-in requires fresh authentication through the current provider.
+The returned issuer and subject must already identify the same internal user.
+The loopback operator can confirm local control only from a loopback connection.
+Internal service or fixture sessions cannot start linking.
+
+Next, select Verify new identity. Authenticate through the target provider.
+Both OIDC steps use code flow, PKCE, state, nonce, and normal token verification.
+They request `max_age=0` and `prompt=login`.
+The token must contain an integer `auth_time`.
+Authentication must follow the authorization request, with one minute of clock tolerance and a five-minute maximum age.
+The protocol requirements are in [OpenID Connect Core](https://openid.net/specs/openid-connect-core-1_0-errata2.html#AuthRequest).
+
+Proof returns to Your account. It creates no identity link, user, membership, or role assignment.
+Review the exact issuer and subject. Select Confirm identity link to add the sign-in method.
+Email matching never links accounts. An existing identity keeps its owner, including when that owner is the current user.
+This workflow cannot merge internal accounts or transfer an identity.
+Provider group mappings apply during later normal sign-in. The linking proof never synchronizes groups.
+
+Confirmation requires the current operation revision and the original active session.
+One database transaction inserts the link, records the audit event, increments the user session epoch, and completes the operation.
+Earlier sessions become invalid. This browser receives a new opaque session cookie and request-forgery token.
+The original session expiry and authentication deadline remain unchanged.
+The replacement session can read the completed operation after an unconfirmed response.
+
+Provider edits, credential changes, disabled users, revoked sessions, and expiry invalidate pending operations.
+Starting another proof supersedes its earlier browser transaction.
+Consumed, superseded, cancelled, and cross-session callbacks cannot complete linking.
+Cancel identity link discards pending proof.
+Use Review current link state after conflicts or unconfirmed responses. Repeated mutations stay disabled until that review succeeds.
+Password values clear after submission and never enter operation records or audit data.
+
+### Identity link API
+
+These operations require an active session. Mutations also require the configured Origin and current request-forgery token.
+
+| Method | Route | Behavior |
+| --- | --- | --- |
+| GET | `/api/v1/me/identity-linking` | Read the source method and enabled target choices. |
+| POST | `/api/v1/me/identity-links` | Start with `providerId`, `reason`, and source authentication. |
+| GET | `/api/v1/me/identity-links/{operation}` | Read the operation owned by this exact session. |
+| GET | `/auth/identity-links/{operation}/authorize` | Navigate to the required source or target provider. |
+| POST | `/api/v1/me/identity-links/{operation}/confirm` | Confirm proven identity with positive `If-Match`. |
+| POST | `/api/v1/me/identity-links/{operation}/cancel` | Cancel with positive `If-Match`. |
+
+Source authentication uses `password` for a password session, or `confirmLocal: true` for the loopback operator.
+OIDC source proof follows the authorize route.
+The existing `/auth/callback/{provider}` route handles purpose-bound linking callbacks.
+No HTTP operation accepts an arbitrary issuer and subject as a linking mutation.
+JSON operation responses contain no session identifiers, protocol secrets, provider credentials, or passwords.
+OpenAPI 0.10 and the generated identity client include the five JSON operations.

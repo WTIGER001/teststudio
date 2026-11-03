@@ -66,6 +66,43 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Record feature commits and targeted validation here.
 
+### Fresh account proof and explicit identity linking
+
+Added session-owned identity link operations, enabled provider choices, current-state reads, cancellation, and revision-controlled confirmation.
+Requests require a reason and expire after five minutes or the earlier session or proof deadline.
+Password accounts verify the current password through the durable limiter.
+OIDC accounts prove the existing account through a fresh provider authentication.
+Loopback operator confirmation remains explicit and unavailable to remote or internal fixture sessions.
+
+Both OIDC steps reuse the normal code exchange and token verifier.
+They request fresh authentication and require a bounded integer authentication time.
+Source proof must resolve to the same internal user. Target proof never provisions users or synchronizes group memberships.
+Purpose-bound state, nonce, PKCE, current provider revisions, and the initiating session protect callbacks.
+New proof transactions supersede earlier callbacks without letting stale failures invalidate the new proof.
+
+Proof exposes the exact issuer and subject for a separate confirmation.
+Already linked identities retain their owner. No email matching, account merging, or identity transfer occurs.
+One database transaction links the identity, audits the reason, rotates the current session, and invalidates older sessions.
+Rotation preserves the original absolute session and authentication deadlines. An outer transaction rollback preserves the original session.
+The new session can recover the completed operation after an unreadable confirmation response.
+
+Your account provides focused source verification, target verification, exact proof review, cancellation, and completion views.
+Conflicts and unknown mutation outcomes block repeat changes until explicit state review.
+Submitted password values clear. Contextual help explains the complete flow.
+OpenAPI 0.10 and the generated client contain 68 JSON operations.
+
+The new STUDIO-LINKS-001 self-test runs through normal TestStudio publication and execution.
+It covers password proof, incorrect credentials, cancellation, OIDC source ownership, target proof, and explicit confirmation.
+It also covers unreadable confirmation recovery, session rotation, linked sign-in, keyboard confirmation, both themes, mobile layout, and unavailable-view recovery.
+Run `20261103T092724.197236000-6ce7a6549b9d40fd8d58b93f` passes with complete evidence and cleaned execution resources.
+Desktop and mobile screenshots were inspected.
+
+Focused identity, session, local authentication, OIDC, API, and generated-client checks pass.
+The linking, session, OIDC, and local authentication checks also pass on local PostgreSQL with race detection.
+The UI build and pure linking utility checks pass.
+
+Pending access, remaining OIDC acceptance, source management, deployment profiles, and the remaining full plan stay required.
+
 ### Managed providers, permanent group ownership, and browser sign-in
 
 Added installation provider list, registration, detail, and revision-controlled configuration APIs.

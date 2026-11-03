@@ -2,6 +2,7 @@
   "schemaVersion": "teststudio.selftest/v1",
   "source": "teststudio-selftests",
   "tests": [
+    { "id": "STUDIO-LINKS-001", "title": "Fresh account proof, explicit identity linking, and session rotation", "selector": "@STUDIO-LINKS-001", "category": "Administration" },
     { "id": "STUDIO-PROVIDERS-001", "title": "Managed providers, scoped group mappings, and isolated OIDC sign-in", "selector": "@STUDIO-PROVIDERS-001", "category": "Administration" },
     { "id": "STUDIO-PERMISSIONS-001", "title": "Effective access decisions, inherited sources, privacy, and changing authority", "selector": "@STUDIO-PERMISSIONS-001", "category": "Administration" },
     { "id": "STUDIO-POLICY-001", "title": "Custom policies, inheritance, previews, and guarded role editors", "selector": "@STUDIO-POLICY-001", "category": "Administration" },

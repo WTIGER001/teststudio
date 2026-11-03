@@ -63,7 +63,7 @@ func newIssuer(t *testing.T) *issuer {
 			if i.onToken != nil {
 				i.onToken()
 			}
-			claims := map[string]any{"iss": i.server.URL, "sub": i.subject, "aud": "teststudio", "iat": time.Now().Add(-time.Second).Unix(), "exp": time.Now().Add(time.Hour).Unix(), "nonce": i.nonce, "name": "Example User", "email": "same@example.invalid", "email_verified": true, "groups": []string{"operators"}}
+			claims := map[string]any{"iss": i.server.URL, "sub": i.subject, "aud": "teststudio", "iat": time.Now().Add(-time.Second).Unix(), "auth_time": time.Now().Unix(), "exp": time.Now().Add(time.Hour).Unix(), "nonce": i.nonce, "name": "Example User", "email": "same@example.invalid", "email_verified": true, "groups": []string{"operators"}}
 			if i.mutate != nil {
 				i.mutate(claims)
 			}

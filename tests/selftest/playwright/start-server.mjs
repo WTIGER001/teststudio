@@ -4,14 +4,15 @@ import { randomBytes } from 'node:crypto'
 import { writeFile, unlink } from 'node:fs/promises'
 import { createOIDCFixture } from './oidc-fixture.mjs'
 
+const linkingWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-LINKS-001'
 const localWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-LOCAL-001'
-const providerWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-PROVIDERS-001'
+const providerWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-PROVIDERS-001' || linkingWorkflow
 const oidcSecret = randomBytes(24).toString('hex'), oidcFixture = providerWorkflow ? createOIDCFixture(oidcSecret) : null
 const token = randomBytes(24).toString('hex'), requests = [], counts = new Map()
 const bindingsPath = '/tmp/teststudio-notification-bindings.json'
 const providerPath = '/tmp/teststudio-password-provider.json'
 const kinds = ['retry', 'failure', 'waiting']
-let development = true, passwords = localWorkflow, restarting = false
+let development = true, passwords = localWorkflow || linkingWorkflow, restarting = false
 let acceptFailure = false, child, stopping = false
 const helpers = new Set()
 const server = createServer(async (request, response) => {

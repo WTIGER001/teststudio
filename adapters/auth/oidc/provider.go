@@ -13,6 +13,7 @@ import (
 	"time"
 
 	coreoidc "github.com/coreos/go-oidc/v3/oidc"
+	"github.com/wtiger001/teststudio/internal/accountlinks"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/identity"
 	"github.com/wtiger001/teststudio/internal/sessions"
@@ -36,6 +37,7 @@ type Provider struct {
 }
 
 type Service struct {
+	Links         *accountlinks.Service
 	Store         *storage.Store
 	Directory     *identity.Directory
 	Sessions      *sessions.Service
