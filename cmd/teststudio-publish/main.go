@@ -47,7 +47,7 @@ func main() {
 
 func run(ctx context.Context, args []string, writer io.Writer) error {
 	if len(args) == 0 {
-		return errors.New("use teststudio-publish login, prepare, status, publish, cancel, logout, inspect, or cleanup")
+		return errors.New("use teststudio-publish login, prepare, status, publish, cancel, logout, build-bundle, inspect, or cleanup")
 	}
 	switch args[0] {
 	case "login":
@@ -56,6 +56,8 @@ func run(ctx context.Context, args []string, writer io.Writer) error {
 		return logout(ctx, args[1:], writer)
 	case "prepare", "status", "publish", "cancel":
 		return publication(ctx, args[0], args[1:], writer)
+	case "build-bundle":
+		return buildBundle(ctx, args[1:], writer)
 	case "inspect":
 		return inspect(ctx, args[1:], writer)
 	case "cleanup":
@@ -151,6 +153,15 @@ func cleanup(ctx context.Context, args []string, writer io.Writer) error {
 	file.Close()
 	if readErr != nil {
 		return readErr
+	}
+	var envelope struct {
+		Schema string `json:"schemaVersion"`
+	}
+	if err := json.Unmarshal(data, &envelope); err != nil {
+		return err
+	}
+	if envelope.Schema == "teststudio.build-reference/v1" {
+		return cleanupBuildReference(ctx, data, *filename, writer)
 	}
 	var state savedReference
 	if err := definitions.Decode("json", string(data), &state); err != nil {

@@ -18,14 +18,20 @@ The acceptance ledger has **23 verified, 34 open, 57 total** items.
 Item **24** now passes local verification: publish two immutable images and execute each without restarting the server.
 Durable prebuilt preparation, cancellation, recovery, API, UI, and CLI server publication are implemented.
 Source synchronization preserves managed metadata and archives omitted owned definitions.
-Inspection foundation commit: `d4ec6a0`. The following feature milestone records publication integration.
+Inspection foundation commit: `d4ec6a0`. Publication integration commit: `50ebc49`.
+The CLI now assembles validated offline Go ZIP bundles through a separate artifact builder interface.
+Selected nested manifests preserve the complete repository context. Vendored dependencies work without downloads.
 
 Focused source, API, CLI, ownership, and generated-client checks pass. The Angular build passes.
 The real local workflow reuses the cached Go fixture without rebuilding its dependencies.
 Evidence is `.data/prebuilt-verification.Y3B1AO/result.json` with verified cleanup in `cleanup.json`.
 No cloud tests run. New preparation controls still need targeted browser verification.
 
-Continue source archive and GitHub preparation through a separate isolated build backend.
+Continue direct UI source archive staging and durable build dispatch through the separate artifact builder interface.
+Then add GitHub preparation, including private repositories, registered suite paths, sync deduplication, and retained source snapshots.
+The current local builder assembles offline Go bundles with a trusted runtime and fixed copy instructions.
+Real bundle evidence is `.data/bundle-verification.GoxFng/result.json` with verified cleanup in `cleanup.json`.
+Playwright bundle assembly and CLI OIDC browser sign-in also remain pending.
 Keep the complete acceptance ledger required and report stable item numbers.
 Implement coherent batches, then run the smallest relevant local checks. Reuse existing evidence.
 

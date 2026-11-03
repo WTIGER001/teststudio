@@ -6,7 +6,8 @@ Use project settings to create a suite when required.
 
 The same page prepares locally available immutable Go and Playwright images when the server enables that worker.
 See [prepared suites](prepared-suites.md) for image labels, durable jobs, cancellation, recovery, and CLI publication.
-ZIP bundles and GitHub repository preparation remain pending.
+The CLI can assemble [offline Go ZIP bundles](source-bundles.md) before server inspection.
+Direct UI bundle uploads and GitHub repository preparation remain pending.
 
 ## Review and publication
 

@@ -57,7 +57,7 @@ func Discover(ctx context.Context, root string) (suitespec.Discovery, error) {
 			TestGoFiles  []string
 			XTestGoFiles []string
 		}
-		list := command(ctx, "list", "-json", "-mod=readonly", pkg)
+		list := command(ctx, "list", "-json", moduleDependencyMode(module), pkg)
 		list.Dir, list.Env = module, environment
 		var listed, diagnostics output
 		list.Stdout, list.Stderr = &listed, &diagnostics
@@ -96,7 +96,7 @@ func Discover(ctx context.Context, root string) (suitespec.Discovery, error) {
 				declarations[pkg][name] = append(declarations[pkg][name], suitespec.DiscoveredTest{File: relative, Line: files.Position(function.Pos()).Line})
 			}
 		}
-		build := command(ctx, "test", "-c", "-mod=readonly", "-o", filepath.Join(temp, fmt.Sprintf("package-%d.test", index)), pkg)
+		build := command(ctx, "test", "-c", moduleDependencyMode(module), "-o", filepath.Join(temp, fmt.Sprintf("package-%d.test", index)), pkg)
 		build.Dir, build.Env = module, environment
 		var compiled output
 		build.Stdout, build.Stderr = &compiled, &compiled

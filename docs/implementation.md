@@ -74,6 +74,30 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Offline Go source bundles and reusable build interface
+
+Added bounded ZIP validation before extraction, including paths, entry types, duplicate names, file conflicts, CRC checks, and required source context.
+Manifest selection preserves the full repository context and supports separate manifest paths within one bundle.
+The source digest covers the original archive bytes, including shared file changes.
+Regular executable helper files retain execution permission. Links and special entries are rejected.
+
+Added an artifact builder interface separate from inspection and test scheduling.
+The local implementation assembles files on a trusted immutable Go runtime with fixed copy instructions.
+Uploaded Dockerfiles cannot control assembly. No source-defined build commands or dependency downloads run during assembly.
+The CLI provides build-bundle and retains a private ownership reference before assembly.
+Recovery removes only the matching image tag. Published releases still require retained execution images.
+Go discovery and normal execution use included vendor dependencies with downloads disabled.
+The runtime build script sends only its binary directory as build context.
+
+Focused archive and builder tests pass. The offline vendor discovery and execution check passes.
+The publisher package compiles and its managed-session checks pass.
+A real local workflow assembles a new ZIP with a nested manifest and vendor dependency, publishes it, and passes a normal run.
+Evidence is `.data/bundle-verification.GoxFng/result.json` and `cleanup.json`.
+The check removes its controller, containers, volumes, and assembled suite image.
+Items **22** and **23** advance but remain open.
+Direct UI bundle staging, durable server build dispatch, GitHub preparation, and Playwright bundle assembly remain pending.
+No cloud checks or broad test matrix run for this milestone.
+
 ### Durable prebuilt preparation and publication
 
 Added durable, project-scoped image preparation through the API, Sources page, and publisher CLI.
@@ -90,7 +114,8 @@ The shared publication path retains revision conflicts, explicit activation, and
 
 The UI provides runner options, image preparation, progress, retained logs, cancellation, history, and shared review.
 The CLI provides managed local sign-in, private session storage, preparation, status, review, publication, cancellation, and logout.
-CLI OIDC browser sign-in, ZIP builds, GitHub preparation, and browser verification of the new preparation controls remain pending.
+At this checkpoint, CLI OIDC browser sign-in, ZIP builds, GitHub preparation, and browser verification of the new preparation controls remain pending.
+The subsequent bundle milestone adds offline Go ZIP assembly through the CLI.
 
 Targeted local source, HTTP API, CLI, and generated-client checks pass.
 The ownership regression check and Angular production build pass.

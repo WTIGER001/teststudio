@@ -67,7 +67,7 @@ func Execute(ctx context.Context, input Input, suite, outputDirectory string) Re
 		report.Result.Go.OS, report.Result.Go.Architecture = platform[0], platform[1]
 	}
 	buildCtx, cancelBuild := context.WithTimeout(ctx, 45*time.Second)
-	build := command(buildCtx, "test", "-c", "-mod=readonly", "-o", filepath.Join(temp, "selected.test"), selected.Package)
+	build := command(buildCtx, "test", "-c", moduleDependencyMode(suite), "-o", filepath.Join(temp, "selected.test"), selected.Package)
 	build.Dir = suite
 	build.Env = environment
 	var buildOutput output

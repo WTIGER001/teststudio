@@ -119,3 +119,31 @@ func TestPreparedGoDiscoveryRejectsMissingDeclarationsAndBuildFailures(t *testin
 		})
 	}
 }
+
+func TestPreparedGoUsesBundledVendorWithoutDownloads(t *testing.T) {
+	root := preparedFixture(t)
+	files := map[string]string{
+		"service/go.mod":             "module teststudio.local/discovery\n\ngo 1.24\n\nrequire teststudio.invalid/bundle-value v1.0.0\n",
+		"service/vendor/modules.txt": "# teststudio.invalid/bundle-value v1.0.0\n## explicit; go 1.24\nteststudio.invalid/bundle-value\n",
+		"service/vendor/teststudio.invalid/bundle-value/value.go": "package value\nfunc Total() int { return 14 }\n",
+		"service/unit/arithmetic_test.go":                         "package arithmetic\nimport(\"testing\"; value \"teststudio.invalid/bundle-value\")\nfunc TestAddition(t *testing.T) { if value.Total()!=14 { t.Fatal(\"total\") } }\nfunc TestRows(t *testing.T) { t.Run(\"first\",func(t *testing.T){}) }\n",
+	}
+	for name, content := range files {
+		filename := filepath.Join(root, name)
+		if err := os.MkdirAll(filepath.Dir(filename), 0700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filename, []byte(content), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if discovery, err := Discover(t.Context(), root); err != nil {
+		t.Fatal("vendored discovery", err, discovery.Log)
+	}
+	var input Input
+	input.Test.ID, input.Test.Selector, input.TimeoutMs = "SUM", "./unit::TestAddition", 5000
+	report := Execute(t.Context(), input, root, t.TempDir())
+	if report.Result.State != "passed" {
+		t.Fatalf("offline vendor execution: %+v", report.Result)
+	}
+}
