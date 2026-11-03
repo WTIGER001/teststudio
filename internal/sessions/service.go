@@ -24,6 +24,7 @@ type Session struct {
 	ID                   string    `json:"-"`
 	UserID               string    `json:"userId"`
 	Provider             string    `json:"provider"`
+	ProviderRevision     int64     `json:"providerRevision,omitempty"`
 	AuthenticationMethod string    `json:"authenticationMethod,omitempty"`
 	LocalModeRevision    int64     `json:"localModeRevision,omitempty"`
 	CredentialRevision   int64     `json:"credentialRevision,omitempty"`
@@ -60,7 +61,18 @@ func Digest(value string) string {
 }
 
 func (s *Service) Create(ctx context.Context, w http.ResponseWriter, user, provider string, authUntil time.Time) (Session, error) {
-	session, cookie, err := s.create(ctx, user, provider, authUntil, 0, "")
+	session, cookie, err := s.create(ctx, user, provider, authUntil, 0, 0, "")
+	if err == nil {
+		http.SetCookie(w, cookie)
+	}
+	return session, err
+}
+
+func (s *Service) CreateOIDC(ctx context.Context, w http.ResponseWriter, user, provider string, revision int64, authUntil time.Time) (Session, error) {
+	if revision < 1 || provider == "" || !time.Now().Before(authUntil) {
+		return Session{}, ErrUnauthenticated
+	}
+	session, cookie, err := s.create(ctx, user, provider, authUntil, 0, revision, "")
 	if err == nil {
 		http.SetCookie(w, cookie)
 	}
@@ -71,10 +83,10 @@ func (s *Service) CreatePassword(ctx context.Context, user string, credentialRev
 	if !s.LocalAccounts || credentialRevision < 1 {
 		return Session{}, nil, ErrUnauthenticated
 	}
-	return s.create(ctx, user, "password", time.Time{}, credentialRevision, previous)
+	return s.create(ctx, user, "password", time.Time{}, credentialRevision, 0, previous)
 }
 
-func (s *Service) create(ctx context.Context, user, provider string, authUntil time.Time, credentialRevision int64, previous string) (Session, *http.Cookie, error) {
+func (s *Service) create(ctx context.Context, user, provider string, authUntil time.Time, credentialRevision, providerRevision int64, previous string) (Session, *http.Cookie, error) {
 	lifetime := s.Lifetime
 	if lifetime == 0 {
 		lifetime = 8 * time.Hour
@@ -94,6 +106,14 @@ func (s *Service) create(ctx context.Context, user, provider string, authUntil t
 		}
 		if u.Disabled {
 			return Session{}, nil, ErrUnauthenticated
+		}
+		var providerGuard storage.Change
+		if providerRevision > 0 {
+			providerRow, err := s.providerAt(ctx, provider, providerRevision)
+			if err != nil {
+				return Session{}, nil, err
+			}
+			providerGuard = storage.Change{Record: providerRow, Assert: true}
 		}
 		mustChange := false
 		localModeRevision := int64(0)
@@ -135,11 +155,17 @@ func (s *Service) create(ctx context.Context, user, provider string, authUntil t
 			until = now.Add(lifetime)
 		}
 		token := Random()
-		method := ""
+		method := "internal"
+		if provider == "local" {
+			method = "local"
+		}
 		if credentialRevision > 0 {
 			method = "password"
 		}
-		v := Session{LocalModeRevision: localModeRevision, AuthenticationMethod: method, ID: Digest(token), UserID: user, Provider: provider, CredentialRevision: credentialRevision, MustChangePassword: mustChange, UserEpoch: u.SessionEpoch, CSRF: Random(), CreatedAt: now, LastSeen: now, ExpiresAt: now.Add(lifetime), AuthenticationUntil: until}
+		if providerRevision > 0 {
+			method = "oidc"
+		}
+		v := Session{ProviderRevision: providerRevision, LocalModeRevision: localModeRevision, AuthenticationMethod: method, ID: Digest(token), UserID: user, Provider: provider, CredentialRevision: credentialRevision, MustChangePassword: mustChange, UserEpoch: u.SessionEpoch, CSRF: Random(), CreatedAt: now, LastSeen: now, ExpiresAt: now.Add(lifetime), AuthenticationUntil: until}
 		c, err := storage.Put("sessions", v.ID, "", 0, v)
 		if err != nil {
 			return Session{}, nil, err
@@ -150,6 +176,9 @@ func (s *Service) create(ctx context.Context, user, provider string, authUntil t
 			return Session{}, nil, err
 		}
 		changes := []storage.Change{profile, c}
+		if providerRevision > 0 {
+			changes = append(changes, providerGuard)
+		}
 		if previous != "" {
 			prior, err := s.Store.Get(ctx, "sessions", previous)
 			if err != nil && !errors.Is(err, storage.ErrNotFound) {
@@ -259,6 +288,13 @@ func (s *Service) Validate(ctx context.Context, id string) (Session, error) {
 }
 
 func (s *Service) checkCredential(ctx context.Context, v Session) error {
+	if v.AuthenticationMethod == "" {
+		return ErrUnauthenticated
+	}
+	if v.AuthenticationMethod == "oidc" {
+		_, err := s.providerAt(ctx, v.Provider, v.ProviderRevision)
+		return err
+	}
 	if v.AuthenticationMethod != "password" {
 		return nil
 	}

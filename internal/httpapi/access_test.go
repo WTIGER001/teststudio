@@ -139,7 +139,14 @@ func TestAccessGroupScopesProvenanceAndMembershipRevisions(t *testing.T) {
 	if err := c.api.Auth.Directory.SaveGroup(t.Context(), identity.Group{ID: "external", Name: "External group", Project: "alpha", ManagedBy: "oidc:example"}, 0); err != nil {
 		t.Fatal(err)
 	}
-	if err := c.api.Auth.Directory.SyncExternalGroups(t.Context(), "member", "oidc:example", []string{"external"}, time.Now().Add(time.Hour)); err != nil {
+	provider, err := storage.Put("providers", "example", "", 0, map[string]any{"issuer": "https://identity.example.test", "clientId": "teststudio", "disabled": false})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := c.api.Store.Commit(t.Context(), provider); err != nil {
+		t.Fatal(err)
+	}
+	if err := c.api.Auth.Directory.SyncProviderGroups(t.Context(), "member", "example", 1, []string{"external"}, time.Now().Add(time.Hour)); err != nil {
 		t.Fatal(err)
 	}
 	page = accessCall(t, c, "GET", "/api/v1/groups/external/members", nil, "", 200)

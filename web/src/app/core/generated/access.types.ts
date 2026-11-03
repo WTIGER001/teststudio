@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.8.0"
+export const accessContractVersion = "0.8.1"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -21,7 +21,7 @@ export type GroupRecord = { "data": Group; "id": string; "projectId"?: string; "
 export type LocalCredential = { "canManage": boolean; "configured": boolean; "createdAt"?: string; "disabled": boolean; "localAccountsEnabled": boolean; "mustChangePassword": boolean; "updatedAt"?: string; "userId": string }
 export type LocalCredentialRecord = { "data": LocalCredential; "id": string; "revision": number }
 export type LocalPasswordDefinition = { "password": string; "reason": string }
-export type Membership = { "active": boolean; "expiresAt"?: string | null; "groupId": string; "groupName"?: string; "name": string; "projectId"?: string; "readOnly": boolean; "source": string; "userId": string }
+export type Membership = { "active": boolean; "expiresAt"?: string | null; "groupId": string; "groupName"?: string; "name": string; "projectId"?: string; "providerRevision"?: number; "readOnly": boolean; "source": string; "userId": string }
 export type MembershipDefinition = { "expiresAt"?: string | null }
 export type MembershipPage = { "cursor"?: string; "items": (MembershipRecord)[]; "partial": boolean }
 export type MembershipRecord = { "data": Membership; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }

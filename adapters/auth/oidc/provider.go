@@ -19,6 +19,7 @@ import (
 )
 
 type Provider struct {
+	revision             int64
 	ID                   string            `json:"id"`
 	Name                 string            `json:"name"`
 	Issuer               string            `json:"issuer"`
@@ -72,12 +73,16 @@ func (s *Service) config(ctx context.Context, id string) (Provider, *coreoidc.Pr
 	if err != nil {
 		return p, nil, oauth2.Config{}, err
 	}
+	if p.ID != id || r.Project != "" {
+		return p, nil, oauth2.Config{}, errors.New("provider record has invalid ownership")
+	}
 	if err := ValidateProvider(p); err != nil {
 		return p, nil, oauth2.Config{}, err
 	}
 	if p.Disabled {
 		return p, nil, oauth2.Config{}, errors.New("provider is disabled")
 	}
+	p.revision = r.Revision
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 	client := s.Client

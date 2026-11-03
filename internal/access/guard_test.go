@@ -3,6 +3,7 @@ package access_test
 import (
 	"context"
 	"errors"
+	"net/http/httptest"
 	"path/filepath"
 	"strings"
 	"sync/atomic"
@@ -13,6 +14,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/access"
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/identity"
+	"github.com/wtiger001/teststudio/internal/sessions"
 	"github.com/wtiger001/teststudio/internal/storage"
 	"github.com/wtiger001/teststudio/internal/testkit"
 )
@@ -125,6 +127,68 @@ func TestAccessGuardDoesNotCountDisabledProvidersOrDeniedAdministrators(t *testi
 				t.Fatalf("counted unusable backup: %v", err)
 			}
 		})
+	}
+}
+
+func TestAccessGuardAndMembershipViewsExcludeAnEarlierProviderConfiguration(t *testing.T) {
+	s := fixture(t)
+	backup := providerUser(t, s, "provider-bound-backup")
+	group := identity.Group{ID: "provider-administrators", Name: "Provider administrators", ManagedBy: "oidc:example"}
+	if err := s.Auth.Directory.SaveGroup(t.Context(), group, 0); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Auth.Directory.SyncProviderGroups(t.Context(), backup.ID, "example", 1, []string{group.ID}, time.Now().Add(time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Auth.Engine.AssignRole(t.Context(), permissions.PrincipalRef{Kind: permissions.PrincipalGroup, ID: group.ID}, "builtin.teststudio.installation-admin", nil); err != nil {
+		t.Fatal(err)
+	}
+	sessionService := sessions.Service{Store: s.Store, Directory: s.Auth.Directory}
+	if _, err := sessionService.CreateOIDC(t.Context(), httptest.NewRecorder(), backup.ID, "example", 1, time.Now().Add(time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	change, err := storage.Put("providers", "example", "", 1, map[string]any{"id": "example", "name": "Changed provider", "issuer": "https://identity.example.test", "clientId": "teststudio", "disabled": false})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Store.Commit(t.Context(), change); err != nil {
+		t.Fatal(err)
+	}
+	row, err := s.ReadMember(t.Context(), "admin", group.ID, backup.ID, "oidc:example")
+	if err != nil {
+		t.Fatal(err)
+	}
+	view, err := storage.Decode[access.MembershipView](row)
+	if err != nil || view.Active || !view.ReadOnly {
+		t.Fatal("group view treated stale provider membership as active", err)
+	}
+	page, err := s.UserMemberships(t.Context(), "admin", backup.ID, "", 30)
+	if err != nil || len(page.Items) != 1 {
+		t.Fatal("retained membership was not inspectable", err)
+	}
+	view, err = storage.Decode[access.MembershipView](page.Items[0])
+	if err != nil || view.Active {
+		t.Fatal("user view treated stale provider membership as active", err)
+	}
+	sessionPage, err := s.UserSessions(t.Context(), "admin", backup.ID, "", "", 30)
+	if err != nil || len(sessionPage.Items) != 0 {
+		t.Fatal("active session list included an earlier provider configuration", err)
+	}
+	if err := s.UserState(t.Context(), "admin", "admin", "Stale provider membership cannot replace the last administrator", 1, true); err == nil || !strings.Contains(err.Error(), "last usable") {
+		t.Fatal("stale provider membership counted as usable administration", err)
+	}
+	if err := s.Auth.Directory.SyncProviderGroups(t.Context(), backup.ID, "example", 2, []string{group.ID}, time.Now().Add(time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := sessionService.CreateOIDC(t.Context(), httptest.NewRecorder(), backup.ID, "example", 2, time.Now().Add(time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	sessionPage, err = s.UserSessions(t.Context(), "admin", backup.ID, "", "", 30)
+	if err != nil || len(sessionPage.Items) != 1 {
+		t.Fatal("active session list did not select the fresh provider configuration", err)
+	}
+	if err := s.UserState(t.Context(), "admin", "admin", "Validated provider membership supplies alternate administration", 1, true); err != nil {
+		t.Fatal(err)
 	}
 }
 

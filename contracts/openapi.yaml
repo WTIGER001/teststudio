@@ -1,7 +1,7 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio identity and access administration"
-  "version": "0.8.0"
+  "version": "0.8.1"
   "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
@@ -2207,6 +2207,10 @@
     "Membership":
       "type": "object"
       "properties":
+        "providerRevision":
+          "type": "integer"
+          "minimum": 1
+          "description": "Provider configuration revision for validated external membership. Server managed."
         "userId":
           "type": "string"
           "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"

@@ -12,6 +12,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"path/filepath"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -23,12 +24,15 @@ import (
 )
 
 type issuer struct {
-	server    *httptest.Server
-	key       *rsa.PrivateKey
-	nonce     string
-	challenge string
-	subject   string
-	mutate    func(map[string]any)
+	server      *httptest.Server
+	key         *rsa.PrivateKey
+	nonce       string
+	challenge   string
+	subject     string
+	mutate      func(map[string]any)
+	onToken     func()
+	onDiscovery func()
+	tokens      atomic.Int32
 }
 
 func newIssuer(t *testing.T) *issuer {
@@ -42,15 +46,22 @@ func newIssuer(t *testing.T) *issuer {
 		w.Header().Set("Content-Type", "application/json")
 		switch r.URL.Path {
 		case "/.well-known/openid-configuration":
+			if i.onDiscovery != nil {
+				i.onDiscovery()
+			}
 			json.NewEncoder(w).Encode(map[string]any{"issuer": i.server.URL, "authorization_endpoint": i.server.URL + "/authorize", "token_endpoint": i.server.URL + "/token", "jwks_uri": i.server.URL + "/keys", "id_token_signing_alg_values_supported": []string{"RS256"}})
 		case "/keys":
 			json.NewEncoder(w).Encode(map[string]any{"keys": []any{map[string]any{"kty": "RSA", "kid": "key-one", "use": "sig", "alg": "RS256", "n": base64.RawURLEncoding.EncodeToString(key.N.Bytes()), "e": base64.RawURLEncoding.EncodeToString(big.NewInt(int64(key.E)).Bytes())}}})
 		case "/token":
+			i.tokens.Add(1)
 			r.ParseForm()
 			hash := sha256.Sum256([]byte(r.Form.Get("code_verifier")))
 			if r.Form.Get("code") != "code" || base64.RawURLEncoding.EncodeToString(hash[:]) != i.challenge {
 				http.Error(w, "invalid PKCE verifier", 400)
 				return
+			}
+			if i.onToken != nil {
+				i.onToken()
 			}
 			claims := map[string]any{"iss": i.server.URL, "sub": i.subject, "aud": "teststudio", "iat": time.Now().Add(-time.Second).Unix(), "exp": time.Now().Add(time.Hour).Unix(), "nonce": i.nonce, "name": "Example User", "email": "same@example.invalid", "email_verified": true, "groups": []string{"operators"}}
 			if i.mutate != nil {

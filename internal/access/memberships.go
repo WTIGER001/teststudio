@@ -53,7 +53,11 @@ func (s *Service) memberView(ctx context.Context, row storage.Record, g identity
 	if err != nil {
 		return row, err
 	}
-	view := MembershipView{Membership: m, Name: u.Name, Active: !g.Archived && !u.Disabled && (m.ExpiresAt == nil || time.Now().Before(*m.ExpiresAt)), ReadOnly: g.ManagedBy != "" || m.Source != "local"}
+	active, err := s.Auth.Directory.MembershipCurrent(ctx, m)
+	if err != nil {
+		return row, err
+	}
+	view := MembershipView{Membership: m, Name: u.Name, Active: !g.Archived && !u.Disabled && active, ReadOnly: g.ManagedBy != "" || m.Source != "local"}
 	row.Data, err = json.Marshal(view)
 	return row, err
 }

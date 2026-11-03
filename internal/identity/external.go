@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/domain"
@@ -43,6 +44,10 @@ func (d *Directory) ExternalLink(ctx context.Context, issuer, subject string) (E
 }
 
 func (d *Directory) ResolveExternal(ctx context.Context, issuer, subject, name, email string, verified, provision bool) (User, error) {
+	return d.resolveExternal(ctx, issuer, subject, name, email, verified, provision, nil)
+}
+
+func (d *Directory) resolveExternal(ctx context.Context, issuer, subject, name, email string, verified, provision bool, guards []storage.Change) (User, error) {
 	if issuer == "" || subject == "" {
 		return User{}, errors.New("issuer and subject are required")
 	}
@@ -76,9 +81,10 @@ func (d *Directory) ResolveExternal(ctx context.Context, issuer, subject, name, 
 	if err != nil {
 		return User{}, err
 	}
-	if err := d.commit(ctx, user, link, audit); err != nil {
+	changes := append([]storage.Change{user, link, audit}, guards...)
+	if err := d.commit(ctx, changes...); err != nil {
 		if errors.Is(err, storage.ErrConflict) {
-			return d.ResolveExternal(ctx, issuer, subject, name, email, verified, false)
+			return d.resolveExternal(ctx, issuer, subject, name, email, verified, false, guards)
 		}
 		return User{}, err
 	}
@@ -86,6 +92,21 @@ func (d *Directory) ResolveExternal(ctx context.Context, issuer, subject, name, 
 }
 
 func (d *Directory) SyncExternalGroups(ctx context.Context, user, source string, groups []string, expires time.Time) error {
+	if strings.HasPrefix(source, "oidc:") {
+		return errors.New("OIDC membership synchronization requires a current provider revision")
+	}
+	return d.syncExternalGroups(ctx, user, source, groups, expires, 0, nil)
+}
+
+func (d *Directory) SyncProviderGroups(ctx context.Context, user, provider string, revision int64, groups []string, expires time.Time) error {
+	row, err := d.providerAt(ctx, provider, revision)
+	if err != nil {
+		return err
+	}
+	return d.syncExternalGroups(ctx, user, "oidc:"+provider, groups, expires, revision, []storage.Change{{Record: row, Assert: true}})
+}
+
+func (d *Directory) syncExternalGroups(ctx context.Context, user, source string, groups []string, expires time.Time, providerRevision int64, guards []storage.Change) error {
 	if len(groups) > 40 {
 		return errors.New("external group mapping exceeds 40 memberships")
 	}
@@ -121,7 +142,7 @@ func (d *Directory) SyncExternalGroups(ctx context.Context, user, source string,
 			continue
 		}
 		r := existing[id]
-		m := Membership{UserID: user, GroupID: id, Source: source, ExpiresAt: &expires}
+		m := Membership{ProviderRevision: providerRevision, UserID: user, GroupID: id, Source: source, ExpiresAt: &expires}
 		c, err := storage.Put("memberships", MembershipID(user, id, source), g.Project, r.Revision, m)
 		if err != nil {
 			return err
@@ -132,13 +153,14 @@ func (d *Directory) SyncExternalGroups(ctx context.Context, user, source string,
 	for _, r := range existing {
 		changes = append(changes, storage.Change{Record: r, Delete: true})
 	}
-	if len(changes) == 0 {
+	if len(changes) == 0 && len(guards) == 0 {
 		return nil
 	}
 	audit, err := domain.Audit(user, "", "identity.groups.sync", source, nil, groups)
 	if err != nil {
 		return err
 	}
+	changes = append(changes, guards...)
 	changes = append(changes, audit)
 	return d.commit(ctx, changes...)
 }

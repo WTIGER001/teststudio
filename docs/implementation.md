@@ -66,6 +66,43 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Record feature commits and targeted validation here.
 
+### Provider-bound authentication and membership state
+
+OIDC login transactions now bind their stored provider revision and assert it after discovery.
+Callbacks recheck the revision before remote discovery, before token exchange, and after token validation.
+Configuration changes reject callbacks before provisioning. Consumed transactions cannot be replayed.
+New-account creation asserts the provider revision with the user, exact identity link, and audit transaction.
+Provider records require installation ownership and matching permanent identifiers.
+
+Provider membership synchronization asserts its revision in the membership and audit transaction.
+Membership provenance retains the revision. Directory lookup rejects stale, disabled, missing, and incorrectly scoped providers.
+Local membership remains independent. Membership screens and administrator safeguards use the same current-state check.
+An outdated external membership cannot act as the last usable administrator.
+
+OIDC sessions retain an explicit authentication method and provider revision.
+Creation asserts that revision with the user and session update.
+Browser and evidence access reject stale provider sessions. Restoration revives neither older cookies nor older memberships.
+Session administration lists only sessions accepted by the shared validator.
+Provider names local and password remain distinct from authentication methods.
+Legacy sessions without a method require sign-in again. Legacy OIDC memberships require a validated provider refresh.
+These changes leave new sessions durable across ordinary restarts.
+
+The OpenAPI 0.8.1 membership schema includes optional server-managed provider provenance.
+Focused loopback tests cover provider edits before callbacks, during discovery, and during token exchange.
+They cover explicit session modes, stale evidence access, membership withdrawal, validated refresh, and local membership independence.
+OIDC, session, membership, administrator guard, HTTP access, and startup checks pass with race detection on SQLite.
+Focused OIDC, session, membership, source, and access checks also pass on disposable PostgreSQL with native permission storage.
+The new provisioning checks reject obsolete provider revisions and foreign issuer proof without identity writes.
+Active session lists exclude earlier provider revisions and include freshly validated sessions.
+Generated-client checks, targeted vet checks, and production Angular builds pass.
+The final access administration browser regression passes: `20261103T075239.360985000-1f5f6084c07b354f0118415a`.
+The permission explanation regression passes: `20261103T074852.739282000-dac8bd5618676a1986354b80`.
+Both runs retain complete evidence and cleaned execution records.
+Actual SQLite restart verification passes with explicit authentication methods: `output/access/access-verification.JAX4Zs/summary.json`.
+Owned controllers, browser containers, output volumes, and disposable database containers exit after verification.
+These changes establish provider configuration boundaries. They do not complete provider administration or full OIDC acceptance.
+Provider management, fresh account linking, pending project access, source releases, hosted profiles, and the remaining plan stay pending.
+
 ### Effective access decisions and source explanations
 
 Added self and authorized-user explanation APIs for exact project, installation, and resource contexts.

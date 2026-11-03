@@ -81,6 +81,19 @@ func (s *Service) administratorState(ctx context.Context) (*permissions.Service,
 			return nil, nil, nil, err
 		}
 		for _, row := range rows {
+			if bucket == "memberships" {
+				membership, err := storage.Decode[identity.Membership](row)
+				if err != nil {
+					return nil, nil, nil, err
+				}
+				active, err := s.Auth.Directory.MembershipCurrent(ctx, membership)
+				if err != nil {
+					return nil, nil, nil, err
+				}
+				if !active {
+					continue
+				}
+			}
 			if err := v.apply(row, false); err != nil {
 				return nil, nil, nil, err
 			}

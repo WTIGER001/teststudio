@@ -10,6 +10,7 @@ import (
 	"time"
 
 	permissions "github.com/wtiger001/go-permissions"
+	authoidc "github.com/wtiger001/teststudio/adapters/auth/oidc"
 	permissionsqlite "github.com/wtiger001/teststudio/adapters/permissions/sqlite"
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/domain"
@@ -68,7 +69,15 @@ func run() error {
 	if err := directory.SaveGroup(ctx, group, 0); err != nil {
 		return err
 	}
-	if err := directory.SyncExternalGroups(ctx, user.ID, group.ManagedBy, []string{group.ID}, time.Now().Add(time.Hour)); err != nil {
+	provider := authoidc.Provider{ID: "browser-fixture", Name: "Isolated fixture provider", Issuer: "https://identity.selftest.invalid", ClientID: "teststudio"}
+	providerChange, err := storage.Put("providers", provider.ID, "", 0, provider)
+	if err != nil {
+		return err
+	}
+	if err := db.Commit(ctx, providerChange); err != nil {
+		return err
+	}
+	if err := directory.SyncProviderGroups(ctx, user.ID, provider.ID, 1, []string{group.ID}, time.Now().Add(time.Hour)); err != nil {
 		return err
 	}
 	reader, err := directory.ResolveExternal(ctx, "https://identity.selftest.invalid", "access-reader", "Access reviewer", "", false, true)

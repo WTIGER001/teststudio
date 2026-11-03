@@ -834,3 +834,38 @@ Run the browser workflow through normal publication and execution:
 ```sh
 bash scripts/test-self.sh --test=STUDIO-PERMISSIONS-001
 ```
+
+
+## Provider configuration binding
+
+OIDC login transactions bind the exact stored provider revision.
+Creating the transaction asserts that revision after discovery completes.
+Callbacks check it before discovery, after discovery, and after token validation.
+A changed configuration rejects the callback before account provisioning or access synchronization.
+New-account creation also asserts the provider revision with the user, exact issuer-subject link, and audit records.
+The rejected transaction cannot be reused. Start a new sign-in.
+
+Validated provider group memberships record `providerRevision` with their existing source and expiry.
+Synchronization asserts that provider revision in the membership and audit transaction.
+An outdated callback cannot restore membership after a provider change.
+Directory lookup rejects outdated, disabled, missing, or incorrectly scoped providers.
+Local membership remains independent.
+Membership screens and administrator guards use the same current-membership check.
+Outdated memberships remain inspectable with inactive state.
+
+New OIDC sessions record their authentication method and provider revision.
+Session creation asserts the provider revision with the session and user sign-in update.
+Browser requests and private evidence access require that revision to remain enabled and current.
+Any provider edit invalidates earlier OIDC sessions and provider memberships, including a display-name edit.
+Restoration does not reactivate earlier cookies or membership records. A validated sign-in refreshes their provenance.
+Active session lists use the same session validator as requests.
+Provider identifiers named local or password do not select those authentication methods.
+
+An upgrade rejects older sessions that have no explicit authentication method.
+Sign in again after this upgrade. New sessions retain their method across ordinary restarts.
+Older OIDC memberships without a provider revision remain inactive until validated refresh.
+Pending login transactions without a provider revision also require a new sign-in.
+
+Focused loopback provider tests use actual discovery, signed tokens, state, nonce, and PKCE exchanges.
+They verify changes during discovery and exchange without external provider accounts.
+Provider administration, explicit fresh-authentication account linking, provider logout, and complete provider acceptance remain pending.

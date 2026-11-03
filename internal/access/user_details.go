@@ -106,11 +106,15 @@ func (s *Service) UserMemberships(ctx context.Context, actor, user, cursor strin
 				return result, err
 			}
 		}
+		active, err := s.Auth.Directory.MembershipCurrent(ctx, m)
+		if err != nil {
+			return result, err
+		}
 		view := struct {
 			MembershipView
 			GroupName string `json:"groupName"`
 			Project   string `json:"projectId"`
-		}{MembershipView{Membership: m, Name: u.Name, Active: !u.Disabled && !g.Archived && (m.ExpiresAt == nil || time.Now().Before(*m.ExpiresAt)), ReadOnly: g.ManagedBy != "" || m.Source != "local"}, g.Name, g.Project}
+		}{MembershipView{Membership: m, Name: u.Name, Active: !u.Disabled && !g.Archived && active, ReadOnly: g.ManagedBy != "" || m.Source != "local"}, g.Name, g.Project}
 		row.Data, err = json.Marshal(view)
 		if err != nil {
 			return result, err
@@ -134,18 +138,19 @@ func (s *Service) UserSessions(ctx context.Context, actor, user, current, cursor
 		return Page{}, err
 	}
 	result := Page{Items: []storage.Record{}, Cursor: page.Cursor, Partial: page.Cursor != ""}
+	validation := sessions.Service{Store: s.Store, Directory: s.Auth.Directory, LocalAccounts: s.LocalAccounts, IdleTimeout: s.SessionIdleTimeout}
 	for _, row := range page.Items {
 		v, err := storage.Decode[sessions.Session](row)
 		if err != nil {
 			return result, err
 		}
-		now := time.Now()
-		idle := s.SessionIdleTimeout
-		if idle == 0 {
-			idle = time.Hour
-		}
-		if v.UserID != user || u.Disabled || u.SessionEpoch != v.UserEpoch || !now.Before(v.ExpiresAt) || !now.Before(v.AuthenticationUntil) || now.Sub(v.LastSeen) >= idle {
+		if v.UserID != user || u.Disabled {
 			continue
+		}
+		if _, err := validation.Validate(ctx, row.ID); errors.Is(err, sessions.ErrUnauthenticated) {
+			continue
+		} else if err != nil {
+			return result, err
 		}
 		view := SessionView{ID: row.ID, Provider: v.Provider, CreatedAt: v.CreatedAt, LastSeen: v.LastSeen, ExpiresAt: v.ExpiresAt, AuthenticationUntil: v.AuthenticationUntil, Current: row.ID == current}
 		row.Data, err = json.Marshal(view)

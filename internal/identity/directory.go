@@ -32,10 +32,11 @@ type Group struct {
 }
 
 type Membership struct {
-	UserID    string     `json:"userId"`
-	GroupID   string     `json:"groupId"`
-	Source    string     `json:"source"`
-	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+	ProviderRevision int64      `json:"providerRevision,omitempty"`
+	UserID           string     `json:"userId"`
+	GroupID          string     `json:"groupId"`
+	Source           string     `json:"source"`
+	ExpiresAt        *time.Time `json:"expiresAt,omitempty"`
 }
 
 type Directory struct{ Store *storage.Store }
@@ -141,7 +142,11 @@ func (d *Directory) memberships(ctx context.Context) ([]Membership, error) {
 		if err != nil {
 			return nil, err
 		}
-		if m.ExpiresAt == nil || time.Now().Before(*m.ExpiresAt) {
+		active, err := d.MembershipCurrent(ctx, m)
+		if err != nil {
+			return nil, err
+		}
+		if active {
 			result = append(result, m)
 		}
 	}
