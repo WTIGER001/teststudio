@@ -47,8 +47,19 @@ func TestSessionCSRFRevocationAndUserDisabling(t *testing.T) {
 	if _, err := s.Read(t.Context(), r); err != nil {
 		t.Fatal(err)
 	}
+	row, err := db.Get(t.Context(), "users", u.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	u, err = dir.User(t.Context(), u.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if u.LastSignIn == nil {
+		t.Fatal("sign-in time was not saved")
+	}
 	u.Disabled = true
-	if err := dir.SaveUser(t.Context(), u, 1); err != nil {
+	if err := dir.SaveUser(t.Context(), u, row.Revision); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := s.Read(t.Context(), r); !errors.Is(err, sessions.ErrUnauthenticated) {

@@ -21,6 +21,7 @@ type Session struct {
 	ID                  string    `json:"-"`
 	UserID              string    `json:"userId"`
 	Provider            string    `json:"provider"`
+	UserEpoch           int64     `json:"userEpoch"`
 	CSRF                string    `json:"csrfToken"`
 	CreatedAt           time.Time `json:"createdAt"`
 	LastSeen            time.Time `json:"lastSeen"`
@@ -51,32 +52,51 @@ func Digest(value string) string {
 }
 
 func (s *Service) Create(ctx context.Context, w http.ResponseWriter, user, provider string, authUntil time.Time) (Session, error) {
-	u, err := s.Directory.User(ctx, user)
-	if err != nil {
-		return Session{}, err
-	}
-	if u.Disabled {
-		return Session{}, ErrUnauthenticated
-	}
 	lifetime := s.Lifetime
 	if lifetime == 0 {
 		lifetime = 8 * time.Hour
 	}
-	now := time.Now().UTC()
-	if authUntil.IsZero() {
-		authUntil = now.Add(lifetime)
+	for range 8 {
+		version, err := s.Directory.Revision(ctx)
+		if err != nil {
+			return Session{}, err
+		}
+		row, err := s.Store.Get(ctx, "users", user)
+		if err != nil {
+			return Session{}, err
+		}
+		u, err := storage.Decode[identity.User](row)
+		if err != nil {
+			return Session{}, err
+		}
+		if u.Disabled {
+			return Session{}, ErrUnauthenticated
+		}
+		now := time.Now().UTC()
+		until := authUntil
+		if until.IsZero() {
+			until = now.Add(lifetime)
+		}
+		token := Random()
+		v := Session{ID: Digest(token), UserID: user, Provider: provider, UserEpoch: u.SessionEpoch, CSRF: Random(), CreatedAt: now, LastSeen: now, ExpiresAt: now.Add(lifetime), AuthenticationUntil: until}
+		c, err := storage.Put("sessions", v.ID, "", 0, v)
+		if err != nil {
+			return Session{}, err
+		}
+		u.LastSignIn = &now
+		profile, err := storage.Put("users", user, "", row.Revision, u)
+		if err != nil {
+			return Session{}, err
+		}
+		if err := s.Directory.CommitAt(ctx, version, profile, c); errors.Is(err, storage.ErrConflict) {
+			continue
+		} else if err != nil {
+			return Session{}, err
+		}
+		http.SetCookie(w, &http.Cookie{Name: "teststudio_session", Value: token, Path: "/", HttpOnly: true, Secure: s.Secure, SameSite: http.SameSiteLaxMode, Expires: v.ExpiresAt})
+		return v, nil
 	}
-	token := Random()
-	v := Session{ID: Digest(token), UserID: user, Provider: provider, CSRF: Random(), CreatedAt: now, LastSeen: now, ExpiresAt: now.Add(lifetime), AuthenticationUntil: authUntil}
-	c, err := storage.Put("sessions", v.ID, "", 0, v)
-	if err != nil {
-		return Session{}, err
-	}
-	if err := s.Store.Commit(ctx, c); err != nil {
-		return Session{}, err
-	}
-	http.SetCookie(w, &http.Cookie{Name: "teststudio_session", Value: token, Path: "/", HttpOnly: true, Secure: s.Secure, SameSite: http.SameSiteLaxMode, Expires: v.ExpiresAt})
-	return v, nil
+	return Session{}, storage.ErrConflict
 }
 
 func (s *Service) Read(ctx context.Context, r *http.Request) (Session, error) {
@@ -109,7 +129,7 @@ func (s *Service) Read(ctx context.Context, r *http.Request) (Session, error) {
 		if err != nil {
 			return Session{}, err
 		}
-		if u.Disabled {
+		if u.Disabled || u.SessionEpoch != v.UserEpoch {
 			return Session{}, ErrUnauthenticated
 		}
 		if now.Sub(v.LastSeen) < time.Minute {
@@ -155,7 +175,7 @@ func (s *Service) Validate(ctx context.Context, id string) (Session, error) {
 	if err != nil {
 		return Session{}, err
 	}
-	if u.Disabled {
+	if u.Disabled || u.SessionEpoch != v.UserEpoch {
 		return Session{}, ErrUnauthenticated
 	}
 	return v, nil

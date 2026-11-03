@@ -62,7 +62,7 @@ func (d *Directory) ResolveExternal(ctx context.Context, issuer, subject, name, 
 	if err != nil {
 		return User{}, err
 	}
-	if err := d.Store.Commit(ctx, user, link, audit); err != nil {
+	if err := d.commit(ctx, user, link, audit); err != nil {
 		if errors.Is(err, storage.ErrConflict) {
 			return d.ResolveExternal(ctx, issuer, subject, name, email, verified, false)
 		}
@@ -108,7 +108,7 @@ func (d *Directory) SyncExternalGroups(ctx context.Context, user, source string,
 		}
 		r := existing[id]
 		m := Membership{UserID: user, GroupID: id, Source: source, ExpiresAt: &expires}
-		c, err := storage.Put("memberships", membershipID(user, id, source), g.Project, r.Revision, m)
+		c, err := storage.Put("memberships", MembershipID(user, id, source), g.Project, r.Revision, m)
 		if err != nil {
 			return err
 		}
@@ -126,5 +126,5 @@ func (d *Directory) SyncExternalGroups(ctx context.Context, user, source string,
 		return err
 	}
 	changes = append(changes, audit)
-	return d.Store.Commit(ctx, changes...)
+	return d.commit(ctx, changes...)
 }

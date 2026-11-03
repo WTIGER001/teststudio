@@ -17,6 +17,7 @@ type User struct {
 	Email         string     `json:"email,omitempty"`
 	EmailVerified bool       `json:"emailVerified"`
 	Disabled      bool       `json:"disabled"`
+	SessionEpoch  int64      `json:"sessionEpoch"`
 	CreatedAt     time.Time  `json:"createdAt"`
 	LastSignIn    *time.Time `json:"lastSignIn,omitempty"`
 }
@@ -58,7 +59,7 @@ func (d *Directory) SaveUser(ctx context.Context, u User, revision int64) error 
 	if err != nil {
 		return err
 	}
-	return d.Store.Commit(ctx, c)
+	return d.commit(ctx, c)
 }
 
 func (d *Directory) Group(ctx context.Context, id string) (Group, error) {
@@ -77,10 +78,10 @@ func (d *Directory) SaveGroup(ctx context.Context, g Group, revision int64) erro
 	if err != nil {
 		return err
 	}
-	return d.Store.Commit(ctx, c)
+	return d.commit(ctx, c)
 }
 
-func membershipID(user, group, source string) string {
+func MembershipID(user, group, source string) string {
 	h := sha256.Sum256([]byte(user + "\x00" + group + "\x00" + source))
 	return hex.EncodeToString(h[:])
 }
@@ -103,7 +104,7 @@ func (d *Directory) AddMember(ctx context.Context, m Membership) error {
 	if g.ManagedBy != "" && g.ManagedBy != m.Source {
 		return errors.New("membership belongs to an external provider")
 	}
-	id := membershipID(m.UserID, m.GroupID, m.Source)
+	id := MembershipID(m.UserID, m.GroupID, m.Source)
 	r, err := d.Store.Get(ctx, "memberships", id)
 	if err != nil && !errors.Is(err, storage.ErrNotFound) {
 		return err
@@ -112,21 +113,21 @@ func (d *Directory) AddMember(ctx context.Context, m Membership) error {
 	if err != nil {
 		return err
 	}
-	return d.Store.Commit(ctx, c)
+	return d.commit(ctx, c)
 }
 
 func (d *Directory) RemoveMember(ctx context.Context, user, group, source string) error {
 	if source == "" {
 		source = "local"
 	}
-	r, err := d.Store.Get(ctx, "memberships", membershipID(user, group, source))
+	r, err := d.Store.Get(ctx, "memberships", MembershipID(user, group, source))
 	if errors.Is(err, storage.ErrNotFound) {
 		return nil
 	}
 	if err != nil {
 		return err
 	}
-	return d.Store.Commit(ctx, storage.Change{Record: r, Delete: true})
+	return d.commit(ctx, storage.Change{Record: r, Delete: true})
 }
 
 func (d *Directory) memberships(ctx context.Context) ([]Membership, error) {

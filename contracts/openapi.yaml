@@ -1,0 +1,1161 @@
+"openapi": "3.1.0"
+"info":
+  "title": "TestStudio identity administration"
+  "version": "0.1.0"
+  "description": "Implemented user, group, membership, current-profile, and session administration. Other API families and role administration remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
+"servers":
+  -
+    "url": "/"
+"security":
+  -
+    "SessionCookie": []
+"paths":
+  "/api/v1/me":
+    "get":
+      "operationId": "currentProfile"
+      "summary": "Read your own profile and linked identities without installation directory authority."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Limit"
+        -
+          "$ref": "#/components/parameters/Cursor"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/Profile"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+  "/api/v1/users":
+    "get":
+      "operationId": "listUsers"
+      "summary": "List readable installation users."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Limit"
+        -
+          "$ref": "#/components/parameters/Cursor"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/UserPage"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+    "post":
+      "operationId": "createUser"
+      "summary": "Register a pending user without linking identities or granting access."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/UserRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/UserDefinition"
+  "/api/v1/users/{user}":
+    "get":
+      "operationId": "readUser"
+      "summary": "Read an authorized installation user."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/User"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/UserRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+    "put":
+      "operationId": "editUser"
+      "summary": "Edit profile fields and preserve server-owned identity metadata."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/User"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/UserRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/UserDefinition"
+  "/api/v1/users/{user}/disable":
+    "post":
+      "operationId": "disableUser"
+      "summary": "Disable the user and invalidate all earlier sessions."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/User"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/UserRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/Reason"
+  "/api/v1/users/{user}/restore":
+    "post":
+      "operationId": "restoreUser"
+      "summary": "Restore the user without reviving earlier sessions."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/User"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/UserRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/Reason"
+  "/api/v1/users/{user}/identities":
+    "get":
+      "operationId": "listUserIdentities"
+      "summary": "Read a bounded page of authorized user identities."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/User"
+        -
+          "$ref": "#/components/parameters/Limit"
+        -
+          "$ref": "#/components/parameters/Cursor"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/ExternalIdentityPage"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+  "/api/v1/users/{user}/sessions":
+    "get":
+      "operationId": "listUserSessions"
+      "summary": "Read a bounded page of authorized user sessions."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/User"
+        -
+          "$ref": "#/components/parameters/Limit"
+        -
+          "$ref": "#/components/parameters/Cursor"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SessionPage"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+  "/api/v1/users/{user}/memberships":
+    "get":
+      "operationId": "listUserMemberships"
+      "summary": "Read a bounded page of authorized user memberships."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/User"
+        -
+          "$ref": "#/components/parameters/Limit"
+        -
+          "$ref": "#/components/parameters/Cursor"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/MembershipPage"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+  "/api/v1/users/{user}/sessions/{session}":
+    "delete":
+      "operationId": "revokeUserSession"
+      "summary": "Revoke one owned session with its current revision. No tokens appear in the response or audit."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/User"
+        -
+          "$ref": "#/components/parameters/Session"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/Revoked"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/Reason"
+  "/api/v1/groups":
+    "get":
+      "operationId": "listGroups"
+      "summary": "List readable groups in one ownership scope."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Project"
+        -
+          "$ref": "#/components/parameters/Archived"
+        -
+          "$ref": "#/components/parameters/Limit"
+        -
+          "$ref": "#/components/parameters/Cursor"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/GroupPage"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+    "post":
+      "operationId": "createGroup"
+      "summary": "Create a local group with permanent ownership scope."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/GroupRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/GroupDefinition"
+  "/api/v1/groups/{group}":
+    "get":
+      "operationId": "readGroup"
+      "summary": "Read the group after checking its stored ownership scope."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Group"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/GroupRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+    "put":
+      "operationId": "editGroup"
+      "summary": "Edit a group without changing ownership or external provenance."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Group"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/GroupRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/GroupDefinition"
+  "/api/v1/groups/{group}/archive":
+    "post":
+      "operationId": "archiveGroup"
+      "summary": "Archive the group and remove its effective membership access."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Group"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/GroupRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/Reason"
+  "/api/v1/groups/{group}/restore":
+    "post":
+      "operationId": "restoreGroup"
+      "summary": "Restore the group with its retained memberships and assignments."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Group"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/GroupRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/Reason"
+  "/api/v1/groups/{group}/members":
+    "get":
+      "operationId": "listGroupMembers"
+      "summary": "Inspect member names, provenance, expiry, and current activity."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Group"
+        -
+          "$ref": "#/components/parameters/Limit"
+        -
+          "$ref": "#/components/parameters/Cursor"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/MembershipPage"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+  "/api/v1/groups/{group}/members/{user}":
+    "put":
+      "operationId": "saveLocalMembership"
+      "summary": "Add or update local membership. External membership remains read-only."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/User"
+        -
+          "$ref": "#/components/parameters/Group"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/MembershipRevision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/Saved"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/MembershipDefinition"
+    "delete":
+      "operationId": "removeLocalMembership"
+      "summary": "Remove one local membership with a reason and revision."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/User"
+        -
+          "$ref": "#/components/parameters/Group"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/Saved"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/Reason"
+"components":
+  "securitySchemes":
+    "SessionCookie":
+      "type": "apiKey"
+      "in": "cookie"
+      "name": "teststudio_session"
+    "CSRFToken":
+      "type": "apiKey"
+      "in": "header"
+      "name": "X-CSRF-Token"
+  "parameters":
+    "User":
+      "name": "user"
+      "in": "path"
+      "required": true
+      "schema":
+        "type": "string"
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    "Group":
+      "name": "group"
+      "in": "path"
+      "required": true
+      "schema":
+        "type": "string"
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    "Session":
+      "name": "session"
+      "in": "path"
+      "required": true
+      "schema":
+        "type": "string"
+        "pattern": "^[a-f0-9]{64}$"
+    "Limit":
+      "name": "limit"
+      "in": "query"
+      "schema":
+        "type": "integer"
+        "minimum": 1
+        "maximum": 1000
+        "default": 30
+    "Cursor":
+      "name": "cursor"
+      "in": "query"
+      "schema":
+        "type": "string"
+    "Project":
+      "name": "project"
+      "in": "query"
+      "schema":
+        "type": "string"
+      "description": "Exact group ownership scope. Empty means installation groups, not all projects."
+    "Archived":
+      "name": "archived"
+      "in": "query"
+      "schema":
+        "type": "boolean"
+        "default": false
+    "Revision":
+      "name": "If-Match"
+      "in": "header"
+      "required": true
+      "schema":
+        "type": "string"
+        "pattern": "^\"?[1-9][0-9]*\"?$"
+      "description": "Current positive record revision, optionally quoted."
+    "MembershipRevision":
+      "name": "If-Match"
+      "in": "header"
+      "required": true
+      "schema":
+        "type": "string"
+        "pattern": "^\"?[0-9]+\"?$"
+      "description": "Use zero to add a local membership. Use its current positive revision to update it."
+    "Origin":
+      "name": "Origin"
+      "in": "header"
+      "required": true
+      "schema":
+        "type": "string"
+        "format": "uri"
+      "description": "Configured application origin."
+  "responses":
+    "Problem":
+      "description": "401 requires sign-in; 403 denies access; 404 hides missing or mismatched resources; 409 requires a fresh revision; 422 rejects invalid requests or administrator lockout."
+      "content":
+        "application/json":
+          "schema":
+            "$ref": "#/components/schemas/Problem"
+  "schemas":
+    "UserDefinition":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        "name":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 256
+          "description": "Nonblank name, limited to 256 UTF-8 bytes."
+        "email":
+          "type": "string"
+          "maxLength": 254
+          "description": "One email address, or empty. A profile edit never verifies an email or links an external identity."
+      "required":
+        - "id"
+        - "name"
+      "additionalProperties": false
+    "User":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        "name":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 256
+          "description": "Nonblank name, limited to 256 UTF-8 bytes."
+        "email":
+          "type": "string"
+          "maxLength": 254
+          "description": "One email address, or empty. A profile edit never verifies an email or links an external identity."
+        "disabled":
+          "type": "boolean"
+        "emailVerified":
+          "type": "boolean"
+        "createdAt":
+          "type": "string"
+          "format": "date-time"
+        "lastSignIn":
+          "type": "string"
+          "format": "date-time"
+        "sessionEpoch":
+          "type": "integer"
+          "minimum": 0
+          "readOnly": true
+      "required":
+        - "id"
+        - "name"
+        - "disabled"
+        - "emailVerified"
+        - "createdAt"
+        - "sessionEpoch"
+    "GroupDefinition":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        "name":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 256
+        "description":
+          "type": "string"
+          "maxLength": 4096
+        "projectId":
+          "type": "string"
+          "description": "Permanent ownership scope. Empty or omitted means installation ownership."
+      "required":
+        - "id"
+        - "name"
+      "additionalProperties": false
+    "Group":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        "name":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 256
+        "description":
+          "type": "string"
+          "maxLength": 4096
+        "projectId":
+          "type": "string"
+          "description": "Permanent ownership scope. Empty or omitted means installation ownership."
+        "archived":
+          "type": "boolean"
+        "managedBy":
+          "type": "string"
+          "readOnly": true
+          "description": "External membership source. Local editors cannot change this value."
+      "required":
+        - "id"
+        - "name"
+        - "description"
+        - "archived"
+    "Reason":
+      "type": "object"
+      "properties":
+        "reason":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 1024
+          "description": "Nonblank reason, limited to 1024 UTF-8 bytes. Saved in the audit record."
+      "required":
+        - "reason"
+      "additionalProperties": false
+    "MembershipDefinition":
+      "type": "object"
+      "properties":
+        "expiresAt":
+          "type":
+            - "string"
+            - "null"
+          "format": "date-time"
+          "description": "Future expiry. Omit or use null for no expiry."
+      "additionalProperties": false
+    "Membership":
+      "type": "object"
+      "properties":
+        "userId":
+          "type": "string"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        "groupId":
+          "type": "string"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        "source":
+          "type": "string"
+        "expiresAt":
+          "type":
+            - "string"
+            - "null"
+          "format": "date-time"
+        "name":
+          "type": "string"
+        "active":
+          "type": "boolean"
+        "readOnly":
+          "type": "boolean"
+        "groupName":
+          "type": "string"
+        "projectId":
+          "type": "string"
+      "required":
+        - "userId"
+        - "groupId"
+        - "source"
+        - "name"
+        - "active"
+        - "readOnly"
+    "ExternalIdentity":
+      "type": "object"
+      "properties":
+        "issuer":
+          "type": "string"
+        "subject":
+          "type": "string"
+        "userId":
+          "type": "string"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+      "required":
+        - "issuer"
+        - "subject"
+        - "userId"
+    "Session":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+        "provider":
+          "type": "string"
+        "createdAt":
+          "type": "string"
+          "format": "date-time"
+        "lastSeen":
+          "type": "string"
+          "format": "date-time"
+        "expiresAt":
+          "type": "string"
+          "format": "date-time"
+        "authenticationUntil":
+          "type": "string"
+          "format": "date-time"
+        "current":
+          "type": "boolean"
+      "required":
+        - "id"
+        - "provider"
+        - "createdAt"
+        - "lastSeen"
+        - "expiresAt"
+        - "authenticationUntil"
+        - "current"
+    "UserRecord":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+        "revision":
+          "type": "integer"
+          "minimum": 1
+        "projectId":
+          "type": "string"
+        "data":
+          "$ref": "#/components/schemas/User"
+        "updatedAt":
+          "type": "string"
+          "format": "date-time"
+      "required":
+        - "id"
+        - "revision"
+        - "data"
+        - "updatedAt"
+    "UserPage":
+      "type": "object"
+      "properties":
+        "items":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/UserRecord"
+        "cursor":
+          "type": "string"
+          "description": "Opaque encrypted cursor, bound to actor, collection, and query. A cursor does not imply readable records remain."
+      "required":
+        - "items"
+    "GroupRecord":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+        "revision":
+          "type": "integer"
+          "minimum": 1
+        "projectId":
+          "type": "string"
+        "data":
+          "$ref": "#/components/schemas/Group"
+        "updatedAt":
+          "type": "string"
+          "format": "date-time"
+      "required":
+        - "id"
+        - "revision"
+        - "data"
+        - "updatedAt"
+    "GroupPage":
+      "type": "object"
+      "properties":
+        "items":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/GroupRecord"
+        "cursor":
+          "type": "string"
+          "description": "Opaque encrypted cursor, bound to actor, collection, and query. A cursor does not imply readable records remain."
+        "partial":
+          "type": "boolean"
+      "required":
+        - "items"
+        - "partial"
+    "MembershipRecord":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+        "revision":
+          "type": "integer"
+          "minimum": 1
+        "projectId":
+          "type": "string"
+        "data":
+          "$ref": "#/components/schemas/Membership"
+        "updatedAt":
+          "type": "string"
+          "format": "date-time"
+      "required":
+        - "id"
+        - "revision"
+        - "data"
+        - "updatedAt"
+    "MembershipPage":
+      "type": "object"
+      "properties":
+        "items":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/MembershipRecord"
+        "cursor":
+          "type": "string"
+          "description": "Opaque encrypted cursor, bound to actor, collection, and query. A cursor does not imply readable records remain."
+        "partial":
+          "type": "boolean"
+      "required":
+        - "items"
+        - "partial"
+    "ExternalIdentityRecord":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+        "revision":
+          "type": "integer"
+          "minimum": 1
+        "projectId":
+          "type": "string"
+        "data":
+          "$ref": "#/components/schemas/ExternalIdentity"
+        "updatedAt":
+          "type": "string"
+          "format": "date-time"
+      "required":
+        - "id"
+        - "revision"
+        - "data"
+        - "updatedAt"
+    "ExternalIdentityPage":
+      "type": "object"
+      "properties":
+        "items":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/ExternalIdentityRecord"
+        "cursor":
+          "type": "string"
+          "description": "Opaque encrypted cursor, bound to actor, collection, and query. A cursor does not imply readable records remain."
+        "partial":
+          "type": "boolean"
+      "required":
+        - "items"
+        - "partial"
+    "SessionRecord":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+        "revision":
+          "type": "integer"
+          "minimum": 1
+        "projectId":
+          "type": "string"
+        "data":
+          "$ref": "#/components/schemas/Session"
+        "updatedAt":
+          "type": "string"
+          "format": "date-time"
+      "required":
+        - "id"
+        - "revision"
+        - "data"
+        - "updatedAt"
+    "SessionPage":
+      "type": "object"
+      "properties":
+        "items":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/SessionRecord"
+        "cursor":
+          "type": "string"
+          "description": "Opaque encrypted cursor, bound to actor, collection, and query. A cursor does not imply readable records remain."
+        "partial":
+          "type": "boolean"
+      "required":
+        - "items"
+        - "partial"
+    "Profile":
+      "type": "object"
+      "properties":
+        "user":
+          "$ref": "#/components/schemas/User"
+        "identities":
+          "$ref": "#/components/schemas/ExternalIdentityPage"
+        "localAccount":
+          "type": "boolean"
+      "required":
+        - "user"
+        - "identities"
+        - "localAccount"
+    "Saved":
+      "type": "object"
+      "properties":
+        "saved":
+          "type": "boolean"
+      "required":
+        - "saved"
+    "Revoked":
+      "type": "object"
+      "properties":
+        "revoked":
+          "type": "boolean"
+      "required":
+        - "revoked"
+    "Problem":
+      "type": "object"
+      "properties":
+        "status":
+          "type": "integer"
+        "message":
+          "type": "string"
+      "required":
+        - "message"

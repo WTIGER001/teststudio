@@ -126,6 +126,7 @@ func (s *Server) Handler() http.Handler {
 		JSON(w, 200, map[string]string{"status": "up", "service": "teststudio"})
 	})
 	s.authRoutes(mux)
+	s.accessRoutes(mux)
 	s.projectRoutes(mux)
 	s.catalogRoutes(mux)
 	s.catalogTransferRoutes(mux)

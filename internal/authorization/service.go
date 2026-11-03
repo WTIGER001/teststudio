@@ -65,6 +65,14 @@ func BuiltInRoles() []RoleDefinition {
 }
 
 func New(ctx context.Context, store permissions.PermissionStore, directory *identity.Directory) (*Service, error) {
+	engine, err := NewEngine(ctx, store, directory)
+	if err != nil {
+		return nil, err
+	}
+	return &Service{Engine: engine, Directory: directory}, nil
+}
+
+func NewEngine(ctx context.Context, store permissions.PermissionStore, directory permissions.IdentityProvider) (*permissions.Service, error) {
 	engine := permissions.NewServiceWithIdentity(directory, store)
 	for _, role := range BuiltInRoles() {
 		if err := engine.AddBuiltInRole(ctx, permissions.Role{ID: role.ID, Name: role.Name}); err != nil {
@@ -81,7 +89,7 @@ func New(ctx context.Context, store permissions.PermissionStore, directory *iden
 			}
 		}
 	}
-	return &Service{Engine: engine, Directory: directory}, nil
+	return engine, nil
 }
 
 func (s *Service) Check(ctx context.Context, user, project, object, name string) error {

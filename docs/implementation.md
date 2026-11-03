@@ -64,6 +64,28 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Record feature commits and targeted validation here.
 
+### Identity administration API and durable session invalidation
+
+Added user profiles, account state, linked identity inspection, active session inspection, and single-session revocation through authorized APIs.
+Added permanent group ownership, local membership edits, provenance and expiry views, archive, and restore.
+Stored ownership drives checks. Project administrators cannot reparent groups or edit shared installation groups.
+Provider-managed membership remains read-only. New profiles and memberships do not grant project access.
+Current profile access requires authentication without installation directory authority.
+Identity writes save revisions and audit data atomically. Destructive lifecycle actions require reasons.
+Shared directory versions fence competing administrator removals across service instances.
+The permission library evaluates proposed directory state, including alternate group paths, explicit denies, and configured sign-in paths.
+Opaque encrypted cursors hide filtered identifiers and bind actor, collection, resource, scope, and archive filters.
+Added a partial OpenAPI contract for all 20 implemented identity administration operations.
+Other route families and role administration remain pending in that contract.
+Sign-in saves its timestamp atomically. Account disabling advances a session generation, and restoration cannot revive old sessions or artifact access.
+Added explicit loopback-only operator recovery with audit records and invalidation of earlier local sessions.
+Validation: focused race checks pass on SQLite and local PostgreSQL.
+Checks cover cross-project and installation boundaries, source ownership, object denies, bounded pages, forged cursors, stale revisions, administrator races, and session secrets.
+Existing OIDC and permission checks pass after the shared directory and session changes.
+The built-service smoke verifies actual SQLite restarts, persisted profiles and membership, cursor continuity, ordinary session continuity, explicit recovery invalidation, and loopback restrictions.
+Owned controllers and the disposable PostgreSQL service stop after verification.
+Users and Groups screens, invitations, identity linking, role and grant administration, hosted verification, and the remaining full plan stay pending.
+
 ### Notification configuration and delivery interface
 
 Added project channel configuration with registered secret names, exact scope filters, trigger selection, distinct timeout outcomes, and bounded attempt budgets.

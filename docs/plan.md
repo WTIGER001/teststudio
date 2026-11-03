@@ -286,6 +286,7 @@ Prevent an ordinary UI action from removing the last usable installation adminis
 Provide an operator-controlled recovery procedure independent of a failed provider or group mapping.
 
 Add Users, Groups, Roles and Permissions, and Sign-in Providers to authorized Settings pages.
+See [Identity administration](access.md) for implemented user, group, membership, profile, and session APIs, revision rules, and local recovery.
 User details show linked identities, local and external groups, project assignments, effective permissions, and active sessions.
 Group details show membership origin, affected projects, and role assignments.
 Role editors show action descriptions, scope bindings, explicit denies, and an effective-access preview.

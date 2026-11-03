@@ -143,3 +143,11 @@ Run details show delivery history for that run. Delivery retries preserve test o
 Run `bash scripts/test-notifications.sh` for a fresh local receiver and built-service verification.
 Run `bash scripts/test-self.sh --test=STUDIO-NOTIFY-001` for the focused browser workflow through TestStudio.
 See [Durable completion notifications](docs/notifications.md) for configuration, retries, permissions, and API routes.
+
+## Identity administration
+
+User, group, local membership, profile, and session administration APIs enforce stored ownership and current permissions.
+Disabling invalidates earlier sessions through later restoration. Ordinary lifecycle actions protect the last usable installation administrator.
+Run `bash scripts/test-access.sh` to verify persistence, restart, and explicit loopback recovery with a fresh local installation.
+See [Identity administration](docs/access.md) and the [identity OpenAPI contract](contracts/openapi.yaml).
+Administration screens, invitations, custom roles, and assignment editors remain pending.

@@ -61,10 +61,14 @@ func run() error {
 	notificationWorker := flag.Bool("notification-worker", true, "Process durable notification deliveries on this instance")
 	secretBindings := flag.String("secret-bindings", "", "Project and purpose scoped environment or mounted-file secret binding configuration")
 	local := flag.Bool("local", false, "Enable explicit loopback-only local administrator sign-in")
+	recoverLocal := flag.Bool("recover-local-admin", false, "Reenable the loopback local administrator and invalidate its earlier sessions; requires --local")
 	providers := flag.String("oidc-config", "", "Initial JSON provider configuration file")
 	bootstrapIssuer := flag.String("bootstrap-issuer", "", "OIDC issuer for the initial installation administrator")
 	bootstrapSubject := flag.String("bootstrap-subject", "", "Exact OIDC subject for the initial installation administrator")
 	flag.Parse()
+	if *recoverLocal && !*local {
+		return errors.New("recover-local-admin requires explicit loopback-only local mode")
+	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	parsed, err := url.Parse(*public)
@@ -129,6 +133,11 @@ func run() error {
 			}
 		} else if err != nil {
 			return err
+		}
+		if *recoverLocal {
+			if err := recoverLocalAdministrator(ctx, directory, localUser); err != nil {
+				return err
+			}
 		}
 		if err := auth.Engine.AssignRole(ctx, permissions.PrincipalRef{Kind: permissions.PrincipalUser, ID: localUser}, "builtin.teststudio.installation-admin", nil); err != nil {
 			return err
