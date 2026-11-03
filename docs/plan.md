@@ -20,8 +20,11 @@ The full objective and all 57 acceptance items remain required. They do not all 
 See demo-readiness.md for the immediate delivery checklist.
 The current user priority is a guided walkthrough of the running local demo.
 Keep that demo available while the user works through its pages.
-The current process starts before private UI snapshots are added. Avoid rebuilding its shared UI output during the walkthrough.
-New launcher starts use private UI snapshots. The current demo does not require a restart for the walkthrough.
+The user requests grouped sidebar sections during the walkthrough.
+The sidebar now separates Workspace, Testing, Project administration, and Installation administration.
+The administration sections collapse by default. The current administration page opens its section.
+The refreshed local demo serves a private UI snapshot and retains its existing database and evidence.
+Future builds do not replace assets used by this running demo.
 
 Item **01** now passes a build from an isolated copy of the current source tree.
 Go uses no workspace or local module replacements. A clean offline npm installation and Angular build also pass.

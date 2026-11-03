@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures'
+import { test, expect, followNavigation } from './fixtures'
 
 test('Notification channels, durable delivery, and retained attempts', { tag: '@STUDIO-NOTIFY-001' }, async ({ page, api }, testInfo) => {
   const { project, path } = await api.scaffold('notification-selftests')
@@ -150,7 +150,7 @@ test('Notification channels, durable delivery, and retained attempts', { tag: '@
       await testInfo.attach(`notifications-${theme}`, { body: await page.screenshot({ fullPage: true, animations: 'disabled' }), contentType: 'image/png' })
     }
     await page.getByLabel('Workspace', { exact: true }).selectOption(other.project)
-    await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Notifications', exact: true }).click()
+    await followNavigation(page, 'Notifications')
     await expect(page.getByRole('heading', { name: 'Edit notification channel', exact: true })).toHaveCount(0)
     await page.getByRole('button', { name: '+ New channel', exact: true }).click()
     await expect(page.getByText(/No notification secret references are registered/)).toBeVisible()

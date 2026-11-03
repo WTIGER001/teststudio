@@ -1,7 +1,20 @@
-import { test as base, expect, type APIRequestContext, type Page } from '@playwright/test'
+import { test as base, expect, type APIRequestContext, type Page, type Locator } from '@playwright/test'
 import crypto from 'node:crypto'
 
 const expectedFailures = new WeakMap<Page, { url: string; status: number; consoleSeen: boolean; responseSeen: boolean }[]>()
+
+export async function navigationLink(page: Page, name: string): Promise<Locator> {
+  const navigation = page.getByRole('navigation', { name: 'Main navigation', includeHidden: true })
+  await navigation.waitFor({ state: 'attached' })
+  if (!await navigation.isVisible()) await page.getByRole('button', { name: 'Navigation', exact: true }).click()
+  const link = navigation.getByRole('link', { name, exact: true, includeHidden: true })
+  await link.waitFor({ state: 'attached' })
+  const disclosure = link.locator('xpath=ancestor::details[1]')
+  if (await disclosure.count() && !await disclosure.evaluate(element => (element as HTMLDetailsElement).open)) await disclosure.locator('summary').click()
+  return link
+}
+
+export async function followNavigation(page: Page, name: string): Promise<void> { await (await navigationLink(page, name)).click() }
 
 export async function expectHTTPFailure(page: Page, method: string, path: string, status: number, action: () => Promise<unknown>) {
   const expected = { url: new URL(path, 'http://127.0.0.1:8040').href, status, consoleSeen: false, responseSeen: false }

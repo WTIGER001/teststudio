@@ -12,6 +12,18 @@ Project settings provides suite inspection, editable settings, archive, and rest
 The focused manager shows readable affected schedules and preserves release pins.
 Revision conflicts require a reload before another mutation. See [Suite settings](suites.md).
 
+## Sidebar navigation
+
+The sidebar separates Workspace, Testing, Project administration, and Installation administration.
+Workspace contains project selection and account navigation.
+Testing contains catalogs, runs, schedules, trends, releases, and sources.
+The administration sections group configuration, notifications, access, users, groups, roles, and identity providers by ownership scope.
+Administration sections start collapsed. Their current page opens the relevant section.
+Native disclosure controls support keyboard operation. Active links expose the current page.
+Existing capability checks still control each protected link.
+On narrow screens, Navigation opens and closes the menu. Selecting a link closes it and returns space to the current page.
+Sidebar styles stay within focused components and use shared theme tokens.
+
 ## Themes
 
 Light, dark, and system preferences use shared semantic CSS tokens.

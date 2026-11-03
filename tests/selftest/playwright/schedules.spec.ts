@@ -1,4 +1,4 @@
-import { test, expect } from './fixtures'
+import { test, expect, followNavigation } from './fixtures'
 
 test('Durable schedules, editable configuration, and retained firing history', { tag: '@STUDIO-SCHEDULE-001' }, async ({ page, api }, testInfo) => {
   const { project, path } = await api.scaffold()
@@ -110,7 +110,7 @@ test('Durable schedules, editable configuration, and retained firing history', {
     await row().getByRole('button', { name: 'Edit', exact: true }).click()
     await page.getByLabel('Schedule name', { exact: true }).fill('Unsaved project change')
     await page.getByLabel('Workspace', { exact: true }).selectOption(other.project)
-    await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Schedules', exact: true }).click()
+    await followNavigation(page, 'Schedules')
     await expect(page.getByRole('heading', { name: 'Edit schedule', exact: true })).toHaveCount(0)
     expect((await api.call('GET', resource)).data.name).toBe('Renamed availability probe')
   })

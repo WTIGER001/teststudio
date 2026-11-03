@@ -74,6 +74,29 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Grouped sidebar navigation
+
+The user's walkthrough feedback replaces the flat sidebar with Workspace, Testing, Project administration, and Installation administration sections.
+Daily testing links stay visible. Native disclosure controls collapse administration links until requested or selected by the current route.
+The sidebar opens the current administration section and marks the current link for assistive technology.
+A compact Navigation button controls the menu on narrow screens. Link selection closes that menu.
+The sidebar and link list use focused components. A pure utility retains existing capability checks and route grouping.
+Navigation styles now stay inside the sidebar components instead of applying to every navigation element.
+The existing Playwright workflows use a shared helper to open native disclosures and mobile navigation before selecting links.
+Permission absence checks include hidden links, so collapsed sections do not conceal a permission regression.
+
+Two focused navigation utility checks pass for section grouping, route ownership, exact account matching, project switching, and capability filtering.
+The Angular production build passes.
+STUDIO-NAV-001 passes through normal TestStudio execution with complete evidence.
+It verifies collapsed defaults, keyboard disclosure, current-page expansion, active-link semantics, mobile menu closure, and narrow layouts in both themes.
+The first check identifies an ambiguous Workspace accessibility label. Distinct navigation region names correct it.
+Evidence is output/selftest/20261103T190457.595672000-3c8197424f65a7a7161a7165/summary.json and cleanup.json.
+The owned verification controller, browser container, and output volume are removed.
+The user's demo restarts with its existing database, history, evidence, and a private snapshot of the updated UI.
+Unchanged application binaries are reused for the corrected browser check and demo restart.
+No unrelated workflow matrix or cloud verification runs for this change.
+This improves the existing interface acceptance work. The ledger remains **26 verified, 31 open, 57 total**.
+
 ### Stable demo UI assets during development
 
 New demo starts copy compiled UI assets into a private content-addressed directory under the demo installation.

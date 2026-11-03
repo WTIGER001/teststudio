@@ -1,5 +1,5 @@
 import { createServer } from 'node:http'
-import { test, expect } from './fixtures'
+import { test, expect, followNavigation } from './fixtures'
 
 test('Stacked result trends, selection gaps, and rankings', { tag: '@STUDIO-TRENDS-001' }, async ({ page, api }, testInfo) => {
   let mode = 'pass', calls = 0
@@ -76,7 +76,7 @@ test('Stacked result trends, selection gaps, and rankings', { tag: '@STUDIO-TREN
       await expect(page.getByRole('heading', { name: 'Test health / CHECK-A', exact: true })).toBeVisible()
       await page.locator('svg a').first().click()
       await expect(page.getByRole('heading', { name: 'Run details', exact: true })).toBeVisible()
-      await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Trends', exact: true }).click()
+      await followNavigation(page, 'Trends')
     })
 
     await test.step('Keep unavailable history distinct from an empty scope', async () => {

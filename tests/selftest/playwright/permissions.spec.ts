@@ -1,4 +1,4 @@
-import { test, expect, expectHTTPFailure } from './fixtures'
+import { test, expect, expectHTTPFailure, followNavigation } from './fixtures'
 
 test('Effective decisions, inherited source paths, bounded scans, and revoked inspection', { tag: '@STUDIO-PERMISSIONS-001' }, async ({ page, api }, testInfo) => {
   const { project, path } = await api.scaffold(), route = `/projects/${project}/explain-access`
@@ -89,7 +89,7 @@ test('Effective decisions, inherited source paths, bounded scans, and revoked in
         await expect(card).not.toContainText('health-source')
         await expect(card).not.toContainText('2000-01-01')
       }
-      await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Explain installation access', exact: true }).click()
+      await followNavigation(page, 'Explain installation access')
       await expect(decision()).toContainText('Denied')
       await expect(decision()).toContainText('No active allow')
       await expect(sources().getByRole('article')).toHaveCount(0)

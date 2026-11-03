@@ -1,5 +1,5 @@
 import { request } from '@playwright/test'
-import { test, expect, expectHTTPFailure } from './fixtures'
+import { test, expect, expectHTTPFailure, followNavigation, navigationLink } from './fixtures'
 
 test.use({ timezoneId: 'America/Los_Angeles' })
 
@@ -70,7 +70,7 @@ test('Identity administration, scoped groups, and session controls', { tag: '@ST
   })
 
   await test.step('Create distinct installation and project groups with permanent scope', async () => {
-    await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Installation groups', exact: true }).click()
+    await followNavigation(page, 'Installation groups')
     await page.getByRole('button', { name: '+ New group', exact: true }).click()
     await page.getByLabel('Group name', { exact: true }).fill('Shared reviewers')
     await page.getByLabel('Group identifier', { exact: true }).fill('shared-reviewers')
@@ -153,13 +153,13 @@ test('Identity administration, scoped groups, and session controls', { tag: '@ST
     await page.getByRole('button', { name: 'Edit group', exact: true }).click()
     await page.getByLabel('Group name', { exact: true }).fill('Unsaved scope change')
     await page.getByLabel('Workspace', { exact: true }).selectOption(other.project)
-    await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Project groups', exact: true }).click()
+    await followNavigation(page, 'Project groups')
     await expect(page.getByRole('heading', { name: 'Edit group', exact: true })).toHaveCount(0)
     await expect(page.getByRole('link', { name: 'Other reviewers', exact: true })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Project reviewers', exact: true })).toHaveCount(0)
     expect((await api.call('GET', groupPath)).data.name).toBe('Project reviewers')
     for (let index = 0; index < 31; index++) await api.call('POST', '/api/v1/users', { id: `zz-reviewer-${index}`, name: `Directory reviewer ${index}` })
-    await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Users', exact: true }).click()
+    await followNavigation(page, 'Users')
     await expect(userTable().getByRole('row')).toHaveCount(31)
     await page.getByRole('button', { name: 'More users', exact: true }).click()
     await expect(userTable().getByRole('row')).toHaveCount(34)
@@ -205,9 +205,9 @@ test('Identity administration, scoped groups, and session controls', { tag: '@ST
       await expect(page.getByRole('button', { name: '+ Add member', exact: true })).toHaveCount(0)
       await expect(page.getByRole('button', { name: 'Edit membership', exact: true })).toHaveCount(0)
       const navigation = page.getByRole('navigation', { name: 'Main navigation' })
-      await expect(navigation.getByRole('link', { name: 'Project groups', exact: true })).toBeVisible()
-      await expect(navigation.getByRole('link', { name: 'Users', exact: true })).toHaveCount(0)
-      await expect(navigation.getByRole('link', { name: 'Installation groups', exact: true })).toHaveCount(0)
+      await expect(await navigationLink(page, 'Project groups')).toBeVisible()
+      await expect(navigation.getByRole('link', { name: 'Users', exact: true, includeHidden: true })).toHaveCount(0)
+      await expect(navigation.getByRole('link', { name: 'Installation groups', exact: true, includeHidden: true })).toHaveCount(0)
       expect((await page.request.get('/api/v1/users')).status()).toBe(403)
       expect((await page.request.get(`/api/v1/groups?project=${other.project}`)).status()).toBe(403)
       expect((await page.request.get('/api/v1/groups/shared-reviewers')).status()).toBe(403)

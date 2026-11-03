@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
-import { FormsModule } from '@angular/forms'
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router'
+import { RouterLink, RouterOutlet } from '@angular/router'
 import { ApplicationService } from './core/application.service'
 import { ThemeService } from './core/theme.service'
+import { SidebarComponent } from './core/sidebar.component'
 import { PasswordSigninComponent } from './features/auth/password-signin.component'
 import { RequiredPasswordComponent } from './features/auth/required-password.component'
 import { AuthFeedbackComponent } from './features/auth/auth-feedback.component'
@@ -12,7 +12,7 @@ import { HelpComponent } from './features/help/help.component'
 @Component({
   selector: 'ts-root',
   standalone: true,
-  imports: [FormsModule, RouterLink, RouterLinkActive, RouterOutlet, HelpComponent, PasswordSigninComponent, RequiredPasswordComponent, AuthFeedbackComponent],
+  imports: [RouterLink, RouterOutlet, SidebarComponent, HelpComponent, PasswordSigninComponent, RequiredPasswordComponent, AuthFeedbackComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <a class="skip-link" href="#main">Skip to content</a>
@@ -59,41 +59,7 @@ import { HelpComponent } from './features/help/help.component'
       <main id="main" class="signin"><ts-required-password /></main>
     } @else {
       <div class="app-layout">
-        <aside class="sidebar">
-          <div class="workspace-picker"><label for="project-picker" class="eyebrow">Workspace</label>
-            <select id="project-picker" [ngModel]="app.workspace.projectId()" (ngModelChange)="app.workspace.selectProject($event)">
-              <option value="">All projects</option>
-              @for (project of app.workspace.projects(); track project.id) { <option [value]="project.id">{{ project.data.name }}</option> }
-            </select>
-          </div>
-          <nav aria-label="Main navigation">
-            <a routerLink="/projects" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><span aria-hidden="true">▦</span> Projects</a>
-            <a routerLink="/account" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><span aria-hidden="true">♙</span> Your account</a>
-            <a routerLink="/account/access" routerLinkActive="active"><span aria-hidden="true">♧</span> Explain installation access</a>
-            @if (app.workspace.projectId()) {
-              <a [routerLink]="['/projects', app.workspace.projectId(), 'explain-access']" routerLinkActive="active"><span aria-hidden="true">♧</span> Explain project access</a>
-              <a [routerLink]="['/projects', app.workspace.projectId(), 'catalog']" routerLinkActive="active"><span aria-hidden="true">≡</span> Test catalog</a>
-              @if (app.workspace.can('catalog.read')) { <a [routerLink]="['/projects', app.workspace.projectId(), 'releases']" routerLinkActive="active"><span aria-hidden="true">◇</span> Suite releases</a> }
-              @if (app.workspace.can('sources.read')) { <a [routerLink]="['/projects', app.workspace.projectId(), 'sources']" routerLinkActive="active"><span aria-hidden="true">◇</span> Sources</a> }
-              <a [routerLink]="['/projects', app.workspace.projectId(), 'runs']" routerLinkActive="active"><span aria-hidden="true">▷</span> Test runs</a>
-              <a [routerLink]="['/projects', app.workspace.projectId(), 'trends']" routerLinkActive="active"><span aria-hidden="true">▥</span> Trends</a>
-              @if (app.workspace.can('schedules.read')) { <a [routerLink]="['/projects', app.workspace.projectId(), 'schedules']" routerLinkActive="active"><span aria-hidden="true">◷</span> Schedules</a> }
-              @if (app.workspace.can('notifications.read')) { <a [routerLink]="['/projects', app.workspace.projectId(), 'notifications']" routerLinkActive="active"><span aria-hidden="true">♧</span> Notifications</a> }
-              <a [routerLink]="['/projects', app.workspace.projectId(), 'configuration']" routerLinkActive="active"><span aria-hidden="true">⚙</span> Project settings</a>
-              @if (app.workspace.can('members.read') && app.workspace.can('permissions.read')) { <a [routerLink]="['/projects', app.workspace.projectId(), 'members']" routerLinkActive="active"><span aria-hidden="true">♧</span> Project access</a> }
-              @if (app.workspace.can('members.read') && app.workspace.can('permissions.read')) { <a [routerLink]="['/projects', app.workspace.projectId(), 'permissions']" routerLinkActive="active"><span aria-hidden="true">♧</span> Project permissions</a> }
-              @if (app.workspace.can('groups.read')) { <a [routerLink]="['/projects', app.workspace.projectId(), 'groups']" routerLinkActive="active"><span aria-hidden="true">♙</span> Project groups</a> }
-              @if (app.workspace.can('roles.read')) { <a [routerLink]="['/projects', app.workspace.projectId(), 'roles']" routerLinkActive="active"><span aria-hidden="true">♧</span> Project roles</a> }
-            }
-            @if (app.workspace.canInstallation('members.read') && app.workspace.canInstallation('permissions.read')) { <a routerLink="/settings/access" routerLinkActive="active"><span aria-hidden="true">♧</span> Installation access</a> }
-            @if (app.workspace.canInstallation('members.read') && app.workspace.canInstallation('permissions.read')) { <a routerLink="/settings/permissions" routerLinkActive="active"><span aria-hidden="true">♧</span> Installation permissions</a> }
-            @if (app.workspace.canInstallation('users.read')) { <a routerLink="/settings/users" routerLinkActive="active"><span aria-hidden="true">♙</span> Users</a> }
-            @if (app.workspace.canInstallation('providers.read')) { <a routerLink="/settings/providers" routerLinkActive="active"><span aria-hidden="true">♧</span> Identity providers</a> }
-            @if (app.workspace.canInstallation('groups.read')) { <a routerLink="/settings/groups" routerLinkActive="active"><span aria-hidden="true">♧</span> Installation groups</a> }
-            @if (app.workspace.canInstallation('roles.read')) { <a routerLink="/settings/roles" routerLinkActive="active"><span aria-hidden="true">♧</span> Installation roles</a> }
-          </nav>
-          <div class="sidebar-footer"><span class="status-dot" aria-hidden="true"></span><span>TestStudio<br><small>Built for clear answers.</small></span></div>
-        </aside>
+        <ts-sidebar />
         <main id="main" class="workspace-main"><ts-auth-feedback />
           @if (app.error()) { <p class="notice error" role="alert">{{ app.error() }}</p> }
           @if (app.message()) { <p class="notice success" role="status">{{ app.message() }}</p> }

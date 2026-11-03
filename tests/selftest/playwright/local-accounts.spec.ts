@@ -1,5 +1,5 @@
 import { request } from '@playwright/test'
-import { API, test, expect, expectHTTPFailure } from './fixtures'
+import { API, test, expect, expectHTTPFailure, followNavigation } from './fixtures'
 
 const rootTemporary = 'calm river granite sunrise 46'
 const rootPassword = 'bright canyon cedar evening 72'
@@ -123,10 +123,10 @@ test('Local accounts, required password changes, and credential administration',
       } finally { page.off('request', observe) }
       await change(temporary, personal)
       await expect(page.getByRole('heading', { name: 'Projects', exact: true })).toBeVisible()
-      await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Your account', exact: true }).click()
+      await followNavigation(page, 'Your account')
       await expect(page.getByRole('heading', { name: 'Your account', exact: true })).toBeVisible()
       await expect(page.getByText('Local password sign-in is enabled.', { exact: true })).toBeVisible()
-      await expect(page.getByRole('navigation').getByRole('link', { name: 'Users', exact: true })).toHaveCount(0)
+      await expect(page.getByRole('navigation').getByRole('link', { name: 'Users', exact: true, includeHidden: true })).toHaveCount(0)
     })
 
     await test.step('Change an ordinary password without installation authority and rotate its session', async () => {
