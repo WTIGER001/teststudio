@@ -66,6 +66,12 @@ func (s *Server) catalogTransferRoutes(m *http.ServeMux) {
 			problem(w, authorization.ErrForbidden)
 			return
 		}
+		for _, change := range plan.Changes {
+			if err := s.Auth.Check(r.Context(), actor(r), p, "test/"+suite+"/"+change.Test.ID, "catalog.read"); err != nil {
+				problem(w, err)
+				return
+			}
+		}
 		JSON(w, 200, row)
 	}))
 	m.HandleFunc("POST "+base+"/catalog-imports/{id}/apply", s.authorized(func(w http.ResponseWriter, r *http.Request) {

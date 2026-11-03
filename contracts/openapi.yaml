@@ -1,7 +1,7 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio API"
-  "version": "0.20.0"
+  "version": "0.21.0"
   "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Includes optional client-identifier RP-initiated provider logout after local session revocation. Includes staged native JSON and YAML sources with atomic catalog publication and retained source provenance. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
@@ -10,6 +10,137 @@
   -
     "SessionCookie": []
 "paths":
+  "/api/v1/projects/{project}/suites/{suite}/tests/bulk-preview":
+    "post":
+      "operationId": "previewCatalogBulk"
+      "parameters":
+        -
+          "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/CatalogPlanRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/CatalogBulkRequest"
+      "security":
+        -
+          "CSRFToken": []
+          "SessionCookie": []
+  "/api/v1/projects/{project}/suites/{suite}/catalog-imports/{id}":
+    "get":
+      "operationId": "readCatalogPlan"
+      "parameters":
+        -
+          "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "in": "path"
+          "name": "id"
+          "required": true
+          "schema":
+            "type": "string"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/CatalogPlanRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+  "/api/v1/projects/{project}/suites/{suite}/catalog-imports/{id}/apply":
+    "post":
+      "operationId": "applyCatalogPlan"
+      "parameters":
+        -
+          "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "in": "path"
+          "name": "id"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/CatalogPlanRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "CSRFToken": []
+          "SessionCookie": []
   "/api/v1/projects/{project}/suites/{suite}/actions/{action}":
     "post":
       "operationId": "changeSuiteLifecycle"
@@ -3757,6 +3888,99 @@
           "schema":
             "$ref": "#/components/schemas/Problem"
   "schemas":
+    "CatalogBulkMetadata":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "title":
+          "type":
+            - "string"
+            - "null"
+        "description":
+          "type":
+            - "string"
+            - "null"
+        "category":
+          "type":
+            - "string"
+            - "null"
+        "owner":
+          "type":
+            - "string"
+            - "null"
+        "safety":
+          "type":
+            - "string"
+            - "null"
+        "rationale":
+          "type":
+            - "string"
+            - "null"
+        "conditions":
+          "type":
+            - "string"
+            - "null"
+        "tags":
+          "type":
+            - "array"
+            - "null"
+          "items":
+            "type": "string"
+          "maxItems": 30
+    "CatalogBulkTarget":
+      "type": "object"
+      "additionalProperties": false
+      "required":
+        - "id"
+        - "revision"
+      "properties":
+        "id":
+          "type": "string"
+        "revision":
+          "type": "integer"
+          "minimum": 1
+    "CatalogBulkRequest":
+      "type": "object"
+      "additionalProperties": false
+      "required":
+        - "action"
+        - "tests"
+      "properties":
+        "action":
+          "type": "string"
+          "enum":
+            - "metadata"
+            - "disable"
+            - "enable"
+            - "archive"
+            - "restore"
+        "tests":
+          "type": "array"
+          "minItems": 1
+          "maxItems": 30
+          "items":
+            "$ref": "#/components/schemas/CatalogBulkTarget"
+        "metadata":
+          "$ref": "#/components/schemas/CatalogBulkMetadata"
+    "CatalogPlanRecord":
+      "type": "object"
+      "required":
+        - "id"
+        - "revision"
+        - "updatedAt"
+        - "data"
+      "properties":
+        "id":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "revision":
+          "type": "integer"
+        "updatedAt":
+          "type": "string"
+          "format": "date-time"
+        "data":
+          "$ref": "#/components/schemas/SourceCatalogImportPlan"
     "SuiteSchedule":
       "properties":
         "enabled":

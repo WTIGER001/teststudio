@@ -33,6 +33,11 @@ The next implementation batches follow the full ledger without adding new gates 
 ## Current implementation checkpoint
 
 The acceptance ledger has **26 verified, 31 open, 57 total** items.
+Bulk metadata edits now support reviewed category, tags, owner, title, description, safety, rationale, and condition changes.
+The API and UI preserve source-owned definitions and use atomic revision-controlled preview plans.
+Safety changes recheck current publishing permission. Stored previews recheck exact read and editing authority.
+Focused catalog checks and STUDIO-BULK-METADATA-001 pass locally. The implementation ledger records evidence and cleanup.
+Catalog category-tree navigation, saved selections, broader filters, and remaining item 21 workflows still require implementation.
 Item **23** now passes a real local repository snapshot with two suites beside shared application source.
 Both suites build separate images, publish, and pass normal runs with one result and complete evidence.
 Item **24** previously passes two-image publication and execution without restarting the server.

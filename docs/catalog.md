@@ -27,7 +27,7 @@ The limit keeps definitions, history, audit records, and guards in one bounded t
 Imports update named definitions and preserve omitted tests.
 Existing lifecycle states require explicit actions. Imports do not change those states.
 Coded tests require source preparation and cannot enter through declarative import.
-Use Sources for reviewed JSON or YAML source uploads. Source archive preparation remains pending.
+Use Sources for reviewed JSON or YAML definitions, complete source ZIP uploads, and registered GitHub source preparation.
 
 ## Preview and apply
 
@@ -50,6 +50,44 @@ Validation errors identify the test and field. Invalid plans cannot apply.
 History shows retained definitions, actor, timestamp, and revision number.
 Duplicate asks for a new permanent identifier and creates a draft entry.
 Opening a preview or history panel moves keyboard focus to its heading.
+
+## Bulk metadata
+
+Select 1 through 30 tests from one suite. Choose **Edit metadata** under **Bulk action**.
+Select each field to replace. Available fields include title, description, category, tags, owner, safety label, rationale, and operating conditions.
+Unselected fields keep their values. Empty optional text clears the selected field. An empty tag list removes all tags.
+The UI accepts comma-separated tags. Tags require distinct values and remain limited to 30 entries of 64 bytes each.
+Titles, categories, and owners accept up to 200 bytes. Descriptions, rationales, and conditions accept up to 4096 bytes.
+Titles, categories, and selected rationales require nonempty text.
+Select an explicit rationale when selecting a safety label. A changed label requires current publishing permission.
+
+Select **Preview bulk changes** and inspect the visible before and after values.
+The preview retains the full definitions for optional inspection.
+Apply uses the same revision-controlled plan operation as imports and lifecycle actions.
+Permission checks and mutations share one assignment transaction. A rejected change cannot partially apply.
+Concurrent replays of an applied plan return its result without adding test revisions.
+Plans recheck current exact read and editing authority. A stored preview does not retain revoked access.
+
+The existing `POST /tests/bulk-preview` route accepts this request:
+
+```json
+{
+  "action": "metadata",
+  "tests": [{ "id": "HEALTH-001", "revision": 3 }],
+  "metadata": {
+    "category": "Availability / Local",
+    "tags": ["reviewed", "local"],
+    "owner": "Example team"
+  }
+}
+```
+
+Omitted or null metadata fields remain unchanged. Use an empty string or array for an explicit supported clear.
+Metadata cannot include executable fields, selectors, source identities, dependencies, runner settings, or lifecycle state.
+Prepared source facts stay unchanged. Future source synchronization preserves the service-managed metadata.
+Metadata edits do not publish a release, start a run, or rewrite retained results.
+After a conflict, reload the catalog and create a new preview.
+The API request, plan read, and apply operations are recorded in OpenAPI and the generated TypeScript client.
 
 ## Native HTTP editor
 

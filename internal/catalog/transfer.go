@@ -61,8 +61,15 @@ func (s *Service) PreviewBulk(ctx context.Context, user, project, suite string, 
 	if err := s.Auth.Check(ctx, user, project, "suite/"+suite, "catalog.read"); err != nil {
 		return ImportPlan{}, err
 	}
-	if !slices.Contains([]string{"disable", "enable", "archive", "restore"}, input.Action) {
-		return ImportPlan{}, errors.New("unsupported bulk lifecycle action")
+	if !slices.Contains([]string{"disable", "enable", "archive", "restore", "metadata"}, input.Action) {
+		return ImportPlan{}, errors.New("unsupported bulk action")
+	}
+	if input.Action == "metadata" {
+		if err := validateBulkMetadata(input.Metadata); err != nil {
+			return ImportPlan{}, err
+		}
+	} else if input.Metadata != nil {
+		return ImportPlan{}, errors.New("metadata changes require the metadata bulk action")
 	}
 	if len(input.Tests) < 1 || len(input.Tests) > MutationLimit {
 		return ImportPlan{}, fmt.Errorf("a bulk action accepts between 1 and %d tests", MutationLimit)
@@ -72,6 +79,9 @@ func (s *Service) PreviewBulk(ctx context.Context, user, project, suite string, 
 	for _, item := range input.Tests {
 		if item.Revision < 1 || revisions[item.ID] > 0 {
 			return ImportPlan{}, errors.New("bulk actions require unique identifiers and positive revisions")
+		}
+		if err := s.Auth.Check(ctx, user, project, "test/"+suite+"/"+item.ID, "catalog.read"); err != nil {
+			return ImportPlan{}, err
 		}
 		r, err := s.Store.Get(ctx, Bucket("tests", project, suite), item.ID)
 		if err != nil {
@@ -84,7 +94,11 @@ func (s *Service) PreviewBulk(ctx context.Context, user, project, suite string, 
 		if err != nil {
 			return ImportPlan{}, err
 		}
-		t.State = map[string]string{"disable": "disabled", "enable": "enabled", "archive": "archived", "restore": "enabled"}[input.Action]
+		if input.Action == "metadata" {
+			t = patchBulkMetadata(t, *input.Metadata)
+		} else {
+			t.State = map[string]string{"disable": "disabled", "enable": "enabled", "archive": "archived", "restore": "enabled"}[input.Action]
+		}
 		tests = append(tests, t)
 		revisions[item.ID] = item.Revision
 	}
@@ -229,6 +243,9 @@ func (s *Service) preview(ctx context.Context, user, project, suite, kind string
 }
 
 func (s *Service) authorizeChange(ctx context.Context, user, project, suite, kind string, c PlannedTest) error {
+	if err := s.Auth.Check(ctx, user, project, "test/"+suite+"/"+c.Test.ID, "catalog.read"); err != nil {
+		return err
+	}
 	permission := "catalog.update"
 	if c.Revision == 0 {
 		permission = "catalog.create"
@@ -249,7 +266,21 @@ func (s *Service) authorizeChange(ctx context.Context, user, project, suite, kin
 }
 
 func (s *Service) ApplyImport(ctx context.Context, user, project, suite, id string, revision int64) (ImportPlan, error) {
-	return s.applyImport(ctx, user, project, suite, id, revision, "")
+	var result ImportPlan
+	err := s.Auth.WithAssignmentTransaction(ctx, func(auth *authorization.Service) error {
+		bound := &Service{Store: auth.Directory.Store, Auth: auth}
+		var err error
+		result, err = bound.applyImport(ctx, user, project, suite, id, revision, "")
+		return err
+	})
+	if errors.Is(err, storage.ErrConflict) {
+		if row, readErr := s.Store.Get(ctx, Bucket("imports", project, suite), id); readErr == nil {
+			if applied, decodeErr := storage.Decode[ImportPlan](row); decodeErr == nil && applied.AppliedAt != nil {
+				return s.applyImport(ctx, user, project, suite, id, revision, "")
+			}
+		}
+	}
+	return result, err
 }
 
 func (s *Service) ApplySourceImport(ctx context.Context, user, project, suite, id string, revision int64, snapshot string) (ImportPlan, error) {

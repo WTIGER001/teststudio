@@ -3,6 +3,8 @@
 The Angular application uses standalone components, OnPush change detection, and signal-based services.
 Components delegate workflows to focused feature services.
 Pure utilities handle catalog filtering and counts.
+Bulk metadata uses a focused editor, signal-based service, and pure field validation utilities.
+Review previews show compact before and after values beside optional complete definitions.
 
 Project settings provides suite inspection, editable settings, archive, and restoration.
 The focused manager shows readable affected schedules and preserves release pins.

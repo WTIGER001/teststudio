@@ -16,6 +16,8 @@ export interface TestDefinition {
   applicationId?: string
   category: string
   tags: string[]
+  owner?: string
+  conditions?: string
   type: string
   runner: string
   state: string

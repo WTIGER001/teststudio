@@ -74,6 +74,32 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Reviewed bulk metadata editing
+
+The existing bulk preview route now supports explicit metadata changes for 1 through 30 tests from one suite.
+Editable fields include category, tags, owner, title, description, safety label, rationale, and operating conditions.
+The focused editor requires explicit field selection and shows field validation beside its controls.
+Unselected fields stay unchanged. Empty optional values clear the selected fields.
+Visible before and after values supplement the retained full definitions in the common review panel.
+Source-owned executable definitions, selectors, lifecycle states, active releases, and historical runs remain unchanged.
+Safety selections require an explicit rationale. Changed labels require current publishing authority.
+Plan reads and apply operations recheck exact test read authority. A stored preview cannot retain revoked access.
+Import and bulk application now share permission and metadata transactions. Stale plans cannot partially apply.
+Concurrent replays retain their idempotent result without adding revisions.
+Selection and metadata changes invalidate displayed or pending previews.
+OpenAPI records the bulk request, plan read, and apply contracts. Generated client synchronization passes.
+
+Focused local catalog checks verify prepared source facts, metadata clearing, stale-plan atomicity, current publishing and update denials, and concurrent replay.
+The focused API check rejects executable metadata fields and exact read denial after preview creation.
+The Angular production build passes.
+STUDIO-BULK-METADATA-001 passes through normal TestStudio execution with complete evidence.
+It edits two selected tests, reviews changed values, rejects a stale apply, clears optional fields, and preserves the active release and historical run.
+Evidence is output/selftest/20261103T181950.320666000-96aed8860fd546b2041e375b/summary.json and cleanup.json.
+The owned controller, browser container, and output volume are removed after verification.
+Only the affected browser workflow and selected backend checks run. No cloud checks run.
+Item **21** advances. Category-tree navigation, saved selections, broader filters, and remaining catalog requirements keep it open.
+The ledger remains **26 verified, 31 open, 57 total**.
+
 ### Suite settings, archive, and restoration
 
 Project settings now opens a focused suite manager with editable name, description, supported applications, and target requirements.

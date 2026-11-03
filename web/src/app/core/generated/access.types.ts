@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.20.0"
+export const accessContractVersion = "0.21.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -11,6 +11,10 @@ export type CLIGrant = { "cookie": string; "csrfToken": string; "expiresAt": str
 export type CLIOptions = { "lifetimeSeconds": number; "pollSeconds": number; "serverTime": string }
 export type CLIProof = { "clientName": string; "requestId": string; "verifier": string }
 export type CLIView = { "clientName": string; "expiresAt": string; "id": string; "state": string }
+export type CatalogBulkMetadata = { "category"?: string | null; "conditions"?: string | null; "description"?: string | null; "owner"?: string | null; "rationale"?: string | null; "safety"?: string | null; "tags"?: (string)[] | null; "title"?: string | null }
+export type CatalogBulkRequest = { "action": "metadata" | "disable" | "enable" | "archive" | "restore"; "metadata"?: CatalogBulkMetadata; "tests": (CatalogBulkTarget)[] }
+export type CatalogBulkTarget = { "id": string; "revision": number }
+export type CatalogPlanRecord = { "data": SourceCatalogImportPlan; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
 export type ExternalIdentity = { "issuer": string; "subject": string; "userId": string }
 export type ExternalIdentityPage = { "cursor"?: string; "items": (ExternalIdentityRecord)[]; "partial": boolean }
 export type ExternalIdentityRecord = { "data": ExternalIdentity; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
@@ -184,6 +188,8 @@ export interface AccessRequests {
   revokeProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
   readProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string }
   changeSuiteLifecycle: { "project": string; "suite": string; "action": "archive" | "restore"; revision: number }
+  readCatalogPlan: { "project": string; "suite": string; "id": string }
+  applyCatalogPlan: { "project": string; "suite": string; "id": string; revision: number }
   readSuiteLifecycle: { "project": string; "suite": string }
   readReleaseRegistry: { "project": string; "suite": string }
   activateRetainedRelease: { "project": string; "suite": string; "id": string; revision: number }
@@ -200,6 +206,7 @@ export interface AccessRequests {
   readSourceUpload: { "project": string; "suite": string; "id": string }
   readSourceContent: { "project": string; "suite": string; "id": string }
   publishSourceUpload: { "project": string; "suite": string; "id": string; revision: number; body: SourcePublishInput }
+  previewCatalogBulk: { "project": string; "suite": string; body: CatalogBulkRequest }
   listInstallationAssignments: { query?: { "limit"?: number; "cursor"?: string } }
   createInstallationAssignment: { body: AssignmentDefinition }
   revokeInstallationAssignment: { "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
@@ -290,6 +297,8 @@ export interface AccessResponses {
   revokeProjectAssignment: Revoked
   readProjectAssignment: AssignmentRecord
   changeSuiteLifecycle: SuiteLifecycle
+  readCatalogPlan: CatalogPlanRecord
+  applyCatalogPlan: CatalogPlanRecord
   readSuiteLifecycle: SuiteLifecycle
   readReleaseRegistry: ReleaseRegistry
   activateRetainedRelease: {  }
@@ -306,6 +315,7 @@ export interface AccessResponses {
   readSourceUpload: SourceUploadPreview
   readSourceContent: SourceContent
   publishSourceUpload: SourceCatalogRelease
+  previewCatalogBulk: CatalogPlanRecord
   listInstallationAssignments: AssignmentPage
   createInstallationAssignment: AssignmentRecord
   revokeInstallationAssignment: Revoked
@@ -396,6 +406,8 @@ export const accessOperations = {
   revokeProjectAssignment: { method: "DELETE", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
   readProjectAssignment: { method: "GET", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
   changeSuiteLifecycle: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/actions/{action}" },
+  readCatalogPlan: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/catalog-imports/{id}" },
+  applyCatalogPlan: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/catalog-imports/{id}/apply" },
   readSuiteLifecycle: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/lifecycle" },
   readReleaseRegistry: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/release-registry" },
   activateRetainedRelease: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/releases/{id}/activate" },
@@ -412,6 +424,7 @@ export const accessOperations = {
   readSourceUpload: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads/{id}" },
   readSourceContent: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads/{id}/content" },
   publishSourceUpload: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads/{id}/publish" },
+  previewCatalogBulk: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/tests/bulk-preview" },
   listInstallationAssignments: { method: "GET", path: "/api/v1/role-assignments" },
   createInstallationAssignment: { method: "POST", path: "/api/v1/role-assignments" },
   revokeInstallationAssignment: { method: "DELETE", path: "/api/v1/role-assignments/{kind}/{principal}/{role}" },

@@ -1,15 +1,16 @@
 import type { RecordValue } from '../../core/api.service'
 import type { CatalogItem } from './catalog.models'
 import type { CatalogDocument, CatalogRevision, TestRevision } from './catalog-operations.models'
+import type { CatalogBulkMetadata, CatalogBulkRequest } from '../../core/generated/access.types'
 
 export function catalogKey(item: CatalogItem): string { return `${item.suiteId}/${item.id}` }
 export function selectedItems(items: CatalogItem[], keys: string[]): CatalogItem[] { return items.filter(item => keys.includes(catalogKey(item))) }
-export function bulkInput(items: CatalogItem[], action: string): { suite: string; input: { action: string; tests: { id: string; revision: number }[] } } {
+export function bulkInput(items: CatalogItem[], action: string, metadata?: CatalogBulkMetadata): { suite: string; input: CatalogBulkRequest } {
   if (!items.length || items.length > 30) throw new Error('Select between 1 and 30 tests for a bulk action.')
   const suite = items[0].suiteId
   if (items.some(item => item.suiteId !== suite)) throw new Error('Bulk actions use one suite at a time. Filter the catalog by suite, then select tests.')
-  if (!action) throw new Error('Choose a bulk action.')
-  return { suite, input: { action, tests: items.map(item => ({ id: item.id, revision: item.revision })) } }
+  if (!['metadata', 'disable', 'enable', 'archive', 'restore'].includes(action)) throw new Error('Choose a bulk action.')
+  return { suite, input: { action: action as CatalogBulkRequest['action'], ...(metadata ? { metadata } : {}), tests: items.map(item => ({ id: item.id, revision: item.revision })) } }
 }
 
 export function parseCatalogDocument(text: string): CatalogDocument {

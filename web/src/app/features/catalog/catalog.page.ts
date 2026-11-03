@@ -10,6 +10,7 @@ import { CatalogPlanService } from './catalog-plan.service'
 import { CatalogPlanComponent } from './catalog-plan.component'
 import { CatalogSelectionService } from './catalog-selection.service'
 import { CatalogBulkComponent } from './catalog-bulk.component'
+import { CatalogBulkMetadataService } from './catalog-bulk-metadata.service'
 import { CatalogTransferComponent } from './catalog-transfer.component'
 import { HTTPCheckEditorComponent } from './http-check-editor.component'
 import { HTTPCheckEditorService } from './http-check-editor.service'
@@ -17,7 +18,7 @@ import { HTTPCheckEditorService } from './http-check-editor.service'
 @Component({
   standalone: true,
   imports: [FormsModule, ReactiveFormsModule, RouterLink, CatalogEntryComponent, CatalogPlanComponent, CatalogBulkComponent, CatalogTransferComponent, TimingPolicyEditorComponent, HTTPCheckEditorComponent],
-  providers: [HTTPCheckEditorService, TimingPolicyEditorService, CatalogService, CatalogEntryService, CatalogPlanService, CatalogSelectionService],
+  providers: [HTTPCheckEditorService, TimingPolicyEditorService, CatalogService, CatalogEntryService, CatalogPlanService, CatalogSelectionService, CatalogBulkMetadataService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Test catalog</h1><p class="muted">Know what you test. Keep every release accountable.</p></div>

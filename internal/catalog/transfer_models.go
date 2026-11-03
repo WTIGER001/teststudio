@@ -38,9 +38,21 @@ type ImportPlan struct {
 }
 
 type BulkRequest struct {
-	Action string `json:"action"`
-	Tests  []struct {
+	Action   string        `json:"action"`
+	Metadata *BulkMetadata `json:"metadata,omitempty"`
+	Tests    []struct {
 		ID       string `json:"id"`
 		Revision int64  `json:"revision"`
 	} `json:"tests"`
+}
+
+type BulkMetadata struct {
+	Title       *string   `json:"title,omitempty"`
+	Description *string   `json:"description,omitempty"`
+	Category    *string   `json:"category,omitempty"`
+	Tags        *[]string `json:"tags,omitempty"`
+	Owner       *string   `json:"owner,omitempty"`
+	Safety      *string   `json:"safety,omitempty"`
+	Rationale   *string   `json:"rationale,omitempty"`
+	Conditions  *string   `json:"conditions,omitempty"`
 }
