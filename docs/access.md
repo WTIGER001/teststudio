@@ -4,7 +4,8 @@ TestStudio stores user profiles, external identity links, groups, and membership
 The permission library evaluates access. The directory does not infer project authority from an email address or group name.
 
 Users and Groups screens use the administrative APIs for profiles, account state, group metadata, local membership, and session revocation.
-Managed local credential screens, identity linking, custom role management, pending project access, and the personal profile screen remain pending.
+Managed password screens use the same directory, sessions, and permission checks.
+Identity linking, custom role management, and pending project access remain pending.
 The full acceptance ledger remains in [Implementation verification](implementation.md).
 The [OpenAPI contract](../contracts/openapi.yaml) describes the implemented identity and predefined assignment routes. Other route families remain pending.
 
@@ -383,7 +384,7 @@ For initial setup, run an explicit loopback administrator with managed local acc
 go run ./cmd/teststudio --local --local-accounts
 ```
 
-Use the administrative APIs to provision credentials and assign permitted roles.
+Use User details to provision credentials. Use Installation access or Project access to assign permitted roles.
 Then restart normal local operation without the development administrator:
 
 ```sh
@@ -393,7 +394,36 @@ go run ./cmd/teststudio --local-accounts
 Keep the same database and private artifact directory.
 Operator recovery remains available through the explicit loopback recovery command.
 Include `--local-accounts` when recovery must manage local credentials.
-Managed password sign-in, password change, and credential administration screens remain pending at this backend checkpoint.
+
+## Managed local account interface
+
+When managed local accounts are enabled, Sign-in provides User identifier and Password fields beside configured OIDC choices.
+Open local workspace remains a separate development action. Normal password-only operation does not display it.
+Wrong sign-in retains the identifier and clears the password.
+Passwords retain significant spaces. Forms do not store passwords in browser storage.
+
+A required password change replaces the workspace with a restricted form.
+The interface makes no ordinary private page requests until the change succeeds.
+The form requires the current temporary password and a confirmed new password.
+Help remains available and preserves unsaved fields.
+Successful changes rotate the session and invalidate earlier sessions.
+
+Open Your account from navigation on desktop or mobile.
+The page shows your own profile, local credential state, and bounded external identity pages.
+These reads require no installation directory authority.
+An enabled credential provides a password-change form that requires the current password.
+Identity linking and personal profile editing remain pending.
+
+Authorized User details provide credential provisioning, reset, disabling, and enabling.
+Credential reads expose no password or hash.
+Editors retain the revision captured when opened. Refreshing visible state does not change that revision.
+Conflicts clear submitted passwords, preserve the reason, and require close, refresh, and a new editor.
+Unconfirmed server responses also require explicit state review before another save.
+Changing the current account's credentials signs it out and clears private workspace state.
+State actions identify their target, explain session invalidation, and require a reason.
+Reset preserves disabled state. The last usable installation administrator remains protected.
+
+Your account, required password change, and User details provide contextual Introduction, Concepts, and Tutorials help.
 
 Verify native local account operation and actual restarts with:
 
@@ -404,3 +434,11 @@ bash scripts/test-local-accounts.sh
 The script uses fresh passwords held in memory and an isolated database.
 It preserves a redacted summary and stops every controller it starts.
 It verifies forced change, cookie rotation, ordinary restart continuity, local-only administration, mode revocation, and protected transport requirements.
+
+Run the browser workflow through TestStudio with:
+
+```sh
+bash scripts/test-self.sh --test=STUDIO-LOCAL-001
+```
+
+The isolated worker supports authentication mode restarts through a test-only wrapper. The production service exposes no such route.

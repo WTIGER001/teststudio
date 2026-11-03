@@ -19,20 +19,25 @@ export class WorkspaceService {
   readonly capabilities = signal<Record<string, boolean>>({})
   readonly installationCapabilities = signal<Record<string, boolean>>({})
   private capabilityGeneration = 0
+  private projectGeneration = 0
 
   constructor() {
     this.router.events.pipe(takeUntilDestroyed(this.destroy)).subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.projectId.set(projectFromURL(event.urlAfterRedirects))
-        if (this.session.signedIn()) void this.loadCapabilities()
+        if (this.session.ready()) void this.loadCapabilities()
       }
     })
   }
 
   async load(): Promise<void> {
-    this.projects.set((await this.api.request<Page<RecordValue<Project>>>('/api/v1/projects')).items)
-    await this.loadCapabilities()
+    const generation = ++this.projectGeneration, user = this.session.user()?.id
+    const response = await this.api.request<Page<RecordValue<Project>>>('/api/v1/projects')
+    if (generation !== this.projectGeneration || user !== this.session.user()?.id || !this.session.ready()) return
+    this.projects.set(response.items); await this.loadCapabilities()
   }
+
+  reset(): void { this.projectGeneration++; this.capabilityGeneration++; this.projects.set([]); this.capabilities.set({}); this.installationCapabilities.set({}) }
 
   async refreshAccess(): Promise<void> {
     try { await this.load() }

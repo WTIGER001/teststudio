@@ -10,18 +10,21 @@ export class ApiError extends Error {
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   readonly csrf = signal('')
-  onUnauthenticated: (() => void) | undefined
+  onUnauthenticated: ((csrf: string) => void) | undefined
 
   async request<T>(path: string, method = 'GET', value?: unknown, revision?: number, key?: string): Promise<T> {
+    const csrf = this.csrf()
     const headers: Record<string, string> = { Accept: 'application/json' }
     if (value !== undefined) headers['Content-Type'] = 'application/json'
-    if (method !== 'GET') headers['X-CSRF-Token'] = this.csrf()
+    if (method !== 'GET') headers['X-CSRF-Token'] = csrf
     if (revision !== undefined) headers['If-Match'] = `"${revision}"`
     if (key) headers['Idempotency-Key'] = key
     const response = await fetch(path, { method, headers, credentials: 'same-origin', body: value === undefined ? undefined : JSON.stringify(value) })
-    const data = await response.json().catch(() => ({ message: 'The server returned an unreadable response.' }))
+    if (response.status === 401 && path !== '/auth/password') this.onUnauthenticated?.(csrf)
+    let data
+    try { data = await response.json() }
+    catch { throw new ApiError(502, 'The server returned an unreadable response. Refresh state before retrying a change.') }
     if (!response.ok) {
-      if (response.status === 401) this.onUnauthenticated?.()
       throw new ApiError(response.status, data.message || 'The request failed.')
     }
     return data as T

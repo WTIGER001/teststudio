@@ -10,8 +10,8 @@ The full plan remains required scope. Check an item only after its implementatio
 - [ ] User, group, role, object, and project grant checks cover explicit denies, expired grants, inheritance, and assignment revocation.
 - [ ] Project administrators cannot grant installation privileges or affect another project's groups, assignments, results, or evidence.
 - [x] Membership and grant revocation reach all instances within the documented limit. Disabled users and revoked sessions fail their next request.
-- [ ] Local accounts, OIDC accounts, and mixed sign-in work through the same directory, permission checks, and managed sessions.
-- [ ] Local credential changes, resets, disabling, and recovery preserve audit records and the last usable administrator.
+- [x] Local accounts, OIDC accounts, and mixed sign-in work through the same directory, permission checks, and managed sessions.
+- [x] Local credential changes, resets, disabling, and recovery preserve audit records and the last usable administrator.
 - [ ] OIDC sign-in supports configured providers with code flow, PKCE, state, nonce, issuer and audience validation, key rotation, and logout.
 - [ ] Duplicate email addresses from different issuer-subject pairs do not merge accounts or transfer access.
 - [ ] Unmapped, missing, incomplete, or outdated external groups do not silently preserve elevated project access.
@@ -65,6 +65,37 @@ The full plan remains required scope. Check an item only after its implementatio
 ## Feature log
 
 Record feature commits and targeted validation here.
+
+### Managed local account interface and browser acceptance
+
+Added managed password sign-in beside configured OIDC choices and the separate explicit loopback development action.
+Required password changes replace private pages with a restricted form. Workspace requests wait until that restriction clears.
+Your account exposes the caller's profile, bounded external identities, credential state, and own-password change without installation directory authority.
+Desktop and mobile navigation provide access to the account page.
+Authorized User details provide provisioning, reset, enable, and disable through the generated identity client.
+Credential editors preserve their opened revision through visible refreshes.
+Conflicts clear submitted secrets, retain reasons, and require explicit review before another save.
+Self changes clear private workspace state and return to sign-in without requesting the revoked account page.
+Authentication changes serialize requests and reject stale session and project responses.
+All new pages provide Introduction, Concepts, and Tutorials help with shared light and dark themes.
+
+Added STUDIO-LOCAL-001 through normal TestStudio publication, execution, timing, and private evidence storage.
+It verifies password-only administration, required changes, last-administrator protection, concurrent reset conflicts, and reason retention.
+It also verifies ordinary password changes, cookie rotation, disabled reset behavior, revoked sessions, and mode restart invalidation.
+A successful server change with unreadable response requires explicit refresh and produces no duplicate password submission.
+An unauthorized response clears the private page even when its response body is unreadable.
+Required sessions make no ordinary private page requests. Account and credential controls respect actual project-only permissions.
+The isolated test wrapper supports local authentication restarts. Production exposes no mode-switching endpoint.
+The final account run passes with complete evidence: `20261103T040250.747799000-7b0b5f4c1113f37c89911ca8`.
+Expanded help passes: `20261103T040013.406913000-af17d4812ad197fa33aa703f`.
+The existing user-administration workflow passes: `20261103T040104.171381000-bf887077304f8d5e04e9891a`.
+Focused password-form utilities, generated-client checks, and the production Angular build pass.
+Focused local-account, bootstrap, recovery, OIDC flow, and session checks pass with race detection.
+Retained screenshots pass visual review in both themes and at 390 pixels. No document overflow or unexpected browser runtime errors remain.
+Owned browser containers, output volumes, and verification controllers exit after checks.
+
+Identity linking, custom policies, pending project access, provider management, and deployment verification remain pending.
+The remaining acceptance criteria stay required scope.
 
 ### Users, scoped groups, and session administration interface
 

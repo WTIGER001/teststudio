@@ -152,4 +152,8 @@ Run `bash scripts/test-access.sh` to verify persistence, restart, and explicit l
 See [Identity administration](docs/access.md) and the [identity OpenAPI contract](contracts/openapi.yaml).
 Open Users, Installation groups, or the selected workspace's Project groups to manage authorized identity records.
 Run `bash scripts/test-self.sh --test=STUDIO-ACCESS-001` for the focused local browser workflow.
-Invitations, identity linking, custom roles, and assignment editors remain pending.
+Open Installation access or Project access to manage predefined scoped role assignments.
+Enable managed password sign-in with `--local-accounts`, alongside configured OIDC providers if required.
+Use User details for authorized credential provisioning and reset. Use Your account for personal password changes.
+Run `bash scripts/test-self.sh --test=STUDIO-LOCAL-001` for the managed local account browser workflow.
+Project owners add members directly. Identity linking, pending project access, and custom role editors remain pending.

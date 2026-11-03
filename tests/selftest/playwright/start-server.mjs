@@ -3,8 +3,12 @@ import { execFile, spawn } from 'node:child_process'
 import { randomBytes } from 'node:crypto'
 import { writeFile, unlink } from 'node:fs/promises'
 
+const localWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-LOCAL-001'
 const token = randomBytes(24).toString('hex'), requests = [], counts = new Map()
 const bindingsPath = '/tmp/teststudio-notification-bindings.json'
+const providerPath = '/tmp/teststudio-password-provider.json'
+const kinds = ['retry', 'failure', 'waiting']
+let development = true, passwords = localWorkflow, restarting = false
 let acceptFailure = false, child, stopping = false
 const helpers = new Set()
 const server = createServer(async (request, response) => {
@@ -22,6 +26,24 @@ const server = createServer(async (request, response) => {
     }
     const body = JSON.parse(Buffer.concat(chunks).toString() || '{}')
     if (stopping) { response.writeHead(503).end(); return }
+    if (localWorkflow && request.method === 'POST' && request.url === '/local/mode') {
+      if (typeof body.development !== 'boolean' || typeof body.enabled !== 'boolean' || restarting) { response.writeHead(400).end(); return }
+      restarting = true
+      try {
+        await stopChild(child)
+        if (stopping) { response.writeHead(503).end(); return }
+        development = body.development; passwords = body.enabled; startChild()
+        let ready = false
+        for (let attempt = 0; attempt < 100 && !stopping; attempt++) {
+          try { ready = (await fetch('http://127.0.0.1:8040/healthz')).ok } catch {}
+          if (ready) break
+          await new Promise(resolve => setTimeout(resolve, 50))
+        }
+        if (!ready) throw new Error('Restarted password fixture did not become ready')
+        response.writeHead(204).end()
+      } finally { restarting = false }
+      return
+    }
     if (request.method === 'POST' && request.url === '/access/prepare') {
       if (typeof body.project !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(body.project)) { response.writeHead(400).end(); return }
       const fixture = await new Promise((resolve, reject) => {
@@ -65,18 +87,23 @@ async function stop(code) {
   server.closeAllConnections()
   await new Promise(resolve => server.close(resolve))
   await unlink(bindingsPath).catch(() => {})
+  await unlink(providerPath).catch(() => {})
   process.exitCode = code
+}
+
+function startChild() {
+  child = spawn('/app/teststudio', [...(development ? ['--local'] : []), ...(passwords ? ['--local-accounts'] : []), ...(localWorkflow ? ['--oidc-config', providerPath] : []), '--database', '/tmp/teststudio-selftest.db', '--artifact-directory', '/tmp/teststudio-artifacts', '--ui', '/app/ui', '--secret-bindings', bindingsPath], {
+    env: { PATH: process.env.PATH, TMPDIR: '/tmp', ...Object.fromEntries(kinds.map(kind => [`TESTSTUDIO_SELFTEST_${kind.toUpperCase()}`, `http://127.0.0.1:8050/receiver/${token}/${kind}`])) }, stdio: ['ignore', 'inherit', 'inherit']
+  })
+  child.once('error', () => { void stop(1) })
+  child.once('exit', code => { if (!stopping && !restarting) void stop(code || 1) })
 }
 
 process.on('SIGTERM', () => { void stop(0) })
 process.on('SIGINT', () => { void stop(0) })
 try {
   await new Promise((resolve, reject) => { server.once('error', reject); server.listen(8050, '127.0.0.1', resolve) })
-  const kinds = ['retry', 'failure', 'waiting']
+  if (localWorkflow) await writeFile(providerPath, JSON.stringify([{ id: 'selftest-oidc', name: 'Self-test identity', issuer: 'https://identity.selftest.invalid', clientId: 'teststudio-selftest', scopes: ['openid'], autoProvision: false }]), { mode: 0o600 })
   await writeFile(bindingsPath, JSON.stringify(kinds.map(kind => ({ id: `${kind}-receiver`, name: `${kind} receiver`, projectId: 'notification-selftests', purpose: 'notification-webhook', environmentVariable: `TESTSTUDIO_SELFTEST_${kind.toUpperCase()}`, network: 'loopback' }))), { mode: 0o600 })
-  child = spawn('/app/teststudio', ['--local', '--database', '/tmp/teststudio-selftest.db', '--artifact-directory', '/tmp/teststudio-artifacts', '--ui', '/app/ui', '--secret-bindings', bindingsPath], {
-    env: { PATH: process.env.PATH, TMPDIR: '/tmp', ...Object.fromEntries(kinds.map(kind => [`TESTSTUDIO_SELFTEST_${kind.toUpperCase()}`, `http://127.0.0.1:8050/receiver/${token}/${kind}`])) }, stdio: ['ignore', 'inherit', 'inherit']
-  })
-  child.once('error', () => { void stop(1) })
-  child.once('exit', code => { if (!stopping) void stop(code || 1) })
+  startChild()
 } catch { await stop(1) }

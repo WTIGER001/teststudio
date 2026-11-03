@@ -3,12 +3,14 @@ import { FormsModule } from '@angular/forms'
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router'
 import { ApplicationService } from './core/application.service'
 import { ThemeService } from './core/theme.service'
+import { PasswordSigninComponent } from './features/auth/password-signin.component'
+import { RequiredPasswordComponent } from './features/auth/required-password.component'
 import { HelpComponent } from './features/help/help.component'
 
 @Component({
   selector: 'ts-root',
   standalone: true,
-  imports: [FormsModule, RouterLink, RouterLinkActive, RouterOutlet, HelpComponent],
+  imports: [FormsModule, RouterLink, RouterLinkActive, RouterOutlet, HelpComponent, PasswordSigninComponent, RequiredPasswordComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <a class="skip-link" href="#main">Skip to content</a>
@@ -22,8 +24,8 @@ import { HelpComponent } from './features/help/help.component'
         </select>
         <ts-help />
         @if (app.session.user(); as user) {
-          <span class="user-name">{{ user.name }}</span>
-          <button type="button" class="button subtle" (click)="app.signOut()">Sign out</button>
+          @if (app.session.ready()) { <a class="user-name" routerLink="/account" aria-label="Your account">{{ user.name }}</a> } @else { <span class="user-name">{{ user.name }}</span> }
+          <button type="button" class="button subtle" [disabled]="app.session.authenticating()" (click)="app.signOut()">Sign out</button>
         }
       </div>
     </header>
@@ -36,18 +38,22 @@ import { HelpComponent } from './features/help/help.component'
           <h1 id="signin-title">A clear view of<br>what works.</h1>
           <p class="muted">Manage your test catalog, run with confidence, and keep the evidence that explains every result.</p>
           @if (app.session.error() || app.error()) { <p class="notice error" role="alert">{{ app.session.error() || app.error() }}</p> }
+          @if (app.session.providers().localAccountsEnabled) { <ts-password-signin /> }
+          @if (app.message()) { <p class="notice success" role="status">{{ app.message() }}</p> }
           @for (provider of app.session.providers().providers; track provider.id) {
-            <a class="button primary full" [href]="'/auth/login/' + provider.id">Continue with {{ provider.name }}</a>
+            <a class="button primary full" [href]="'/auth/login/' + provider.id" [attr.aria-disabled]="app.session.authenticating()" (click)="app.session.authenticating() && $event.preventDefault()">Continue with {{ provider.name }}</a>
           }
           @if (app.session.providers().localEnabled) {
-            <button type="button" class="button primary full" (click)="app.signInLocally()">Open local workspace <span aria-hidden="true">→</span></button>
+            <button type="button" class="button primary full" [disabled]="app.session.authenticating()" (click)="app.signInLocally()">Open local workspace <span aria-hidden="true">→</span></button>
             <p class="small muted">Local administrator access on this computer.</p>
-          } @else if (app.session.providers().providers.length === 0 && !app.session.error()) {
+          } @else if (app.session.providers().providers.length === 0 && !app.session.providers().localAccountsEnabled && !app.session.error()) {
             <p class="notice">No sign-in providers are configured for this installation.</p>
           }
           <div class="signin-footer"><span class="status-dot" aria-hidden="true"></span> Independent testing. Your infrastructure.</div>
         </section>
       </main>
+    } @else if (app.session.mustChangePassword()) {
+      <main id="main" class="signin"><ts-required-password /></main>
     } @else {
       <div class="app-layout">
         <aside class="sidebar">
@@ -59,6 +65,7 @@ import { HelpComponent } from './features/help/help.component'
           </div>
           <nav aria-label="Main navigation">
             <a routerLink="/projects" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><span aria-hidden="true">▦</span> Projects</a>
+            <a routerLink="/account" routerLinkActive="active"><span aria-hidden="true">♙</span> Your account</a>
             @if (app.workspace.projectId()) {
               <a [routerLink]="['/projects', app.workspace.projectId(), 'catalog']" routerLinkActive="active"><span aria-hidden="true">≡</span> Test catalog</a>
               <a [routerLink]="['/projects', app.workspace.projectId(), 'runs']" routerLinkActive="active"><span aria-hidden="true">▷</span> Test runs</a>
@@ -77,6 +84,7 @@ import { HelpComponent } from './features/help/help.component'
         </aside>
         <main id="main" class="workspace-main">
           @if (app.error()) { <p class="notice error" role="alert">{{ app.error() }}</p> }
+          @if (app.message()) { <p class="notice success" role="status">{{ app.message() }}</p> }
           <router-outlet />
         </main>
       </div>

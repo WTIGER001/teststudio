@@ -2,6 +2,7 @@ import type { Routes } from '@angular/router'
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'projects' },
+  { path: 'account', data: { helpTopic: 'account' }, loadComponent: () => import('./features/account/account.page').then(m => m.AccountPage) },
   { path: 'projects', data: { helpTopic: 'projects' }, loadComponent: () => import('./features/projects/projects.page').then(m => m.ProjectsPage) },
   { path: 'settings/access', data: { helpTopic: 'installation-access' }, loadComponent: () => import('./features/access/assignments.page').then(m => m.AssignmentsPage) },
   { path: 'projects/:projectId/members', data: { helpTopic: 'project-access' }, loadComponent: () => import('./features/access/assignments.page').then(m => m.AssignmentsPage) },

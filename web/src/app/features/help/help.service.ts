@@ -13,5 +13,5 @@ export class HelpService {
     filter(event => event instanceof NavigationEnd),
     map(() => this.router.routerState.snapshot.root.firstChild?.data['helpTopic'] as string | undefined)
   ), { initialValue: this.router.routerState.snapshot.root.firstChild?.data['helpTopic'] as string | undefined })
-  readonly page = computed(() => this.session.signedIn() ? (helpPages[this.topic() ?? 'projects'] ?? helpPages['projects']) : helpPages['signin'])
+  readonly page = computed(() => this.session.mustChangePassword() ? helpPages['password-required'] : this.session.signedIn() ? (helpPages[this.topic() ?? 'projects'] ?? helpPages['projects']) : helpPages['signin'])
 }

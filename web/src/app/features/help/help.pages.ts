@@ -29,6 +29,26 @@ export const helpPages: Record<string, HelpPage> = {
       { title: 'Remove and review access', steps: ['Find the exact principal and role in Role assignments. Use More assignments to continue a bounded scan.', 'Select Remove role on the intended row and review the target and scope.', 'Enter a reason and select Confirm action. Cancel the action if its target is incorrect.', 'If a conflict appears, cancel, use Refresh access, inspect the current assignment, and open a new action. Other role and group access can still apply.'] }
     ]
   },
+  'password-required': {
+    id: 'password-required', title: 'Required password change',
+    introduction: ['Your administrator requires a new password before this password session can open the workspace.'],
+    concepts: [
+      { title: 'Restricted session', description: 'You can inspect this sign-in state, change the password, or sign out. Project and administration pages remain unavailable until the change succeeds.' },
+      { title: 'Password policy', description: 'Use 15 through 256 characters and at most 1024 bytes. Spaces are significant. The server also rejects common values.' },
+      { title: 'Session rotation', description: 'A successful change invalidates earlier sessions and gives this browser a new session. Password fields clear after a request. An uncertain result requires a session refresh before another attempt.' }
+    ],
+    tutorials: [{ title: 'Complete the required change', steps: ['Enter the temporary password in Current password.', 'Enter a different New password and repeat it in Confirm new password.', 'Select Change password. The requested page opens after the new session loads.', 'If session refresh fails, select Refresh session. Do not repeat a confirmed password change.'] }]
+  },
+  account: {
+    id: 'account', title: 'Your account',
+    introduction: ['Inspect your own profile, external identity links, and local password state without installation directory authority.'],
+    concepts: [
+      { title: 'Your identifier', description: 'Local password sign-in uses your permanent internal user identifier. Email matching never links accounts.' },
+      { title: 'Independent sign-in methods', description: 'Local credentials and configured OIDC identities can share the directory. Disabled or unconfigured local credentials require installation administration. Identity linking is not available on this page.' },
+      { title: 'Password changes', description: 'A password change requires the current password. Successful changes invalidate earlier sessions and rotate this browser’s session. Password values are never saved in browser storage.' }
+    ],
+    tutorials: [{ title: 'Change your local password', steps: ['Select Your account in navigation, or select your name in the desktop header.', 'Read Your local sign-in. If an enabled credential exists, enter Current password, New password, and Confirm new password.', 'Select Change password. Review the result and refreshed account state.', 'Use Refresh session if the request outcome or refreshed session is unavailable.'] }, { title: 'Inspect your external identities', steps: ['Read Your linked identities for exact issuer and subject pairs.', 'Use More linked identities to continue a bounded page.', 'Use Refresh account to load current profile and credential state.'] }]
+  },
   users: {
     id: 'users', title: 'Users',
     introduction: ['Manage installation user profiles and open account details. Project permissions alone do not grant access to this directory.'],
@@ -48,6 +68,7 @@ export const helpPages: Record<string, HelpPage> = {
     concepts: [
       { title: 'Profile and sign-in', description: 'An enabled profile still needs a configured sign-in identity. Editing an email clears verification and does not change identity ownership.' },
       { title: 'Account disabling', description: 'Disabling blocks sign-in and invalidates earlier sessions. Restoring the account does not revive them. The last usable installation administrator remains protected.' },
+      { title: 'Local credentials', description: 'Installation administrators can set or reset a local password with a reason. The account must change it at password sign-in. Resets preserve disabled state and invalidate earlier sessions. Refresh local credential before reopening a conflicted editor.' },
       { title: 'Session revocation', description: 'Revocation removes one session without ending other sessions. Revoking Current browser signs you out. Session credentials never appear in this view.' },
       { title: 'Revision conflicts', description: 'Edits and actions use the revision you opened. A conflict keeps your edits. Reload a profile explicitly; cancel and reopen stale lifecycle actions after refreshing.' }
     ],
@@ -131,11 +152,11 @@ export const helpPages: Record<string, HelpPage> = {
     introduction: ['Sign in to open your TestStudio workspace. Your installation controls which sign-in options appear.'],
     concepts: [
       { title: 'Your workspace', description: 'Projects organize applications, suites, test definitions, and run history. Your permissions control which actions are available.' },
-      { title: 'Local access', description: 'Open local workspace appears only when local administrator sign-in is enabled for this installation.' },
+      { title: 'Local sign-in', description: 'Sign in with a password uses a managed local account and its internal user identifier. Open local workspace is a separate development administrator option that appears only when explicitly enabled.' },
       { title: 'Session', description: 'If your session expires, sign in again. The page address still identifies the work you were viewing.' }
     ],
     tutorials: [
-      { title: 'Open your workspace', steps: ['Choose your organization’s sign-in provider, or select Open local workspace on a local installation.', 'Complete sign-in. TestStudio opens the requested page.', 'Use the Workspace selector to choose a project.'] },
+      { title: 'Open your workspace', steps: ['Choose your organization’s sign-in provider, or select Open local workspace on a local installation.', 'Complete sign-in. If a password change is required, enter the current password and a new password before the requested page opens.', 'Use the Workspace selector to choose a project.'] },
       { title: 'If no sign-in option appears', steps: ['Ask your installation administrator to configure a sign-in provider.', 'Reload this page after the administrator confirms the setup.'] }
     ]
   },

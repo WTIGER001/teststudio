@@ -38,6 +38,11 @@ test('Page help, keyboard access, and responsive drawer', { tag: '@STUDIO-HELP-0
 
   await test.step('Follow the current page through normal navigation', async () => {
     const navigation = page.getByRole('navigation', { name: 'Main navigation' })
+    await navigation.getByRole('link', { name: 'Your account', exact: true }).click()
+    const account = await openHelp(page, 'Your account')
+    await expect(account).toContainText('Password changes')
+    await account.getByRole('button', { name: 'Close help' }).click()
+    await page.getByLabel('Workspace', { exact: true }).selectOption(project)
     await navigation.getByRole('link', { name: 'Project settings' }).click()
     const settings = await openHelp(page, 'Project settings')
     await expect(settings).toContainText('Environment and endpoint')
