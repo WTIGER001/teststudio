@@ -64,6 +64,32 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Record feature commits and targeted validation here.
 
+### Users, scoped groups, and session administration interface
+
+Added Users and User details for pending profile registration, permitted profile edits, account disabling, restoration, and active session revocation.
+Details expose linked identities, readable local and external membership, account metadata, and bounded session pages without session credentials.
+Added separate installation and project group directories, metadata editing, local membership management, UTC expiry, archive, and restore.
+Installation navigation uses installation capabilities independently from project capabilities.
+Editors preserve permanent identifiers and scope, strip server-owned fields, retain unsaved values on conflicts, and provide explicit reload actions.
+Lifecycle and removal actions display the target and impact, require a reason, and preserve server administrator protection.
+Shared collection state discards stale responses after route changes and clears cached data after authorization failures.
+Added four contextual help guides with Introduction, Concepts, and Tutorials.
+The new interface uses the generated OpenAPI client and shared light and dark theme tokens.
+Validation: focused utilities, generated-client checks, the Angular production build, and scoped API race checks pass.
+The membership read and legacy user response checks pass on SQLite and local PostgreSQL.
+STUDIO-ACCESS-001 passes through TestStudio's normal publication, execution, timing, and private evidence workflow.
+It verifies actual profile and membership conflicts, reason validation, UTC expiry, local membership removal, retained archive and restore, pagination, and scope changes.
+It also verifies final-administrator rejection and revocation of a second real session while preserving the current browser session.
+An isolated preparer uses product directory, role, membership, and session services for project-administrator and external membership checks.
+The browser verifies hidden installation navigation, rejected installation and foreign-project views, and read-only provider-managed membership through the actual server.
+UTC expiry remains correct in a non-UTC browser timezone.
+Expected HTTP rejections remain explicit; unrelated browser errors still fail the workflow.
+Light, dark, and 390-pixel views pass workflow and document-width checks. Visual inspection confirms the layout.
+STUDIO-HELP-001 passes with all four new guides and existing keyboard, focus, dismissal, theme, and mobile behavior.
+STUDIO-NOTIFY-001 passes again after the shared fixture and shutdown changes.
+Owned verification controllers and browser containers stop after checks. The disposable PostgreSQL service also stops.
+Invitations, identity linking, personal profile UI, role and grant editors, deployment verification, and the remaining full plan stay pending.
+
 ### Generated identity client and direct membership reads
 
 Added deterministic TypeScript request types, response types, operation methods, and route templates from the identity OpenAPI contract.

@@ -26,6 +26,7 @@ export class ApplicationService {
       await this.session.signOut()
       this.workspace.projects.set([])
       this.workspace.capabilities.set({})
+      this.workspace.installationCapabilities.set({})
       await this.router.navigate(['/projects'])
     } catch (error) { this.error.set(error instanceof Error ? error.message : 'Sign-out failed.') }
   }

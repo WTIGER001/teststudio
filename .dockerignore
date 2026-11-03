@@ -5,6 +5,7 @@ web/.angular
 !.data/selftest-build
 .data/selftest-build/*
 !.data/selftest-build/teststudio
+!.data/selftest-build/access-fixture
 !.data/go-runner-build
 .data/go-runner-build/*
 !.data/go-runner-build/teststudio-go

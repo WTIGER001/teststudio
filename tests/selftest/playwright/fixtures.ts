@@ -1,5 +1,16 @@
-import { test as base, expect, type APIRequestContext } from '@playwright/test'
+import { test as base, expect, type APIRequestContext, type Page } from '@playwright/test'
 import crypto from 'node:crypto'
+
+const expectedFailures = new WeakMap<Page, { url: string; status: number; consoleSeen: boolean; responseSeen: boolean }[]>()
+
+export async function expectHTTPFailure(page: Page, method: string, path: string, status: number, action: () => Promise<unknown>) {
+  const expected = { url: new URL(path, 'http://127.0.0.1:8040').href, status, consoleSeen: false, responseSeen: false }
+  const entries = expectedFailures.get(page) ?? []
+  entries.push(expected); expectedFailures.set(page, entries)
+  const [response] = await Promise.all([page.waitForResponse(response => response.url() === expected.url && response.request().method() === method), action()])
+  expect(response.status()).toBe(status); expected.responseSeen = true
+  await expect.poll(() => expected.consoleSeen, { timeout: 1000, intervals: [0, 10, 30] }).toBe(true)
+}
 
 export class API {
   constructor(private readonly request: APIRequestContext, private readonly csrf: string) {}
@@ -42,11 +53,18 @@ export const test = base.extend<{ api: API }>({
     const diagnostics: { kind: string; message: string }[] = []
     const add = (kind: string, message: string) => { if (diagnostics.length < 200) diagnostics.push({ kind, message: message.slice(0, 2048) }) }
     page.on('pageerror', error => add('pageerror', error.message))
-    page.on('console', message => { if (message.type() === 'error' || message.type() === 'warning') add(message.type(), message.text()) })
+    page.on('console', message => {
+      if (message.type() !== 'error' && message.type() !== 'warning') return
+      const status = /^Failed to load resource: the server responded with a status of (\d+)\b/.exec(message.text())
+      const expected = status && expectedFailures.get(page)?.find(item => !item.consoleSeen && item.url === message.location().url && item.status === Number(status[1]))
+      if (message.type() === 'error' && expected) { expected.consoleSeen = true; add('expected-http', `${expected.status} ${expected.url}`) }
+      else add(message.type(), `${message.text()}${message.type() === 'error' ? ' · ' + message.location().url : ''}`)
+    })
     page.on('requestfailed', request => add('requestfailed', `${request.method()} ${request.url()} ${request.failure()?.errorText}`))
     await use(page)
     await testInfo.attach('browser-diagnostics', { body: Buffer.from(JSON.stringify(diagnostics)), contentType: 'application/json' })
     expect(diagnostics.filter(item => item.kind === 'pageerror' || item.kind === 'error'), 'Browser runtime errors').toEqual([])
+    expect((expectedFailures.get(page) ?? []).every(item => item.responseSeen), 'Expected HTTP failures were observed').toBe(true)
   },
   api: async ({ page }, use) => {
     await page.goto('/projects')

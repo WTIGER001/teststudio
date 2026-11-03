@@ -1,13 +1,15 @@
 import { createServer } from 'node:http'
-import { spawn } from 'node:child_process'
+import { execFile, spawn } from 'node:child_process'
 import { randomBytes } from 'node:crypto'
 import { writeFile, unlink } from 'node:fs/promises'
 
 const token = randomBytes(24).toString('hex'), requests = [], counts = new Map()
 const bindingsPath = '/tmp/teststudio-notification-bindings.json'
 let acceptFailure = false, child, stopping = false
+const helpers = new Set()
 const server = createServer(async (request, response) => {
   try {
+    if (stopping) { response.writeHead(503).end(); return }
     if (request.method === 'GET' && request.url === '/state') {
       response.setHeader('Content-Type', 'application/json'); response.end(JSON.stringify({ requests })); return
     }
@@ -19,6 +21,18 @@ const server = createServer(async (request, response) => {
       chunks.push(chunk)
     }
     const body = JSON.parse(Buffer.concat(chunks).toString() || '{}')
+    if (stopping) { response.writeHead(503).end(); return }
+    if (request.method === 'POST' && request.url === '/access/prepare') {
+      if (typeof body.project !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(body.project)) { response.writeHead(400).end(); return }
+      const fixture = await new Promise((resolve, reject) => {
+        const helper = execFile('/app/access-fixture', [body.project], { env: { PATH: process.env.PATH, TMPDIR: '/tmp' }, timeout: 10000, maxBuffer: 4096 }, (error, stdout) => {
+          helpers.delete(helper)
+          if (error) reject(new Error('Fixture preparation failed')); else resolve(stdout)
+        })
+        helpers.add(helper)
+      })
+      response.setHeader('Content-Type', 'application/json'); response.end(JSON.stringify(JSON.parse(fixture))); return
+    }
     if (request.method === 'POST' && request.url === '/control') {
       acceptFailure = body.acceptFailure === true; response.writeHead(204).end(); return
     }
@@ -33,18 +47,21 @@ const server = createServer(async (request, response) => {
       secretSeenInMessage: JSON.stringify(body).includes(token) })
     if (status === 503) response.setHeader('Retry-After', kind === 'waiting' ? '30' : '1')
     response.writeHead(status).end(status === 204 ? undefined : `Do not retain this provider diagnostic ${token}`)
-  } catch { response.writeHead(400).end() }
+  } catch { if (!response.headersSent && !response.destroyed) response.writeHead(400).end() }
 })
+
+async function stopChild(owned) {
+  if (!owned?.pid || owned.exitCode !== null || owned.signalCode !== null) return
+  const exited = new Promise(resolve => owned.once('exit', resolve))
+  owned.kill('SIGTERM')
+  const timer = setTimeout(() => owned.kill('SIGKILL'), 4000)
+  await exited; clearTimeout(timer)
+}
 
 async function stop(code) {
   if (stopping) return
   stopping = true
-  if (child?.pid && child.exitCode === null && child.signalCode === null) {
-    const exited = new Promise(resolve => child.once('exit', resolve))
-    child.kill('SIGTERM')
-    const timer = setTimeout(() => child.kill('SIGKILL'), 4000)
-    await exited; clearTimeout(timer)
-  }
+  await Promise.all([stopChild(child), ...[...helpers].map(stopChild)])
   server.closeAllConnections()
   await new Promise(resolve => server.close(resolve))
   await unlink(bindingsPath).catch(() => {})

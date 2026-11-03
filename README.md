@@ -150,4 +150,6 @@ User, group, local membership, profile, and session administration APIs enforce 
 Disabling invalidates earlier sessions through later restoration. Ordinary lifecycle actions protect the last usable installation administrator.
 Run `bash scripts/test-access.sh` to verify persistence, restart, and explicit loopback recovery with a fresh local installation.
 See [Identity administration](docs/access.md) and the [identity OpenAPI contract](contracts/openapi.yaml).
-Administration screens, invitations, custom roles, and assignment editors remain pending.
+Open Users, Installation groups, or the selected workspace's Project groups to manage authorized identity records.
+Run `bash scripts/test-self.sh --test=STUDIO-ACCESS-001` for the focused local browser workflow.
+Invitations, identity linking, custom roles, and assignment editors remain pending.

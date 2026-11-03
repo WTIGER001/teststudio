@@ -3,7 +3,8 @@
 TestStudio stores user profiles, external identity links, groups, and membership provenance in its selected database.
 The permission library evaluates access. The directory does not infer project authority from an email address or group name.
 
-This checkpoint provides administrative APIs. Users and Groups screens, invitations, identity linking, custom role management, and assignment editors remain pending.
+Users and Groups screens use the administrative APIs for profiles, account state, group metadata, local membership, and session revocation.
+Invitations, identity linking, custom role management, assignment editors, and the personal profile screen remain pending.
 The full acceptance ledger remains in [Implementation verification](implementation.md).
 The [OpenAPI contract](../contracts/openapi.yaml) describes the implemented identity routes. Other route families remain pending in that contract.
 
@@ -58,6 +59,34 @@ Expired membership does not grant effective access.
 Membership alone grants no project permissions. Role assignments and explicit grants determine access through the permission library.
 Archive removes a group's effective membership access while preserving its records and assignments.
 Restore reactivates retained, unexpired membership. It can restore the associated role access.
+
+## Interface
+
+Open Users from the installation navigation to register profiles and inspect user details.
+User details show account state, email verification, linked identities, readable memberships, and active sessions.
+Use Edit profile to change permitted fields. Account actions use separate reason forms.
+Session revocation identifies the current browser before confirmation.
+
+Open Installation groups for shared groups owned by the installation.
+Select a workspace and open Project groups for that project's directory.
+Installation navigation uses installation capabilities. Project navigation uses the selected project's capabilities.
+The server still checks each requested resource.
+
+Group details show permanent ownership, lifecycle state, description, membership source, and member activity.
+Local membership forms accept a registered user identifier and optional future expiry.
+Expiry inputs use UTC in both themes, independent of the computer's local timezone.
+Provider-managed membership displays its source and remains read-only.
+Archived groups retain visible membership records and require restoration before local membership edits.
+
+Profile, group, and membership conflicts keep unsaved form values.
+Explicit reload actions retrieve the current record and revision before another save.
+Lifecycle and removal conflicts require cancellation, refresh, and a newly opened action.
+Changing ownership scope closes the previous editor and prevents stale responses from replacing the current view.
+
+Each collection provides explicit refresh and bounded continuation controls.
+Read failures remain separate from valid empty pages. Authorization failures clear cached collection data.
+The interface uses shared light and dark theme tokens. Tables scroll inside narrow screens.
+Users, User details, Groups, and Group details each provide contextual Introduction, Concepts, and Tutorials help.
 
 ## Revisions, audit, and pagination
 
@@ -151,3 +180,17 @@ bash scripts/test-access.sh
 
 The smoke script also continues an encrypted history cursor after restart.
 It uses no cloud credentials. It stops its owned controllers and retains an isolated database and redacted summary.
+
+Run the focused interface workflow through normal TestStudio publication, execution, timing, and evidence storage:
+
+```sh
+bash scripts/test-self.sh --test=STUDIO-ACCESS-001
+```
+
+The workflow uses new local profiles and groups. It verifies real revision conflicts, reason forms, UTC expiry, archive, restore, and session revocation.
+It also verifies scope changes, bounded pages, final-administrator protection, preserved help edits, light and dark layouts, and mobile document width.
+An isolated product-issued fixture session verifies project-administrator navigation, foreign-project rejection, and provider-managed membership controls through the real server.
+The expiry check runs in a non-UTC browser timezone and compares the stored UTC timestamp.
+Expected rejected requests bind to exact methods, addresses, statuses, and individual browser resource diagnostics.
+Other browser runtime errors still fail the workflow.
+The worker retains diagnostic evidence and removes its owned browser container after verification.

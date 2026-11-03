@@ -17,6 +17,7 @@ export class WorkspaceService {
   readonly projectId = signal(projectFromURL(this.router.url))
   readonly project = computed(() => this.projects().find(p => p.id === this.projectId())?.data ?? null)
   readonly capabilities = signal<Record<string, boolean>>({})
+  readonly installationCapabilities = signal<Record<string, boolean>>({})
   private capabilityGeneration = 0
 
   constructor() {
@@ -36,12 +37,16 @@ export class WorkspaceService {
   async loadCapabilities(): Promise<void> {
     const generation = ++this.capabilityGeneration
     const project = this.projectId()
+    this.capabilities.set({}); this.installationCapabilities.set({})
     try {
-      const capabilities = await this.api.request<Record<string, boolean>>(`/api/v1/me/capabilities?project=${encodeURIComponent(project)}`)
-      if (generation === this.capabilityGeneration) this.capabilities.set(capabilities)
-    } catch { if (generation === this.capabilityGeneration) this.capabilities.set({}) }
+      const [capabilities, installation] = await Promise.all([this.readCapabilities(project), project ? this.readCapabilities('') : Promise.resolve(null)])
+      if (generation === this.capabilityGeneration) { this.capabilities.set(capabilities); this.installationCapabilities.set(installation ?? capabilities) }
+    } catch { if (generation === this.capabilityGeneration) { this.capabilities.set({}); this.installationCapabilities.set({}) } }
   }
+
+  readCapabilities(project: string): Promise<Record<string, boolean>> { return this.api.request<Record<string, boolean>>(`/api/v1/me/capabilities?project=${encodeURIComponent(project)}`) }
 
   selectProject(id: string): void { void this.router.navigate(id ? ['/projects', id, 'catalog'] : ['/projects']) }
   can(permission: string): boolean { return this.capabilities()[`teststudio.${permission}`] === true }
+  canInstallation(permission: string): boolean { return this.installationCapabilities()[`teststudio.${permission}`] === true }
 }

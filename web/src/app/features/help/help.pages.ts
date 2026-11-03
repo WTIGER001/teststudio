@@ -1,6 +1,60 @@
 import type { HelpPage } from './help.models'
 
 export const helpPages: Record<string, HelpPage> = {
+  users: {
+    id: 'users', title: 'Users',
+    introduction: ['Manage installation user profiles and open account details. Project permissions alone do not grant access to this directory.'],
+    concepts: [
+      { title: 'Pending profiles', description: 'Registration adds a profile with a permanent internal identifier. It sends no invitation, links no external identity, and grants no project access.' },
+      { title: 'Email and identity', description: 'Email is profile information. Matching email addresses never merge accounts. An external identity uses its exact issuer and subject pair.' },
+      { title: 'Directory pages', description: 'Pages scan a bounded portion of the directory and filter unreadable records. An empty page can still have a More users button.' }
+    ],
+    tutorials: [
+      { title: 'Register a profile', steps: ['Select + Register user.', 'Enter a display name, permanent identifier, and optional email address.', 'Select Save user profile. The new record has no identity link or project access.', 'Open the user name to inspect account details.'] },
+      { title: 'Find and inspect an account', steps: ['Read account state, email verification, and last sign-in in User directory.', 'Use More users to continue a bounded scan.', 'Open a user name to inspect linked identities, group membership, and active sessions.', 'Use Refresh users to return to a fresh first page.'] }
+    ]
+  },
+  user: {
+    id: 'user', title: 'User details',
+    introduction: ['Inspect a user profile, linked identities, group membership, and active sessions. Installation user permissions control these views and actions.'],
+    concepts: [
+      { title: 'Profile and sign-in', description: 'An enabled profile still needs a configured sign-in identity. Editing an email clears verification and does not change identity ownership.' },
+      { title: 'Account disabling', description: 'Disabling blocks sign-in and invalidates earlier sessions. Restoring the account does not revive them. The last usable installation administrator remains protected.' },
+      { title: 'Session revocation', description: 'Revocation removes one session without ending other sessions. Revoking Current browser signs you out. Session credentials never appear in this view.' },
+      { title: 'Revision conflicts', description: 'Edits and actions use the revision you opened. A conflict keeps your edits. Reload a profile explicitly; cancel and reopen stale lifecycle actions after refreshing.' }
+    ],
+    tutorials: [
+      { title: 'Edit or disable a user', steps: ['Select Edit profile, change the permitted fields, and select Save user profile.', 'If a revision conflict appears, review your unsaved values before selecting Reload stored profile.', 'To disable access, select Disable user, enter a reason, and select Confirm action.', 'Use Restore user with a reason when the account can sign in again. Earlier sessions remain invalid.'] },
+      { title: 'Inspect access and revoke a session', steps: ['Read Linked identities for retained issuer and subject pairs.', 'Open a Group memberships link to inspect permitted local or external membership.', 'Read Active sessions and identify the provider, last activity, and expiry limits.', 'Select Revoke session on the intended row, enter a reason, and confirm.', 'Refresh a collection for current status or use its More control to continue a bounded scan.'] }
+    ]
+  },
+  groups: {
+    id: 'groups', title: 'Groups',
+    introduction: ['Manage installation groups or groups owned by the selected project. Each directory shows one permanent ownership scope.'],
+    concepts: [
+      { title: 'Ownership scope', description: 'Installation groups and project groups use separate directories. Project administrators cannot reparent groups or change shared installation groups.' },
+      { title: 'Membership source', description: 'Local groups permit authorized local membership edits. Externally managed membership is read-only and must change through its source provider.' },
+      { title: 'Membership and access', description: 'Membership alone grants no project permissions. Role assignments and explicit grants determine access. Archive removes effective membership access while retaining records.' }
+    ],
+    tutorials: [
+      { title: 'Create a local group', steps: ['Choose Installation groups, or select a workspace and open Project groups.', 'Select + New group. Read the displayed ownership scope.', 'Enter a name, permanent identifier, and optional description.', 'Select Save group. Ownership cannot change after creation.', 'Open the group to manage permitted local membership.'] },
+      { title: 'Find an archived or external group', steps: ['Read Membership source to distinguish local and external groups.', 'Select Include archived groups to find retained archived records.', 'Use More groups to continue a bounded scan.', 'Open a group for its state, source, membership, and available lifecycle actions.'] }
+    ]
+  },
+  group: {
+    id: 'group', title: 'Group details',
+    introduction: ['Inspect group ownership and membership. Manage permitted local members or archive and restore the group without removing its history.'],
+    concepts: [
+      { title: 'Local and external members', description: 'Local membership records can have an expiry. External source records remain read-only. Membership does not imply a project role.' },
+      { title: 'UTC expiry', description: 'Enter membership expiry in UTC, independent of your computer’s timezone. Empty expiry means no expiry. Expired or inactive membership does not grant effective access.' },
+      { title: 'Archive and restore', description: 'Archive removes effective membership access while retaining membership and assignment records. Restore can reactivate unexpired membership and associated role access.' },
+      { title: 'Conflicts and reasons', description: 'Edits retain their original revision and keep unsaved values on a conflict. Lifecycle actions and member removal require a reason. The last usable administrator remains protected.' }
+    ],
+    tutorials: [
+      { title: 'Add or update a local member', steps: ['Select + Add member and enter an existing internal user identifier.', 'Optionally enter a future UTC expiry, then select Save local membership.', 'Use Edit membership on a local row to change or clear expiry.', 'After a conflict, review your edits before selecting Reload stored membership.', 'To remove a local member, select Remove member, enter a reason, and confirm.'] },
+      { title: 'Archive or restore a group', steps: ['Review ownership, membership source, and the retained members.', 'Select Archive group, enter a reason, and select Confirm action.', 'Archived members remain visible but inactive. Local membership edits require restoration.', 'To restore, review the retained membership and assigned access before selecting Restore group.', 'Enter a reason and confirm. Retained, unexpired membership becomes active again.'] }
+    ]
+  },
   notifications: {
     id: 'notifications', title: 'Notifications',
     introduction: ['Send completion summaries to a generic or Discord webhook. Inspect delivery history without changing test outcomes.'],

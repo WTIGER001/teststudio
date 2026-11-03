@@ -18,7 +18,8 @@ It packages them with the pinned Playwright runtime and the new browser tests.
 An isolated controller registers the catalog, publishes an immutable local image ID, and starts a normal TestStudio run.
 Each test container starts a new TestStudio instance with its own SQLite database.
 The instances use loopback endpoints inside the container. They have no external network access.
-The suite tests themes, mobile layout, page help, catalog publication, HTTP assertions, native execution, timing, baseline reset, timeout reruns, trends, and durable schedules.
+The suite tests themes, mobile layout, page help, catalog publication, HTTP assertions, native execution, timing, baseline reset, timeout reruns, and trends.
+It also tests durable schedules, completion notifications, identity administration, scoped groups, and session controls.
 Native check runs remain separate from the outer Playwright run. They cannot recurse into browser self-tests.
 
 The script stops its controller after verification. It preserves its database and private artifacts under `.data/selftest-verification.*`.
@@ -33,6 +34,29 @@ bash scripts/test-self.sh --test=STUDIO-HELP-001
 ```
 
 The identifier must exist in the self-test catalog. Diagnostic flags use their separate selection.
+
+## Identity interface fixtures
+
+Run the identity workflow with:
+
+```sh
+bash scripts/test-self.sh --test=STUDIO-ACCESS-001
+```
+
+The workflow creates new profiles and groups through the normal service API.
+It checks real revision conflicts, reason forms, archive, restore, bounded pages, and session revocation.
+The browser uses a non-UTC timezone and verifies the stored UTC membership expiry.
+
+The self-test image includes a dedicated directory preparer for authority checks.
+It uses product identity, membership, role, and session services against the worker's fixed disposable database.
+The preparer creates a project administrator and provider-managed membership with a fresh opaque session.
+The browser checks installation and foreign-project rejection, hidden installation navigation, and read-only external membership.
+Dedicated OIDC tests verify provider sign-in separately.
+
+The preparer runs only inside the isolated self-test image. Its local fixture route belongs to the test wrapper.
+The product HTTP server provides no fixture preparation route.
+The wrapper awaits its owned service and helper processes during shutdown.
+The normal worker cleanup removes the test browser container and its output volume.
 
 ## Reuse a local installation
 

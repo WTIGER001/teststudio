@@ -130,3 +130,20 @@ The page includes contextual help and shared light and dark theme tokens.
 Tables scroll inside their containers on narrow screens.
 The focused self-test verifies manual and scheduled completion, real retries, Discord confirmation, stopped delivery, and preserved history.
 Checked light and dark views have no document overflow or browser runtime errors.
+
+## Identity administration
+
+Users and Groups use focused page services, small standalone components, and an OpenAPI-generated identity client.
+Installation capabilities control Users and Installation groups navigation independently from project capabilities.
+Project groups retain an explicit ownership scope. Editors cannot change that scope.
+User details show profile state, linked identities, readable group membership, and active sessions.
+Group details show membership origin, activity, UTC expiry, and permitted local membership controls.
+External membership remains read-only. Archive preserves records and removes effective membership access.
+Restore can reactivate retained membership and its assigned access.
+Lifecycle actions and session revocation use explicit reason forms with target and impact text.
+Revision conflicts preserve unsaved values and offer explicit reload controls.
+Scope changes close old editors. Failed reads remain distinct from empty bounded pages.
+Each new page includes contextual help with Introduction, Concepts, and Tutorials.
+Shared tokens support light and dark themes. Mobile detail actions sit below the heading, and tables scroll within their panels.
+The focused self-test verifies real local API mutations, conflicts, membership, archive, restoration, administrator protection, pagination, and session revocation.
+The checked views have no document overflow or unexpected browser runtime errors.

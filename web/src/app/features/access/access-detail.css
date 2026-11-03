@@ -1,0 +1,6 @@
+.access-heading > :first-child { min-width: 0; }
+.guidance { margin-top: 20px; }
+@media (max-width: 640px) {
+  .access-heading { flex-direction: column; align-items: stretch; }
+  .access-heading .row-actions { justify-content: flex-start; }
+}

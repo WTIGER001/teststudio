@@ -66,7 +66,10 @@ import { HelpComponent } from './features/help/help.component'
               @if (app.workspace.can('schedules.read')) { <a [routerLink]="['/projects', app.workspace.projectId(), 'schedules']" routerLinkActive="active"><span aria-hidden="true">◷</span> Schedules</a> }
               @if (app.workspace.can('notifications.read')) { <a [routerLink]="['/projects', app.workspace.projectId(), 'notifications']" routerLinkActive="active"><span aria-hidden="true">♧</span> Notifications</a> }
               <a [routerLink]="['/projects', app.workspace.projectId(), 'configuration']" routerLinkActive="active"><span aria-hidden="true">⚙</span> Project settings</a>
+              @if (app.workspace.can('groups.read')) { <a [routerLink]="['/projects', app.workspace.projectId(), 'groups']" routerLinkActive="active"><span aria-hidden="true">♙</span> Project groups</a> }
             }
+            @if (app.workspace.canInstallation('users.read')) { <a routerLink="/settings/users" routerLinkActive="active"><span aria-hidden="true">♙</span> Users</a> }
+            @if (app.workspace.canInstallation('groups.read')) { <a routerLink="/settings/groups" routerLinkActive="active"><span aria-hidden="true">♧</span> Installation groups</a> }
           </nav>
           <div class="sidebar-footer"><span class="status-dot" aria-hidden="true"></span><span>TestStudio<br><small>Built for clear answers.</small></span></div>
         </aside>
