@@ -74,6 +74,19 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Stable demo UI assets during development
+
+New demo starts copy compiled UI assets into a private content-addressed directory under the demo installation.
+The server serves that snapshot instead of the mutable development build directory.
+Later development builds cannot replace the files used by a running snapshot.
+Unchanged snapshots are verified and reused. Altered snapshots and symbolic links are rejected.
+Copy verification rejects a build that changes during setup.
+A focused local filesystem workflow replaces the source build and verifies that the first snapshot retains its original index and lazy chunk.
+The same workflow verifies reuse, a separate snapshot for changed output, altered-cache rejection, and symbolic-link rejection.
+Evidence is output/demo-ui/result.json. Temporary fixtures are removed after verification.
+The user's current demo stays running. No Angular build, browser test, cloud check, or demo restart runs for this change.
+The ledger remains **26 verified, 31 open, 57 total**.
+
 ### Saved catalog selections and frozen run reviews
 
 Suites now store shared saved selections with explicit identifiers or schema-versioned filter expressions.

@@ -7,6 +7,7 @@ import { spawn, execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { startDemoTarget } from './lib/demo-target.mjs'
 import { seedDemo, demoProject } from './lib/demo-seed.mjs'
+import { snapshotDemoUI } from './lib/demo-ui.mjs'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
 process.chdir(root)
@@ -131,6 +132,7 @@ async function serve() {
   try {
     progress('Preparing local server and UI builds. Docker must be running for the browser example.')
     const build = JSON.parse(execFileSync(process.execPath, ['scripts/build-selftest.mjs', '--local-only'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] }))
+    const ui = snapshotDemoUI(build.ui, directory)
     const image = runtimeImage()
     if (owner.ports) await requireFreePorts(owner.ports)
     const excluded = new Set(Object.values(owner.ports ?? {}))
@@ -156,7 +158,7 @@ async function serve() {
     status = { ready: false, directory, pid: process.pid, owner: owner.id, origin, artifactOrigin, target: target.origin, projectURL: `${origin}/projects/${demoProject}/catalog`, startedAt: new Date().toISOString() }
     progress('Starting the local TestStudio API and separate source worker.')
     const database = path.join(directory, 'teststudio.db')
-    const server = start('TestStudio server', build.server, ['--local', '--source-bundles', '--addr', `127.0.0.1:${owner.ports.api}`, '--public-url', origin, '--artifact-addr', `127.0.0.1:${owner.ports.artifacts}`, '--artifact-origin', artifactOrigin, '--database', database, '--artifact-directory', path.join(directory, 'artifacts'), '--ui', build.ui], `TestStudio listens at ${origin}`)
+    const server = start('TestStudio server', build.server, ['--local', '--source-bundles', '--addr', `127.0.0.1:${owner.ports.api}`, '--public-url', origin, '--artifact-addr', `127.0.0.1:${owner.ports.artifacts}`, '--artifact-origin', artifactOrigin, '--database', database, '--artifact-directory', path.join(directory, 'artifacts'), '--ui', ui], `TestStudio listens at ${origin}`)
     let available = false
     for (let attempt = 0; attempt < 100 && !stopping; attempt++) { if (server.listening) { try { available = (await fetch(origin + '/healthz', { signal: AbortSignal.timeout(1000) })).ok } catch {} } if (available) break; await new Promise(resolve => setTimeout(resolve, 100)) }
     if (!available || stopping) throw new Error('The local demo API did not start; inspect its process log')

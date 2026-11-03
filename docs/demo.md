@@ -16,6 +16,8 @@ node scripts/demo.mjs start
 The first start installs UI dependencies, builds the application, and prepares a trusted browser runtime.
 Initial dependency downloads require network access. Test execution uses local resources.
 Later starts reuse unchanged builds and preserve your edits, history, and evidence.
+Each start serves a private snapshot of its compiled UI files.
+Later development builds do not replace assets used by that running demo.
 Setup creates three HTTP runs and one browser run only once.
 The terminal prints the application address, project address, and local target address.
 Ports default to 8040, 8041, and 8060. A new installation selects free ports when needed.
