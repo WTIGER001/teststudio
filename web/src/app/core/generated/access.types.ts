@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.5.0"
+export const accessContractVersion = "0.6.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -8,6 +8,12 @@ export type AssignmentRecord = { "data": Assignment; "id": string; "projectId"?:
 export type ExternalIdentity = { "issuer": string; "subject": string; "userId": string }
 export type ExternalIdentityPage = { "cursor"?: string; "items": (ExternalIdentityRecord)[]; "partial": boolean }
 export type ExternalIdentityRecord = { "data": ExternalIdentity; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type GrantDefinition = { "effect": "allow" | "deny"; "expiresAt"?: string | null; "object"?: string; "permission": string; "principalId": string; "principalKind": "user" | "group"; "reason": string }
+export type GrantRecord = { "data": GrantView; "id": string; "projectId": string; "revision": number; "updatedAt": string }
+export type GrantRemoved = { "removed": boolean }
+export type GrantUpdate = { "expiresAt"?: string | null; "reason": string }
+export type GrantView = { "canRemove": boolean; "canUpdate": boolean; "effect": "allow" | "deny"; "expired": boolean; "expiresAt"?: string | null; "object"?: string; "permission": string; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "projectId": string }
+export type GrantsPage = { "canCreate": boolean; "cursor"?: string; "items": (GrantRecord)[]; "partial": boolean }
 export type Group = { "archived": boolean; "description": string; "id": string; "managedBy"?: string; "name": string; "projectId"?: string }
 export type GroupDefinition = { "description"?: string; "id": string; "name": string; "projectId"?: string }
 export type GroupPage = { "cursor"?: string; "items": (GroupRecord)[]; "partial": boolean }
@@ -64,6 +70,16 @@ export interface AccessRequests {
   currentProfile: { query?: { "limit"?: number; "cursor"?: string } }
   readOwnLocalCredential: {  }
   permissionCatalog: { query?: { "project"?: string; "object"?: string } }
+  listInstallationGrants: { query?: { "limit"?: number; "cursor"?: string } }
+  createInstallationGrant: { body: GrantDefinition }
+  removeInstallationGrant: { "grant": string; revision: number; body: Reason }
+  readInstallationGrant: { "grant": string }
+  updateInstallationGrant: { "grant": string; revision: number; body: GrantUpdate }
+  listProjectGrants: { "project": string; query?: { "limit"?: number; "cursor"?: string } }
+  createProjectGrant: { "project": string; body: GrantDefinition }
+  removeProjectGrant: { "project": string; "grant": string; revision: number; body: Reason }
+  readProjectGrant: { "project": string; "grant": string }
+  updateProjectGrant: { "project": string; "grant": string; revision: number; body: GrantUpdate }
   listProjectAssignments: { "project": string; query?: { "limit"?: number; "cursor"?: string } }
   createProjectAssignment: { "project": string; body: AssignmentDefinition }
   revokeProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
@@ -111,6 +127,16 @@ export interface AccessResponses {
   currentProfile: Profile
   readOwnLocalCredential: LocalCredentialRecord
   permissionCatalog: PermissionCatalog
+  listInstallationGrants: GrantsPage
+  createInstallationGrant: GrantRecord
+  removeInstallationGrant: GrantRemoved
+  readInstallationGrant: GrantRecord
+  updateInstallationGrant: GrantRecord
+  listProjectGrants: GrantsPage
+  createProjectGrant: GrantRecord
+  removeProjectGrant: GrantRemoved
+  readProjectGrant: GrantRecord
+  updateProjectGrant: GrantRecord
   listProjectAssignments: AssignmentPage
   createProjectAssignment: AssignmentRecord
   revokeProjectAssignment: Revoked
@@ -158,6 +184,16 @@ export const accessOperations = {
   currentProfile: { method: "GET", path: "/api/v1/me" },
   readOwnLocalCredential: { method: "GET", path: "/api/v1/me/local-credential" },
   permissionCatalog: { method: "GET", path: "/api/v1/permissions" },
+  listInstallationGrants: { method: "GET", path: "/api/v1/permissions/grants" },
+  createInstallationGrant: { method: "POST", path: "/api/v1/permissions/grants" },
+  removeInstallationGrant: { method: "DELETE", path: "/api/v1/permissions/grants/{grant}" },
+  readInstallationGrant: { method: "GET", path: "/api/v1/permissions/grants/{grant}" },
+  updateInstallationGrant: { method: "PUT", path: "/api/v1/permissions/grants/{grant}" },
+  listProjectGrants: { method: "GET", path: "/api/v1/projects/{project}/permissions" },
+  createProjectGrant: { method: "POST", path: "/api/v1/projects/{project}/permissions" },
+  removeProjectGrant: { method: "DELETE", path: "/api/v1/projects/{project}/permissions/{grant}" },
+  readProjectGrant: { method: "GET", path: "/api/v1/projects/{project}/permissions/{grant}" },
+  updateProjectGrant: { method: "PUT", path: "/api/v1/projects/{project}/permissions/{grant}" },
   listProjectAssignments: { method: "GET", path: "/api/v1/projects/{project}/role-assignments" },
   createProjectAssignment: { method: "POST", path: "/api/v1/projects/{project}/role-assignments" },
   revokeProjectAssignment: { method: "DELETE", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },

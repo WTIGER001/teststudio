@@ -94,7 +94,7 @@ func TestCustomRoleAPIRejectsInvalidObjectsAndServerOwnedFields(t *testing.T) {
 func TestCustomRoleAPIProtectsFinalAdministratorAcrossInheritedPolicies(t *testing.T) {
 	c := roleSetup(t)
 	child := roleInput("administration-policy", "")
-	for _, action := range []string{"system.manage", "users.manage", "permissions.grant", "roles.manage", "roles.read", "members.manage", "members.read"} {
+	for _, action := range []string{"system.manage", "users.manage", "permissions.grant", "permissions.read", "roles.manage", "roles.read", "members.manage", "members.read"} {
 		child.Rules = append(child.Rules, roleRule(action, permissions.EffectAllow, ""))
 	}
 	stored := accessCall(t, c, "POST", "/api/v1/roles", child, "", 200)

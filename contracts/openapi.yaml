@@ -1,8 +1,8 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio identity and access administration"
-  "version": "0.5.0"
-  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Direct principal grant administration and other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
+  "version": "0.6.0"
+  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
     "url": "/"
@@ -1439,6 +1439,331 @@
             "schema":
               "$ref": "#/components/schemas/RolePreviewInput"
 
+  "/api/v1/permissions/grants":
+    "get":
+      "operationId": "listInstallationGrants"
+      "summary": "Scan managed direct user and group grants in this exact scope. Expired rules remain visible. Unmanaged native grants are not included."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Limit"
+        -
+          "$ref": "#/components/parameters/Cursor"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/GrantsPage"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+    "post":
+      "operationId": "createInstallationGrant"
+      "summary": "Create one exact allow or deny rule for a registered principal. The route fixes scope. Do not adopt unmanaged grants."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/GrantRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/GrantDefinition"
+  "/api/v1/permissions/grants/{grant}":
+    "get":
+      "operationId": "readInstallationGrant"
+      "summary": "Read one managed direct grant and current update and removal capabilities."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Grant"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/GrantRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+    "put":
+      "operationId": "updateInstallationGrant"
+      "summary": "Change expiry using the opened positive revision. Omitted or null expiry removes expiry. Identity stays permanent."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Grant"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/GrantRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/GrantUpdate"
+    "delete":
+      "operationId": "removeInstallationGrant"
+      "summary": "Remove this exact grant using its current revision and a reason. Preserve revision history and the last usable administrator."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Grant"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/GrantRemoved"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/Reason"
+  "/api/v1/projects/{project}/permissions":
+    "get":
+      "operationId": "listProjectGrants"
+      "summary": "Scan managed direct user and group grants in this exact scope. Expired rules remain visible. Unmanaged native grants are not included."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/AssignmentProject"
+        -
+          "$ref": "#/components/parameters/Limit"
+        -
+          "$ref": "#/components/parameters/Cursor"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/GrantsPage"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+    "post":
+      "operationId": "createProjectGrant"
+      "summary": "Create one exact allow or deny rule for a registered principal. The route fixes scope. Do not adopt unmanaged grants."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/AssignmentProject"
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/GrantRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/GrantDefinition"
+  "/api/v1/projects/{project}/permissions/{grant}":
+    "get":
+      "operationId": "readProjectGrant"
+      "summary": "Read one managed direct grant and current update and removal capabilities."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/AssignmentProject"
+        -
+          "$ref": "#/components/parameters/Grant"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/GrantRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+    "put":
+      "operationId": "updateProjectGrant"
+      "summary": "Change expiry using the opened positive revision. Omitted or null expiry removes expiry. Identity stays permanent."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/AssignmentProject"
+        -
+          "$ref": "#/components/parameters/Grant"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/GrantRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/GrantUpdate"
+    "delete":
+      "operationId": "removeProjectGrant"
+      "summary": "Remove this exact grant using its current revision and a reason. Preserve revision history and the last usable administrator."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/AssignmentProject"
+        -
+          "$ref": "#/components/parameters/Grant"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/GrantRemoved"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/Reason"
+
 "components":
   "securitySchemes":
     "SessionCookie":
@@ -1450,6 +1775,14 @@
       "in": "header"
       "name": "X-CSRF-Token"
   "parameters":
+    "Grant":
+      "name": "grant"
+      "in": "path"
+      "required": true
+      "schema":
+        "type": "string"
+        "pattern": "^[a-f0-9]{64}$"
+      "description": "Stable managed grant identity. Removal and recreation retain revision history."
     "User":
       "name": "user"
       "in": "path"
@@ -2504,3 +2837,155 @@
         - "object"
         - "userDisabled"
         - "decisions"
+
+    "GrantDefinition":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "principalKind":
+          "type": "string"
+          "enum":
+            - "user"
+            - "group"
+        "principalId":
+          "type": "string"
+        "permission":
+          "type": "string"
+        "effect":
+          "type": "string"
+          "enum":
+            - "allow"
+            - "deny"
+        "object":
+          "type": "string"
+          "description": "Exact supported resource in the selected scope. Empty applies throughout that scope."
+        "expiresAt":
+          "type":
+            - "string"
+            - "null"
+          "format": "date-time"
+          "description": "UTC microsecond expiry. Past expiry remains inspectable and grants no access."
+        "reason":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 1024
+      "required":
+        - "principalKind"
+        - "principalId"
+        - "permission"
+        - "effect"
+        - "reason"
+    "GrantUpdate":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "expiresAt":
+          "type":
+            - "string"
+            - "null"
+          "format": "date-time"
+          "description": "UTC microsecond expiry. Past expiry remains inspectable and grants no access."
+        "reason":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 1024
+      "required":
+        - "reason"
+    "GrantView":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "projectId":
+          "type": "string"
+        "principalKind":
+          "type": "string"
+          "enum":
+            - "user"
+            - "group"
+        "principalId":
+          "type": "string"
+        "permission":
+          "type": "string"
+        "effect":
+          "type": "string"
+          "enum":
+            - "allow"
+            - "deny"
+        "object":
+          "type": "string"
+          "description": "Exact supported resource in the selected scope. Empty applies throughout that scope."
+        "expiresAt":
+          "type":
+            - "string"
+            - "null"
+          "format": "date-time"
+          "description": "UTC microsecond expiry. Past expiry remains inspectable and grants no access."
+        "expired":
+          "type": "boolean"
+        "principalName":
+          "type": "string"
+        "principalActive":
+          "type": "boolean"
+        "canUpdate":
+          "type": "boolean"
+        "canRemove":
+          "type": "boolean"
+      "required":
+        - "principalKind"
+        - "principalId"
+        - "permission"
+        - "effect"
+        - "projectId"
+        - "expired"
+        - "principalName"
+        - "principalActive"
+        - "canUpdate"
+        - "canRemove"
+    "GrantRecord":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "id":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "revision":
+          "type": "integer"
+          "minimum": 1
+        "updatedAt":
+          "type": "string"
+          "format": "date-time"
+        "data":
+          "$ref": "#/components/schemas/GrantView"
+      "required":
+        - "id"
+        - "projectId"
+        - "revision"
+        - "updatedAt"
+        - "data"
+    "GrantsPage":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "items":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/GrantRecord"
+        "cursor":
+          "type": "string"
+        "partial":
+          "type": "boolean"
+        "canCreate":
+          "type": "boolean"
+      "required":
+        - "items"
+        - "partial"
+        - "canCreate"
+    "GrantRemoved":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "removed":
+          "type": "boolean"
+      "required":
+        - "removed"

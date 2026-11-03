@@ -19,7 +19,10 @@ test('policy forms preserve exact expiry and strip mutable authority from existi
   assert.equal(roleExpiryValid('2027-02-30T00:00:00Z'), false)
   assert.equal(roleExpiryValid('2027-01-01T00:00:00'), false)
   assert.equal(roleExpiryValid('2027-01-01T24:00:00Z'), false)
+  assert.equal(roleExpiryValid('0000-01-01T00:00:00Z'), false)
+  assert.equal(roleExpiryValid('9999-12-31T23:59:59-01:00'), false)
   assert.equal(roleObjectValid('suite/*'), false); assert.equal(roleObjectValid('test/health/check'), true)
+  assert.equal(roleObjectValid('grant/abc123'), true); assert.equal(roleObjectValid('grant/*'), false)
 })
 test('preview context expires when policy or subject changes while reasons leave access unchanged', () => {
   const body = rolePolicyDefinition(fields, 'alpha', null), key = previewFingerprint(body, 0, 'member', 'suite/health')

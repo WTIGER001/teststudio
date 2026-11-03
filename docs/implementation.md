@@ -66,6 +66,37 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Record feature commits and targeted validation here.
 
+### Managed direct user and group grant APIs
+
+Added scoped direct grant listing, creation, detail, expiry updates, and revision-controlled removal.
+Rules retain user or group ownership, exact project and object scope, allow or deny effect, and UTC microsecond expiry.
+Shared rule validation keeps custom role and direct grant semantics aligned, including supported UTC years.
+The permission library evaluates current grants, role inheritance, active membership, deny precedence, and expiry.
+Reads and mutations check scope, principal, grant, and object authority. Shared groups require authority in their installation scope.
+Inactive principals and archived projects reject new or renewed access while permitting authorized removal.
+Native grant identifiers stay private. Unrelated native identifiers remain stable.
+Retained management records preserve public identifiers and advance revisions through removal and recreation.
+Exact native inspection rejects missing or inconsistent state. Unmanaged native duplicates are not adopted.
+Native changes, management metadata, audit reasons, and directory revisions commit atomically.
+Project revision assertions protect new and renewed grants against concurrent archive changes.
+
+Strengthened the usable-administrator definition to include permission inspection, role administration, and membership administration.
+Direct denies cannot remove those essential actions from the only usable administrator.
+Independent connection checks verify that competing administrator denies commit at most one removal path.
+Rejected changes preserve native state, audit history, and the directory revision.
+
+Focused direct grant, custom policy, assignment, account guard, and generated-client race checks pass on SQLite and disposable local PostgreSQL.
+Checks cover read-only sessions, filtered object denies, foreign scopes, expired group denies, disabled users, archived groups, and stale revisions.
+Native grant discovery scans beyond 1000 existing grants without an arbitrary total ceiling.
+The built-service check verifies actual SQLite restarts, retained direct grants and expiry, deny precedence, existing-session access revocation, and recreated revisions.
+Its summary is retained in `output/access/access-verification.J4pSuu/summary.json`.
+The OpenAPI 0.6 contract and generated client now contain 54 identity and access operations.
+Pure interface utility checks, generated-client checks, targeted vet checks, and the production Angular build pass.
+The custom-policy Playwright regression passes through normal TestStudio execution with complete evidence: `20261103T052916.550828000-2bbf5c6e6d855ce26c4200ee`.
+Owned verification controllers, browser containers, output volumes, and disposable database containers exit after checks.
+
+Direct grant screens, complete effective-access source explanations, built-in override administration, and the remaining full plan stay pending.
+
 ### Custom policy interface and temporary access preview
 
 Added installation and project Roles and permissions pages, scoped detail views, and focused policy editor components.

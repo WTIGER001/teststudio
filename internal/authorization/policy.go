@@ -3,7 +3,24 @@ package authorization
 import (
 	"context"
 	"errors"
+
+	permissions "github.com/wtiger001/go-permissions"
 )
+
+type GrantReader interface {
+	ReadGrant(context.Context, int64) (permissions.Grant, error)
+}
+
+func (s *Service) ReadPolicyGrant(ctx context.Context, id int64) (permissions.Grant, error) {
+	reader, ok := s.Engine.GetStore().(GrantReader)
+	if !ok {
+		return permissions.Grant{}, errors.New("permission store does not support exact grant inspection")
+	}
+	if id < 1 {
+		return permissions.Grant{}, errors.New("a positive grant identifier is required")
+	}
+	return reader.ReadGrant(ctx, id)
+}
 
 type PolicyRemovalStore interface {
 	RemoveGrant(context.Context, int64) error

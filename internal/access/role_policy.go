@@ -147,28 +147,18 @@ func normalizeRolePolicy(value RolePolicy) (RolePolicy, error) {
 			return value, errors.New("inheritance requires different, unique custom role identifiers")
 		}
 	}
-	registered := authorization.PermissionNames()
 	seen := map[string]bool{}
 	for i, rule := range value.Rules {
-		if !slices.Contains(registered, rule.Permission) || (rule.Effect != permissions.EffectAllow && rule.Effect != permissions.EffectDeny) {
-			return value, errors.New("each rule requires a registered permission and allow or deny effect")
-		}
-		if value.Project != "" && authorization.InstallationPermission(rule.Permission) {
-			return value, errors.New("project roles cannot contain installation actions")
-		}
-		if rule.Object != "" && !validPolicyObject(rule.Object) {
-			return value, errors.New("rule objects require an exact supported resource identifier")
+		rule, err := normalizePolicyRule(value.Project, rule)
+		if err != nil {
+			return value, err
 		}
 		key := rule.Permission + "\x00" + string(rule.Effect) + "\x00" + rule.Object
 		if seen[key] {
 			return value, errors.New("duplicate role rule")
 		}
 		seen[key] = true
-		if rule.ExpiresAt != nil {
-			expiry := rule.ExpiresAt.UTC().Truncate(time.Microsecond)
-			rule.ExpiresAt = &expiry
-			value.Rules[i] = rule
-		}
+		value.Rules[i] = rule
 	}
 	return value, nil
 }

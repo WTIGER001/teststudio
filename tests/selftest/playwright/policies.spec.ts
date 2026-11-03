@@ -193,7 +193,7 @@ test('Custom policies, inherited assignment, access previews, and guarded editor
 
   await test.step('Reject last-administrator policy disabling through the actual confirmation form', async () => {
     const id = 'safety-administrator'
-    await api.call('POST', '/api/v1/roles', { id, name: 'Safety administrator', projectId: '', rules: ['system.manage', 'users.manage', 'permissions.grant', 'roles.manage', 'roles.read', 'members.manage', 'members.read'].map(action => ({ permission: `teststudio.${action}`, effect: 'allow' })), inherits: [], reason: 'Verify the last custom administrator guard' })
+    await api.call('POST', '/api/v1/roles', { id, name: 'Safety administrator', projectId: '', rules: ['system.manage', 'users.manage', 'permissions.grant', 'permissions.read', 'roles.manage', 'roles.read', 'members.manage', 'members.read'].map(action => ({ permission: `teststudio.${action}`, effect: 'allow' })), inherits: [], reason: 'Verify the last custom administrator guard' })
     await api.call('POST', '/api/v1/role-assignments', { principalKind: 'user', principalId: 'local-administrator', roleId: id, reason: 'Retain an explicit custom administrator' })
     const root = '/api/v1/role-assignments/user/local-administrator/builtin.teststudio.installation-admin', current = await api.call('GET', root)
     await api.call('DELETE', root, { reason: 'Verify recovery with the custom role' }, current.revision)

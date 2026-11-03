@@ -159,7 +159,7 @@ func usableAdministrator(ctx context.Context, engine *permissions.Service, v *di
 			continue
 		}
 		usable := true
-		for _, permission := range []string{"teststudio.system.manage", "teststudio.users.manage", "teststudio.permissions.grant"} {
+		for _, permission := range []string{"teststudio.system.manage", "teststudio.users.manage", "teststudio.permissions.grant", "teststudio.permissions.read", "teststudio.roles.manage", "teststudio.roles.read", "teststudio.members.manage", "teststudio.members.read"} {
 			ok, err := engine.HasPermission(ctx, permissions.Request{UserID: id, Perm: permission})
 			if err != nil {
 				return false, err

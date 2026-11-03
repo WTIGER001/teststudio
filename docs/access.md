@@ -9,7 +9,7 @@ Managed custom role APIs support scoped rules, inheritance, disabled state, and 
 Custom role screens use the same typed API, scope checks, and revision guards.
 Identity linking and pending project access remain pending.
 The full acceptance ledger remains in [Implementation verification](implementation.md).
-The [OpenAPI contract](../contracts/openapi.yaml) describes identity, role policy, permission catalog, and assignment routes. Other route families remain pending.
+The [OpenAPI contract](../contracts/openapi.yaml) describes identity, role policy, direct grants, permission catalog, and assignment routes. Other route families remain pending.
 
 ## Typed client contract
 
@@ -21,7 +21,7 @@ go run ./cmd/teststudio-client --check
 ```
 
 Run these commands from the repository root.
-The generated module contains all 44 implemented identity and access operations, including policy previews and custom assignment choices.
+The generated module contains all 54 implemented identity and access operations, including direct grants, policy previews, and custom assignment choices.
 The shared client adapter supplies same-origin sessions, request-forgery protection, and revision headers.
 The client escapes path identifiers and preserves explicit query values.
 Generator checks reject stale output. Nullable expiry and required fields retain their contract types.
@@ -110,6 +110,8 @@ Cursors cannot reveal filtered identifiers or move between query contexts.
 ## Administrator protection
 
 Ordinary account disabling, group archival, membership removal, and installation role revocation preserve the last usable installation administrator.
+Managed installation role and direct grant changes use the same protection.
+Usable administration requires system management, user management, permission inspection and delegation, role inspection and management, and membership inspection and management.
 The check evaluates the proposed directory state through the same permission library and built-in definitions used for requests.
 Explicit denies and active membership remain authoritative. Alternate group paths can preserve access.
 Unlinked accounts and accounts with disabled sign-in providers do not count as usable recovery accounts.
@@ -117,7 +119,7 @@ The configured loopback administrator provides an independent local sign-in path
 
 A shared directory revision prevents competing administrative mutations from passing stale checks and removing both administrators.
 Directory provisioning, membership synchronization, profile changes, and local recovery also advance that revision.
-Future role, grant, and provider administration must join this coordination before those write APIs become available.
+Role and direct grant administration join this coordination. Future provider administration must also join it before its write APIs become available.
 Provider outages and external membership expiration can still require operator recovery.
 
 ## Operator recovery
@@ -176,6 +178,10 @@ Keep operator access to the database and host under installation control.
 | GET, DELETE | `/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}` | Read or revoke one exact project assignment. |
 | GET, POST | `/api/v1/role-assignments` | Scan or create predefined and managed custom installation assignments. |
 | GET, DELETE | `/api/v1/role-assignments/{kind}/{principal}/{role}` | Read or revoke one exact installation assignment. |
+| GET, POST | `/api/v1/projects/{project}/permissions` | Scan or create managed direct project grants. |
+| GET, PUT, DELETE | `/api/v1/projects/{project}/permissions/{grant}` | Read, change expiry, or remove one managed project grant. |
+| GET, POST | `/api/v1/permissions/grants` | Scan or create managed direct installation grants. |
+| GET, PUT, DELETE | `/api/v1/permissions/grants/{grant}` | Read, change expiry, or remove one managed installation grant. |
 
 
 ## Local verification
@@ -260,7 +266,7 @@ All access decisions continue through the permission library.
 Focused SQLite and local PostgreSQL checks cover pending evaluation, complete rollback, exact object boundaries, direct reports, and grant pagination.
 They also cover disabled overrides, expired denies, independent connections, retained grant identifiers, and alternate inheritance paths.
 Managed role APIs use this storage foundation.
-Direct principal grant administration, editor workflows, and effective-access explanations remain pending.
+Direct principal grant APIs use this transaction. Their editor workflows and complete effective-access explanations remain pending.
 
 ## Managed custom role policies
 
@@ -274,7 +280,7 @@ Each rule contains a full registered `permission`, an `allow` or `deny` effect, 
 Project rules use the owning project as an exact native team scope. Project policies reject installation actions.
 Installation rules require installation authority. They use the native installation-wide scope.
 Object rules use exact relative identifiers. Supported forms include `suite/health`, `test/health/check`, and `run/{id}`.
-Environment, application, group, user, and role identifiers are also supported where their stored ownership matches the rule scope.
+Environment, application, group, user, role, and managed grant identifiers are also supported where their stored ownership matches the rule scope.
 The service loads each resource before it accepts a new object rule.
 User directory objects require installation scope. Wildcards and caller-supplied native binding fields are rejected.
 The service prefixes project objects with their permanent project identifier.
@@ -594,3 +600,61 @@ bash scripts/test-self.sh --test=STUDIO-LOCAL-001
 ```
 
 The isolated worker supports authentication mode restarts through a test-only wrapper. The production service exposes no such route.
+
+## Managed direct grant API
+
+Direct grants assign one registered permission to a user or group with an explicit allow or deny effect.
+The route fixes the project. Installation routes use installation-wide native scope.
+Optional exact objects use the same validated resource forms as custom role rules.
+Project grants reject installation actions, foreign project resources, and wildcard objects.
+The permission library evaluates direct grants together with assignments, inherited roles, active groups, explicit denies, and expiry.
+
+Creation requires `principalKind`, `principalId`, `permission`, `effect`, and a nonblank `reason`.
+Optional `object` and `expiresAt` fields refine the rule.
+The service rejects disabled users, archived groups, and archived projects when creating or renewing grants.
+Expiry uses UTC microseconds and UTC years from 1 through 9999. Expired grants remain inspectable and grant no access.
+
+Inspection requires membership and permission read authority at the scope, principal, grant, and exact object.
+Mutation requires membership management, permission delegation, and the actual rule action in its exact context.
+Group grants also require group authority in the group's stored ownership scope.
+Project administrators cannot manage shared installation groups through a project route.
+A caller denied the rule action needs another authorized administrator to change that rule.
+
+Each grant has a stable public identifier derived from its permanent scope, principal, permission, effect, and object.
+Expiry does not change that identifier.
+Use `PUT` with the current positive `If-Match` revision and a reason to change expiry.
+Omitted or null expiry removes the expiry limit.
+Identity changes require removal and creation. Caller-supplied native identifiers and other server fields are rejected.
+
+Removal requires the current positive revision and a reason.
+Removal remains available for retained inactive principals and archived projects when the caller has current authority.
+A retained management record preserves revision history after removal.
+Recreating the same rule advances its revision. Earlier removal requests cannot remove the recreated grant.
+
+Managed pages include current principal activity, expiry state, and server-computed update and removal capabilities.
+They scan bounded management records and filter current object permissions.
+Expired rules remain visible. Removed rules do not appear.
+Continuation binds to the actor, collection, and exact scope. Empty filtered pages can still permit continuation.
+These pages list managed direct grants. They do not claim to list every native grant or explain complete effective access.
+
+Native grants, management records, reasons, audit events, and directory revisions share one policy transaction.
+Unrelated native grant identifiers remain stable during expiry changes and removal.
+The service rejects unmanaged duplicate adoption and inconsistent native grant records.
+Project revision assertions reject an archive that races with a new or renewed grant.
+Installation changes evaluate the proposed native state before preserving the last usable administrator.
+Rejected changes leave no partial management, permission, audit, or directory state.
+
+Verify the API and independent connection guards on SQLite:
+
+```sh
+go test -race ./internal/access ./internal/httpapi -run TestDirectGrant -count=1
+```
+
+Run the same checks on disposable local PostgreSQL:
+
+```sh
+bash scripts/test-postgres.sh ./internal/access ./internal/httpapi -run TestDirectGrant
+```
+
+The built-service access verifier checks actual SQLite restarts, retained expiry, deny precedence, revoked access through existing sessions, and recreation revisions.
+Direct grant screens and complete source explanations remain pending.
