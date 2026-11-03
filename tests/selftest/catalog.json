@@ -2,6 +2,7 @@
   "schemaVersion": "teststudio.selftest/v1",
   "source": "teststudio-selftests",
   "tests": [
+    { "id": "STUDIO-SUITES-001", "title": "Suite settings, archive and restoration with retained evidence and schedule pins", "selector": "@STUDIO-SUITES-001", "category": "Catalog" },
     { "id": "STUDIO-RELEASES-001", "title": "Retained release comparisons, activation conflicts, rollback, and frozen runs", "selector": "@STUDIO-RELEASES-001", "category": "Catalog" },
     { "id": "STUDIO-CLI-001", "title": "Publisher CLI browser confirmation with local and OIDC accounts", "selector": "@STUDIO-CLI-001", "category": "Authentication" },
     { "id": "STUDIO-GIT-001", "title": "Repository registration, multiple suite bindings, and durable sync history", "selector": "@STUDIO-GIT-001", "category": "Sources" },

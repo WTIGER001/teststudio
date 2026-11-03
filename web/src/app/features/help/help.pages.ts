@@ -330,12 +330,14 @@ export const helpPages: Record<string, HelpPage> = {
     concepts: [
       { title: 'Application', description: 'An application identifies the system being tested. Environments belong to an application.' },
       { title: 'Suite', description: 'A suite groups test definitions and published releases. A suite can require a target environment or run without one.' },
+      { title: 'Suite lifecycle', description: 'Inspect suite opens settings, current authority, and readable affected schedules. Archive blocks new dispatch and attempts. Releases, results, evidence, and schedule pins stay retained. Restore keeps the same identity and active release.' },
       { title: 'Environment and endpoint', description: 'An environment records a stage and named endpoint URLs. Test definitions refer to endpoint names instead of embedding a target URL.' },
       { title: 'Protection', description: 'Protection is separate from the stage name. A protected environment requires safe tests and protected-target permissions.' }
     ],
     tutorials: [
       { title: 'Prepare a target for HTTPS checks', steps: ['Choose Applications. Enter a name and permanent identifier, then select Create.', 'Choose Environments. Select the application, enter a name and identifier, and choose the stage.', 'Enter an endpoint name and URL. Use this endpoint name in test definitions.', 'Choose whether the environment needs production-safe tests, then select Create.'] },
-      { title: 'Register a suite', steps: ['Choose Suites and enter a name and permanent identifier.', 'Choose an application when the suite belongs to one.', 'Keep Requires a target environment enabled for checks that use registered endpoints. Turn it off for tests that need no target.', 'Select Create, then open Test catalog to add and publish definitions.'] }
+      { title: 'Register a suite', steps: ['Choose Suites and enter a name and permanent identifier.', 'Choose an application when the suite belongs to one.', 'Keep Requires a target environment enabled for checks that use registered endpoints. Turn it off for tests that need no target.', 'Select Create, then open Test catalog to add and publish definitions.'] },
+      { title: 'Manage or archive a suite', steps: ['Choose Suites and select Inspect suite on its row.', 'Edit Suite name, Suite description, applications, or target requirements. Select Save suite settings.', 'Review Affected schedules before selecting Archive suite. Current permissions control which schedules appear.', 'Select Restore suite to resume normal selection with its retained release.', 'If a revision conflict appears, select Reload suite settings and review the current values before trying again.'] }
     ]
   },
   runs: {

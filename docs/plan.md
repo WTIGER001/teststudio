@@ -22,9 +22,13 @@ See demo-readiness.md for the immediate delivery checklist.
 Item **01** now passes a build from an isolated copy of the current source tree.
 Go uses no workspace or local module replacements. A clean offline npm installation and Angular build also pass.
 Evidence and cleanup are recorded in implementation.md.
-The suite settings and lifecycle UI work remains uncommitted. Preserve these changes.
-The isolated Go and Angular builds include them, but targeted functional validation remains pending.
-Do not expand this feature while preparing the demonstration. Finish only necessary integration or park it explicitly.
+The five-item local demonstration checklist is complete.
+The explicit launcher, new examples, walkthrough, and targeted local verification are recorded in demo-readiness.md.
+Suite settings and lifecycle controls also pass focused local verification after the demonstration delivery.
+Project settings supports edits, revision conflicts, archive, restoration, and readable affected schedules.
+Exact suite read and management checks protect both lifecycle routes and the existing PUT route.
+Run history, artifact downloads, retained releases, and schedule pins survive archive and restoration.
+The next implementation batches follow the full ledger without adding new gates to the usable demonstration.
 
 ## Current implementation checkpoint
 

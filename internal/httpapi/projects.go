@@ -10,6 +10,7 @@ import (
 )
 
 func (s *Server) projectRoutes(m *http.ServeMux) {
+	s.suiteLifecycleRoutes(m)
 	m.HandleFunc("GET /api/v1/projects", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		rows, err := s.Store.All(r.Context(), "projects", "")
 		if err != nil {
@@ -90,6 +91,18 @@ func (s *Server) projectRoutes(m *http.ServeMux) {
 			if err != nil {
 				problem(w, err)
 				return
+			}
+			if kind == "suites" {
+				allowed := []storage.Record{}
+				for _, row := range rows {
+					if err := s.Auth.Check(r.Context(), actor(r), p, "suite/"+row.ID, permission); err == nil {
+						allowed = append(allowed, row)
+					} else if !errors.Is(err, authorization.ErrForbidden) {
+						problem(w, err)
+						return
+					}
+				}
+				rows = allowed
 			}
 			JSON(w, 200, map[string]any{"items": rows})
 		}))

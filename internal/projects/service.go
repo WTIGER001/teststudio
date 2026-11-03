@@ -90,12 +90,20 @@ func (s *Service) SaveEnvironment(ctx context.Context, user, project string, e E
 	return s.save(ctx, user, Bucket("environments", project), e.ID, project, revision, e)
 }
 
-func (s *Service) SaveSuite(ctx context.Context, user, project string, v Suite, revision int64) error {
-	if err := s.Auth.Check(ctx, user, project, "", "suites.manage"); err != nil {
-		return err
+func (s *Service) SaveSuite(ctx context.Context, user, project string, value Suite, revision int64) error {
+	return s.Auth.WithAssignmentTransaction(ctx, func(auth *authorization.Service) error {
+		return (&Service{Store: auth.Directory.Store, Auth: auth}).saveSuite(ctx, user, project, value, revision)
+	})
+}
+
+func (s *Service) saveSuite(ctx context.Context, user, project string, v Suite, revision int64) error {
+	for _, permission := range []string{"suites.read", "suites.manage"} {
+		if err := s.Auth.Check(ctx, user, project, "suite/"+v.ID, permission); err != nil {
+			return err
+		}
 	}
-	if !domain.ValidID(v.ID) || v.Name == "" {
-		return errors.New("valid suite identifier and name are required")
+	if err := validSuiteSettings(v); err != nil {
+		return err
 	}
 	projectRow, err := s.Store.Get(ctx, "projects", project)
 	if err != nil {

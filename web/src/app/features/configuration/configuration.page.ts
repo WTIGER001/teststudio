@@ -1,11 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { ReactiveFormsModule } from '@angular/forms'
+import { SuiteManagerComponent } from './suite-manager.component'
+import { SuiteManagerService } from './suite-manager.service'
 import { ConfigurationService } from './configuration.service'
 
 @Component({
   standalone: true,
-  imports: [ReactiveFormsModule],
-  providers: [ConfigurationService],
+  imports: [ReactiveFormsModule, SuiteManagerComponent],
+  providers: [ConfigurationService, SuiteManagerService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Project settings</h1><p class="muted">Connect your applications, execution targets, and suites.</p></div></div>
@@ -26,7 +28,7 @@ import { ConfigurationService } from './configuration.service'
             @empty { <div class="empty-state compact"><h3>No applications yet.</h3><p>Add an application before registering its environments.</p></div> }
           }
           @case ('suites') {
-            @for (item of service.suites(); track item.id) { <article class="resource-row"><div><h3>{{ item.data.name }}</h3><code>{{ item.id }}</code></div><span class="badge" [class.success]="item.data.activeReleaseId">{{ item.data.activeReleaseId ? 'Published' : 'No active release' }}</span></article> }
+            @for (item of service.suites(); track item.id) { <article class="resource-row"><div><h3>{{ item.data.name }}</h3><code>{{ item.id }}</code></div><div class="row-actions"><span class="badge" [class.success]="!item.data.archived && item.data.activeReleaseId" [class.warning]="item.data.archived">{{ item.data.archived ? 'Archived' : item.data.activeReleaseId ? 'Published' : 'No active release' }}</span><button type="button" class="button small secondary" (click)="manager.open(item.id)" [attr.aria-label]="'Inspect suite ' + item.data.name">Inspect suite</button></div></article> }
             @empty { <div class="empty-state compact"><h3>Your catalog starts with a suite.</h3><p>A suite groups tests and their immutable releases.</p></div> }
           }
           @case ('environments') {
@@ -55,6 +57,7 @@ import { ConfigurationService } from './configuration.service'
         </section>
       }
     </div>
+    @if (service.kind() === 'suites') { <ts-suite-manager /> }
   `
 })
-export class ConfigurationPage { readonly service = inject(ConfigurationService) }
+export class ConfigurationPage { readonly service = inject(ConfigurationService); readonly manager = inject(SuiteManagerService) }

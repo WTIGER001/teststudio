@@ -1,7 +1,7 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio API"
-  "version": "0.19.0"
+  "version": "0.20.0"
   "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Includes optional client-identifier RP-initiated provider logout after local session revocation. Includes staged native JSON and YAML sources with atomic catalog publication and retained source provenance. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
@@ -10,6 +10,128 @@
   -
     "SessionCookie": []
 "paths":
+  "/api/v1/projects/{project}/suites/{suite}/actions/{action}":
+    "post":
+      "operationId": "changeSuiteLifecycle"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "action"
+          "required": true
+          "schema":
+            "enum":
+              - "archive"
+              - "restore"
+            "type": "string"
+        - "$ref": "#/components/parameters/Origin"
+        - "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SuiteLifecycle"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "CSRFToken": []
+          "SessionCookie": []
+      "summary": "Archive or restore a suite under current exact authority and an explicit revision. Preserve releases, results, evidence, and schedule pins."
+  "/api/v1/projects/{project}/suites/{suite}/settings":
+    "patch":
+      "operationId": "updateSuiteSettings"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        - "$ref": "#/components/parameters/Origin"
+        - "$ref": "#/components/parameters/Revision"
+      "requestBody":
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/SuiteSettings"
+        "required": true
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SuiteLifecycle"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "CSRFToken": []
+          "SessionCookie": []
+      "summary": "Edit registered suite settings under current authority and an explicit revision. Preserve active release, timing, evidence policy, and permanent identity."
+  "/api/v1/projects/{project}/suites/{suite}/lifecycle":
+    "get":
+      "operationId": "readSuiteLifecycle"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SuiteLifecycle"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "SessionCookie": []
+      "summary": "Read registered suite settings, current exact management authority, and readable affected schedules, including archived suites."
   "/api/v1/projects/{project}/suites/{suite}/releases/{id}/activate":
     "post":
       "operationId": "activateRetainedRelease"
@@ -3635,6 +3757,95 @@
           "schema":
             "$ref": "#/components/schemas/Problem"
   "schemas":
+    "SuiteSchedule":
+      "properties":
+        "enabled":
+          "type": "boolean"
+        "id":
+          "type": "string"
+        "name":
+          "type": "string"
+        "releaseId":
+          "type": "string"
+      "required":
+        - "id"
+        - "name"
+        - "enabled"
+      "type": "object"
+    "SuiteSettings":
+      "properties":
+        "applications":
+          "items":
+            "type": "string"
+          "type":
+            - "array"
+            - "null"
+        "description":
+          "type": "string"
+        "name":
+          "type": "string"
+        "requiresTarget":
+          "type": "boolean"
+      "required":
+        - "name"
+        - "description"
+        - "applications"
+        - "requiresTarget"
+      "type": "object"
+    "SuiteDefinition":
+      "properties":
+        "activeReleaseId":
+          "type": "string"
+        "applications":
+          "items":
+            "type": "string"
+          "type":
+            - "array"
+            - "null"
+        "archived":
+          "type": "boolean"
+        "capture":
+          "$ref": "#/components/schemas/SourceCapturePolicy"
+        "description":
+          "type": "string"
+        "id":
+          "type": "string"
+        "name":
+          "type": "string"
+        "requiresTarget":
+          "type": "boolean"
+        "timing":
+          "$ref": "#/components/schemas/SourceTimingPolicy"
+      "required":
+        - "id"
+        - "name"
+        - "description"
+        - "applications"
+        - "requiresTarget"
+        - "archived"
+      "type": "object"
+    "SuiteLifecycle":
+      "properties":
+        "updatedAt":
+          "type": "string"
+          "format": "date-time"
+        "canManage":
+          "type": "boolean"
+        "revision":
+          "type": "integer"
+        "schedules":
+          "items":
+            "$ref": "#/components/schemas/SuiteSchedule"
+          "type": "array"
+        "suite":
+          "$ref": "#/components/schemas/SuiteDefinition"
+      "required":
+        - "updatedAt"
+        - "suite"
+        - "revision"
+        - "canManage"
+        - "schedules"
+      "type": "object"
     "ReleaseRegistry":
       "properties":
         "activeReleaseId":

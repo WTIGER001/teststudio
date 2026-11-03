@@ -3,6 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
 import { ActivatedRoute } from '@angular/router'
 import { ApiService, type Page, type RecordValue } from '../../core/api.service'
+import type { SuiteLifecycle } from '../../core/generated/access.types'
+import { replaceConfiguredSuite } from './configuration.utils'
 import { WorkspaceService } from '../../core/workspace.service'
 
 export interface Application { id: string; name: string; description: string }
@@ -58,6 +60,8 @@ export class ConfigurationService {
     } catch (error) { if (generation === this.generation) this.error.set(error instanceof Error ? error.message : 'Project settings could not be loaded.') }
     finally { if (generation === this.generation) this.loading.set(false) }
   }
+
+  applySuite(state: SuiteLifecycle): void { this.suites.update(rows => replaceConfiguredSuite(rows, state)) }
 
   select(kind: Kind): void { this.kind.set(kind); this.success.set(''); this.error.set(''); this.form.controls.id.setValue(''); this.form.controls.name.setValue('') }
 

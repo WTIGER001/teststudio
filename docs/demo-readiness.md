@@ -50,8 +50,8 @@ AWS, Kubernetes, and Azure deployment verification follows the local demonstrati
 Additional dependency preparation profiles, database transfer, broader recovery checks, and remaining authorization and evidence requirements remain on the full ledger.
 They do not gate this initial local demonstration.
 
-## Current worktree
+## Follow-up implementation
 
-Suite settings, archive, restoration, affected schedule visibility, and exact suite management checks are in progress.
-The isolated server and UI builds pass with these changes.
-Their targeted functional checks remain pending. Preserve the edits and avoid adding more scope to them before the demonstration.
+Suite settings, archive, restoration, affected schedule visibility, and exact suite authority checks now pass focused local verification.
+Project settings exposes these controls. See [Suite settings](suites.md).
+This follow-up does not change the demonstration setup or add a demonstration gate.

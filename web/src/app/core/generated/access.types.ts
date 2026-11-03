@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.19.0"
+export const accessContractVersion = "0.20.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -121,6 +121,10 @@ export type SourceUploadInput = { "content": string; "format": "json" | "yaml"; 
 export type SourceUploadPage = { "cursor"?: string; "items": (SourceUploadRecord)[] }
 export type SourceUploadPreview = { "plan"?: SourceCatalogImportPlan; "upload": SourceUploadRecord }
 export type SourceUploadRecord = { "data": SourceUpload; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type SuiteDefinition = { "activeReleaseId"?: string; "applications": (string)[] | null; "archived": boolean; "capture"?: SourceCapturePolicy; "description": string; "id": string; "name": string; "requiresTarget": boolean; "timing"?: SourceTimingPolicy }
+export type SuiteLifecycle = { "canManage": boolean; "revision": number; "schedules": (SuiteSchedule)[]; "suite": SuiteDefinition; "updatedAt": string }
+export type SuiteSchedule = { "enabled": boolean; "id": string; "name": string; "releaseId"?: string }
+export type SuiteSettings = { "applications": (string)[] | null; "description": string; "name": string; "requiresTarget": boolean }
 export type User = { "createdAt": string; "disabled": boolean; "email"?: string; "emailVerified": boolean; "id": string; "lastSignIn"?: string; "name": string; "sessionEpoch": number }
 export type UserDefinition = { "email"?: string; "id": string; "name": string }
 export type UserPage = { "cursor"?: string; "items": (UserRecord)[] }
@@ -179,8 +183,11 @@ export interface AccessRequests {
   createProjectAssignment: { "project": string; body: AssignmentDefinition }
   revokeProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
   readProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string }
+  changeSuiteLifecycle: { "project": string; "suite": string; "action": "archive" | "restore"; revision: number }
+  readSuiteLifecycle: { "project": string; "suite": string }
   readReleaseRegistry: { "project": string; "suite": string }
   activateRetainedRelease: { "project": string; "suite": string; "id": string; revision: number }
+  updateSuiteSettings: { "project": string; "suite": string; revision: number; body: SuiteSettings }
   uploadSourceBundle: { "project": string; "suite": string; key: string; query: { "name": string; "manifest": string }; body: Blob }
   readPreparationOptions: { "project": string; "suite": string }
   listSourcePreparations: { "project": string; "suite": string; query?: { "limit"?: number; "cursor"?: string } }
@@ -282,8 +289,11 @@ export interface AccessResponses {
   createProjectAssignment: AssignmentRecord
   revokeProjectAssignment: Revoked
   readProjectAssignment: AssignmentRecord
+  changeSuiteLifecycle: SuiteLifecycle
+  readSuiteLifecycle: SuiteLifecycle
   readReleaseRegistry: ReleaseRegistry
   activateRetainedRelease: {  }
+  updateSuiteSettings: SuiteLifecycle
   uploadSourceBundle: SourcePreparationRecord
   readPreparationOptions: SourcePreparationOptions
   listSourcePreparations: SourcePreparationPage
@@ -385,8 +395,11 @@ export const accessOperations = {
   createProjectAssignment: { method: "POST", path: "/api/v1/projects/{project}/role-assignments" },
   revokeProjectAssignment: { method: "DELETE", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
   readProjectAssignment: { method: "GET", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
+  changeSuiteLifecycle: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/actions/{action}" },
+  readSuiteLifecycle: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/lifecycle" },
   readReleaseRegistry: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/release-registry" },
   activateRetainedRelease: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/releases/{id}/activate" },
+  updateSuiteSettings: { method: "PATCH", path: "/api/v1/projects/{project}/suites/{suite}/settings" },
   uploadSourceBundle: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/source-bundles" },
   readPreparationOptions: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-preparation-options" },
   listSourcePreparations: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-preparations" },

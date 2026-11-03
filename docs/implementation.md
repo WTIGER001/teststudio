@@ -74,6 +74,31 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Suite settings, archive, and restoration
+
+Project settings now opens a focused suite manager with editable name, description, supported applications, and target requirements.
+The manager displays the active release, current authority, and readable affected schedules with their release pins.
+Settings updates preserve execution policies and the active release. They do not publish or run tests.
+Archive and restoration preserve the suite identifier, releases, run snapshots, retained evidence, and schedule pins.
+Archive blocks new dispatch and new attempts through the existing execution checks.
+Read checks omit denied schedules from the affected list and denied suites from the suite collection.
+Settings, lifecycle, and legacy PUT routes check current exact suite read and management authority inside a shared assignment transaction.
+Lifecycle response construction shares the mutation transaction. A rejected response read cannot leave a committed update.
+Revision conflicts keep the form and block another mutation until the user reloads current values.
+The contextual help provides suite lifecycle concepts and a management tutorial.
+The OpenAPI additions and generated TypeScript client remain synchronized.
+
+The focused TestSuiteLifecycle API checks pass locally in under one second.
+They verify missing and stale revisions, duplicate applications, archive dispatch rejection, restoration, retained run snapshots, artifact downloads, and schedule pins.
+Exact read, management, and schedule denials pass. Rejected changes preserve the stored suite revision.
+The targeted STUDIO-SUITES-001 Playwright workflow passes through normal TestStudio execution with complete evidence.
+It verifies saved settings, a concurrent edit conflict, mandatory reload, archive, retained release access, restoration, schedule pins, and page help.
+Evidence is output/selftest/20261103T180829.702720000-ab5aa2952544dc82f9fc933b/summary.json and cleanup.json.
+The owned controller, browser execution container, and output volume are removed. Unchanged native binaries are reused for the browser correction.
+No unrelated browser workflow, broad fixture matrix, or cloud verification runs for this feature.
+Items **21** and **29** advance. Their broader catalog and removed-test requirements remain open.
+The ledger remains **26 verified, 31 open, 57 total**.
+
 ### Usable local demonstration
 
 The immediate demonstration checklist is complete. The full acceptance ledger remains **26 verified, 31 open, 57 total**.

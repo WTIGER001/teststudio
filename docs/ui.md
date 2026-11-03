@@ -4,6 +4,10 @@ The Angular application uses standalone components, OnPush change detection, and
 Components delegate workflows to focused feature services.
 Pure utilities handle catalog filtering and counts.
 
+Project settings provides suite inspection, editable settings, archive, and restoration.
+The focused manager shows readable affected schedules and preserves release pins.
+Revision conflicts require a reload before another mutation. See [Suite settings](suites.md).
+
 ## Themes
 
 Light, dark, and system preferences use shared semantic CSS tokens.
