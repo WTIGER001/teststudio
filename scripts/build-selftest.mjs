@@ -37,14 +37,18 @@ function save() {
   fs.renameSync(temporary, filename)
 }
 
+const localOnly = process.argv.includes('--local-only')
 const dockerfile = fs.readFileSync('tests/selftest/Dockerfile', 'utf8')
 const base = /^FROM ([^\s]+)$/m.exec(dockerfile)?.[1]
 if (!base?.includes('@sha256:')) throw new Error('The self-test base must use an immutable digest')
-let baseMetadata = inspect(base)
-if (!baseMetadata) { run('docker', ['pull', base]); baseMetadata = inspect(base) }
-if (!baseMetadata) throw new Error('The pinned self-test base is unavailable')
-const [baseImage, architecture] = baseMetadata
-if (!['amd64', 'arm64'].includes(architecture)) throw new Error('Unsupported self-test runtime architecture')
+let baseImage = '', architecture = process.arch === 'arm64' ? 'arm64' : 'amd64'
+if (!localOnly) {
+  let baseMetadata = inspect(base)
+  if (!baseMetadata) { run('docker', ['pull', base]); baseMetadata = inspect(base) }
+  if (!baseMetadata) throw new Error('The pinned self-test base is unavailable')
+  ;[baseImage, architecture] = baseMetadata
+  if (!['amd64', 'arm64'].includes(architecture)) throw new Error('Unsupported self-test runtime architecture')
+}
 
 const uiKey = fingerprint(['web/src', 'web/public', 'web/angular.json', 'web/tsconfig.json', 'web/tsconfig.app.json', 'web/package.json', 'web/package-lock.json'], false, true)
 const uiDirectory = 'web/dist/web/browser'
@@ -58,7 +62,10 @@ if (cache.uiKey !== uiKey || !uiOutput || cache.uiOutput !== uiOutput) {
 
 const goVersion = execFileSync('go', ['version'], { encoding: 'utf8' }).trim()
 const goKey = digest([goVersion, fingerprint(['go.mod', 'go.sum', 'internal', 'adapters', 'cmd', 'tests/selftest/seed-access'], true)])
-const targets = [
+const targets = localOnly ? [
+  { id: 'controller', package: './cmd/teststudio', platform: `${process.platform}-${process.arch}`, env: {} },
+  { id: 'preparation-worker', package: './cmd/teststudio-prepare', platform: `${process.platform}-${process.arch}`, env: {} }
+] : [
   { id: 'controller', package: './cmd/teststudio', platform: `${process.platform}-${process.arch}`, env: {} },
   { id: 'teststudio', package: './cmd/teststudio', platform: `linux-${architecture}-cgo0`, env: { CGO_ENABLED: '0', GOOS: 'linux', GOARCH: architecture } },
   { id: 'teststudio-publish', package: './cmd/teststudio-publish', platform: `linux-${architecture}-cgo0`, env: { CGO_ENABLED: '0', GOOS: 'linux', GOARCH: architecture } },
@@ -72,6 +79,10 @@ for (const target of targets) {
     run('go', ['build', '-o', output, target.package], { env: { ...process.env, ...target.env } })
     cache.binaries[target.id] = { key, hash: fileHash(output) }; save()
   } else console.error(`Reusing unchanged self-test binary: ${target.id}.`)
+}
+if (localOnly) {
+  console.log(JSON.stringify({ server: path.resolve(directory, 'controller'), preparation: path.resolve(directory, 'preparation-worker'), ui: path.resolve(uiDirectory) }))
+  process.exit(0)
 }
 const imageKey = digest([baseImage, architecture, uiOutput, cache.binaries.teststudio.hash, cache.binaries['access-fixture'].hash, cache.binaries['teststudio-publish'].hash, fingerprint(['tests/selftest/Dockerfile', 'tests/selftest/playwright', 'runners/playwright'])])
 if (cache.imageKey !== imageKey || !cache.image || !inspect(cache.image)) {

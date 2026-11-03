@@ -4,6 +4,24 @@ TestStudio is an independent test catalog, execution, and evidence platform.
 The implementation follows [the product plan](docs/plan.md).
 The [acceptance ledger](docs/implementation.md) records verified work and pending requirements.
 
+## Local demonstration
+
+Start a separate demonstration with new generic examples:
+
+```sh
+node scripts/demo.mjs start
+```
+
+The command builds the application and starts a local server, source worker, and controlled target.
+It requires Go, Node, npm, and Docker. The browser example runs in a local container.
+Unchanged builds and the trusted browser runtime are reused.
+The terminal prints the application and target addresses when setup completes.
+Select Open local workspace to explore the prepared project.
+Use Ctrl+C or `node scripts/demo.mjs stop` to stop its processes.
+History and evidence stay in `.data/demo` for the next start.
+The [demonstration guide](docs/demo.md) provides a short walkthrough and explains the intentional failures.
+Normal local development still starts with an empty project registry.
+
 ## Local development
 
 Requirements: Go 1.26.2 or later and Node 22.22.3, Node 24.15, or Node 26 or later.

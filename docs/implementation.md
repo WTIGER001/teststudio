@@ -74,6 +74,28 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Usable local demonstration
+
+The immediate demonstration checklist is complete. The full acceptance ledger remains **26 verified, 31 open, 57 total**.
+Run `node scripts/demo.mjs start` to build and start an explicit, separate local demonstration.
+The launcher reuses unchanged UI, server, preparation worker, and trusted browser runtime outputs.
+It starts loopback listeners and uses a dedicated SQLite database, artifact directory, and local target.
+New generic HTTP checks demonstrate passing, failing, and timed-out results.
+A new Parcel desk Playwright check produces screenshot evidence through normal source publication and execution.
+The setup records three HTTP runs and one browser run only once.
+The local browser walkthrough edits and publishes a catalog, starts a manual run, previews screenshot evidence, and opens stacked trends.
+After target recovery, failure reruns select the failed and timed-out checks. The result contains one pass and one timeout.
+The manual run uses three clean healthy-check observations for its timing baseline.
+Restart verification preserves all six runs, the catalog edit, and screenshot metadata without duplicate setup runs.
+Saved-port checks and an owned-process readiness message prevent seeding into another local server.
+An occupied-port check confirms startup stops before server startup or seeding.
+Use Ctrl+C or the authenticated local stop command. Demo history and source images remain available for resumption.
+The browser session, owned service processes, and execution containers and volumes are cleaned after verification.
+Evidence is `output/playwright/demo-checkpoint.json`, `demo-port-conflict.json`, workflow snapshots, and screenshot captures.
+The README and demo.md document startup, the walkthrough, restart behavior, and intentional failures.
+No broad test matrix, Linux fixture rebuild, cloud account, or cloud deployment check runs for this delivery.
+The pending suite lifecycle edits remain separate work. Broader acceptance items remain open.
+
 ### Independent repository build
 
 Item **01** passes an isolated build of the current TestStudio source tree.

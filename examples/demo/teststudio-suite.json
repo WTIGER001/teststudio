@@ -1,0 +1,1 @@
+{"schemaVersion":1,"suiteId":"browser","type":"browser","runner":"playwright","applications":[],"moduleRoot":"browser","tests":{"config":"playwright.config.ts","project":"chromium"},"catalog":"catalog.json","buildProfile":"playwright-node"}

@@ -16,11 +16,27 @@ Browser-confirmed CLI sign-in and retained release comparison and rollback are a
 
 ## Immediate checklist
 
-- [ ] Provide one local start and stop command with an explicit, separate demo data directory.
-- [ ] Provide an explicit demo setup action with new generic data and a local target fixture.
-- [ ] Include pass, failure, and timeout scenarios, plus a browser example with screenshot evidence.
-- [ ] Document a short walkthrough: catalog, publish, run, result, evidence, rerun, timing, and trends.
-- [ ] Run one targeted local demonstration check from a clean demo installation.
+- [x] Provide one local start and stop command with an explicit, separate demo data directory.
+- [x] Provide an explicit demo setup action with new generic data and a local target fixture.
+- [x] Include pass, failure, and timeout scenarios, plus a browser example with screenshot evidence.
+- [x] Document a short walkthrough: catalog, publish, run, result, evidence, rerun, timing, and trends.
+- [x] Run one targeted local demonstration check from a clean demo installation.
+
+Run `node scripts/demo.mjs start` from the repository directory.
+Follow [the demonstration guide](demo.md).
+Use Ctrl+C or `node scripts/demo.mjs stop` to stop the demonstration.
+The verified walkthrough installation remains in `.data/demo-review` with its recorded history and catalog edit.
+Use `--data .data/demo-review` to resume that installation.
+
+The fresh setup produces three HTTP runs and one passing browser run through normal API contracts.
+The UI walkthrough edits and publishes a catalog, starts a run, previews its screenshot, and reruns failures after target recovery.
+The rerun contains one pass and one timeout. It excludes the already passing healthy check.
+The healthy check has three comparable timing observations before the manual run.
+The stacked area chart displays the resulting states. The application browser console has no errors or warnings.
+A restart preserves all six runs, the catalog edit, and available screenshot metadata without duplicate setup runs.
+An occupied saved API port causes startup to stop before server startup or seeding.
+Evidence is `output/playwright/demo-checkpoint.json`, `demo-port-conflict.json`, the workflow snapshots, and the screenshot captures.
+The owned browser session and demo processes stop after verification.
 
 Reuse trusted runtime images and unchanged build outputs.
 Run only the demonstration workflow and checks required by changes to its setup.
