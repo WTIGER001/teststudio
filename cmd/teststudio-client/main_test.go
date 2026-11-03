@@ -71,7 +71,7 @@ func TestIdentityClientPreservesStringDictionaryValues(t *testing.T) {
 		t.Fatal(err)
 	}
 	result, err := schemaType(&value)
-	if err != nil || result != "Record<string, string>" {
+	if err != nil || result != "{ [key: string]: string }" {
 		t.Fatal("dictionary values lost their type", result, err)
 	}
 }

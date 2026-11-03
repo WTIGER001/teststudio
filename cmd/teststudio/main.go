@@ -39,6 +39,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/schedules"
 	"github.com/wtiger001/teststudio/internal/sessions"
+	"github.com/wtiger001/teststudio/internal/sources"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
 
@@ -228,6 +229,7 @@ func run() error {
 	workerContext, cancelWorkers := context.WithCancel(ctx)
 	workersDone := runService.Start(workerContext)
 	maintenanceDone := evidenceService.StartMaintenance(workerContext, 5*time.Second)
+	sourceMaintenanceDone := (&sources.Service{Store: db, Auth: auth}).StartMaintenance(workerContext, 5*time.Second)
 	var schedulesDone <-chan struct{}
 	if *scheduler {
 		schedulesDone = scheduleService.Start(workerContext)
@@ -240,6 +242,7 @@ func run() error {
 		cancelWorkers()
 		<-workersDone
 		<-maintenanceDone
+		<-sourceMaintenanceDone
 		if schedulesDone != nil {
 			<-schedulesDone
 		}

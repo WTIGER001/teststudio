@@ -67,6 +67,44 @@ The full plan remains required scope. Check an item only after its implementatio
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Native source uploads and atomic release publication
+
+Added the Sources page and suite-scoped JSON and YAML upload APIs.
+Uploads retain the stored UTF-8 source and its server-computed SHA-256 digest.
+Strict document parsing rejects duplicate keys, aliases, merges, unsupported tags, trailing documents, and excessive structure.
+The initial native workflow uses the existing 30-test import limit and a 1 MiB source limit.
+
+The review shows discovered identifiers, categories, types, safety labels, and before and after definitions.
+The upload actor explicitly publishes and chooses whether to activate the release.
+Publication uses the existing catalog import, draft, release, and activation contracts in one shared authorization and metadata transaction.
+Source-bound plans reject ordinary import application outside that transaction.
+Stale reviews and publication failures preserve catalog records and the active release.
+Concurrent retries return one immutable release and preserve the original activation choice.
+Publication never creates a test run.
+
+Release artifacts reference retained source snapshots and digests.
+Draft and publication checks validate source ownership, availability, and stored content digests.
+Published snapshots survive activation changes and rollback.
+A bounded maintenance worker expires abandoned staging and removes its source text and import plan.
+Published source retention currently has no automatic deletion.
+
+The composed Angular page includes upload history, retained source inspection, explicit activation, accessible change review, and contextual help.
+The generated OpenAPI 0.13 client describes five source operations.
+Dictionary generation uses index signatures so recursive JSON assertion values compile correctly.
+
+Source and catalog checks pass on SQLite with race detection.
+Source, catalog transfer, and source API checks pass on local PostgreSQL with race detection.
+Checks cover stale revisions, publication rollback, actor binding, project isolation, invalid documents, staging expiry, and concurrent publication.
+The generated client check and Angular build pass.
+Permanent self-test STUDIO-SOURCES-001 passes through normal TestStudio publication, execution, timing, and evidence handling.
+Run `20261103T112052.874370000-12768173eed23e629c9e7309` verifies upload review, exact digests, detached-plan rejection, immutable releases, explicit execution, malformed files, and mobile help.
+Desktop light and mobile dark screenshots were inspected.
+The current-page help regression also passes in run `20261103T111917.109619000-3e8ce2db188b82120631a393`.
+Owned controllers, browser containers, volumes, and the local PostgreSQL test container are absent after verification.
+
+ZIP preparation, GitHub connections, complete source synchronization, source-owned metadata, prebuilt and CLI publication, build jobs, and configurable source retention remain required.
+The complete source acceptance criteria remain unchecked. The full product plan remains active.
+
 ### OIDC acceptance, provider sign-out, and complete claim handling
 
 Added optional exact end-session endpoints and post-logout callback display to managed provider settings.

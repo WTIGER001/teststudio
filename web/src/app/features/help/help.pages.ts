@@ -1,6 +1,22 @@
 import type { HelpPage } from './help.models'
 
 export const helpPages: Record<string, HelpPage> = {
+  sources: {
+    id: 'sources', title: 'Sources',
+    introduction: ['Upload native HTTP checks in JSON or YAML. Review the catalog changes and publish an immutable release without starting tests.'],
+    concepts: [
+      { title: 'Staged source', description: 'The server stores the uploaded bytes and computes their SHA-256 digest. A staged file expires after 30 minutes. Published files remain available with their release.' },
+      { title: 'Review and conflicts', description: 'Review identifiers, categories, types, safety labels, and before and after definitions. Existing catalog or suite changes invalidate the preview. Create a new preview after reviewing those changes.' },
+      { title: 'Publication and activation', description: 'Publication applies the reviewed native definitions and freezes a release in one transaction. Activation is optional and affects future runs. Publication never starts a test run.' },
+      { title: 'Current upload limits', description: 'One upload accepts up to 30 native HTTP definitions and 1 MiB of UTF-8 source. Omitted tests remain in the suite. ZIP and Git source preparation remain under development.' },
+      { title: 'Authority', description: 'Staging requires source management and catalog import and editing permissions. Publication also requires catalog publication. Only the staging user can publish that upload.' }
+    ],
+    tutorials: [
+      { title: 'Upload and review', steps: ['Choose Suite for sources. Use Create or manage suites if the destination does not exist.', 'Select + Upload tests. Choose a JSON or YAML source file, or enter its name, format, and document.', 'Select Validate source and preview. Inspect the test changes and resolve any validation errors.', 'Select View retained source to inspect the exact uploaded document.'] },
+      { title: 'Publish a release', steps: ['Review the destination suite, digest, and discovered definitions.', 'Select Activate this release for future runs only when the new release should become active.', 'Select Publish source release. Read the immutable release identifier and confirmation.', 'Use Test runs to start checks explicitly. Tests do not run during publication.'] },
+      { title: 'Recover from a conflict', steps: ['Keep the source document and inspect the current catalog and suite settings.', 'Create a new source preview. Review every change again before publication.', 'If the publication response is interrupted, inspect Upload history. A repeated publication of the same upload returns its original release.'] }
+    ]
+  },
   providers: {
     id: 'providers', title: 'Identity providers',
     introduction: ['Configure installation OpenID Connect providers. Sign-in establishes a user identity. Project roles and group assignments remain separate.'],

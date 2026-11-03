@@ -131,7 +131,7 @@ func schemaType(value *schema) (string, error) {
 				return "", err
 			}
 			t, err := schemaType(&item)
-			return "Record<string, " + t + ">", err
+			return "{ [key: string]: " + t + " }", err
 		}
 		fields := []string{}
 		for _, name := range keys(value.Properties) {

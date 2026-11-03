@@ -27,7 +27,7 @@ The limit keeps definitions, history, audit records, and guards in one bounded t
 Imports update named definitions and preserve omitted tests.
 Existing lifecycle states require explicit actions. Imports do not change those states.
 Coded tests require source preparation and cannot enter through declarative import.
-YAML and source archive upload remain pending.
+Use Sources for reviewed JSON or YAML source uploads. Source archive preparation remains pending.
 
 ## Preview and apply
 
@@ -75,3 +75,8 @@ Each test can override these defaults through the API or catalog editor.
 Timing rules and timeout ceilings enter immutable releases with the test definition.
 Publication activates changes for future runs. Existing runs keep their captured timing criteria.
 See [Test timing](timing.md) for baseline scope, adaptive timeouts, estimates, and reset contracts.
+
+## Native source releases
+
+Use Sources to stage JSON or YAML files and publish their reviewed catalog changes atomically.
+The [source upload guide](sources.md) describes provenance, retention, permissions, and publication retries.

@@ -21,6 +21,7 @@ The instances use loopback endpoints inside the container. They have no external
 The suite tests themes, mobile layout, page help, catalog publication, HTTP assertions, native execution, timing, baseline reset, timeout reruns, and trends.
 It also tests durable schedules, completion notifications, identity administration, scoped groups, role assignments, and session controls.
 Effective-access checks exercise actual decisions, inherited source paths, expiry, redaction, bounded scans, and revoked inspection.
+The native source workflow checks YAML uploads, server digests, reviewed changes, atomic publication, conflicts, retained source, explicit runs, and mobile help.
 Native check runs remain separate from the outer Playwright run. They cannot recurse into browser self-tests.
 
 The script stops its controller after verification. It preserves its database and private artifacts under `.data/selftest-verification.*`.

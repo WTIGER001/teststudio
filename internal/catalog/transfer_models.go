@@ -21,18 +21,19 @@ type PlannedTest struct {
 }
 
 type ImportPlan struct {
-	ID            string        `json:"id"`
-	Project       string        `json:"projectId"`
-	Suite         string        `json:"suiteId"`
-	Actor         string        `json:"actor"`
-	Kind          string        `json:"kind"`
-	HeadRevision  int64         `json:"catalogRevision"`
-	SuiteRevision int64         `json:"suiteRevision"`
-	Changes       []PlannedTest `json:"changes"`
-	Issues        []Issue       `json:"issues"`
-	CreatedAt     time.Time     `json:"createdAt"`
-	ExpiresAt     time.Time     `json:"expiresAt"`
-	AppliedAt     *time.Time    `json:"appliedAt,omitempty"`
+	SourceSnapshot string        `json:"sourceSnapshotId,omitempty"`
+	ID             string        `json:"id"`
+	Project        string        `json:"projectId"`
+	Suite          string        `json:"suiteId"`
+	Actor          string        `json:"actor"`
+	Kind           string        `json:"kind"`
+	HeadRevision   int64         `json:"catalogRevision"`
+	SuiteRevision  int64         `json:"suiteRevision"`
+	Changes        []PlannedTest `json:"changes"`
+	Issues         []Issue       `json:"issues"`
+	CreatedAt      time.Time     `json:"createdAt"`
+	ExpiresAt      time.Time     `json:"expiresAt"`
+	AppliedAt      *time.Time    `json:"appliedAt,omitempty"`
 }
 
 type BulkRequest struct {

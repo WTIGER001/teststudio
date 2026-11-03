@@ -50,6 +50,9 @@ func (s *Service) Publish(ctx context.Context, user, project, suite, id, key str
 	if err != nil {
 		return Release{}, err
 	}
+	if err := s.validateSourceSnapshot(ctx, user, project, suite, d.Artifact); err != nil {
+		return Release{}, err
+	}
 	if d.PublishedRelease != "" {
 		return Release{}, errors.New("draft is already published")
 	}

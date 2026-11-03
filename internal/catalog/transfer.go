@@ -34,6 +34,17 @@ func (s *Service) Export(ctx context.Context, user, project, suite string) (Docu
 }
 
 func (s *Service) PreviewImport(ctx context.Context, user, project, suite string, document Document) (ImportPlan, error) {
+	return s.previewImport(ctx, user, project, suite, document, "")
+}
+
+func (s *Service) PreviewSourceImport(ctx context.Context, user, project, suite string, document Document, snapshot string) (ImportPlan, error) {
+	if !domain.ValidID(snapshot) {
+		return ImportPlan{}, errors.New("valid source snapshot identifier is required")
+	}
+	return s.previewImport(ctx, user, project, suite, document, snapshot)
+}
+
+func (s *Service) previewImport(ctx context.Context, user, project, suite string, document Document, snapshot string) (ImportPlan, error) {
 	if err := s.Auth.Check(ctx, user, project, "suite/"+suite, "catalog.import"); err != nil {
 		return ImportPlan{}, err
 	}
@@ -43,7 +54,7 @@ func (s *Service) PreviewImport(ctx context.Context, user, project, suite string
 	if len(document.Tests) < 1 || len(document.Tests) > MutationLimit {
 		return ImportPlan{}, fmt.Errorf("an import accepts between 1 and %d test definitions", MutationLimit)
 	}
-	return s.preview(ctx, user, project, suite, "import", document.Tests, nil)
+	return s.preview(ctx, user, project, suite, "import", document.Tests, nil, snapshot)
 }
 
 func (s *Service) PreviewBulk(ctx context.Context, user, project, suite string, input BulkRequest) (ImportPlan, error) {
@@ -77,10 +88,10 @@ func (s *Service) PreviewBulk(ctx context.Context, user, project, suite string, 
 		tests = append(tests, t)
 		revisions[item.ID] = item.Revision
 	}
-	return s.preview(ctx, user, project, suite, input.Action, tests, revisions)
+	return s.preview(ctx, user, project, suite, input.Action, tests, revisions, "")
 }
 
-func (s *Service) preview(ctx context.Context, user, project, suite, kind string, tests []Test, revisions map[string]int64) (ImportPlan, error) {
+func (s *Service) preview(ctx context.Context, user, project, suite, kind string, tests []Test, revisions map[string]int64, snapshot string) (ImportPlan, error) {
 	v, suiteRow, err := s.suite(ctx, project, suite)
 	if err != nil {
 		return ImportPlan{}, err
@@ -103,7 +114,7 @@ func (s *Service) preview(ctx context.Context, user, project, suite, kind string
 		current[t.ID] = row
 		merged[t.ID] = t
 	}
-	plan := ImportPlan{ID: domain.NewID(), Project: project, Suite: suite, Actor: user, Kind: kind, HeadRevision: head.Revision, SuiteRevision: suiteRow.Revision, Changes: []PlannedTest{}, Issues: []Issue{}, CreatedAt: time.Now().UTC()}
+	plan := ImportPlan{SourceSnapshot: snapshot, ID: domain.NewID(), Project: project, Suite: suite, Actor: user, Kind: kind, HeadRevision: head.Revision, SuiteRevision: suiteRow.Revision, Changes: []PlannedTest{}, Issues: []Issue{}, CreatedAt: time.Now().UTC()}
 	plan.ExpiresAt = plan.CreatedAt.Add(30 * time.Minute)
 	seen := map[string]bool{}
 	for _, test := range tests {
@@ -202,7 +213,18 @@ func (s *Service) authorizeChange(ctx context.Context, user, project, suite, kin
 	return nil
 }
 
-func (s *Service) ApplyImport(ctx context.Context, user, project, suite, id string, revision int64) (result ImportPlan, resultErr error) {
+func (s *Service) ApplyImport(ctx context.Context, user, project, suite, id string, revision int64) (ImportPlan, error) {
+	return s.applyImport(ctx, user, project, suite, id, revision, "")
+}
+
+func (s *Service) ApplySourceImport(ctx context.Context, user, project, suite, id string, revision int64, snapshot string) (ImportPlan, error) {
+	if !domain.ValidID(snapshot) {
+		return ImportPlan{}, errors.New("valid source snapshot identifier is required")
+	}
+	return s.applyImport(ctx, user, project, suite, id, revision, snapshot)
+}
+
+func (s *Service) applyImport(ctx context.Context, user, project, suite, id string, revision int64, snapshot string) (result ImportPlan, resultErr error) {
 	defer func() {
 		if !errors.Is(resultErr, storage.ErrConflict) {
 			return
@@ -212,7 +234,7 @@ func (s *Service) ApplyImport(ctx context.Context, user, project, suite, id stri
 			return
 		}
 		applied, err := storage.Decode[ImportPlan](current)
-		if err == nil && applied.Actor == user && applied.Project == project && applied.Suite == suite && applied.AppliedAt != nil {
+		if err == nil && applied.SourceSnapshot == snapshot && applied.Actor == user && applied.Project == project && applied.Suite == suite && applied.AppliedAt != nil {
 			result = applied
 			resultErr = nil
 		}
@@ -225,7 +247,7 @@ func (s *Service) ApplyImport(ctx context.Context, user, project, suite, id stri
 	if err != nil {
 		return plan, err
 	}
-	if plan.Actor != user || plan.Project != project || plan.Suite != suite {
+	if plan.SourceSnapshot != snapshot || plan.Actor != user || plan.Project != project || plan.Suite != suite {
 		return plan, authorization.ErrForbidden
 	}
 	if plan.Kind == "import" {

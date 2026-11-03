@@ -1,8 +1,8 @@
 "openapi": "3.1.0"
 "info":
-  "title": "TestStudio identity and access administration"
-  "version": "0.12.0"
-  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Includes optional client-identifier RP-initiated provider logout after local session revocation. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
+  "title": "TestStudio API"
+  "version": "0.13.0"
+  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Includes optional client-identifier RP-initiated provider logout after local session revocation. Includes staged native JSON and YAML sources with atomic catalog publication and retained source provenance. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
     "url": "/"
@@ -2473,6 +2473,218 @@
         "503":
           "$ref": "#/components/responses/Problem"
 
+  "/api/v1/projects/{project}/suites/{suite}/source-uploads":
+    "get":
+      "operationId": "listSourceUploads"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "query"
+          "name": "limit"
+          "schema":
+            "default": 30
+            "maximum": 1000
+            "minimum": 1
+            "type": "integer"
+        - "in": "query"
+          "name": "cursor"
+          "schema":
+            "type": "string"
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SourceUploadPage"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "SessionCookie": []
+      "summary": "List native source uploads in one suite. Requires source and catalog read authority."
+    "post":
+      "operationId": "stageSourceUpload"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        - "$ref": "#/components/parameters/Origin"
+      "requestBody":
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/SourceUploadInput"
+        "required": true
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SourceUploadPreview"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "CSRFToken": []
+          "SessionCookie": []
+      "summary": "Stage one UTF-8 JSON or YAML catalog, compute its digest, and preview changes. Requires sources.manage and catalog import and edit authority. Accepts at most 30 tests and 1 MiB of source; expires after 30 minutes. Does not change tests or run them."
+  "/api/v1/projects/{project}/suites/{suite}/source-uploads/{id}":
+    "get":
+      "operationId": "readSourceUpload"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "id"
+          "required": true
+          "schema":
+            "type": "string"
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SourceUploadPreview"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "SessionCookie": []
+      "summary": "Inspect a staged or published native upload and its catalog preview."
+  "/api/v1/projects/{project}/suites/{suite}/source-uploads/{id}/content":
+    "get":
+      "operationId": "readSourceContent"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "id"
+          "required": true
+          "schema":
+            "type": "string"
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SourceContent"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "SessionCookie": []
+      "summary": "Read retained immutable source content after project and suite permission checks. Expired staging content is unavailable."
+  "/api/v1/projects/{project}/suites/{suite}/source-uploads/{id}/publish":
+    "post":
+      "operationId": "publishSourceUpload"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "id"
+          "required": true
+          "schema":
+            "type": "string"
+        - "$ref": "#/components/parameters/Origin"
+        - "$ref": "#/components/parameters/Revision"
+      "requestBody":
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/SourcePublishInput"
+        "required": true
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SourceCatalogRelease"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "CSRFToken": []
+          "SessionCookie": []
+      "summary": "Atomically apply the reviewed catalog and publish an immutable release with source provenance. Only the staging actor can publish. Explicit activation never executes tests. Failed or stale publication preserves the catalog and active release. Retrying the same upload returns the original release."
 "components":
   "securitySchemes":
     "SessionCookie":
@@ -2613,6 +2825,446 @@
           "schema":
             "$ref": "#/components/schemas/Problem"
   "schemas":
+    "SourceUpload":
+      "properties":
+        "activated":
+          "type": "boolean"
+        "actor":
+          "type": "string"
+        "bytes":
+          "type": "integer"
+        "createdAt":
+          "format": "date-time"
+          "type": "string"
+        "digest":
+          "type": "string"
+        "expiresAt":
+          "format": "date-time"
+          "type": "string"
+        "format":
+          "type": "string"
+          "enum": ["json", "yaml"]
+        "id":
+          "type": "string"
+        "issues":
+          "items":
+            "$ref": "#/components/schemas/SourceCatalogIssue"
+          "type": "array"
+        "name":
+          "type": "string"
+        "planId":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "releaseId":
+          "type": "string"
+        "state":
+          "type": "string"
+          "enum": ["staged", "failed", "published", "expired"]
+        "suiteId":
+          "type": "string"
+      "required":
+        - "id"
+        - "projectId"
+        - "suiteId"
+        - "name"
+        - "format"
+        - "digest"
+        - "bytes"
+        - "actor"
+        - "state"
+        - "issues"
+        - "createdAt"
+        - "expiresAt"
+        - "activated"
+      "type": "object"
+    "SourceCatalogTest":
+      "properties":
+        "applicationId":
+          "type": "string"
+        "capture":
+          "$ref": "#/components/schemas/SourceCapturePolicy"
+        "category":
+          "type": "string"
+        "check":
+          "$ref": "#/components/schemas/SourceCatalogHTTPCheck"
+        "conditions":
+          "type": "string"
+        "dependencies":
+          "items":
+            "type": "string"
+          "type": ["array", "null"]
+        "description":
+          "type": "string"
+        "id":
+          "type": "string"
+        "owner":
+          "type": "string"
+        "rationale":
+          "type": "string"
+        "requiredBindings":
+          "items":
+            "type": "string"
+          "type": ["array", "null"]
+        "runner":
+          "type": "string"
+        "safety":
+          "type": "string"
+        "selector":
+          "type": "string"
+        "source":
+          "type": "string"
+        "state":
+          "type": "string"
+        "tags":
+          "items":
+            "type": "string"
+          "type": ["array", "null"]
+        "timeoutSeconds":
+          "type": "integer"
+        "timing":
+          "$ref": "#/components/schemas/SourceTimingPolicy"
+        "title":
+          "type": "string"
+        "type":
+          "type": "string"
+      "required":
+        - "id"
+        - "title"
+        - "description"
+        - "category"
+        - "tags"
+        - "type"
+        - "runner"
+        - "state"
+        - "safety"
+        - "rationale"
+        - "dependencies"
+        - "requiredBindings"
+        - "timeoutSeconds"
+      "type": "object"
+    "SourceTimingPolicy":
+      "properties":
+        "maxAgeDays":
+          "type": "integer"
+        "minimumIncreaseMs":
+          "type": "number"
+        "minimumSamples":
+          "type": "integer"
+        "minimumTimeoutMs":
+          "type": "integer"
+        "mode":
+          "type": "string"
+        "slowdownFactor":
+          "type": "number"
+        "timeoutFactor":
+          "type": "number"
+        "timeoutMarginMs":
+          "type": "number"
+        "timeoutMode":
+          "type": "string"
+        "window":
+          "type": "integer"
+      "required":
+        - "mode"
+        - "slowdownFactor"
+        - "minimumIncreaseMs"
+        - "minimumSamples"
+        - "window"
+        - "maxAgeDays"
+        - "timeoutMode"
+        - "timeoutFactor"
+        - "timeoutMarginMs"
+        - "minimumTimeoutMs"
+      "type": "object"
+    "SourceCatalogDraft":
+      "properties":
+        "artifact":
+          "$ref": "#/components/schemas/SourceCatalogArtifact"
+        "capture":
+          "$ref": "#/components/schemas/SourceCapturePolicy"
+        "id":
+          "type": "string"
+        "publishedReleaseId":
+          "type": "string"
+        "tests":
+          "items":
+            "$ref": "#/components/schemas/SourceCatalogTest"
+          "type": "array"
+        "timing":
+          "$ref": "#/components/schemas/SourceTimingPolicy"
+      "required":
+        - "id"
+        - "tests"
+        - "artifact"
+        - "timing"
+        - "capture"
+      "type": "object"
+    "SourceCatalogArtifact":
+      "properties":
+        "discoveredSelectors":
+          "additionalProperties":
+            "type": "string"
+          "type": "object"
+        "image":
+          "type": "string"
+        "sourceRevision":
+          "type": "string"
+        "sourceSnapshotId":
+          "type": "string"
+      "required": []
+      "type": "object"
+    "SourceUploadInput":
+      "properties":
+        "content":
+          "type": "string"
+        "format":
+          "type": "string"
+          "enum": ["json", "yaml"]
+        "name":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 200
+      "required":
+        - "name"
+        - "format"
+        - "content"
+      "type": "object"
+    "SourceUploadRecord":
+      "properties":
+        "data":
+          "$ref": "#/components/schemas/SourceUpload"
+        "id":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "revision":
+          "type": "integer"
+        "updatedAt":
+          "format": "date-time"
+          "type": "string"
+      "required":
+        - "id"
+        - "revision"
+        - "data"
+        - "updatedAt"
+      "type": "object"
+    "SourceUploadPreview":
+      "properties":
+        "plan":
+          "$ref": "#/components/schemas/SourceCatalogImportPlan"
+        "upload":
+          "$ref": "#/components/schemas/SourceUploadRecord"
+      "required":
+        - "upload"
+      "type": "object"
+    "SourceCatalogIssue":
+      "properties":
+        "field":
+          "type": "string"
+        "message":
+          "type": "string"
+        "testId":
+          "type": "string"
+      "required":
+        - "field"
+        - "message"
+      "type": "object"
+    "SourceCatalogImportPlan":
+      "properties":
+        "sourceSnapshotId":
+          "type": "string"
+        "actor":
+          "type": "string"
+        "appliedAt":
+          "format": "date-time"
+          "type": "string"
+        "catalogRevision":
+          "type": "integer"
+        "changes":
+          "items":
+            "$ref": "#/components/schemas/SourceCatalogPlannedTest"
+          "type": "array"
+        "createdAt":
+          "format": "date-time"
+          "type": "string"
+        "expiresAt":
+          "format": "date-time"
+          "type": "string"
+        "id":
+          "type": "string"
+        "issues":
+          "items":
+            "$ref": "#/components/schemas/SourceCatalogIssue"
+          "type": "array"
+        "kind":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "suiteId":
+          "type": "string"
+        "suiteRevision":
+          "type": "integer"
+      "required":
+        - "id"
+        - "projectId"
+        - "suiteId"
+        - "actor"
+        - "kind"
+        - "catalogRevision"
+        - "suiteRevision"
+        - "changes"
+        - "issues"
+        - "createdAt"
+        - "expiresAt"
+      "type": "object"
+    "SourceCatalogPlannedTest":
+      "properties":
+        "action":
+          "type": "string"
+        "before":
+          "$ref": "#/components/schemas/SourceCatalogTest"
+        "expectedRevision":
+          "type": "integer"
+        "test":
+          "$ref": "#/components/schemas/SourceCatalogTest"
+      "required":
+        - "test"
+        - "expectedRevision"
+        - "action"
+      "type": "object"
+    "SourceCatalogHTTPCheck":
+      "properties":
+        "endpoint":
+          "type": "string"
+        "forbiddenText":
+          "type": "string"
+        "headers":
+          "additionalProperties":
+            "type": "string"
+          "type": "object"
+        "json":
+          "additionalProperties":
+            "$ref": "#/components/schemas/SourceJSONValue"
+          "type": "object"
+        "maxResponseMs":
+          "type": "integer"
+        "method":
+          "type": "string"
+        "minCertificateDays":
+          "type": "integer"
+        "path":
+          "type": "string"
+        "requiredText":
+          "type": "string"
+        "statusCodes":
+          "items":
+            "type": "integer"
+          "type": "array"
+      "required":
+        - "endpoint"
+        - "path"
+        - "method"
+        - "statusCodes"
+      "type": "object"
+    "SourceCatalogRelease":
+      "properties":
+        "activatedOnPublication":
+          "type": "boolean"
+        "actor":
+          "type": "string"
+        "catalog":
+          "$ref": "#/components/schemas/SourceCatalogDraft"
+        "createdAt":
+          "format": "date-time"
+          "type": "string"
+        "draftRevision":
+          "type": "integer"
+        "id":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "suiteId":
+          "type": "string"
+      "required":
+        - "activatedOnPublication"
+        - "id"
+        - "suiteId"
+        - "projectId"
+        - "draftRevision"
+        - "catalog"
+        - "actor"
+        - "createdAt"
+      "type": "object"
+    "SourceContent":
+      "properties":
+        "content":
+          "type": "string"
+        "digest":
+          "type": "string"
+      "required":
+        - "content"
+        - "digest"
+      "type": "object"
+    "SourceJSONValue":
+      "oneOf":
+        - "type": "null"
+        - "type": "string"
+        - "type": "number"
+        - "type": "boolean"
+        - "items":
+            "$ref": "#/components/schemas/SourceJSONValue"
+          "type": "array"
+        - "additionalProperties":
+            "$ref": "#/components/schemas/SourceJSONValue"
+          "type": "object"
+    "SourcePublishInput":
+      "additionalProperties": false
+      "properties":
+        "activate":
+          "type": "boolean"
+      "required":
+        - "activate"
+      "type": "object"
+    "SourceCapturePolicy":
+      "properties":
+        "failureRetentionDays":
+          "type": "integer"
+        "kindRetentionDays":
+          "additionalProperties":
+            "type": "integer"
+          "type": "object"
+        "logs":
+          "type": "boolean"
+        "maxBytes":
+          "type": "integer"
+        "maxFileBytes":
+          "type": "integer"
+        "retentionDays":
+          "type": "integer"
+        "screenshots":
+          "type": "string"
+        "trace":
+          "type": "string"
+        "video":
+          "type": "string"
+      "required":
+        - "logs"
+        - "screenshots"
+        - "trace"
+        - "video"
+      "type": "object"
+    "SourceUploadPage":
+      "properties":
+        "cursor":
+          "type": "string"
+        "items":
+          "items":
+            "$ref": "#/components/schemas/SourceUploadRecord"
+          "type": "array"
+      "required":
+        - "items"
+      "type": "object"
     "ProviderLogoutOffer":
       "type": "object"
       "properties":

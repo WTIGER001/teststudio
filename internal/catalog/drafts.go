@@ -47,6 +47,9 @@ func (s *Service) SaveDraft(ctx context.Context, user, project, suite string, d 
 	if _, _, err := s.suite(ctx, project, suite); err != nil {
 		return err
 	}
+	if err := s.validateSourceSnapshot(ctx, user, project, suite, d.Artifact); err != nil {
+		return err
+	}
 	if !domain.ValidID(d.ID) || len(d.Tests) > 1000 {
 		return errors.New("invalid draft identifier or catalog size")
 	}

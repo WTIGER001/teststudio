@@ -31,6 +31,7 @@ Add native HTTPS checks, save catalog changes, validate a draft, and publish a r
 Use Import and export to transfer native JSON definitions through a reviewed preview.
 Use table selection for bulk lifecycle actions. Duplicate and History appear on each test row.
 The [catalog guide](docs/catalog.md) describes schemas, revision checks, and request limits.
+The [source upload guide](docs/sources.md) describes reviewed JSON and YAML publication, source digests, and retained snapshots.
 Native HTTP runs use durable local workers and retained attempt records.
 The API provides run creation, progress, cancellation, failure reruns, logs, and private evidence access.
 The artifact listener uses `http://127.0.0.1:8041` by default.

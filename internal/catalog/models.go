@@ -50,6 +50,7 @@ type Test struct {
 }
 
 type Artifact struct {
+	SourceSnapshot string            `json:"sourceSnapshotId,omitempty"`
 	Image          string            `json:"image,omitempty"`
 	SourceRevision string            `json:"sourceRevision,omitempty"`
 	Discovered     map[string]string `json:"discoveredSelectors,omitempty"`

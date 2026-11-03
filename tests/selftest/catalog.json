@@ -2,6 +2,7 @@
   "schemaVersion": "teststudio.selftest/v1",
   "source": "teststudio-selftests",
   "tests": [
+    { "id": "STUDIO-SOURCES-001", "title": "Native source upload, immutable releases, and guarded publication", "selector": "@STUDIO-SOURCES-001", "category": "Sources" },
     { "id": "STUDIO-AUTH-001", "title": "OIDC key rotation, group refresh, provider logout, and callback feedback", "selector": "@STUDIO-AUTH-001", "category": "Authentication" },
     { "id": "STUDIO-PENDING-001", "title": "Pending project access, verified provider claims, and retained approvals", "selector": "@STUDIO-PENDING-001", "category": "Administration" },
     { "id": "STUDIO-LINKS-001", "title": "Fresh account proof, explicit identity linking, and session rotation", "selector": "@STUDIO-LINKS-001", "category": "Administration" },

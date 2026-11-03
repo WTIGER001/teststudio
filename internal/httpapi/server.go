@@ -156,6 +156,7 @@ func (s *Server) Handler() http.Handler {
 	s.projectRoutes(mux)
 	s.catalogRoutes(mux)
 	s.catalogTransferRoutes(mux)
+	s.sourceRoutes(mux)
 	s.runRoutes(mux)
 	s.scheduleRoutes(mux)
 	s.notificationRoutes(mux)

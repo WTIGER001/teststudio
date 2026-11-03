@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.12.0"
+export const accessContractVersion = "0.13.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -55,7 +55,7 @@ export type Problem = { "message": string; "status"?: number }
 export type Profile = { "identities": ExternalIdentityPage; "localAccount": boolean; "user": User }
 export type Provider = { "autoProvision": boolean; "callbackUrl": string; "canManage": boolean; "clientId": string; "disabled": boolean; "groupClaim"?: string; "groupMappings": ProviderMappings; "id": string; "issuer": string; "logoutCallbackUrl": string; "logoutEndpoint"?: string; "membershipTtlSeconds": number; "name": string; "scopes": (string)[]; "secretRef"?: string }
 export type ProviderLogoutOffer = { "expiresAt": string; "providerName": string; "url": string }
-export type ProviderMappings = Record<string, string>
+export type ProviderMappings = { [key: string]: string }
 export type ProviderMutation = { "autoProvision": boolean; "clientId": string; "disabled": boolean; "groupClaim"?: string; "groupMappings": ProviderMappings; "id": string; "issuer": string; "logoutEndpoint"?: string; "membershipTtlSeconds": number; "name": string; "reason": string; "scopes": (string)[]; "secretRef"?: string }
 export type ProviderPage = { "canCreate": boolean; "credentialRefs": (string)[]; "cursor"?: string; "items": (ProviderRecord)[]; "partial": boolean }
 export type ProviderRecord = { "data": Provider; "id": string; "revision": number; "updatedAt": string }
@@ -76,6 +76,24 @@ export type Saved = { "saved": boolean }
 export type Session = { "authenticationUntil": string; "createdAt": string; "current": boolean; "expiresAt": string; "id": string; "lastSeen": string; "provider": string }
 export type SessionPage = { "cursor"?: string; "items": (SessionRecord)[]; "partial": boolean }
 export type SessionRecord = { "data": Session; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type SourceCapturePolicy = { "failureRetentionDays"?: number; "kindRetentionDays"?: { [key: string]: number }; "logs": boolean; "maxBytes"?: number; "maxFileBytes"?: number; "retentionDays"?: number; "screenshots": string; "trace": string; "video": string }
+export type SourceCatalogArtifact = { "discoveredSelectors"?: { [key: string]: string }; "image"?: string; "sourceRevision"?: string; "sourceSnapshotId"?: string }
+export type SourceCatalogDraft = { "artifact": SourceCatalogArtifact; "capture": SourceCapturePolicy; "id": string; "publishedReleaseId"?: string; "tests": (SourceCatalogTest)[]; "timing": SourceTimingPolicy }
+export type SourceCatalogHTTPCheck = { "endpoint": string; "forbiddenText"?: string; "headers"?: { [key: string]: string }; "json"?: { [key: string]: SourceJSONValue }; "maxResponseMs"?: number; "method": string; "minCertificateDays"?: number; "path": string; "requiredText"?: string; "statusCodes": (number)[] }
+export type SourceCatalogImportPlan = { "actor": string; "appliedAt"?: string; "catalogRevision": number; "changes": (SourceCatalogPlannedTest)[]; "createdAt": string; "expiresAt": string; "id": string; "issues": (SourceCatalogIssue)[]; "kind": string; "projectId": string; "sourceSnapshotId"?: string; "suiteId": string; "suiteRevision": number }
+export type SourceCatalogIssue = { "field": string; "message": string; "testId"?: string }
+export type SourceCatalogPlannedTest = { "action": string; "before"?: SourceCatalogTest; "expectedRevision": number; "test": SourceCatalogTest }
+export type SourceCatalogRelease = { "activatedOnPublication": boolean; "actor": string; "catalog": SourceCatalogDraft; "createdAt": string; "draftRevision": number; "id": string; "projectId": string; "suiteId": string }
+export type SourceCatalogTest = { "applicationId"?: string; "capture"?: SourceCapturePolicy; "category": string; "check"?: SourceCatalogHTTPCheck; "conditions"?: string; "dependencies": (string)[] | null; "description": string; "id": string; "owner"?: string; "rationale": string; "requiredBindings": (string)[] | null; "runner": string; "safety": string; "selector"?: string; "source"?: string; "state": string; "tags": (string)[] | null; "timeoutSeconds": number; "timing"?: SourceTimingPolicy; "title": string; "type": string }
+export type SourceContent = { "content": string; "digest": string }
+export type SourceJSONValue = null | string | number | boolean | (SourceJSONValue)[] | { [key: string]: SourceJSONValue }
+export type SourcePublishInput = { "activate": boolean }
+export type SourceTimingPolicy = { "maxAgeDays": number; "minimumIncreaseMs": number; "minimumSamples": number; "minimumTimeoutMs": number; "mode": string; "slowdownFactor": number; "timeoutFactor": number; "timeoutMarginMs": number; "timeoutMode": string; "window": number }
+export type SourceUpload = { "activated": boolean; "actor": string; "bytes": number; "createdAt": string; "digest": string; "expiresAt": string; "format": "json" | "yaml"; "id": string; "issues": (SourceCatalogIssue)[]; "name": string; "planId"?: string; "projectId": string; "releaseId"?: string; "state": "staged" | "failed" | "published" | "expired"; "suiteId": string }
+export type SourceUploadInput = { "content": string; "format": "json" | "yaml"; "name": string }
+export type SourceUploadPage = { "cursor"?: string; "items": (SourceUploadRecord)[] }
+export type SourceUploadPreview = { "plan"?: SourceCatalogImportPlan; "upload": SourceUploadRecord }
+export type SourceUploadRecord = { "data": SourceUpload; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
 export type User = { "createdAt": string; "disabled": boolean; "email"?: string; "emailVerified": boolean; "id": string; "lastSignIn"?: string; "name": string; "sessionEpoch": number }
 export type UserDefinition = { "email"?: string; "id": string; "name": string }
 export type UserPage = { "cursor"?: string; "items": (UserRecord)[] }
@@ -127,6 +145,11 @@ export interface AccessRequests {
   createProjectAssignment: { "project": string; body: AssignmentDefinition }
   revokeProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
   readProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string }
+  listSourceUploads: { "project": string; "suite": string; query?: { "limit"?: number; "cursor"?: string } }
+  stageSourceUpload: { "project": string; "suite": string; body: SourceUploadInput }
+  readSourceUpload: { "project": string; "suite": string; "id": string }
+  readSourceContent: { "project": string; "suite": string; "id": string }
+  publishSourceUpload: { "project": string; "suite": string; "id": string; revision: number; body: SourcePublishInput }
   listInstallationAssignments: { query?: { "limit"?: number; "cursor"?: string } }
   createInstallationAssignment: { body: AssignmentDefinition }
   revokeInstallationAssignment: { "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
@@ -204,6 +227,11 @@ export interface AccessResponses {
   createProjectAssignment: AssignmentRecord
   revokeProjectAssignment: Revoked
   readProjectAssignment: AssignmentRecord
+  listSourceUploads: SourceUploadPage
+  stageSourceUpload: SourceUploadPreview
+  readSourceUpload: SourceUploadPreview
+  readSourceContent: SourceContent
+  publishSourceUpload: SourceCatalogRelease
   listInstallationAssignments: AssignmentPage
   createInstallationAssignment: AssignmentRecord
   revokeInstallationAssignment: Revoked
@@ -281,6 +309,11 @@ export const accessOperations = {
   createProjectAssignment: { method: "POST", path: "/api/v1/projects/{project}/role-assignments" },
   revokeProjectAssignment: { method: "DELETE", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
   readProjectAssignment: { method: "GET", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
+  listSourceUploads: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads" },
+  stageSourceUpload: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads" },
+  readSourceUpload: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads/{id}" },
+  readSourceContent: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads/{id}/content" },
+  publishSourceUpload: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads/{id}/publish" },
   listInstallationAssignments: { method: "GET", path: "/api/v1/role-assignments" },
   createInstallationAssignment: { method: "POST", path: "/api/v1/role-assignments" },
   revokeInstallationAssignment: { method: "DELETE", path: "/api/v1/role-assignments/{kind}/{principal}/{role}" },
