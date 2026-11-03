@@ -10,6 +10,8 @@ The full plan remains required scope. Check an item only after its implementatio
 - [ ] User, group, role, object, and project grant checks cover explicit denies, expired grants, inheritance, and assignment revocation.
 - [ ] Project administrators cannot grant installation privileges or affect another project's groups, assignments, results, or evidence.
 - [x] Membership and grant revocation reach all instances within the documented limit. Disabled users and revoked sessions fail their next request.
+- [ ] Local accounts, OIDC accounts, and mixed sign-in work through the same directory, permission checks, and managed sessions.
+- [ ] Local credential changes, resets, disabling, and recovery preserve audit records and the last usable administrator.
 - [ ] OIDC sign-in supports configured providers with code flow, PKCE, state, nonce, issuer and audience validation, key rotation, and logout.
 - [ ] Duplicate email addresses from different issuer-subject pairs do not merge accounts or transfer access.
 - [ ] Unmapped, missing, incomplete, or outdated external groups do not silently preserve elevated project access.
@@ -89,6 +91,13 @@ STUDIO-HELP-001 passes with all four new guides and existing keyboard, focus, di
 STUDIO-NOTIFY-001 passes again after the shared fixture and shutdown changes.
 Owned verification controllers and browser containers stop after checks. The disposable PostgreSQL service also stops.
 Identity linking, pending project access, personal profile UI, role and grant editors, deployment verification, and the remaining full plan stay pending.
+
+### Local and OIDC account decision
+
+The plan now supports local accounts, OIDC accounts, or both in one installation.
+Both sign-in methods use the same internal directory, sessions, groups, and permission service.
+Managed local credentials, password changes, administrator resets, and sign-in controls remain pending.
+The current loopback development administrator does not satisfy the managed local account requirements.
 
 ### Atomic assignment storage
 

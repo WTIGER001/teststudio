@@ -162,7 +162,7 @@ Use `github.com/wtiger001/go-permissions` as the authorization engine.
 Pin a reviewed library version or commit and verify its Go toolchain requirements before implementation.
 Use `permissions.Service` for permission checks, role management, assignments, grants, and effective-permission reports.
 Do not create a second authorization evaluator in TestStudio.
-The library handles authorization. TestStudio handles identities, group membership, sessions, and OIDC sign-in.
+The library handles authorization. TestStudio handles identities, group membership, sessions, local sign-in, and OIDC sign-in.
 
 #### Users and groups
 
@@ -299,6 +299,23 @@ Role editors show action descriptions, scope bindings, explicit denies, and an e
 Show the reason for an access decision, including its role or group source, to authorized managers.
 Return distinct unauthenticated and unauthorized responses without exposing another project's private data.
 
+### Local and OIDC sign-in
+
+Each installation can enable local accounts, OIDC providers, or both.
+Local accounts and external identities use the same internal user directory, sessions, groups, and project permissions.
+An authorized installation administrator creates local credentials for an internal user.
+Store password hashes on the server with a maintained password-hashing implementation and per-account salts.
+Never return password hashes or credentials in directory responses, audit records, or logs.
+Support password changes, administrator resets, required changes after a reset, and disabling local sign-in for one account.
+Password reset and credential disabling revoke affected sessions.
+Apply bounded sign-in attempts, generic credential errors, and request-forgery protection to local authentication.
+Local account creation does not automatically grant project roles.
+The sign-in screen presents the enabled local and provider choices.
+Linking local and external sign-in methods requires fresh authentication and proof of control.
+Matching email addresses do not link accounts.
+Protect the last usable administrator when local credentials, providers, user state, or access assignments change.
+Operator recovery remains explicit and distinct from ordinary account management.
+
 ### OIDC sign-in and sessions
 
 Support one or more explicitly configured OpenID Connect providers on every deployment profile.
@@ -344,7 +361,7 @@ Static UI hosting routes authentication and session API requests to the Go servi
 Provision the initial administrator through an operator-controlled bootstrap bound to an exact issuer and subject.
 An explicit loopback-only development mode can create a local principal without an external provider.
 That mode still uses the permission engine and configured local groups. It never silently activates for remote clients.
-Shared or remotely accessible local servers use configured authentication.
+Shared or remotely accessible local servers use configured local credentials, OIDC, or both.
 Automation clients use revocable, expiring project-scoped credentials. Workers retain separately scoped run-ingestion credentials.
 Neither credential type reuses a browser cookie or receives installation administration by default.
 
@@ -1182,7 +1199,7 @@ Use these building blocks:
 | Styling | App-owned CSS and shared design tokens for spacing, typography, borders, focus, and status colors. |
 | Charts | ECharts through a compatible Angular integration. |
 | API client | Typed client generated from the service OpenAPI contract, with a small authentication adapter. |
-| Authentication | OIDC authorization code sign-in through Go-managed sessions. Authorization uses `wtiger001/go-permissions`. |
+| Authentication | Local credentials and OIDC authorization code sign-in through Go-managed sessions. Authorization uses `wtiger001/go-permissions`. |
 
 Create a small set of shared UI primitives for buttons, form fields, selectors, dialogs, cards, status badges, and empty states.
 Reuse these primitives across feature pages.
@@ -1347,6 +1364,8 @@ Verify schedule ownership, execution recovery, and notification retries when rep
 - User, group, role, object, and project grant checks cover explicit denies, expired grants, inheritance, and assignment revocation.
 - Project administrators cannot grant installation privileges or affect another project's groups, assignments, results, or evidence.
 - Membership and grant revocation reach all instances within the documented limit. Disabled users and revoked sessions fail their next request.
+- Local accounts, OIDC accounts, and mixed sign-in work through the same directory, permission checks, and managed sessions.
+- Local credential changes, resets, disabling, and recovery preserve audit records and the last usable administrator.
 - OIDC sign-in supports configured providers with code flow, PKCE, state, nonce, issuer and audience validation, key rotation, and logout.
 - Duplicate email addresses from different issuer-subject pairs do not merge accounts or transfer access.
 - Unmapped, missing, incomplete, or outdated external groups do not silently preserve elevated project access.
