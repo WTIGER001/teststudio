@@ -4,9 +4,10 @@ TestStudio has a versioned manifest and a local isolated artifact inspector.
 The Sources page, API, and publisher CLI enqueue inspection jobs and publish reviewed catalogs.
 The current worker supports locally available immutable Go and Playwright images.
 Inspection does not start tests. Publication and activation remain explicit actions.
-The Sources page also uploads offline Go ZIP bundles for a separate preparation worker.
+The Sources page also uploads offline Go or Playwright ZIP bundles for a separate preparation worker.
 The CLI can assemble those bundles outside the API.
-GitHub repository preparation and Playwright bundle assembly remain pending.
+Registered GitHub sources use the same durable preparation and reviewed publication workflow.
+See [repository sources](repository-sources.md) and [source bundles](source-bundles.md) for supported offline profiles.
 See [source bundles](source-bundles.md) for worker setup, staging, and retention.
 
 ## Manifest

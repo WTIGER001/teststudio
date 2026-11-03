@@ -70,33 +70,42 @@ func (s *Service) ProcessBuildNext(ctx context.Context, worker string) (bool, er
 }
 
 func (s *Service) processQueue(ctx context.Context, worker, bucket string) (bool, error) {
-	page, err := s.Store.List(ctx, bucket, "", "", 25)
-	if err != nil {
-		return false, err
-	}
-	for _, index := range page.Items {
-		job, claimed, err := s.claimPreparation(ctx, index, worker)
-		if errors.Is(err, storage.ErrConflict) {
-			continue
+	cursor := ""
+	for {
+		if ctx.Err() != nil {
+			return false, ctx.Err()
 		}
+		page, err := s.Store.List(ctx, bucket, "", cursor, 25)
 		if err != nil {
 			return false, err
 		}
-		if !claimed {
-			continue
+		for _, index := range page.Items {
+			job, claimed, err := s.claimPreparation(ctx, index, worker)
+			if errors.Is(err, storage.ErrConflict) {
+				continue
+			}
+			if err != nil {
+				return false, err
+			}
+			if !claimed {
+				continue
+			}
+			inspectionContext, cancel := context.WithCancel(ctx)
+			heartbeatDone := make(chan struct{})
+			go func() { defer close(heartbeatDone); s.preparationHeartbeat(inspectionContext, cancel, job, worker) }()
+			result, inspectErr := s.inspectJob(inspectionContext, job, worker)
+			cancel()
+			<-heartbeatDone
+			finishContext, stop := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+			err = s.finishPreparation(finishContext, job, worker, result, inspectErr)
+			stop()
+			return true, err
 		}
-		inspectionContext, cancel := context.WithCancel(ctx)
-		heartbeatDone := make(chan struct{})
-		go func() { defer close(heartbeatDone); s.preparationHeartbeat(inspectionContext, cancel, job, worker) }()
-		result, inspectErr := s.inspectJob(inspectionContext, job, worker)
-		cancel()
-		<-heartbeatDone
-		finishContext, stop := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
-		err = s.finishPreparation(finishContext, job, worker, result, inspectErr)
-		stop()
-		return true, err
+		if page.Cursor == "" {
+			return false, nil
+		}
+		cursor = page.Cursor
 	}
-	return false, nil
 }
 
 func (s *Service) claimPreparation(ctx context.Context, index storage.Record, worker string) (job Job, claimed bool, resultErr error) {
@@ -120,6 +129,9 @@ func (s *Service) claimPreparation(ctx context.Context, index storage.Record, wo
 		}
 		if job.State != "received" {
 			return store.Commit(ctx, storage.Change{Record: index, Delete: true})
+		}
+		if job.Bundle != "" && s.Builders[job.Runner] == nil {
+			return nil
 		}
 		driver := s.Inspectors[job.Runner]
 		denied := false

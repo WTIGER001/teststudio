@@ -11,6 +11,7 @@ import (
 
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/domain"
+	"github.com/wtiger001/teststudio/internal/preparation"
 	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/secrets"
 	"github.com/wtiger001/teststudio/internal/sourcebundle"
@@ -149,7 +150,7 @@ func (s *Service) SaveRepository(ctx context.Context, user, project, id string, 
 func (s *Service) validateRepositoryBindings(ctx context.Context, user, project string, input RepositoryConfig) error {
 	seen := map[string]bool{}
 	for _, binding := range input.Bindings {
-		if !domain.ValidID(binding.Suite) || !sourcebundle.SafePath(binding.Manifest) || seen[binding.Suite] || !slices.Contains(s.BundleRunners, binding.Runner) || binding.Profile != "go-module" || binding.Runner != "go" {
+		if !domain.ValidID(binding.Suite) || !sourcebundle.SafePath(binding.Manifest) || seen[binding.Suite] || !slices.Contains(s.BundleRunners, binding.Runner) || !preparation.OfflineSourceProfile(binding.Runner, binding.Profile) {
 			return errors.New("each source binding requires a distinct suite, manifest path, and enabled build profile")
 		}
 		seen[binding.Suite] = true

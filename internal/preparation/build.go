@@ -28,3 +28,7 @@ type ArtifactBuilder interface {
 	Build(context.Context, BuildRequest) (Build, error)
 	CleanupBuild(context.Context, execution.Reference) error
 }
+
+func OfflineSourceProfile(runner, profile string) bool {
+	return runner == "go" && profile == "go-module" || runner == "playwright" && profile == "playwright-node"
+}

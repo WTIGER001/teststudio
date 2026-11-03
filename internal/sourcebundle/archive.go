@@ -159,7 +159,11 @@ func validateContext(snapshot Snapshot) error {
 	case "go":
 		required = []string{path.Join(root, "go.mod")}
 	case "playwright":
-		required = []string{path.Join(root, "package.json"), path.Join(root, "package-lock.json")}
+		config := snapshot.Manifest.Tests.Config
+		if config == "" {
+			config = "playwright.config.ts"
+		}
+		required = []string{path.Join(root, "package.json"), path.Join(root, "package-lock.json"), path.Join(root, config)}
 	}
 	for _, name := range required {
 		if _, ok := snapshot.Files[name]; !ok {

@@ -34,7 +34,8 @@ func main() {
 func run() error {
 	database := flag.String("database", ".data/teststudio.db", "SQLite path or PostgreSQL URL shared with the API")
 	location := flag.String("execution-location", "local", "Preparation queue location")
-	runtime := flag.String("go-runtime", "", "Trusted immutable local Go source runtime image ID; omit to perform recovery only")
+	browserRuntime := flag.String("playwright-runtime", "", "Trusted immutable local Playwright source runtime image ID")
+	runtime := flag.String("go-runtime", "", "Trusted immutable local Go source runtime image ID")
 	directory := flag.String("build-directory", ".data/source-builds", "Private local source context directory shared by this location's workers")
 	githubSources := flag.Bool("github-sources", false, "Process durable GitHub source synchronization")
 	secretBindings := flag.String("secret-bindings", "", "Project-scoped repository access credential bindings")
@@ -76,15 +77,22 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	inspector := &localcontainer.Executor{Runner: "go", AllowProjectImages: true, RequireProject: true}
-	builder := &localimage.Builder{RuntimeImage: *runtime, TempDirectory: root}
-	service := &sources.Service{Store: store, Auth: auth, Location: *location, Inspectors: map[string]preparation.ArtifactInspector{"go": inspector}, RecoveryInspectors: map[string]preparation.ArtifactInspector{"go": inspector}, RecoveryBuilders: map[string]preparation.ArtifactBuilder{"go": builder}}
-	if *runtime != "" {
-		service.Builders = map[string]preparation.ArtifactBuilder{"go": builder}
-		service.BundleRunners = []string{"go"}
+	service := &sources.Service{Store: store, Auth: auth, Location: *location, Inspectors: map[string]preparation.ArtifactInspector{}, RecoveryInspectors: map[string]preparation.ArtifactInspector{}, Builders: map[string]preparation.ArtifactBuilder{}, RecoveryBuilders: map[string]preparation.ArtifactBuilder{}}
+	for runner, image := range map[string]string{"go": *runtime, "playwright": *browserRuntime} {
+		inspector := &localcontainer.Executor{Runner: runner, AllowProjectImages: true, RequireProject: true}
+		builder := &localimage.Builder{RuntimeImage: image, TempDirectory: root}
+		service.RecoveryInspectors[runner] = inspector
+		service.RecoveryBuilders[runner] = builder
+		if image != "" {
+			service.Inspectors[runner] = inspector
+			service.Builders[runner] = builder
+		}
+	}
+	if len(service.Builders) > 0 {
+		service.BundleRunners = []string{"go", "playwright"}
 	}
 	var syncDone <-chan struct{}
-	if *githubSources && *runtime != "" {
+	if *githubSources && len(service.Builders) > 0 {
 		provider, err := localsecrets.Load(*secretBindings)
 		if err != nil {
 			return err

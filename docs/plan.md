@@ -38,8 +38,15 @@ No live GitHub or cloud deployment checks run for this milestone.
 Signed push events and durable periodic sync now use the same source queue and current authority checks.
 The Sources UI manages both policies, next due time, webhook address, and trigger history.
 Focused signature, delivery replay, delayed push, scheduler contention, coalescing, and revocation checks pass locally.
-Continue Playwright bundle assembly, dependency preparation profiles, and CLI OIDC browser sign-in.
-The current source builder supports offline Go bundles with a trusted runtime and fixed copy instructions.
+Offline Playwright bundles now use the same builder, discovery, publication, and execution workflow.
+A real local browser bundle and the expanded STUDIO-BUNDLES-001 self-test pass.
+Workers accept separate Go and Playwright runtimes and leave other runtime work queued.
+Continue complete GitHub-to-UI publication evidence for item 22, dependency preparation profiles, and CLI OIDC browser sign-in.
+The cached browser runtime is teststudio/playwright-source-runtime:local. The cached Go runtime is teststudio/go-source-runtime:local.
+Do not repeat the passing real Go or Playwright image integrations without a builder or execution contract change.
+Use the targeted source checks or affected self-test selector after implementation changes.
+Recent feature commits are 6b5a9f1 for registered sources and e1354ef for push and periodic synchronization.
+The current source builder supports offline Go and Playwright bundles with trusted runtimes and fixed copy instructions.
 Items **22**, **25**, **26**, and **29** advance but remain open for their broader scope.
 Keep the full 57-item plan required. Do not narrow the goal to this milestone.
 Implement coherent batches, then run the smallest relevant local checks. Reuse existing evidence.

@@ -74,6 +74,33 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Offline Playwright source bundles
+
+Added a trusted generic browser runtime with pinned Playwright packages and no application tests, UI, or controller files.
+The runtime build reuses the existing trusted dependency layers without downloads or reinstalls in this checkpoint.
+The source assembler validates exact runtime versions, lockfile roots, required packages, and package shadowing before assembly.
+It uses the existing playwright-node profile, fixed copy instructions, isolated discovery, and normal publication workflow.
+Uploaded build scripts and dependency installers do not run during assembly.
+
+ZIP staging and repository suite bindings now accept Go or Playwright profiles through the Sources UI and API.
+The preparation worker accepts independent Go and Playwright runtime flags and keeps recovery for both profiles.
+Workers leave unsupported runtime jobs queued and scan later pages for work they can process.
+The publisher CLI uses the same source assembler for either runner.
+
+A newly written browser bundle imports shared application source, builds, discovers, publishes, and passes a normal targetless run.
+It records one passed logical result and complete evidence in about eight seconds.
+Verification is TestBrowserSourceBundleBuildsPublishesAndRunsWithRuntimeDependencies in internal/sources/browser_bundle_local_test.go.
+Run identifier is 20261103T164017.169602000-e7ff513fa532ce3fa4073713.
+Its owned image, discovery resources, browser container, volume, and private context are removed.
+An initial profile mismatch is corrected by using the existing inspector profile before the passing run.
+
+Focused dependency, controlled-builder, source, queue-pagination, and compilation checks pass.
+The Angular build and updated STUDIO-BUNDLES-001 pass for both Go and browser uploads, retained source, queued jobs, and cancellation.
+Evidence is output/selftest/20261103T164151.211223000-fbde814a60efc9df0c742ab8/summary.json.
+Only the affected browser selector runs. No repeat of the Go image integration or broad matrix runs.
+The ledger remains **24 verified, 33 open**. Item **22** advances and remains open for complete source workflow evidence and broader dependency preparation.
+All checks run locally. No cloud deployment or live GitHub tests run.
+
 ### Signed push events and durable periodic synchronization
 
 Added signed GitHub push notifications through a provider-neutral verification port and a separate provider endpoint contract.

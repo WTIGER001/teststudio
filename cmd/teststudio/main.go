@@ -204,7 +204,7 @@ func run() error {
 		"go": &localcontainer.Executor{Runner: "go"}, "playwright": &localcontainer.Executor{Runner: "playwright"},
 	}}
 	if *sourceBundles || *githubSources {
-		sourceService.BundleRunners = []string{"go"}
+		sourceService.BundleRunners = []string{"go", "playwright"}
 	}
 	if *githubSources {
 		sourceService.Secrets = secretProvider

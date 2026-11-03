@@ -23,7 +23,7 @@ import (
 )
 
 var immutable = regexp.MustCompile(`^sha256:[a-f0-9]{64}$`)
-var runtimeLabel = regexp.MustCompile(`^go[0-9A-Za-z._-]+$`)
+var runtimeLabel = regexp.MustCompile(`^(?:go|playwright)[0-9A-Za-z._-]+$`)
 
 const logLimit = 256 << 10
 
@@ -45,8 +45,8 @@ func (b *Builder) Build(ctx context.Context, input preparation.BuildRequest) (re
 	if !immutable.MatchString(b.RuntimeImage) || !validReference(input.Reference) {
 		return result, errors.New("local source assembly requires an immutable runtime image and preparation ownership")
 	}
-	if input.Snapshot.Manifest.Runner != "go" || input.Snapshot.Manifest.BuildProfile != "go-module" {
-		return result, errors.New("the local source assembler currently supports offline go-module bundles")
+	if !preparation.OfflineSourceProfile(input.Snapshot.Manifest.Runner, input.Snapshot.Manifest.BuildProfile) {
+		return result, errors.New("the local source assembler requires a supported offline Go or Playwright profile")
 	}
 	if input.Origin.SnapshotDigest != input.Snapshot.Digest || suitespec.ValidateOrigin(input.Origin) != nil {
 		return result, errors.New("build provenance must identify the stored source digest")
@@ -58,7 +58,15 @@ func (b *Builder) Build(ctx context.Context, input preparation.BuildRequest) (re
 		return result, err
 	}
 	if metadata.Kind != "source-base/v1" || !runtimeLabel.MatchString(metadata.Runtime) || len(metadata.OnBuild) > 0 {
-		return result, errors.New("runtime image must be a trusted Go source base without ONBUILD instructions")
+		return result, errors.New("runtime image must be a trusted source base without ONBUILD instructions")
+	}
+	if !strings.HasPrefix(metadata.Runtime, input.Snapshot.Manifest.Runner) {
+		return result, errors.New("source runner does not match the trusted runtime")
+	}
+	if input.Snapshot.Manifest.Runner == "playwright" {
+		if err := runtimeDependencies(input.Snapshot, metadata.PlaywrightVersion); err != nil {
+			return result, err
+		}
 	}
 	if existing, err := b.metadata(wall, tag(input.Reference)); err == nil {
 		if !matches(existing, input.Reference) || existing.Source != input.Snapshot.Digest {
@@ -150,14 +158,15 @@ func (b *Builder) Build(ctx context.Context, input preparation.BuildRequest) (re
 }
 
 type imageMetadata struct {
-	ID           string   `json:"id"`
-	Runtime      string   `json:"runtime"`
-	Kind         string   `json:"kind"`
-	Project      string   `json:"project"`
-	Installation string   `json:"installation"`
-	Preparation  string   `json:"preparation"`
-	Source       string   `json:"source"`
-	OnBuild      []string `json:"onBuild"`
+	PlaywrightVersion string   `json:"playwrightVersion"`
+	ID                string   `json:"id"`
+	Runtime           string   `json:"runtime"`
+	Kind              string   `json:"kind"`
+	Project           string   `json:"project"`
+	Installation      string   `json:"installation"`
+	Preparation       string   `json:"preparation"`
+	Source            string   `json:"source"`
+	OnBuild           []string `json:"onBuild"`
 }
 
 var errImageAbsent = errors.New("image is absent")
@@ -165,7 +174,7 @@ var errImageAbsent = errors.New("image is absent")
 func (b *Builder) metadata(ctx context.Context, image string) (imageMetadata, error) {
 	var result imageMetadata
 	var output boundedLog
-	command := b.command(ctx, "image", "inspect", image, "--format", `{"id":{{json .Id}},"runtime":{{json (index .Config.Labels "teststudio.runtime")}},"kind":{{json (index .Config.Labels "teststudio.runtime-kind")}},"project":{{json (index .Config.Labels "teststudio.project")}},"installation":{{json (index .Config.Labels "teststudio.installation")}},"preparation":{{json (index .Config.Labels "teststudio.preparation")}},"source":{{json (index .Config.Labels "teststudio.source")}},"onBuild":{{json (index .Config "OnBuild")}}}`)
+	command := b.command(ctx, "image", "inspect", image, "--format", `{"playwrightVersion":{{json (index .Config.Labels "teststudio.playwright-version")}},"id":{{json .Id}},"runtime":{{json (index .Config.Labels "teststudio.runtime")}},"kind":{{json (index .Config.Labels "teststudio.runtime-kind")}},"project":{{json (index .Config.Labels "teststudio.project")}},"installation":{{json (index .Config.Labels "teststudio.installation")}},"preparation":{{json (index .Config.Labels "teststudio.preparation")}},"source":{{json (index .Config.Labels "teststudio.source")}},"onBuild":{{json (index .Config "OnBuild")}}}`)
 	command.Stdout, command.Stderr = &output, &output
 	if err := command.Run(); err != nil {
 		if strings.Contains(strings.ToLower(output.String()), "no such image") {

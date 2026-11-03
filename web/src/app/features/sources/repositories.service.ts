@@ -41,7 +41,7 @@ export class RepositoriesService {
     push: new FormControl(false, { nonNullable: true }),
     webhookCredential: new FormControl('', { nonNullable: true }),
     intervalSeconds: new FormControl(0, { nonNullable: true, validators: [Validators.min(0), Validators.max(86400)] }),
-    bindings: new FormArray<FormGroup<{ suite: FormControl<string>; manifest: FormControl<string> }>>([])
+    bindings: new FormArray<FormGroup<{ suite: FormControl<string>; manifest: FormControl<string>; runner: FormControl<string> }>>([])
   })
   private generation = 0
   private listGeneration = 0
@@ -74,8 +74,8 @@ export class RepositoriesService {
     finally { if (request === this.listGeneration) this.loading.set(false) }
   }
 
-  addBinding(suite = '', manifest = 'teststudio-suite.json'): void {
-    this.form.controls.bindings.push(new FormGroup({ suite: new FormControl(suite, { nonNullable: true, validators: Validators.required }), manifest: new FormControl(manifest, { nonNullable: true, validators: [Validators.required, Validators.maxLength(512)] }) }))
+  addBinding(suite = '', manifest = 'teststudio-suite.json', runner = 'go'): void {
+    this.form.controls.bindings.push(new FormGroup({ runner: new FormControl(runner, { nonNullable: true, validators: Validators.required }), suite: new FormControl(suite, { nonNullable: true, validators: Validators.required }), manifest: new FormControl(manifest, { nonNullable: true, validators: [Validators.required, Validators.maxLength(512)] }) }))
   }
 
   removeBinding(index: number): void { if (this.form.controls.bindings.length > 1) this.form.controls.bindings.removeAt(index) }
@@ -87,7 +87,7 @@ export class RepositoriesService {
     this.form.controls.id.enable()
     this.form.reset({ id: row?.id ?? '', name: config?.name ?? '', repository: config?.repository ?? '', referenceKind: reference.kind, reference: reference.value, credential: config?.credentialReference ?? '', enabled: config?.enabled ?? true, autoActivate: config?.autoActivate ?? false, push: config?.pushEnabled ?? false, webhookCredential: config?.webhookCredentialReference ?? '', intervalSeconds: config?.syncIntervalSeconds ?? 0 })
     this.form.controls.bindings.clear()
-    if (config) for (const binding of config.bindings) this.addBinding(binding.suiteId, binding.manifestPath)
+    if (config) for (const binding of config.bindings) this.addBinding(binding.suiteId, binding.manifestPath, binding.runner)
     else this.addBinding(this.sources.form.controls.suite.value)
     if (row) this.form.controls.id.disable()
   }

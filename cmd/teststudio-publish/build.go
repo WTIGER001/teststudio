@@ -41,7 +41,7 @@ func buildBundle(ctx context.Context, args []string, writer io.Writer) error {
 	flags.SetOutput(writer)
 	archivePath := flags.String("archive", "", "Complete ZIP source context")
 	manifestPath := flags.String("manifest", suitespec.ManifestFile, "Manifest path relative to the ZIP root")
-	runtimeImage := flags.String("runtime-image", "", "Trusted locally available Go source runtime image ID")
+	runtimeImage := flags.String("runtime-image", "", "Trusted locally available Go or Playwright source runtime image ID")
 	project := flags.String("project", "", "Destination project identifier")
 	suite := flags.String("suite", "", "Destination suite identifier")
 	output := flags.String("output", "", "New private build result JSON file")

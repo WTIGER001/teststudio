@@ -1,7 +1,7 @@
 # Repository sources
 
 The Sources page registers one GitHub repository with one or more suite manifest paths.
-Each binding selects a targetless suite and the offline Go build profile.
+Each binding selects a targetless suite and an offline Go or Playwright build profile.
 Application source, shared libraries, and several suites can share the same repository snapshot.
 
 Registration stores settings. It does not fetch source, build images, or execute tests.
@@ -17,7 +17,7 @@ Enable registration on the API:
 bin/teststudio --local --github-sources --secret-bindings .data/source-bindings.json
 ```
 
-Build the trusted runtime as described in [Go source bundles](source-bundles.md).
+Build the trusted runtime as described in [Source bundles](source-bundles.md).
 Start the separate worker against the same database and local Docker daemon:
 
 ```sh
@@ -29,8 +29,9 @@ bin/teststudio-prepare --database .data/teststudio.db \
 
 Public repositories need no credential binding. Omit secret-bindings when none exist.
 The API and worker must use the same source credentials and approved references.
+Add playwright-runtime for browser bindings as described in the source bundle guide.
 The API never runs assembly commands. The worker never runs test bodies during preparation.
-Omit go-runtime to recover recorded preparation resources without starting new builds or source fetches.
+Omit both runtime flags to recover recorded preparation resources without starting new builds or source fetches.
 
 ## Private access
 
@@ -166,6 +167,6 @@ The source details show the next due time. Sync details distinguish manual, push
 
 ## Remaining source work
 
-Playwright source assembly and online dependency preparation remain pending.
-The current implementation supports manual, push, and periodic public or GitHub App synchronization with offline Go source assembly.
+Online dependency preparation and additional dependency profiles remain pending.
+The current implementation supports manual, push, and periodic public or GitHub App synchronization with offline Go and Playwright source assembly.
 All verification for this milestone runs locally. No live GitHub or cloud deployment is required for these checks.

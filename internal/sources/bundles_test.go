@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 	"time"
@@ -240,5 +241,39 @@ func TestBundleExpiryPreservesRecordedBuildFailure(t *testing.T) {
 	retained, _ := storage.Decode[sources.Job](row)
 	if retained.State != "failed" || retained.Error != job.Error || !retained.SourceExpired || !retained.FinishedAt.Equal(*job.FinishedAt) {
 		t.Fatal("source expiry erased preparation history")
+	}
+}
+
+func TestBundleWorkerLeavesOtherRuntimeQueuedAndScansLaterPages(t *testing.T) {
+	s, _, builder := bundleSetup(t)
+	first, _ := enqueueZIP(t, s, "original")
+	row, err := s.ReadJob(t.Context(), "admin", "alpha", "health", first.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	original, _ := storage.Decode[sources.Job](row)
+	for index := range 26 {
+		other := original
+		other.ID = fmt.Sprintf("other-%02d", index)
+		other.Runner = "playwright"
+		change, _ := storage.Put(row.Bucket, other.ID, "alpha", 0, other)
+		queued, _ := storage.Put("preparation-build-queue/local", fmt.Sprintf("000-%02d", index), "alpha", 0, map[string]string{"jobId": other.ID, "suiteId": "health", "executionLocation": "local"})
+		if err := s.Store.Commit(t.Context(), change, queued); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if processed, err := s.ProcessBuildNext(t.Context(), "go-worker"); err != nil || !processed {
+		t.Fatal(processed, err)
+	}
+	if builder.calls != 1 {
+		t.Fatal("Go build was starved by another runtime queue")
+	}
+	other, err := s.ReadJob(t.Context(), "admin", "alpha", "health", "other-00")
+	if err != nil {
+		t.Fatal(err)
+	}
+	waiting, _ := storage.Decode[sources.Job](other)
+	if waiting.State != "received" || waiting.Error != "" {
+		t.Fatal("unavailable runtime failed a queued build")
 	}
 }

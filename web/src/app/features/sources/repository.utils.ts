@@ -2,11 +2,11 @@ import type { SourceRepositoryConfig } from '../../core/generated/access.types'
 
 export interface RepositoryFormValue {
   id: string; name: string; repository: string; referenceKind: string; reference: string; credential: string; enabled: boolean; autoActivate: boolean; push: boolean; webhookCredential: string; intervalSeconds: number
-  bindings: { suite: string; manifest: string }[]
+  bindings: { suite: string; manifest: string; runner: string }[]
 }
 export function repositoryConfig(value: RepositoryFormValue): SourceRepositoryConfig {
   const reference = value.referenceKind === 'commit' ? value.reference : `${value.referenceKind === 'tag' ? 'tags' : 'heads'}/${value.reference}`
-  return { pushEnabled: value.push, webhookCredentialReference: value.webhookCredential || undefined, syncIntervalSeconds: value.intervalSeconds || undefined, name: value.name, provider: 'github', repository: value.repository, reference, credentialReference: value.credential || undefined, enabled: value.enabled, autoActivate: value.autoActivate, bindings: value.bindings.map(item => ({ suiteId: item.suite, manifestPath: item.manifest, runner: 'go', buildProfile: 'go-module' })) }
+  return { pushEnabled: value.push, webhookCredentialReference: value.webhookCredential || undefined, syncIntervalSeconds: value.intervalSeconds || undefined, name: value.name, provider: 'github', repository: value.repository, reference, credentialReference: value.credential || undefined, enabled: value.enabled, autoActivate: value.autoActivate, bindings: value.bindings.map(item => ({ suiteId: item.suite, manifestPath: item.manifest, runner: item.runner, buildProfile: item.runner === 'playwright' ? 'playwright-node' : 'go-module' })) }
 }
 export function repositoryReference(reference: string): { kind: string; value: string } {
   if (reference.startsWith('heads/')) return { kind: 'branch', value: reference.slice(6) }

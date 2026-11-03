@@ -11,6 +11,7 @@ import (
 
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/catalog"
+	"github.com/wtiger001/teststudio/internal/preparation"
 	"github.com/wtiger001/teststudio/internal/sourcebundle"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
@@ -71,7 +72,7 @@ func (s *Service) enqueueBundle(ctx context.Context, user, project, suite, key, 
 	for _, runner := range s.BundleRunners {
 		enabled = enabled || runner == snapshot.Manifest.Runner
 	}
-	if !enabled {
+	if !enabled || !preparation.OfflineSourceProfile(snapshot.Manifest.Runner, snapshot.Manifest.BuildProfile) {
 		return result, errors.New("bundle preparation is not enabled for this runner")
 	}
 	id := bundleJobID(user, project, suite, key)

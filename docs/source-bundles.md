@@ -1,11 +1,11 @@
-# Go source bundles
+# Source bundles
 
-The Sources page stores complete Go ZIP bundles and queues durable preparation jobs.
+The Sources page stores complete Go or Playwright ZIP bundles and queues durable preparation jobs.
 A separate worker assembles the source and invokes isolated discovery.
 Review and publication use the common immutable release workflow.
 The CLI can also assemble bundles outside the API.
 Registered [GitHub sources](repository-sources.md) use the same preparation workflow.
-Playwright bundle assembly remains pending.
+The offline Playwright profile uses dependencies already installed in a trusted browser runtime.
 
 ## Archive context
 
@@ -26,7 +26,7 @@ Alternatively, include complete local replacement modules in the archive.
 Discovery and execution disable module downloads and toolchain downloads.
 Assembly does not install dependencies or execute uploaded build scripts.
 
-## Trusted runtime
+## Trusted Go runtime
 
 Prepare the pinned Go base image in the local Docker daemon before building the runtime.
 The runtime script does not pull images automatically.
@@ -42,9 +42,47 @@ Its labels identify the source-base contract and runtime profile.
 The assembler rejects runtime images with ONBUILD instructions.
 The script sends only the compiled runner directory as build context.
 
+## Trusted Playwright runtime
+
+Prepare the pinned Playwright base image in the local Docker daemon.
+Build the trusted runtime once:
+
+```sh
+bash scripts/build-playwright-runtime.sh
+```
+
+The script sends only the runner declarations and implementation as build context.
+It reuses cached dependency layers. It does not include TestStudio self-tests, the UI, or controller files.
+The image contains the browser toolchain and pinned Playwright packages.
+Suite images add only validated source files and provenance. Assembly runs no uploaded scripts or dependency installer.
+
+Use runner playwright and buildProfile playwright-node in the suite manifest.
+The moduleRoot contains package.json, package-lock.json, the selected configuration, tests, and helpers.
+Declare the exact @playwright/test version from the trusted runtime as a dependency or development dependency.
+The current runtime uses version 1.64.1.
+The version 3 lockfile contains its root entry and @playwright/test, playwright, and playwright-core at that same version.
+Floating versions, additional packages, workspace dependencies, and uploaded node_modules are rejected by this offline profile.
+Include application source and local helpers in the archive when tests import them.
+The Playwright runner resolves its trusted packages from the runtime, including when moduleRoot is nested.
+Online preparation and additional dependency profiles remain separate required work.
+
+Start the worker with playwright-runtime instead of, or beside, go-runtime:
+
+```sh
+bin/teststudio-prepare --database .data/teststudio.db \
+  --playwright-runtime sha256:TRUSTED_BROWSER_RUNTIME_IMAGE \
+  --execution-location local --build-directory .data/source-builds
+```
+
+Configure each runtime needed at the location. Workers leave jobs for other runtimes queued.
+They scan subsequent queue pages to avoid starving an available runner behind pending work for another runtime.
+Recovery keeps both ownership profiles available when new builds are disabled.
+Current local coded preparation requires a suite without a target environment.
+Tests can start isolated application fixtures or render source directly in their own worker.
+
 ## Server worker and interface
 
-Enable source bundle staging on the API:
+Enable Go and Playwright source bundle staging on the API:
 
 ```sh
 bin/teststudio --local --source-bundles
@@ -64,10 +102,10 @@ The worker shares the metadata database and execution location with the API.
 SQLite supports local processes that share the same database file.
 Each local location uses the same Docker daemon and private build directory across its workers.
 PostgreSQL can also provide the shared metadata database.
-Omit go-runtime to recover recorded resources without dispatching new builds.
+Omit both runtime flags to recover recorded resources without dispatching new builds.
 
 Open Sources and choose a suite without a target environment.
-Select a complete ZIP under Go source ZIP and enter its manifest path relative to the ZIP root.
+Select a complete ZIP under Source ZIP and enter its manifest path relative to the ZIP root.
 Select Upload and prepare bundle. Repeating a request with the same key returns its original job.
 The worker records ownership before assembly, then records the image before discovery.
 Builds and discovery do not execute test bodies.

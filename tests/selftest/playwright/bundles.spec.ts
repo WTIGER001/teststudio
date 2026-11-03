@@ -1,16 +1,17 @@
 import { test, expect } from './fixtures'
 import { readFile } from 'node:fs/promises'
-import path from 'node:path'
+import pathModule from 'node:path'
 import { createHash } from 'node:crypto'
 
-const sourceFile = path.join(__dirname, 'fixtures/bundle-go.zip')
+const sourceFile = pathModule.join(__dirname, 'fixtures/bundle-go.zip')
 
 test('ZIP staging retains source and queues cancellable preparation', { tag: '@STUDIO-BUNDLES-001' }, async ({ page, api }) => {
   const { project, path } = await api.scaffold()
+  await api.call('PUT', `${path}/suites/browser-bundles`, { id: 'browser-bundles', name: 'Bundled browser checks', applications: [], requiresTarget: false }, 0)
   await api.call('PUT', `${path}/suites/bundles`, { id: 'bundles', name: 'Bundled Go checks', applications: [], requiresTarget: false }, 0)
   await page.goto(`/projects/${project}/sources`)
   await page.getByLabel('Suite for sources', { exact: true }).selectOption('bundles')
-  await page.getByLabel('Go source ZIP', { exact: true }).setInputFiles(sourceFile)
+  await page.getByLabel('Source ZIP', { exact: true }).setInputFiles(sourceFile)
   await page.getByLabel('Suite manifest path', { exact: true }).fill('suites/totals.json')
   const response = page.waitForResponse(response => response.request().method() === 'POST' && response.url().includes('/source-bundles?'))
   await page.getByRole('button', { name: 'Upload and prepare bundle', exact: true }).click()
@@ -30,6 +31,18 @@ test('ZIP staging retains source and queues cancellable preparation', { tag: '@S
   expect(await retained.body()).toEqual(original)
   await page.getByRole('button', { name: 'Upload and prepare bundle', exact: true }).click()
   expect((await api.call('GET', `${path}/suites/bundles/source-preparations`)).items).toHaveLength(1)
+  expect((await api.call('GET', `${path}/runs`)).items).toEqual([])
+  await page.getByRole('button', { name: 'Cancel preparation', exact: true }).click()
+  await expect(page.getByRole('table', { name: 'Source preparation history' }).getByRole('cell', { name: 'cancelled', exact: true })).toBeVisible()
+  await page.getByLabel('Suite for sources', { exact: true }).selectOption('browser-bundles')
+  await page.getByLabel('Source ZIP', { exact: true }).setInputFiles(pathModule.join(__dirname, 'fixtures/bundle-browser.zip'))
+  await page.getByLabel('Suite manifest path', { exact: true }).fill('suites/browser.json')
+  await page.getByRole('button', { name: 'Upload and prepare bundle', exact: true }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Waiting for a preparation worker' })).toBeVisible()
+  const browser = await api.call('GET', `${path}/suites/browser-bundles/source-preparations`)
+  expect(browser.items).toHaveLength(1)
+  expect(browser.items[0].data.runner).toBe('playwright')
+  expect(browser.items[0].data.state).toBe('received')
   expect((await api.call('GET', `${path}/runs`)).items).toEqual([])
   await page.getByRole('button', { name: 'Cancel preparation', exact: true }).click()
   await expect(page.getByRole('table', { name: 'Source preparation history' }).getByRole('cell', { name: 'cancelled', exact: true })).toBeVisible()
