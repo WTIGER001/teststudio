@@ -92,6 +92,32 @@ STUDIO-NOTIFY-001 passes again after the shared fixture and shutdown changes.
 Owned verification controllers and browser containers stop after checks. The disposable PostgreSQL service also stops.
 Identity linking, pending project access, personal profile UI, role and grant editors, deployment verification, and the remaining full plan stay pending.
 
+### Scoped assignment interface
+
+Added Project access and Installation access screens with predefined role choices and permission details.
+The generated client handles user and group assignment creation, bounded pages, and exact revision-based removal.
+The service returns per-assignment removal authority. Shared-group controls use that result instead of inferred project privileges.
+Forms preserve creation conflicts and stale-removal reason fields until explicit review.
+Scope changes invalidate old requests and close previous editors and actions.
+Self-revocation clears unavailable collections and refreshes the project directory and navigation capabilities.
+Both pages provide contextual help and shared light and dark themes.
+Mobile tables preserve readable columns inside a keyboard-focusable horizontal scroll region.
+
+Added `STUDIO-ROLES-001` to normal TestStudio self-tests.
+The isolated fixture now includes a project administrator and a read-only access reviewer.
+The browser verifies real assignment mutations, recreation conflicts, exact project removal, shared-group restrictions, role delegation, and administrator protection.
+It also verifies blocked installation and foreign-project views, read-only controls, self-revocation, bounded pages, preserved help edits, and both themes.
+The final assignment run passes with complete evidence: `20261103T025912.895503000-47da3217fdbc9caf1d095c9f`.
+Expanded help passes: `20261103T025926.025821000-16446d2f91cf5b6422877d15`.
+The identity workflow passes with the updated fixture and navigation: `20261103T025943.041337000-44d75a7033dd3d027f5a5f64`.
+Retained screenshots pass visual review. No unexpected browser runtime errors or document overflow remain in these workflows.
+Owned controllers, browser containers, and output volumes are gone after verification.
+
+Targeted API and generated-client checks pass on SQLite and local PostgreSQL with race detection.
+Five focused pure utility checks and the Angular production build pass.
+The utility runner accepts selected test files, compiles runtime dependencies through the pinned TypeScript package, and removes temporary output.
+Custom policy editors, effective-access explanations, pending project access, managed local credentials, and the remaining full plan stay pending.
+
 ### Scoped predefined assignment APIs
 
 Added predefined role choices and bounded assignment APIs for installation and project scopes.

@@ -2,6 +2,7 @@
   "schemaVersion": "teststudio.selftest/v1",
   "source": "teststudio-selftests",
   "tests": [
+    { "id": "STUDIO-ROLES-001", "title": "Scoped role assignments, delegation, and durable revocation controls", "selector": "@STUDIO-ROLES-001", "category": "Administration" },
     { "id": "STUDIO-ACCESS-001", "title": "Identity administration, scoped groups, and session controls", "selector": "@STUDIO-ACCESS-001", "category": "Administration" },
     { "id": "STUDIO-NOTIFY-001", "title": "Notification channels, durable delivery, and retained attempts", "selector": "@STUDIO-NOTIFY-001", "category": "Notifications" },
     { "id": "STUDIO-SCHEDULE-001", "title": "Durable schedules, editable configuration, and retained firing history", "selector": "@STUDIO-SCHEDULE-001", "category": "Schedules" },

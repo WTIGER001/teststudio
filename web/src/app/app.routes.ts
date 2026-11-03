@@ -3,6 +3,8 @@ import type { Routes } from '@angular/router'
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'projects' },
   { path: 'projects', data: { helpTopic: 'projects' }, loadComponent: () => import('./features/projects/projects.page').then(m => m.ProjectsPage) },
+  { path: 'settings/access', data: { helpTopic: 'installation-access' }, loadComponent: () => import('./features/access/assignments.page').then(m => m.AssignmentsPage) },
+  { path: 'projects/:projectId/members', data: { helpTopic: 'project-access' }, loadComponent: () => import('./features/access/assignments.page').then(m => m.AssignmentsPage) },
   { path: 'settings/users', data: { helpTopic: 'users' }, loadComponent: () => import('./features/access/users.page').then(m => m.UsersPage) },
   { path: 'settings/users/:userId', data: { helpTopic: 'user' }, loadComponent: () => import('./features/access/user-detail.page').then(m => m.UserDetailPage) },
   { path: 'settings/groups', data: { helpTopic: 'groups' }, loadComponent: () => import('./features/access/groups.page').then(m => m.GroupsPage) },

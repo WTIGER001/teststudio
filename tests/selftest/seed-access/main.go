@@ -71,6 +71,15 @@ func run() error {
 	if err := directory.SyncExternalGroups(ctx, user.ID, group.ManagedBy, []string{group.ID}, time.Now().Add(time.Hour)); err != nil {
 		return err
 	}
+	reader, err := directory.ResolveExternal(ctx, "https://identity.selftest.invalid", "access-reader", "Access reviewer", "", false, true)
+	if err != nil {
+		return err
+	}
+	for _, name := range []string{"projects.read", "members.read", "permissions.read", "roles.read"} {
+		if err := auth.Engine.CreateGrant(ctx, permissions.Grant{OwnerKind: permissions.PrincipalUser, OwnerID: reader.ID, Effect: permissions.EffectAllow, TeamScope: project, PermissionName: "teststudio." + name}); err != nil {
+			return err
+		}
+	}
 	service := &sessions.Service{Store: db, Directory: directory, Origin: "http://127.0.0.1:8040"}
 	w := httptest.NewRecorder()
 	if _, err := service.Create(ctx, w, user.ID, "isolated-browser-fixture", time.Now().Add(time.Hour)); err != nil {
@@ -80,5 +89,13 @@ func run() error {
 	if len(cookies) != 1 {
 		return errors.New("fixture session cookie is unavailable")
 	}
-	return json.NewEncoder(os.Stdout).Encode(map[string]any{"userId": user.ID, "groupId": group.ID, "cookie": cookies[0].Value})
+	rw := httptest.NewRecorder()
+	if _, err := service.Create(ctx, rw, reader.ID, "isolated-browser-fixture", time.Now().Add(time.Hour)); err != nil {
+		return err
+	}
+	readerCookies := rw.Result().Cookies()
+	if len(readerCookies) != 1 {
+		return errors.New("reader session cookie is unavailable")
+	}
+	return json.NewEncoder(os.Stdout).Encode(map[string]any{"userId": user.ID, "groupId": group.ID, "cookie": cookies[0].Value, "readerId": reader.ID, "readerCookie": readerCookies[0].Value})
 }

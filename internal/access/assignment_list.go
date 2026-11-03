@@ -64,6 +64,10 @@ func (s *Service) ListAssignments(ctx context.Context, actor, project, cursor st
 		if err != nil {
 			return result, err
 		}
+		row, err = s.assignmentCapability(ctx, actor, row)
+		if err != nil {
+			return result, err
+		}
 		result.Items = append(result.Items, row)
 	}
 	return result, nil

@@ -146,3 +146,19 @@ func (s *Service) ListRoles(ctx context.Context, actor, project string) ([]RoleV
 	}
 	return roles, nil
 }
+
+func (s *Service) assignmentCapability(ctx context.Context, actor string, row AssignmentRecord) (AssignmentRecord, error) {
+	d := AssignmentDefinition{PrincipalKind: row.Data.PrincipalKind, PrincipalID: row.Data.PrincipalID, RoleID: row.Data.RoleID}
+	err := s.assignmentAuthority(ctx, actor, row.Project, d, true)
+	if err == nil && d.PrincipalKind == permissions.PrincipalGroup {
+		_, _, err = s.group(ctx, actor, d.PrincipalID, "groups.manage")
+	}
+	if errors.Is(err, authorization.ErrForbidden) || errors.Is(err, storage.ErrNotFound) {
+		return row, nil
+	}
+	if err != nil {
+		return AssignmentRecord{}, err
+	}
+	row.Data.CanRevoke = true
+	return row, nil
+}

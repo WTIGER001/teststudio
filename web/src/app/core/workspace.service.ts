@@ -34,6 +34,11 @@ export class WorkspaceService {
     await this.loadCapabilities()
   }
 
+  async refreshAccess(): Promise<void> {
+    try { await this.load() }
+    catch { this.projects.set([]); await this.loadCapabilities() }
+  }
+
   async loadCapabilities(): Promise<void> {
     const generation = ++this.capabilityGeneration
     const project = this.projectId()

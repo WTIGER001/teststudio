@@ -1,0 +1,177 @@
+import { test, expect, expectHTTPFailure } from './fixtures'
+
+test('Scoped role assignments, delegation, and durable revocation controls', { tag: '@STUDIO-ROLES-001' }, async ({ page, api }, testInfo) => {
+  const { project, path } = await api.scaffold(), other = await api.scaffold()
+  const user = 'role-reviewer', group = 'role-reviewers', shared = 'shared-role-reviewers'
+  const base = `${path}/role-assignments`, editorPath = `${base}/user/${user}/builtin.teststudio.editor`
+  const table = () => page.getByRole('table', { name: 'Role assignments in the selected scope', exact: true })
+  const row = (id: string, role: string) => table().getByRole('row').filter({ has: page.getByText(id, { exact: true }) }).filter({ hasText: role })
+  const nav = () => page.getByRole('navigation', { name: 'Main navigation' })
+  const form = async (kind: 'user' | 'group', id: string, role: string, reason: string) => {
+    await page.getByRole('button', { name: '+ Add role', exact: true }).click()
+    await page.getByLabel('Principal type', { exact: true }).selectOption(kind)
+    await page.getByLabel('Registered principal identifier', { exact: true }).fill(id)
+    await page.getByLabel('Role to assign', { exact: true }).selectOption(`builtin.teststudio.${role}`)
+    await page.getByLabel('Assignment reason', { exact: true }).fill(reason)
+  }
+  const assign = async (kind: 'user' | 'group', id: string, role: string) => {
+    await form(kind, id, role, 'Approve scoped access')
+    await page.getByRole('button', { name: 'Assign role', exact: true }).click()
+    await expect(page.getByRole('heading', { name: 'Add role assignment', exact: true })).toHaveCount(0)
+  }
+  const confirm = async (reason: string) => { await page.getByLabel('Reason', { exact: true }).fill(reason); await page.getByRole('button', { name: 'Confirm action', exact: true }).click() }
+  await api.call('POST', '/api/v1/users', { id: user, name: 'Scoped review operator' })
+  await api.call('POST', '/api/v1/groups', { id: group, name: 'Project reviewers', projectId: project })
+  await api.call('POST', '/api/v1/groups', { id: shared, name: 'Shared reviewers' })
+  await api.call('PUT', `/api/v1/groups/${group}/members/${user}`, {}, 0)
+
+  await test.step('Assign user and group roles through the page and retain conflicted form entries', async () => {
+    await page.goto(`/projects/${project}/members`)
+    await expect(page.getByRole('heading', { name: 'Project access', exact: true })).toBeVisible()
+    await page.getByText('View permissions for Viewer', { exact: true }).click()
+    await expect(page.getByText('teststudio.catalog.read', { exact: true }).first()).toBeVisible()
+    await assign('user', user, 'editor')
+    await expect(row(user, 'Catalog editor')).toContainText(project)
+    const stored = await api.call('GET', editorPath)
+    expect(stored.data.bindingValues).toEqual({ team: project }); expect(stored.data.canRevoke).toBe(true)
+    await form('user', user, 'editor', 'Keep this unsaved reason')
+    await expectHTTPFailure(page, 'POST', base, 409, () => page.getByRole('button', { name: 'Assign role', exact: true }).click())
+    await expect(page.getByLabel('Assignment reason', { exact: true })).toHaveValue('Keep this unsaved reason')
+    await expect(page.getByRole('button', { name: 'Assign role', exact: true })).toBeDisabled()
+    await page.getByRole('button', { name: 'Refresh current assignments', exact: true }).click()
+    await expect(page.getByLabel('Registered principal identifier', { exact: true })).toHaveValue(user)
+    await page.getByRole('button', { name: 'Close assignment editor', exact: true }).click()
+    await assign('group', group, 'operator')
+    await expect(row(group, 'Operator')).toContainText('Group · Active')
+  })
+
+  await test.step('Reject stale removal after real revocation and recreation, then remove only the exact assignment', async () => {
+    await api.call('POST', `${other.path}/role-assignments`, { principalKind: 'user', principalId: user, roleId: 'builtin.teststudio.editor', reason: 'Independent second project' })
+    await row(user, 'Catalog editor').getByRole('button', { name: 'Remove role', exact: true }).click()
+    await expect(page.getByRole('heading', { name: 'Remove role assignment', exact: true })).toBeFocused()
+    const previous = await api.call('GET', editorPath)
+    await api.call('DELETE', editorPath, { reason: 'Concurrent revocation' }, previous.revision)
+    const current = await api.call('POST', base, { principalKind: 'user', principalId: user, roleId: 'builtin.teststudio.editor', reason: 'Concurrent recreation' })
+    expect(current.revision).toBeGreaterThan(previous.revision)
+    await page.getByLabel('Reason', { exact: true }).fill('Keep removal review text')
+    await expectHTTPFailure(page, 'DELETE', editorPath, 409, () => page.getByRole('button', { name: 'Confirm action', exact: true }).click())
+    await expect(page.getByLabel('Reason', { exact: true })).toHaveValue('Keep removal review text')
+    await expect(page.getByRole('button', { name: 'Confirm action', exact: true })).toBeDisabled()
+    await page.getByRole('button', { name: 'Cancel action', exact: true }).click()
+    await page.getByRole('button', { name: 'Refresh access', exact: true }).click()
+    await expect(page.getByRole('button', { name: 'Refresh access', exact: true })).toBeEnabled()
+    await row(user, 'Catalog editor').getByRole('button', { name: 'Remove role', exact: true }).click()
+    await confirm('   ')
+    await expect(page.getByRole('alert')).toContainText('Enter a reason')
+    await confirm('Remove this project role only')
+    await expect(row(user, 'Catalog editor')).toHaveCount(0)
+    await expect(row(group, 'Operator')).toBeVisible()
+    expect((await api.call('GET', `${other.path}/role-assignments/user/${user}/builtin.teststudio.editor`)).data.bindingValues.team).toBe(other.project)
+  })
+
+  await test.step('Keep help edits and render project and installation controls in both themes', async () => {
+    await form('user', user, 'viewer', 'Unsaved scope review')
+    await page.getByRole('button', { name: 'Help', exact: true }).click()
+    await expect(page.getByRole('dialog', { name: 'Project access help', exact: true })).toContainText('Delegation and group ownership')
+    await page.keyboard.press('Escape')
+    await expect(page.getByLabel('Assignment reason', { exact: true })).toHaveValue('Unsaved scope review')
+    for (const theme of ['light', 'dark']) {
+      await page.getByLabel('Color theme').selectOption(theme)
+      await page.setViewportSize(theme === 'light' ? { width: 1280, height: 900 } : { width: 390, height: 844 })
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+      await testInfo.attach(`project-access-${theme}`, { body: await page.screenshot({ fullPage: true, animations: 'disabled' }), contentType: 'image/png' })
+    }
+    await page.getByLabel('Workspace', { exact: true }).selectOption(other.project)
+    await nav().getByRole('link', { name: 'Project access', exact: true }).click()
+    await expect(page.getByRole('heading', { name: 'Add role assignment', exact: true })).toHaveCount(0)
+    await expect(row(group, 'Operator')).toHaveCount(0)
+    await nav().getByRole('link', { name: 'Installation access', exact: true }).click()
+    await expect(page.getByRole('heading', { name: 'Installation access', exact: true })).toBeVisible()
+    await expect(row('local-administrator', 'Installation administrator')).toContainText('Bootstrap or operator-managed')
+    await assign('user', user, 'installation-admin')
+    await row(user, 'Installation administrator').getByRole('button', { name: 'Remove role', exact: true }).click()
+    await confirm('Remove the temporary installation assignment')
+    await expect(row(user, 'Installation administrator')).toHaveCount(0)
+    await row('local-administrator', 'Installation administrator').getByRole('button', { name: 'Remove role', exact: true }).click()
+    const rootPath = '/api/v1/role-assignments/user/local-administrator/builtin.teststudio.installation-admin'
+    await page.getByLabel('Reason', { exact: true }).fill('Protect final administration')
+    await expectHTTPFailure(page, 'DELETE', rootPath, 422, () => page.getByRole('button', { name: 'Confirm action', exact: true }).click())
+    await expect(page.getByRole('alert')).toContainText('last usable installation administrator')
+    await page.getByRole('button', { name: 'Cancel action', exact: true }).click()
+    await page.getByRole('button', { name: 'Help', exact: true }).click()
+    await expect(page.getByRole('dialog', { name: 'Installation access help', exact: true })).toContainText('Retained access')
+    await page.keyboard.press('Escape')
+    for (const theme of ['light', 'dark']) {
+      await page.getByLabel('Color theme').selectOption(theme)
+      await page.setViewportSize(theme === 'light' ? { width: 1280, height: 900 } : { width: 390, height: 844 })
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+      await testInfo.attach(`installation-access-${theme}`, { body: await page.screenshot({ fullPage: true, animations: 'disabled' }), contentType: 'image/png' })
+    }
+    await page.setViewportSize({ width: 1280, height: 900 })
+  })
+
+  await test.step('Use real project administrator and read-only sessions, then clear access after self-revocation', async () => {
+    await api.call('POST', base, { principalKind: 'group', principalId: shared, roleId: 'builtin.teststudio.publisher', reason: 'Shared group with scoped publication' })
+    const original = await page.context().cookies('http://127.0.0.1:8040')
+    const response = await page.request.post('http://127.0.0.1:8050/access/prepare', { data: { project } })
+    expect(response.ok()).toBe(true)
+    const fixture = await response.json()
+    const session = async (cookie: string) => {
+      await page.context().addCookies([{ name: 'teststudio_session', value: cookie, domain: '127.0.0.1', path: '/', httpOnly: true, sameSite: 'Lax', secure: false }])
+      await page.goto(`/projects/${project}/members`)
+      await expect(row(group, 'Operator')).toBeVisible()
+    }
+    try {
+      await session(fixture.cookie)
+      await expect(nav().getByRole('link', { name: 'Installation access', exact: true })).toHaveCount(0)
+      await expect(nav().getByRole('link', { name: 'Users', exact: true })).toHaveCount(0)
+      await expect(row(shared, 'Publisher')).toContainText('Read only')
+      await expect(row(shared, 'Publisher').getByRole('button', { name: 'Remove role', exact: true })).toHaveCount(0)
+      await expect(row(group, 'Operator').getByRole('button', { name: 'Remove role', exact: true })).toBeVisible()
+      await form('user', user, 'editor', 'Project owner approval')
+      await expect(page.getByLabel('Role to assign', { exact: true }).getByRole('option', { name: 'Installation administrator', exact: true })).toHaveCount(0)
+      await page.getByRole('button', { name: 'Assign role', exact: true }).click()
+      await expect(row(user, 'Catalog editor')).toBeVisible()
+      await page.goto('/settings/access')
+      await expect(page.getByRole('alert')).toContainText('Membership and permission read authority is required')
+      await expect(page.getByRole('button', { name: '+ Add role', exact: true })).toHaveCount(0)
+      await expect(row('local-administrator', 'Installation administrator')).toHaveCount(0)
+      await page.goto(`/projects/${other.project}/members`)
+      await expect(page.getByRole('alert')).toContainText('Membership and permission read authority is required')
+      await expect(table().getByRole('row')).toHaveCount(1)
+      await session(fixture.readerCookie)
+      await expect(page.getByRole('button', { name: '+ Add role', exact: true })).toHaveCount(0)
+      await expect(table().getByRole('button', { name: 'Remove role', exact: true })).toHaveCount(0)
+      await expect(row(user, 'Catalog editor')).toContainText('Read only')
+      await session(fixture.cookie)
+      await row(fixture.userId, 'Project administrator').getByRole('button', { name: 'Remove role', exact: true }).click()
+      await confirm('End this project management assignment')
+      await expect(page.getByRole('alert')).toContainText('Membership and permission read authority is required')
+      await expect(nav().getByRole('link', { name: 'Project access', exact: true })).toHaveCount(0)
+      await expect(table().getByRole('row')).toHaveCount(1)
+      await expect(page.getByLabel('Workspace', { exact: true }).getByRole('option')).toHaveCount(1)
+    } finally { await page.context().addCookies(original); await page.goto(`/projects/${project}/members`) }
+    await expect(page.getByRole('button', { name: '+ Add role', exact: true })).toBeVisible()
+  })
+
+  await test.step('Continue bounded assignment pages and reset to the first scan', async () => {
+    for (let index = 0; index < 31; index++) {
+      const id = `role-page-${index}`
+      await api.call('POST', '/api/v1/users', { id, name: `Paged reviewer ${index}` })
+      await api.call('POST', base, { principalKind: 'user', principalId: id, roleId: 'builtin.teststudio.viewer', reason: 'Bounded assignment verification' })
+    }
+    await page.getByRole('button', { name: 'Refresh access', exact: true }).click()
+    const more = page.getByRole('button', { name: 'More assignments', exact: true })
+    await expect(more).toBeVisible()
+    for (let scans = 0; scans < 4 && await more.count(); scans++) {
+      const before = await table().getByRole('row').count()
+      await more.click()
+      await expect.poll(() => table().getByRole('row').count()).toBeGreaterThan(before)
+    }
+    await expect(more).toHaveCount(0)
+    await expect(table().getByRole('row')).toHaveCount(35)
+    await page.getByRole('button', { name: 'Refresh assignments', exact: true }).click()
+    await expect(more).toBeVisible()
+    expect(await table().getByRole('row').count()).toBeLessThan(35)
+  })
+})

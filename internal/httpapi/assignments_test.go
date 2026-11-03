@@ -61,6 +61,9 @@ func TestAccessAssignmentAPIKeepsExactProjectBindingsAndRecreationRevisions(t *t
 	for _, project := range []string{"alpha", "beta"} {
 		path := "/api/v1/projects/" + project + "/role-assignments"
 		row := accessCall(t, c, "POST", path, assignBody("user", "member", "editor"), "", 200)
+		if row["data"].(map[string]any)["canRevoke"] != true {
+			t.Fatal("administrator cannot manage its assignment", row)
+		}
 		if row["revision"] != float64(2) || row["updatedAt"] == nil || row["data"].(map[string]any)["managed"] != true {
 			t.Fatal(row)
 		}
@@ -167,6 +170,9 @@ func TestAccessAssignmentAPILimitsDelegationAndSharedGroupChanges(t *testing.T) 
 	assignmentSignInAs(t, c, "manager")
 	sharedPath := "/api/v1/projects/alpha/role-assignments/group/shared/builtin.teststudio.publisher"
 	shared := accessCall(t, c, "GET", sharedPath, nil, "", 200)
+	if shared["data"].(map[string]any)["canRevoke"] != false {
+		t.Fatal("shared group authority was inferred from project authority", shared)
+	}
 	accessCall(t, c, "DELETE", sharedPath, map[string]string{"reason": "Cannot manage a shared group"}, assignmentRevision(shared), 403)
 	accessCall(t, c, "GET", "/api/v1/groups/shared", nil, "", 403)
 	memberObject := "alpha/user/member"

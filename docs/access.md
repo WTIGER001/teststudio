@@ -4,7 +4,7 @@ TestStudio stores user profiles, external identity links, groups, and membership
 The permission library evaluates access. The directory does not infer project authority from an email address or group name.
 
 Users and Groups screens use the administrative APIs for profiles, account state, group metadata, local membership, and session revocation.
-Managed local credentials, identity linking, custom role management, assignment editors, pending project access, and the personal profile screen remain pending.
+Managed local credentials, identity linking, custom role management, pending project access, and the personal profile screen remain pending.
 The full acceptance ledger remains in [Implementation verification](implementation.md).
 The [OpenAPI contract](../contracts/openapi.yaml) describes the implemented identity and predefined assignment routes. Other route families remain pending.
 
@@ -222,7 +222,7 @@ Its transaction adapter supports assignment changes and rejects other policy wri
 SQLite uses transaction-bound record storage.
 An exact revocation removes one role and binding combination.
 An empty binding map does not remove assignments with project bindings.
-The assignment API uses this transaction. The assignment interface and custom policy transactions remain pending.
+The assignment API and interface use this transaction. Custom policy transactions remain pending.
 
 ## Predefined role assignments
 
@@ -263,3 +263,45 @@ Changes reach existing service instances without another sign-in.
 The shared directory revision serializes competing role revocation and account-state changes.
 The last-administrator check uses the proposed assignment state inside the transaction.
 A rejected change leaves its assignment, management record, audit history, and directory revision unchanged.
+
+## Assignment interface
+
+Open Project access from a selected workspace or Installation access from installation navigation.
+These navigation entries require the corresponding membership and permission read authority.
+Role choices show predefined roles, their registered permissions, disabled state, and current delegation authority.
+Select Add role, choose User or Group, enter the registered identifier, select a role, and enter a reason.
+The form shows the exact scope. It creates no credentials or identity links.
+Local and OIDC profiles use the same internal identifiers.
+
+Assignment rows show principal activity, role state, exact scope, and the last managed change when available.
+The server returns each assignment's current removal capability as `canRevoke`.
+The interface uses that capability for removal controls. It does not infer shared-group authority from project access.
+Removal displays the exact target and impact before it accepts a reason.
+The last-administrator safeguard still runs when the action reaches the server.
+
+A creation conflict preserves entered values and blocks another submission until explicit review and reopening.
+A removal conflict preserves the reason. Cancel, refresh access, inspect the current record, and open a new action.
+Revoking your own access refreshes capabilities and the project directory, then clears unavailable assignment data.
+Scope changes close old editors and actions. Late responses cannot replace the new scope.
+Refresh and More assignments provide bounded scans. Empty pages and request errors remain distinct.
+
+Both pages provide contextual Introduction, Concepts, and Tutorials help.
+Help preserves open edits. Shared theme tokens support light and dark layouts.
+Narrow screens keep the table inside a keyboard-focusable horizontal scroll region.
+The `STUDIO-ROLES-001` self-test verifies actual creation, stale removal after recreation, role delegation, shared groups, read-only access, and self-revocation.
+It also verifies administrator protection, pagination, preserved help edits, both themes, and mobile document width.
+
+Run the focused workflow with:
+
+```sh
+bash scripts/test-self.sh --test=STUDIO-ROLES-001
+```
+
+Run selected pure interface utility checks with:
+
+```sh
+node scripts/test-ui-utils.mjs web/src/app/features/access/assignment.utils.test.ts
+```
+
+The utility runner compiles temporary CommonJS files through the pinned TypeScript dependency.
+It preserves runtime relative dependencies, accepts Node built-ins, rejects framework imports, and removes temporary output after execution.

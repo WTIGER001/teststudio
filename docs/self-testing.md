@@ -19,7 +19,7 @@ An isolated controller registers the catalog, publishes an immutable local image
 Each test container starts a new TestStudio instance with its own SQLite database.
 The instances use loopback endpoints inside the container. They have no external network access.
 The suite tests themes, mobile layout, page help, catalog publication, HTTP assertions, native execution, timing, baseline reset, timeout reruns, and trends.
-It also tests durable schedules, completion notifications, identity administration, scoped groups, and session controls.
+It also tests durable schedules, completion notifications, identity administration, scoped groups, role assignments, and session controls.
 Native check runs remain separate from the outer Playwright run. They cannot recurse into browser self-tests.
 
 The script stops its controller after verification. It preserves its database and private artifacts under `.data/selftest-verification.*`.
@@ -49,7 +49,7 @@ The browser uses a non-UTC timezone and verifies the stored UTC membership expir
 
 The self-test image includes a dedicated directory preparer for authority checks.
 It uses product identity, membership, role, and session services against the worker's fixed disposable database.
-The preparer creates a project administrator and provider-managed membership with a fresh opaque session.
+The preparer creates a project administrator, a read-only access reviewer, and provider-managed membership with fresh opaque sessions.
 The browser checks installation and foreign-project rejection, hidden installation navigation, and read-only external membership.
 Dedicated OIDC tests verify provider sign-in separately.
 
@@ -57,6 +57,20 @@ The preparer runs only inside the isolated self-test image. Its local fixture ro
 The product HTTP server provides no fixture preparation route.
 The wrapper awaits its owned service and helper processes during shutdown.
 The normal worker cleanup removes the test browser container and its output volume.
+
+## Assignment interface checks
+
+Run the focused assignment workflow with:
+
+```sh
+bash scripts/test-self.sh --test=STUDIO-ROLES-001
+```
+
+The workflow uses actual API mutations and browser-issued role actions.
+It verifies exact project scope, duplicate creation, stale removal after recreation, preserved reason fields, and administrator protection.
+Project-administrator and read-only sessions verify navigation, shared-group controls, scoped delegation, and rejected installation or foreign-project views.
+Self-revocation clears assignment data, project choices, and unavailable navigation without another sign-in.
+Bounded pages, contextual help, light and dark screenshots, and mobile width checks use normal retained evidence.
 
 ## Reuse a local installation
 

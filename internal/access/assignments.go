@@ -40,6 +40,7 @@ type AssignmentView struct {
 	PrincipalActive bool   `json:"principalActive"`
 	RoleName        string `json:"roleName"`
 	RoleDisabled    bool   `json:"roleDisabled"`
+	CanRevoke       bool   `json:"canRevoke"`
 	Managed         bool   `json:"managed"`
 }
 
@@ -144,7 +145,10 @@ func (s *Service) ReadAssignment(ctx context.Context, actor, project string, d A
 		return AssignmentRecord{}, storage.ErrNotFound
 	}
 	view, _, err := s.assignmentRecord(ctx, project, key)
-	return view, err
+	if err != nil {
+		return AssignmentRecord{}, err
+	}
+	return s.assignmentCapability(ctx, actor, view)
 }
 
 func (s *Service) CreateAssignment(ctx context.Context, actor, project string, d AssignmentDefinition) (AssignmentRecord, error) {
@@ -259,6 +263,9 @@ func (s *Service) changeAssignment(ctx context.Context, actor, project string, d
 		}
 		if !remove {
 			result, _, err = bound.assignmentRecord(ctx, project, key)
+			if err == nil {
+				result, err = bound.assignmentCapability(ctx, actor, result)
+			}
 		}
 		return err
 	})

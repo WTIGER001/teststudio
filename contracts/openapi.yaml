@@ -1546,6 +1546,9 @@
       "type": "object"
       "additionalProperties": false
       "properties":
+        "canRevoke":
+          "type": "boolean"
+          "description": "Current delegation and principal ownership authority. The last-administrator safeguard still applies at mutation time."
         "principalKind":
           "type": "string"
           "enum":
@@ -1568,6 +1571,7 @@
         "managed":
           "type": "boolean"
       "required":
+        - "canRevoke"
         - "principalKind"
         - "principalId"
         - "roleId"

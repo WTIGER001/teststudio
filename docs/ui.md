@@ -147,3 +147,17 @@ Each new page includes contextual help with Introduction, Concepts, and Tutorial
 Shared tokens support light and dark themes. Mobile detail actions sit below the heading, and tables scroll within their panels.
 The focused self-test verifies real local API mutations, conflicts, membership, archive, restoration, administrator protection, pagination, and session revocation.
 The checked views have no document overflow or unexpected browser runtime errors.
+
+## Role assignments
+
+Project access and Installation access provide scoped predefined role administration.
+Focused services handle permissions, bounded collections, creation, and reason-based removal.
+The shared generated client supplies the same API contract as the service.
+Role choices expose registered actions and current delegation capability.
+Assignment rows use server-provided removal capabilities, including shared-group ownership checks.
+Creation and removal conflicts preserve entered values and require explicit review.
+Self-revocation refreshes project choices and capabilities, then clears unavailable private collections.
+Changing scope closes previous editors and invalidates old responses.
+Each page includes contextual help and uses shared light and dark tokens.
+Narrow screens keep readable table columns inside a keyboard-focusable horizontal scroll region.
+The focused self-test exercises real project-administrator and read-only sessions, mutations, conflicts, pagination, help, and administrator protection.
