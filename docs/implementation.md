@@ -66,6 +66,38 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Record feature commits and targeted validation here.
 
+### Custom policy interface and temporary access preview
+
+Added installation and project Roles and permissions pages, scoped detail views, and focused policy editor components.
+Editors show registered action descriptions, explicit effects, exact object scope, precise UTC expiry, and bounded inheritance choices.
+Server-computed creation, management, and delegation capabilities control the interface.
+Predefined and custom assignment choices share existing guarded workflows. Custom choices expose exact policy links and bounded continuation.
+The editor retains its opened revision through visible refreshes. Conflicts preserve entries and require explicit reload before another save.
+Lost role read access clears private details and open editor values, including after a rejected preview.
+State actions identify their target and impact, require reasons, and retain last-administrator protection.
+Both pages provide contextual Introduction, Concepts, and Tutorials help with preserved unsaved values.
+
+Added a proposed policy preview through the generated API client.
+Current and proposed decisions use the permission service in one transaction that always rolls back temporary policy, assignment, audit, and directory changes.
+The preview checks subject administration and permission inspection authority. Existing grants, group roles, denies, and disabled users remain effective.
+Changed decisions appear by default. Unchanged permissions remain available, and altered inputs invalidate the displayed preview.
+The OpenAPI 0.5 contract and generated identity client now contain 44 operations.
+
+STUDIO-POLICY-001 verifies real policy creation, exact rules, expiry, inheritance, group assignment, conflict retention, and explicit disabling and restoration.
+It verifies preview rollback, stale comparisons, read-only controls, lost access during editing, bounded pages, and the last usable administrator guard.
+Light, dark, 390-pixel, and contextual help workflows pass with complete evidence and no unexpected browser runtime errors.
+The final policy workflow passes: `20261103T050900.119419000-aa688a7b9b8fe9b0bf7d7235`.
+Help passes: `20261103T050204.102684000-a29eef838ee0d20a41ed1588`.
+Assignments pass: `20261103T050221.000765000-34bc3f75005bf38763decca3`.
+Stacked trends pass: `20261103T050451.649733000-d5d95cd39733ed77f297b592`.
+Existing help, assignment, and stacked-trend browser workflows pass after the shared navigation and row-header changes.
+Visual review confirms readable exact identifiers, theme tokens, and contained table scrolling.
+Focused policy, capability, preview, assignment, administrator guard, and generated-client race checks pass on SQLite and disposable local PostgreSQL.
+Three pure interface utility checks and the production Angular build pass.
+Owned browser containers, output volumes, PostgreSQL containers, and verification controllers exit after checks.
+
+Direct principal grant management, built-in override administration, complete effective-access source explanations, and the remaining full plan stay pending.
+
 ### Managed custom role APIs
 
 Added custom role creation, detail, bounded listing, and revision-based updates through the identity API.

@@ -1,6 +1,28 @@
 import type { HelpPage } from './help.models'
 
 export const helpPages: Record<string, HelpPage> = {
+  roles: {
+    id: 'roles', title: 'Roles and permissions',
+    introduction: ['Inspect predefined roles and manage custom policies in the displayed installation or project scope.'],
+    concepts: [
+      { title: 'Permanent ownership', description: 'A custom role belongs to one scope. Its identifier and ownership cannot change. Installation policies can grant access across projects. Project policies use one exact project.' },
+      { title: 'Explicit policy', description: 'Rules allow or deny registered actions, optionally for an exact object and expiry. Denies take precedence. Object rules do not grant descendant access.' },
+      { title: 'Predefined and custom roles', description: 'Predefined definitions are code managed. Custom roles support editable rules and inheritance. Creating a policy does not assign it to anyone.' },
+      { title: 'Bounded catalog', description: 'More custom roles continues a bounded scan. A filtered page can contain no readable records and still have another page.' }
+    ],
+    tutorials: [{ title: 'Create a policy', steps: ['Read the ownership scope and select + Create role.', 'Enter Role name, a permanent Role identifier, and an optional Role description.', 'Use + Add permission rule. Select an action and effect. Leave Exact object empty for the ownership scope, or enter an exact resource such as suite/health.', 'Refresh rule permissions after changing an object. Enter an optional complete UTC expiry timestamp.', 'Use + Inherit role to include existing managed roles from this scope.', 'Enter a Policy change reason and select Save role policy. Open the new role to inspect it.'] }, { title: 'Inspect and assign a role', steps: ['Open a custom role from the catalog. Inspect its rules and inherited policies.', 'Use Project access or Installation access to assign an authorized role to an existing user or group.', 'Read More custom role choices when the required role is outside the first choice page.'] }]
+  },
+  role: {
+    id: 'role', title: 'Role details',
+    introduction: ['Review this stored policy and its permanent scope. Authorized editors can change its rules or enable and disable effective access.'],
+    concepts: [
+      { title: 'Inheritance and authority', description: 'Inherited roles must belong to this scope. The service rejects cycles and checks affected parent roles. Custom delegation requires each rule action and delegation authority.' },
+      { title: 'Disabled policy', description: 'Disabling withdraws direct and inherited access while retaining the definition and assignments. Enabling revalidates and restores the stored policy. The last usable administrator remains protected.' },
+      { title: 'Access preview', description: 'Preview compares current access with the proposed policy for one registered user and optional exact object. Enabled roles are assigned only for the preview. Existing groups, roles, and denies still apply. No changes are saved.' },
+      { title: 'Revision conflicts', description: 'The editor keeps the revision it opened. Refresh role updates the stored view without replacing unsaved edits. Reload stored role explicitly replaces the editor contents after review.' }
+    ],
+    tutorials: [{ title: 'Edit and preview', steps: ['Select Edit role policy. Adjust the name, description, rules, or inherited roles.', 'Enter Preview user identifier and an optional Preview exact object. Select Preview access.', 'Compare Current access and Proposed access. Changed editor fields make the preview out of date.', 'Enter a Policy change reason and select Save role policy. If a conflict appears, review your entries before selecting Reload stored role.'] }, { title: 'Disable or restore access', steps: ['Close the editor after saving or discarding its changes.', 'Select Disable role or Enable role. Read the target and its effect on assignments and parent roles.', 'Enter a reason and select Confirm action.', 'If the action conflicts, cancel, refresh the role, inspect its current state, and open a new action.'] }]
+  },
   'project-access': {
     id: 'project-access', title: 'Project access',
     introduction: ['Review role assignments and manage access for registered users and groups in this project. Local and OIDC identities use the same internal user identifiers.'],

@@ -12,6 +12,10 @@ import (
 )
 
 func (s *Service) SaveRolePolicy(ctx context.Context, actor string, input RolePolicyMutation, revision int64) (storage.Record, error) {
+	return s.changeRolePolicy(ctx, actor, input, revision, nil)
+}
+
+func (s *Service) changeRolePolicy(ctx context.Context, actor string, input RolePolicyMutation, revision int64, inspect func(*Service, bool) error) (storage.Record, error) {
 	if err := reason(input.Reason); err != nil {
 		return storage.Record{}, err
 	}
@@ -64,6 +68,11 @@ func (s *Service) SaveRolePolicy(ctx context.Context, actor string, input RolePo
 		}
 		if err := bound.roleInheritanceAuthority(ctx, actor, value); err != nil {
 			return err
+		}
+		if inspect != nil {
+			if err := inspect(bound, false); err != nil {
+				return err
+			}
 		}
 		hadAdmin := false
 		if value.Project == "" {
@@ -136,7 +145,13 @@ func (s *Service) SaveRolePolicy(ctx context.Context, actor string, input RolePo
 			return err
 		}
 		result, err = bound.Store.Get(ctx, rolePolicyBucket(value.Project), value.ID)
-		return err
+		if err != nil {
+			return err
+		}
+		if inspect != nil {
+			return inspect(bound, true)
+		}
+		return nil
 	})
 	if err != nil {
 		return storage.Record{}, err

@@ -75,10 +75,12 @@ import { HelpComponent } from './features/help/help.component'
               <a [routerLink]="['/projects', app.workspace.projectId(), 'configuration']" routerLinkActive="active"><span aria-hidden="true">⚙</span> Project settings</a>
               @if (app.workspace.can('members.read') && app.workspace.can('permissions.read')) { <a [routerLink]="['/projects', app.workspace.projectId(), 'members']" routerLinkActive="active"><span aria-hidden="true">♧</span> Project access</a> }
               @if (app.workspace.can('groups.read')) { <a [routerLink]="['/projects', app.workspace.projectId(), 'groups']" routerLinkActive="active"><span aria-hidden="true">♙</span> Project groups</a> }
+              @if (app.workspace.can('roles.read')) { <a [routerLink]="['/projects', app.workspace.projectId(), 'roles']" routerLinkActive="active"><span aria-hidden="true">♧</span> Project roles</a> }
             }
             @if (app.workspace.canInstallation('members.read') && app.workspace.canInstallation('permissions.read')) { <a routerLink="/settings/access" routerLinkActive="active"><span aria-hidden="true">♧</span> Installation access</a> }
             @if (app.workspace.canInstallation('users.read')) { <a routerLink="/settings/users" routerLinkActive="active"><span aria-hidden="true">♙</span> Users</a> }
             @if (app.workspace.canInstallation('groups.read')) { <a routerLink="/settings/groups" routerLinkActive="active"><span aria-hidden="true">♧</span> Installation groups</a> }
+            @if (app.workspace.canInstallation('roles.read')) { <a routerLink="/settings/roles" routerLinkActive="active"><span aria-hidden="true">♧</span> Installation roles</a> }
           </nav>
           <div class="sidebar-footer"><span class="status-dot" aria-hidden="true"></span><span>TestStudio<br><small>Built for clear answers.</small></span></div>
         </aside>

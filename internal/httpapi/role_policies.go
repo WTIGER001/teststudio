@@ -9,6 +9,32 @@ import (
 
 func (s *Server) rolePolicyRoutes(m *http.ServeMux) {
 	a := s.accessService()
+	m.HandleFunc("POST /api/v1/roles/preview", s.authorized(func(w http.ResponseWriter, r *http.Request) {
+		var input access.RolePreviewInput
+		if err := body(r, &input); err != nil {
+			problem(w, err)
+			return
+		}
+		preview, err := a.PreviewRolePolicy(r.Context(), actor(r), input)
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		JSON(w, 200, preview)
+	}))
+	m.HandleFunc("GET /api/v1/roles/choices", s.authorized(func(w http.ResponseWriter, r *http.Request) {
+		limit, err := pageLimit(r, 30)
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		page, err := a.CustomRoleChoices(r.Context(), actor(r), r.URL.Query().Get("project"), r.URL.Query().Get("cursor"), limit)
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		JSON(w, 200, page)
+	}))
 	m.HandleFunc("GET /api/v1/permissions", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		items, err := a.PermissionCatalog(r.Context(), actor(r), r.URL.Query().Get("project"), r.URL.Query().Get("object"))
 		if err != nil {
@@ -23,7 +49,7 @@ func (s *Server) rolePolicyRoutes(m *http.ServeMux) {
 			problem(w, err)
 			return
 		}
-		page, err := a.ListRolePolicies(r.Context(), actor(r), r.URL.Query().Get("project"), r.URL.Query().Get("cursor"), limit)
+		page, err := a.RolePolicies(r.Context(), actor(r), r.URL.Query().Get("project"), r.URL.Query().Get("cursor"), limit)
 		if err != nil {
 			problem(w, err)
 			return
@@ -31,7 +57,7 @@ func (s *Server) rolePolicyRoutes(m *http.ServeMux) {
 		JSON(w, 200, page)
 	}))
 	m.HandleFunc("GET /api/v1/roles/{role}", s.authorized(func(w http.ResponseWriter, r *http.Request) {
-		row, err := a.ReadRolePolicy(r.Context(), actor(r), r.PathValue("role"))
+		row, err := a.RolePolicyDetails(r.Context(), actor(r), r.PathValue("role"))
 		if err != nil {
 			problem(w, err)
 			return

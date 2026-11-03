@@ -6,7 +6,8 @@ The permission library evaluates access. The directory does not infer project au
 Users and Groups screens use the administrative APIs for profiles, account state, group metadata, local membership, and session revocation.
 Managed password screens use the same directory, sessions, and permission checks.
 Managed custom role APIs support scoped rules, inheritance, disabled state, and assignment.
-Custom role editors, identity linking, and pending project access remain pending.
+Custom role screens use the same typed API, scope checks, and revision guards.
+Identity linking and pending project access remain pending.
 The full acceptance ledger remains in [Implementation verification](implementation.md).
 The [OpenAPI contract](../contracts/openapi.yaml) describes identity, role policy, permission catalog, and assignment routes. Other route families remain pending.
 
@@ -20,7 +21,7 @@ go run ./cmd/teststudio-client --check
 ```
 
 Run these commands from the repository root.
-The generated module contains all 42 implemented identity and access operations, including managed custom roles and permission descriptions.
+The generated module contains all 44 implemented identity and access operations, including policy previews and custom assignment choices.
 The shared client adapter supplies same-origin sessions, request-forgery protection, and revision headers.
 The client escapes path identifiers and preserves explicit query values.
 Generator checks reject stale output. Nullable expiry and required fields retain their contract types.
@@ -167,6 +168,8 @@ Keep operator access to the database and host under installation control.
 | GET | `/api/v1/roles?project={project}` | List readable predefined project roles and delegation capabilities. Empty scope selects installation roles. |
 | POST | `/api/v1/roles` | Create a managed custom role with scoped rules, inheritance, and a reason. |
 | GET | `/api/v1/roles/custom?project={project}` | Scan readable custom roles in one exact ownership scope. |
+| GET | `/api/v1/roles/choices?project={project}` | Scan custom assignment choices with current delegation authority. |
+| POST | `/api/v1/roles/preview` | Compare current and proposed user access without committing policy changes. |
 | GET, PUT | `/api/v1/roles/{role}` | Read or update a custom role with its current revision. |
 | GET | `/api/v1/permissions?project={project}&object={object}` | Read action descriptions and current grantability for an exact context. |
 | GET, POST | `/api/v1/projects/{project}/role-assignments` | Scan or create predefined and managed custom project assignments. |
@@ -264,7 +267,7 @@ Direct principal grant administration, editor workflows, and effective-access ex
 Create a role with `POST /api/v1/roles`. Read or update it through `/api/v1/roles/{role}`.
 Updates require a positive `If-Match` revision. Every mutation requires a nonblank reason.
 The identifier and owning project remain permanent. An empty `projectId` selects installation ownership.
-Identifiers are globally unique. The `builtin.` prefix and the `custom` route identifier are reserved.
+Identifiers are globally unique. The `builtin.` prefix and the `custom` and `choices` route identifiers are reserved.
 Names permit 200 bytes. Descriptions permit 4096 bytes.
 
 Each rule contains a full registered `permission`, an `allow` or `deny` effect, and optional `object` and `expiresAt` values.
@@ -305,8 +308,61 @@ Cursors bind to the actor and owning scope. Installation pages contain no projec
 `GET /api/v1/permissions` provides registered action descriptions and server-computed `canGrant` values.
 Supply an exact project and optional object to inspect that context.
 The service checks stored object ownership and current delegation and action permissions.
-Custom role editing and assignment controls remain pending in the interface.
-Direct principal grants, built-in role overrides, effective-access explanations, and policy previews also remain pending in the API.
+Custom role details return server-computed `canManage` and `delegatable` values.
+Catalog pages return `canCreate` for the current scope. Archived projects suppress mutation capabilities.
+Custom assignment choice pages use a separate actor-bound cursor and current delegation checks.
+Direct principal grants, built-in role override administration, and complete effective-access explanations remain pending.
+
+## Proposed policy preview
+
+`POST /api/v1/roles/preview` accepts `policy`, its current `revision`, a registered `userId`, and an optional exact `object`.
+Use revision zero for a new policy. Existing policies require their opened revision.
+The preview validates the same proposed policy and administrator protections as an actual save.
+It also requires scoped user membership management, delegation authority, and permission inspection authority for the selected context.
+
+The service evaluates current access before it writes temporary policy state.
+It then evaluates the proposal with the enabled role assigned directly to the selected user.
+A disabled policy adds no new assignment. Existing assigned roles still reflect the proposed disabling.
+Disabled users remain denied.
+Both comparisons call the common permission service. Existing assignments, groups, denies, and expiry remain effective.
+The preview always rolls back temporary policy, assignment, audit, and directory revision writes.
+It returns one current and proposed decision for each registered action in the selected scope.
+These comparisons do not replace the pending permission-source explanation workflow.
+
+## Custom role interface
+
+Open Project roles inside a selected workspace, or Installation roles from installation navigation.
+Roles and permissions shows bounded custom policy pages and code-managed predefined definitions.
+Create role uses the server's current creation capability. Role details use current management and delegation flags.
+The editor preserves permanent ownership and captures its opened revision.
+Refresh role updates the stored view while unsaved editor fields and the opened revision remain unchanged.
+Reload stored role explicitly replaces editor fields after review.
+
+Permission rules provide registered action descriptions, allow and deny effects, exact object fields, and full UTC expiry timestamps.
+Refresh rule permissions retrieves grantability for the entered object.
+The editor preserves timestamp precision and permits inspection of expired rules.
+Inheritance controls select existing managed roles and provide bounded continuation choices.
+State actions use separate target, impact, reason, and confirmation controls.
+
+Preview effective access accepts a registered user and optional exact object.
+It shows current and proposed decisions without saving the policy.
+Changed decisions appear first. Show unchanged permissions includes the complete comparison.
+Changed policy or preview inputs mark the result out of date. Save remains a separate action with an audit reason.
+Conflicts preserve edited fields and block another save until explicit reload or reopening.
+Unconfirmed write responses also require state review before retrying.
+Lost read access clears private role details, open editor fields, and obsolete asynchronous responses.
+
+Project access and Installation access combine predefined choices with bounded custom choices.
+The server supplies assignment authority. Custom choices link to their exact policies instead of flattening deny rules into allow lists.
+Both new pages provide Introduction, Concepts, and Tutorials help. Help preserves unsaved policy fields.
+Light and dark themes share the existing tokens. Narrow tables scroll inside labeled, keyboard-focusable regions.
+Table row headers retain readable case for exact permission identifiers.
+
+Run the focused browser workflow through normal TestStudio execution and evidence capture:
+
+```sh
+bash scripts/test-self.sh --test=STUDIO-POLICY-001
+```
 
 Run focused checks on SQLite and disposable local PostgreSQL:
 

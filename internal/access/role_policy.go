@@ -38,7 +38,7 @@ type RolePolicyMutation struct {
 func rolePolicyBucket(project string) string { return "access-roles/" + project }
 
 func validCustomRoleID(id string) bool {
-	return domain.ValidID(id) && id != "custom" && !strings.HasPrefix(id, "builtin.")
+	return domain.ValidID(id) && id != "custom" && id != "choices" && !strings.HasPrefix(id, "builtin.")
 }
 
 func (s *Service) loadRolePolicy(ctx context.Context, id string) (RolePolicy, storage.Record, error) {
@@ -91,10 +91,14 @@ func (s *Service) ReadRolePolicy(ctx context.Context, actor, id string) (storage
 }
 
 func (s *Service) ListRolePolicies(ctx context.Context, actor, project, cursor string, limit int) (Page, error) {
+	return s.listRolePolicies(ctx, actor, project, cursor, limit, "custom-roles")
+}
+
+func (s *Service) listRolePolicies(ctx context.Context, actor, project, cursor string, limit int, collection string) (Page, error) {
 	if _, err := s.assignmentScope(ctx, actor, project, "roles.read"); err != nil {
 		return Page{}, err
 	}
-	page, err := s.page(ctx, rolePolicyBucket(project), project, queryScope(actor, "custom-roles", project, false), cursor, limit)
+	page, err := s.page(ctx, rolePolicyBucket(project), project, queryScope(actor, collection, project, false), cursor, limit)
 	if err != nil {
 		return Page{}, err
 	}

@@ -1,7 +1,7 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio identity and access administration"
-  "version": "0.4.0"
+  "version": "0.5.0"
   "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Direct principal grant administration and other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
@@ -791,7 +791,7 @@
           "content":
             "application/json":
               "schema":
-                "$ref": "#/components/schemas/RolePolicyRecord"
+                "$ref": "#/components/schemas/RolePolicyDetail"
         "401":
           "$ref": "#/components/responses/Problem"
         "403":
@@ -1375,6 +1375,69 @@
           "$ref": "#/components/responses/Problem"
         "422":
           "$ref": "#/components/responses/Problem"
+
+  "/api/v1/roles/choices":
+    "get":
+      "operationId": "customRoleChoices"
+      "summary": "Read bounded custom role assignment choices with server-computed delegation authority."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/RoleProject"
+        -
+          "$ref": "#/components/parameters/Limit"
+        -
+          "$ref": "#/components/parameters/Cursor"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/RoleChoicePage"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+  "/api/v1/roles/preview":
+    "post":
+      "operationId": "previewRolePolicy"
+      "summary": "Evaluate current and proposed access through the permission engine, then roll back all temporary policy and assignment changes."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/RolePreview"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/RolePreviewInput"
 
 "components":
   "securitySchemes":
@@ -2207,7 +2270,7 @@
         "id":
           "type": "string"
           "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
-          "description": "Permanent globally unique custom role identifier. The builtin. prefix and the custom route identifier are reserved."
+          "description": "Permanent globally unique custom role identifier. The builtin. prefix and the custom and choices route identifiers are reserved."
         "name":
           "type": "string"
           "maxLength": 200
@@ -2246,7 +2309,7 @@
         "id":
           "type": "string"
           "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
-          "description": "Permanent globally unique custom role identifier. The builtin. prefix and the custom route identifier are reserved."
+          "description": "Permanent globally unique custom role identifier. The builtin. prefix and the custom and choices route identifiers are reserved."
         "name":
           "type": "string"
           "maxLength": 200
@@ -2302,6 +2365,8 @@
     "RolePolicyPage":
       "type": "object"
       "properties":
+        "canCreate":
+          "type": "boolean"
         "items":
           "type": "array"
           "items":
@@ -2312,6 +2377,7 @@
         "partial":
           "type": "boolean"
       "required":
+        - "canCreate"
         - "items"
         - "partial"
 
@@ -2346,3 +2412,95 @@
             "$ref": "#/components/schemas/PermissionChoice"
       "required":
         - "items"
+
+    "RolePolicyDetail":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+        "revision":
+          "type": "integer"
+          "minimum": 1
+        "projectId":
+          "type": "string"
+        "data":
+          "$ref": "#/components/schemas/RolePolicy"
+        "updatedAt":
+          "type": "string"
+          "format": "date-time"
+        "canManage":
+          "type": "boolean"
+        "delegatable":
+          "type": "boolean"
+      "required":
+        - "id"
+        - "revision"
+        - "data"
+        - "updatedAt"
+        - "canManage"
+        - "delegatable"
+    "RoleChoicePage":
+      "type": "object"
+      "properties":
+        "items":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/Role"
+        "cursor":
+          "type": "string"
+        "partial":
+          "type": "boolean"
+      "required":
+        - "items"
+        - "partial"
+    "RolePreviewInput":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "policy":
+          "$ref": "#/components/schemas/RolePolicyMutation"
+        "revision":
+          "type": "integer"
+          "minimum": 0
+        "userId":
+          "type": "string"
+        "object":
+          "type": "string"
+      "required":
+        - "policy"
+        - "revision"
+        - "userId"
+    "PermissionComparison":
+      "type": "object"
+      "properties":
+        "permission":
+          "type": "string"
+        "before":
+          "type": "boolean"
+        "after":
+          "type": "boolean"
+      "required":
+        - "permission"
+        - "before"
+        - "after"
+    "RolePreview":
+      "type": "object"
+      "properties":
+        "userId":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "object":
+          "type": "string"
+        "userDisabled":
+          "type": "boolean"
+        "decisions":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/PermissionComparison"
+      "required":
+        - "userId"
+        - "projectId"
+        - "object"
+        - "userDisabled"
+        - "decisions"

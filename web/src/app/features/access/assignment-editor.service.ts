@@ -22,7 +22,7 @@ export class AssignmentEditorService {
   readonly conflict = signal(false)
   readonly form = new FormGroup({ principalKind: new FormControl<'user' | 'group'>('user', { nonNullable: true }), principalId: new FormControl('', { nonNullable: true }), roleId: new FormControl('', { nonNullable: true }), reason: new FormControl('', { nonNullable: true }) })
   private readonly roleId = toSignal(this.form.controls.roleId.valueChanges, { initialValue: '' })
-  readonly role = computed(() => selectedRole(this.access.roles.items(), this.roleId()))
+  readonly role = computed(() => selectedRole(this.access.roleChoices(), this.roleId()))
   private generation = 0
 
   constructor() {
@@ -36,7 +36,7 @@ export class AssignmentEditorService {
   close(): void { this.generation++; this.opened.set(false); this.busy.set(false); accessFocus('assignments-heading') }
   async submit(): Promise<void> {
     if (this.busy() || this.conflict() || !this.access.canAdd()) return
-    const definition = assignmentDefinition(this.form.getRawValue()), validation = assignmentValidation(definition, this.access.roles.items())
+    const definition = assignmentDefinition(this.form.getRawValue()), validation = assignmentValidation(definition, this.access.roleChoices())
     this.error.set(validation); if (validation) return
     const project = this.access.projectId(), generation = ++this.generation
     this.busy.set(true)

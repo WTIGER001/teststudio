@@ -156,6 +156,8 @@ Open Installation access or Project access to manage predefined scoped role assi
 Enable managed password sign-in with `--local-accounts`, alongside configured OIDC providers if required.
 Use User details for authorized credential provisioning and reset. Use Your account for personal password changes.
 Run `bash scripts/test-self.sh --test=STUDIO-LOCAL-001` for the managed local account browser workflow.
-Project owners add members directly. Identity linking, pending project access, and custom role editors remain pending.
+Project owners add members directly. Identity linking and pending project access remain pending.
 Custom role APIs support exact scoped rules, inheritance, disabled state, and managed assignment.
 The permission catalog exposes registered descriptions and current grantability. See [Identity administration](docs/access.md).
+Open Project roles or Installation roles to edit custom policies, inspect inheritance, and preview proposed access without saving changes.
+Run `bash scripts/test-self.sh --test=STUDIO-POLICY-001` for the guarded custom-policy browser workflow.

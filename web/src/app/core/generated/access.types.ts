@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.4.0"
+export const accessContractVersion = "0.5.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -25,16 +25,21 @@ export type PasswordLogin = { "password": string; "userId": string }
 export type PasswordSignedIn = { "mustChangePassword": boolean; "signedIn": boolean }
 export type PermissionCatalog = { "items": (PermissionChoice)[] }
 export type PermissionChoice = { "action": string; "area": string; "canGrant": boolean; "description": string; "id": string; "installationOnly": boolean }
+export type PermissionComparison = { "after": boolean; "before": boolean; "permission": string }
 export type Problem = { "message": string; "status"?: number }
 export type Profile = { "identities": ExternalIdentityPage; "localAccount": boolean; "user": User }
 export type Reason = { "reason": string }
 export type Revoked = { "revoked": boolean }
 export type Role = { "builtIn": boolean; "delegatable": boolean; "disabled": boolean; "id": string; "name": string; "permissions": (string)[]; "scope": "project" | "installation" }
+export type RoleChoicePage = { "cursor"?: string; "items": (Role)[]; "partial": boolean }
 export type RolePage = { "items": (Role)[] }
 export type RolePolicy = { "description": string; "disabled": boolean; "id": string; "inherits": (string)[]; "name": string; "projectId": string; "rules": (RoleRule)[] }
+export type RolePolicyDetail = { "canManage": boolean; "data": RolePolicy; "delegatable": boolean; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
 export type RolePolicyMutation = { "description"?: string; "disabled"?: boolean; "id": string; "inherits"?: (string)[]; "name": string; "projectId": string; "reason": string; "rules"?: (RoleRule)[] }
-export type RolePolicyPage = { "cursor"?: string; "items": (RolePolicyRecord)[]; "partial": boolean }
+export type RolePolicyPage = { "canCreate": boolean; "cursor"?: string; "items": (RolePolicyRecord)[]; "partial": boolean }
 export type RolePolicyRecord = { "data": RolePolicy; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type RolePreview = { "decisions": (PermissionComparison)[]; "object": string; "projectId": string; "userDisabled": boolean; "userId": string }
+export type RolePreviewInput = { "object"?: string; "policy": RolePolicyMutation; "revision": number; "userId": string }
 export type RoleRule = { "effect": "allow" | "deny"; "expiresAt"?: string | null; "object"?: string; "permission": string }
 export type Saved = { "saved": boolean }
 export type Session = { "authenticationUntil": string; "createdAt": string; "current": boolean; "expiresAt": string; "id": string; "lastSeen": string; "provider": string }
@@ -69,7 +74,9 @@ export interface AccessRequests {
   readInstallationAssignment: { "kind": "user" | "group"; "principal": string; "role": string }
   listRoles: { query?: { "project"?: string } }
   createRolePolicy: { body: RolePolicyMutation }
+  customRoleChoices: { query?: { "project"?: string; "limit"?: number; "cursor"?: string } }
   listRolePolicies: { query?: { "project"?: string; "limit"?: number; "cursor"?: string } }
+  previewRolePolicy: { body: RolePreviewInput }
   readRolePolicy: { "role": string }
   editRolePolicy: { "role": string; revision: number; body: RolePolicyMutation }
   listUsers: { query?: { "limit"?: number; "cursor"?: string } }
@@ -114,8 +121,10 @@ export interface AccessResponses {
   readInstallationAssignment: AssignmentRecord
   listRoles: RolePage
   createRolePolicy: RolePolicyRecord
+  customRoleChoices: RoleChoicePage
   listRolePolicies: RolePolicyPage
-  readRolePolicy: RolePolicyRecord
+  previewRolePolicy: RolePreview
+  readRolePolicy: RolePolicyDetail
   editRolePolicy: RolePolicyRecord
   listUsers: UserPage
   createUser: UserRecord
@@ -159,7 +168,9 @@ export const accessOperations = {
   readInstallationAssignment: { method: "GET", path: "/api/v1/role-assignments/{kind}/{principal}/{role}" },
   listRoles: { method: "GET", path: "/api/v1/roles" },
   createRolePolicy: { method: "POST", path: "/api/v1/roles" },
+  customRoleChoices: { method: "GET", path: "/api/v1/roles/choices" },
   listRolePolicies: { method: "GET", path: "/api/v1/roles/custom" },
+  previewRolePolicy: { method: "POST", path: "/api/v1/roles/preview" },
   readRolePolicy: { method: "GET", path: "/api/v1/roles/{role}" },
   editRolePolicy: { method: "PUT", path: "/api/v1/roles/{role}" },
   listUsers: { method: "GET", path: "/api/v1/users" },
