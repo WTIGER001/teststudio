@@ -1,4 +1,5 @@
 import { RunWorkersComponent } from './run-workers.component'
+import { NotificationDeliveriesComponent } from '../notifications/notification-deliveries.component'
 import { RunWorkersService } from './run-workers.service'
 import { RunTimingComponent } from '../timing/run-timing.component'
 import { RunTimingService } from '../timing/run-timing.service'
@@ -14,7 +15,7 @@ import { RunRetentionComponent } from './run-retention.component'
 import { RunRetentionService } from './run-retention.service'
 
 @Component({
-  standalone: true, imports: [DatePipe, RouterLink, RunEvidenceComponent, RunArtifactsComponent, RunRetentionComponent, RunTimingComponent, TimingResultComponent, RunWorkersComponent], providers: [RunDetailService, RunWorkersService, RunTimingService, RunEvidenceService, RunRetentionService], changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true, imports: [DatePipe, RouterLink, RunEvidenceComponent, RunArtifactsComponent, RunRetentionComponent, RunTimingComponent, TimingResultComponent, RunWorkersComponent, NotificationDeliveriesComponent], providers: [RunDetailService, RunWorkersService, RunTimingService, RunEvidenceService, RunRetentionService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <a class="small" [routerLink]="['/projects', service.projectId(), 'runs']">← Run history</a>
     <div class="page-heading run-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Run details</h1><code class="small muted wrap-anywhere">{{ service.runId() }}</code></div><div class="row-actions">
@@ -49,6 +50,7 @@ import { RunRetentionService } from './run-retention.service'
         </tbody></table></div>
       </section>
       <ts-run-workers /><ts-run-evidence />
+      @if (service.workspace.can('notifications.read')) { <ts-notification-deliveries /> }
       @if (service.workspace.can('evidence.read')) { <ts-run-retention /><ts-run-artifacts /> }
     } @else if (service.loading()) { <p class="loading-state" role="status">Loading run details…</p> }
   `

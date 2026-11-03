@@ -12,7 +12,7 @@ export default defineConfig({
     serviceWorkers: 'block'
   },
   webServer: {
-    command: '/app/teststudio --local --database /tmp/teststudio-selftest.db --artifact-directory /tmp/teststudio-artifacts --ui /app/ui',
+    command: 'node /suite/start-server.mjs',
     url: 'http://127.0.0.1:8040/healthz', reuseExistingServer: false, timeout: 30000,
     gracefulShutdown: { signal: 'SIGTERM', timeout: 5000 }, stdout: 'pipe', stderr: 'pipe'
   }

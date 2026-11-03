@@ -127,4 +127,40 @@ The verification publishes a new native suite, runs it manually and on a schedul
 It verifies stable delivery identifiers, retained failures, final counts, configured links, and secret-free API data.
 The script stops its controller and local receiver. It retains its isolated database, artifacts, and summaries for inspection.
 Focused race checks also cover leases, replica claims, uncertainty, policy snapshots, permissions, cooldowns, and cancellation.
-The notification interface and its Playwright workflow remain under implementation at this backend checkpoint.
+## Interface
+
+Open Notifications from the project navigation to manage channels and inspect delivery history.
+The editor selects registered secret names. It never requests a webhook URL or displays a resolved credential.
+New channels start paused. Filters select exact suite, environment, and stage values, run triggers, outcomes, and evidence gaps.
+Timeouts remain a separate outcome. Empty scope filters include all values.
+The editor requires at least one trigger and one outcome or the evidence-gap rule.
+Changes apply to future runs. Open edits remain intact during polling and page help.
+Revision conflicts retain edits and offer an explicit stored-configuration reload.
+A project change closes the previous editor.
+
+Channel controls pause, enable, archive, and restore configuration. Restoration leaves the channel paused.
+Delivery history remains available after configuration changes and archive.
+Run details show the same delivery view, restricted to that run.
+Project history also accepts a `run` query parameter.
+
+Expand Frozen run summary for captured scope, counts, and destination references.
+Select Attempts for retained responses and checkpoint diagnostics.
+Unknown acceptance remains explicit after later confirmation.
+Expired sending leases show Recovery pending while a worker reconciles them.
+Retry delivery preserves the identifier and test result. Stop retries cancels only pending or waiting delivery work.
+These actions require notification management permission and current record revisions.
+
+History uses bounded pages and exposes partial coverage.
+Automatic refresh pauses after older history loads. Refresh deliveries returns to current history.
+Tables scroll within narrow screens. Shared theme tokens support light, dark, and system preferences.
+Page help provides Introduction, Concepts, and Tutorials.
+
+Run the focused browser workflow through normal TestStudio execution:
+
+```sh
+bash scripts/test-self.sh --test=STUDIO-NOTIFY-001
+```
+
+Its isolated receiver verifies real generic and Discord requests without external network access.
+The fixture registers only new project bindings and exposes no destination values through application APIs.
+Hosted secret service adapters remain pending.

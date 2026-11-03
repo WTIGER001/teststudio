@@ -1312,7 +1312,7 @@ Run links use the configured product UI origin and project routes.
 Store webhook and provider credentials through the selected secret adapter.
 Store only secret references in project settings.
 No notification integration requires a MarketMaker library or compatibility wrapper.
-See [Durable completion notifications](notifications.md) for the implemented outbox, scoped API, and local verification contract.
+See [Durable completion notifications](notifications.md) for the outbox, scoped API, channel editor, delivery history, and local verification contract.
 
 ### Delivery sequence
 

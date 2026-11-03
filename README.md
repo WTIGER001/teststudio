@@ -138,5 +138,8 @@ See [Durable schedules](docs/schedules.md) for permissions, release pins, overla
 ## Completion notifications
 
 Project channels use scoped secret references and one durable delivery path for manual and scheduled runs.
+Open the project Notifications page to configure channels and inspect delivery attempts.
+Run details show delivery history for that run. Delivery retries preserve test outcomes.
 Run `bash scripts/test-notifications.sh` for a fresh local receiver and built-service verification.
+Run `bash scripts/test-self.sh --test=STUDIO-NOTIFY-001` for the focused browser workflow through TestStudio.
 See [Durable completion notifications](docs/notifications.md) for configuration, retries, permissions, and API routes.

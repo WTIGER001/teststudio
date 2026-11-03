@@ -115,3 +115,18 @@ Pause controls future firings. Archive preserves identifiers and history. Restor
 Triggered firings link to normal runs. Blocked and skipped firings retain their reasons.
 The page includes contextual help and supports light, dark, and narrow layouts.
 The focused self-test verifies the real local scheduler through TestStudio's publication, execution, timing, and evidence workflow.
+
+## Notifications
+
+The project notification page provides channel configuration and durable delivery history.
+The editor selects registered secret names and exact scope filters. Timeouts remain distinct from failed outcomes.
+New channels start paused. Settings apply to future runs, and open edits survive polling and page help.
+Archive preserves history. Restore leaves the channel paused.
+Run details include a delivery view restricted to that run.
+Delivery state, frozen test outcome, HTTP responses, and unknown acceptance remain separate.
+Explicit retry and stop controls operate on delivery work without rerunning tests.
+History shows bounded coverage and pauses automatic refresh after older pages load.
+The page includes contextual help and shared light and dark theme tokens.
+Tables scroll inside their containers on narrow screens.
+The focused self-test verifies manual and scheduled completion, real retries, Discord confirmation, stopped delivery, and preserved history.
+Checked light and dark views have no document overflow or browser runtime errors.

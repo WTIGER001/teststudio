@@ -1,6 +1,20 @@
 import type { HelpPage } from './help.models'
 
 export const helpPages: Record<string, HelpPage> = {
+  notifications: {
+    id: 'notifications', title: 'Notifications',
+    introduction: ['Send completion summaries to a generic or Discord webhook. Inspect delivery history without changing test outcomes.'],
+    concepts: [
+      { title: 'Registered secrets', description: 'Choose a project secret reference. The installation operator registers destinations on the server. The browser receives names, never webhook URLs or credentials.' },
+      { title: 'Frozen selection', description: 'Run creation freezes enabled channel definitions and scope filters. Edits affect future runs. Empty scope filters include all values. Timeouts remain separate from failures.' },
+      { title: 'Delivery and uncertainty', description: 'Transient failures retry within the frozen attempt budget. Delivery retries preserve identity and never rerun tests. An interrupted checkpoint can leave remote acceptance unknown, even after later confirmation.' },
+      { title: 'Pause and archive', description: 'Pause blocks later attempts. Reenabling does not revive old messages automatically. Explicit retry requires the original destination and an enabled channel. Archive keeps history; restore leaves the channel paused.' }
+    ],
+    tutorials: [
+      { title: 'Configure a completion channel', steps: ['Select + New channel and enter a name and permanent identifier.', 'Choose a transport and registered secret reference.', 'Optionally filter suites, environments, and stages. Select triggers and outcomes, or include evidence gaps.', 'Set the automatic attempt budget. Select Enable this channel when ready, then Save notification channel.', 'Queue a new matching run. Earlier runs do not gain new notifications.'] },
+      { title: 'Investigate delivery', steps: ['Read Notification deliveries on this page or one run’s details.', 'Expand Frozen run summary to inspect the captured result and destination reference.', 'Select Attempts for retained HTTP statuses and checkpoint uncertainty.', 'For stopped or waiting deliveries, correct the channel or receiver before selecting Retry delivery.', 'Use Stop retries to cancel pending work. A message already sent cannot be recalled.'] }
+    ]
+  },
   schedules: {
     id: 'schedules', title: 'Schedules',
     introduction: ['Repeat published tests on an interval or cron timetable. Every triggered firing creates a normal run with frozen definitions, timing criteria, results, and evidence.'],
@@ -110,6 +124,7 @@ export const helpPages: Record<string, HelpPage> = {
       { title: 'Evidence and retention', description: 'Logs and artifacts have capture and retention policies. Capture gaps do not erase test outcomes. Pins preserve evidence; deletion removes files while retaining results.' },
       { title: 'HTTP diagnostics', description: 'Expand HTTP diagnostics in attempt history to inspect network phases and certificate data. Unavailable phases stay unavailable. Certificate lifetime uses the retained attempt finish time.' },
       { title: 'Go diagnostics', description: 'Expand Go diagnostics for the selected package, test, toolchain, platform, build duration, and process exit codes. Build errors and missing selected tests retain unknown attempts and block the run. Recorded subtests remain steps within the registered logical test.' },
+      { title: 'Notification deliveries', description: 'Completion messages use channel settings captured when the run was queued. Delivery failures remain separate from test failures. Inspect attempts, retry stopped delivery, or stop waiting retries without rerunning tests.' },
       { title: 'Worker recovery', description: 'After an interruption, recovery retains available diagnostics and removes owned resources. Recovered observations keep the original run outcome.' }
     ],
     tutorials: [

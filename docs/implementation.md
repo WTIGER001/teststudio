@@ -52,7 +52,7 @@ The full plan remains required scope. Check an item only after its implementatio
 - [ ] Hosted identity and private report access work through installation-specific configuration.
 - [ ] Local and scheduled executions produce the same logical run and result records.
 - [ ] Protected environments reject unsafe selections and unsafe dependencies.
-- [ ] Manual and scheduled notifications use the same configured completion path.
+- [x] Manual and scheduled notifications use the same configured completion path.
 - [ ] Replica failover creates no duplicate logical run. Notification retries retain their documented at-least-once behavior.
 - [ ] Test-only publication requires no API or UI deployment.
 - [ ] Provider credentials remain outside browser configuration and application logs.
@@ -63,6 +63,28 @@ The full plan remains required scope. Check an item only after its implementatio
 ## Feature log
 
 Record feature commits and targeted validation here.
+
+### Notification configuration and delivery interface
+
+Added project channel configuration with registered secret names, exact scope filters, trigger selection, distinct timeout outcomes, and bounded attempt budgets.
+New channels start paused. The editor retains unsaved values during polling and help, and closes them on project changes.
+Revision errors retain edits and provide an explicit configuration reload.
+Channel controls pause, enable, archive, and restore without removing retained history.
+Project and run views share delivery history, frozen summaries, attempt responses, explicit retries, and cancellation of waiting work.
+Test outcomes remain separate from delivery outcomes. Unknown acceptance and expired checkpoint leases remain explicit.
+Bounded history exposes coverage and pauses automatic refresh after older pages load.
+Added Notifications help with Introduction, Concepts, and Tutorials.
+Added the permanent STUDIO-NOTIFY-001 workflow and a fresh isolated receiver inside the Playwright worker.
+The fixture uses new project bindings and fresh secrets. It requires no external network or cloud credentials.
+Validation: focused notification and timeout-rerun utilities pass. The Angular production build passes.
+STUDIO-NOTIFY-001 passes through normal publication, execution, timing, and evidence storage.
+It verifies real manual and scheduled delivery, transient retries, permanent Discord failures, explicit retries, waiting cancellation, stable identifiers, and retained history.
+It also verifies project reference isolation, preserved edits, contextual help, light and dark themes, and mobile document overflow.
+Browser diagnostics contain no runtime errors. Visual inspection confirms readable light and dark layouts.
+STUDIO-TIMEOUT-001 passes again and preserves the original timed-out result after a successful UI failure rerun.
+STUDIO-HELP-001 passes again with the new Notifications guide and existing keyboard, dismissal, theme, and mobile checks.
+Verification workers finish with complete evidence and cleaned resources. Owned controllers and browser containers stop after checks.
+Hosted secret adapters, cloud deployment checks, and the remaining full plan stay pending.
 
 ### Durable completion outbox and notification API
 

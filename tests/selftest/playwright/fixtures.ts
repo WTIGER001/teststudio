@@ -11,8 +11,8 @@ export class API {
     expect(response.ok(), `${method} ${path}: ${await response.text()}`).toBeTruthy()
     return response.json()
   }
-  async scaffold() {
-    const project = `pw-${crypto.randomUUID().slice(0, 8)}`, path = `/api/v1/projects/${project}`
+  async scaffold(project = `pw-${crypto.randomUUID().slice(0, 8)}`) {
+    const path = `/api/v1/projects/${project}`
     await this.call('POST', '/api/v1/projects', { id: project, name: 'Self-test workspace', description: 'Disposable browser test data' })
     await this.call('PUT', `${path}/applications/app`, { id: 'app', name: 'TestStudio' }, 0)
     await this.call('PUT', `${path}/environments/local`, { id: 'local', name: 'Self-test instance', applicationId: 'app', stage: 'local', endpoints: { api: 'http://127.0.0.1:8040' } }, 0)
