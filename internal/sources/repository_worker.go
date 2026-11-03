@@ -218,7 +218,7 @@ func (s *Service) fetchRepository(ctx context.Context, sync RepositorySync) (map
 			continue
 		}
 		_, name, _ := strings.Cut(revision.Repository, "/")
-		row, err := s.enqueueBundle(ctx, sync.Actor, sync.Project, binding.Suite, preparationKey(sync, binding), name+"-"+revision.Commit[:12]+".zip", binding.Manifest, archive.Content, &repositoryPreparation{Sync: sync.ID, Worker: sync.Worker, Source: sync.Source, Generation: sync.SourceGeneration, Sequence: sync.Sequence, Snapshot: sync.ID, Origin: origin, Root: archive.Root})
+		row, err := s.enqueueBundle(ctx, sync.Actor, sync.Project, binding.Suite, preparationKey(sync, binding), name+"-"+revision.Commit[:12]+".zip", binding.Manifest, archive.Content, &repositoryPreparation{Sync: sync.ID, Worker: sync.Worker, Source: sync.Source, Generation: sync.SourceGeneration, Sequence: sync.Sequence, Snapshot: sync.ID, Origin: origin, Root: archive.Root}, nil)
 		if err != nil {
 			return jobs, err
 		}

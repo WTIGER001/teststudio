@@ -47,10 +47,10 @@ func jobQueue(job Job) string {
 func activeJob(state string) bool { return state == "preparing" || state == "discovering" }
 
 func (s *Service) EnqueueBundle(ctx context.Context, user, project, suite, key, name, manifest string, data []byte) (storage.Record, error) {
-	return s.enqueueBundle(ctx, user, project, suite, key, name, manifest, data, nil)
+	return s.enqueueBundle(ctx, user, project, suite, key, name, manifest, data, nil, nil)
 }
 
-func (s *Service) enqueueBundle(ctx context.Context, user, project, suite, key, name, manifest string, data []byte, repository *repositoryPreparation) (result storage.Record, err error) {
+func (s *Service) enqueueBundle(ctx context.Context, user, project, suite, key, name, manifest string, data []byte, repository *repositoryPreparation, draft *storage.Record) (result storage.Record, err error) {
 	if err := s.check(ctx, user, project, suite, "manage"); err != nil {
 		return result, err
 	}
@@ -87,6 +87,21 @@ func (s *Service) enqueueBundle(ctx context.Context, user, project, suite, key, 
 		if _, err := (&catalog.Service{Store: bound.Store, Auth: auth}).Tests(ctx, user, project, suite); err != nil {
 			return err
 		}
+		if draft != nil {
+			if err := bound.check(ctx, user, project, suite, "read"); err != nil {
+				return err
+			}
+			current, err := bound.Store.Get(ctx, draft.Bucket, draft.ID)
+			if err != nil {
+				return err
+			}
+			if current.Revision != draft.Revision {
+				return storage.ErrConflict
+			}
+			if err := bound.draftSuite(ctx, project, suite); err != nil {
+				return err
+			}
+		}
 		if repository != nil {
 			if err := bound.checkSyncLease(ctx, RepositorySync{Project: project, Source: repository.Source, ID: repository.Sync, Worker: repository.Worker}); err != nil {
 				return err
@@ -97,7 +112,7 @@ func (s *Service) enqueueBundle(ctx context.Context, user, project, suite, key, 
 			if err != nil {
 				return err
 			}
-			if (repository == nil && job.SourceDigest != snapshot.Digest) || job.Manifest != manifest || job.SourceName != name || (repository != nil && (job.RepositorySource != repository.Source || job.SourceGeneration != repository.Generation || job.Origin == nil || job.Origin.Commit != repository.Origin.Commit)) {
+			if (repository == nil && job.SourceDigest != snapshot.Digest) || job.Manifest != manifest || job.SourceName != name || (draft != nil && (job.Draft != draft.ID || job.DraftRevision != draft.Revision)) || (repository != nil && (job.RepositorySource != repository.Source || job.SourceGeneration != repository.Generation || job.Origin == nil || job.Origin.Commit != repository.Origin.Commit)) {
 				return errors.New("idempotency key reused for another source bundle")
 			}
 			if repository != nil && job.State != "published" && job.SourceSequence < repository.Sequence {
@@ -125,6 +140,9 @@ func (s *Service) enqueueBundle(ctx context.Context, user, project, suite, key, 
 		now := time.Now().UTC()
 		expires := now.Add(StagingLifetime)
 		job := Job{Kind: "bundle", Bundle: id, SourceDigest: snapshot.Digest, SourceName: name, Manifest: manifest, ID: id, Project: project, Suite: suite, Actor: user, Runner: snapshot.Manifest.Runner, Location: s.Location, State: "received", Phase: "validating", CreatedAt: now}
+		if draft != nil {
+			job.Draft, job.DraftRevision = draft.ID, draft.Revision
+		}
 		bundle := Bundle{ID: id, Project: project, Suite: suite, Name: name, Manifest: manifest, Digest: snapshot.Digest, Content: data, ExpiresAt: expires}
 		if repository != nil {
 			job.Kind = "repository"
@@ -142,6 +160,9 @@ func (s *Service) enqueueBundle(ctx context.Context, user, project, suite, key, 
 			bundle.Origin = &repository.Origin
 		}
 		changes := []storage.Change{}
+		if draft != nil {
+			changes = append(changes, storage.Change{Record: *draft, Assert: true})
+		}
 		for _, item := range []struct {
 			bucket, id string
 			value      any
@@ -172,6 +193,12 @@ func (s *Service) enqueueBundle(ctx context.Context, user, project, suite, key, 
 	if errors.Is(err, storage.ErrConflict) {
 		if row, readErr := s.ReadJob(ctx, user, project, suite, id); readErr == nil {
 			job, _ := storage.Decode[Job](row)
+			if draft != nil {
+				current, readErr := s.Draft(ctx, user, project, suite, draft.ID)
+				if readErr != nil || current.Revision != draft.Revision || job.Draft != draft.ID || job.DraftRevision != draft.Revision {
+					return result, err
+				}
+			}
 			if job.Actor == user && job.SourceDigest == snapshot.Digest && job.Manifest == manifest && job.SourceName == name {
 				return row, nil
 			}

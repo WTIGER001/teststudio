@@ -7,6 +7,8 @@ The CLI can also assemble bundles outside the API.
 Registered [GitHub sources](repository-sources.md) use the same preparation workflow.
 The offline Playwright profile uses dependencies already installed in a trusted browser runtime.
 
+The in-app [Playwright editor](playwright-editor.md) generates these bundles from saved source drafts.
+
 ## Archive context
 
 Include the complete suite context, manifest, catalog, tests, and required dependencies.

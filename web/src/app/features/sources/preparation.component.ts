@@ -2,11 +2,13 @@ import { DatePipe } from '@angular/common'
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { ReactiveFormsModule } from '@angular/forms'
 import { BundleUploadComponent } from './bundle-upload.component'
+import { PlaywrightEditorComponent } from './playwright-editor.component'
 import { PreparationService } from './preparation.service'
 
 @Component({
-  selector: 'ts-source-preparation', standalone: true, imports: [DatePipe, ReactiveFormsModule, BundleUploadComponent], providers: [PreparationService], changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'ts-source-preparation', standalone: true, imports: [DatePipe, ReactiveFormsModule, BundleUploadComponent, PlaywrightEditorComponent], providers: [PreparationService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    <ts-playwright-editor />
     @if (service.bundleRunners().length && service.sources.workspace.can('sources.manage') && service.sources.workspace.can('catalog.import')) { <ts-source-bundle /> }
     <section class="panel" aria-labelledby="preparation-title">
       <div class="section-top"><h2 id="preparation-title">Suite preparation</h2><button class="button secondary" type="button" [disabled]="service.busy()" (click)="service.load()">Refresh preparations</button></div>
@@ -20,7 +22,7 @@ import { PreparationService } from './preparation.service'
       } @else if (!service.runners().length) { <p class="notice">Prebuilt image preparation is unavailable on this server.</p> }
       @if (service.selected(); as row) {
         <article class="preparation-detail" aria-labelledby="preparation-detail-title"><h3 id="preparation-detail-title">Preparation details</h3>
-          <dl class="detail-grid"><dt>Identifier</dt><dd>{{ row.id }}</dd><dt>Image</dt><dd>{{ row.data.image || 'Build pending' }}</dd>@if (row.data.sourceName) { <dt>Source ZIP</dt><dd>{{ row.data.sourceName }}</dd><dt>Manifest path</dt><dd>{{ row.data.manifestPath }}</dd><dt>Source digest</dt><dd>{{ row.data.sourceDigest }}</dd> }@if (row.data.build; as build) { <dt>Assembly started</dt><dd>{{ build.startedAt | date:'medium':'UTC' }} UTC</dd><dt>Assembly finished</dt><dd>{{ build.finishedAt | date:'medium':'UTC' }} UTC</dd> }@if (row.data.runtime) { <dt>Runtime</dt><dd>{{ row.data.runtime }}</dd> }<dt>State</dt><dd>{{ row.data.state }} · {{ row.data.phase }}</dd><dt>Created</dt><dd>{{ row.data.createdAt | date:'medium':'UTC' }} UTC</dd>@if (row.data.releaseId) { <dt>Published release</dt><dd>{{ row.data.releaseId }}</dd> }</dl>
+          <dl class="detail-grid"><dt>Identifier</dt><dd>{{ row.id }}</dd><dt>Image</dt><dd>{{ row.data.image || 'Build pending' }}</dd>@if (row.data.sourceName) { <dt>Source ZIP</dt><dd>{{ row.data.sourceName }}</dd><dt>Manifest path</dt><dd>{{ row.data.manifestPath }}</dd><dt>Source digest</dt><dd>{{ row.data.sourceDigest }}</dd> }@if (row.data.build; as build) { <dt>Assembly started</dt><dd>{{ build.startedAt | date:'medium':'UTC' }} UTC</dd><dt>Assembly finished</dt><dd>{{ build.finishedAt | date:'medium':'UTC' }} UTC</dd> }@if (row.data.runtime) { <dt>Runtime</dt><dd>{{ row.data.runtime }}</dd> }@if (row.data.sourceDraftId) { <dt>Editor draft</dt><dd>{{ row.data.sourceDraftId }} · revision {{ row.data.sourceDraftRevision }}</dd> }<dt>State</dt><dd>{{ row.data.state }} · {{ row.data.phase }}</dd><dt>Created</dt><dd>{{ row.data.createdAt | date:'medium':'UTC' }} UTC</dd>@if (row.data.releaseId) { <dt>Published release</dt><dd>{{ row.data.releaseId }}</dd> }</dl>
           @if (row.data.error) { <p class="notice error">{{ row.data.error }}</p> }
           @if (row.data.sourceExpired) { <p class="notice">The original source ZIP has expired. Preparation diagnostics remain available.</p> }
           @if (row.data.cleanupPending) { <p class="notice warning">Resource cleanup is pending. The server retains the reference for recovery.</p> }

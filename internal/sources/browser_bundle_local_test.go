@@ -25,6 +25,15 @@ import (
 )
 
 func TestBrowserSourceBundleBuildsPublishesAndRunsWithRuntimeDependencies(t *testing.T) {
+	verifyBrowserSourceWorkflow(t, false)
+}
+
+func TestPlaywrightEditorLocalStarterBuildsPublishesAndRuns(t *testing.T) {
+	verifyBrowserSourceWorkflow(t, true)
+}
+
+func verifyBrowserSourceWorkflow(t *testing.T, editor bool) {
+	t.Helper()
 	runtime := os.Getenv("TESTSTUDIO_BROWSER_RUNTIME_IMAGE")
 	if runtime == "" {
 		t.Skip("set TESTSTUDIO_BROWSER_RUNTIME_IMAGE to a cached immutable local Playwright source runtime")
@@ -64,7 +73,21 @@ func TestBrowserSourceBundleBuildsPublishesAndRunsWithRuntimeDependencies(t *tes
 	s.RecoveryBuilders = s.Builders
 	s.Inspectors = map[string]preparation.ArtifactInspector{"playwright": inspector}
 	s.RecoveryInspectors = s.Inspectors
-	row, err := s.EnqueueBundle(t.Context(), "admin", "alpha", "health", "browser-upload", "browser.zip", "suites/browser.json", archive.Bytes())
+	expectedID := "BROWSER-BUNDLE-001"
+	var row storage.Record
+	var err error
+	if editor {
+		value := sources.StarterDraft()
+		value.ID = "local-editor"
+		saved, saveErr := s.SaveDraft(t.Context(), "admin", "alpha", "health", value, 0)
+		if saveErr != nil {
+			t.Fatal(saveErr)
+		}
+		row, err = s.PrepareDraft(t.Context(), "admin", "alpha", "health", value.ID, "browser-editor", saved.Revision)
+		expectedID = "BROWSER-001"
+	} else {
+		row, err = s.EnqueueBundle(t.Context(), "admin", "alpha", "health", "browser-upload", "browser.zip", "suites/browser.json", archive.Bytes())
+	}
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,6 +117,14 @@ func TestBrowserSourceBundleBuildsPublishesAndRunsWithRuntimeDependencies(t *tes
 		t.Fatal(err)
 	}
 	job, _ := storage.Decode[sources.Job](stored)
+	if editor && job.Image != "" {
+		t.Cleanup(func() {
+			output, err := exec.Command("docker", "image", "rm", job.Image).CombinedOutput()
+			if err != nil {
+				t.Errorf("editor image cleanup: %s %v", output, err)
+			}
+		})
+	}
 	if job.State != "ready" {
 		t.Fatalf("browser preparation: %+v", job)
 	}
@@ -101,7 +132,7 @@ func TestBrowserSourceBundleBuildsPublishesAndRunsWithRuntimeDependencies(t *tes
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(release.Draft.Tests) != 1 || release.Draft.Artifact.Discovered["BROWSER-BUNDLE-001"] != "@BROWSER-BUNDLE-001" {
+	if len(release.Draft.Tests) != 1 || release.Draft.Artifact.Discovered[expectedID] != "@"+expectedID {
 		t.Fatal("browser catalog mapping changed")
 	}
 	blobs, err := filesystem.New(filepath.Join(root, "artifacts"))

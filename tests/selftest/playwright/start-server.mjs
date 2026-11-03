@@ -5,7 +5,7 @@ import { writeFile, unlink } from 'node:fs/promises'
 import { createOIDCFixture } from './oidc-fixture.mjs'
 
 const repositoryWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-GIT-001'
-const bundleWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-BUNDLES-001'
+const bundleWorkflow = ['@STUDIO-BUNDLES-001', '@STUDIO-EDITOR-001'].includes(JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector)
 const linkingWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-LINKS-001'
 const localWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-LOCAL-001'
 const cliWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-CLI-001'

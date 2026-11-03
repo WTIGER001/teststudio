@@ -2,6 +2,7 @@
   "schemaVersion": "teststudio.selftest/v1",
   "source": "teststudio-selftests",
   "tests": [
+    { "id": "STUDIO-EDITOR-001", "title": "Playwright editor, persistent drafts, conflicts, and immutable preparation", "selector": "@STUDIO-EDITOR-001", "category": "Sources" },
     { "id": "STUDIO-NAV-001", "title": "Grouped sidebar, administration disclosure, and responsive navigation", "selector": "@STUDIO-NAV-001", "category": "Interface" },
     { "id": "STUDIO-SELECTIONS-001", "title": "Saved selections, versioned filters, resolved dependencies, and frozen runs", "selector": "@STUDIO-SELECTIONS-001", "category": "Catalog" },
     { "id": "STUDIO-BULK-METADATA-001", "title": "Reviewed bulk metadata, atomic conflicts, explicit clearing, and frozen definitions", "selector": "@STUDIO-BULK-METADATA-001", "category": "Catalog" },

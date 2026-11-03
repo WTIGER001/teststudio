@@ -14,6 +14,8 @@ type PrebuiltInput struct {
 }
 
 type Job struct {
+	Draft            string               `json:"sourceDraftId,omitempty"`
+	DraftRevision    int64                `json:"sourceDraftRevision,omitempty"`
 	RepositorySync   string               `json:"repositorySyncId,omitempty"`
 	RepositorySource string               `json:"repositorySourceId,omitempty"`
 	SourceGeneration int64                `json:"sourceGeneration,omitempty"`

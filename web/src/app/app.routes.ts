@@ -1,9 +1,10 @@
+import type { SourcesPage } from './features/sources/sources.page'
 import type { Routes } from '@angular/router'
 
 export const routes: Routes = [
   { path: 'projects/:projectId/releases', data: { helpTopic: 'releases' }, loadComponent: () => import('./features/releases/releases.page').then(m => m.ReleasesPage) },
   { path: 'cli-sign-in/:requestId', data: { helpTopic: 'cli-signin' }, loadComponent: () => import('./features/cli-signin/cli-signin.page').then(m => m.CLISignInPage) },
-  { path: 'projects/:projectId/sources', data: { helpTopic: 'sources' }, loadComponent: () => import('./features/sources/sources.page').then(m => m.SourcesPage) },
+  { path: 'projects/:projectId/sources', canDeactivate: [(page: SourcesPage) => page.canLeave()], data: { helpTopic: 'sources' }, loadComponent: () => import('./features/sources/sources.page').then(m => m.SourcesPage) },
   { path: 'settings/providers', data: { helpTopic: 'providers' }, loadComponent: () => import('./features/access/providers.page').then(m => m.ProvidersPage) },
   { path: 'settings/providers/:providerId', data: { helpTopic: 'provider' }, loadComponent: () => import('./features/access/provider-detail.page').then(m => m.ProviderDetailPage) },
   { path: '', pathMatch: 'full', redirectTo: 'projects' },

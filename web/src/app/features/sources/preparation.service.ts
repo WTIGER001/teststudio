@@ -76,6 +76,11 @@ export class PreparationService {
     finally { if (generation === this.generation) this.busy.set(false) }
   }
 
+  showQueued(row: SourcePreparationRecord): void {
+    this.generation++; this.detailGeneration++; this.reading = false; this.busy.set(false); this.error.set(''); this.clearDownload()
+    this.selected.set(row); this.jobs.update(items => [row, ...items.filter(item => item.id !== row.id)])
+  }
+
   async downloadBundle(): Promise<void> {
     const row = this.selected()
     if (!row || this.busy()) return

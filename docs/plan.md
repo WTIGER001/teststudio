@@ -25,6 +25,11 @@ The sidebar now separates Workspace, Testing, Project administration, and Instal
 The administration sections collapse by default. The current administration page opens its section.
 The refreshed local demo serves a private UI snapshot and retains its existing database and evidence.
 Future builds do not replace assets used by this running demo.
+The user also requests in-app Playwright authoring during the walkthrough.
+The Sources page now provides saved browser workspaces and the common preparation, review, and publication flow.
+The editor generates package and manifest files. It keeps source editing separate from catalog metadata management.
+See playwright-editor.md for the workflow, API, revision rules, and current isolated profile limits.
+Environment-backed website execution and browser recording remain open work.
 
 Item **01** now passes a build from an isolated copy of the current source tree.
 Go uses no workspace or local module replacements. A clean offline npm installation and Angular build also pass.

@@ -26,6 +26,7 @@ export class SourcesService {
   readonly error = signal('')
   readonly message = signal('')
   readonly editor = signal(false)
+  readonly draftDirty = signal(false)
   readonly preview = signal<SourceUploadPreview | null>(null)
   readonly content = signal('')
   readonly activate = signal(false)

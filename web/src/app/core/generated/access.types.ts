@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.22.0"
+export const accessContractVersion = "0.23.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -15,6 +15,7 @@ export type CatalogBulkMetadata = { "category"?: string | null; "conditions"?: s
 export type CatalogBulkRequest = { "action": "metadata" | "disable" | "enable" | "archive" | "restore"; "metadata"?: CatalogBulkMetadata; "tests": (CatalogBulkTarget)[] }
 export type CatalogBulkTarget = { "id": string; "revision": number }
 export type CatalogPlanRecord = { "data": SourceCatalogImportPlan; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type EditorFile = { "content": string; "path": string }
 export type ExternalIdentity = { "issuer": string; "subject": string; "userId": string }
 export type ExternalIdentityPage = { "cursor"?: string; "items": (ExternalIdentityRecord)[]; "partial": boolean }
 export type ExternalIdentityRecord = { "data": ExternalIdentity; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
@@ -57,6 +58,9 @@ export type PermissionComparison = { "after": boolean; "before": boolean; "permi
 export type PermissionDefinition = { "action": string; "area": string; "description": string; "id": string; "installationOnly": boolean }
 export type PermissionExplanation = { "allowed": boolean; "canInspectOthers": boolean; "checkedAt": string; "cursor"?: string; "items": (PermissionSource)[]; "object": string; "partial": boolean; "permission": string; "permissions": (PermissionDefinition)[]; "projectId": string; "reason": "allowed" | "explicit-deny" | "no-matching-allow" | "user-disabled"; "userDisabled": boolean; "userId": string; "userName": string }
 export type PermissionSource = { "assignedRoleId"?: string; "assignedRoleName"?: string; "assignmentProject"?: string; "effect": "allow" | "deny"; "expiresAt"?: string; "grantId"?: string; "id": string; "kind": "direct" | "role"; "objectScope"?: string; "principalId"?: string; "principalKind"?: "user" | "group"; "principalName"?: string; "projectId"?: string; "restricted": boolean; "restrictedFields"?: (string)[]; "roleId"?: string; "roleName"?: string; "scopeKnown": boolean; "status": "matching" | "expired"; "teamScope"?: string }
+export type PlaywrightDraft = { "files": (EditorFile)[]; "id": string; "name": string }
+export type PlaywrightDraftPage = { "cursor"?: string; "items": (PlaywrightDraftRecord)[] }
+export type PlaywrightDraftRecord = { "data": PlaywrightDraft; "id": string; "revision": number; "updatedAt": string }
 export type PredefinedRole = { "canManage": boolean; "disabled": boolean; "id": string; "name": string; "permissions": (string)[]; "scope": "project" | "installation" }
 export type PredefinedRolePage = { "items": (PredefinedRoleRecord)[] }
 export type PredefinedRoleRecord = { "data": PredefinedRole; "id": string; "revision": number; "updatedAt"?: string }
@@ -111,7 +115,7 @@ export type SourceCredentialReference = { "id": string; "name": string }
 export type SourceJSONValue = null | string | number | boolean | (SourceJSONValue)[] | { [key: string]: SourceJSONValue }
 export type SourceOrigin = { "commit"?: string; "reference"?: string; "repository"?: string; "snapshotDigest"?: string }
 export type SourcePrebuiltInput = { "image": string; "runner": string }
-export type SourcePreparationJob = { "actor": string; "build"?: SourceBuild; "cancelRequested": boolean; "cleanupPending": boolean; "createdAt": string; "error"?: string; "executionLocation": string; "finishedAt"?: string; "id": string; "image": string; "kind"?: string; "leaseUntil"?: string; "localImageId"?: string; "log"?: string; "logTruncated"?: boolean; "manifestPath"?: string; "phase": string; "projectId": string; "reference"?: SourcePreparationReference; "releaseId"?: string; "repositorySourceId"?: string; "repositorySyncId"?: string; "runner": string; "runtime"?: string; "sourceBundleId"?: string; "sourceDigest"?: string; "sourceExpired"?: boolean; "sourceGeneration"?: number; "sourceName"?: string; "sourceOrigin"?: SourceOrigin; "sourceSequence"?: number; "startedAt"?: string; "state": string; "suiteId": string; "uploadId"?: string; "worker"?: string }
+export type SourcePreparationJob = { "actor": string; "build"?: SourceBuild; "cancelRequested": boolean; "cleanupPending": boolean; "createdAt": string; "error"?: string; "executionLocation": string; "finishedAt"?: string; "id": string; "image": string; "kind"?: string; "leaseUntil"?: string; "localImageId"?: string; "log"?: string; "logTruncated"?: boolean; "manifestPath"?: string; "phase": string; "projectId": string; "reference"?: SourcePreparationReference; "releaseId"?: string; "repositorySourceId"?: string; "repositorySyncId"?: string; "runner": string; "runtime"?: string; "sourceBundleId"?: string; "sourceDigest"?: string; "sourceDraftId"?: string; "sourceDraftRevision"?: number; "sourceExpired"?: boolean; "sourceGeneration"?: number; "sourceName"?: string; "sourceOrigin"?: SourceOrigin; "sourceSequence"?: number; "startedAt"?: string; "state": string; "suiteId": string; "uploadId"?: string; "worker"?: string }
 export type SourcePreparationOptions = { "bundleRunners": (string)[]; "executionLocation": string; "runners": (string)[] }
 export type SourcePreparationPage = { "cursor"?: string; "items": (SourcePreparationRecord)[] }
 export type SourcePreparationRecord = { "data": SourcePreparationJob; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
@@ -200,6 +204,11 @@ export interface AccessRequests {
   readCatalogPlan: { "project": string; "suite": string; "id": string }
   applyCatalogPlan: { "project": string; "suite": string; "id": string; revision: number }
   readSuiteLifecycle: { "project": string; "suite": string }
+  listPlaywrightDrafts: { "project": string; "suite": string; query?: { "cursor"?: string; "limit"?: number } }
+  readPlaywrightStarter: { "project": string; "suite": string }
+  readPlaywrightDraft: { "project": string; "suite": string; "id": string }
+  savePlaywrightDraft: { "project": string; "suite": string; "id": string; revision: number; body: PlaywrightDraft }
+  preparePlaywrightDraft: { "project": string; "suite": string; "id": string; revision: number; key: string }
   readReleaseRegistry: { "project": string; "suite": string }
   activateRetainedRelease: { "project": string; "suite": string; "id": string; revision: number }
   listSavedSelections: { "project": string; "suite": string; query?: { "cursor"?: string; "limit"?: number; "archived"?: boolean } }
@@ -315,6 +324,11 @@ export interface AccessResponses {
   readCatalogPlan: CatalogPlanRecord
   applyCatalogPlan: CatalogPlanRecord
   readSuiteLifecycle: SuiteLifecycle
+  listPlaywrightDrafts: PlaywrightDraftPage
+  readPlaywrightStarter: PlaywrightDraft
+  readPlaywrightDraft: PlaywrightDraftRecord
+  savePlaywrightDraft: PlaywrightDraftRecord
+  preparePlaywrightDraft: SourcePreparationRecord
   readReleaseRegistry: ReleaseRegistry
   activateRetainedRelease: {  }
   listSavedSelections: SavedSelectionPage
@@ -430,6 +444,11 @@ export const accessOperations = {
   readCatalogPlan: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/catalog-imports/{id}" },
   applyCatalogPlan: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/catalog-imports/{id}/apply" },
   readSuiteLifecycle: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/lifecycle" },
+  listPlaywrightDrafts: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/playwright-drafts" },
+  readPlaywrightStarter: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/playwright-drafts/starter" },
+  readPlaywrightDraft: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/playwright-drafts/{id}" },
+  savePlaywrightDraft: { method: "PUT", path: "/api/v1/projects/{project}/suites/{suite}/playwright-drafts/{id}" },
+  preparePlaywrightDraft: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/playwright-drafts/{id}/prepare" },
   readReleaseRegistry: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/release-registry" },
   activateRetainedRelease: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/releases/{id}/activate" },
   listSavedSelections: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/saved-selections" },

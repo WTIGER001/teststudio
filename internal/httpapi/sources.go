@@ -15,6 +15,7 @@ func (s *Server) sourceRoutes(m *http.ServeMux) {
 	}
 	s.preparationRoutes(m, service)
 	s.bundleRoutes(m, service)
+	s.playwrightDraftRoutes(m, service)
 	s.repositoryRoutes(m, service)
 	base := "/api/v1/projects/{project}/suites/{suite}/source-uploads"
 	m.HandleFunc("GET "+base, s.authorized(func(w http.ResponseWriter, r *http.Request) {

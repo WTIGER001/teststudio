@@ -74,6 +74,45 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### In-app Playwright editor and saved source workspaces
+
+The Sources page now provides an in-app TypeScript editor and an independent browser starter.
+A draft contains the complete suite workspace, catalog, configuration, and optional source or helper files.
+The editor provides syntax colors, line numbers, bracket matching, undo, search, and keyboard focus escape.
+Saved drafts persist in the installation database. Explicit revision checks protect concurrent edits.
+Unfinished code remains saveable. Preparation validates catalog structure and the worker reports code or discovery errors.
+Unsaved edits disable suite switching and prompt before page navigation or browser reload.
+Conflict responses preserve the local buffer. Users can copy edits, discard changes, and reopen the current saved revision.
+
+The API generates pinned package declarations and the suite manifest.
+Preparation snapshots the exact saved revision and uses the existing isolated bundle worker and common source review.
+Current source authority, catalog import authority, suite state, and draft revision apply inside the queue transaction.
+Later draft edits cannot change retained preparation bytes, releases, or existing runs.
+Saving and preparation never create a test run. Publication and execution remain separate steps.
+The current browser profile remains offline and isolated. Website environment support and browser recording remain open work.
+
+The Sources page now puts destination selection and browser authoring before repository administration.
+It explains HTTP definitions, complete ZIP bundles, repository sources, and the editor workflow.
+The native upload form no longer says ZIP bundles and repository connections are unavailable.
+Contextual help and playwright-editor.md document the implemented controls and limits.
+The API contract and generated client advance to version 0.23.0.
+
+Three focused API and source checks pass locally in less than one second per package.
+They cover authority, project boundaries, sessions, request-forgery protection, revision conflicts, unsafe paths, unfinished source recovery, and immutable preparation bytes.
+TestPlaywrightEditorLocalStarterBuildsPublishesAndRuns passes through real local assembly, discovery, publication, execution, and complete evidence in 9.14 seconds.
+Its owned assembled image, browser containers, and volumes are removed. The trusted runtime stays cached.
+The record is output/playwright-editor/local-starter.json.
+STUDIO-EDITOR-001 passes through TestStudio with complete evidence in 1.574 seconds.
+It covers editing, saved reloads, helper files, a frozen preparation revision, cancellation, concurrent edits, unsaved navigation, help, dark theme, keyboard focus, and mobile overflow.
+The first two attempts identify a missing source-preparation fixture flag and an unsuitable hidden-link harness locator.
+The fixture enables source preparation. The navigation guard check uses the visible application brand link.
+Before broader self-tests, revisit navigationLink hidden-link name resolution. No broader workflow matrix runs here.
+Evidence is output/selftest/20261103T192406.578680000-672e1c4c5bbe69b902f4a10d/summary.json and cleanup.json.
+All three verification controllers, browser containers, and output volumes are removed.
+The Angular production build and generated contract check pass.
+The user's local demo restarts with its existing database and the updated private UI snapshot.
+The ledger remains **26 verified, 31 open, 57 total**. Items **21** and **22** advance and remain open.
+
 ### Grouped sidebar navigation
 
 The user's walkthrough feedback replaces the flat sidebar with Workspace, Testing, Project administration, and Installation administration sections.
