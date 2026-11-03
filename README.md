@@ -33,6 +33,7 @@ Use table selection for bulk lifecycle actions. Duplicate and History appear on 
 The [catalog guide](docs/catalog.md) describes schemas, revision checks, and request limits.
 The [source upload guide](docs/sources.md) describes reviewed JSON and YAML publication, source digests, and retained snapshots.
 The [CLI sign-in guide](docs/cli-sign-in.md) describes browser confirmation for local and OIDC accounts and private managed sessions.
+The [release guide](docs/releases.md) describes retained catalogs, comparisons, activation, rollback, and frozen run selections.
 The [prepared suite guide](docs/prepared-suites.md) describes manifests, isolated discovery, and reviewed image publication.
 The [repository source guide](docs/repository-sources.md) describes GitHub registration, private App access, manual sync, and shared suite snapshots.
 The [source bundle guide](docs/source-bundles.md) describes Go and Playwright ZIP uploads, trusted runtimes, separate build workers, CLI assembly, and retained snapshots.

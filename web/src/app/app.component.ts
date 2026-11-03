@@ -73,6 +73,7 @@ import { HelpComponent } from './features/help/help.component'
             @if (app.workspace.projectId()) {
               <a [routerLink]="['/projects', app.workspace.projectId(), 'explain-access']" routerLinkActive="active"><span aria-hidden="true">♧</span> Explain project access</a>
               <a [routerLink]="['/projects', app.workspace.projectId(), 'catalog']" routerLinkActive="active"><span aria-hidden="true">≡</span> Test catalog</a>
+              @if (app.workspace.can('catalog.read')) { <a [routerLink]="['/projects', app.workspace.projectId(), 'releases']" routerLinkActive="active"><span aria-hidden="true">◇</span> Suite releases</a> }
               @if (app.workspace.can('sources.read')) { <a [routerLink]="['/projects', app.workspace.projectId(), 'sources']" routerLinkActive="active"><span aria-hidden="true">◇</span> Sources</a> }
               <a [routerLink]="['/projects', app.workspace.projectId(), 'runs']" routerLinkActive="active"><span aria-hidden="true">▷</span> Test runs</a>
               <a [routerLink]="['/projects', app.workspace.projectId(), 'trends']" routerLinkActive="active"><span aria-hidden="true">▥</span> Trends</a>

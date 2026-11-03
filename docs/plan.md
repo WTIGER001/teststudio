@@ -14,10 +14,13 @@ The full product scope remains required. This direction supersedes the testing s
 
 ## Current implementation checkpoint
 
-The acceptance ledger has **24 verified, 33 open, 57 total** items.
+The acceptance ledger has **25 verified, 32 open, 57 total** items.
 Item **23** now passes a real local repository snapshot with two suites beside shared application source.
 Both suites build separate images, publish, and pass normal runs with one result and complete evidence.
 Item **24** previously passes two-image publication and execution without restarting the server.
+Item **27** now passes UI activation and rollback with immutable existing runs, future active selection, and explicit run and schedule pins.
+The Suite releases page provides retained definitions, comparisons, immutable source links, conflict handling, and archived-suite history.
+Focused catalog checks and STUDIO-RELEASES-001 pass locally. The implementation ledger records evidence and cleanup.
 
 Go ZIP uploads, prebuilt images, and registered GitHub sources use durable preparation and the common catalog review.
 The Sources UI manages repository settings, multiple bindings, manual sync, diagnostics, history, and publication policy.
@@ -52,6 +55,7 @@ Use the targeted source checks or affected self-test selector after implementati
 Recent feature commits are 6b5a9f1 for registered sources and e1354ef for push and periodic synchronization.
 The current source builder supports offline Go and Playwright bundles with trusted runtimes and fixed copy instructions.
 Items **22**, **25**, **26**, and **29** advance but remain open for their broader scope.
+Items **21** and **29** also advance through retained release controls.
 Keep the full 57-item plan required. Do not narrow the goal to this milestone.
 Implement coherent batches, then run the smallest relevant local checks. Reuse existing evidence.
 AWS, Kubernetes, and Azure verification remain separate work.

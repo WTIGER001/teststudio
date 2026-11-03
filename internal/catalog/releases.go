@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/projects"
@@ -115,26 +116,38 @@ func (s *Service) Publish(ctx context.Context, user, project, suite, id, key str
 }
 
 func (s *Service) Activate(ctx context.Context, user, project, suite, releaseID string, revision int64) error {
-	if err := s.Auth.Check(ctx, user, project, "suite/"+suite, "catalog.publish"); err != nil {
-		return err
-	}
-	if _, err := s.Store.Get(ctx, Bucket("releases", project, suite), releaseID); err != nil {
-		return err
-	}
-	v, r, err := s.suite(ctx, project, suite)
-	if err != nil {
-		return err
-	}
-	v.ActiveRelease = releaseID
-	c, err := storage.Put(r.Bucket, r.ID, project, revision, v)
-	if err != nil {
-		return err
-	}
-	audit, err := domain.Audit(user, project, "catalog.activate", suite, nil, releaseID)
-	if err != nil {
-		return err
-	}
-	return s.Store.Commit(ctx, c, audit)
+	return s.Auth.WithAssignmentTransaction(ctx, func(auth *authorization.Service) error {
+		bound := &Service{Store: auth.Directory.Store, Auth: auth}
+		if err := bound.Auth.Check(ctx, user, project, "suite/"+suite, "catalog.publish"); err != nil {
+			return err
+		}
+		record, err := bound.Store.Get(ctx, Bucket("releases", project, suite), releaseID)
+		if err != nil {
+			return err
+		}
+		release, err := storage.Decode[Release](record)
+		if err != nil {
+			return err
+		}
+		if release.Project != project || release.Suite != suite || release.ID != releaseID {
+			return storage.ErrNotFound
+		}
+		current, row, err := bound.suite(ctx, project, suite)
+		if err != nil {
+			return err
+		}
+		previous := current.ActiveRelease
+		current.ActiveRelease = releaseID
+		change, err := storage.Put(row.Bucket, row.ID, project, revision, current)
+		if err != nil {
+			return err
+		}
+		audit, err := domain.Audit(user, project, "catalog.activate", suite, previous, releaseID)
+		if err != nil {
+			return err
+		}
+		return bound.Store.Commit(ctx, change, audit)
+	})
 }
 
 func (s *Service) ActiveRelease(ctx context.Context, project, suite string) (Release, error) {

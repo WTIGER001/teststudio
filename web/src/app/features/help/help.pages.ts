@@ -1,6 +1,17 @@
 import type { HelpPage } from './help.models'
 
 export const helpPages: Record<string, HelpPage> = {
+  releases: {
+    id: 'releases', title: 'Suite releases',
+    introduction: ['Browse immutable suite releases, compare definitions and artifacts, and select a release for future runs.'],
+    concepts: [
+      { title: 'Retained releases', description: 'Each release freezes its test definitions, timing and evidence policies, execution artifact, and source provenance. Archived suites retain readable releases.' },
+      { title: 'Activation and rollback', description: 'The active release supplies future runs that follow the suite. Activating an older retained release rolls the suite back. Existing runs and pinned schedules keep their own release.' },
+      { title: 'Comparisons', description: 'Choose a baseline under Compare releases. The table identifies added, removed, and changed definitions. Separate notices identify execution artifact, source provenance, timing policy, and evidence policy changes.' },
+      { title: 'Current authority and conflicts', description: 'Activation checks current publishing permission and the displayed suite revision. A conflict requires refreshing before another activation. Archived suites require restoration first.' }
+    ],
+    tutorials: [{ title: 'Inspect and compare releases', steps: ['Select Suite for retained releases. Search by identifier, author, repository, or commit when needed.', 'Select Inspect on a release. Review its publication details, definitions, image, and recorded source.', 'Choose another release under Compare selected release against. Review changed fields and artifact notices.', 'Use View recorded commit to inspect the exact GitHub commit when repository provenance is available.'] }, { title: 'Roll back a suite', steps: ['Inspect the retained release you want to select.', 'Review its definitions and compare it with the active release.', 'Select Activate selected release. This does not start tests or change existing run snapshots.', 'If a conflict appears, refresh retained releases and review the current state before activating again.'] }]
+  },
   'cli-signin': {
     id: 'cli-signin', title: 'CLI sign-in',
     introduction: ['Confirm a TestStudio publisher CLI request using your current browser account. Local and configured OIDC sign-in methods use the same confirmation.'],

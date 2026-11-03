@@ -90,6 +90,14 @@ func (s *Server) catalogRoutes(m *http.ServeMux) {
 		}
 		s.record(w, r, catalog.Bucket("tests", p, suite), id)
 	}))
+	m.HandleFunc("GET "+base+"/release-registry", s.authorized(func(w http.ResponseWriter, r *http.Request) {
+		value, err := s.Catalog.ReleaseRegistry(r.Context(), actor(r), r.PathValue("project"), r.PathValue("suite"))
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		JSON(w, 200, value)
+	}))
 	for _, kind := range []string{"drafts", "releases"} {
 		kind := kind
 		route := map[string]string{"drafts": "catalog-drafts", "releases": "releases"}[kind]

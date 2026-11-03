@@ -13,14 +13,14 @@ let cache = {}
 try { cache = JSON.parse(fs.readFileSync(filename, 'utf8')) } catch (error) { if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error }
 const digest = values => crypto.createHash('sha256').update(JSON.stringify(values)).digest('hex')
 const fileHash = filename => fs.existsSync(filename) ? crypto.createHash('sha256').update(fs.readFileSync(filename)).digest('hex') : ''
-function fingerprint(roots, omitGoTests = false) {
+function fingerprint(roots, omitGoTests = false, omitTypeScriptTests = false) {
   const hash = crypto.createHash('sha256')
   function visit(filename) {
     if (!fs.existsSync(filename)) return
     const stat = fs.lstatSync(filename)
     if (stat.isSymbolicLink()) throw new Error(`Self-test build input must not be a symbolic link: ${filename}`)
     if (stat.isDirectory()) { for (const name of fs.readdirSync(filename).sort()) visit(path.join(filename, name)); return }
-    if (!stat.isFile() || omitGoTests && filename.endsWith('_test.go')) return
+    if (!stat.isFile() || omitGoTests && filename.endsWith('_test.go') || omitTypeScriptTests && /\.(?:test|spec)\.ts$/.test(filename)) return
     hash.update(filename + '\0'); hash.update(fs.readFileSync(filename)); hash.update('\0')
   }
   for (const filename of roots) visit(filename)
@@ -46,7 +46,7 @@ if (!baseMetadata) throw new Error('The pinned self-test base is unavailable')
 const [baseImage, architecture] = baseMetadata
 if (!['amd64', 'arm64'].includes(architecture)) throw new Error('Unsupported self-test runtime architecture')
 
-const uiKey = fingerprint(['web/src', 'web/public', 'web/angular.json', 'web/tsconfig.json', 'web/tsconfig.app.json', 'web/package.json', 'web/package-lock.json'])
+const uiKey = fingerprint(['web/src', 'web/public', 'web/angular.json', 'web/tsconfig.json', 'web/tsconfig.app.json', 'web/package.json', 'web/package-lock.json'], false, true)
 const uiDirectory = 'web/dist/web/browser'
 let uiOutput = fs.existsSync(`${uiDirectory}/index.html`) ? fingerprint([uiDirectory]) : ''
 if (cache.uiKey !== uiKey || !uiOutput || cache.uiOutput !== uiOutput) {

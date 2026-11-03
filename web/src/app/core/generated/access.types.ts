@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.18.0"
+export const accessContractVersion = "0.19.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -66,6 +66,7 @@ export type ProviderMutation = { "autoProvision": boolean; "clientId": string; "
 export type ProviderPage = { "canCreate": boolean; "credentialRefs": (string)[]; "cursor"?: string; "items": (ProviderRecord)[]; "partial": boolean }
 export type ProviderRecord = { "data": Provider; "id": string; "revision": number; "updatedAt": string }
 export type Reason = { "reason": string }
+export type ReleaseRegistry = { "activeReleaseId"?: string; "archived": boolean; "canActivate": boolean; "items": (SourceCatalogRelease)[]; "suiteId": string; "suiteName": string; "suiteRevision": number }
 export type Revoked = { "revoked": boolean }
 export type Role = { "builtIn": boolean; "delegatable": boolean; "disabled": boolean; "id": string; "name": string; "permissions": (string)[]; "scope": "project" | "installation" }
 export type RoleChoicePage = { "cursor"?: string; "items": (Role)[]; "partial": boolean }
@@ -178,6 +179,8 @@ export interface AccessRequests {
   createProjectAssignment: { "project": string; body: AssignmentDefinition }
   revokeProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
   readProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string }
+  readReleaseRegistry: { "project": string; "suite": string }
+  activateRetainedRelease: { "project": string; "suite": string; "id": string; revision: number }
   uploadSourceBundle: { "project": string; "suite": string; key: string; query: { "name": string; "manifest": string }; body: Blob }
   readPreparationOptions: { "project": string; "suite": string }
   listSourcePreparations: { "project": string; "suite": string; query?: { "limit"?: number; "cursor"?: string } }
@@ -279,6 +282,8 @@ export interface AccessResponses {
   createProjectAssignment: AssignmentRecord
   revokeProjectAssignment: Revoked
   readProjectAssignment: AssignmentRecord
+  readReleaseRegistry: ReleaseRegistry
+  activateRetainedRelease: {  }
   uploadSourceBundle: SourcePreparationRecord
   readPreparationOptions: SourcePreparationOptions
   listSourcePreparations: SourcePreparationPage
@@ -380,6 +385,8 @@ export const accessOperations = {
   createProjectAssignment: { method: "POST", path: "/api/v1/projects/{project}/role-assignments" },
   revokeProjectAssignment: { method: "DELETE", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
   readProjectAssignment: { method: "GET", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
+  readReleaseRegistry: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/release-registry" },
+  activateRetainedRelease: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/releases/{id}/activate" },
   uploadSourceBundle: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/source-bundles" },
   readPreparationOptions: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-preparation-options" },
   listSourcePreparations: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-preparations" },

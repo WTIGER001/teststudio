@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 24 verified of 57.
+The acceptance count is 25 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -37,7 +37,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **24.** Test-only publication requires no API or UI deployment.
 - [ ] **25.** Concurrent catalog edits produce explicit conflicts. Source synchronization preserves service-managed metadata.
 - [ ] **26.** Failed or duplicate preparation events preserve the active release and do not create unintended test runs.
-- [ ] **27.** Runs retain their release across updates, activation changes, and rollbacks.
+- [x] **27.** Runs retain their release across updates, activation changes, and rollbacks.
 - [ ] **28.** Catalog changes do not change existing run snapshots. Disabled tests and invalid dependencies block new dispatch explicitly.
 - [ ] **29.** Removed tests and archived suites retain their history and required artifacts.
 - [x] **30.** TestStudio executes its own new Playwright suite through normal publication, execution, timing, result, and evidence contracts.
@@ -73,6 +73,32 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
+
+### Retained release comparison, activation, and rollback
+
+Added the Suite releases page with retained catalogs, immutable provenance, exact commit links, definition inspection, and release comparisons.
+Comparisons preserve permanent test identities and separate definition changes from artifact, timing, and evidence policy changes.
+The registry exposes the current active release, suite revision, archived state, and exact activation authority.
+Archived suites retain readable release history.
+Activation now checks current permission inside the shared assignment transaction and records previous and selected release identifiers.
+Concurrent suite changes produce a conflict. The UI requires a refresh before another activation.
+
+Item **27** passes the full local publication, activation, and rollback workflow through the UI and normal run API.
+Runs created before and after a definition update keep their original release and title after repeated activation changes and rollback.
+A future unpinned run follows the rolled-back release. An explicit run pin still executes the other retained release.
+An existing schedule release pin remains unchanged.
+The same shared run snapshot contract retains coded artifacts, with earlier two-image execution evidence under item 24.
+
+Focused catalog and generated-client checks pass. Pure comparison and immutable source-link checks pass.
+The Angular production build and STUDIO-RELEASES-001 pass with complete evidence and cleaned execution.
+Evidence is output/selftest/20261103T171931.090298000-b214991be576d067b3830d33/summary.json.
+The owned browser container, volume, and controller are absent after verification.
+The first targeted test uses an unsupported suite detail URL at its final archive step. The corrected test uses the existing collection API.
+The retry reuses every unchanged binary and runs only the affected selector.
+The self-test UI input fingerprint also ignores standalone TypeScript test files that the application build does not import.
+No repeated Go or browser source-image integrations, broad matrix, live provider, or cloud tests run.
+The ledger is **25 verified, 32 open, 57 total**. Items **21** and **29** advance but remain open.
+The full acceptance scope remains required.
 
 ### Browser-confirmed CLI sign-in for local and OIDC accounts
 
