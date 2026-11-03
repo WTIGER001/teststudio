@@ -1,10 +1,16 @@
-export const accessContractVersion = "0.17.0"
+export const accessContractVersion = "0.18.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
 export type AssignmentDefinition = { "principalId": string; "principalKind": "user" | "group"; "reason": string; "roleId": string }
 export type AssignmentPage = { "cursor"?: string; "items": (AssignmentRecord)[]; "partial": boolean }
 export type AssignmentRecord = { "data": Assignment; "id": string; "projectId"?: string; "revision": number; "updatedAt"?: string }
+export type CLIConfirmation = { "approve": boolean; "clientName": string; "code": string }
+export type CLIExchange = { "session"?: CLIGrant; "state": string }
+export type CLIGrant = { "cookie": string; "csrfToken": string; "expiresAt": string }
+export type CLIOptions = { "lifetimeSeconds": number; "pollSeconds": number; "serverTime": string }
+export type CLIProof = { "clientName": string; "requestId": string; "verifier": string }
+export type CLIView = { "clientName": string; "expiresAt": string; "id": string; "state": string }
 export type ExternalIdentity = { "issuer": string; "subject": string; "userId": string }
 export type ExternalIdentityPage = { "cursor"?: string; "items": (ExternalIdentityRecord)[]; "partial": boolean }
 export type ExternalIdentityRecord = { "data": ExternalIdentity; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
@@ -73,7 +79,7 @@ export type RolePreview = { "decisions": (PermissionComparison)[]; "object": str
 export type RolePreviewInput = { "object"?: string; "policy": RolePolicyMutation; "revision": number; "userId": string }
 export type RoleRule = { "effect": "allow" | "deny"; "expiresAt"?: string | null; "object"?: string; "permission": string }
 export type Saved = { "saved": boolean }
-export type Session = { "authenticationUntil": string; "createdAt": string; "current": boolean; "expiresAt": string; "id": string; "lastSeen": string; "provider": string }
+export type Session = { "authenticationUntil": string; "client"?: string; "clientName"?: string; "createdAt": string; "current": boolean; "expiresAt": string; "id": string; "lastSeen": string; "provider": string }
 export type SessionPage = { "cursor"?: string; "items": (SessionRecord)[]; "partial": boolean }
 export type SessionRecord = { "data": Session; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
 export type SourceBuild = { "finishedAt": string; "image": string; "log"?: string; "logTruncated"?: boolean; "sourceDigest": string; "startedAt": string }
@@ -210,6 +216,11 @@ export interface AccessRequests {
   restoreUser: { "user": string; revision: number; body: Reason }
   listUserSessions: { "user": string; query?: { "limit"?: number; "cursor"?: string } }
   revokeUserSession: { "user": string; "session": string; revision: number; body: Reason }
+  cancelCLISignIn: { body: CLIProof }
+  exchangeCLISignIn: { body: CLIProof }
+  readCLISignInOptions: {  }
+  readCLISignInRequest: { "request": string; query: { "clientName": string } }
+  confirmCLISignInRequest: { "request": string; body: CLIConfirmation }
   signOut: {  }
   signInWithPassword: { body: PasswordLogin }
   changeLocalPassword: { body: PasswordChange }
@@ -306,6 +317,11 @@ export interface AccessResponses {
   restoreUser: UserRecord
   listUserSessions: SessionPage
   revokeUserSession: Revoked
+  cancelCLISignIn: { "state": string }
+  exchangeCLISignIn: CLIExchange
+  readCLISignInOptions: CLIOptions
+  readCLISignInRequest: CLIView
+  confirmCLISignInRequest: CLIView
   signOut: LogoutResponse
   signInWithPassword: PasswordSignedIn
   changeLocalPassword: PasswordChanged
@@ -402,6 +418,11 @@ export const accessOperations = {
   restoreUser: { method: "POST", path: "/api/v1/users/{user}/restore" },
   listUserSessions: { method: "GET", path: "/api/v1/users/{user}/sessions" },
   revokeUserSession: { method: "DELETE", path: "/api/v1/users/{user}/sessions/{session}" },
+  cancelCLISignIn: { method: "POST", path: "/auth/cli/cancel" },
+  exchangeCLISignIn: { method: "POST", path: "/auth/cli/exchange" },
+  readCLISignInOptions: { method: "GET", path: "/auth/cli/options" },
+  readCLISignInRequest: { method: "GET", path: "/auth/cli/requests/{request}" },
+  confirmCLISignInRequest: { method: "POST", path: "/auth/cli/requests/{request}" },
   signOut: { method: "POST", path: "/auth/logout" },
   signInWithPassword: { method: "POST", path: "/auth/password" },
   changeLocalPassword: { method: "POST", path: "/auth/password/change" }

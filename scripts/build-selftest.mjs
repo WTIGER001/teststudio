@@ -61,6 +61,7 @@ const goKey = digest([goVersion, fingerprint(['go.mod', 'go.sum', 'internal', 'a
 const targets = [
   { id: 'controller', package: './cmd/teststudio', platform: `${process.platform}-${process.arch}`, env: {} },
   { id: 'teststudio', package: './cmd/teststudio', platform: `linux-${architecture}-cgo0`, env: { CGO_ENABLED: '0', GOOS: 'linux', GOARCH: architecture } },
+  { id: 'teststudio-publish', package: './cmd/teststudio-publish', platform: `linux-${architecture}-cgo0`, env: { CGO_ENABLED: '0', GOOS: 'linux', GOARCH: architecture } },
   { id: 'access-fixture', package: './tests/selftest/seed-access', platform: `linux-${architecture}-cgo0`, env: { CGO_ENABLED: '0', GOOS: 'linux', GOARCH: architecture } }
 ]
 cache.binaries ??= {}
@@ -72,7 +73,7 @@ for (const target of targets) {
     cache.binaries[target.id] = { key, hash: fileHash(output) }; save()
   } else console.error(`Reusing unchanged self-test binary: ${target.id}.`)
 }
-const imageKey = digest([baseImage, architecture, uiOutput, cache.binaries.teststudio.hash, cache.binaries['access-fixture'].hash, fingerprint(['tests/selftest/Dockerfile', 'tests/selftest/playwright', 'runners/playwright'])])
+const imageKey = digest([baseImage, architecture, uiOutput, cache.binaries.teststudio.hash, cache.binaries['access-fixture'].hash, cache.binaries['teststudio-publish'].hash, fingerprint(['tests/selftest/Dockerfile', 'tests/selftest/playwright', 'runners/playwright'])])
 if (cache.imageKey !== imageKey || !cache.image || !inspect(cache.image)) {
   run('docker', ['build', '--pull=false', '-q', '-f', 'tests/selftest/Dockerfile', '-t', 'teststudio/selftests:local', '.'])
   const image = inspect('teststudio/selftests:local')?.[0]

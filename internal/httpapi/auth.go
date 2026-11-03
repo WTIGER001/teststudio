@@ -13,6 +13,7 @@ import (
 )
 
 func (s *Server) authRoutes(m *http.ServeMux) {
+	s.cliAuthenticationRoutes(m)
 	m.HandleFunc("GET /auth/providers", func(w http.ResponseWriter, r *http.Request) {
 		rows, err := s.Store.All(r.Context(), "providers", "")
 		if err != nil {

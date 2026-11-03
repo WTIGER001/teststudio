@@ -41,7 +41,11 @@ Focused signature, delivery replay, delayed push, scheduler contention, coalesci
 Offline Playwright bundles now use the same builder, discovery, publication, and execution workflow.
 A real local browser bundle and the expanded STUDIO-BUNDLES-001 self-test pass.
 Workers accept separate Go and Playwright runtimes and leave other runtime work queued.
-Continue complete GitHub-to-UI publication evidence for item 22, dependency preparation profiles, and CLI OIDC browser sign-in.
+Browser-confirmed publisher login now supports local and OIDC accounts through the ordinary browser sign-in screen.
+It issues one independent, proof-bound managed CLI session and retains current authorization and expiry bounds.
+The actual CLI binary passes STUDIO-CLI-001 with local and local-fixture OIDC accounts, denial, help, and mobile checks.
+See cli-sign-in.md and the implementation ledger for exact evidence and continuation details.
+Continue complete GitHub-to-UI publication evidence for item 22 and dependency preparation profiles.
 The cached browser runtime is teststudio/playwright-source-runtime:local. The cached Go runtime is teststudio/go-source-runtime:local.
 Do not repeat the passing real Go or Playwright image integrations without a builder or execution contract change.
 Use the targeted source checks or affected self-test selector after implementation changes.

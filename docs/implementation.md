@@ -74,6 +74,36 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Browser-confirmed CLI sign-in for local and OIDC accounts
+
+Added native publisher login with browser, no-open, and client-name options.
+The terminal generates a private proof bound to the server time and displayed client name.
+The browser requires normal account sign-in, a matching terminal code, explicit approval, current origin, and CSRF protection.
+Anonymous polling creates no durable authorization records. Approved or declined requests expire after five minutes.
+The server atomically consumes approval and creates one independent managed CLI session.
+It preserves authentication and credential revisions, user revocation epoch, and the original authentication and session expiry bounds.
+The browser remains signed in. Private provider tokens never enter the CLI or confirmation response.
+
+The terminal saves only managed TestStudio credentials in the existing private session-file format.
+Failed file delivery cancels the issued session. Successful replacement attempts to revoke the previous same-origin CLI session.
+User session administration displays each CLI client name and retains ordinary revocation controls.
+A new confirmation page provides contextual Introduction, Concepts, Tutorials, keyboard dismissal, and mobile layout.
+
+Focused local checks pass for proof tampering, client-name binding, wrong codes, concurrent exchange, replay, denial, expiry, account disabling, parent revocation, private output, and failed file delivery.
+The signed-in browser session remains valid after CLI issuance and cancellation.
+The existing local publisher review and publication check and session CSRF/revocation check pass.
+Generated client checks and the Angular production build pass.
+
+STUDIO-CLI-001 runs the actual publisher binary through normal TestStudio publication and execution.
+It passes local browser approval, a new local OIDC provider, denied approval, private file modes, independent session credentials, and expiry bounds.
+It also passes help input preservation, keyboard close, dark theme, mobile width, and owned publisher process cleanup.
+Evidence is output/selftest/20261103T170106.595113000-222b227f16dac6a53ad47c83/summary.json.
+Evidence is complete. Execution is cleaned. Its owned browser container, volume, and controller are absent.
+The first image build misses the new binary's Docker allowlist entry. The corrected retry reuses unchanged UI and binaries.
+Only this new browser selector runs. No broad matrix or cloud verification runs.
+The ledger remains **24 verified, 33 open**. This extends the implemented behavior for **09**, **19**, and **50**.
+The full acceptance scope remains required.
+
 ### Offline Playwright source bundles
 
 Added a trusted generic browser runtime with pinned Playwright packages and no application tests, UI, or controller files.

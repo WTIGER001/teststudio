@@ -30,6 +30,7 @@ import (
 	githubsource "github.com/wtiger001/teststudio/adapters/sources/github"
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/catalog"
+	"github.com/wtiger001/teststudio/internal/cliauth"
 	"github.com/wtiger001/teststudio/internal/evidence"
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/httpapi"
@@ -258,6 +259,7 @@ func run() error {
 	defer artifactListener.Close()
 	workerContext, cancelWorkers := context.WithCancel(ctx)
 	workersDone := runService.Start(workerContext)
+	cliMaintenanceDone := (&cliauth.Service{Sessions: sessionService}).StartMaintenance(workerContext)
 	maintenanceDone := evidenceService.StartMaintenance(workerContext, 5*time.Second)
 	sourceMaintenanceDone := sourceService.StartMaintenance(workerContext, 5*time.Second)
 	var preparationDone <-chan struct{}
@@ -273,6 +275,7 @@ func run() error {
 	defer func() {
 		cancelWorkers()
 		<-workersDone
+		<-cliMaintenanceDone
 		<-maintenanceDone
 		<-sourceMaintenanceDone
 		if preparationDone != nil {

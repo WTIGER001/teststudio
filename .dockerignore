@@ -19,3 +19,5 @@ bin
 !.data/discovery-build/teststudio-go
 !.data/discovery-build/go-origin.json
 !.data/discovery-build/playwright-origin.json
+
+!.data/selftest-build/teststudio-publish

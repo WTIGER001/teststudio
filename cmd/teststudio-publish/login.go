@@ -14,6 +14,9 @@ func login(ctx context.Context, args []string, writer io.Writer) error {
 	flags := flag.NewFlagSet("login", flag.ContinueOnError)
 	flags.SetOutput(writer)
 	server := flags.String("server", "", "Exact TestStudio public origin")
+	browser := flags.Bool("browser", false, "Confirm a separate CLI session in your browser using any configured sign-in method")
+	noOpen := flags.Bool("no-open", false, "Print the browser sign-in address without launching a browser")
+	clientName := flags.String("client-name", "TestStudio publisher CLI", "Client name shown during browser confirmation")
 	local := flags.Bool("local", false, "Use the server's enabled loopback administrator sign-in")
 	user := flags.String("user", "", "Local account identifier")
 	passwordEnv := flags.String("password-env", "", "Environment variable containing the password")
@@ -24,12 +27,15 @@ func login(ctx context.Context, args []string, writer io.Writer) error {
 		}
 		return err
 	}
-	if flags.NArg() != 0 || *server == "" || (*local && (*user != "" || *passwordEnv != "")) || (!*local && (*user == "" || *passwordEnv == "")) {
-		return errors.New("choose --local or --user with --password-env")
+	if flags.NArg() != 0 || *server == "" || (*browser && (*local || *user != "" || *passwordEnv != "")) || (!*browser && *noOpen) || (!*browser && ((*local && (*user != "" || *passwordEnv != "")) || (!*local && (*user == "" || *passwordEnv == "")))) {
+		return errors.New("choose --browser, --local, or --user with --password-env")
 	}
 	origin, err := serverOrigin(*server)
 	if err != nil {
 		return err
+	}
+	if *browser {
+		return browserLogin(ctx, origin, *clientName, *filename, *noOpen, writer)
 	}
 	if *local && !loopback(origin.Hostname()) {
 		return errors.New("local administrator sign-in requires a loopback server")

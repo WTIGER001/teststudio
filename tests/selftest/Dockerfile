@@ -6,6 +6,7 @@ COPY runners/playwright/run.mjs runners/playwright/reporter.cjs runners/playwrig
 COPY tests/selftest/playwright /suite
 RUN ln -s /runner/node_modules /suite/node_modules && mkdir -p /output && chmod 1777 /output
 COPY .data/selftest-build/teststudio /app/teststudio
+COPY .data/selftest-build/teststudio-publish /app/teststudio-publish
 COPY .data/selftest-build/access-fixture /app/access-fixture
 COPY web/dist/web/browser /app/ui
 WORKDIR /suite

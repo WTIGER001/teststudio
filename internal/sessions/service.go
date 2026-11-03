@@ -21,6 +21,8 @@ var ErrPasswordChangeRequired = errors.New("change your password before continui
 var ErrUnauthenticated = errors.New("sign-in is required")
 
 type Session struct {
+	ClientName           string    `json:"clientName,omitempty"`
+	Client               string    `json:"client,omitempty"`
 	ID                   string    `json:"-"`
 	UserID               string    `json:"userId"`
 	Provider             string    `json:"provider"`

@@ -13,6 +13,8 @@ import (
 )
 
 type SessionView struct {
+	ClientName          string    `json:"clientName,omitempty"`
+	Client              string    `json:"client,omitempty"`
 	ID                  string    `json:"id"`
 	Provider            string    `json:"provider"`
 	CreatedAt           time.Time `json:"createdAt"`
@@ -152,7 +154,7 @@ func (s *Service) UserSessions(ctx context.Context, actor, user, current, cursor
 		} else if err != nil {
 			return result, err
 		}
-		view := SessionView{ID: row.ID, Provider: v.Provider, CreatedAt: v.CreatedAt, LastSeen: v.LastSeen, ExpiresAt: v.ExpiresAt, AuthenticationUntil: v.AuthenticationUntil, Current: row.ID == current}
+		view := SessionView{ClientName: v.ClientName, Client: v.Client, ID: row.ID, Provider: v.Provider, CreatedAt: v.CreatedAt, LastSeen: v.LastSeen, ExpiresAt: v.ExpiresAt, AuthenticationUntil: v.AuthenticationUntil, Current: row.ID == current}
 		row.Data, err = json.Marshal(view)
 		if err != nil {
 			return result, err
@@ -187,6 +189,6 @@ func (s *Service) RevokeSession(ctx context.Context, actor, user, id, why string
 	if revision < 1 || revision != r.Revision {
 		return storage.ErrConflict
 	}
-	before := SessionView{ID: id, Provider: v.Provider, CreatedAt: v.CreatedAt, LastSeen: v.LastSeen, ExpiresAt: v.ExpiresAt, AuthenticationUntil: v.AuthenticationUntil}
+	before := SessionView{ClientName: v.ClientName, Client: v.Client, ID: id, Provider: v.Provider, CreatedAt: v.CreatedAt, LastSeen: v.LastSeen, ExpiresAt: v.ExpiresAt, AuthenticationUntil: v.AuthenticationUntil}
 	return s.commit(ctx, actor, "", "user.session.revoke", user+"/"+id, why, before, nil, version, storage.Change{Record: r, Delete: true})
 }

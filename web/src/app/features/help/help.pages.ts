@@ -1,6 +1,17 @@
 import type { HelpPage } from './help.models'
 
 export const helpPages: Record<string, HelpPage> = {
+  'cli-signin': {
+    id: 'cli-signin', title: 'CLI sign-in',
+    introduction: ['Confirm a TestStudio publisher CLI request using your current browser account. Local and configured OIDC sign-in methods use the same confirmation.'],
+    concepts: [
+      { title: 'Terminal code', description: 'Start sign-in in your own terminal. Review the client name and account, then enter the code printed by that terminal. A request expires after five minutes.' },
+      { title: 'Separate session', description: 'Approval allows that CLI to exchange its private proof once for a separate managed session. The browser keeps its session. Provider tokens remain on the server.' },
+      { title: 'Current access', description: 'The CLI uses your existing roles and project permissions. Revoked grants, disabled accounts, password changes, and provider changes follow the normal authorization rules.' },
+      { title: 'Decline or expiry', description: 'Declining creates no CLI session. Expired, consumed, or cancelled requests require a new terminal sign-in. Refresh the request after an uncertain approval response.' }
+    ],
+    tutorials: [{ title: 'Sign in from the publisher CLI', steps: ['Run teststudio-publish login with --server and --browser. Use --no-open to copy the address manually.', 'Sign in through the browser when required. Review the displayed account and client name.', 'Enter Terminal code exactly as printed in your terminal, then select Approve CLI sign-in.', 'Return to the terminal. It saves its managed session privately. Run logout when that CLI session is no longer needed.'] }, { title: 'Reject a request', steps: ['Select Decline CLI sign-in when you do not want to connect this terminal.', 'Start a new request in your own terminal if the client name, account, or code is incorrect.', 'Use user session administration to revoke an issued CLI session when necessary.'] }]
+  },
   sources: {
     id: 'sources', title: 'Sources',
     introduction: ['Upload native HTTP checks, prepare a Go or Playwright ZIP bundle, register a GitHub repository, or inspect a project-owned Go or Playwright image. Review its catalog and publish an immutable release without starting tests.'],

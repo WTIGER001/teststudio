@@ -151,7 +151,8 @@ bin/teststudio-publish login --server http://127.0.0.1:8040 --local
 
 Managed local accounts use `--user USER --password-env VARIABLE` instead of `--local`.
 The CLI stores a private managed session file. Use `--session-file` to choose its location.
-Remote connections require HTTPS. CLI OIDC browser sign-in remains pending.
+Remote connections require HTTPS. Local and OIDC accounts can use [CLI browser confirmation](cli-sign-in.md).
+Run login with --browser to approve a separate managed CLI session through the normal sign-in screen.
 Use `logout` to revoke the session and remove its local file.
 
 Prepare and review a project-labelled image:
