@@ -19,12 +19,16 @@ func (s *Service) inspectJob(ctx context.Context, job Job, worker string) (prepa
 		if err != nil {
 			return preparation.Inspection{}, err
 		}
-		snapshot, err := sourcebundle.Validate(bundle.Content, job.Manifest, job.Suite)
+		snapshot, err := sourcebundle.ValidateRoot(bundle.Content, job.Manifest, job.Suite, bundle.Root)
 		if err != nil {
 			return preparation.Inspection{}, err
 		}
 		builder := s.Builders[job.Runner]
-		result, buildErr := builder.Build(ctx, preparation.BuildRequest{Snapshot: snapshot, Origin: suitespec.Origin{SnapshotDigest: snapshot.Digest}, Reference: *job.Reference})
+		origin := suitespec.Origin{SnapshotDigest: snapshot.Digest}
+		if bundle.Origin != nil {
+			origin = *bundle.Origin
+		}
+		result, buildErr := builder.Build(ctx, preparation.BuildRequest{Snapshot: snapshot, Origin: origin, Reference: *job.Reference})
 		buildLog, buildTruncated = result.Log, result.LogTruncated
 		checkpoint, stop := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 		job, err = s.checkpointBuild(checkpoint, job, worker, result, buildErr == nil)

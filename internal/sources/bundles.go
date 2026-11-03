@@ -16,14 +16,17 @@ import (
 )
 
 type Bundle struct {
-	ID        string    `json:"id"`
-	Project   string    `json:"projectId"`
-	Suite     string    `json:"suiteId"`
-	Name      string    `json:"name"`
-	Manifest  string    `json:"manifestPath"`
-	Digest    string    `json:"digest"`
-	Content   []byte    `json:"content"`
-	ExpiresAt time.Time `json:"expiresAt"`
+	Snapshot  string              `json:"repositorySnapshotId,omitempty"`
+	Root      string              `json:"archiveRoot,omitempty"`
+	Origin    *catalog.Provenance `json:"sourceOrigin,omitempty"`
+	ID        string              `json:"id"`
+	Project   string              `json:"projectId"`
+	Suite     string              `json:"suiteId"`
+	Name      string              `json:"name"`
+	Manifest  string              `json:"manifestPath"`
+	Digest    string              `json:"digest"`
+	Content   []byte              `json:"content"`
+	ExpiresAt time.Time           `json:"expiresAt"`
 }
 
 type bundleIndex struct {
@@ -42,7 +45,11 @@ func jobQueue(job Job) string {
 }
 func activeJob(state string) bool { return state == "preparing" || state == "discovering" }
 
-func (s *Service) EnqueueBundle(ctx context.Context, user, project, suite, key, name, manifest string, data []byte) (result storage.Record, err error) {
+func (s *Service) EnqueueBundle(ctx context.Context, user, project, suite, key, name, manifest string, data []byte) (storage.Record, error) {
+	return s.enqueueBundle(ctx, user, project, suite, key, name, manifest, data, nil)
+}
+
+func (s *Service) enqueueBundle(ctx context.Context, user, project, suite, key, name, manifest string, data []byte, repository *repositoryPreparation) (result storage.Record, err error) {
 	if err := s.check(ctx, user, project, suite, "manage"); err != nil {
 		return result, err
 	}
@@ -52,7 +59,11 @@ func (s *Service) EnqueueBundle(ctx context.Context, user, project, suite, key, 
 	if len(key) < 1 || len(key) > 128 || !domain.ValidID(s.Location) {
 		return result, errors.New("bundle upload requires an idempotency key")
 	}
-	snapshot, err := sourcebundle.Validate(data, manifest, suite)
+	root := ""
+	if repository != nil {
+		root = repository.Root
+	}
+	snapshot, err := sourcebundle.ValidateRoot(data, manifest, suite, root)
 	if err != nil {
 		return result, err
 	}
@@ -63,7 +74,7 @@ func (s *Service) EnqueueBundle(ctx context.Context, user, project, suite, key, 
 	if !enabled {
 		return result, errors.New("bundle preparation is not enabled for this runner")
 	}
-	id := digest("bundle\x00" + user + "\x00" + project + "\x00" + suite + "\x00" + key)[7:]
+	id := bundleJobID(user, project, suite, key)
 	err = s.Auth.WithAssignmentTransaction(ctx, func(auth *authorization.Service) error {
 		bound := &Service{Store: auth.Directory.Store, Auth: auth}
 		if err := bound.check(ctx, user, project, suite, "manage"); err != nil {
@@ -75,13 +86,35 @@ func (s *Service) EnqueueBundle(ctx context.Context, user, project, suite, key, 
 		if _, err := (&catalog.Service{Store: bound.Store, Auth: auth}).Tests(ctx, user, project, suite); err != nil {
 			return err
 		}
+		if repository != nil {
+			if err := bound.checkSyncLease(ctx, RepositorySync{Project: project, Source: repository.Source, ID: repository.Sync, Worker: repository.Worker}); err != nil {
+				return err
+			}
+		}
 		if row, err := bound.Store.Get(ctx, JobBucket(project, suite), id); err == nil {
 			job, err := storage.Decode[Job](row)
 			if err != nil {
 				return err
 			}
-			if job.SourceDigest != snapshot.Digest || job.Manifest != manifest || job.SourceName != name {
+			if (repository == nil && job.SourceDigest != snapshot.Digest) || job.Manifest != manifest || job.SourceName != name || (repository != nil && (job.RepositorySource != repository.Source || job.SourceGeneration != repository.Generation || job.Origin == nil || job.Origin.Commit != repository.Origin.Commit)) {
 				return errors.New("idempotency key reused for another source bundle")
+			}
+			if repository != nil && job.State != "published" && job.SourceSequence < repository.Sequence {
+				job.SourceSequence = repository.Sequence
+				if err := bound.checkRepositoryJob(ctx, job, false); err != nil {
+					return err
+				}
+				changed, err := storage.Put(row.Bucket, row.ID, project, row.Revision, job)
+				if err != nil {
+					return err
+				}
+				if err := bound.Store.Commit(ctx, changed); err != nil {
+					return err
+				}
+				row, err = bound.Store.Get(ctx, row.Bucket, row.ID)
+				if err != nil {
+					return err
+				}
 			}
 			result = row
 			return nil
@@ -92,6 +125,21 @@ func (s *Service) EnqueueBundle(ctx context.Context, user, project, suite, key, 
 		expires := now.Add(StagingLifetime)
 		job := Job{Kind: "bundle", Bundle: id, SourceDigest: snapshot.Digest, SourceName: name, Manifest: manifest, ID: id, Project: project, Suite: suite, Actor: user, Runner: snapshot.Manifest.Runner, Location: s.Location, State: "received", Phase: "validating", CreatedAt: now}
 		bundle := Bundle{ID: id, Project: project, Suite: suite, Name: name, Manifest: manifest, Digest: snapshot.Digest, Content: data, ExpiresAt: expires}
+		if repository != nil {
+			job.Kind = "repository"
+			job.RepositorySync = repository.Sync
+			job.RepositorySource = repository.Source
+			job.SourceGeneration = repository.Generation
+			job.SourceSequence = repository.Sequence
+			job.Origin = &repository.Origin
+			if err := bound.checkRepositoryJob(ctx, job, false); err != nil {
+				return err
+			}
+			bundle.Content = nil
+			bundle.Snapshot = repository.Snapshot
+			bundle.Root = repository.Root
+			bundle.Origin = &repository.Origin
+		}
 		changes := []storage.Change{}
 		for _, item := range []struct {
 			bucket, id string
@@ -102,6 +150,13 @@ func (s *Service) EnqueueBundle(ctx context.Context, user, project, suite, key, 
 				return err
 			}
 			changes = append(changes, change)
+		}
+		if repository != nil {
+			references, err := bound.referenceRepositorySnapshot(ctx, project, repository.Snapshot, 1, false, expires)
+			if err != nil {
+				return err
+			}
+			changes = append(changes, references...)
 		}
 		audit, err := domain.Audit(user, project, "sources.bundle.upload", suite+"/"+id, nil, map[string]any{"digest": snapshot.Digest, "bytes": len(data)})
 		if err != nil {
@@ -136,6 +191,11 @@ func (s *Service) ReadBundle(ctx context.Context, user, project, suite, id strin
 	if err != nil {
 		return Bundle{}, err
 	}
+	if job.RepositorySource != "" {
+		if err := s.checkRepository(ctx, user, project, job.RepositorySource, "read"); err != nil {
+			return Bundle{}, err
+		}
+	}
 	if job.Bundle == "" {
 		return Bundle{}, storage.ErrNotFound
 	}
@@ -150,6 +210,13 @@ func (s *Service) loadBundle(ctx context.Context, job Job) (Bundle, error) {
 	if err != nil {
 		return bundle, err
 	}
+	if bundle.Snapshot != "" {
+		snapshot, err := s.loadRepositorySnapshot(ctx, job.Project, bundle.Snapshot, job.RepositorySource)
+		if err != nil {
+			return Bundle{}, err
+		}
+		bundle.Content = snapshot.Content
+	}
 	if bundle.ID != job.Bundle || bundle.Project != job.Project || bundle.Suite != job.Suite || bundle.Digest != job.SourceDigest || digest(string(bundle.Content)) != bundle.Digest {
 		return Bundle{}, errors.New("stored source bundle does not match its preparation")
 	}
@@ -157,4 +224,8 @@ func (s *Service) loadBundle(ctx context.Context, job Job) (Bundle, error) {
 		return Bundle{}, errors.New("source bundle staging has expired")
 	}
 	return bundle, nil
+}
+
+func bundleJobID(user, project, suite, key string) string {
+	return digest("bundle\x00" + user + "\x00" + project + "\x00" + suite + "\x00" + key)[7:]
 }

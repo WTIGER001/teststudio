@@ -14,37 +14,34 @@ The full product scope remains required. This direction supersedes the testing s
 
 ## Current implementation checkpoint
 
-The acceptance ledger has **23 verified, 34 open, 57 total** items.
-Item **24** now passes local verification: publish two immutable images and execute each without restarting the server.
-Durable prebuilt preparation, cancellation, recovery, API, UI, and CLI server publication are implemented.
-Source synchronization preserves managed metadata and archives omitted owned definitions.
-Inspection foundation commit: `d4ec6a0`. Publication integration commit: `50ebc49`.
-Go ZIP bundles now upload through the UI and API, or assemble through the CLI.
-A separate teststudio-prepare process shares the metadata database and local execution location.
-The API only enqueues builds. The worker checkpoints ownership and images before isolated discovery.
-Selected nested manifests preserve the complete repository context. Vendored dependencies work without downloads.
-Cancellation, withdrawal, expired staging, and recovery retain diagnostics and clean owned resources.
-Published ZIP snapshots remain retained with their release provenance.
+The acceptance ledger has **24 verified, 33 open, 57 total** items.
+Item **23** now passes a real local repository snapshot with two suites beside shared application source.
+Both suites build separate images, publish, and pass normal runs with one result and complete evidence.
+Item **24** previously passes two-image publication and execution without restarting the server.
 
-Focused source, API, builder, generated-client, expiry, and recovery checks pass. The Angular build passes.
-The local browser workflow covers ZIP upload, separate worker assembly, discovery, source download, review, publication, and an explicit passing run.
-Evidence is `.data/bundle-ui-verification.Eh6NWc/result.json` with browser and cleanup evidence beside it.
-The browser and both local processes exit. Owned containers, volumes, suite images, and private contexts are absent.
-STUDIO-BUNDLES-001 also passes through normal TestStudio publication, execution, timing, and complete evidence capture.
-Evidence is `output/selftest/20261103T151752.455247000-97c8c9cdf744e8bad8b0705a/summary.json`.
+Go ZIP uploads, prebuilt images, and registered GitHub sources use durable preparation and the common catalog review.
+The Sources UI manages repository settings, multiple bindings, manual sync, diagnostics, history, and publication policy.
+The separate worker uses a provider-neutral port and repository-scoped GitHub App credentials for private source.
+It pins a commit and repository identity, shares one archive, and retains exact source provenance.
+Unchanged commits reuse work. Ready reviews refresh metadata without repeating assembly or discovery.
+Generation, current authority, worker leases, and latest-sync guards fence stale work.
+Source-object denies protect preparations, reviews, and retained archives.
 
-The self-test launcher now reuses unchanged UI builds, binaries, and verified immutable runner images.
-Its warm build check reuses all artifacts in about 0.25 seconds without rerunning tests.
-Use --test=ID to run the relevant workflow. Do not repeat the broad matrix without a specific integration concern.
-No cloud tests run. AWS, Kubernetes, and Azure verification remain separate work.
+Focused backend checks pass. The real two-suite local workflow passes in about 22 seconds.
+The Angular build and targeted STUDIO-GIT-001 UI self-test pass.
+The implementation ledger records exact evidence and cleanup.
+The cached runtime remains available. Owned verification images, containers, volumes, and contexts are removed.
+The self-test launcher reuses unchanged UI builds, binaries, and immutable runner images.
+Use --test=ID to run only the affected workflow. Do not repeat the broad matrix without a specific integration concern.
+No live GitHub or cloud deployment checks run for this milestone.
 
-Continue GitHub preparation, including private repositories, registered suite paths, sync deduplication, and retained source snapshots.
-Use a provider-neutral source port and server-only connection credentials.
+Continue signed push webhooks and periodic repository sync through the durable manual-sync queue.
 Then complete Playwright bundle assembly, dependency preparation profiles, and CLI OIDC browser sign-in.
-The current local builder supports offline Go bundles with a trusted runtime and fixed copy instructions.
-The acceptance ledger remains **23 verified, 34 open**. Items **22**, **23**, **25**, **26**, and **29** receive partial progress.
-Keep the complete acceptance ledger required and report stable item numbers.
+The current source builder supports offline Go bundles with a trusted runtime and fixed copy instructions.
+Items **22**, **25**, **26**, and **29** advance but remain open for their broader scope.
+Keep the full 57-item plan required. Do not narrow the goal to this milestone.
 Implement coherent batches, then run the smallest relevant local checks. Reuse existing evidence.
+AWS, Kubernetes, and Azure verification remain separate work.
 
 ## Historical shutdown checkpoint and continuation
 

@@ -139,3 +139,27 @@ func TestBulkLifecycleAndDuplicateKeepIndependentHistory(t *testing.T) {
 		t.Fatalf("stale bulk revisions: %v", err)
 	}
 }
+
+func TestDeclarativeImportCannotAssignSourceOwnership(t *testing.T) {
+	s, _ := setup(t)
+	for _, existing := range []bool{false, true} {
+		test := check("OWNERSHIP")
+		if existing {
+			if err := s.SaveTest(t.Context(), "admin", "alpha", "health", test, 0); err != nil {
+				t.Fatal(err)
+			}
+		}
+		test.DefinitionSource = "untrusted-owner"
+		plan, err := s.PreviewImport(t.Context(), "admin", "alpha", "health", catalog.Document{Schema: catalog.SchemaVersion, Tests: []catalog.Test{test}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		protected := false
+		for _, issue := range plan.Issues {
+			protected = protected || issue.Field == "source"
+		}
+		if !protected {
+			t.Fatal("declarative import assigned source ownership")
+		}
+	}
+}

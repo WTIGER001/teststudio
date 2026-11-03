@@ -27,6 +27,7 @@ const EntryLimit = 10000
 
 type Snapshot struct {
 	Digest        string             `json:"digest"`
+	ArchiveRoot   string             `json:"archiveRoot,omitempty"`
 	ManifestPath  string             `json:"manifestPath"`
 	Manifest      suitespec.Manifest `json:"manifest"`
 	Catalog       catalog.Document   `json:"catalog"`
@@ -39,7 +40,14 @@ func SafePath(name string) bool {
 	return len(name) > 0 && len(name) <= 512 && utf8.ValidString(name) && fs.ValidPath(name) && name != "." && !strings.ContainsAny(name, "\\:\x00") && !strings.ContainsFunc(name, unicode.IsControl)
 }
 
-func Validate(data []byte, manifestPath, suite string) (snapshot Snapshot, err error) {
+func Validate(data []byte, manifestPath, suite string) (Snapshot, error) {
+	return ValidateRoot(data, manifestPath, suite, "")
+}
+
+func ValidateRoot(data []byte, manifestPath, suite, root string) (snapshot Snapshot, err error) {
+	if root != "" && (!SafePath(root) || strings.Contains(root, "/")) {
+		return snapshot, errors.New("repository archive root must identify one safe wrapper directory")
+	}
 	if len(data) < 1 || len(data) > CompressedLimit || !SafePath(manifestPath) {
 		return snapshot, errors.New("provide a ZIP of at most 32 MiB and a relative manifest path")
 	}
@@ -59,6 +67,18 @@ func Validate(data []byte, manifestPath, suite string) (snapshot Snapshot, err e
 		mode := entry.Mode()
 		if !SafePath(name) || (!mode.IsRegular() && !mode.IsDir()) || (strings.HasSuffix(entry.Name, "/") != mode.IsDir()) {
 			return Snapshot{}, errors.New("ZIP entries must be relative regular files or directories without links")
+		}
+		if root != "" {
+			if name == root {
+				if !mode.IsDir() {
+					return Snapshot{}, errors.New("repository archive wrapper must be a directory")
+				}
+				continue
+			}
+			if !strings.HasPrefix(name, root+"/") {
+				return Snapshot{}, errors.New("repository archive contains files outside its wrapper directory")
+			}
+			name = strings.TrimPrefix(name, root+"/")
 		}
 		key := strings.ToLower(name)
 		if names[key] {
@@ -116,6 +136,7 @@ func Validate(data []byte, manifestPath, suite string) (snapshot Snapshot, err e
 	sum := sha256.Sum256(data)
 	snapshot.Digest = "sha256:" + hex.EncodeToString(sum[:])
 	snapshot.ManifestPath = manifestPath
+	snapshot.ArchiveRoot = root
 	return snapshot, nil
 }
 
@@ -160,4 +181,34 @@ func (s Snapshot) Paths() []string {
 	}
 	slices.Sort(result)
 	return result
+}
+
+func WrappedRoot(data []byte) (string, error) {
+	if len(data) < 1 || len(data) > CompressedLimit {
+		return "", errors.New("repository archive exceeds its compressed limit")
+	}
+	archive, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
+	if err != nil {
+		return "", errors.New("repository archive is not a valid ZIP")
+	}
+	if len(archive.File) < 1 || len(archive.File) > EntryLimit {
+		return "", errors.New("repository archive entry count exceeds its limit")
+	}
+	root := ""
+	for _, entry := range archive.File {
+		name := strings.TrimSuffix(entry.Name, "/")
+		if !SafePath(name) {
+			return "", errors.New("repository archive contains an unsafe path")
+		}
+		first, _, nested := strings.Cut(name, "/")
+		if !nested && !entry.Mode().IsDir() {
+			return "", errors.New("repository archive requires one wrapper directory")
+		}
+		if root == "" {
+			root = first
+		} else if root != first {
+			return "", errors.New("repository archive contains multiple wrapper directories")
+		}
+	}
+	return root, nil
 }

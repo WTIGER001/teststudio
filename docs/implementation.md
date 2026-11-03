@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 23 verified of 57.
+The acceptance count is 24 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -33,7 +33,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **20.** Provider credentials remain outside browser configuration and application logs.
 - [ ] **21.** Catalog creation, editing, validation, publication, import, export, bulk actions, archive, and restoration work through both API and UI.
 - [ ] **22.** Declarative uploads, complete source bundles, and registered GitHub repositories can produce versioned releases through the UI.
-- [ ] **23.** One repository can provide multiple suites, including suites beside existing application source.
+- [x] **23.** One repository can provide multiple suites, including suites beside existing application source.
 - [x] **24.** Test-only publication requires no API or UI deployment.
 - [ ] **25.** Concurrent catalog edits produce explicit conflicts. Source synchronization preserves service-managed metadata.
 - [ ] **26.** Failed or duplicate preparation events preserve the active release and do not create unintended test runs.
@@ -73,6 +73,42 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
+
+### Registered GitHub sources and shared suite snapshots
+
+Added provider-neutral repository registration, manual sync, and private GitHub App access.
+The API queues work. The separate preparation worker pins the repository identity and commit, then fetches one bounded archive.
+Several bound suites share its exact immutable bytes and full application context.
+Credentials remain server-side and outside images, browser configuration, and diagnostics.
+
+The Sources page registers settings, multiple suite bindings, private credential references, and publication policy.
+It exposes durable sync history, preparation diagnostics, and the canonical catalog review.
+Repeated requests and unchanged commits reuse work. Explicit force requests create fresh preparation.
+Ready reviews refresh managed metadata without repeating assembly or discovery.
+Current authority, generation, worker leases, and latest sync sequence fence stale work and activation.
+Source-scoped denies protect retained details, preparations, reviews, and source downloads.
+Failed preparation preserves active releases. Registration, sync, and publication create no test runs.
+
+Item **23** passes one real local two-suite repository workflow.
+Both newly written suites import shared application source from a nested module.
+Each builds a separate image, publishes a release, and passes a normal targetless run with one logical result and complete evidence.
+The test removes its owned images, containers, volumes, and contexts. It reuses the cached trusted runtime.
+Verification is TestRepositorySnapshotRunsTwoSuitesBesideApplicationSource in internal/sources/repository_local_test.go.
+Run identifiers are 20261103T162229.539610000-5f6f05a43d498d033dccee67 and 20261103T162234.448321000-ea7d79c4fca9e3d39295a05c.
+The integration test takes about 22 seconds. Its initial fixture path error is corrected before images are built.
+
+Focused source, API, archive, GitHub protocol, publication, and generated-client checks pass in about four seconds.
+GitHub protocol checks use local TLS fixtures. They make no live GitHub requests.
+The Angular production build and STUDIO-GIT-001 pass.
+The UI self-test covers registration, two bindings, setting changes, queued history, dark theme, and mobile width.
+It fixes a mobile action-row overflow found by its first targeted run.
+Evidence is output/selftest/20261103T162436.812696000-0512635ac07bcde78895b448/summary.json.
+The execution is cleaned with complete evidence. Its owned browser container, volume, and controller are absent.
+The retry reuses unchanged binaries and rebuilds only changed UI and image inputs.
+Items **22**, **25**, **26**, and **29** advance but remain open for their broader required scope.
+The ledger is **24 verified, 33 open, 57 total**.
+Push webhooks, periodic sync, Playwright assembly, and additional dependency profiles remain required work.
+No AWS, Kubernetes, or Azure checks run.
 
 ### ZIP uploads, separate durable builds, and targeted self-test reuse
 

@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.15.0"
+export const accessContractVersion = "0.16.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -87,17 +87,29 @@ export type SourceCatalogPlannedTest = { "action": string; "before"?: SourceCata
 export type SourceCatalogRelease = { "activatedOnPublication": boolean; "actor": string; "catalog": SourceCatalogDraft; "createdAt": string; "draftRevision": number; "id": string; "projectId": string; "suiteId": string }
 export type SourceCatalogTest = { "applicationId"?: string; "capture"?: SourceCapturePolicy; "category": string; "check"?: SourceCatalogHTTPCheck; "conditions"?: string; "definitionSourceId"?: string; "dependencies": (string)[] | null; "description": string; "id": string; "owner"?: string; "rationale": string; "requiredBindings": (string)[] | null; "runner": string; "safety": string; "selector"?: string; "source"?: string; "state": string; "tags": (string)[] | null; "timeoutSeconds": number; "timing"?: SourceTimingPolicy; "title": string; "type": string }
 export type SourceContent = { "content": string; "digest": string }
+export type SourceCredentialReference = { "id": string; "name": string }
 export type SourceJSONValue = null | string | number | boolean | (SourceJSONValue)[] | { [key: string]: SourceJSONValue }
 export type SourceOrigin = { "commit"?: string; "reference"?: string; "repository"?: string; "snapshotDigest"?: string }
 export type SourcePrebuiltInput = { "image": string; "runner": string }
-export type SourcePreparationJob = { "actor": string; "build"?: SourceBuild; "cancelRequested": boolean; "cleanupPending": boolean; "createdAt": string; "error"?: string; "executionLocation": string; "finishedAt"?: string; "id": string; "image": string; "kind"?: string; "leaseUntil"?: string; "localImageId"?: string; "log"?: string; "logTruncated"?: boolean; "manifestPath"?: string; "phase": string; "projectId": string; "reference"?: SourcePreparationReference; "releaseId"?: string; "runner": string; "runtime"?: string; "sourceBundleId"?: string; "sourceDigest"?: string; "sourceExpired"?: boolean; "sourceName"?: string; "startedAt"?: string; "state": string; "suiteId": string; "uploadId"?: string; "worker"?: string }
+export type SourcePreparationJob = { "actor": string; "build"?: SourceBuild; "cancelRequested": boolean; "cleanupPending": boolean; "createdAt": string; "error"?: string; "executionLocation": string; "finishedAt"?: string; "id": string; "image": string; "kind"?: string; "leaseUntil"?: string; "localImageId"?: string; "log"?: string; "logTruncated"?: boolean; "manifestPath"?: string; "phase": string; "projectId": string; "reference"?: SourcePreparationReference; "releaseId"?: string; "repositorySourceId"?: string; "repositorySyncId"?: string; "runner": string; "runtime"?: string; "sourceBundleId"?: string; "sourceDigest"?: string; "sourceExpired"?: boolean; "sourceGeneration"?: number; "sourceName"?: string; "sourceOrigin"?: SourceOrigin; "sourceSequence"?: number; "startedAt"?: string; "state": string; "suiteId": string; "uploadId"?: string; "worker"?: string }
 export type SourcePreparationOptions = { "bundleRunners": (string)[]; "executionLocation": string; "runners": (string)[] }
 export type SourcePreparationPage = { "cursor"?: string; "items": (SourcePreparationRecord)[] }
 export type SourcePreparationRecord = { "data": SourcePreparationJob; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
 export type SourcePreparationReference = { "attempt": number; "container": string; "id": string; "installationId": string; "profile": string; "projectId": string; "runId": string; "testId": string; "volume": string; "workerId": string }
 export type SourcePublishInput = { "activate": boolean }
+export type SourceRepositoryBinding = { "buildProfile": string; "manifestPath": string; "runner": string; "suiteId": string }
+export type SourceRepositoryConfig = { "autoActivate": boolean; "bindings": (SourceRepositoryBinding)[]; "credentialReference"?: string; "enabled": boolean; "name": string; "provider": string; "reference": string; "repository": string }
+export type SourceRepositoryOptions = { "credentials": (SourceCredentialReference)[]; "providers": (string)[] }
+export type SourceRepositoryPage = { "cursor"?: string; "items": (SourceRepositoryRecord)[] }
+export type SourceRepositoryRecord = { "data": SourceRepositorySource; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type SourceRepositorySource = { "actor": string; "configuration": SourceRepositoryConfig; "generation": number; "id": string; "lastCommit"?: string; "lastError"?: string; "lastState"?: string; "lastSyncAt"?: string; "lastSyncId"?: string; "projectId": string; "repositoryId"?: string; "sequence": number }
+export type SourceRepositorySync = { "actor": string; "configuration": SourceRepositoryConfig; "createdAt": string; "error"?: string; "finishedAt"?: string; "force": boolean; "id": string; "leaseUntil"?: string; "preparations": { [key: string]: string }; "projectId": string; "repositoryId"?: string; "requestedBy": string; "revision"?: SourceRevision; "sequence": number; "snapshotId"?: string; "sourceGeneration": number; "sourceId": string; "state": string; "worker"?: string }
+export type SourceRepositorySyncPage = { "cursor"?: string; "items": (SourceRepositorySyncRecord)[] }
+export type SourceRepositorySyncRecord = { "data": SourceRepositorySync; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type SourceRevision = { "commit": string; "private": boolean; "reference": string; "repository": string; "repositoryId": string; "url": string }
+export type SourceSyncInput = { "force": boolean }
 export type SourceTimingPolicy = { "maxAgeDays": number; "minimumIncreaseMs": number; "minimumSamples": number; "minimumTimeoutMs": number; "mode": string; "slowdownFactor": number; "timeoutFactor": number; "timeoutMarginMs": number; "timeoutMode": string; "window": number }
-export type SourceUpload = { "activated": boolean; "actor": string; "artifact"?: SourceCatalogArtifact; "bytes": number; "createdAt": string; "digest": string; "expiresAt": string; "format": "json" | "yaml"; "id": string; "issues": (SourceCatalogIssue)[]; "kind"?: string; "name": string; "planId"?: string; "preparationId"?: string; "projectId": string; "releaseId"?: string; "state": "staged" | "failed" | "published" | "expired" | "cancelled"; "suiteId": string }
+export type SourceUpload = { "activated": boolean; "actor": string; "artifact"?: SourceCatalogArtifact; "bytes": number; "createdAt": string; "digest": string; "expiresAt": string; "format": string; "id": string; "issues": (SourceCatalogIssue)[]; "kind"?: string; "name": string; "planId"?: string; "preparationId"?: string; "projectId": string; "releaseId"?: string; "repositorySourceId"?: string; "state": string; "suiteId": string }
 export type SourceUploadInput = { "content": string; "format": "json" | "yaml"; "name": string }
 export type SourceUploadPage = { "cursor"?: string; "items": (SourceUploadRecord)[] }
 export type SourceUploadPreview = { "plan"?: SourceCatalogImportPlan; "upload": SourceUploadRecord }
@@ -149,6 +161,13 @@ export interface AccessRequests {
   removeProjectGrant: { "project": string; "grant": string; revision: number; body: Reason }
   readProjectGrant: { "project": string; "grant": string }
   updateProjectGrant: { "project": string; "grant": string; revision: number; body: GrantUpdate }
+  readRepositorySourceOptions: { "project": string }
+  listRepositorySources: { "project": string; query?: { "limit"?: number; "cursor"?: string } }
+  readRepositorySource: { "project": string; "source": string }
+  saveRepositorySource: { "project": string; "source": string; revision: number; body: SourceRepositoryConfig }
+  listRepositorySyncs: { "project": string; "source": string; query?: { "limit"?: number; "cursor"?: string } }
+  enqueueRepositorySync: { "project": string; "source": string; key: string; body: SourceSyncInput }
+  readRepositorySync: { "project": string; "source": string; "sync": string }
   listProjectAssignments: { "project": string; query?: { "limit"?: number; "cursor"?: string } }
   createProjectAssignment: { "project": string; body: AssignmentDefinition }
   revokeProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
@@ -238,6 +257,13 @@ export interface AccessResponses {
   removeProjectGrant: GrantRemoved
   readProjectGrant: GrantRecord
   updateProjectGrant: GrantRecord
+  readRepositorySourceOptions: SourceRepositoryOptions
+  listRepositorySources: SourceRepositoryPage
+  readRepositorySource: SourceRepositoryRecord
+  saveRepositorySource: SourceRepositoryRecord
+  listRepositorySyncs: SourceRepositorySyncPage
+  enqueueRepositorySync: SourceRepositorySyncRecord
+  readRepositorySync: SourceRepositorySyncRecord
   listProjectAssignments: AssignmentPage
   createProjectAssignment: AssignmentRecord
   revokeProjectAssignment: Revoked
@@ -327,6 +353,13 @@ export const accessOperations = {
   removeProjectGrant: { method: "DELETE", path: "/api/v1/projects/{project}/permissions/{grant}" },
   readProjectGrant: { method: "GET", path: "/api/v1/projects/{project}/permissions/{grant}" },
   updateProjectGrant: { method: "PUT", path: "/api/v1/projects/{project}/permissions/{grant}" },
+  readRepositorySourceOptions: { method: "GET", path: "/api/v1/projects/{project}/repository-source-options" },
+  listRepositorySources: { method: "GET", path: "/api/v1/projects/{project}/repository-sources" },
+  readRepositorySource: { method: "GET", path: "/api/v1/projects/{project}/repository-sources/{source}" },
+  saveRepositorySource: { method: "PUT", path: "/api/v1/projects/{project}/repository-sources/{source}" },
+  listRepositorySyncs: { method: "GET", path: "/api/v1/projects/{project}/repository-sources/{source}/syncs" },
+  enqueueRepositorySync: { method: "POST", path: "/api/v1/projects/{project}/repository-sources/{source}/syncs" },
+  readRepositorySync: { method: "GET", path: "/api/v1/projects/{project}/repository-sources/{source}/syncs/{sync}" },
   listProjectAssignments: { method: "GET", path: "/api/v1/projects/{project}/role-assignments" },
   createProjectAssignment: { method: "POST", path: "/api/v1/projects/{project}/role-assignments" },
   revokeProjectAssignment: { method: "DELETE", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },

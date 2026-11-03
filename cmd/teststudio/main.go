@@ -27,6 +27,7 @@ import (
 	permissionpg "github.com/wtiger001/teststudio/adapters/permissions/postgres"
 	permissionsqlite "github.com/wtiger001/teststudio/adapters/permissions/sqlite"
 	localsecrets "github.com/wtiger001/teststudio/adapters/secrets/local"
+	githubsource "github.com/wtiger001/teststudio/adapters/sources/github"
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/evidence"
@@ -40,6 +41,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/schedules"
 	"github.com/wtiger001/teststudio/internal/sessions"
+	"github.com/wtiger001/teststudio/internal/sourceprovider"
 	"github.com/wtiger001/teststudio/internal/sources"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
@@ -63,6 +65,7 @@ func run() error {
 	goImages := flag.String("go-images", "", "Comma-separated immutable local Go suite image references; enables the isolated local Go worker")
 	preparedSources := flag.Bool("prepared-sources", false, "Enable local prebuilt preparation and project-labelled immutable suite images")
 	sourceBundles := flag.Bool("source-bundles", false, "Enable Go ZIP staging for the separate teststudio-prepare worker")
+	githubSources := flag.Bool("github-sources", false, "Enable GitHub repository registration and durable sync queues")
 	scheduler := flag.Bool("scheduler", true, "Process durable project schedules on this instance")
 	notificationWorker := flag.Bool("notification-worker", true, "Process durable notification deliveries on this instance")
 	secretBindings := flag.String("secret-bindings", "", "Project and purpose scoped environment or mounted-file secret binding configuration")
@@ -200,8 +203,12 @@ func run() error {
 	sourceService := &sources.Service{Store: db, Auth: auth, Location: *location, RecoveryInspectors: map[string]preparation.ArtifactInspector{
 		"go": &localcontainer.Executor{Runner: "go"}, "playwright": &localcontainer.Executor{Runner: "playwright"},
 	}}
-	if *sourceBundles {
+	if *sourceBundles || *githubSources {
 		sourceService.BundleRunners = []string{"go"}
+	}
+	if *githubSources {
+		sourceService.Secrets = secretProvider
+		sourceService.Providers = map[string]sourceprovider.Provider{"github": &githubsource.Client{Secrets: secretProvider}}
 	}
 	if *preparedSources {
 		sourceService.Inspectors = map[string]preparation.ArtifactInspector{
@@ -211,16 +218,16 @@ func run() error {
 	}
 	runService.RecoveryDriver = &localplaywright.Executor{}
 	runService.RecoveryDrivers = []execution.ManagedExecutor{&localcontainer.Executor{Runner: "go"}}
-	if strings.TrimSpace(*playwrightImages) != "" || *preparedSources || *sourceBundles {
+	if strings.TrimSpace(*playwrightImages) != "" || *preparedSources || *sourceBundles || *githubSources {
 		driver := &localplaywright.Executor{Images: strings.Split(*playwrightImages, ",")}
-		if *preparedSources || *sourceBundles {
+		if *preparedSources || *sourceBundles || *githubSources {
 			driver.ApproveArtifact = sourceService.ApproveArtifact
 		}
 		runService.Playwright = driver
 	}
-	if strings.TrimSpace(*goImages) != "" || *preparedSources || *sourceBundles {
+	if strings.TrimSpace(*goImages) != "" || *preparedSources || *sourceBundles || *githubSources {
 		driver := &localcontainer.Executor{Runner: "go", Images: strings.Split(*goImages, ",")}
-		if *preparedSources || *sourceBundles {
+		if *preparedSources || *sourceBundles || *githubSources {
 			driver.ApproveArtifact = sourceService.ApproveArtifact
 		}
 		runService.Go = driver

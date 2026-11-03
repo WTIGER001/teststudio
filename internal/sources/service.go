@@ -14,10 +14,14 @@ import (
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/preparation"
+	"github.com/wtiger001/teststudio/internal/secrets"
+	"github.com/wtiger001/teststudio/internal/sourceprovider"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
 
 type Service struct {
+	Providers          map[string]sourceprovider.Provider
+	Secrets            secrets.Provider
 	BundleRunners      []string
 	Builders           map[string]preparation.ArtifactBuilder
 	RecoveryBuilders   map[string]preparation.ArtifactBuilder
@@ -119,6 +123,11 @@ func (s *Service) Read(ctx context.Context, user, project, suite, id string) (Pr
 	if err != nil {
 		return Preview{}, err
 	}
+	if upload.RepositorySource != "" {
+		if err := s.checkRepository(ctx, user, project, upload.RepositorySource, "read"); err != nil {
+			return Preview{}, err
+		}
+	}
 	result := Preview{Upload: row}
 	if upload.PlanID != "" && (upload.State == "published" || time.Now().Before(upload.ExpiresAt)) {
 		planRow, err := s.Store.Get(ctx, catalog.Bucket("imports", project, suite), upload.PlanID)
@@ -138,7 +147,11 @@ func (s *Service) List(ctx context.Context, user, project, suite, cursor string,
 	if err := s.check(ctx, user, project, suite, "read"); err != nil {
 		return storage.Page{}, err
 	}
-	return s.Store.ListNewest(ctx, Bucket(project, suite), project, cursor, limit)
+	page, err := s.Store.ListNewest(ctx, Bucket(project, suite), project, cursor, limit)
+	if err != nil {
+		return page, err
+	}
+	return s.filterRepositoryReads(ctx, user, project, page)
 }
 
 func (s *Service) Content(ctx context.Context, user, project, suite, id string) (Content, error) {

@@ -21,6 +21,12 @@ func (s *Service) stagePrepared(ctx context.Context, job Job, result preparation
 	if result.Image != job.Image || result.Project != job.Project || result.Discovery.Manifest.Suite != job.Suite || result.Discovery.Manifest.Runner != job.Runner {
 		return upload, errors.New("inspection does not match its project, suite, or image")
 	}
+	if err := s.checkRepositoryJob(ctx, job, false); err != nil {
+		return upload, err
+	}
+	if job.Origin != nil && !reflect.DeepEqual(*job.Origin, result.Discovery.Origin) {
+		return upload, errors.New("discovered source provenance does not match its resolved repository snapshot")
+	}
 	if job.Bundle != "" && result.Discovery.Origin.SnapshotDigest != job.SourceDigest {
 		return upload, errors.New("discovered artifact does not match the retained source bundle")
 	}
@@ -61,6 +67,9 @@ func (s *Service) stagePrepared(ctx context.Context, job Job, result preparation
 	}
 	artifact := catalog.Artifact{SourceSnapshot: id, SourceProject: job.Project, SourceRevision: digest(string(content)), Image: job.Image, Discovered: selectors, Provenance: &result.Discovery.Origin}
 	channel := digest(job.Project + "/" + job.Suite + "/prebuilt")[7:]
+	if job.RepositorySource != "" {
+		channel = digest(job.Project + "/" + job.Suite + "/repository/" + job.RepositorySource)[7:]
+	}
 	catalogs := &catalog.Service{Store: s.Store, Auth: s.Auth}
 	plan, err := catalogs.PreviewPreparedImport(ctx, job.Actor, job.Project, job.Suite, result.Discovery.Catalog, id, channel, artifact)
 	if err != nil {
@@ -70,7 +79,10 @@ func (s *Service) stagePrepared(ctx context.Context, job Job, result preparation
 	if job.Bundle != "" {
 		kind = "bundle"
 	}
-	upload = Upload{Kind: kind, Job: job.ID, Artifact: &artifact, ID: id, Project: job.Project, Suite: job.Suite, Name: "prebuilt-" + job.Runner + ".json", Format: "json", Digest: artifact.SourceRevision, Bytes: len(content), Actor: job.Actor, State: "staged", PlanID: plan.ID, Issues: plan.Issues, CreatedAt: now, ExpiresAt: plan.ExpiresAt}
+	if job.RepositorySource != "" {
+		kind = "repository"
+	}
+	upload = Upload{RepositorySource: job.RepositorySource, Kind: kind, Job: job.ID, Artifact: &artifact, ID: id, Project: job.Project, Suite: job.Suite, Name: kind + "-" + job.Runner + ".json", Format: "json", Digest: artifact.SourceRevision, Bytes: len(content), Actor: job.Actor, State: "staged", PlanID: plan.ID, Issues: plan.Issues, CreatedAt: now, ExpiresAt: plan.ExpiresAt}
 	if len(plan.Issues) > 0 {
 		upload.State = "failed"
 	}
@@ -114,6 +126,13 @@ func (s *Service) stagePrepared(ctx context.Context, job Job, result preparation
 			return upload, err
 		}
 		changes = append(changes, saved, indexed)
+		if bundle.Snapshot != "" {
+			referenced, err := s.referenceRepositorySnapshot(ctx, job.Project, bundle.Snapshot, 0, false, upload.ExpiresAt)
+			if err != nil {
+				return upload, err
+			}
+			changes = append(changes, referenced...)
+		}
 	}
 	return upload, s.Store.Commit(ctx, changes...)
 }

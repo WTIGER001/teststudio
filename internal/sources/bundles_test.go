@@ -19,6 +19,7 @@ import (
 )
 
 type bundleBuilder struct {
+	origin          suitespec.Origin
 	calls, cleanups int
 	digest          string
 	failure         error
@@ -27,6 +28,7 @@ type bundleBuilder struct {
 func (b *bundleBuilder) Build(_ context.Context, input preparation.BuildRequest) (preparation.Build, error) {
 	b.calls++
 	b.digest = input.Snapshot.Digest
+	b.origin = input.Origin
 	now := time.Now().UTC()
 	return preparation.Build{Image: "sha256:" + strings.Repeat("d", 64), SourceDigest: b.digest, StartedAt: now, FinishedAt: now, Log: "Retained assembly log\n"}, b.failure
 }
@@ -42,7 +44,7 @@ type bundleInspector struct {
 
 func (p *bundleInspector) Inspect(ctx context.Context, input preparation.InspectionRequest) (preparation.Inspection, error) {
 	result, err := p.inspector.Inspect(ctx, input)
-	result.Discovery.Origin.SnapshotDigest = p.builder.digest
+	result.Discovery.Origin = p.builder.origin
 	return result, err
 }
 func bundleSetup(t *testing.T) (*sources.Service, *catalog.Service, *bundleBuilder) {

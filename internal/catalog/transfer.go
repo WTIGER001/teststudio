@@ -127,6 +127,9 @@ func (s *Service) preview(ctx context.Context, user, project, suite, kind string
 			plan.Issues = append(plan.Issues, Issue{TestID: test.ID, Field: "runner", Message: "declarative import accepts native HTTP definitions; use source preparation for coded tests"})
 		}
 		change := PlannedTest{Test: test, Revision: current[test.ID].Revision, Action: "create"}
+		if kind != "prepared" && change.Revision == 0 && test.DefinitionSource != "" {
+			plan.Issues = append(plan.Issues, Issue{TestID: test.ID, Field: "source", Message: "register source ownership through source preparation"})
+		}
 		if row, ok := current[test.ID]; ok {
 			before, err := storage.Decode[Test](row)
 			if err != nil {
@@ -138,7 +141,7 @@ func (s *Service) preview(ctx context.Context, user, project, suite, kind string
 				}
 				test = MergeManagedMetadata(before, test)
 				change.Test = test
-			} else if before.DefinitionSource != "" && !SameSourceFacts(before, test) {
+			} else if before.DefinitionSource != test.DefinitionSource || (before.DefinitionSource != "" && !SameSourceFacts(before, test)) {
 				plan.Issues = append(plan.Issues, Issue{TestID: test.ID, Field: "source", Message: "change source-owned definitions through their registered source"})
 			}
 			change.Before = &before

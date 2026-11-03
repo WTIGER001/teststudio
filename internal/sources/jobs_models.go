@@ -1,6 +1,7 @@
 package sources
 
 import (
+	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/preparation"
 	"time"
 
@@ -13,37 +14,42 @@ type PrebuiltInput struct {
 }
 
 type Job struct {
-	SourceExpired   bool                 `json:"sourceExpired,omitempty"`
-	Kind            string               `json:"kind,omitempty"`
-	Bundle          string               `json:"sourceBundleId,omitempty"`
-	SourceDigest    string               `json:"sourceDigest,omitempty"`
-	SourceName      string               `json:"sourceName,omitempty"`
-	Manifest        string               `json:"manifestPath,omitempty"`
-	Build           *preparation.Build   `json:"build,omitempty"`
-	ImageID         string               `json:"localImageId,omitempty"`
-	Runtime         string               `json:"runtime,omitempty"`
-	Release         string               `json:"releaseId,omitempty"`
-	CleanupPending  bool                 `json:"cleanupPending"`
-	ID              string               `json:"id"`
-	Project         string               `json:"projectId"`
-	Suite           string               `json:"suiteId"`
-	Actor           string               `json:"actor"`
-	Image           string               `json:"image"`
-	Runner          string               `json:"runner"`
-	Location        string               `json:"executionLocation"`
-	State           string               `json:"state"`
-	Phase           string               `json:"phase"`
-	CancelRequested bool                 `json:"cancelRequested"`
-	Reference       *execution.Reference `json:"reference,omitempty"`
-	Worker          string               `json:"worker,omitempty"`
-	LeaseUntil      *time.Time           `json:"leaseUntil,omitempty"`
-	Upload          string               `json:"uploadId,omitempty"`
-	Error           string               `json:"error,omitempty"`
-	Log             string               `json:"log,omitempty"`
-	LogTruncated    bool                 `json:"logTruncated,omitempty"`
-	CreatedAt       time.Time            `json:"createdAt"`
-	StartedAt       *time.Time           `json:"startedAt,omitempty"`
-	FinishedAt      *time.Time           `json:"finishedAt,omitempty"`
+	RepositorySync   string               `json:"repositorySyncId,omitempty"`
+	RepositorySource string               `json:"repositorySourceId,omitempty"`
+	SourceGeneration int64                `json:"sourceGeneration,omitempty"`
+	SourceSequence   int64                `json:"sourceSequence,omitempty"`
+	Origin           *catalog.Provenance  `json:"sourceOrigin,omitempty"`
+	SourceExpired    bool                 `json:"sourceExpired,omitempty"`
+	Kind             string               `json:"kind,omitempty"`
+	Bundle           string               `json:"sourceBundleId,omitempty"`
+	SourceDigest     string               `json:"sourceDigest,omitempty"`
+	SourceName       string               `json:"sourceName,omitempty"`
+	Manifest         string               `json:"manifestPath,omitempty"`
+	Build            *preparation.Build   `json:"build,omitempty"`
+	ImageID          string               `json:"localImageId,omitempty"`
+	Runtime          string               `json:"runtime,omitempty"`
+	Release          string               `json:"releaseId,omitempty"`
+	CleanupPending   bool                 `json:"cleanupPending"`
+	ID               string               `json:"id"`
+	Project          string               `json:"projectId"`
+	Suite            string               `json:"suiteId"`
+	Actor            string               `json:"actor"`
+	Image            string               `json:"image"`
+	Runner           string               `json:"runner"`
+	Location         string               `json:"executionLocation"`
+	State            string               `json:"state"`
+	Phase            string               `json:"phase"`
+	CancelRequested  bool                 `json:"cancelRequested"`
+	Reference        *execution.Reference `json:"reference,omitempty"`
+	Worker           string               `json:"worker,omitempty"`
+	LeaseUntil       *time.Time           `json:"leaseUntil,omitempty"`
+	Upload           string               `json:"uploadId,omitempty"`
+	Error            string               `json:"error,omitempty"`
+	Log              string               `json:"log,omitempty"`
+	LogTruncated     bool                 `json:"logTruncated,omitempty"`
+	CreatedAt        time.Time            `json:"createdAt"`
+	StartedAt        *time.Time           `json:"startedAt,omitempty"`
+	FinishedAt       *time.Time           `json:"finishedAt,omitempty"`
 }
 
 type jobIndex struct {

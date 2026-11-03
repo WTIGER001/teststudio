@@ -69,6 +69,7 @@ func (s *Service) StartMaintenance(ctx context.Context, interval time.Duration) 
 		defer ticker.Stop()
 		cursor := ""
 		bundleCursor := ""
+		repositoryCursor := ""
 		for {
 			next, err := s.Sweep(ctx, cursor)
 			if err != nil && ctx.Err() == nil {
@@ -81,6 +82,12 @@ func (s *Service) StartMaintenance(ctx context.Context, interval time.Duration) 
 				slog.Error("source bundle staging cleanup failed")
 			} else {
 				bundleCursor = nextBundle
+			}
+			nextRepository, err := s.SweepRepositorySnapshots(ctx, repositoryCursor)
+			if err != nil && ctx.Err() == nil {
+				slog.Error("repository snapshot cleanup failed")
+			} else {
+				repositoryCursor = nextRepository
 			}
 			select {
 			case <-ctx.Done():

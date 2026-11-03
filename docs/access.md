@@ -1084,3 +1084,11 @@ No provider credentials enter JSON logout responses, browser storage, or audit e
 OpenAPI 0.12 and the generated identity client include 74 JSON operations.
 
 Deployment-wide identity parity and privilege-change session behavior beyond the verified credential and account operations remain in the full plan.
+
+## Repository source objects
+
+Repository policies use source/SOURCE_ID within a project scope.
+The object resolves against the stored repository source before policy evaluation.
+Source read denies also protect child preparations, retained reviews, and original archives.
+Suite and catalog permissions remain required for each binding.
+Background source work checks the current source owner and current grants before preparing or publishing.

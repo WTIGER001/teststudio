@@ -108,3 +108,29 @@ func TestBundleRejectsCorruptionAndMissingContext(t *testing.T) {
 		t.Fatal("oversized declared ZIP entry passed")
 	}
 }
+
+func TestRepositoryArchiveWrapperKeepsSourceDigestAndRejectsOtherRoots(t *testing.T) {
+	original := bundle(t)
+	wrapped := make([]entry, 0, len(original))
+	for _, file := range original {
+		file.name = "repository-root/" + file.name
+		wrapped = append(wrapped, file)
+	}
+	data := archive(t, wrapped)
+	root, err := sourcebundle.WrappedRoot(data)
+	if err != nil || root != "repository-root" {
+		t.Fatal("repository wrapper missing", err)
+	}
+	snapshot, err := sourcebundle.ValidateRoot(data, "suites/totals.json", "totals", root)
+	if err != nil || snapshot.Files["module/go.mod"] == nil || snapshot.ArchiveRoot != root {
+		t.Fatal("selected repository context missing", err)
+	}
+	for _, file := range []entry{{name: "other-root/file.txt"}, {name: "repository-root/../outside"}} {
+		if _, err := sourcebundle.ValidateRoot(archive(t, append(wrapped, file)), "suites/totals.json", "totals", root); err == nil {
+			t.Fatal("repository wrapper admitted another context")
+		}
+	}
+	if _, err := sourcebundle.WrappedRoot(archive(t, append(wrapped, entry{name: "other-root/file.txt"}))); err == nil {
+		t.Fatal("multiple repository roots accepted")
+	}
+}

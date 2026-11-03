@@ -19,7 +19,7 @@ func validPolicyObject(object string) bool {
 	if len(parts) == 3 && parts[0] != "test" {
 		return false
 	}
-	if len(parts) == 2 && !strings.Contains("|suite|test|run|environment|application|group|user|role|grant|provider|pending-access|", "|"+parts[0]+"|") {
+	if len(parts) == 2 && !strings.Contains("|suite|test|run|environment|application|source|group|user|role|grant|provider|pending-access|", "|"+parts[0]+"|") {
 		return false
 	}
 	if parts[0] == "test" && len(parts) != 3 {
@@ -85,6 +85,11 @@ func (s *Service) checkPolicyObject(ctx context.Context, project, object string)
 		row, err = s.Store.Get(ctx, "users", id)
 	case "run":
 		row, err = s.Store.Get(ctx, "runs", id)
+	case "source":
+		if project == "" {
+			return errors.New("repository sources require an explicit project scope")
+		}
+		row, err = s.Store.Get(ctx, "repository-sources/"+project, id)
 	case "suite", "environment", "application":
 		if project == "" {
 			return errors.New("project resources require an explicit project scope")

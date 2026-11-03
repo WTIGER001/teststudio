@@ -4,7 +4,8 @@ The Sources page stores complete Go ZIP bundles and queues durable preparation j
 A separate worker assembles the source and invokes isolated discovery.
 Review and publication use the common immutable release workflow.
 The CLI can also assemble bundles outside the API.
-GitHub sync and Playwright bundle assembly remain pending.
+Registered [GitHub sources](repository-sources.md) use the same preparation workflow.
+Playwright bundle assembly remains pending.
 
 ## Archive context
 

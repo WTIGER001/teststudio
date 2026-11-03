@@ -33,6 +33,7 @@ Use table selection for bulk lifecycle actions. Duplicate and History appear on 
 The [catalog guide](docs/catalog.md) describes schemas, revision checks, and request limits.
 The [source upload guide](docs/sources.md) describes reviewed JSON and YAML publication, source digests, and retained snapshots.
 The [prepared suite guide](docs/prepared-suites.md) describes manifests, isolated discovery, and reviewed image publication.
+The [repository source guide](docs/repository-sources.md) describes GitHub registration, private App access, manual sync, and shared suite snapshots.
 The [source bundle guide](docs/source-bundles.md) describes Go ZIP uploads, separate build workers, CLI assembly, and retained snapshots.
 Native HTTP runs use durable local workers and retained attempt records.
 The API provides run creation, progress, cancellation, failure reruns, logs, and private evidence access.

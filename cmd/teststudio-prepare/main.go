@@ -15,10 +15,13 @@ import (
 	permissionpg "github.com/wtiger001/teststudio/adapters/permissions/postgres"
 	permissionsqlite "github.com/wtiger001/teststudio/adapters/permissions/sqlite"
 	"github.com/wtiger001/teststudio/adapters/preparation/localimage"
+	localsecrets "github.com/wtiger001/teststudio/adapters/secrets/local"
+	githubsource "github.com/wtiger001/teststudio/adapters/sources/github"
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/identity"
 	"github.com/wtiger001/teststudio/internal/preparation"
+	"github.com/wtiger001/teststudio/internal/sourceprovider"
 	"github.com/wtiger001/teststudio/internal/sources"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
@@ -33,6 +36,8 @@ func run() error {
 	location := flag.String("execution-location", "local", "Preparation queue location")
 	runtime := flag.String("go-runtime", "", "Trusted immutable local Go source runtime image ID; omit to perform recovery only")
 	directory := flag.String("build-directory", ".data/source-builds", "Private local source context directory shared by this location's workers")
+	githubSources := flag.Bool("github-sources", false, "Process durable GitHub source synchronization")
+	secretBindings := flag.String("secret-bindings", "", "Project-scoped repository access credential bindings")
 	flag.Parse()
 	if !domain.ValidID(*location) {
 		return errors.New("a valid preparation location is required")
@@ -76,8 +81,22 @@ func run() error {
 	service := &sources.Service{Store: store, Auth: auth, Location: *location, Inspectors: map[string]preparation.ArtifactInspector{"go": inspector}, RecoveryInspectors: map[string]preparation.ArtifactInspector{"go": inspector}, RecoveryBuilders: map[string]preparation.ArtifactBuilder{"go": builder}}
 	if *runtime != "" {
 		service.Builders = map[string]preparation.ArtifactBuilder{"go": builder}
+		service.BundleRunners = []string{"go"}
+	}
+	var syncDone <-chan struct{}
+	if *githubSources && *runtime != "" {
+		provider, err := localsecrets.Load(*secretBindings)
+		if err != nil {
+			return err
+		}
+		service.Secrets = provider
+		service.Providers = map[string]sourceprovider.Provider{"github": &githubsource.Client{Secrets: provider}}
+		syncDone = service.StartRepositorySynchronization(ctx)
 	}
 	done := service.StartBuildPreparation(ctx)
 	<-done
+	if syncDone != nil {
+		<-syncDone
+	}
 	return nil
 }

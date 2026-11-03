@@ -38,6 +38,9 @@ func (s *Service) startPreparation(ctx context.Context, builds bool) <-chan stru
 			}
 			var err error
 			if builds {
+				if _, publishErr := s.ProcessRepositoryPublication(ctx); publishErr != nil && ctx.Err() == nil {
+					slog.Error("repository publication could not persist its outcome")
+				}
 				_, err = s.ProcessBuildNext(ctx, worker)
 			} else {
 				_, err = s.ProcessNext(ctx, worker)
@@ -131,6 +134,9 @@ func (s *Service) claimPreparation(ctx context.Context, index storage.Record, wo
 				return err
 			}
 		}
+		if err := bound.checkRepositoryJob(ctx, job, false); err != nil {
+			denied = true
+		}
 		now := time.Now().UTC()
 		job.StartedAt = &now
 		changes := []storage.Change{{Record: index, Delete: true}}
@@ -187,6 +193,10 @@ func (s *Service) preparationHeartbeat(ctx context.Context, cancel context.Cance
 				return
 			}
 			if err := s.check(ctx, job.Actor, job.Project, job.Suite, "manage"); err != nil {
+				cancel()
+				return
+			}
+			if err := s.checkRepositoryJob(ctx, job, false); err != nil {
 				cancel()
 				return
 			}
@@ -258,7 +268,11 @@ func (s *Service) finishPreparation(ctx context.Context, claimed Job, worker str
 			}
 			return bound.Store.Commit(ctx, saved)
 		}
-		return bound.Store.Commit(ctx, saved, storage.Change{Record: lease, Delete: true})
+		queued, err := bound.queueRepositoryPublication(ctx, job)
+		if err != nil {
+			return err
+		}
+		return bound.Store.Commit(ctx, append(queued, saved, storage.Change{Record: lease, Delete: true})...)
 	})
 	if err != nil {
 		return s.failPreparation(ctx, claimed, worker, result, err)

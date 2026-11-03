@@ -46,6 +46,13 @@ func (s *Service) SweepBundles(ctx context.Context, cursor string) (string, erro
 				return nil
 			}
 			changes := []storage.Change{}
+			if bundle.Snapshot != "" && !activeJob(job.State) {
+				referenced, err := (&Service{Store: store}).referenceRepositorySnapshot(ctx, job.Project, bundle.Snapshot, -1, false, time.Time{})
+				if err != nil {
+					return err
+				}
+				changes = append(changes, referenced...)
+			}
 			job.CancelRequested = true
 			if activeJob(job.State) {
 				saved, err := storage.Put(row.Bucket, row.ID, row.Project, row.Revision, job)

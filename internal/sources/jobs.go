@@ -88,13 +88,30 @@ func (s *Service) ReadJob(ctx context.Context, user, project, suite, id string) 
 	if err := s.check(ctx, user, project, suite, "read"); err != nil {
 		return storage.Record{}, err
 	}
-	return s.Store.Get(ctx, JobBucket(project, suite), id)
+	row, err := s.Store.Get(ctx, JobBucket(project, suite), id)
+	if err != nil {
+		return row, err
+	}
+	job, err := storage.Decode[Job](row)
+	if err != nil {
+		return row, err
+	}
+	if job.RepositorySource != "" {
+		if err := s.checkRepository(ctx, user, project, job.RepositorySource, "read"); err != nil {
+			return storage.Record{}, err
+		}
+	}
+	return row, nil
 }
 func (s *Service) ListJobs(ctx context.Context, user, project, suite, cursor string, limit int) (storage.Page, error) {
 	if err := s.check(ctx, user, project, suite, "read"); err != nil {
 		return storage.Page{}, err
 	}
-	return s.Store.ListNewest(ctx, JobBucket(project, suite), project, cursor, limit)
+	page, err := s.Store.ListNewest(ctx, JobBucket(project, suite), project, cursor, limit)
+	if err != nil {
+		return page, err
+	}
+	return s.filterRepositoryReads(ctx, user, project, page)
 }
 
 func (s *Service) CancelJob(ctx context.Context, user, project, suite, id string, revision int64) error {
@@ -116,6 +133,11 @@ func (s *Service) CancelJob(ctx context.Context, user, project, suite, id string
 		job, err := storage.Decode[Job](row)
 		if err != nil {
 			return err
+		}
+		if job.RepositorySource != "" {
+			if err := bound.checkRepository(ctx, user, project, job.RepositorySource, "manage"); err != nil {
+				return err
+			}
 		}
 		if job.State == "cancelled" {
 			return nil

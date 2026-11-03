@@ -1,0 +1,26 @@
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
+import { ReactiveFormsModule } from '@angular/forms'
+import { RepositoriesService } from './repositories.service'
+
+@Component({
+  selector: 'ts-repository-editor', standalone: true, imports: [ReactiveFormsModule], changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <section class="panel" aria-labelledby="repository-editor-title"><h3 id="repository-editor-title">{{ service.selected() ? 'Edit repository source' : 'Register repository source' }}</h3>
+      <form [formGroup]="service.form" (ngSubmit)="service.save()"><fieldset [disabled]="service.busy()"><div class="form-grid">
+        <div class="field"><label for="repository-id">Source identifier</label><input id="repository-id" formControlName="id" required><small>This identifier stays permanent.</small></div>
+        <div class="field"><label for="repository-name">Source name</label><input id="repository-name" formControlName="name" required maxlength="200"></div>
+        <div class="field"><label for="repository-path">GitHub repository</label><input id="repository-path" formControlName="repository" required placeholder="owner/repository"><small>Use the repository identity without a URL or credentials.</small></div>
+        <div class="field"><label for="repository-credential">Repository access</label><select id="repository-credential" formControlName="credential"><option value="">Public repository</option>@for (credential of service.options().credentials; track credential.id) { <option [value]="credential.id">{{ credential.name }}</option> }</select><small>Private repositories use an approved GitHub App credential reference.</small></div>
+        <div class="field"><label for="repository-reference-kind">Reference type</label><select id="repository-reference-kind" formControlName="referenceKind"><option value="branch">Branch</option><option value="tag">Tag</option><option value="commit">Commit</option></select></div>
+        <div class="field"><label for="repository-reference">Reference name or commit</label><input id="repository-reference" formControlName="reference" required maxlength="256"></div>
+      </div>
+      <h4>Suite bindings</h4><p class="small muted">Choose suites without a target environment. Manifest paths refer to the repository root. Each binding uses the offline Go build profile.</p>
+      <div formArrayName="bindings">@for (binding of service.form.controls.bindings.controls; track binding; let index = $index) { <div class="binding-row" [formGroupName]="index"><div class="field"><label [for]="'repository-suite-' + index">Suite {{ index + 1 }}</label><select [id]="'repository-suite-' + index" formControlName="suite" required><option value="">Choose a suite</option>@for (suite of service.sources.suites(); track suite.id) { <option [value]="suite.id">{{ suite.data.name }}</option> }</select></div><div class="field"><label [for]="'repository-manifest-' + index">Manifest path {{ index + 1 }}</label><input [id]="'repository-manifest-' + index" formControlName="manifest" required></div><button type="button" class="button secondary" [disabled]="service.form.controls.bindings.length < 2" (click)="service.removeBinding(index)" [attr.aria-label]="'Remove suite binding ' + (index + 1)">Remove</button></div> }</div>
+      <button type="button" class="button secondary" [disabled]="service.form.controls.bindings.length >= 20" (click)="service.addBinding()">Add suite binding</button>
+      <div class="source-policies"><label class="checkbox-field"><input type="checkbox" formControlName="enabled">Enable repository synchronization</label><label class="checkbox-field"><input type="checkbox" formControlName="autoActivate">Publish and activate successful preparations automatically</label><p class="small muted">Automatic publication requires current publishing and suite permissions. Sync never starts tests. Disabling sync keeps retained releases and source snapshots.</p></div>
+      <div class="row-actions"><button type="submit" class="button primary" [disabled]="service.form.invalid">Save repository source</button><button type="button" class="button secondary" (click)="service.editor.set(false)">Close editor</button></div></fieldset></form>
+    </section>
+  `,
+  styles: [`fieldset { border: 0; padding: 0; margin: 0; min-width: 0; } .binding-row { display: grid; grid-template-columns: 1fr 1fr auto; align-items: end; gap: 1rem; margin: 1rem 0; } .source-policies { margin: 1.5rem 0; } @media(max-width: 640px) { .binding-row { grid-template-columns: 1fr; } }`]
+})
+export class RepositoryEditorComponent { readonly service = inject(RepositoriesService) }

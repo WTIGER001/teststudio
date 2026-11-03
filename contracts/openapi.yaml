@@ -1,7 +1,7 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio API"
-  "version": "0.15.0"
+  "version": "0.16.0"
   "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Includes optional client-identifier RP-initiated provider logout after local session revocation. Includes staged native JSON and YAML sources with atomic catalog publication and retained source provenance. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
@@ -2993,6 +2993,283 @@
       "security":
         - "SessionCookie": []
       "summary": "Download the exact retained source ZIP after current project permission checks."
+  "/api/v1/projects/{project}/repository-sources":
+    "get":
+      "operationId": "listRepositorySources"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "query"
+          "name": "limit"
+          "schema":
+            "default": 30
+            "maximum": 1000
+            "minimum": 1
+            "type": "integer"
+        - "in": "query"
+          "name": "cursor"
+          "schema":
+            "type": "string"
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SourceRepositoryPage"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "SessionCookie": []
+      "summary": "Read project repository connections and current synchronization summaries."
+  "/api/v1/projects/{project}/repository-sources/{source}":
+    "get":
+      "operationId": "readRepositorySource"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "source"
+          "required": true
+          "schema":
+            "type": "string"
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SourceRepositoryRecord"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "SessionCookie": []
+      "summary": "Read a repository source and its configured suite bindings."
+    "put":
+      "operationId": "saveRepositorySource"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "source"
+          "required": true
+          "schema":
+            "type": "string"
+        - "$ref": "#/components/parameters/Origin"
+        - "$ref": "#/components/parameters/Revision"
+      "requestBody":
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/SourceRepositoryConfig"
+        "required": true
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SourceRepositoryRecord"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "CSRFToken": []
+          "SessionCookie": []
+      "summary": "Save a source with explicit revision, current authority, and approved credential references. No remote provider request runs during registration."
+  "/api/v1/projects/{project}/repository-sources/{source}/syncs":
+    "get":
+      "operationId": "listRepositorySyncs"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "source"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "query"
+          "name": "limit"
+          "schema":
+            "default": 30
+            "maximum": 1000
+            "minimum": 1
+            "type": "integer"
+        - "in": "query"
+          "name": "cursor"
+          "schema":
+            "type": "string"
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SourceRepositorySyncPage"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "SessionCookie": []
+      "summary": "Read bounded sync history and preparation identifiers."
+    "post":
+      "operationId": "enqueueRepositorySync"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "source"
+          "required": true
+          "schema":
+            "type": "string"
+        - "$ref": "#/components/parameters/Origin"
+        - "in": "header"
+          "name": "Idempotency-Key"
+          "required": true
+          "schema":
+            "maxLength": 128
+            "minLength": 1
+            "type": "string"
+      "requestBody":
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/SourceSyncInput"
+        "required": true
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SourceRepositorySyncRecord"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "CSRFToken": []
+          "SessionCookie": []
+      "summary": "Queue exact-commit source synchronization for a separate worker. Preparation never starts test runs."
+  "/api/v1/projects/{project}/repository-sources/{source}/syncs/{sync}":
+    "get":
+      "operationId": "readRepositorySync"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "source"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "sync"
+          "required": true
+          "schema":
+            "type": "string"
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SourceRepositorySyncRecord"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "SessionCookie": []
+      "summary": "Read a durable repository sync and its resolved commit."
+  "/api/v1/projects/{project}/repository-source-options":
+    "get":
+      "operationId": "readRepositorySourceOptions"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SourceRepositoryOptions"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "SessionCookie": []
+      "summary": "Read enabled source providers and approved project credential references."
 "components":
   "securitySchemes":
     "SessionCookie":
@@ -3133,6 +3410,258 @@
           "schema":
             "$ref": "#/components/schemas/Problem"
   "schemas":
+    "SourceRepositoryOptions":
+      "properties":
+        "credentials":
+          "items":
+            "$ref": "#/components/schemas/SourceCredentialReference"
+          "type": "array"
+        "providers":
+          "items":
+            "type": "string"
+          "type": "array"
+      "required":
+        - "providers"
+        - "credentials"
+      "type": "object"
+    "SourceRevision":
+      "properties":
+        "commit":
+          "type": "string"
+        "private":
+          "type": "boolean"
+        "reference":
+          "type": "string"
+        "repository":
+          "type": "string"
+        "repositoryId":
+          "type": "string"
+        "url":
+          "type": "string"
+      "required":
+        - "repositoryId"
+        - "repository"
+        - "url"
+        - "reference"
+        - "commit"
+        - "private"
+      "type": "object"
+    "SourceRepositorySyncPage":
+      "properties":
+        "cursor":
+          "type": "string"
+        "items":
+          "items":
+            "$ref": "#/components/schemas/SourceRepositorySyncRecord"
+          "type": "array"
+      "required":
+        - "items"
+      "type": "object"
+    "SourceRepositoryPage":
+      "properties":
+        "cursor":
+          "type": "string"
+        "items":
+          "items":
+            "$ref": "#/components/schemas/SourceRepositoryRecord"
+          "type": "array"
+      "required":
+        - "items"
+      "type": "object"
+    "SourceSyncInput":
+      "properties":
+        "force":
+          "type": "boolean"
+      "required":
+        - "force"
+      "type": "object"
+    "SourceRepositoryConfig":
+      "properties":
+        "autoActivate":
+          "type": "boolean"
+        "bindings":
+          "items":
+            "$ref": "#/components/schemas/SourceRepositoryBinding"
+          "type": "array"
+        "credentialReference":
+          "type": "string"
+        "enabled":
+          "type": "boolean"
+        "name":
+          "type": "string"
+        "provider":
+          "type": "string"
+        "reference":
+          "type": "string"
+        "repository":
+          "type": "string"
+      "required":
+        - "name"
+        - "provider"
+        - "repository"
+        - "reference"
+        - "enabled"
+        - "autoActivate"
+        - "bindings"
+      "type": "object"
+    "SourceRepositorySyncRecord":
+      "properties":
+        "data":
+          "$ref": "#/components/schemas/SourceRepositorySync"
+        "id":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "revision":
+          "type": "integer"
+        "updatedAt":
+          "format": "date-time"
+          "type": "string"
+      "required":
+        - "id"
+        - "revision"
+        - "updatedAt"
+        - "data"
+      "type": "object"
+    "SourceRepositoryBinding":
+      "properties":
+        "buildProfile":
+          "type": "string"
+        "manifestPath":
+          "type": "string"
+        "runner":
+          "type": "string"
+        "suiteId":
+          "type": "string"
+      "required":
+        - "suiteId"
+        - "manifestPath"
+        - "runner"
+        - "buildProfile"
+      "type": "object"
+    "SourceRepositoryRecord":
+      "properties":
+        "data":
+          "$ref": "#/components/schemas/SourceRepositorySource"
+        "id":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "revision":
+          "type": "integer"
+        "updatedAt":
+          "format": "date-time"
+          "type": "string"
+      "required":
+        - "id"
+        - "revision"
+        - "updatedAt"
+        - "data"
+      "type": "object"
+    "SourceCredentialReference":
+      "properties":
+        "id":
+          "type": "string"
+        "name":
+          "type": "string"
+      "required":
+        - "id"
+        - "name"
+      "type": "object"
+    "SourceRepositorySync":
+      "properties":
+        "actor":
+          "type": "string"
+        "configuration":
+          "$ref": "#/components/schemas/SourceRepositoryConfig"
+        "createdAt":
+          "format": "date-time"
+          "type": "string"
+        "error":
+          "type": "string"
+        "finishedAt":
+          "format": "date-time"
+          "type": "string"
+        "force":
+          "type": "boolean"
+        "id":
+          "type": "string"
+        "leaseUntil":
+          "format": "date-time"
+          "type": "string"
+        "preparations":
+          "additionalProperties":
+            "type": "string"
+          "type": "object"
+        "projectId":
+          "type": "string"
+        "repositoryId":
+          "type": "string"
+        "requestedBy":
+          "type": "string"
+        "revision":
+          "$ref": "#/components/schemas/SourceRevision"
+        "sequence":
+          "type": "integer"
+        "snapshotId":
+          "type": "string"
+        "sourceGeneration":
+          "type": "integer"
+        "sourceId":
+          "type": "string"
+        "state":
+          "type": "string"
+        "worker":
+          "type": "string"
+      "required":
+        - "id"
+        - "projectId"
+        - "sourceId"
+        - "actor"
+        - "requestedBy"
+        - "sourceGeneration"
+        - "sequence"
+        - "configuration"
+        - "force"
+        - "state"
+        - "preparations"
+        - "createdAt"
+      "type": "object"
+    "SourceRepositorySource":
+      "properties":
+        "actor":
+          "type": "string"
+        "configuration":
+          "$ref": "#/components/schemas/SourceRepositoryConfig"
+        "generation":
+          "type": "integer"
+        "id":
+          "type": "string"
+        "lastCommit":
+          "type": "string"
+        "lastError":
+          "type": "string"
+        "lastState":
+          "type": "string"
+        "lastSyncAt":
+          "format": "date-time"
+          "type": "string"
+        "lastSyncId":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "repositoryId":
+          "type": "string"
+        "sequence":
+          "type": "integer"
+      "required":
+        - "id"
+        - "projectId"
+        - "configuration"
+        - "actor"
+        - "generation"
+        - "sequence"
+      "type": "object"
     "SourceBuild":
       "properties":
         "finishedAt":
@@ -3195,6 +3724,7 @@
           "type": "string"
         "snapshotDigest":
           "type": "string"
+      "required": []
       "type": "object"
     "SourcePreparationJob":
       "properties":
@@ -3241,6 +3771,10 @@
           "$ref": "#/components/schemas/SourcePreparationReference"
         "releaseId":
           "type": "string"
+        "repositorySourceId":
+          "type": "string"
+        "repositorySyncId":
+          "type": "string"
         "runner":
           "type": "string"
         "runtime":
@@ -3251,8 +3785,14 @@
           "type": "string"
         "sourceExpired":
           "type": "boolean"
+        "sourceGeneration":
+          "type": "integer"
         "sourceName":
           "type": "string"
+        "sourceOrigin":
+          "$ref": "#/components/schemas/SourceOrigin"
+        "sourceSequence":
+          "type": "integer"
         "startedAt":
           "format": "date-time"
           "type": "string"
@@ -3345,6 +3885,8 @@
           "type": "boolean"
         "actor":
           "type": "string"
+        "artifact":
+          "$ref": "#/components/schemas/SourceCatalogArtifact"
         "bytes":
           "type": "integer"
         "createdAt":
@@ -3357,39 +3899,30 @@
           "type": "string"
         "format":
           "type": "string"
-          "enum":
-            - "json"
-            - "yaml"
         "id":
           "type": "string"
         "issues":
           "items":
             "$ref": "#/components/schemas/SourceCatalogIssue"
           "type": "array"
+        "kind":
+          "type": "string"
         "name":
           "type": "string"
         "planId":
+          "type": "string"
+        "preparationId":
           "type": "string"
         "projectId":
           "type": "string"
         "releaseId":
           "type": "string"
+        "repositorySourceId":
+          "type": "string"
         "state":
-          "enum":
-            - "staged"
-            - "failed"
-            - "published"
-            - "expired"
-            - "cancelled"
           "type": "string"
         "suiteId":
           "type": "string"
-        "kind":
-          "type": "string"
-        "preparationId":
-          "type": "string"
-        "artifact":
-          "$ref": "#/components/schemas/SourceCatalogArtifact"
       "required":
         - "id"
         - "projectId"
@@ -3543,14 +4076,14 @@
           "type": "object"
         "image":
           "type": "string"
+        "provenance":
+          "$ref": "#/components/schemas/SourceOrigin"
+        "sourceProjectId":
+          "type": "string"
         "sourceRevision":
           "type": "string"
         "sourceSnapshotId":
           "type": "string"
-        "sourceProjectId":
-          "type": "string"
-        "provenance":
-          "$ref": "#/components/schemas/SourceOrigin"
       "required": []
       "type": "object"
     "SourceUploadInput":

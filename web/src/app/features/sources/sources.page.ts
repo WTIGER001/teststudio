@@ -2,19 +2,21 @@ import { DatePipe } from '@angular/common'
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { ReactiveFormsModule } from '@angular/forms'
 import { RouterLink } from '@angular/router'
+import { RepositoriesComponent } from './repositories.component'
 import { PreparationComponent } from './preparation.component'
 import { SourcesService } from './sources.service'
 import { SourceUploadComponent } from './source-upload.component'
 import { SourcePreviewComponent } from './source-preview.component'
 
 @Component({
-  standalone: true, imports: [DatePipe, ReactiveFormsModule, RouterLink, SourceUploadComponent, SourcePreviewComponent, PreparationComponent], providers: [SourcesService], changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true, imports: [DatePipe, ReactiveFormsModule, RouterLink, SourceUploadComponent, SourcePreviewComponent, PreparationComponent, RepositoriesComponent], providers: [SourcesService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Sources</h1><p class="muted">Review definitions and prepared suite images. Retain the source behind each release.</p></div>
       @if (service.workspace.can('sources.manage') && service.workspace.can('catalog.import')) { <button type="button" class="button primary" [disabled]="!service.form.controls.suite.value || service.saving()" (click)="service.openEditor()">+ Upload tests</button> }
     </div>
     @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }
     @if (service.message()) { <p class="notice success" role="status">{{ service.message() }}</p> }
+    <ts-repository-sources />
     <section class="panel" aria-labelledby="source-suite-title"><h2 id="source-suite-title">Destination suite</h2><fieldset [disabled]="service.saving()"><div class="field" [formGroup]="service.form"><label for="source-suite">Suite for sources</label><select id="source-suite" formControlName="suite" [attr.aria-busy]="service.loading()"><option value="">Choose a suite</option>@for (suite of service.suites(); track suite.id) { <option [value]="suite.id">{{ suite.data.name }}</option> }</select></div></fieldset>
       <a class="small" [routerLink]="['/projects', service.project(), 'configuration']">Create or manage suites</a>
     </section>
