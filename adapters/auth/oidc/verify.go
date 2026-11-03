@@ -5,6 +5,7 @@ import (
 	"crypto/subtle"
 	"encoding/json"
 	"errors"
+	"strings"
 	"time"
 
 	coreoidc "github.com/coreos/go-oidc/v3/oidc"
@@ -33,22 +34,43 @@ func (s *Service) exchangeIdentity(ctx context.Context, p Provider, remote *core
 	if !ok {
 		return verifiedIdentity{}, errors.New("identity token is missing")
 	}
-	verified, err := remote.Verifier(&coreoidc.Config{ClientID: p.ClientID}).Verify(ctx, raw)
+	verifier, keys, err := s.tokenVerifier(ctx, remote, p)
+	if err != nil {
+		return verifiedIdentity{}, err
+	}
+	verified, err := verifier.Verify(ctx, raw)
 	if err != nil {
 		return verifiedIdentity{}, errors.New("identity token verification failed")
 	}
-	if verified.Subject == "" || verified.IssuedAt.After(time.Now().Add(time.Minute)) || subtle.ConstantTimeCompare([]byte(verified.Nonce), []byte(v.Nonce)) != 1 {
+	if verified.Subject == "" || len(verified.Subject) > 255 || strings.IndexFunc(verified.Subject, func(r rune) bool { return r < 0x20 || r > 0x7e }) >= 0 || verified.IssuedAt.After(time.Now().Add(time.Minute)) || subtle.ConstantTimeCompare([]byte(verified.Nonce), []byte(v.Nonce)) != 1 {
 		return verifiedIdentity{}, errors.New("identity token nonce, subject, or issue time is invalid")
 	}
-	var claims map[string]json.RawMessage
-	if err := verified.Claims(&claims); err != nil {
-		return verifiedIdentity{}, err
+	claims := keys.claims
+
+	var issued float64
+	if err := json.Unmarshal(claims["iat"], &issued); err != nil {
+		return verifiedIdentity{}, errors.New("identity token issue time is required")
 	}
-	text := func(name string) string { var value string; _ = json.Unmarshal(claims[name], &value); return value }
-	if len(verified.Audience) > 1 && text("azp") != p.ClientID {
-		return verifiedIdentity{}, errors.New("authorized party is invalid")
+	if issued <= 0 {
+		return verifiedIdentity{}, errors.New("identity token issue time is invalid")
 	}
-	if verified.AccessTokenHash != "" {
+	if data, present := claims["azp"]; present || len(verified.Audience) > 1 {
+		var party string
+		if err := json.Unmarshal(data, &party); err != nil || party != p.ClientID {
+			return verifiedIdentity{}, errors.New("authorized party is invalid")
+		}
+	}
+	if data, present := claims["token_use"]; present {
+		var use string
+		if err := json.Unmarshal(data, &use); err != nil || use != "id" {
+			return verifiedIdentity{}, errors.New("identity token use is invalid")
+		}
+	}
+	if data, present := claims["at_hash"]; present {
+		var hash string
+		if err := json.Unmarshal(data, &hash); err != nil || hash == "" {
+			return verifiedIdentity{}, errors.New("access token binding is invalid")
+		}
 		if err := verified.VerifyAccessToken(token.AccessToken); err != nil {
 			return verifiedIdentity{}, errors.New("access token binding is invalid")
 		}

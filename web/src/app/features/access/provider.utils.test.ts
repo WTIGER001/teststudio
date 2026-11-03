@@ -26,3 +26,12 @@ test('Issuer forms preserve exact HTTPS or loopback contexts and reject query or
   for (const value of ['https://identity.example.test/tenant', 'http://127.0.0.1:8050/oidc/one', 'http://127.0.0.2:8050/oidc/one', 'http://[::1]:8050/oidc/one']) assert.equal(providerIssuerValid(value), true)
   for (const value of ['http://identity.example.test', 'https://user:secret@identity.example.test', 'https://identity.example.test?', 'https://identity.example.test/#fragment', '//identity.example.test']) assert.equal(providerIssuerValid(value), false)
 })
+
+test('Provider logout settings retain explicit endpoint and reject token-bearing query parameters', () => {
+  const value = fields()
+  value.logoutEndpoint = 'https://identity.example.test/end-session?tenant=one'
+  assert.equal(providerValidation(value, [], null), '')
+  assert.equal(providerDefinition(value).logoutEndpoint, value.logoutEndpoint)
+  value.logoutEndpoint += '&id_token_hint=private'
+  assert.match(providerValidation(value, [], null), /logout endpoint/)
+})

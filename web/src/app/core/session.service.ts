@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core'
 import { ApiError, ApiService } from './api.service'
 import { AccessClientService } from './access-client.service'
-import type { PasswordChange, PasswordLogin } from './generated/access.types'
+import type { PasswordChange, PasswordLogin, ProviderLogoutOffer } from './generated/access.types'
 
 export interface User { id: string; name: string; email?: string }
 interface SessionResponse { user: User | null; session: { csrfToken: string; expiresAt: string; mustChangePassword?: boolean; authenticationMethod?: string } | null }
@@ -20,6 +20,9 @@ export class SessionService {
   readonly authenticating = signal(false)
   readonly loading = signal(true)
   readonly error = signal('')
+  readonly providerLogout = signal<ProviderLogoutOffer | null>(null)
+  readonly providerLogoutUnavailable = signal(false)
+  readonly signOutCompleted = signal(false)
   readonly providers = signal<ProviderList>({ providers: [], localEnabled: false, localAccountsEnabled: false })
   onAuthenticationChanged: (() => void) | undefined
   private generation = 0
@@ -32,7 +35,8 @@ export class SessionService {
       void this.loadProviders().catch(() => {})
     }
   }
-  private clear(): void { this.api.csrf.set(''); this.user.set(null); this.mustChangePassword.set(false); this.authenticationMethod.set(''); this.onAuthenticationChanged?.() }
+  dismissLogout(): void { this.providerLogout.set(null); this.providerLogoutUnavailable.set(false); this.signOutCompleted.set(false) }
+  private clear(): void { this.dismissLogout(); this.api.csrf.set(''); this.user.set(null); this.mustChangePassword.set(false); this.authenticationMethod.set(''); this.onAuthenticationChanged?.() }
   async initialize(): Promise<void> {
     this.loading.set(true); this.error.set('')
     try { await this.loadProviders(); await this.refresh() }
@@ -45,12 +49,13 @@ export class SessionService {
     const response = await this.api.request<SessionResponse>('/auth/session')
     if (generation !== this.generation) return
     const changed = this.user()?.id !== response.user?.id || this.mustChangePassword() !== (response.session?.mustChangePassword === true)
+    if(response.user) this.dismissLogout()
     this.api.csrf.set(response.session?.csrfToken ?? ''); this.mustChangePassword.set(response.session?.mustChangePassword === true); this.authenticationMethod.set(response.session?.authenticationMethod ?? ''); this.user.set(response.user)
     if (changed) this.onAuthenticationChanged?.()
   }
   private async authenticate(work: () => Promise<unknown>): Promise<void> {
     if (this.authenticating()) throw new Error('An authentication request is already in progress.')
-    this.generation++; this.authenticating.set(true); this.error.set('')
+    this.generation++; this.dismissLogout(); this.authenticating.set(true); this.error.set('')
     try {
       try { await work() }
       catch (error) { await this.refresh().catch(() => {}); throw error }
@@ -62,5 +67,5 @@ export class SessionService {
   guardProviderNavigation(event: Event): void { if (this.authenticating()) event.preventDefault() }
   signInWithPassword(body: PasswordLogin): Promise<void> { return this.authenticate(() => this.client.call('signInWithPassword', { body })) }
   changePassword(body: PasswordChange): Promise<void> { return this.authenticate(() => this.client.call('changeLocalPassword', { body })) }
-  async signOut(): Promise<void> { await this.authenticate(() => this.api.request('/auth/logout', 'POST', {})); await this.loadProviders() }
+  async signOut(): Promise<void> { await this.authenticate(async () => { const result=await this.client.call('signOut',{});this.providerLogout.set(result.providerLogout ?? null);this.providerLogoutUnavailable.set(result.providerLogoutUnavailable === true);this.signOutCompleted.set(result.signedOut) }); await this.loadProviders() }
 }

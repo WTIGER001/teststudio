@@ -113,3 +113,49 @@ func TestRotationRollsBackWithItsOwningTransaction(t *testing.T) {
 		t.Fatal("rolled-back replacement survived", err)
 	}
 }
+
+func TestSessionIdleAbsoluteAndAuthenticationDeadlinesFailNextRead(t *testing.T) {
+	for _, mode := range []string{"idle", "absolute", "authentication"} {
+		t.Run(mode, func(t *testing.T) {
+			db, err := testkit.Open(t, filepath.Join(t.TempDir(), "deadline.db"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer db.Close()
+			directory := &identity.Directory{Store: db}
+			if err := directory.SaveUser(t.Context(), identity.User{ID: "user", Name: "User"}, 0); err != nil {
+				t.Fatal(err)
+			}
+			service := &sessions.Service{Store: db, Directory: directory, IdleTimeout: time.Minute}
+			writer := httptest.NewRecorder()
+			current, err := service.Create(t.Context(), writer, "user", "local", time.Now().Add(time.Hour))
+			if err != nil {
+				t.Fatal(err)
+			}
+			row, err := db.Get(t.Context(), "sessions", current.ID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			switch mode {
+			case "idle":
+				current.LastSeen = time.Now().Add(-2 * time.Minute)
+			case "absolute":
+				current.ExpiresAt = time.Now().Add(-time.Second)
+			case "authentication":
+				current.AuthenticationUntil = time.Now().Add(-time.Second)
+			}
+			change, _ := storage.Put(row.Bucket, row.ID, "", row.Revision, current)
+			if err := db.Commit(t.Context(), change); err != nil {
+				t.Fatal(err)
+			}
+			request := httptest.NewRequest("GET", "http://studio.example/auth/session", nil)
+			request.AddCookie(writer.Result().Cookies()[0])
+			if _, err := service.Read(t.Context(), request); !errors.Is(err, sessions.ErrUnauthenticated) {
+				t.Fatal("expired session read succeeded", mode, err)
+			}
+			if _, err := service.Validate(t.Context(), current.ID); !errors.Is(err, sessions.ErrUnauthenticated) {
+				t.Fatal("expired private-evidence authorization succeeded", mode, err)
+			}
+		})
+	}
+}

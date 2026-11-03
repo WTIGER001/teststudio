@@ -2,6 +2,7 @@
   "schemaVersion": "teststudio.selftest/v1",
   "source": "teststudio-selftests",
   "tests": [
+    { "id": "STUDIO-AUTH-001", "title": "OIDC key rotation, group refresh, provider logout, and callback feedback", "selector": "@STUDIO-AUTH-001", "category": "Authentication" },
     { "id": "STUDIO-PENDING-001", "title": "Pending project access, verified provider claims, and retained approvals", "selector": "@STUDIO-PENDING-001", "category": "Administration" },
     { "id": "STUDIO-LINKS-001", "title": "Fresh account proof, explicit identity linking, and session rotation", "selector": "@STUDIO-LINKS-001", "category": "Administration" },
     { "id": "STUDIO-PROVIDERS-001", "title": "Managed providers, scoped group mappings, and isolated OIDC sign-in", "selector": "@STUDIO-PROVIDERS-001", "category": "Administration" },

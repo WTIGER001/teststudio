@@ -21,7 +21,7 @@ export class ApplicationService {
 
   async signInLocally(): Promise<void> {
     this.error.set('')
-    try { await this.session.signInLocally(); await this.loadWorkspace() }
+    try { await this.session.signInLocally(); await this.clearAuthenticationFeedback(); await this.loadWorkspace() }
     catch (error) { this.error.set(error instanceof Error ? error.message : 'Sign-in failed.') }
   }
 
@@ -33,7 +33,7 @@ export class ApplicationService {
     } catch (error) { this.error.set(error instanceof Error ? error.message : 'Sign-out failed.') }
   }
 
-  async signInWithPassword(body: PasswordLogin): Promise<void> { this.error.set(''); this.message.set(''); await this.session.signInWithPassword(body); if (this.session.ready()) await this.loadWorkspace() }
+  async signInWithPassword(body: PasswordLogin): Promise<void> { this.error.set(''); this.message.set(''); await this.session.signInWithPassword(body); await this.clearAuthenticationFeedback(); if (this.session.ready()) await this.loadWorkspace() }
   async changePassword(body: PasswordChange): Promise<void> {
     const required = this.session.mustChangePassword()
     this.message.set('')
@@ -42,6 +42,8 @@ export class ApplicationService {
     if (this.session.ready()) { await this.loadWorkspace(); if (required) this.message.set('Password changed. Earlier sessions are invalid.') }
   }
   async refreshAuthentication(): Promise<void> { await this.session.loadProviders(); await this.session.refresh(); this.workspace.reset(); if (this.session.ready()) await this.loadWorkspace() }
+
+  private async clearAuthenticationFeedback(): Promise<void> { await this.router.navigate([], {queryParams:{signIn:null,providerLogout:null},queryParamsHandling:'merge',replaceUrl:true}) }
 
   private async loadWorkspace(): Promise<void> {
     try { await this.workspace.load() }

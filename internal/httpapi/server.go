@@ -192,6 +192,9 @@ func (s *Server) Handler() http.Handler {
 			artifactSource = " " + s.ArtifactOrigin
 		}
 		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:"+artifactSource+"; media-src 'self'"+artifactSource+"; connect-src 'self'"+artifactSource+"; object-src 'none'; base-uri 'self'; frame-ancestors 'none'")
+		if strings.HasPrefix(r.URL.Path, "/auth/") || strings.HasPrefix(r.URL.Path, "/api/") {
+			w.Header().Set("Cache-Control", "no-store")
+		}
 		mux.ServeHTTP(w, r)
 	})
 }

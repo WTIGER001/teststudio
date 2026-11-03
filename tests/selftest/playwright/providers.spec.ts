@@ -11,7 +11,7 @@ test('Provider configuration, mapped groups, guarded editors, and two isolated O
     const response = await page.request.fetch(resource, { method, data: body, headers: { Cookie: `${root.name}=${root.value}`, Origin: 'http://127.0.0.1:8040', 'X-CSRF-Token': csrf, ...(revision === undefined ? {} : { 'If-Match': `"${revision}"` }) } })
     expect(response.ok(), `${method} ${resource}: ${await response.text()}`).toBe(true); return response.json()
   }
-  const mutation = (record: any, reason: string) => { const { callbackUrl, canManage, ...definition } = record.data; return { ...definition, reason } }
+  const mutation = (record: any, reason: string) => { const { callbackUrl, logoutCallbackUrl, canManage, ...definition } = record.data; return { ...definition, reason } }
   const editor = () => page.getByRole('region', { name: /^(Register identity provider|Edit identity provider)$/ })
   const stored = () => page.getByRole('region', { name: 'Stored provider', exact: true })
   const save = async (reason: string, button = 'Save provider') => { await page.getByLabel('Provider change reason', { exact: true }).fill(reason); await page.getByRole('button', { name: button, exact: true }).click(); await expect(editor()).toHaveCount(0) }

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net"
 	"net/http"
+	"net/url"
 	"time"
 
 	authoidc "github.com/wtiger001/teststudio/adapters/auth/oidc"
@@ -45,10 +46,11 @@ func (s *Server) authRoutes(m *http.ServeMux) {
 			JSON(w, 403, map[string]string{"message": "local sign-in is unavailable"})
 			return
 		}
-		if _, err := s.Sessions.Create(r.Context(), w, s.LocalUser, "local", time.Time{}); err != nil {
+		if _, err := s.Sessions.CreateReplacing(r.Context(), w, s.LocalUser, "local", time.Time{}, sessionFromCookie(r)); err != nil {
 			problem(w, err)
 			return
 		}
+		clearLoginTransaction(w, s.Sessions.Secure)
 		JSON(w, 200, map[string]bool{"signedIn": true})
 	})
 	m.HandleFunc("GET /auth/session", func(w http.ResponseWriter, r *http.Request) {
@@ -75,16 +77,74 @@ func (s *Server) authRoutes(m *http.ServeMux) {
 			return
 		}
 		s.Sessions.Clear(w)
-		JSON(w, 200, map[string]bool{"signedOut": true})
+		clearLoginTransaction(w, s.Sessions.Secure)
+		result := authoidc.LogoutResponse{SignedOut: true}
+		if s.OIDC != nil {
+			offer, cookie, err := s.OIDC.OfferLogout(r.Context(), v)
+			if err != nil {
+				result.ProviderLogoutUnavailable = true
+			} else if offer != nil {
+				result.ProviderLogout = offer
+				http.SetCookie(w, cookie)
+			}
+		}
+		JSON(w, 200, result)
 	}, true))
+	m.HandleFunc("GET /auth/logout/{offer}", func(w http.ResponseWriter, r *http.Request) {
+		if s.OIDC == nil || s.OIDC.LaunchLogout(w, r, r.PathValue("offer")) != nil {
+			providerLogoutFailure(w, r)
+		}
+	})
+	m.HandleFunc("GET /auth/logout/callback/{provider}", func(w http.ResponseWriter, r *http.Request) {
+		if s.OIDC == nil || s.OIDC.CompleteLogout(w, r, r.PathValue("provider")) != nil {
+			providerLogoutFailure(w, r)
+		}
+	})
 	m.HandleFunc("GET /auth/login/{provider}", func(w http.ResponseWriter, r *http.Request) {
 		if err := s.OIDC.Login(w, r, r.PathValue("provider")); err != nil {
-			problem(w, errors.New("sign-in provider is unavailable"))
+			http.Redirect(w, r, "/projects?signIn=unavailable", http.StatusFound)
 		}
 	})
 	m.HandleFunc("GET /auth/callback/{provider}", func(w http.ResponseWriter, r *http.Request) {
 		if err := s.OIDC.Callback(w, r, r.PathValue("provider")); err != nil {
-			problem(w, err)
+			outcome := "failed"
+			if errors.Is(err, authoidc.ErrSignInCancelled) {
+				outcome = "cancelled"
+			}
+			if errors.Is(err, authoidc.ErrSignInExpired) {
+				outcome = "expired"
+			}
+			w.Header().Set("Cache-Control", "no-store")
+			target := "/projects"
+			var failure *authoidc.SignInError
+			if errors.As(err, &failure) && failure.ReturnTo != "/" {
+				target = failure.ReturnTo
+			}
+			destination, parseErr := url.Parse(target)
+			if parseErr != nil {
+				destination = &url.URL{Path: "/projects"}
+			}
+			query := destination.Query()
+			query.Set("signIn", outcome)
+			destination.RawQuery = query.Encode()
+			http.Redirect(w, r, destination.String(), http.StatusFound)
 		}
 	})
+}
+
+func sessionFromCookie(r *http.Request) string {
+	if cookie, err := r.Cookie("teststudio_session"); err == nil && len(cookie.Value) == 43 {
+		return sessions.Digest(cookie.Value)
+	}
+	return ""
+}
+
+func clearLoginTransaction(w http.ResponseWriter, secure bool) {
+	http.SetCookie(w, &http.Cookie{Name: "teststudio_login", Value: "", Path: "/auth", HttpOnly: true, Secure: secure, SameSite: http.SameSiteLaxMode, MaxAge: -1})
+}
+
+func providerLogoutFailure(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("Referrer-Policy", "no-referrer")
+	http.Redirect(w, r, "/projects?providerLogout=unconfirmed", http.StatusFound)
 }

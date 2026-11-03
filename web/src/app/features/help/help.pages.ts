@@ -11,6 +11,7 @@ export const helpPages: Record<string, HelpPage> = {
       { title: 'Bounded directory', description: 'More providers continues a bounded scan. Exact provider read denies filter rows. A filtered page can be empty while more readable records remain.' }
     ],
     tutorials: [
+      { title: 'Provider logout', steps: ['Open a saved provider and copy its Post-logout callback URL into the provider’s registered logout redirects.', 'Edit Provider logout endpoint to match the discovered end-session endpoint. Leave it empty for TestStudio-only sign-out.', 'Use a provider that accepts client-identifier logout without an ID-token hint. Enter a reason and save the current revision.', 'Verify sign-out locally before enabling the integration in a hosted installation.'] },
       { title: 'Register a provider', steps: ['Select + Register provider.', 'Enter Provider name, Provider identifier, Exact issuer URL, and Client identifier.', 'Select Credential reference and Requested scopes. Keep Provider disabled while preparing group mappings.', 'Choose whether first sign-in creates pending profiles. Enter Provider change reason and select Register provider.', 'Open the saved provider to copy its Callback URL and create provider groups.'] },
       { title: 'Review configuration changes', steps: ['Open a provider from the directory and select Edit provider.', 'Review the impact of invalidating earlier authentication. Enter a reason and select Save provider.', 'A conflict preserves your fields. Select Reload stored provider to review the current revision before another save.'] }
     ]
@@ -239,6 +240,7 @@ export const helpPages: Record<string, HelpPage> = {
     introduction: ['Sign in to open your TestStudio workspace. Your installation controls which sign-in options appear.'],
     concepts: [
       { title: 'Your workspace', description: 'Projects organize applications, suites, test definitions, and run history. Your permissions control which actions are available.' },
+      { title: 'Provider sign-out', description: 'Sign out closes the current TestStudio session first. A configured provider can offer a separate Sign out of provider action. Confirm it at the provider. Failure or cancellation leaves the TestStudio session closed.' },
       { title: 'Local sign-in', description: 'Sign in with a password uses a managed local account and its internal user identifier. Open local workspace is a separate development administrator option that appears only when explicitly enabled.' },
       { title: 'Session', description: 'If your session expires, sign in again. The page address still identifies the work you were viewing.' }
     ],

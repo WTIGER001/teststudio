@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.11.0"
+export const accessContractVersion = "0.12.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -26,6 +26,7 @@ export type IdentityLinkStart = { "confirmLocal"?: boolean; "password"?: string;
 export type LocalCredential = { "canManage": boolean; "configured": boolean; "createdAt"?: string; "disabled": boolean; "localAccountsEnabled": boolean; "mustChangePassword": boolean; "updatedAt"?: string; "userId": string }
 export type LocalCredentialRecord = { "data": LocalCredential; "id": string; "revision": number }
 export type LocalPasswordDefinition = { "password": string; "reason": string }
+export type LogoutResponse = { "providerLogout"?: ProviderLogoutOffer; "providerLogoutUnavailable"?: boolean; "signedOut": boolean }
 export type Membership = { "active": boolean; "expiresAt"?: string | null; "groupId": string; "groupName"?: string; "name": string; "projectId"?: string; "providerRevision"?: number; "readOnly": boolean; "source": string; "userId": string }
 export type MembershipDefinition = { "expiresAt"?: string | null }
 export type MembershipPage = { "cursor"?: string; "items": (MembershipRecord)[]; "partial": boolean }
@@ -52,9 +53,10 @@ export type PredefinedRoleRecord = { "data": PredefinedRole; "id": string; "revi
 export type PredefinedRoleUpdate = { "disabled": boolean; "reason": string }
 export type Problem = { "message": string; "status"?: number }
 export type Profile = { "identities": ExternalIdentityPage; "localAccount": boolean; "user": User }
-export type Provider = { "autoProvision": boolean; "callbackUrl": string; "canManage": boolean; "clientId": string; "disabled": boolean; "groupClaim"?: string; "groupMappings": ProviderMappings; "id": string; "issuer": string; "membershipTtlSeconds": number; "name": string; "scopes": (string)[]; "secretRef"?: string }
+export type Provider = { "autoProvision": boolean; "callbackUrl": string; "canManage": boolean; "clientId": string; "disabled": boolean; "groupClaim"?: string; "groupMappings": ProviderMappings; "id": string; "issuer": string; "logoutCallbackUrl": string; "logoutEndpoint"?: string; "membershipTtlSeconds": number; "name": string; "scopes": (string)[]; "secretRef"?: string }
+export type ProviderLogoutOffer = { "expiresAt": string; "providerName": string; "url": string }
 export type ProviderMappings = Record<string, string>
-export type ProviderMutation = { "autoProvision": boolean; "clientId": string; "disabled": boolean; "groupClaim"?: string; "groupMappings": ProviderMappings; "id": string; "issuer": string; "membershipTtlSeconds": number; "name": string; "reason": string; "scopes": (string)[]; "secretRef"?: string }
+export type ProviderMutation = { "autoProvision": boolean; "clientId": string; "disabled": boolean; "groupClaim"?: string; "groupMappings": ProviderMappings; "id": string; "issuer": string; "logoutEndpoint"?: string; "membershipTtlSeconds": number; "name": string; "reason": string; "scopes": (string)[]; "secretRef"?: string }
 export type ProviderPage = { "canCreate": boolean; "credentialRefs": (string)[]; "cursor"?: string; "items": (ProviderRecord)[]; "partial": boolean }
 export type ProviderRecord = { "data": Provider; "id": string; "revision": number; "updatedAt": string }
 export type Reason = { "reason": string }
@@ -151,6 +153,7 @@ export interface AccessRequests {
   restoreUser: { "user": string; revision: number; body: Reason }
   listUserSessions: { "user": string; query?: { "limit"?: number; "cursor"?: string } }
   revokeUserSession: { "user": string; "session": string; revision: number; body: Reason }
+  signOut: {  }
   signInWithPassword: { body: PasswordLogin }
   changeLocalPassword: { body: PasswordChange }
 }
@@ -227,6 +230,7 @@ export interface AccessResponses {
   restoreUser: UserRecord
   listUserSessions: SessionPage
   revokeUserSession: Revoked
+  signOut: LogoutResponse
   signInWithPassword: PasswordSignedIn
   changeLocalPassword: PasswordChanged
 }
@@ -303,6 +307,7 @@ export const accessOperations = {
   restoreUser: { method: "POST", path: "/api/v1/users/{user}/restore" },
   listUserSessions: { method: "GET", path: "/api/v1/users/{user}/sessions" },
   revokeUserSession: { method: "DELETE", path: "/api/v1/users/{user}/sessions/{session}" },
+  signOut: { method: "POST", path: "/auth/logout" },
   signInWithPassword: { method: "POST", path: "/auth/password" },
   changeLocalPassword: { method: "POST", path: "/auth/password/change" }
 } as const

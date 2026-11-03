@@ -68,7 +68,7 @@ func normalizeProvider(input ProviderInput) (authoidc.Provider, error) {
 	if input.Disabled == nil {
 		return authoidc.Provider{}, errors.New("provider state must include an explicit disabled value")
 	}
-	provider := authoidc.Provider{ID: input.ID, Name: strings.TrimSpace(input.Name), Issuer: strings.TrimSpace(input.Issuer), ClientID: strings.TrimSpace(input.ClientID), SecretRef: input.SecretRef, Scopes: slices.Clone(input.Scopes), Disabled: *input.Disabled, AutoProvision: input.AutoProvision, GroupClaim: input.GroupClaim, GroupMappings: input.GroupMappings, MembershipTTLSeconds: input.MembershipTTLSeconds}
+	provider := authoidc.Provider{ID: input.ID, Name: strings.TrimSpace(input.Name), Issuer: strings.TrimSpace(input.Issuer), ClientID: strings.TrimSpace(input.ClientID), SecretRef: input.SecretRef, Scopes: slices.Clone(input.Scopes), Disabled: *input.Disabled, AutoProvision: input.AutoProvision, GroupClaim: input.GroupClaim, GroupMappings: input.GroupMappings, MembershipTTLSeconds: input.MembershipTTLSeconds, LogoutEndpoint: strings.TrimSpace(input.LogoutEndpoint)}
 	if err := authoidc.ValidateProvider(provider); err != nil {
 		return provider, err
 	}

@@ -61,7 +61,11 @@ func Digest(value string) string {
 }
 
 func (s *Service) Create(ctx context.Context, w http.ResponseWriter, user, provider string, authUntil time.Time) (Session, error) {
-	session, cookie, err := s.create(ctx, user, provider, authUntil, 0, 0, "")
+	return s.CreateReplacing(ctx, w, user, provider, authUntil, "")
+}
+
+func (s *Service) CreateReplacing(ctx context.Context, w http.ResponseWriter, user, provider string, authUntil time.Time, previous string) (Session, error) {
+	session, cookie, err := s.create(ctx, user, provider, authUntil, 0, 0, previous)
 	if err == nil {
 		http.SetCookie(w, cookie)
 	}
@@ -69,10 +73,14 @@ func (s *Service) Create(ctx context.Context, w http.ResponseWriter, user, provi
 }
 
 func (s *Service) CreateOIDC(ctx context.Context, w http.ResponseWriter, user, provider string, revision int64, authUntil time.Time) (Session, error) {
+	return s.CreateOIDCReplacing(ctx, w, user, provider, revision, authUntil, "")
+}
+
+func (s *Service) CreateOIDCReplacing(ctx context.Context, w http.ResponseWriter, user, provider string, revision int64, authUntil time.Time, previous string) (Session, error) {
 	if revision < 1 || provider == "" || !time.Now().Before(authUntil) {
 		return Session{}, ErrUnauthenticated
 	}
-	session, cookie, err := s.create(ctx, user, provider, authUntil, 0, revision, "")
+	session, cookie, err := s.create(ctx, user, provider, authUntil, 0, revision, previous)
 	if err == nil {
 		http.SetCookie(w, cookie)
 	}

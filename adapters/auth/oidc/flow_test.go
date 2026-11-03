@@ -12,6 +12,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"path/filepath"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -24,15 +25,22 @@ import (
 )
 
 type issuer struct {
-	server      *httptest.Server
-	key         *rsa.PrivateKey
-	nonce       string
-	challenge   string
-	subject     string
-	mutate      func(map[string]any)
-	onToken     func()
-	onDiscovery func()
-	tokens      atomic.Int32
+	tokenType    string
+	keyMu        sync.RWMutex
+	keyID        string
+	publishedKey *rsa.PrivateKey
+	publishedID  string
+	metadata     func(map[string]any)
+	keys         atomic.Int32
+	server       *httptest.Server
+	key          *rsa.PrivateKey
+	nonce        string
+	challenge    string
+	subject      string
+	mutate       func(map[string]any)
+	onToken      func()
+	onDiscovery  func()
+	tokens       atomic.Int32
 }
 
 func newIssuer(t *testing.T) *issuer {
@@ -41,7 +49,7 @@ func newIssuer(t *testing.T) *issuer {
 	if err != nil {
 		t.Fatal(err)
 	}
-	i := &issuer{key: key, subject: "subject-one"}
+	i := &issuer{key: key, keyID: "key-one", subject: "subject-one"}
 	i.server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		switch r.URL.Path {
@@ -49,9 +57,21 @@ func newIssuer(t *testing.T) *issuer {
 			if i.onDiscovery != nil {
 				i.onDiscovery()
 			}
-			json.NewEncoder(w).Encode(map[string]any{"issuer": i.server.URL, "authorization_endpoint": i.server.URL + "/authorize", "token_endpoint": i.server.URL + "/token", "jwks_uri": i.server.URL + "/keys", "id_token_signing_alg_values_supported": []string{"RS256"}})
+			metadata := map[string]any{"issuer": i.server.URL, "authorization_endpoint": i.server.URL + "/authorize", "token_endpoint": i.server.URL + "/token", "jwks_uri": i.server.URL + "/keys", "end_session_endpoint": i.server.URL + "/end-session", "id_token_signing_alg_values_supported": []string{"RS256"}}
+			if i.metadata != nil {
+				i.metadata(metadata)
+			}
+			json.NewEncoder(w).Encode(metadata)
 		case "/keys":
-			json.NewEncoder(w).Encode(map[string]any{"keys": []any{map[string]any{"kty": "RSA", "kid": "key-one", "use": "sig", "alg": "RS256", "n": base64.RawURLEncoding.EncodeToString(key.N.Bytes()), "e": base64.RawURLEncoding.EncodeToString(big.NewInt(int64(key.E)).Bytes())}}})
+			i.keys.Add(1)
+			i.keyMu.RLock()
+			key, kid := i.key, i.keyID
+			if i.publishedKey != nil {
+				key = i.publishedKey
+				kid = i.publishedID
+			}
+			i.keyMu.RUnlock()
+			json.NewEncoder(w).Encode(map[string]any{"keys": []any{map[string]any{"kty": "RSA", "kid": kid, "use": "sig", "alg": "RS256", "n": base64.RawURLEncoding.EncodeToString(key.N.Bytes()), "e": base64.RawURLEncoding.EncodeToString(big.NewInt(int64(key.E)).Bytes())}}})
 		case "/token":
 			i.tokens.Add(1)
 			r.ParseForm()
@@ -67,7 +87,14 @@ func newIssuer(t *testing.T) *issuer {
 			if i.mutate != nil {
 				i.mutate(claims)
 			}
-			header, _ := json.Marshal(map[string]string{"alg": "RS256", "kid": "key-one"})
+			i.keyMu.RLock()
+			key, kid := i.key, i.keyID
+			i.keyMu.RUnlock()
+			protected := map[string]string{"alg": "RS256", "kid": kid}
+			if i.tokenType != "" {
+				protected["typ"] = i.tokenType
+			}
+			header, _ := json.Marshal(protected)
 			payload, _ := json.Marshal(claims)
 			unsigned := base64.RawURLEncoding.EncodeToString(header) + "." + base64.RawURLEncoding.EncodeToString(payload)
 			digest := sha256.Sum256([]byte(unsigned))

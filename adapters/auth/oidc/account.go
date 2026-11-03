@@ -71,9 +71,7 @@ func (s *Service) accountCallback(w http.ResponseWriter, r *http.Request, v tran
 		}
 		ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
 		defer cancel()
-		if s.Client != nil {
-			ctx = coreoidc.ClientContext(ctx, s.Client)
-		}
+		ctx = coreoidc.ClientContext(ctx, s.httpClient())
 		proof, err := s.exchangeIdentity(ctx, p, remote, cfg, v, r.URL.Query().Get("code"))
 		if err != nil {
 			return err

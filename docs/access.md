@@ -870,7 +870,7 @@ Pending login transactions without a provider revision also require a new sign-i
 Focused loopback provider tests use actual discovery, signed tokens, state, nonce, and PKCE exchanges.
 They verify changes during discovery and exchange without external provider accounts.
 The [provider guide](providers.md) describes managed provider configuration.
-Provider logout and complete provider acceptance remain pending.
+Optional provider sign-out and focused OIDC acceptance are implemented below. Deployment-wide identity acceptance remains pending.
 
 ## Explicit identity linking
 
@@ -1001,3 +1001,86 @@ Cancel stale approvals before replacing them.
 The interface clears private edits after revoked access and supports read-only project inspection.
 Contextual help covers preparation, verification, blocked states, cancellation, and ordinary role revocation.
 OpenAPI 0.11 and the generated identity client include 73 JSON operations.
+
+## OIDC verification and group refresh
+
+Provider discovery and key requests use bounded HTTP clients. The maximum client timeout is ten seconds.
+Authorization, token, and key endpoints require HTTPS outside loopback. Redirects cannot downgrade an HTTPS request.
+A shorter operator-supplied timeout remains unchanged. Provider logout discovery has a five-second request deadline.
+The SDK verifies the original signed token against discovered signing keys. New sign-ins fetch current keys and accept valid key rotation.
+Retired or unknown signing keys fail verification.
+
+TestStudio uses the SDK for signature, issuer, audience, expiry, and basic token validation.
+It also checks nonce, issue time, authorized party, token use, and access-token hash when present.
+An authorized-party claim must match the configured client, including for a single audience.
+Multiple audiences require that claim. An explicit access-token type or use cannot identify a TestStudio browser user.
+Registered claim names cannot use ambiguous case variants.
+Provider ID tokens cannot replace the opaque session cookie on API requests.
+
+The signature key-set adapter preserves the original verified claims for application validation.
+It removes distributed-claim envelopes only from the payload used for SDK identity-claim parsing.
+It never rewrites the signed input before signature verification.
+The SDK validates the identity fields before TestStudio changes group membership.
+This permits safe membership withdrawal when unsupported distributed group metadata would otherwise prevent identity parsing.
+An invalid nonce or identity binding cannot withdraw another account’s membership.
+
+Group mappings require a complete string array. An explicit empty array is complete and grants no mapped membership.
+Missing, null, malformed, overflowing, distributed, or paged group claims fail the refresh and withdraw that provider’s earlier memberships.
+External identifiers are bounded to 512 bytes. A complete claim permits at most 4096 values.
+Unmapped identifiers grant nothing. Local membership remains independent.
+Only explicit configured mappings can select destination groups. External role names never become executable permissions.
+Expired membership loses project permissions on the next check, even while another valid session remains open.
+The configured membership lifetime also bounds the OIDC session authentication deadline.
+
+Unresolved distributed email or email-verification claims cannot activate pending project access.
+Provider-confirmed inline email remains mandatory for that workflow.
+
+Normal OIDC and local sign-in replace the earlier browser session identifier.
+Other browser sessions remain independent unless account or credential changes revoke them.
+Idle, absolute, and authentication deadlines apply to normal requests and private evidence authorization.
+Authentication and API responses, including redirects, use `Cache-Control: no-store`.
+
+Sign-in links preserve the current local page, query, and fragment.
+Authentication server actions and encoded external-authority paths cannot become return routes.
+Validated cancellation and failure responses preserve the approved destination and add a fixed sign-in status.
+Messages never display raw provider diagnostics.
+
+## Optional provider sign-out
+
+The default Sign out action revokes the current TestStudio session and clears its cookie first.
+It also clears any unfinished browser sign-in cookie.
+Provider sign-out is a separate optional action. Provider errors cannot restore the closed TestStudio session.
+
+Open a provider’s settings and copy Post-logout callback URL into its registered logout redirects.
+Set Provider logout endpoint to the exact discovered `end_session_endpoint`.
+Leave the field empty to disable the integration.
+Endpoints require HTTPS outside loopback. Reserved authentication parameters cannot appear in the configured URL.
+
+This integration uses the client-identifier mode from [OpenID Connect RP-Initiated Logout](https://openid.net/specs/openid-connect-rpinitiated-1_0.html).
+It sends `client_id`, the registered `post_logout_redirect_uri`, and an opaque state.
+It sends no ID-token hint, access token, refresh token, or client secret through the browser.
+The provider must support this mode and validate the registered return destination.
+The provider asks the user to confirm sign-out when no identity-token hint is supplied.
+A provider that requires an identity-token hint can retain TestStudio-only sign-out.
+
+After local sign-out, the interface offers Sign out of the configured provider.
+The offer expires after five minutes and belongs to the initiating browser.
+Its opaque URL and separate HttpOnly cookie bind the launch. The server keeps protocol state in the selected database.
+Successful launch consumes the offer and requires current provider configuration and matching discovery metadata.
+The callback checks provider, browser, state, expiry, and one-time transaction state.
+It cannot clear or revoke a newer TestStudio session.
+Completion, denial, and unavailable-provider outcomes return readable messages.
+Provider configuration changes invalidate earlier offers.
+
+| Method | Route | Behavior |
+| --- | --- | --- |
+| POST | `/auth/logout` | Revoke the local session and return an optional browser-bound provider offer. |
+| GET | `/auth/logout/{offer}` | Launch the configured provider logout after browser and discovery checks. |
+| GET | `/auth/logout/callback/{provider}` | Complete a matching logout transaction without changing newer sessions. |
+
+The POST requires the current session, configured Origin, and request-forgery token.
+Launch and callback occur after local revocation. They use their separate short-lived browser binding.
+No provider credentials enter JSON logout responses, browser storage, or audit events.
+OpenAPI 0.12 and the generated identity client include 74 JSON operations.
+
+Deployment-wide identity parity and privilege-change session behavior beyond the verified credential and account operations remain in the full plan.

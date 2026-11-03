@@ -23,14 +23,16 @@ type ProviderInput struct {
 	AutoProvision        bool              `json:"autoProvision"`
 	GroupClaim           string            `json:"groupClaim,omitempty"`
 	GroupMappings        map[string]string `json:"groupMappings"`
+	LogoutEndpoint       string            `json:"logoutEndpoint,omitempty"`
 	MembershipTTLSeconds int               `json:"membershipTtlSeconds"`
 	Reason               string            `json:"reason"`
 }
 
 type ProviderView struct {
 	authoidc.Provider
-	CanManage   bool   `json:"canManage"`
-	CallbackURL string `json:"callbackUrl"`
+	CanManage         bool   `json:"canManage"`
+	LogoutCallbackURL string `json:"logoutCallbackUrl"`
+	CallbackURL       string `json:"callbackUrl"`
 }
 type ProviderRecord struct {
 	ID       string       `json:"id"`
@@ -91,7 +93,7 @@ func (s *Service) providerRecord(ctx context.Context, actor string, provider aut
 		}
 		return s.providerMappingAuthority(ctx, actor, provider, false)
 	})
-	return ProviderRecord{ID: row.ID, Revision: row.Revision, Updated: row.Updated, Data: ProviderView{Provider: provider, CanManage: canManage, CallbackURL: s.AuthOrigin + "/auth/callback/" + provider.ID}}, err
+	return ProviderRecord{ID: row.ID, Revision: row.Revision, Updated: row.Updated, Data: ProviderView{Provider: provider, CanManage: canManage, CallbackURL: s.AuthOrigin + "/auth/callback/" + provider.ID, LogoutCallbackURL: s.AuthOrigin + "/auth/logout/callback/" + provider.ID}}, err
 }
 
 func (s *Service) ReadProvider(ctx context.Context, actor, id string) (ProviderRecord, error) {

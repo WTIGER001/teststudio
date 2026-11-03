@@ -1,8 +1,8 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio identity and access administration"
-  "version": "0.11.0"
-  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
+  "version": "0.12.0"
+  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Includes optional client-identifier RP-initiated provider logout after local session revocation. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
     "url": "/"
@@ -2446,6 +2446,33 @@
             "schema":
               "$ref": "#/components/schemas/Reason"
 
+  "/auth/logout":
+    "post":
+      "operationId": "signOut"
+      "summary": "Revoke the current TestStudio session and clear its cookie before preparing any optional provider sign-out. Provider integration failure never restores the local session."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Origin"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "responses":
+        "200":
+          "description": "Local session revoked. Optional browser-bound provider action contains no provider tokens."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/LogoutResponse"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "503":
+          "$ref": "#/components/responses/Problem"
+
 "components":
   "securitySchemes":
     "SessionCookie":
@@ -2586,6 +2613,34 @@
           "schema":
             "$ref": "#/components/schemas/Problem"
   "schemas":
+    "ProviderLogoutOffer":
+      "type": "object"
+      "properties":
+        "providerName":
+          "type": "string"
+        "url":
+          "type": "string"
+          "pattern": "^/auth/logout/[A-Za-z0-9_-]{43}$"
+        "expiresAt":
+          "type": "string"
+          "format": "date-time"
+      "required":
+        - "providerName"
+        - "url"
+        - "expiresAt"
+      "additionalProperties": false
+    "LogoutResponse":
+      "type": "object"
+      "properties":
+        "signedOut":
+          "type": "boolean"
+        "providerLogout":
+          "$ref": "#/components/schemas/ProviderLogoutOffer"
+        "providerLogoutUnavailable":
+          "type": "boolean"
+      "required":
+        - "signedOut"
+      "additionalProperties": false
     "PendingProviderChoice":
       "type": "object"
       "properties":
@@ -4203,6 +4258,9 @@
           "maxLength": 256
         "groupMappings":
           "$ref": "#/components/schemas/ProviderMappings"
+        "logoutEndpoint":
+          "type": "string"
+          "description": "Optional exact discovered end-session endpoint. Empty disables provider logout. Uses client_id and a registered post-logout callback without provider tokens in the browser."
         "membershipTtlSeconds":
           "type": "integer"
           "minimum": 0
@@ -4261,6 +4319,9 @@
           "maxLength": 256
         "groupMappings":
           "$ref": "#/components/schemas/ProviderMappings"
+        "logoutEndpoint":
+          "type": "string"
+          "description": "Optional exact discovered end-session endpoint. Empty disables provider logout. Uses client_id and a registered post-logout callback without provider tokens in the browser."
         "membershipTtlSeconds":
           "type": "integer"
           "minimum": 0
@@ -4268,6 +4329,9 @@
           "description": "Zero uses 1800 seconds. Validated group membership expires no later than the token."
         "canManage":
           "type": "boolean"
+        "logoutCallbackUrl":
+          "type": "string"
+          "readOnly": true
         "callbackUrl":
           "type": "string"
       "required":
@@ -4282,6 +4346,7 @@
         - "membershipTtlSeconds"
         - "canManage"
         - "callbackUrl"
+        - "logoutCallbackUrl"
     "ProviderRecord":
       "type": "object"
       "properties":

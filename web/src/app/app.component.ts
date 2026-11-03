@@ -5,12 +5,14 @@ import { ApplicationService } from './core/application.service'
 import { ThemeService } from './core/theme.service'
 import { PasswordSigninComponent } from './features/auth/password-signin.component'
 import { RequiredPasswordComponent } from './features/auth/required-password.component'
+import { AuthFeedbackComponent } from './features/auth/auth-feedback.component'
+import { AuthNavigationService } from './features/auth/auth-navigation.service'
 import { HelpComponent } from './features/help/help.component'
 
 @Component({
   selector: 'ts-root',
   standalone: true,
-  imports: [FormsModule, RouterLink, RouterLinkActive, RouterOutlet, HelpComponent, PasswordSigninComponent, RequiredPasswordComponent],
+  imports: [FormsModule, RouterLink, RouterLinkActive, RouterOutlet, HelpComponent, PasswordSigninComponent, RequiredPasswordComponent, AuthFeedbackComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <a class="skip-link" href="#main">Skip to content</a>
@@ -37,11 +39,12 @@ import { HelpComponent } from './features/help/help.component'
           <span class="eyebrow">Your testing workspace</span>
           <h1 id="signin-title">A clear view of<br>what works.</h1>
           <p class="muted">Manage your test catalog, run with confidence, and keep the evidence that explains every result.</p>
+          <ts-auth-feedback />
           @if (app.session.error() || app.error()) { <p class="notice error" role="alert">{{ app.session.error() || app.error() }}</p> }
           @if (app.session.providers().localAccountsEnabled) { <ts-password-signin /> }
           @if (app.message()) { <p class="notice success" role="status">{{ app.message() }}</p> }
           @for (provider of app.session.providers().providers; track provider.id) {
-            <a class="button primary full" [href]="'/auth/login/' + provider.id" [attr.aria-disabled]="app.session.authenticating()" (click)="app.session.guardProviderNavigation($event)">Continue with {{ provider.name }}</a>
+            <a class="button primary full" [href]="authentication.providerPath(provider.id)" [attr.aria-disabled]="app.session.authenticating()" (click)="app.session.guardProviderNavigation($event)">Continue with {{ provider.name }}</a>
           }
           @if (app.session.providers().localEnabled) {
             <button type="button" class="button primary full" [disabled]="app.session.authenticating()" (click)="app.signInLocally()">Open local workspace <span aria-hidden="true">→</span></button>
@@ -89,7 +92,7 @@ import { HelpComponent } from './features/help/help.component'
           </nav>
           <div class="sidebar-footer"><span class="status-dot" aria-hidden="true"></span><span>TestStudio<br><small>Built for clear answers.</small></span></div>
         </aside>
-        <main id="main" class="workspace-main">
+        <main id="main" class="workspace-main"><ts-auth-feedback />
           @if (app.error()) { <p class="notice error" role="alert">{{ app.error() }}</p> }
           @if (app.message()) { <p class="notice success" role="status">{{ app.message() }}</p> }
           <router-outlet />
@@ -99,6 +102,7 @@ import { HelpComponent } from './features/help/help.component'
   `
 })
 export class AppComponent {
+  readonly authentication=inject(AuthNavigationService)
   readonly app = inject(ApplicationService)
   readonly theme = inject(ThemeService)
   constructor() { void this.app.start() }

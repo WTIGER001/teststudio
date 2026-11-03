@@ -12,10 +12,10 @@ The full plan remains required scope. Check an item only after its implementatio
 - [x] Membership and grant revocation reach all instances within the documented limit. Disabled users and revoked sessions fail their next request.
 - [x] Local accounts, OIDC accounts, and mixed sign-in work through the same directory, permission checks, and managed sessions.
 - [x] Local credential changes, resets, disabling, and recovery preserve audit records and the last usable administrator.
-- [ ] OIDC sign-in supports configured providers with code flow, PKCE, state, nonce, issuer and audience validation, key rotation, and logout.
+- [x] OIDC sign-in supports configured providers with code flow, PKCE, state, nonce, issuer and audience validation, key rotation, and logout.
 - [x] Duplicate email addresses from different issuer-subject pairs do not merge accounts or transfer access.
-- [ ] Unmapped, missing, incomplete, or outdated external groups do not silently preserve elevated project access.
-- [ ] Browser sessions keep provider tokens server-side. Expiry, revocation, callback rejection, and request-forgery protection pass focused checks.
+- [x] Unmapped, missing, incomplete, or outdated external groups do not silently preserve elevated project access.
+- [x] Browser sessions keep provider tokens server-side. Expiry, revocation, callback rejection, and request-forgery protection pass focused checks.
 - [x] SQLite restarts preserve users, memberships, assignments, custom grants, disabled roles, and sessions without a PostgreSQL service.
 - [ ] Two newly configured OIDC providers work with the same internal directory and project-scoped permissions across deployment profiles.
 - [ ] Catalog creation, editing, validation, publication, import, export, bulk actions, archive, and restoration work through both API and UI.
@@ -66,6 +66,47 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
+
+### OIDC acceptance, provider sign-out, and complete claim handling
+
+Added optional exact end-session endpoints and post-logout callback display to managed provider settings.
+Local session revocation and cookie clearing precede provider integration.
+The interface offers an explicit provider action after TestStudio sign-out.
+Client-identifier logout sends no provider token or client secret through the browser.
+A separate HttpOnly browser cookie, opaque offer, state, expiry, provider revision, and one-time records bind the protocol.
+Discovery must match the configured endpoint. Callback completion never clears a newer session.
+Provider failure and cancellation retain local revocation.
+
+Sign-in preserves approved local destinations, including query and fragment.
+Fixed feedback covers cancellation, expiry, provider unavailability, and rejected identity proof.
+Normal sign-in replaces the prior browser session. Authentication and API redirects use no-store responses.
+Provider HTTP clients retain shorter timeouts and cap background key requests at ten seconds.
+Logout discovery has a separate five-second deadline.
+Discovered protocol endpoints require HTTPS outside loopback, and redirect policies reject HTTPS downgrades.
+
+The shared verifier uses the SDK’s original signature verification and basic identity validation.
+Additional checks cover authorized party for all audience forms, required issue time, bounded subject, token use, and access-token hash.
+A signature key-set adapter isolates unsupported distributed metadata from SDK identity parsing while retaining original claims for application validation.
+No signed input is rewritten before verification. Invalid identity bindings cannot change memberships.
+Valid identities with incomplete group data withdraw only that provider’s old memberships.
+Missing, null, malformed, overflowing, paged, distributed, complete-empty, and unmapped cases have focused coverage.
+Native permission checks prove immediate loss after external membership expiry.
+Unresolved email verification cannot activate pending project access.
+
+The permanent STUDIO-AUTH-001 self-test runs through normal TestStudio publication and execution.
+It verifies provider settings, deep links, key rotation, browser session replacement, token-free browser storage, optional logout, denial, outage, callback feedback, and stale-group withdrawal.
+Run `20261103T104942.021902000-31381e3e1f8f5a36ec4c0254` passes with complete evidence and cleaned execution resources.
+Desktop light and mobile dark screenshots were inspected.
+Provider administration regression run `20261103T103654.904212000-3cc587e46077e07ac9e7e690` passes.
+Account-linking regression run `20261103T103835.895016000-b62c15eecef928f3a4c21de4` passes.
+
+Focused OIDC, session, API, and generated-client checks pass on SQLite and local PostgreSQL, including race detection.
+Idle, absolute, and authentication expiry reject the next normal and evidence request.
+The UI build and pure provider and authentication-navigation checks pass.
+OpenAPI 0.12 and the generated client contain 74 JSON operations.
+Three focused authentication acceptance criteria are now verified.
+
+Deployment-wide identity parity, remaining authorization and privilege-change behavior, sources, execution parity, cloud profiles, and the remaining full plan stay required.
 
 ### Pending project access without invitations
 

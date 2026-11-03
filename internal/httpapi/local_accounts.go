@@ -60,6 +60,7 @@ func (s *Server) localAccountRoutes(m *http.ServeMux) {
 			return
 		}
 		http.SetCookie(w, cookie)
+		clearLoginTransaction(w, s.Sessions.Secure)
 		JSON(w, 200, map[string]any{"signedIn": true, "mustChangePassword": session.MustChangePassword})
 	})
 	m.HandleFunc("POST /auth/password/change", s.authenticated(func(w http.ResponseWriter, r *http.Request) {

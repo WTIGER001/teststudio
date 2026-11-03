@@ -84,7 +84,7 @@ func TestProviderAdministrationRejectsInvalidMappingsAndUnapprovedCredentialsWit
 		t.Fatal("default lifetime was omitted from the typed response", withDefault)
 	}
 	accessCall(t, c, "POST", "/api/v1/groups", map[string]string{"id": "local", "name": "Local group"}, "", 200)
-	for _, mode := range []string{"state", "credential", "claim", "scope", "foreign-group", "source", "blank-reason"} {
+	for _, mode := range []string{"state", "credential", "claim", "scope", "foreign-group", "source", "blank-reason", "logout-credentials", "logout-scheme", "logout-fragment"} {
 		t.Run(mode, func(t *testing.T) {
 			value := providerInput("example", true)
 			switch mode {
@@ -101,6 +101,12 @@ func TestProviderAdministrationRejectsInvalidMappingsAndUnapprovedCredentialsWit
 				value.GroupMappings = map[string]string{"external": "local"}
 			case "source":
 				value.SecretRef = "inline:secret-value"
+			case "logout-credentials":
+				value.LogoutEndpoint = "https://identity.example.test/logout?id_token_hint=private"
+			case "logout-scheme":
+				value.LogoutEndpoint = "http://identity.example.test/logout"
+			case "logout-fragment":
+				value.LogoutEndpoint = "https://identity.example.test/logout#fragment"
 			case "blank-reason":
 				value.Reason = " "
 			}

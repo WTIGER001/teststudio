@@ -3,7 +3,6 @@ package oidc
 import (
 	"context"
 	"crypto/subtle"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"net/url"
@@ -16,6 +15,17 @@ import (
 	"github.com/wtiger001/teststudio/internal/storage"
 	"golang.org/x/oauth2"
 )
+
+var ErrSignInCancelled = errors.New("sign-in was cancelled or denied")
+var ErrSignInExpired = errors.New("sign-in transaction is missing or expired")
+
+type SignInError struct {
+	Cause    error
+	ReturnTo string
+}
+
+func (e *SignInError) Error() string { return e.Cause.Error() }
+func (e *SignInError) Unwrap() error { return e.Cause }
 
 type transaction struct {
 	Account          *accountlinks.ProofRequest `json:"account,omitempty"`
@@ -30,7 +40,7 @@ type transaction struct {
 
 func returnPath(value string) string {
 	u, err := url.Parse(value)
-	if err != nil || u.IsAbs() || u.Host != "" || !strings.HasPrefix(value, "/") || strings.HasPrefix(value, "//") || strings.Contains(value, "\\") {
+	if err != nil || u.IsAbs() || u.Host != "" || !strings.HasPrefix(value, "/") || strings.HasPrefix(value, "//") || strings.Contains(value, "\\") || strings.Contains(u.Path, "\\") || strings.HasPrefix(u.Path, "//") || len(value) > 4096 || u.Path == "/auth" || strings.HasPrefix(u.Path, "/auth/") || u.Path == "/api" || strings.HasPrefix(u.Path, "/api/") {
 		return "/"
 	}
 	return value
@@ -56,21 +66,29 @@ func (s *Service) Login(w http.ResponseWriter, r *http.Request, id string) error
 	return nil
 }
 
-func (s *Service) Callback(w http.ResponseWriter, r *http.Request, id string) error {
+func (s *Service) Callback(w http.ResponseWriter, r *http.Request, id string) (outcome error) {
 	cookie, err := r.Cookie("teststudio_login")
 	if err != nil {
-		return errors.New("sign-in transaction is missing")
+		return ErrSignInExpired
 	}
 	record, err := s.Store.Get(r.Context(), "login-transactions", sessions.Digest(cookie.Value))
 	if err != nil {
-		return errors.New("sign-in transaction is unavailable")
+		return ErrSignInExpired
 	}
 	v, err := storage.Decode[transaction](record)
 	if err != nil {
 		return err
 	}
-	if v.Provider != id || !time.Now().Before(v.ExpiresAt) || subtle.ConstantTimeCompare([]byte(v.State), []byte(r.URL.Query().Get("state"))) != 1 {
-		return errors.New("sign-in state is invalid or expired")
+	if v.Provider != id || subtle.ConstantTimeCompare([]byte(v.State), []byte(r.URL.Query().Get("state"))) != 1 {
+		return errors.New("sign-in state is invalid")
+	}
+	defer func() {
+		if outcome != nil && v.Account == nil {
+			outcome = &SignInError{Cause: outcome, ReturnTo: returnPath(v.ReturnTo)}
+		}
+	}()
+	if !time.Now().Before(v.ExpiresAt) {
+		return ErrSignInExpired
 	}
 	if v.Account != nil && (v.Account.ProviderID != id || v.Account.TransactionID != record.ID) {
 		return errors.New("identity proof transaction is invalid")
@@ -83,7 +101,7 @@ func (s *Service) Callback(w http.ResponseWriter, r *http.Request, id string) er
 		return s.accountCallback(w, r, v)
 	}
 	if r.URL.Query().Get("error") != "" {
-		return errors.New("sign-in was cancelled or denied")
+		return ErrSignInCancelled
 	}
 	if err := s.currentProvider(r.Context(), id, v.ProviderRevision); err != nil {
 		return err
@@ -100,16 +118,13 @@ func (s *Service) Callback(w http.ResponseWriter, r *http.Request, id string) er
 	}
 	ctx, cancel := context.WithTimeout(r.Context(), 20*time.Second)
 	defer cancel()
-	if s.Client != nil {
-		ctx = coreoidc.ClientContext(ctx, s.Client)
-	}
+	ctx = coreoidc.ClientContext(ctx, s.httpClient())
 	identity, err := s.exchangeIdentity(ctx, p, remote, cfg, v, r.URL.Query().Get("code"))
 	if err != nil {
 		return err
 	}
 	verified, claims, text := identity.Token, identity.Claims, identity.text
-	var emailVerified bool
-	_ = json.Unmarshal(claims["email_verified"], &emailVerified)
+	emailVerified := providerEmailVerified(claims)
 	if err := s.currentProvider(ctx, id, v.ProviderRevision); err != nil {
 		return err
 	}
@@ -125,25 +140,9 @@ func (s *Service) Callback(w http.ResponseWriter, r *http.Request, id string) er
 			}
 			return errors.New(message)
 		}
-		var external []string
-		if _, ok := claims["hasgroups"]; ok {
-			return rejectGroups("provider requires an explicit group resolver")
-		}
-		var distributed map[string]any
-		if data := claims["_claim_names"]; len(data) > 0 {
-			_ = json.Unmarshal(data, &distributed)
-			if distributed[p.GroupClaim] != nil {
-				return rejectGroups("provider returned incomplete group membership")
-			}
-		}
-		if err := json.Unmarshal(claims[p.GroupClaim], &external); err != nil {
-			return rejectGroups("complete group membership is required")
-		}
-		groups := []string{}
-		for _, name := range external {
-			if group := p.GroupMappings[name]; group != "" {
-				groups = append(groups, group)
-			}
+		groups, err := mappedGroups(p, claims)
+		if err != nil {
+			return rejectGroups(err.Error())
 		}
 		ttl := p.MembershipTTLSeconds
 		if ttl == 0 {
@@ -161,7 +160,11 @@ func (s *Service) Callback(w http.ResponseWriter, r *http.Request, id string) er
 			return err
 		}
 	}
-	if _, err := s.Sessions.CreateOIDC(ctx, w, user.ID, p.ID, v.ProviderRevision, authUntil); err != nil {
+	previous := ""
+	if cookie, err := r.Cookie("teststudio_session"); err == nil && len(cookie.Value) == 43 {
+		previous = sessions.Digest(cookie.Value)
+	}
+	if _, err := s.Sessions.CreateOIDCReplacing(ctx, w, user.ID, p.ID, v.ProviderRevision, authUntil, previous); err != nil {
 		return err
 	}
 	http.Redirect(w, r, v.ReturnTo, http.StatusFound)

@@ -33,6 +33,7 @@ type Provider struct {
 	AutoProvision        bool              `json:"autoProvision"`
 	GroupClaim           string            `json:"groupClaim,omitempty"`
 	GroupMappings        map[string]string `json:"groupMappings"`
+	LogoutEndpoint       string            `json:"logoutEndpoint,omitempty"`
 	MembershipTTLSeconds int               `json:"membershipTtlSeconds"`
 }
 
@@ -64,6 +65,11 @@ func ValidateProvider(p Provider) error {
 	local := u.Hostname() == "localhost" || (ip != nil && ip.IsLoopback())
 	if u.Scheme != "https" && !(u.Scheme == "http" && local) {
 		return errors.New("OIDC issuer requires HTTPS outside loopback")
+	}
+	if p.LogoutEndpoint != "" {
+		if err := validateLogoutEndpoint(p.LogoutEndpoint); err != nil {
+			return err
+		}
 	}
 	if len(p.GroupMappings) > 40 || (len(p.GroupMappings) > 0 && p.GroupClaim == "") {
 		return errors.New("group mappings require a claim name and at most 40 destination groups")
@@ -110,13 +116,19 @@ func (s *Service) config(ctx context.Context, id string) (Provider, *coreoidc.Pr
 	p.revision = r.Revision
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
-	client := s.Client
-	if client == nil {
-		client = &http.Client{Timeout: 10 * time.Second}
-	}
+	client := s.httpClient()
 	remote, err := coreoidc.NewProvider(coreoidc.ClientContext(ctx, client), p.Issuer)
 	if err != nil {
 		return p, nil, oauth2.Config{}, err
+	}
+	var metadata coreoidc.ProviderConfig
+	if err := remote.Claims(&metadata); err != nil {
+		return p, nil, oauth2.Config{}, err
+	}
+	for _, endpoint := range []string{metadata.AuthURL, metadata.TokenURL, metadata.JWKSURL} {
+		if err := protocolEndpoint(endpoint); err != nil {
+			return p, nil, oauth2.Config{}, err
+		}
 	}
 	secret := ""
 	if p.SecretRef != "" {
