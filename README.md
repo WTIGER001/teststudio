@@ -157,3 +157,5 @@ Enable managed password sign-in with `--local-accounts`, alongside configured OI
 Use User details for authorized credential provisioning and reset. Use Your account for personal password changes.
 Run `bash scripts/test-self.sh --test=STUDIO-LOCAL-001` for the managed local account browser workflow.
 Project owners add members directly. Identity linking, pending project access, and custom role editors remain pending.
+Custom role APIs support exact scoped rules, inheritance, disabled state, and managed assignment.
+The permission catalog exposes registered descriptions and current grantability. See [Identity administration](docs/access.md).

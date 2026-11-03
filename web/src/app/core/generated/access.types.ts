@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.3.0"
+export const accessContractVersion = "0.4.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -23,12 +23,19 @@ export type PasswordChange = { "currentPassword": string; "newPassword": string 
 export type PasswordChanged = { "changed": boolean }
 export type PasswordLogin = { "password": string; "userId": string }
 export type PasswordSignedIn = { "mustChangePassword": boolean; "signedIn": boolean }
+export type PermissionCatalog = { "items": (PermissionChoice)[] }
+export type PermissionChoice = { "action": string; "area": string; "canGrant": boolean; "description": string; "id": string; "installationOnly": boolean }
 export type Problem = { "message": string; "status"?: number }
 export type Profile = { "identities": ExternalIdentityPage; "localAccount": boolean; "user": User }
 export type Reason = { "reason": string }
 export type Revoked = { "revoked": boolean }
 export type Role = { "builtIn": boolean; "delegatable": boolean; "disabled": boolean; "id": string; "name": string; "permissions": (string)[]; "scope": "project" | "installation" }
 export type RolePage = { "items": (Role)[] }
+export type RolePolicy = { "description": string; "disabled": boolean; "id": string; "inherits": (string)[]; "name": string; "projectId": string; "rules": (RoleRule)[] }
+export type RolePolicyMutation = { "description"?: string; "disabled"?: boolean; "id": string; "inherits"?: (string)[]; "name": string; "projectId": string; "reason": string; "rules"?: (RoleRule)[] }
+export type RolePolicyPage = { "cursor"?: string; "items": (RolePolicyRecord)[]; "partial": boolean }
+export type RolePolicyRecord = { "data": RolePolicy; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type RoleRule = { "effect": "allow" | "deny"; "expiresAt"?: string | null; "object"?: string; "permission": string }
 export type Saved = { "saved": boolean }
 export type Session = { "authenticationUntil": string; "createdAt": string; "current": boolean; "expiresAt": string; "id": string; "lastSeen": string; "provider": string }
 export type SessionPage = { "cursor"?: string; "items": (SessionRecord)[]; "partial": boolean }
@@ -51,6 +58,7 @@ export interface AccessRequests {
   restoreGroup: { "group": string; revision: number; body: Reason }
   currentProfile: { query?: { "limit"?: number; "cursor"?: string } }
   readOwnLocalCredential: {  }
+  permissionCatalog: { query?: { "project"?: string; "object"?: string } }
   listProjectAssignments: { "project": string; query?: { "limit"?: number; "cursor"?: string } }
   createProjectAssignment: { "project": string; body: AssignmentDefinition }
   revokeProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
@@ -60,6 +68,10 @@ export interface AccessRequests {
   revokeInstallationAssignment: { "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
   readInstallationAssignment: { "kind": "user" | "group"; "principal": string; "role": string }
   listRoles: { query?: { "project"?: string } }
+  createRolePolicy: { body: RolePolicyMutation }
+  listRolePolicies: { query?: { "project"?: string; "limit"?: number; "cursor"?: string } }
+  readRolePolicy: { "role": string }
+  editRolePolicy: { "role": string; revision: number; body: RolePolicyMutation }
   listUsers: { query?: { "limit"?: number; "cursor"?: string } }
   createUser: { body: UserDefinition }
   readUser: { "user": string }
@@ -91,6 +103,7 @@ export interface AccessResponses {
   restoreGroup: GroupRecord
   currentProfile: Profile
   readOwnLocalCredential: LocalCredentialRecord
+  permissionCatalog: PermissionCatalog
   listProjectAssignments: AssignmentPage
   createProjectAssignment: AssignmentRecord
   revokeProjectAssignment: Revoked
@@ -100,6 +113,10 @@ export interface AccessResponses {
   revokeInstallationAssignment: Revoked
   readInstallationAssignment: AssignmentRecord
   listRoles: RolePage
+  createRolePolicy: RolePolicyRecord
+  listRolePolicies: RolePolicyPage
+  readRolePolicy: RolePolicyRecord
+  editRolePolicy: RolePolicyRecord
   listUsers: UserPage
   createUser: UserRecord
   readUser: UserRecord
@@ -131,6 +148,7 @@ export const accessOperations = {
   restoreGroup: { method: "POST", path: "/api/v1/groups/{group}/restore" },
   currentProfile: { method: "GET", path: "/api/v1/me" },
   readOwnLocalCredential: { method: "GET", path: "/api/v1/me/local-credential" },
+  permissionCatalog: { method: "GET", path: "/api/v1/permissions" },
   listProjectAssignments: { method: "GET", path: "/api/v1/projects/{project}/role-assignments" },
   createProjectAssignment: { method: "POST", path: "/api/v1/projects/{project}/role-assignments" },
   revokeProjectAssignment: { method: "DELETE", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
@@ -140,6 +158,10 @@ export const accessOperations = {
   revokeInstallationAssignment: { method: "DELETE", path: "/api/v1/role-assignments/{kind}/{principal}/{role}" },
   readInstallationAssignment: { method: "GET", path: "/api/v1/role-assignments/{kind}/{principal}/{role}" },
   listRoles: { method: "GET", path: "/api/v1/roles" },
+  createRolePolicy: { method: "POST", path: "/api/v1/roles" },
+  listRolePolicies: { method: "GET", path: "/api/v1/roles/custom" },
+  readRolePolicy: { method: "GET", path: "/api/v1/roles/{role}" },
+  editRolePolicy: { method: "PUT", path: "/api/v1/roles/{role}" },
   listUsers: { method: "GET", path: "/api/v1/users" },
   createUser: { method: "POST", path: "/api/v1/users" },
   readUser: { method: "GET", path: "/api/v1/users/{user}" },

@@ -66,6 +66,30 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Record feature commits and targeted validation here.
 
+### Managed custom role APIs
+
+Added custom role creation, detail, bounded listing, and revision-based updates through the identity API.
+Policies retain permanent global identifiers and owning scopes, names, descriptions, explicit rule effects, exact object rules, expiry, inheritance, and disabled state.
+The service validates registered actions and stored resource ownership. Project policies cannot contain installation actions or inherit installation roles.
+Custom delegation requires current rule actions and explicit delegation authority through inherited policies.
+Edits also require authority over affected parent roles. A child update cannot bypass an ancestor's delegation deny.
+Existing assignment APIs now support managed custom roles with exact route bindings and existing group ownership guards.
+Disabling withdraws native rules and outgoing inheritance while retaining the logical definition.
+Enabling revalidates and restores the retained policy. Unchanged rules preserve their native grant identifiers.
+Installation changes preserve the last usable administrator against the proposed native state.
+Policy metadata, ownership index, native permission changes, audit, and directory revision share one transaction.
+
+Added registered action descriptions and exact-context grantability through the permission catalog API.
+The OpenAPI 0.4 contract and generated identity client now contain 42 operations.
+Focused race checks pass on SQLite and disposable local PostgreSQL for role CRUD, exact object boundaries, inheritance, deny precedence, expiry, and disabled access.
+They also verify stale edits, immutable ownership, rejected server fields, ancestor restrictions, bounded filtered pages, cursor binding, and last-administrator rollback.
+The built-service check passes across actual SQLite restarts with a new managed user and inherited group assignment.
+It verifies retained definitions, exact-object access, disabled inherited access, and explicit restoration.
+Evidence is retained in `output/access/access-verification.KpIKdZ/summary.json`.
+Generated-client checks and the production Angular build pass. Owned controllers and disposable PostgreSQL containers exit after verification.
+
+Custom role editing and assignment controls, policy previews, effective-access explanations, direct principal grants, built-in override APIs, and the remaining full plan stay pending.
+
 ### Atomic custom policy storage
 
 Added a separate policy transaction without widening the existing PostgreSQL assignment-only transaction contract.

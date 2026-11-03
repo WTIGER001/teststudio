@@ -5,9 +5,10 @@ The permission library evaluates access. The directory does not infer project au
 
 Users and Groups screens use the administrative APIs for profiles, account state, group metadata, local membership, and session revocation.
 Managed password screens use the same directory, sessions, and permission checks.
-Identity linking, custom role management, and pending project access remain pending.
+Managed custom role APIs support scoped rules, inheritance, disabled state, and assignment.
+Custom role editors, identity linking, and pending project access remain pending.
 The full acceptance ledger remains in [Implementation verification](implementation.md).
-The [OpenAPI contract](../contracts/openapi.yaml) describes the implemented identity and predefined assignment routes. Other route families remain pending.
+The [OpenAPI contract](../contracts/openapi.yaml) describes identity, role policy, permission catalog, and assignment routes. Other route families remain pending.
 
 ## Typed client contract
 
@@ -19,7 +20,7 @@ go run ./cmd/teststudio-client --check
 ```
 
 Run these commands from the repository root.
-The generated module contains all 37 implemented identity and access operations, including direct membership reads and scoped predefined assignments.
+The generated module contains all 42 implemented identity and access operations, including managed custom roles and permission descriptions.
 The shared client adapter supplies same-origin sessions, request-forgery protection, and revision headers.
 The client escapes path identifiers and preserves explicit query values.
 Generator checks reject stale output. Nullable expiry and required fields retain their contract types.
@@ -164,9 +165,13 @@ Keep operator access to the database and host under installation control.
 | GET | `/api/v1/groups/{group}/members/{user}` | Read one membership and its current revision. Optional `source` defaults to `local`. |
 | PUT, DELETE | `/api/v1/groups/{group}/members/{user}` | Save or remove local membership with a revision. |
 | GET | `/api/v1/roles?project={project}` | List readable predefined project roles and delegation capabilities. Empty scope selects installation roles. |
-| GET, POST | `/api/v1/projects/{project}/role-assignments` | Scan or create predefined project assignments. |
+| POST | `/api/v1/roles` | Create a managed custom role with scoped rules, inheritance, and a reason. |
+| GET | `/api/v1/roles/custom?project={project}` | Scan readable custom roles in one exact ownership scope. |
+| GET, PUT | `/api/v1/roles/{role}` | Read or update a custom role with its current revision. |
+| GET | `/api/v1/permissions?project={project}&object={object}` | Read action descriptions and current grantability for an exact context. |
+| GET, POST | `/api/v1/projects/{project}/role-assignments` | Scan or create predefined and managed custom project assignments. |
 | GET, DELETE | `/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}` | Read or revoke one exact project assignment. |
-| GET, POST | `/api/v1/role-assignments` | Scan or create predefined installation assignments. |
+| GET, POST | `/api/v1/role-assignments` | Scan or create predefined and managed custom installation assignments. |
 | GET, DELETE | `/api/v1/role-assignments/{kind}/{principal}/{role}` | Read or revoke one exact installation assignment. |
 
 
@@ -251,7 +256,69 @@ All access decisions continue through the permission library.
 
 Focused SQLite and local PostgreSQL checks cover pending evaluation, complete rollback, exact object boundaries, direct reports, and grant pagination.
 They also cover disabled overrides, expired denies, independent connections, retained grant identifiers, and alternate inheritance paths.
-These checks establish the storage foundation. Custom policy APIs, authorized delegation, editor workflows, and effective-access explanations remain pending.
+Managed role APIs use this storage foundation.
+Direct principal grant administration, editor workflows, and effective-access explanations remain pending.
+
+## Managed custom role policies
+
+Create a role with `POST /api/v1/roles`. Read or update it through `/api/v1/roles/{role}`.
+Updates require a positive `If-Match` revision. Every mutation requires a nonblank reason.
+The identifier and owning project remain permanent. An empty `projectId` selects installation ownership.
+Identifiers are globally unique. The `builtin.` prefix and the `custom` route identifier are reserved.
+Names permit 200 bytes. Descriptions permit 4096 bytes.
+
+Each rule contains a full registered `permission`, an `allow` or `deny` effect, and optional `object` and `expiresAt` values.
+Project rules use the owning project as an exact native team scope. Project policies reject installation actions.
+Installation rules require installation authority. They use the native installation-wide scope.
+Object rules use exact relative identifiers. Supported forms include `suite/health`, `test/health/check`, and `run/{id}`.
+Environment, application, group, user, and role identifiers are also supported where their stored ownership matches the rule scope.
+The service loads each resource before it accepts a new object rule.
+User directory objects require installation scope. Wildcards and caller-supplied native binding fields are rejected.
+The service prefixes project objects with their permanent project identifier.
+Object rules do not imply access to descendant resources.
+
+Expiry normalizes to UTC microseconds on both databases. Expired rules remain inspectable and grant no access.
+Unchanged rules retain their native grant identifiers during metadata edits.
+One role permits 100 rules and 16 directly inherited roles. One ownership scope permits 256 managed custom roles.
+Inheritance uses existing managed roles in the same ownership scope. Cycles and paths beyond 16 inheritance edges are rejected.
+The logical graph includes disabled definitions, so disabling cannot conceal a cycle for later activation.
+Changes require management and delegation authority for affected parent roles as well as the edited role.
+
+Custom rule changes require delegation authority and the actual rule action in the rule's exact context.
+Custom role assignment checks those conditions through inherited rules and each inherited role.
+Project administrators receive no implicit custom-policy management permission.
+Delegating custom-policy administration requires an explicit `teststudio.roles.manage` grant in the appropriate scope.
+Existing user, group ownership, project, and assignment revision guards still apply.
+
+Disabled policies retain their rules and inheritance in metadata.
+Their native grants and outgoing inheritance are withdrawn atomically, including access through child roles.
+Enabling revalidates the stored policy and restores its grants and inheritance.
+Installation policy changes evaluate the proposed native state before commit and preserve the last usable administrator.
+Policy, ownership index, audit, and directory revision changes commit together.
+Rejected changes leave all those records unchanged.
+
+`GET /api/v1/roles/custom` scans bounded pages in the selected scope.
+Object checks filter unreadable records. An empty page can retain a continuation cursor.
+Cursors bind to the actor and owning scope. Installation pages contain no project-owned policies.
+`GET /api/v1/roles` remains the predefined role-choice endpoint. Custom choices use the separate paginated catalog.
+
+`GET /api/v1/permissions` provides registered action descriptions and server-computed `canGrant` values.
+Supply an exact project and optional object to inspect that context.
+The service checks stored object ownership and current delegation and action permissions.
+Custom role editing and assignment controls remain pending in the interface.
+Direct principal grants, built-in role overrides, effective-access explanations, and policy previews also remain pending in the API.
+
+Run focused checks on SQLite and disposable local PostgreSQL:
+
+```sh
+go test -race ./internal/access ./internal/httpapi -run 'CustomRole|RolePolicyGraph' -count=1
+bash scripts/test-postgres.sh ./internal/access ./internal/httpapi -run 'CustomRole|RolePolicyGraph'
+bash scripts/test-access.sh
+```
+
+The built-service check verifies custom policies, inherited group assignment, exact-object access, and disabled state across actual SQLite restarts.
+It uses a new managed local user and random passwords held in memory.
+All owned verification controllers exit after the check.
 
 ## Predefined role assignments
 
@@ -261,7 +328,8 @@ The API creates no credentials, identity links, or invitation messages.
 The project route determines the exact `team` binding. Request bodies cannot supply bindings or widen the scope.
 The installation route supports the installation administrator role.
 Project routes support viewer, operator, editor, publisher, and project administrator roles.
-Custom roles and object bindings remain pending in this API slice.
+The same routes also accept managed custom roles in their exact owning scope.
+Their literal rule scopes require no caller-supplied bindings. Arbitrary object binding templates remain unavailable.
 
 Adding an assignment requires membership management and permission delegation in the selected scope.
 Checks include the target role and principal objects. Explicit denies remain authoritative.

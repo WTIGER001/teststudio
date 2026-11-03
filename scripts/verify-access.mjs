@@ -3,6 +3,7 @@ import { createServer } from 'node:net'
 import { openSync, closeSync, mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import assert from 'node:assert/strict'
+import { randomBytes } from 'node:crypto'
 
 const root = path.resolve(process.argv[2]), binary = path.join(root, 'teststudio')
 const ports = []
@@ -16,10 +17,11 @@ try {
 const origin = `http://127.0.0.1:${ports[0].port}`, artifactOrigin = `http://127.0.0.1:${ports[1].port}`
 const environment = { PATH: process.env.PATH, TMPDIR: process.env.TMPDIR ?? '/tmp' }
 let owned, cookie = '', csrf = ''
+const reviewerInitial = randomBytes(24).toString('base64url'), reviewerPassword = randomBytes(24).toString('base64url')
 
 async function start(recover = false) {
   const fd = openSync(path.join(root, 'server.log'), 'a', 0o600)
-  const child = spawn(binary, ['--local', ...(recover ? ['--recover-local-admin'] : []), '--addr', `127.0.0.1:${ports[0].port}`, '--public-url', origin,
+  const child = spawn(binary, ['--local', '--local-accounts', ...(recover ? ['--recover-local-admin'] : []), '--addr', `127.0.0.1:${ports[0].port}`, '--public-url', origin,
     '--artifact-addr', `127.0.0.1:${ports[1].port}`, '--artifact-origin', artifactOrigin, '--database', path.join(root, 'teststudio.db'), '--artifact-directory', path.join(root, 'artifacts')], { env: environment, stdio: ['ignore', fd, fd] })
   closeSync(fd)
   const exited = new Promise((resolve, reject) => { child.once('exit', (code, signal) => resolve({ code, signal })); child.once('error', reject) })
@@ -77,6 +79,12 @@ try {
   const assignmentBase = '/api/v1/projects/access-example/role-assignments'
   const assignmentPath = assignmentBase + '/user/pending-reviewer/builtin.teststudio.editor'
   const assigned = await request('POST', assignmentBase, { principalKind: 'user', principalId: 'pending-reviewer', roleId: 'builtin.teststudio.editor', reason: 'Verify durable scoped access' })
+  for (const id of ['health', 'another']) await request('PUT', '/api/v1/projects/access-example/suites/' + id, { id, name: id, applications: [], requiresTarget: false }, 0)
+  const role = { id: 'health-reader', name: 'Health reader', description: 'New exact-object verification', projectId: 'access-example', disabled: false, rules: [{ permission: 'teststudio.catalog.read', effect: 'allow', object: 'suite/health' }], inherits: [], reason: 'Verify durable object rules' }
+  const reader = await request('POST', '/api/v1/roles', role)
+  const composite = await request('POST', '/api/v1/roles', { ...role, id: 'composite-reader', name: 'Composite reader', rules: [], inherits: [role.id] })
+  await request('POST', assignmentBase, { principalKind: 'group', principalId: 'reviewers', roleId: composite.id, reason: 'Verify inherited group access' })
+  await request('PUT', '/api/v1/users/pending-reviewer/local-credential', { password: reviewerInitial, reason: 'Verify through an actual managed session' }, 0)
   const rootAssignment = '/api/v1/role-assignments/user/local-administrator/builtin.teststudio.installation-admin'
   const rootRole = await request('GET', rootAssignment)
   await request('DELETE', rootAssignment, { reason: 'Reject removal of the only usable role' }, rootRole.revision, 422)
@@ -85,6 +93,13 @@ try {
   const sessions = await request('GET', '/api/v1/users/local-administrator/sessions')
   assert.equal(sessions.items.length, 1)
   assert.equal(JSON.stringify(sessions).includes(csrf), false)
+  const rootCookie = cookie, rootCSRF = csrf
+  cookie = ''; csrf = ''
+  await request('POST', '/auth/password', { userId: 'pending-reviewer', password: reviewerInitial })
+  csrf = (await request('GET', '/auth/session')).session.csrfToken
+  await request('POST', '/auth/password/change', { currentPassword: reviewerInitial, newPassword: reviewerPassword })
+  const reviewerCookie = cookie
+  cookie = rootCookie; csrf = rootCSRF
   await stop()
 
   await start()
@@ -96,13 +111,28 @@ try {
   const retainedAssignment = await request('GET', assignmentPath)
   assert.equal(retainedAssignment.id, assigned.id)
   assert.equal(retainedAssignment.revision, assigned.revision)
+  assert.equal((await request('GET', '/api/v1/roles/' + role.id)).revision, reader.revision)
+  assert.deepEqual((await request('GET', '/api/v1/roles/' + composite.id)).data.inherits, [role.id])
   await request('DELETE', assignmentPath, { reason: 'Revoke before the next restart' }, assigned.revision)
+  const healthDrafts = '/api/v1/projects/access-example/suites/health/catalog-drafts'
+  await request('GET', healthDrafts, undefined, undefined, 200, reviewerCookie)
+  await request('GET', '/api/v1/projects/access-example/suites/another/catalog-drafts', undefined, undefined, 403, reviewerCookie)
+  await request('GET', '/api/v1/roles/' + composite.id, undefined, undefined, 403, reviewerCookie)
+  const disabledRole = await request('PUT', '/api/v1/roles/' + composite.id, { ...composite.data, disabled: true, reason: 'Disable inherited access before restart' }, composite.revision)
+  await request('GET', healthDrafts, undefined, undefined, 403, reviewerCookie)
   await stop()
 
   await start(true)
   const invalidated = await request('GET', '/auth/session', undefined, undefined, 200, oldCookie)
   assert.equal(invalidated.user, null)
   assert.equal((await signIn()).user.sessionEpoch, 2)
+  const retainedRole = await request('GET', '/api/v1/roles/' + composite.id)
+  assert.equal(retainedRole.revision, disabledRole.revision)
+  assert.equal(retainedRole.data.disabled, true)
+  assert.deepEqual(retainedRole.data.inherits, [role.id])
+  await request('GET', healthDrafts, undefined, undefined, 403, reviewerCookie)
+  await request('PUT', '/api/v1/roles/' + composite.id, { ...retainedRole.data, disabled: false, reason: 'Restore retained inherited policy' }, retainedRole.revision)
+  await request('GET', healthDrafts, undefined, undefined, 200, reviewerCookie)
   await request('GET', assignmentPath, undefined, undefined, 404)
   const recreated = await request('POST', assignmentBase, { principalKind: 'user', principalId: 'pending-reviewer', roleId: 'builtin.teststudio.editor', reason: 'Recreate with a new revision' })
   assert.equal(recreated.id, assigned.id)
@@ -118,7 +148,7 @@ try {
     const code = await new Promise((resolve, reject) => { child.once('exit', resolve); child.once('error', reject) })
     assert.equal(code, 1, 'Recovery accepted an invalid listen mode')
   }
-  const summary = { assignmentsPreserved: true, assignmentRevocationPreserved: true, recreatedAssignmentRevisionAdvanced: true, usersPreserved: true, membershipsPreserved: true, paginationSurvivedRestart: true, oldSessionSurvivedOrdinaryRestart: true, oldSessionRejectedAfterRecovery: true, lastAdministratorRemovalRejected: true, recoveryRequiresLoopbackLocalMode: true, ownedControllersExited: true }
+  const summary = { customRoleRulesPreserved: true, customRoleInheritancePreserved: true, exactObjectAccessVerified: true, disabledInheritedAccessPreserved: true, enabledInheritedAccessRestored: true, assignmentsPreserved: true, assignmentRevocationPreserved: true, recreatedAssignmentRevisionAdvanced: true, usersPreserved: true, membershipsPreserved: true, paginationSurvivedRestart: true, oldSessionSurvivedOrdinaryRestart: true, oldSessionRejectedAfterRecovery: true, lastAdministratorRemovalRejected: true, recoveryRequiresLoopbackLocalMode: true, ownedControllersExited: true }
   const output = path.resolve('output/access', path.basename(root))
   mkdirSync(output, { recursive: true })
   writeFileSync(path.join(output, 'summary.json'), JSON.stringify(summary, null, 2))

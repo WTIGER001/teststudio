@@ -1,8 +1,8 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio identity and access administration"
-  "version": "0.3.0"
-  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Custom policy administration and other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
+  "version": "0.4.0"
+  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Direct principal grant administration and other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
     "url": "/"
@@ -696,7 +696,7 @@
   "/api/v1/roles":
     "get":
       "operationId": "listRoles"
-      "summary": "List readable predefined roles for the exact scope. Custom role administration remains pending."
+      "summary": "List readable predefined roles for the exact scope. Managed custom roles use the separate bounded custom-role catalog."
       "parameters":
         -
           "$ref": "#/components/parameters/RoleProject"
@@ -717,6 +717,128 @@
           "$ref": "#/components/responses/Problem"
         "422":
           "$ref": "#/components/responses/Problem"
+    "post":
+      "operationId": "createRolePolicy"
+      "summary": "Create an authorized custom role with exact scoped rules and validated inheritance."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/RolePolicyRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/RolePolicyMutation"
+  "/api/v1/roles/custom":
+    "get":
+      "operationId": "listRolePolicies"
+      "summary": "List a bounded page of readable managed custom roles in exactly one ownership scope."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/RoleProject"
+        -
+          "$ref": "#/components/parameters/Limit"
+        -
+          "$ref": "#/components/parameters/Cursor"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/RolePolicyPage"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+  "/api/v1/roles/{role}":
+    "get":
+      "operationId": "readRolePolicy"
+      "summary": "Read the stored custom role using its authoritative owning scope."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/AssignmentRole"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/RolePolicyRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+    "put":
+      "operationId": "editRolePolicy"
+      "summary": "Update custom role metadata, rules, inheritance, or disabled state atomically. Preserve the last usable administrator."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/AssignmentRole"
+        -
+          "$ref": "#/components/parameters/Revision"
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/RolePolicyRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/RolePolicyMutation"
   "/api/v1/role-assignments":
     "get":
       "operationId": "listInstallationAssignments"
@@ -745,7 +867,7 @@
           "$ref": "#/components/responses/Problem"
     "post":
       "operationId": "createInstallationAssignment"
-      "summary": "Assign a predefined role to an existing user or group. The route determines exact bindings. A reason is required."
+      "summary": "Assign a predefined or managed custom role to an existing user or group. The route determines exact bindings and validates delegation. A reason is required."
       "parameters":
         -
           "$ref": "#/components/parameters/Origin"
@@ -875,7 +997,7 @@
           "$ref": "#/components/responses/Problem"
     "post":
       "operationId": "createProjectAssignment"
-      "summary": "Assign a predefined role to an existing user or group. The route determines exact bindings. A reason is required."
+      "summary": "Assign a predefined or managed custom role to an existing user or group. The route determines exact bindings and validates delegation. A reason is required."
       "parameters":
         -
           "$ref": "#/components/parameters/AssignmentProject"
@@ -1223,6 +1345,35 @@
         "403":
           "$ref": "#/components/responses/Problem"
         "503":
+          "$ref": "#/components/responses/Problem"
+
+  "/api/v1/permissions":
+    "get":
+      "operationId": "permissionCatalog"
+      "summary": "Read registered action descriptions and current grantability for an exact project and optional object."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/RoleProject"
+        -
+          "name": "object"
+          "in": "query"
+          "schema":
+            "type": "string"
+          "description": "Optional exact relative object. The server validates stored ownership."
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/PermissionCatalog"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "422":
           "$ref": "#/components/responses/Problem"
 
 "components":
@@ -2024,3 +2175,174 @@
         - "id"
         - "revision"
         - "data"
+
+    "RoleRule":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "permission":
+          "type": "string"
+          "description": "Registered full teststudio permission identifier."
+        "effect":
+          "type": "string"
+          "enum":
+            - "allow"
+            - "deny"
+        "object":
+          "type": "string"
+          "description": "Optional exact relative resource, such as suite/health or test/health/check. The server loads ownership and prefixes the project. Wildcards are rejected."
+        "expiresAt":
+          "type":
+            - "string"
+            - "null"
+          "format": "date-time"
+          "description": "Optional expiry, normalized to UTC microseconds on both databases. Expired rules remain inspectable."
+      "required":
+        - "permission"
+        - "effect"
+    "RolePolicy":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "id":
+          "type": "string"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+          "description": "Permanent globally unique custom role identifier. The builtin. prefix and the custom route identifier are reserved."
+        "name":
+          "type": "string"
+          "maxLength": 200
+        "description":
+          "type": "string"
+          "maxLength": 4096
+        "projectId":
+          "type": "string"
+          "description": "Permanent owning project. Empty selects installation ownership."
+        "disabled":
+          "type": "boolean"
+          "description": "Retain the policy while withdrawing its grants and outgoing inheritance. Enabling revalidates authority."
+        "rules":
+          "type": "array"
+          "maxItems": 100
+          "items":
+            "$ref": "#/components/schemas/RoleRule"
+        "inherits":
+          "type": "array"
+          "maxItems": 16
+          "items":
+            "type": "string"
+          "description": "Unique managed roles in the same ownership scope. Cycles and paths deeper than 16 inheritance edges are rejected."
+      "required":
+        - "id"
+        - "name"
+        - "description"
+        - "projectId"
+        - "disabled"
+        - "rules"
+        - "inherits"
+    "RolePolicyMutation":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "id":
+          "type": "string"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+          "description": "Permanent globally unique custom role identifier. The builtin. prefix and the custom route identifier are reserved."
+        "name":
+          "type": "string"
+          "maxLength": 200
+        "description":
+          "type": "string"
+          "maxLength": 4096
+        "projectId":
+          "type": "string"
+          "description": "Permanent owning project. Empty selects installation ownership."
+        "disabled":
+          "type": "boolean"
+          "description": "Retain the policy while withdrawing its grants and outgoing inheritance. Enabling revalidates authority."
+        "rules":
+          "type": "array"
+          "maxItems": 100
+          "items":
+            "$ref": "#/components/schemas/RoleRule"
+        "inherits":
+          "type": "array"
+          "maxItems": 16
+          "items":
+            "type": "string"
+          "description": "Unique managed roles in the same ownership scope. Cycles and paths deeper than 16 inheritance edges are rejected."
+        "reason":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 1024
+      "required":
+        - "id"
+        - "name"
+        - "projectId"
+        - "reason"
+    "RolePolicyRecord":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+        "revision":
+          "type": "integer"
+          "minimum": 1
+        "projectId":
+          "type": "string"
+        "data":
+          "$ref": "#/components/schemas/RolePolicy"
+        "updatedAt":
+          "type": "string"
+          "format": "date-time"
+      "required":
+        - "id"
+        - "revision"
+        - "data"
+        - "updatedAt"
+    "RolePolicyPage":
+      "type": "object"
+      "properties":
+        "items":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/RolePolicyRecord"
+        "cursor":
+          "type": "string"
+          "description": "Opaque actor- and ownership-bound continuation cursor."
+        "partial":
+          "type": "boolean"
+      "required":
+        - "items"
+        - "partial"
+
+    "PermissionChoice":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+        "area":
+          "type": "string"
+        "action":
+          "type": "string"
+        "description":
+          "type": "string"
+        "installationOnly":
+          "type": "boolean"
+        "canGrant":
+          "type": "boolean"
+      "required":
+        - "id"
+        - "area"
+        - "action"
+        - "description"
+        - "installationOnly"
+        - "canGrant"
+    "PermissionCatalog":
+      "type": "object"
+      "properties":
+        "items":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/PermissionChoice"
+      "required":
+        - "items"

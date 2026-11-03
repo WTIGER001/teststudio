@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"slices"
+	"strings"
 
 	permissions "github.com/wtiger001/go-permissions"
 	"github.com/wtiger001/teststudio/internal/authorization"
@@ -51,8 +52,8 @@ func (s *Service) assignmentAuthority(ctx context.Context, actor, project string
 	if (d.PrincipalKind != permissions.PrincipalUser && d.PrincipalKind != permissions.PrincipalGroup) || !domain.ValidID(d.PrincipalID) {
 		return errors.New("a valid user or group principal is required")
 	}
-	if _, ok := builtinRole(project, d.RoleID); !ok {
-		return errors.New("choose a predefined role for this scope")
+	if _, err := s.roleForScope(ctx, project, d.RoleID); err != nil {
+		return err
 	}
 	permission, membership := "permissions.read", "members.read"
 	if manage {
@@ -65,6 +66,9 @@ func (s *Service) assignmentAuthority(ctx context.Context, actor, project string
 		if err := s.Auth.Check(ctx, actor, project, object, membership); err != nil {
 			return err
 		}
+	}
+	if manage && !strings.HasPrefix(d.RoleID, "builtin.") {
+		return s.customRoleDelegation(ctx, actor, project, d.RoleID)
 	}
 	return nil
 }

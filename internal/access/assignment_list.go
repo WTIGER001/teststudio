@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"strings"
 
 	permissions "github.com/wtiger001/go-permissions"
 	"github.com/wtiger001/teststudio/internal/authorization"
@@ -39,8 +40,16 @@ func (s *Service) ListAssignments(ctx context.Context, actor, project, cursor st
 		if hit.Kind != permissions.PrincipalUser && hit.Kind != permissions.PrincipalGroup {
 			continue
 		}
-		if _, ok := builtinRole(project, hit.RoleID); !ok {
-			continue
+		if strings.HasPrefix(hit.RoleID, "builtin.") {
+			if _, ok := builtinRole(project, hit.RoleID); !ok {
+				continue
+			}
+		} else {
+			if _, err := s.roleForScope(ctx, project, hit.RoleID); errors.Is(err, storage.ErrNotFound) {
+				continue
+			} else if err != nil {
+				return result, err
+			}
 		}
 		d := AssignmentDefinition{PrincipalKind: hit.Kind, PrincipalID: hit.ID, RoleID: hit.RoleID}
 		key := assignmentKey(project, d)
