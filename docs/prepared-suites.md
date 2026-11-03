@@ -4,9 +4,10 @@ TestStudio has a versioned manifest and a local isolated artifact inspector.
 The Sources page, API, and publisher CLI enqueue inspection jobs and publish reviewed catalogs.
 The current worker supports locally available immutable Go and Playwright images.
 Inspection does not start tests. Publication and activation remain explicit actions.
-The CLI can assemble offline Go ZIP bundles before server inspection.
-Direct UI bundle uploads and GitHub repository preparation remain pending.
-See [source bundles](source-bundles.md) for the current CLI workflow.
+The Sources page also uploads offline Go ZIP bundles for a separate preparation worker.
+The CLI can assemble those bundles outside the API.
+GitHub repository preparation and Playwright bundle assembly remain pending.
+See [source bundles](source-bundles.md) for worker setup, staging, and retention.
 
 ## Manifest
 
@@ -122,7 +123,8 @@ Select Prepare image, inspect progress and retained logs, then open Review prepa
 Review catalog changes and validation issues before publication.
 Activation starts unchecked. Publication does not run tests.
 
-Jobs move from `received` to `discovering`, then `ready`, `failed`, or `cancelled`.
+Image jobs move from `received` to `discovering`, then `ready`, `failed`, or `cancelled`.
+Bundle jobs add a `preparing` stage before discovery. Expired unpublished bundles cannot dispatch or publish.
 Publication changes a ready job to `published` and records its release identifier.
 Cancel can stop queued or running work and withdraw an unpublished ready review.
 A published job cannot be cancelled.

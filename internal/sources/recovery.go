@@ -38,7 +38,7 @@ func (s *Service) RecoverPreparations(ctx context.Context, worker string) error 
 			if driver == nil {
 				driver = s.RecoveryInspectors[job.Runner]
 			}
-			if driver == nil || job.Reference == nil {
+			if driver == nil || job.Reference == nil || (job.Bundle != "" && s.Builders[job.Runner] == nil && s.RecoveryBuilders[job.Runner] == nil) {
 				return nil
 			}
 			lease := time.Now().UTC().Add(30 * time.Second)
@@ -69,6 +69,13 @@ func (s *Service) RecoverPreparations(ctx context.Context, worker string) error 
 		}
 		cleanupContext, cancel := context.WithTimeout(ctx, 15*time.Second)
 		cleanupErr := driver.CleanupInspection(cleanupContext, preparation.InspectionRequest{Image: claimed.Image, Suite: claimed.Suite, Reference: *claimed.Reference})
+		if claimed.Bundle != "" {
+			builder := s.Builders[claimed.Runner]
+			if builder == nil {
+				builder = s.RecoveryBuilders[claimed.Runner]
+			}
+			cleanupErr = errors.Join(cleanupErr, builder.CleanupBuild(cleanupContext, *claimed.Reference))
+		}
 		cancel()
 		err = s.Store.Transaction(ctx, func(store *storage.Store, _ *sql.Tx) error {
 			row, err := store.Get(ctx, JobBucket(claimed.Project, claimed.Suite), claimed.ID)
@@ -83,11 +90,14 @@ func (s *Service) RecoverPreparations(ctx context.Context, worker string) error 
 				return storage.ErrConflict
 			}
 			now := time.Now().UTC()
-			job.State, job.Phase, job.Error = "failed", "finished", "Preparation was interrupted. No tests were rerun; prepare the image again explicitly."
-			job.FinishedAt = &now
+			if activeJob(job.State) {
+				job.State, job.Error = "failed", "Preparation was interrupted. No tests were rerun; prepare the source again explicitly."
+				job.FinishedAt = &now
+			}
+			job.Phase = "finished"
 			job.LeaseUntil = nil
 			job.CleanupPending = cleanupErr != nil
-			if job.CancelRequested {
+			if job.CancelRequested && job.State != "expired" {
 				job.State, job.Error = "cancelled", ""
 			}
 			changes := []storage.Change{}

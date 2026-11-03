@@ -3,6 +3,7 @@ package sources
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/authorization"
@@ -14,6 +15,14 @@ import (
 )
 
 func (s *Service) StartPreparation(ctx context.Context) <-chan struct{} {
+	return s.startPreparation(ctx, false)
+}
+
+func (s *Service) StartBuildPreparation(ctx context.Context) <-chan struct{} {
+	return s.startPreparation(ctx, true)
+}
+
+func (s *Service) startPreparation(ctx context.Context, builds bool) <-chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
@@ -24,8 +33,18 @@ func (s *Service) StartPreparation(ctx context.Context) <-chan struct{} {
 			if ctx.Err() != nil {
 				return
 			}
-			_ = s.RecoverPreparations(ctx, worker)
-			_, _ = s.ProcessNext(ctx, worker)
+			if err := s.RecoverPreparations(ctx, worker); err != nil && ctx.Err() == nil {
+				slog.Error("preparation recovery failed")
+			}
+			var err error
+			if builds {
+				_, err = s.ProcessBuildNext(ctx, worker)
+			} else {
+				_, err = s.ProcessNext(ctx, worker)
+			}
+			if err != nil && ctx.Err() == nil {
+				slog.Error("source preparation failed to persist its result")
+			}
 			select {
 			case <-ctx.Done():
 				return
@@ -37,7 +56,18 @@ func (s *Service) StartPreparation(ctx context.Context) <-chan struct{} {
 }
 
 func (s *Service) ProcessNext(ctx context.Context, worker string) (bool, error) {
-	page, err := s.Store.List(ctx, queueBucket(s.Location), "", "", 25)
+	return s.processQueue(ctx, worker, queueBucket(s.Location))
+}
+
+func (s *Service) ProcessBuildNext(ctx context.Context, worker string) (bool, error) {
+	if len(s.Builders) == 0 {
+		return false, nil
+	}
+	return s.processQueue(ctx, worker, buildQueueBucket(s.Location))
+}
+
+func (s *Service) processQueue(ctx context.Context, worker, bucket string) (bool, error) {
+	page, err := s.Store.List(ctx, bucket, "", "", 25)
 	if err != nil {
 		return false, err
 	}
@@ -52,12 +82,10 @@ func (s *Service) ProcessNext(ctx context.Context, worker string) (bool, error) 
 		if !claimed {
 			continue
 		}
-		driver := s.Inspectors[job.Runner]
-		request := preparation.InspectionRequest{Image: job.Image, Suite: job.Suite, Reference: *job.Reference}
 		inspectionContext, cancel := context.WithCancel(ctx)
 		heartbeatDone := make(chan struct{})
 		go func() { defer close(heartbeatDone); s.preparationHeartbeat(inspectionContext, cancel, job, worker) }()
-		result, inspectErr := driver.Inspect(inspectionContext, request)
+		result, inspectErr := s.inspectJob(inspectionContext, job, worker)
 		cancel()
 		<-heartbeatDone
 		finishContext, stop := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
@@ -106,7 +134,7 @@ func (s *Service) claimPreparation(ctx context.Context, index storage.Record, wo
 		now := time.Now().UTC()
 		job.StartedAt = &now
 		changes := []storage.Change{{Record: index, Delete: true}}
-		if driver == nil || job.CancelRequested || denied {
+		if driver == nil || (job.Bundle != "" && s.Builders[job.Runner] == nil) || job.CancelRequested || denied {
 			job.State, job.Phase = "failed", "finished"
 			job.Error = "Preparation runner is no longer enabled."
 			if denied {
@@ -121,6 +149,9 @@ func (s *Service) claimPreparation(ctx context.Context, index storage.Record, wo
 			deadline := now.Add(30 * time.Second)
 			job.Reference, job.Worker, job.LeaseUntil = &ref, worker, &deadline
 			job.State, job.Phase = "discovering", "discovering"
+			if job.Bundle != "" {
+				job.State, job.Phase = "preparing", "preparing"
+			}
 			lease, err := storage.Put(leaseBucket(job.Location), job.ID, job.Project, 0, jobIndex{Job: job.ID, Suite: job.Suite, Location: job.Location})
 			if err != nil {
 				return err
@@ -151,7 +182,7 @@ func (s *Service) preparationHeartbeat(ctx context.Context, cancel context.Cance
 				return
 			}
 			job, err := storage.Decode[Job](row)
-			if err != nil || job.Worker != worker || job.CancelRequested || job.State != "discovering" {
+			if err != nil || job.Worker != worker || job.CancelRequested || !activeJob(job.State) {
 				cancel()
 				return
 			}
@@ -216,6 +247,17 @@ func (s *Service) finishPreparation(ctx context.Context, claimed Job, worker str
 		if err != nil {
 			return err
 		}
+		if job.State == "failed" && job.Bundle != "" {
+			job.CleanupPending = true
+			retry := now.Add(5 * time.Second)
+			job.LeaseUntil = &retry
+			job.Phase = "cleanup-pending"
+			saved, err = storage.Put(row.Bucket, row.ID, row.Project, row.Revision, job)
+			if err != nil {
+				return err
+			}
+			return bound.Store.Commit(ctx, saved)
+		}
 		return bound.Store.Commit(ctx, saved, storage.Change{Record: lease, Delete: true})
 	})
 	if err != nil {
@@ -234,7 +276,7 @@ func (s *Service) failPreparation(ctx context.Context, claimed Job, worker strin
 		if err != nil {
 			return err
 		}
-		if job.Worker != worker || job.State != "discovering" {
+		if job.Worker != worker || !activeJob(job.State) {
 			return storage.ErrConflict
 		}
 		now := time.Now().UTC()
@@ -245,7 +287,7 @@ func (s *Service) failPreparation(ctx context.Context, claimed Job, worker strin
 		if job.CancelRequested {
 			job.State, job.Error = "cancelled", ""
 		}
-		job.CleanupPending = errors.Is(failure, preparation.ErrCleanupIncomplete)
+		job.CleanupPending = errors.Is(failure, preparation.ErrCleanupIncomplete) || job.Bundle != ""
 		changes := []storage.Change{}
 		if job.CleanupPending {
 			lease := now.Add(5 * time.Second)

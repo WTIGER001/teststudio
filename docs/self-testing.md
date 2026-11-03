@@ -13,7 +13,11 @@ Run this command from the repository root:
 bash scripts/test-self.sh
 ```
 
-The script builds the current Go service and Angular UI.
+The script builds changed Go and UI inputs and reuses verified unchanged outputs.
+It records source fingerprints and output hashes under `.data/selftest-build`.
+It reuses the immutable runner image when its complete input fingerprint still matches.
+The pinned base image is pulled only when absent.
+The cache does not skip requested tests. Each invocation still creates a fresh verification installation.
 It packages them with the pinned Playwright runtime and the new browser tests.
 An isolated controller registers the catalog, publishes an immutable local image ID, and starts a normal TestStudio run.
 Each test container starts a new TestStudio instance with its own SQLite database.
@@ -73,6 +77,31 @@ It verifies exact project scope, duplicate creation, stale removal after recreat
 Project-administrator and read-only sessions verify navigation, shared-group controls, scoped delegation, and rejected installation or foreign-project views.
 Self-revocation clears assignment data, project choices, and unavailable navigation without another sign-in.
 Bounded pages, contextual help, light and dark screenshots, and mobile width checks use normal retained evidence.
+
+## Focused bundle workflow
+
+Run only the ZIP staging and cancellation workflow after source upload changes:
+
+```sh
+bash scripts/test-self.sh --test=STUDIO-BUNDLES-001
+```
+
+This workflow enables source-bundles on its own isolated controller.
+It verifies exact source bytes, queued state, duplicate upload replay, cancellation, reload, and mobile layout.
+It does not start a source builder inside the browser worker container.
+The separate local preparation worker has focused source and builder checks.
+A local browser workflow also verifies real assembly, publication, and a normal run with the cached Go runtime.
+
+Check build reuse without starting another test:
+
+```sh
+node scripts/build-selftest.mjs
+```
+
+Unchanged builds print reuse messages and the verified immutable image identifier.
+Changes to browser tests rebuild the image while preserving unchanged Go and UI outputs.
+Changes to Go test files do not rebuild application binaries.
+Do not run multiple self-test scripts against the shared build cache concurrently.
 
 ## Reuse a local installation
 

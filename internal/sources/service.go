@@ -18,6 +18,9 @@ import (
 )
 
 type Service struct {
+	BundleRunners      []string
+	Builders           map[string]preparation.ArtifactBuilder
+	RecoveryBuilders   map[string]preparation.ArtifactBuilder
 	Inspectors         map[string]preparation.ArtifactInspector
 	RecoveryInspectors map[string]preparation.ArtifactInspector
 	Location           string

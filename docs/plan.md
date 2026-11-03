@@ -19,19 +19,30 @@ Item **24** now passes local verification: publish two immutable images and exec
 Durable prebuilt preparation, cancellation, recovery, API, UI, and CLI server publication are implemented.
 Source synchronization preserves managed metadata and archives omitted owned definitions.
 Inspection foundation commit: `d4ec6a0`. Publication integration commit: `50ebc49`.
-The CLI now assembles validated offline Go ZIP bundles through a separate artifact builder interface.
+Go ZIP bundles now upload through the UI and API, or assemble through the CLI.
+A separate teststudio-prepare process shares the metadata database and local execution location.
+The API only enqueues builds. The worker checkpoints ownership and images before isolated discovery.
 Selected nested manifests preserve the complete repository context. Vendored dependencies work without downloads.
+Cancellation, withdrawal, expired staging, and recovery retain diagnostics and clean owned resources.
+Published ZIP snapshots remain retained with their release provenance.
 
-Focused source, API, CLI, ownership, and generated-client checks pass. The Angular build passes.
-The real local workflow reuses the cached Go fixture without rebuilding its dependencies.
-Evidence is `.data/prebuilt-verification.Y3B1AO/result.json` with verified cleanup in `cleanup.json`.
-No cloud tests run. New preparation controls still need targeted browser verification.
+Focused source, API, builder, generated-client, expiry, and recovery checks pass. The Angular build passes.
+The local browser workflow covers ZIP upload, separate worker assembly, discovery, source download, review, publication, and an explicit passing run.
+Evidence is `.data/bundle-ui-verification.Eh6NWc/result.json` with browser and cleanup evidence beside it.
+The browser and both local processes exit. Owned containers, volumes, suite images, and private contexts are absent.
+STUDIO-BUNDLES-001 also passes through normal TestStudio publication, execution, timing, and complete evidence capture.
+Evidence is `output/selftest/20261103T151752.455247000-97c8c9cdf744e8bad8b0705a/summary.json`.
 
-Continue direct UI source archive staging and durable build dispatch through the separate artifact builder interface.
-Then add GitHub preparation, including private repositories, registered suite paths, sync deduplication, and retained source snapshots.
-The current local builder assembles offline Go bundles with a trusted runtime and fixed copy instructions.
-Real bundle evidence is `.data/bundle-verification.GoxFng/result.json` with verified cleanup in `cleanup.json`.
-Playwright bundle assembly and CLI OIDC browser sign-in also remain pending.
+The self-test launcher now reuses unchanged UI builds, binaries, and verified immutable runner images.
+Its warm build check reuses all artifacts in about 0.25 seconds without rerunning tests.
+Use --test=ID to run the relevant workflow. Do not repeat the broad matrix without a specific integration concern.
+No cloud tests run. AWS, Kubernetes, and Azure verification remain separate work.
+
+Continue GitHub preparation, including private repositories, registered suite paths, sync deduplication, and retained source snapshots.
+Use a provider-neutral source port and server-only connection credentials.
+Then complete Playwright bundle assembly, dependency preparation profiles, and CLI OIDC browser sign-in.
+The current local builder supports offline Go bundles with a trusted runtime and fixed copy instructions.
+The acceptance ledger remains **23 verified, 34 open**. Items **22**, **23**, **25**, **26**, and **29** receive partial progress.
 Keep the complete acceptance ledger required and report stable item numbers.
 Implement coherent batches, then run the smallest relevant local checks. Reuse existing evidence.
 

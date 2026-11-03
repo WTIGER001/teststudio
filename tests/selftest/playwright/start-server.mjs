@@ -4,6 +4,7 @@ import { randomBytes } from 'node:crypto'
 import { writeFile, unlink } from 'node:fs/promises'
 import { createOIDCFixture } from './oidc-fixture.mjs'
 
+const bundleWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-BUNDLES-001'
 const linkingWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-LINKS-001'
 const localWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-LOCAL-001'
 const providerWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-PROVIDERS-001' || linkingWorkflow || JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-PENDING-001' || JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-AUTH-001'
@@ -97,7 +98,7 @@ async function stop(code) {
 }
 
 function startChild() {
-  child = spawn('/app/teststudio', [...(development ? ['--local'] : []), ...(passwords ? ['--local-accounts'] : []), ...(localWorkflow ? ['--oidc-config', providerPath] : []), ...(providerWorkflow ? ['--oidc-secret-refs', 'env:TESTSTUDIO_SELFTEST_OIDC_SECRET'] : []), '--database', '/tmp/teststudio-selftest.db', '--artifact-directory', '/tmp/teststudio-artifacts', '--ui', '/app/ui', '--secret-bindings', bindingsPath], {
+  child = spawn('/app/teststudio', [...(development ? ['--local'] : []), ...(bundleWorkflow ? ['--source-bundles'] : []), ...(passwords ? ['--local-accounts'] : []), ...(localWorkflow ? ['--oidc-config', providerPath] : []), ...(providerWorkflow ? ['--oidc-secret-refs', 'env:TESTSTUDIO_SELFTEST_OIDC_SECRET'] : []), '--database', '/tmp/teststudio-selftest.db', '--artifact-directory', '/tmp/teststudio-artifacts', '--ui', '/app/ui', '--secret-bindings', bindingsPath], {
     env: { PATH: process.env.PATH, TMPDIR: '/tmp', ...(providerWorkflow ? { TESTSTUDIO_SELFTEST_OIDC_SECRET: oidcSecret } : {}), ...Object.fromEntries(kinds.map(kind => [`TESTSTUDIO_SELFTEST_${kind.toUpperCase()}`, `http://127.0.0.1:8050/receiver/${token}/${kind}`])) }, stdio: ['ignore', 'inherit', 'inherit']
   })
   child.once('error', () => { void stop(1) })

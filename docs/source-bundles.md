@@ -1,8 +1,10 @@
-# Offline Go source bundles
+# Go source bundles
 
-The publisher CLI assembles validated Go ZIP bundles into local immutable images.
-Server inspection and reviewed publication use the existing prepared source workflow.
-Direct UI ZIP uploads, durable server build dispatch, GitHub sync, and Playwright bundle assembly remain pending.
+The Sources page stores complete Go ZIP bundles and queues durable preparation jobs.
+A separate worker assembles the source and invokes isolated discovery.
+Review and publication use the common immutable release workflow.
+The CLI can also assemble bundles outside the API.
+GitHub sync and Playwright bundle assembly remain pending.
 
 ## Archive context
 
@@ -39,7 +41,44 @@ Its labels identify the source-base contract and runtime profile.
 The assembler rejects runtime images with ONBUILD instructions.
 The script sends only the compiled runner directory as build context.
 
-## Assemble and publish
+## Server worker and interface
+
+Enable source bundle staging on the API:
+
+```sh
+bin/teststudio --local --source-bundles
+```
+
+Build and start the separate preparation worker:
+
+```sh
+go build -o bin/teststudio-prepare ./cmd/teststudio-prepare
+bin/teststudio-prepare --database .data/teststudio.db \
+  --execution-location local --go-runtime sha256:TRUSTED_RUNTIME_IMAGE \
+  --build-directory .data/source-builds
+```
+
+The API does not assemble images or install dependencies.
+The worker shares the metadata database and execution location with the API.
+SQLite supports local processes that share the same database file.
+Each local location uses the same Docker daemon and private build directory across its workers.
+PostgreSQL can also provide the shared metadata database.
+Omit go-runtime to recover recorded resources without dispatching new builds.
+
+Open Sources and choose a suite without a target environment.
+Select a complete ZIP under Go source ZIP and enter its manifest path relative to the ZIP root.
+Select Upload and prepare bundle. Repeating a request with the same key returns its original job.
+The worker records ownership before assembly, then records the image before discovery.
+Builds and discovery do not execute test bodies.
+
+Preparation details show the source digest, image, runtime, build timestamps, diagnostics, and state.
+Use Get original source ZIP to fetch the exact retained archive.
+Use Review prepared source to inspect catalog changes and publish with optional activation.
+Publication creates no run. Start tests through a separate normal run action.
+Cancel stops active work. Withdraw review cancels unpublished ready work.
+Failed builds preserve the active release and retain diagnostics.
+
+## CLI assembly and publication
 
 Build the publisher locally and assemble a complete bundle:
 
@@ -78,9 +117,13 @@ See [prepared suites](prepared-suites.md) for managed sessions, cancellation, re
 
 The CLI saves a private build ownership reference before invoking Docker.
 It retains that reference after success because the image is a required execution artifact.
-Keep the original ZIP and result file while the source snapshot is needed.
-The server currently retains discovered source metadata, rather than the uploaded ZIP itself.
-Server-side ZIP staging and retention remain pending.
+For CLI-only assembly, keep the original ZIP and result file while the source snapshot is needed.
+Server uploads retain exact ZIP bytes with a project-bound digest.
+Unpublished staging expires after 30 minutes. A ready review receives its own 30-minute staging window.
+The maintenance worker removes expired ZIP bytes and requests cleanup of unused images.
+Expiry keeps preparation summaries, logs, original failure reasons, and completion timestamps.
+Published ZIP snapshots remain immutable and retained with their releases.
+Configured published-source retention and image garbage collection remain pending.
 
 Remove an assembled image only after its releases and runs no longer need it:
 
@@ -90,8 +133,10 @@ bin/teststudio-publish cleanup --state-file PATH_TO_BUILD_REFERENCE
 
 Cleanup checks the project, installation, and preparation labels before removing the exact image tag.
 It does not remove another preparation's image or unrelated containers.
-CLI build references can also recover owned image tags after interruption.
-The private reference also identifies the temporary source context for cleanup after process interruption.
+CLI cleanup and worker recovery remove owned image tags and private temporary contexts after interruption.
+Recovery does not repeat builds, discovery, or tests.
+A separate worker must remain available to recover bundle resources when API staging is disabled.
+Private CLI references and durable worker references identify the temporary source context after process interruption.
 Cleanup rejects moved references, symbolic links, and non-private context directories.
 Normal completion and cancellation remove temporary source contexts.
 

@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.14.0"
+export const accessContractVersion = "0.15.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -76,6 +76,7 @@ export type Saved = { "saved": boolean }
 export type Session = { "authenticationUntil": string; "createdAt": string; "current": boolean; "expiresAt": string; "id": string; "lastSeen": string; "provider": string }
 export type SessionPage = { "cursor"?: string; "items": (SessionRecord)[]; "partial": boolean }
 export type SessionRecord = { "data": Session; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type SourceBuild = { "finishedAt": string; "image": string; "log"?: string; "logTruncated"?: boolean; "sourceDigest": string; "startedAt": string }
 export type SourceCapturePolicy = { "failureRetentionDays"?: number; "kindRetentionDays"?: { [key: string]: number }; "logs": boolean; "maxBytes"?: number; "maxFileBytes"?: number; "retentionDays"?: number; "screenshots": string; "trace": string; "video": string }
 export type SourceCatalogArtifact = { "discoveredSelectors"?: { [key: string]: string }; "image"?: string; "provenance"?: SourceOrigin; "sourceProjectId"?: string; "sourceRevision"?: string; "sourceSnapshotId"?: string }
 export type SourceCatalogDraft = { "artifact": SourceCatalogArtifact; "capture": SourceCapturePolicy; "id": string; "publishedReleaseId"?: string; "tests": (SourceCatalogTest)[]; "timing": SourceTimingPolicy }
@@ -89,8 +90,8 @@ export type SourceContent = { "content": string; "digest": string }
 export type SourceJSONValue = null | string | number | boolean | (SourceJSONValue)[] | { [key: string]: SourceJSONValue }
 export type SourceOrigin = { "commit"?: string; "reference"?: string; "repository"?: string; "snapshotDigest"?: string }
 export type SourcePrebuiltInput = { "image": string; "runner": string }
-export type SourcePreparationJob = { "actor": string; "cancelRequested": boolean; "cleanupPending": boolean; "createdAt": string; "error"?: string; "executionLocation": string; "finishedAt"?: string; "id": string; "image": string; "leaseUntil"?: string; "localImageId"?: string; "log"?: string; "logTruncated"?: boolean; "phase": string; "projectId": string; "reference"?: SourcePreparationReference; "releaseId"?: string; "runner": string; "runtime"?: string; "startedAt"?: string; "state": string; "suiteId": string; "uploadId"?: string; "worker"?: string }
-export type SourcePreparationOptions = { "executionLocation": string; "runners": (string)[] }
+export type SourcePreparationJob = { "actor": string; "build"?: SourceBuild; "cancelRequested": boolean; "cleanupPending": boolean; "createdAt": string; "error"?: string; "executionLocation": string; "finishedAt"?: string; "id": string; "image": string; "kind"?: string; "leaseUntil"?: string; "localImageId"?: string; "log"?: string; "logTruncated"?: boolean; "manifestPath"?: string; "phase": string; "projectId": string; "reference"?: SourcePreparationReference; "releaseId"?: string; "runner": string; "runtime"?: string; "sourceBundleId"?: string; "sourceDigest"?: string; "sourceExpired"?: boolean; "sourceName"?: string; "startedAt"?: string; "state": string; "suiteId": string; "uploadId"?: string; "worker"?: string }
+export type SourcePreparationOptions = { "bundleRunners": (string)[]; "executionLocation": string; "runners": (string)[] }
 export type SourcePreparationPage = { "cursor"?: string; "items": (SourcePreparationRecord)[] }
 export type SourcePreparationRecord = { "data": SourcePreparationJob; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
 export type SourcePreparationReference = { "attempt": number; "container": string; "id": string; "installationId": string; "profile": string; "projectId": string; "runId": string; "testId": string; "volume": string; "workerId": string }
@@ -152,10 +153,12 @@ export interface AccessRequests {
   createProjectAssignment: { "project": string; body: AssignmentDefinition }
   revokeProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
   readProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string }
+  uploadSourceBundle: { "project": string; "suite": string; key: string; query: { "name": string; "manifest": string }; body: Blob }
   readPreparationOptions: { "project": string; "suite": string }
   listSourcePreparations: { "project": string; "suite": string; query?: { "limit"?: number; "cursor"?: string } }
   enqueuePrebuiltPreparation: { "project": string; "suite": string; key: string; body: SourcePrebuiltInput }
   readSourcePreparation: { "project": string; "suite": string; "id": string }
+  downloadSourceBundle: { "project": string; "suite": string; "id": string }
   cancelSourcePreparation: { "project": string; "suite": string; "id": string; revision: number }
   listSourceUploads: { "project": string; "suite": string; query?: { "limit"?: number; "cursor"?: string } }
   stageSourceUpload: { "project": string; "suite": string; body: SourceUploadInput }
@@ -239,10 +242,12 @@ export interface AccessResponses {
   createProjectAssignment: AssignmentRecord
   revokeProjectAssignment: Revoked
   readProjectAssignment: AssignmentRecord
+  uploadSourceBundle: SourcePreparationRecord
   readPreparationOptions: SourcePreparationOptions
   listSourcePreparations: SourcePreparationPage
   enqueuePrebuiltPreparation: SourcePreparationRecord
   readSourcePreparation: SourcePreparationRecord
+  downloadSourceBundle: Blob
   cancelSourcePreparation: SourcePreparationRecord
   listSourceUploads: SourceUploadPage
   stageSourceUpload: SourceUploadPreview
@@ -326,10 +331,12 @@ export const accessOperations = {
   createProjectAssignment: { method: "POST", path: "/api/v1/projects/{project}/role-assignments" },
   revokeProjectAssignment: { method: "DELETE", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
   readProjectAssignment: { method: "GET", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
+  uploadSourceBundle: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/source-bundles" },
   readPreparationOptions: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-preparation-options" },
   listSourcePreparations: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-preparations" },
   enqueuePrebuiltPreparation: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/source-preparations" },
   readSourcePreparation: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-preparations/{id}" },
+  downloadSourceBundle: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-preparations/{id}/bundle", responseType: "blob" },
   cancelSourcePreparation: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/source-preparations/{id}/cancel" },
   listSourceUploads: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads" },
   stageSourceUpload: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads" },

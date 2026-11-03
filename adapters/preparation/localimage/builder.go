@@ -68,8 +68,19 @@ func (b *Builder) Build(ctx context.Context, input preparation.BuildRequest) (re
 	} else if !errors.Is(err, errImageAbsent) {
 		return result, err
 	}
-	directory, err := os.MkdirTemp(b.TempDirectory, "teststudio-build-")
+	directory := b.contextPath(input.Reference)
+	if err := os.MkdirAll(filepath.Dir(directory), 0700); err != nil {
+		return result, err
+	}
+	if err := os.Mkdir(directory, 0700); err != nil {
+		return result, errors.New("build context already exists or cannot be reserved; recover its reference first")
+	}
+	ownership, err := json.Marshal(input.Reference)
 	if err != nil {
+		return result, err
+	}
+	if err := os.WriteFile(filepath.Join(directory, "owner.json"), ownership, 0600); err != nil {
+		os.Remove(directory)
 		return result, err
 	}
 	defer os.RemoveAll(directory)
@@ -182,22 +193,47 @@ func (b *Builder) CleanupBuild(ctx context.Context, ref execution.Reference) err
 		return errors.New("invalid build cleanup ownership")
 	}
 	image, err := b.metadata(ctx, tag(ref))
-	if errors.Is(err, errImageAbsent) {
+	if err != nil && !errors.Is(err, errImageAbsent) {
+		return err
+	}
+	if err == nil {
+		if !matches(image, ref) {
+			return errors.New("build cleanup refuses another preparation image")
+		}
+		var output boundedLog
+		command := b.command(ctx, "image", "rm", tag(ref))
+		command.Stdout, command.Stderr = &output, &output
+		if err := command.Run(); err != nil {
+			return errors.New("preparation image reference cleanup failed")
+		}
+	}
+	directory := b.contextPath(ref)
+	info, err := os.Lstat(directory)
+	if os.IsNotExist(err) {
 		return nil
 	}
 	if err != nil {
 		return err
 	}
-	if !matches(image, ref) {
-		return errors.New("build cleanup refuses another preparation image")
+	if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 || info.Mode().Perm()&0077 != 0 {
+		return errors.New("build cleanup refuses an unowned context directory")
 	}
-	var output boundedLog
-	command := b.command(ctx, "image", "rm", tag(ref))
-	command.Stdout, command.Stderr = &output, &output
-	if err := command.Run(); err != nil {
-		return errors.New("preparation image reference cleanup failed")
+	data, err := os.ReadFile(filepath.Join(directory, "owner.json"))
+	if err != nil {
+		return err
 	}
-	return nil
+	var owner execution.Reference
+	if len(data) > 8192 || json.Unmarshal(data, &owner) != nil || owner != ref {
+		return errors.New("build context ownership does not match its reference")
+	}
+	return os.RemoveAll(directory)
+}
+func (b *Builder) contextPath(ref execution.Reference) string {
+	root := b.TempDirectory
+	if root == "" {
+		root = os.TempDir()
+	}
+	return filepath.Join(root, "teststudio-build-"+strings.TrimPrefix(tag(ref), "teststudio-preparation:"))
 }
 
 type boundedLog struct {

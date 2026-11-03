@@ -1,6 +1,7 @@
 package sources
 
 import (
+	"github.com/wtiger001/teststudio/internal/preparation"
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/execution"
@@ -12,6 +13,13 @@ type PrebuiltInput struct {
 }
 
 type Job struct {
+	SourceExpired   bool                 `json:"sourceExpired,omitempty"`
+	Kind            string               `json:"kind,omitempty"`
+	Bundle          string               `json:"sourceBundleId,omitempty"`
+	SourceDigest    string               `json:"sourceDigest,omitempty"`
+	SourceName      string               `json:"sourceName,omitempty"`
+	Manifest        string               `json:"manifestPath,omitempty"`
+	Build           *preparation.Build   `json:"build,omitempty"`
 	ImageID         string               `json:"localImageId,omitempty"`
 	Runtime         string               `json:"runtime,omitempty"`
 	Release         string               `json:"releaseId,omitempty"`

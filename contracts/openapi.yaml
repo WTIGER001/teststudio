@@ -1,7 +1,7 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio API"
-  "version": "0.14.0"
+  "version": "0.15.0"
   "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Includes optional client-identifier RP-initiated provider logout after local session revocation. Includes staged native JSON and YAML sources with atomic catalog publication and retained source provenance. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
@@ -2893,6 +2893,106 @@
         - "CSRFToken": []
           "SessionCookie": []
       "summary": "Cancel queued or running preparation, or withdraw an unpublished ready review. Published releases cannot be cancelled."
+  "/api/v1/projects/{project}/suites/{suite}/source-bundles":
+    "post":
+      "operationId": "uploadSourceBundle"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        - "$ref": "#/components/parameters/Origin"
+        - "in": "header"
+          "name": "Idempotency-Key"
+          "required": true
+          "schema":
+            "maxLength": 128
+            "minLength": 1
+            "type": "string"
+        - "in": "query"
+          "name": "name"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "query"
+          "name": "manifest"
+          "required": true
+          "schema":
+            "type": "string"
+      "requestBody":
+        "content":
+          "application/zip":
+            "schema":
+              "format": "binary"
+              "type": "string"
+        "required": true
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SourcePreparationRecord"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "CSRFToken": []
+          "SessionCookie": []
+      "summary": "Store a bounded ZIP source snapshot and queue a build for a separate worker. No build or test runs in the request."
+  "/api/v1/projects/{project}/suites/{suite}/source-preparations/{id}/bundle":
+    "get":
+      "operationId": "downloadSourceBundle"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "id"
+          "required": true
+          "schema":
+            "type": "string"
+      "responses":
+        "200":
+          "content":
+            "application/zip":
+              "schema":
+                "format": "binary"
+                "type": "string"
+          "description": "Exact retained ZIP bytes."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "SessionCookie": []
+      "summary": "Download the exact retained source ZIP after current project permission checks."
 "components":
   "securitySchemes":
     "SessionCookie":
@@ -3033,6 +3133,28 @@
           "schema":
             "$ref": "#/components/schemas/Problem"
   "schemas":
+    "SourceBuild":
+      "properties":
+        "finishedAt":
+          "format": "date-time"
+          "type": "string"
+        "image":
+          "type": "string"
+        "log":
+          "type": "string"
+        "logTruncated":
+          "type": "boolean"
+        "sourceDigest":
+          "type": "string"
+        "startedAt":
+          "format": "date-time"
+          "type": "string"
+      "required":
+        - "image"
+        - "sourceDigest"
+        - "startedAt"
+        - "finishedAt"
+      "type": "object"
     "SourcePreparationRecord":
       "properties":
         "data":
@@ -3076,14 +3198,10 @@
       "type": "object"
     "SourcePreparationJob":
       "properties":
-        "localImageId":
-          "type": "string"
-        "runtime":
-          "type": "string"
-        "releaseId":
-          "type": "string"
         "actor":
           "type": "string"
+        "build":
+          "$ref": "#/components/schemas/SourceBuild"
         "cancelRequested":
           "type": "boolean"
         "cleanupPending":
@@ -3102,20 +3220,38 @@
           "type": "string"
         "image":
           "type": "string"
+        "kind":
+          "type": "string"
         "leaseUntil":
           "format": "date-time"
+          "type": "string"
+        "localImageId":
           "type": "string"
         "log":
           "type": "string"
         "logTruncated":
           "type": "boolean"
+        "manifestPath":
+          "type": "string"
         "phase":
           "type": "string"
         "projectId":
           "type": "string"
         "reference":
           "$ref": "#/components/schemas/SourcePreparationReference"
+        "releaseId":
+          "type": "string"
         "runner":
+          "type": "string"
+        "runtime":
+          "type": "string"
+        "sourceBundleId":
+          "type": "string"
+        "sourceDigest":
+          "type": "string"
+        "sourceExpired":
+          "type": "boolean"
+        "sourceName":
           "type": "string"
         "startedAt":
           "format": "date-time"
@@ -3188,6 +3324,10 @@
       "type": "object"
     "SourcePreparationOptions":
       "properties":
+        "bundleRunners":
+          "items":
+            "type": "string"
+          "type": "array"
         "executionLocation":
           "type": "string"
         "runners":
@@ -3195,6 +3335,7 @@
             "type": "string"
           "type": "array"
       "required":
+        - "bundleRunners"
         - "runners"
         - "executionLocation"
       "type": "object"

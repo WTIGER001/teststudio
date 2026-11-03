@@ -12,15 +12,17 @@ export class ApiService {
   readonly csrf = signal('')
   onUnauthenticated: ((csrf: string) => void) | undefined
 
-  async request<T>(path: string, method = 'GET', value?: unknown, revision?: number, key?: string): Promise<T> {
+  async request<T>(path: string, method = 'GET', value?: unknown, revision?: number, key?: string, responseType: 'json' | 'blob' = 'json'): Promise<T> {
     const csrf = this.csrf()
     const headers: Record<string, string> = { Accept: 'application/json' }
-    if (value !== undefined) headers['Content-Type'] = 'application/json'
+    const binary = value instanceof Blob
+    if (value !== undefined) headers['Content-Type'] = binary ? 'application/zip' : 'application/json'
     if (method !== 'GET') headers['X-CSRF-Token'] = csrf
     if (revision !== undefined) headers['If-Match'] = `"${revision}"`
     if (key) headers['Idempotency-Key'] = key
-    const response = await fetch(path, { method, headers, credentials: 'same-origin', body: value === undefined ? undefined : JSON.stringify(value) })
+    const response = await fetch(path, { method, headers, credentials: 'same-origin', body: value === undefined ? undefined : binary ? value : JSON.stringify(value) })
     if (response.status === 401 && path !== '/auth/password') this.onUnauthenticated?.(csrf)
+    if (response.ok && responseType === 'blob') return await response.blob() as T
     let data
     try { data = await response.json() }
     catch { throw new ApiError(response.ok ? 502 : response.status, response.ok ? 'The server returned an unreadable response. Refresh state before retrying a change.' : 'The request was rejected with an unreadable response. Refresh state to review current access.') }

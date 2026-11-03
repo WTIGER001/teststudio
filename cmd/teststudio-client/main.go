@@ -15,6 +15,7 @@ import (
 )
 
 type schema struct {
+	Format               string             `yaml:"format"`
 	Ref                  string             `yaml:"$ref"`
 	Type                 any                `yaml:"type"`
 	Properties           map[string]*schema `yaml:"properties"`
@@ -111,6 +112,9 @@ func schemaType(value *schema) (string, error) {
 	}
 	switch value.Type {
 	case "string":
+		if value.Format == "binary" {
+			return "Blob", nil
+		}
 		return "string", nil
 	case "integer", "number":
 		return "number", nil
@@ -222,19 +226,33 @@ func generate(data []byte) ([]byte, error) {
 				fields = append(fields, "query"+optional+": { "+strings.Join(query, "; ")+" }")
 			}
 			if op.Body != nil {
-				t, err := schemaType(op.Body.Content["application/json"].Schema)
+				bodySchema := op.Body.Content["application/json"].Schema
+				if bodySchema == nil {
+					bodySchema = op.Body.Content["application/zip"].Schema
+				}
+				t, err := schemaType(bodySchema)
 				if err != nil {
 					return nil, err
 				}
 				fields = append(fields, "body: "+t)
 			}
-			t, err := schemaType(op.Responses["200"].Content["application/json"].Schema)
+			responseSchema := op.Responses["200"].Content["application/json"].Schema
+			binaryResponse := false
+			if responseSchema == nil {
+				responseSchema = op.Responses["200"].Content["application/zip"].Schema
+				binaryResponse = responseSchema != nil
+			}
+			t, err := schemaType(responseSchema)
 			if err != nil {
 				return nil, fmt.Errorf("operation %s success response: %w", op.ID, err)
 			}
 			requests = append(requests, "  "+op.ID+": { "+strings.Join(fields, "; ")+" }")
 			responses = append(responses, "  "+op.ID+": "+t)
-			routes = append(routes, "  "+op.ID+": { method: "+quote(strings.ToUpper(method))+", path: "+quote(path)+" }")
+			responseOption := ""
+			if binaryResponse {
+				responseOption = `, responseType: "blob"`
+			}
+			routes = append(routes, "  "+op.ID+": { method: "+quote(strings.ToUpper(method))+", path: "+quote(path)+responseOption+" }")
 		}
 	}
 	fmt.Fprintf(&out, "\nexport interface AccessRequests {\n%s\n}\n\nexport interface AccessResponses {\n%s\n}\n\nexport const accessOperations = {\n%s\n} as const\n", strings.Join(requests, "\n"), strings.Join(responses, "\n"), strings.Join(routes, ",\n"))

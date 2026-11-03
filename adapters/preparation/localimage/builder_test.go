@@ -2,6 +2,8 @@ package localimage_test
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"os/exec"
@@ -114,4 +116,45 @@ func TestBuilderCommandProcess(t *testing.T) {
 		fail("unexpected docker operation")
 	}
 	os.Exit(0)
+}
+
+func TestBuilderRecoveryRemovesOnlyItsPrivateInterruptedContext(t *testing.T) {
+	root := t.TempDir()
+	state := filepath.Join(root, "absent-image.json")
+	ref := execution.Reference{ID: "interrupted", Project: "alpha", Installation: "preparation-installation"}
+	sum := sha256.Sum256([]byte(ref.Installation + "\x00" + ref.Project + "\x00" + ref.ID))
+	directory := filepath.Join(root, "teststudio-build-"+hex.EncodeToString(sum[:]))
+	if err := os.Mkdir(directory, 0700); err != nil {
+		t.Fatal(err)
+	}
+	owner, _ := json.Marshal(ref)
+	if err := os.WriteFile(filepath.Join(directory, "owner.json"), owner, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(directory, "source.txt"), []byte("private interrupted context"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	builder := &localimage.Builder{TempDirectory: root, Command: func(ctx context.Context, bin string, args ...string) *exec.Cmd {
+		command := exec.CommandContext(ctx, os.Args[0], append([]string{"-test.run=^TestBuilderCommandProcess$", "--"}, args...)...)
+		command.Env = append(os.Environ(), "TESTSTUDIO_BUILD_HELPER=1", "TESTSTUDIO_BUILD_STATE="+state)
+		return command
+	}}
+	wrong := ref
+	wrong.Project = "beta"
+	foreign, _ := json.Marshal(wrong)
+	if err := os.WriteFile(filepath.Join(directory, "owner.json"), foreign, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := builder.CleanupBuild(t.Context(), ref); err == nil {
+		t.Fatal("recovery removed another context owner")
+	}
+	if err := os.WriteFile(filepath.Join(directory, "owner.json"), owner, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := builder.CleanupBuild(t.Context(), ref); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(directory); !os.IsNotExist(err) {
+		t.Fatal("interrupted source context survived recovery")
+	}
 }

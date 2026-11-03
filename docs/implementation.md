@@ -74,6 +74,41 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### ZIP uploads, separate durable builds, and targeted self-test reuse
+
+Added project-scoped ZIP upload and exact source download through authenticated API operations.
+The Sources page selects a complete Go bundle and manifest path, then displays durable preparation progress.
+A separate teststudio-prepare process assembles the image. The API only queues build work.
+The worker retains ownership before assembly and checkpoints its image before isolated discovery.
+Build metadata, runtime, bounded logs, review, publication, cancellation, and source downloads use the common source workflow.
+
+Bundle retries return the original job. Preparation and publication create no unintended runs.
+Current authority checks remain inside the shared transaction and worker heartbeat.
+Ready withdrawal and interrupted-job recovery clean owned images and private contexts without repeating builds or tests.
+Expired staging removes ZIP bytes while retaining summaries, logs, original failures, and completion timestamps.
+Published snapshots retain their exact ZIP bytes and source provenance.
+
+Focused source, API, builder, generated-client, expiry, and context-recovery checks pass.
+The Angular production build passes.
+A real local browser workflow uploads a ZIP, waits for its separate worker, downloads source, reviews, and publishes.
+A separate explicit normal run passes. Reload retains published history. The mobile dark view has no document overflow or browser errors.
+Evidence is `.data/bundle-ui-verification.Eh6NWc/result.json`, `browser.json`, and `cleanup.json`.
+Cleanup confirms browser and controller exit, no owned containers, volumes, suite images, or private build contexts.
+
+Added permanent STUDIO-BUNDLES-001 for ZIP staging, exact source, duplicate replay, cancellation, and retained history.
+The targeted workflow passes through normal TestStudio publication, execution, timing, and complete evidence capture.
+Evidence is `output/selftest/20261103T151752.455247000-97c8c9cdf744e8bad8b0705a/summary.json`.
+The execution is cleaned. Its owned container and volume are absent after verification.
+An initial test observation depended on Chromium's response-body cache. The final test reads durable preparation state through the API.
+
+The self-test launcher now fingerprints source inputs and verifies cached output hashes.
+It reuses unchanged UI builds, native and Linux binaries, and immutable runner images.
+The local base image is pulled only when absent.
+A warm build check reuses every artifact in about 0.25 seconds without executing tests again.
+No broad matrix, AWS, Kubernetes, or Azure tests run for this milestone.
+The ledger remains **23 verified, 34 open**.
+Items **22**, **23**, **25**, **26**, and **29** advance. GitHub preparation and remaining source profiles keep those broad criteria open.
+
 ### Offline Go source bundles and reusable build interface
 
 Added bounded ZIP validation before extraction, including paths, entry types, duplicate names, file conflicts, CRC checks, and required source context.
@@ -95,7 +130,8 @@ A real local workflow assembles a new ZIP with a nested manifest and vendor depe
 Evidence is `.data/bundle-verification.GoxFng/result.json` and `cleanup.json`.
 The check removes its controller, containers, volumes, and assembled suite image.
 Items **22** and **23** advance but remain open.
-Direct UI bundle staging, durable server build dispatch, GitHub preparation, and Playwright bundle assembly remain pending.
+At this assembly checkpoint, direct UI staging, durable server builds, GitHub preparation, and Playwright assembly remain pending.
+The subsequent ZIP upload milestone above delivers direct staging and durable server builds.
 No cloud checks or broad test matrix run for this milestone.
 
 ### Durable prebuilt preparation and publication

@@ -6,8 +6,9 @@ Use project settings to create a suite when required.
 
 The same page prepares locally available immutable Go and Playwright images when the server enables that worker.
 See [prepared suites](prepared-suites.md) for image labels, durable jobs, cancellation, recovery, and CLI publication.
-The CLI can assemble [offline Go ZIP bundles](source-bundles.md) before server inspection.
-Direct UI bundle uploads and GitHub repository preparation remain pending.
+The same page uploads [Go ZIP bundles](source-bundles.md) for a separate preparation worker.
+The CLI can also assemble bundles before server inspection.
+GitHub repository preparation and Playwright bundle assembly remain pending.
 
 ## Review and publication
 
@@ -84,7 +85,9 @@ Routes use `/api/v1/projects/{project}/suites/{suite}` as their base.
 
 | Method | Route | Result |
 | --- | --- | --- |
-| GET | `/source-preparation-options` | Read enabled runners and the execution location. |
+| GET | `/source-preparation-options` | Read enabled image runners, bundle runners, and execution location. |
+| POST | `/source-bundles` | Store a ZIP and queue its build with an `Idempotency-Key`. |
+| GET | `/source-preparations/{id}/bundle` | Download exact authorized source ZIP bytes. |
 | GET | `/source-preparations` | Read preparation history. |
 | POST | `/source-preparations` | Queue an immutable image with an `Idempotency-Key`. |
 | GET | `/source-preparations/{id}` | Read progress, diagnostics, and review identifiers. |
@@ -95,7 +98,9 @@ Routes use `/api/v1/projects/{project}/suites/{suite}` as their base.
 | GET | `/source-uploads/{id}/content` | Read authorized retained source text and its digest. |
 | POST | `/source-uploads/{id}/publish` | Publish the reviewed upload atomically. |
 
-Staging accepts `name`, `format`, and `content`.
+ZIP staging uses an application/zip body, with name and manifest query parameters.
+The ZIP limit is 32 MiB compressed. The server validates archive limits and paths before storing it.
+Native staging accepts `name`, `format`, and `content`.
 Format must be `json` or `yaml`.
 Publication requires a positive `If-Match` upload revision and an explicit `activate` boolean.
 Mutations require the installation Origin and a current session request token.

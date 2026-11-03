@@ -21,16 +21,8 @@ trap cleanup EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
-if [ ! -d web/node_modules ]; then npm --prefix web ci; fi
-npm --prefix web run build
-docker pull mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f >/dev/null
-teststudio_arch=$(docker image inspect mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f --format '{{.Architecture}}')
-mkdir -p .data/selftest-build
-CGO_ENABLED=0 GOOS=linux GOARCH="$teststudio_arch" go build -o .data/selftest-build/teststudio ./cmd/teststudio
-CGO_ENABLED=0 GOOS=linux GOARCH="$teststudio_arch" go build -o .data/selftest-build/access-fixture ./tests/selftest/seed-access
-docker build -q -f tests/selftest/Dockerfile -t teststudio/selftests:local . >/dev/null
-teststudio_image=$(docker image inspect teststudio/selftests:local --format '{{.Id}}')
-go build -o "$teststudio_run_root/teststudio" ./cmd/teststudio
+teststudio_image=$(node scripts/build-selftest.mjs)
+cp .data/selftest-build/controller "$teststudio_run_root/teststudio"
 
 teststudio_api_port=$(node -e 'const s=require("node:net").createServer();s.listen(0,"127.0.0.1",()=>{console.log(s.address().port);s.close()})')
 teststudio_artifact_port=$(node -e 'const s=require("node:net").createServer();s.listen(0,"127.0.0.1",()=>{console.log(s.address().port);s.close()})')

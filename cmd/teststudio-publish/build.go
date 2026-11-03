@@ -150,7 +150,7 @@ func cleanupBuildReference(ctx context.Context, data []byte, filename string, wr
 	}
 	cleanup, stop := context.WithTimeout(ctx, 15*time.Second)
 	defer stop()
-	if err := (&localimage.Builder{}).CleanupBuild(cleanup, state.Reference); err != nil {
+	if err := (&localimage.Builder{TempDirectory: state.ContextDirectory}).CleanupBuild(cleanup, state.Reference); err != nil {
 		return err
 	}
 	if err := os.RemoveAll(expected); err != nil {

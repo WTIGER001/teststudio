@@ -62,6 +62,7 @@ func run() error {
 	playwrightImages := flag.String("playwright-images", "", "Comma-separated immutable local Playwright image references; enables the isolated local worker")
 	goImages := flag.String("go-images", "", "Comma-separated immutable local Go suite image references; enables the isolated local Go worker")
 	preparedSources := flag.Bool("prepared-sources", false, "Enable local prebuilt preparation and project-labelled immutable suite images")
+	sourceBundles := flag.Bool("source-bundles", false, "Enable Go ZIP staging for the separate teststudio-prepare worker")
 	scheduler := flag.Bool("scheduler", true, "Process durable project schedules on this instance")
 	notificationWorker := flag.Bool("notification-worker", true, "Process durable notification deliveries on this instance")
 	secretBindings := flag.String("secret-bindings", "", "Project and purpose scoped environment or mounted-file secret binding configuration")
@@ -199,6 +200,9 @@ func run() error {
 	sourceService := &sources.Service{Store: db, Auth: auth, Location: *location, RecoveryInspectors: map[string]preparation.ArtifactInspector{
 		"go": &localcontainer.Executor{Runner: "go"}, "playwright": &localcontainer.Executor{Runner: "playwright"},
 	}}
+	if *sourceBundles {
+		sourceService.BundleRunners = []string{"go"}
+	}
 	if *preparedSources {
 		sourceService.Inspectors = map[string]preparation.ArtifactInspector{
 			"go":         &localcontainer.Executor{Runner: "go", AllowProjectImages: true, RequireProject: true},
@@ -207,16 +211,16 @@ func run() error {
 	}
 	runService.RecoveryDriver = &localplaywright.Executor{}
 	runService.RecoveryDrivers = []execution.ManagedExecutor{&localcontainer.Executor{Runner: "go"}}
-	if strings.TrimSpace(*playwrightImages) != "" || *preparedSources {
+	if strings.TrimSpace(*playwrightImages) != "" || *preparedSources || *sourceBundles {
 		driver := &localplaywright.Executor{Images: strings.Split(*playwrightImages, ",")}
-		if *preparedSources {
+		if *preparedSources || *sourceBundles {
 			driver.ApproveArtifact = sourceService.ApproveArtifact
 		}
 		runService.Playwright = driver
 	}
-	if strings.TrimSpace(*goImages) != "" || *preparedSources {
+	if strings.TrimSpace(*goImages) != "" || *preparedSources || *sourceBundles {
 		driver := &localcontainer.Executor{Runner: "go", Images: strings.Split(*goImages, ",")}
-		if *preparedSources {
+		if *preparedSources || *sourceBundles {
 			driver.ApproveArtifact = sourceService.ApproveArtifact
 		}
 		runService.Go = driver

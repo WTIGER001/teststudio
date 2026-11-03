@@ -21,6 +21,9 @@ func (s *Service) stagePrepared(ctx context.Context, job Job, result preparation
 	if result.Image != job.Image || result.Project != job.Project || result.Discovery.Manifest.Suite != job.Suite || result.Discovery.Manifest.Runner != job.Runner {
 		return upload, errors.New("inspection does not match its project, suite, or image")
 	}
+	if job.Bundle != "" && result.Discovery.Origin.SnapshotDigest != job.SourceDigest {
+		return upload, errors.New("discovered artifact does not match the retained source bundle")
+	}
 	if err := suitespec.ValidateDiscovery(result.Discovery, job.Image); err != nil {
 		return upload, err
 	}
@@ -63,7 +66,11 @@ func (s *Service) stagePrepared(ctx context.Context, job Job, result preparation
 	if err != nil {
 		return upload, err
 	}
-	upload = Upload{Kind: "prebuilt", Job: job.ID, Artifact: &artifact, ID: id, Project: job.Project, Suite: job.Suite, Name: "prebuilt-" + job.Runner + ".json", Format: "json", Digest: artifact.SourceRevision, Bytes: len(content), Actor: job.Actor, State: "staged", PlanID: plan.ID, Issues: plan.Issues, CreatedAt: now, ExpiresAt: plan.ExpiresAt}
+	kind := "prebuilt"
+	if job.Bundle != "" {
+		kind = "bundle"
+	}
+	upload = Upload{Kind: kind, Job: job.ID, Artifact: &artifact, ID: id, Project: job.Project, Suite: job.Suite, Name: "prebuilt-" + job.Runner + ".json", Format: "json", Digest: artifact.SourceRevision, Bytes: len(content), Actor: job.Actor, State: "staged", PlanID: plan.ID, Issues: plan.Issues, CreatedAt: now, ExpiresAt: plan.ExpiresAt}
 	if len(plan.Issues) > 0 {
 		upload.State = "failed"
 	}
@@ -83,7 +90,32 @@ func (s *Service) stagePrepared(ctx context.Context, job Job, result preparation
 	if err != nil {
 		return upload, err
 	}
-	return upload, s.Store.Commit(ctx, row, raw, staging, audit)
+	changes := []storage.Change{row, raw, staging, audit}
+	if job.Bundle != "" {
+		bundleRow, err := s.Store.Get(ctx, bundleBucket(job.Project), job.Bundle)
+		if err != nil {
+			return upload, err
+		}
+		bundle, err := storage.Decode[Bundle](bundleRow)
+		if err != nil {
+			return upload, err
+		}
+		bundle.ExpiresAt = upload.ExpiresAt
+		saved, err := storage.Put(bundleRow.Bucket, bundleRow.ID, job.Project, bundleRow.Revision, bundle)
+		if err != nil {
+			return upload, err
+		}
+		indexRow, err := s.Store.Get(ctx, "source-bundle-staging", job.Bundle)
+		if err != nil {
+			return upload, err
+		}
+		indexed, err := storage.Put(indexRow.Bucket, indexRow.ID, job.Project, indexRow.Revision, bundleIndex{Job: job.ID, Suite: job.Suite, ExpiresAt: upload.ExpiresAt})
+		if err != nil {
+			return upload, err
+		}
+		changes = append(changes, saved, indexed)
+	}
+	return upload, s.Store.Commit(ctx, changes...)
 }
 
 func (s *Service) ApproveArtifact(ctx context.Context, artifact catalog.Artifact) error {

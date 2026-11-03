@@ -116,7 +116,7 @@ func (s *Service) Publish(ctx context.Context, user, project, suite, id string, 
 			return err
 		}
 		changes := []storage.Change{saved, {Record: staging, Delete: true}, audit}
-		if upload.Kind == "prebuilt" && upload.Artifact != nil {
+		if (upload.Kind == "prebuilt" || upload.Kind == "bundle") && upload.Artifact != nil {
 			approved, err := storage.Put("prepared-artifacts/"+project, id, project, 0, *upload.Artifact)
 			if err != nil {
 				return err
@@ -132,6 +132,16 @@ func (s *Service) Publish(ctx context.Context, user, project, suite, id string, 
 			}
 			if job.State != "ready" || job.Upload != id {
 				return errors.New("preparation is no longer ready for publication")
+			}
+			if job.Bundle != "" {
+				if _, err := bound.loadBundle(ctx, job); err != nil {
+					return err
+				}
+				staged, err := bound.Store.Get(ctx, "source-bundle-staging", job.Bundle)
+				if err != nil {
+					return err
+				}
+				changes = append(changes, storage.Change{Record: staged, Delete: true})
 			}
 			job.State, job.Phase, job.Release = "published", "finished", release.ID
 			updated, err := storage.Put(jobRow.Bucket, jobRow.ID, project, jobRow.Revision, job)

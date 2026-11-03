@@ -149,13 +149,23 @@ func (s *Service) CancelJob(ctx context.Context, user, project, suite, id string
 			}
 			changes = append(changes, saved)
 		}
+		if job.Bundle != "" && job.State == "ready" && job.Reference != nil {
+			job.CleanupPending = true
+			deadline := time.Now().UTC()
+			job.LeaseUntil = &deadline
+			lease, err := storage.Put(leaseBucket(job.Location), job.ID, project, 0, jobIndex{Job: job.ID, Suite: suite, Location: job.Location})
+			if err != nil {
+				return err
+			}
+			changes = append(changes, lease)
+		}
 		job.CancelRequested = true
-		if job.State != "discovering" {
+		if !activeJob(job.State) {
 			job.State, job.Phase = "cancelled", "finished"
 			now := time.Now().UTC()
 			job.FinishedAt = &now
 		}
-		if queued, err := bound.Store.Get(ctx, queueBucket(job.Location), queueID(job)); err == nil {
+		if queued, err := bound.Store.Get(ctx, jobQueue(job), queueID(job)); err == nil {
 			changes = append(changes, storage.Change{Record: queued, Delete: true})
 		} else if !errors.Is(err, storage.ErrNotFound) {
 			return err
@@ -173,12 +183,13 @@ func (s *Service) CancelJob(ctx context.Context, user, project, suite, id string
 }
 
 type PreparationOptions struct {
-	Runners  []string `json:"runners"`
-	Location string   `json:"executionLocation"`
+	BundleRunners []string `json:"bundleRunners"`
+	Runners       []string `json:"runners"`
+	Location      string   `json:"executionLocation"`
 }
 
 func (s *Service) Options(ctx context.Context, user, project, suite string) (PreparationOptions, error) {
-	options := PreparationOptions{Runners: []string{}, Location: s.Location}
+	options := PreparationOptions{Runners: []string{}, BundleRunners: append([]string{}, s.BundleRunners...), Location: s.Location}
 	if err := s.check(ctx, user, project, suite, "read"); err != nil {
 		return options, err
 	}
