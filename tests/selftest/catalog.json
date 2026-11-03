@@ -2,6 +2,7 @@
   "schemaVersion": "teststudio.selftest/v1",
   "source": "teststudio-selftests",
   "tests": [
+    { "id": "STUDIO-PERMISSIONS-001", "title": "Effective access decisions, inherited sources, privacy, and changing authority", "selector": "@STUDIO-PERMISSIONS-001", "category": "Administration" },
     { "id": "STUDIO-POLICY-001", "title": "Custom policies, inheritance, previews, and guarded role editors", "selector": "@STUDIO-POLICY-001", "category": "Administration" },
     { "id": "STUDIO-BUILTIN-001", "title": "Installation-wide predefined role state, retained assignments, and recovery guards", "selector": "@STUDIO-BUILTIN-001", "category": "Administration" },
     { "id": "STUDIO-GRANTS-001", "title": "Direct grant editors, expiry, deny precedence, and guarded removal", "selector": "@STUDIO-GRANTS-001", "category": "Administration" },

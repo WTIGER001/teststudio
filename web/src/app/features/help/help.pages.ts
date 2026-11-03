@@ -1,6 +1,23 @@
 import type { HelpPage } from './help.models'
 
 export const helpPages: Record<string, HelpPage> = {
+  'effective-permissions': {
+    id: 'effective-permissions', title: 'Explain access',
+    introduction: ['Check a registered permission for yourself or an authorized user. Inspect the current decision and its direct grants, groups, and inherited role paths.'],
+    concepts: [
+      { title: 'Exact context', description: 'An empty object checks the displayed project or installation scope. An exact object checks one existing resource. A suite object does not include its tests.' },
+      { title: 'Decision and source scan', description: 'The current decision uses the same permission evaluator as live requests. The source list uses bounded scans. An incomplete or empty source page does not change the decision.' },
+      { title: 'Deny, expiry, and field restrictions', description: 'Active matching denies override allows. Expired matching rules remain visible but have no effect. Field restrictions follow the evaluator for the requested permission.' },
+      { title: 'Assigned and inherited roles', description: 'Each role path identifies the user or group, assigned role, inherited grant owner, and project binding. Disabled roles withdraw their access paths.' },
+      { title: 'Private source details', description: 'A restricted source shows its effect and expiry status. Principal, role, scope, expiry timestamp, and field details require source administration read authority.' },
+      { title: 'Changing access', description: 'A decision describes access at its check time. A directory change or processed grant expiry invalidates continued scans. Refresh by checking access again.' }
+    ],
+    tutorials: [
+      { title: 'Check your access', steps: ['Open Explain project access or Explain installation access.', 'Leave Inspect user identifier set to your account. Select Permission to check.', 'Leave Exact object empty or enter an existing resource such as suite/health. Select Check access.', 'Read Current decision. Select Scan more sources until Source scan complete appears.'] },
+      { title: 'Explain another user', steps: ['Use an account with membership management and permission read authority in the displayed scope.', 'Enter the registered Inspect user identifier. Select the permission and optional exact object.', 'Select Check access. Read the assigned role, inherited grant owner, configured scopes, and expiry.', 'Use my account returns the inspection to your own user.'] },
+      { title: 'Respond to changed access', steps: ['A changed input clears the earlier report. Select Check access for the new context.', 'If access changes during a scan, the page clears its report. Select Check access again.', 'If access is denied, inspect the active deny or missing allow. Use the normal role or permission pages for authorized changes.'] }
+    ]
+  },
   grants: {
     id: 'grants', title: 'Direct permissions',
     introduction: ['Manage direct allow and deny rules for registered users and groups in the displayed scope. These rules apply alongside roles and inherited access.'],

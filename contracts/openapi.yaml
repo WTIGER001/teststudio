@@ -1,8 +1,8 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio identity and access administration"
-  "version": "0.7.0"
-  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
+  "version": "0.8.0"
+  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
     "url": "/"
@@ -1848,6 +1848,99 @@
             "schema":
               "$ref": "#/components/schemas/PredefinedRoleUpdate"
 
+  "/api/v1/me/effective-permissions":
+    "get":
+      "operationId": "explainOwnPermission"
+      "summary": "Explain your own access in an authorized project or exact resource context. Decisions use the live permission service. Bounded policy paths include matching allows, denies, and retained expiry. Restricted source details remain redacted. A partial page can be empty. Cursors bind actor and context and reject changed policy state or expiry."
+      "parameters":
+        -
+          "name": "project"
+          "in": "query"
+          "schema":
+            "type": "string"
+          "description": "Exact project context. Empty selects installation context."
+        -
+          "name": "object"
+          "in": "query"
+          "schema":
+            "type": "string"
+          "description": "An existing exact relative resource, or empty for the selected scope."
+        -
+          "name": "permission"
+          "in": "query"
+          "required": true
+          "schema":
+            "type": "string"
+          "description": "One full registered teststudio permission identifier."
+        -
+          "$ref": "#/components/parameters/Limit"
+        -
+          "$ref": "#/components/parameters/Cursor"
+      "responses":
+        "200":
+          "description": "Current decision and a bounded policy-path scan."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/PermissionExplanation"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+  "/api/v1/users/{user}/effective-permissions":
+    "get":
+      "operationId": "explainUserPermission"
+      "summary": "Explain another registered user only with scoped membership administration and permission inspection authority. Decisions use the live permission service. Bounded policy paths include matching allows, denies, and retained expiry. Restricted source details remain redacted. A partial page can be empty. Cursors bind actor and context and reject changed policy state or expiry."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/User"
+        -
+          "name": "project"
+          "in": "query"
+          "schema":
+            "type": "string"
+          "description": "Exact project context. Empty selects installation context."
+        -
+          "name": "object"
+          "in": "query"
+          "schema":
+            "type": "string"
+          "description": "An existing exact relative resource, or empty for the selected scope."
+        -
+          "name": "permission"
+          "in": "query"
+          "required": true
+          "schema":
+            "type": "string"
+          "description": "One full registered teststudio permission identifier."
+        -
+          "$ref": "#/components/parameters/Limit"
+        -
+          "$ref": "#/components/parameters/Cursor"
+      "responses":
+        "200":
+          "description": "Current decision and a bounded policy-path scan."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/PermissionExplanation"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+
 "components":
   "securitySchemes":
     "SessionCookie":
@@ -3144,3 +3237,150 @@
       "required":
         - "disabled"
         - "reason"
+
+    "PermissionDefinition":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "id":
+          "type": "string"
+        "area":
+          "type": "string"
+        "action":
+          "type": "string"
+        "description":
+          "type": "string"
+        "installationOnly":
+          "type": "boolean"
+      "required":
+        - "id"
+        - "area"
+        - "action"
+        - "description"
+        - "installationOnly"
+    "PermissionSource":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "id":
+          "type": "string"
+          "pattern": "^[a-f0-9]{64}$"
+          "description": "Inspector-bound source identifier. It exposes no native grant identifier."
+        "principalId":
+          "type": "string"
+        "principalName":
+          "type": "string"
+        "roleId":
+          "type": "string"
+        "roleName":
+          "type": "string"
+        "assignedRoleId":
+          "type": "string"
+        "assignedRoleName":
+          "type": "string"
+        "grantId":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "teamScope":
+          "type": "string"
+          "description": "Configured native scope. A template remains a template. assignmentProject shows only a binding in the selected project."
+        "objectScope":
+          "type": "string"
+        "assignmentProject":
+          "type": "string"
+        "kind":
+          "type": "string"
+          "enum":
+            - "direct"
+            - "role"
+        "effect":
+          "type": "string"
+          "enum":
+            - "allow"
+            - "deny"
+        "status":
+          "type": "string"
+          "enum":
+            - "matching"
+            - "expired"
+        "restricted":
+          "type": "boolean"
+          "description": "True hides principal, role, grant, scope, binding, expiry, and field details. The matching effect and source kind remain visible."
+        "scopeKnown":
+          "type": "boolean"
+        "principalKind":
+          "type": "string"
+          "enum":
+            - "user"
+            - "group"
+        "expiresAt":
+          "type": "string"
+          "format": "date-time"
+        "restrictedFields":
+          "type": "array"
+          "items":
+            "type": "string"
+      "required":
+        - "id"
+        - "kind"
+        - "effect"
+        - "status"
+        - "restricted"
+        - "scopeKnown"
+    "PermissionExplanation":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "userId":
+          "type": "string"
+        "userName":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "object":
+          "type": "string"
+        "permission":
+          "type": "string"
+        "allowed":
+          "type": "boolean"
+        "reason":
+          "type": "string"
+          "enum":
+            - "allowed"
+            - "explicit-deny"
+            - "no-matching-allow"
+            - "user-disabled"
+        "userDisabled":
+          "type": "boolean"
+        "checkedAt":
+          "type": "string"
+          "format": "date-time"
+        "items":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/PermissionSource"
+        "cursor":
+          "type": "string"
+        "partial":
+          "type": "boolean"
+        "canInspectOthers":
+          "type": "boolean"
+        "permissions":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/PermissionDefinition"
+      "required":
+        - "userId"
+        - "userName"
+        - "projectId"
+        - "object"
+        - "permission"
+        - "allowed"
+        - "reason"
+        - "userDisabled"
+        - "checkedAt"
+        - "items"
+        - "partial"
+        - "canInspectOthers"
+        - "permissions"

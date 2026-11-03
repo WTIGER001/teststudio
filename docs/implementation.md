@@ -5,7 +5,7 @@ The full plan remains required scope. Check an item only after its implementatio
 ## Acceptance criteria
 
 - [x] A new project, application, environment, and suite can be registered without editing Go or TypeScript source.
-- [ ] Users, groups, membership, custom roles, assignments, and effective permissions are manageable through authorized API and UI workflows.
+- [x] Users, groups, membership, custom roles, assignments, and effective permissions are manageable through authorized API and UI workflows.
 - [x] `wtiger001/go-permissions` evaluates access on PostgreSQL and SQLite through the same service and identity contracts.
 - [ ] User, group, role, object, and project grant checks cover explicit denies, expired grants, inheritance, and assignment revocation.
 - [ ] Project administrators cannot grant installation privileges or affect another project's groups, assignments, results, or evidence.
@@ -65,6 +65,46 @@ The full plan remains required scope. Check an item only after its implementatio
 ## Feature log
 
 Record feature commits and targeted validation here.
+
+### Effective access decisions and source explanations
+
+Added self and authorized-user explanation APIs for exact project, installation, and resource contexts.
+The decision uses the live permission service. Read-only library probes verify each direct or inherited role path.
+The probes preserve actual principal, root assignment, binding, grant owner, disabled state, denies, expiry, and field semantics.
+No second policy matcher or native permission writes are introduced.
+Reasons distinguish allows, explicit denies, missing allows, and disabled users.
+
+Source details require authority over their actual administration scope, principal, role, group, and managed grant.
+Restricted rows omit private identifiers, scopes, names, bindings, expiry timestamps, and field details.
+Source identities use inspector-bound opaque authentication codes. Native grant identifiers remain private.
+Bounded continuations bind current directory, group, role-path, decision, actor, subject, action, and resource context.
+Changed directory state and processed grant expiry reject stale continuation.
+Empty partial scans retain the complete decision and permit further scanning without a total-source ceiling.
+
+Explain project access and Explain installation access provide registered action selection and self-inspection.
+Authorized managers can inspect another registered user.
+The interface separates the complete decision from source-scan progress.
+Cards show direct, assigned, inherited, expired, and restricted paths with precise scopes and expiry.
+Changed fields discard reports and invalidate late responses. Failed refreshes and continuations clear private state.
+Both pages provide contextual help, keyboard controls, shared themes, and narrow-screen layouts.
+
+The OpenAPI 0.8 contract and generated client contain 59 identity and access operations.
+Required query parameters now require the query container in generated request types.
+The built-service restart verifier preserves explanation identities and verifies inactive and restored inherited access.
+Its retained summary is `output/access/access-verification.ShC9BP/summary.json`.
+
+Focused source, privacy, stale-context, grant, custom-role, predefined-role, and client checks pass with race detection on SQLite.
+Source checks also pass on disposable PostgreSQL, including actual foreign assignment bindings and scoped source redaction.
+Generated-client checks, targeted vet checks, pure presentation checks, TypeScript checks, and production builds pass.
+The normal Playwright workflow verifies active denies, expiry, direct and inherited paths, self-inspection, restricted groups, and installation denial.
+It verifies bounded continuation, explicit conflict recovery, discarded late responses, and revoked administrative inspection with retained evidence.
+The final explanation workflow passes: `20261103T073014.785326000-005a226812b3e6f723ee4679`.
+Contextual help and navigation pass: `20261103T072814.022520000-78634560dda57dbe23d9955b`.
+Predefined role regression passes: `20261103T073122.920006000-e4b99c8f38befc1986e5d421`.
+Visual review confirms loaded source cards and decisions in light mode and at 390 pixels in dark mode without document overflow.
+Owned controllers, browser containers, output volumes, and disposable databases exit after verification.
+This evidence completes the authorized user, group, membership, role, assignment, and effective-permission workflow acceptance item.
+Identity linking, provider workflows, source releases, hosted profiles, and the remaining full plan stay pending.
 
 ### Predefined role overrides and fresh authorization state
 

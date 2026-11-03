@@ -79,11 +79,11 @@ func New(ctx context.Context, store permissions.PermissionStore, directory *iden
 }
 
 func NewEngine(ctx context.Context, store permissions.PermissionStore, directory permissions.IdentityProvider) (*permissions.Service, error) {
-	engine := permissions.NewServiceWithIdentity(directory, store)
+	engine, err := roleEngine(ctx, store, directory)
+	if err != nil {
+		return nil, err
+	}
 	for _, role := range BuiltInRoles() {
-		if err := engine.AddBuiltInRole(ctx, permissions.Role{ID: role.ID, Name: role.Name}); err != nil {
-			return nil, err
-		}
 		for _, name := range role.Permissions {
 			g := permissions.Grant{OwnerKind: permissions.PrincipalRole, OwnerID: role.ID, PermissionName: name, Effect: permissions.EffectAllow, TeamScope: "?team", VariableSpec: map[string]any{"team": "required"}}
 			if role.ID == "builtin.teststudio.installation-admin" {
@@ -98,6 +98,27 @@ func NewEngine(ctx context.Context, store permissions.PermissionStore, directory
 	return engine, nil
 }
 
+func roleEngine(ctx context.Context, store permissions.PermissionStore, directory permissions.IdentityProvider) (*permissions.Service, error) {
+	engine := permissions.NewServiceWithIdentity(directory, store)
+	engine.SetSyntheticRoleIDs("", "", "")
+	for _, role := range BuiltInRoles() {
+		if err := engine.AddBuiltInRole(ctx, permissions.Role{ID: role.ID, Name: role.Name}); err != nil {
+			return nil, err
+		}
+	}
+	return engine, nil
+}
+
+func RequestFor(user, project, object, name string) permissions.Request {
+	if !strings.HasPrefix(name, "teststudio.") {
+		name = "teststudio." + name
+	}
+	if project != "" && object != "" {
+		object = project + "/" + object
+	}
+	return permissions.Request{UserID: user, TeamID: project, Object: object, Perm: name}
+}
+
 func (s *Service) Check(ctx context.Context, user, project, object, name string) error {
 	if user == "" {
 		return ErrForbidden
@@ -109,17 +130,11 @@ func (s *Service) Check(ctx context.Context, user, project, object, name string)
 	if u.Disabled {
 		return ErrForbidden
 	}
-	if !strings.HasPrefix(name, "teststudio.") {
-		name = "teststudio." + name
-	}
-	if project != "" && object != "" {
-		object = project + "/" + object
-	}
 	engine, err := s.CurrentEngine(ctx)
 	if err != nil {
 		return err
 	}
-	ok, err := engine.HasPermission(ctx, permissions.Request{UserID: user, TeamID: project, Object: object, Perm: name})
+	ok, err := engine.HasPermission(ctx, RequestFor(user, project, object, name))
 	if err != nil {
 		return err
 	}

@@ -43,3 +43,24 @@ func TestIdentityClientPreservesNullableExpiryAndRequiredFields(t *testing.T) {
 		t.Fatal("unsupported schema silently changed the contract")
 	}
 }
+
+func TestIdentityClientRequiresTheQueryForMandatoryPermissionInputs(t *testing.T) {
+	data, err := os.ReadFile("../../contracts/openapi.yaml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	generated, err := generate(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, operation := range []string{"explainOwnPermission", "explainUserPermission"} {
+		start := strings.Index(string(generated), "  "+operation+": {")
+		if start < 0 {
+			t.Fatal("missing explanation request", operation)
+		}
+		line := strings.SplitN(string(generated[start:]), "\n", 2)[0]
+		if !strings.Contains(line, "query: {") || strings.Contains(line, "query?:") || !strings.Contains(line, `"permission": string`) || !strings.Contains(line, `"cursor"?: string`) {
+			t.Fatal("required permission input became optional", line)
+		}
+	}
+}

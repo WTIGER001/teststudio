@@ -8,6 +8,7 @@ Managed password screens use the same directory, sessions, and permission checks
 Managed custom role APIs support scoped rules, inheritance, disabled state, and assignment.
 Custom role screens use the same typed API, scope checks, and revision guards.
 Direct permission screens manage user and group rules through the same generated client.
+Explain access screens show current decisions and authorized source details through the same permission evaluator.
 Identity linking and pending project access remain pending.
 The full acceptance ledger remains in [Implementation verification](implementation.md).
 The [OpenAPI contract](../contracts/openapi.yaml) describes identity, role policy, direct grants, permission catalog, and assignment routes. Other route families remain pending.
@@ -22,7 +23,7 @@ go run ./cmd/teststudio-client --check
 ```
 
 Run these commands from the repository root.
-The generated module contains all 57 implemented identity and access operations, including predefined role state, direct grants, previews, and custom assignment choices.
+The generated module contains all 59 implemented identity and access operations, including explanations, predefined role state, grants, previews, and custom assignment choices.
 The shared client adapter supplies same-origin sessions, request-forgery protection, and revision headers.
 The client escapes path identifiers and preserves explicit query values.
 Generator checks reject stale output. Nullable expiry and required fields retain their contract types.
@@ -272,7 +273,7 @@ All access decisions continue through the permission library.
 Focused SQLite and local PostgreSQL checks cover pending evaluation, complete rollback, exact object boundaries, direct reports, and grant pagination.
 They also cover disabled overrides, expired denies, independent connections, retained grant identifiers, and alternate inheritance paths.
 Managed role APIs use this storage foundation.
-Direct principal grant APIs and editors use this transaction. Complete effective-access explanations remain pending.
+Direct principal grant APIs and editors use this transaction. Read-only explanations use the same permission evaluator.
 
 ## Managed custom role policies
 
@@ -324,7 +325,7 @@ Custom role details return server-computed `canManage` and `delegatable` values.
 Catalog pages return `canCreate` for the current scope. Archived projects suppress mutation capabilities.
 Custom assignment choice pages use a separate actor-bound cursor and current delegation checks.
 Direct principal grants and predefined role overrides use their dedicated administration routes.
-Complete effective-access explanations remain pending.
+The effective-access explanation workflow appears below.
 
 ## Proposed policy preview
 
@@ -340,7 +341,7 @@ Disabled users remain denied.
 Both comparisons call the common permission service. Existing assignments, groups, denies, and expiry remain effective.
 The preview always rolls back temporary policy, assignment, audit, and directory revision writes.
 It returns one current and proposed decision for each registered action in the selected scope.
-These comparisons do not replace the pending permission-source explanation workflow.
+These comparisons do not replace the permission-source explanation workflow.
 
 ## Custom role interface
 
@@ -664,7 +665,7 @@ bash scripts/test-postgres.sh ./internal/access ./internal/httpapi -run TestDire
 ```
 
 The built-service access verifier checks actual SQLite restarts, retained expiry, deny precedence, revoked access through existing sessions, and recreation revisions.
-Complete effective-access source explanations remain pending.
+The effective-access explanation workflow appears below.
 
 ## Direct grant interface
 
@@ -775,4 +776,61 @@ Use the disposable PostgreSQL profile for the same contract:
 ```sh
 bash scripts/test-postgres.sh ./internal/access ./internal/httpapi ./internal/authorization ./cmd/teststudio \
   -run 'TestBuiltinRole|TestLocalRecovery'
+```
+
+## Effective-access explanations
+
+Open Explain project access for the selected project. Open Explain installation access for installation context.
+Both pages start with your own account. Inspection grants no new access.
+Select a registered permission. Leave the object empty for the displayed scope or enter one exact existing resource.
+Changing a field clears the earlier report and invalidates late responses.
+Check access evaluates the current context. Use my account resets the inspected user.
+
+The API provides these read-only endpoints:
+
+| Method | Path | Purpose |
+| --- | --- | --- |
+| GET | `/api/v1/me/effective-permissions` | Explain your own permission in the requested context. |
+| GET | `/api/v1/users/{user}/effective-permissions` | Explain an authorized registered user's permission. |
+
+Supply the full registered `permission` query value. Optional parameters are `project`, `object`, `limit`, and `cursor`.
+The default scan limit is 30. Accepted limits are 1 through 1000.
+Project context rejects installation-only actions. Exact objects require authoritative ownership in the supplied scope.
+Another user's inspection requires scoped membership reading, membership management, and permission reading, including the subject and requested object.
+Self-inspection requires project reading for a whole project, or appropriate reading authority for the exact resource.
+Self-inspection of installation scope requires an active authenticated account.
+
+The decision calls the same permission service as live requests.
+Reasons distinguish an allow, an explicit deny, no matching allow, and a disabled account.
+The report includes its check time. It does not promise unchanged future access.
+Synthetic public, authenticated, and administrator roles remain disabled. Product access requires explicit assignments or grants.
+
+Each source identifies a direct grant or an assigned role path.
+Authorized role details include the principal, assigned root, inherited grant owner, configured scopes, project binding, and expiry.
+Expired rules appear only when they otherwise match the context. They grant no access.
+Field restrictions follow the library's permission-level evaluation.
+Disabled roles and inactive groups contribute no active paths.
+
+Source inspection uses isolated read-only library engines. It does not implement a second policy matcher.
+Each role probe retains its actual principal, root assignment, binding, inherited grant owner, and native role state.
+Deny probes use an in-memory baseline allow to verify actual deny precedence.
+The probes write no assignments, native grants, role definitions, or audit changes.
+
+Source details require reading authority over their principal, role, grant, and ownership scope.
+Group sources also require reading authority over the stored group and membership context.
+Exact object read denies remain authoritative.
+Restricted sources expose only an opaque identity, source kind, effect, and matching or expired status.
+They omit names, identifiers, scopes, bindings, expiry timestamps, and field restrictions.
+Opaque source identities bind the inspector and context. They do not expose native grant identifiers.
+
+Source scans are bounded. They can return an empty partial page before later matching sources.
+Scan more sources continues the same context. The decision remains complete even while its source list is incomplete.
+Continuation binds the inspector, subject, project, object, action, directory revision, group state, role paths, and current decision.
+Directory changes or processed grant expiry invalidate continuation with HTTP 409.
+Rejected continuations and failed refreshes clear private reports. Check access starts a new scan.
+
+Run the browser workflow through normal publication and execution:
+
+```sh
+bash scripts/test-self.sh --test=STUDIO-PERMISSIONS-001
 ```

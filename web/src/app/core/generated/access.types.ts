@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.7.0"
+export const accessContractVersion = "0.8.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -32,6 +32,9 @@ export type PasswordSignedIn = { "mustChangePassword": boolean; "signedIn": bool
 export type PermissionCatalog = { "items": (PermissionChoice)[] }
 export type PermissionChoice = { "action": string; "area": string; "canGrant": boolean; "description": string; "id": string; "installationOnly": boolean }
 export type PermissionComparison = { "after": boolean; "before": boolean; "permission": string }
+export type PermissionDefinition = { "action": string; "area": string; "description": string; "id": string; "installationOnly": boolean }
+export type PermissionExplanation = { "allowed": boolean; "canInspectOthers": boolean; "checkedAt": string; "cursor"?: string; "items": (PermissionSource)[]; "object": string; "partial": boolean; "permission": string; "permissions": (PermissionDefinition)[]; "projectId": string; "reason": "allowed" | "explicit-deny" | "no-matching-allow" | "user-disabled"; "userDisabled": boolean; "userId": string; "userName": string }
+export type PermissionSource = { "assignedRoleId"?: string; "assignedRoleName"?: string; "assignmentProject"?: string; "effect": "allow" | "deny"; "expiresAt"?: string; "grantId"?: string; "id": string; "kind": "direct" | "role"; "objectScope"?: string; "principalId"?: string; "principalKind"?: "user" | "group"; "principalName"?: string; "projectId"?: string; "restricted": boolean; "restrictedFields"?: (string)[]; "roleId"?: string; "roleName"?: string; "scopeKnown": boolean; "status": "matching" | "expired"; "teamScope"?: string }
 export type PredefinedRole = { "canManage": boolean; "disabled": boolean; "id": string; "name": string; "permissions": (string)[]; "scope": "project" | "installation" }
 export type PredefinedRolePage = { "items": (PredefinedRoleRecord)[] }
 export type PredefinedRoleRecord = { "data": PredefinedRole; "id": string; "revision": number; "updatedAt"?: string }
@@ -72,6 +75,7 @@ export interface AccessRequests {
   saveLocalMembership: { "user": string; "group": string; revision: number; body: MembershipDefinition }
   restoreGroup: { "group": string; revision: number; body: Reason }
   currentProfile: { query?: { "limit"?: number; "cursor"?: string } }
+  explainOwnPermission: { query: { "project"?: string; "object"?: string; "permission": string; "limit"?: number; "cursor"?: string } }
   readOwnLocalCredential: {  }
   permissionCatalog: { query?: { "project"?: string; "object"?: string } }
   listInstallationGrants: { query?: { "limit"?: number; "cursor"?: string } }
@@ -107,6 +111,7 @@ export interface AccessRequests {
   readUser: { "user": string }
   editUser: { "user": string; revision: number; body: UserDefinition }
   disableUser: { "user": string; revision: number; body: Reason }
+  explainUserPermission: { "user": string; query: { "project"?: string; "object"?: string; "permission": string; "limit"?: number; "cursor"?: string } }
   listUserIdentities: { "user": string; query?: { "limit"?: number; "cursor"?: string } }
   readLocalCredential: { "user": string }
   setLocalPassword: { "user": string; revision: number; body: LocalPasswordDefinition }
@@ -132,6 +137,7 @@ export interface AccessResponses {
   saveLocalMembership: Saved
   restoreGroup: GroupRecord
   currentProfile: Profile
+  explainOwnPermission: PermissionExplanation
   readOwnLocalCredential: LocalCredentialRecord
   permissionCatalog: PermissionCatalog
   listInstallationGrants: GrantsPage
@@ -167,6 +173,7 @@ export interface AccessResponses {
   readUser: UserRecord
   editUser: UserRecord
   disableUser: UserRecord
+  explainUserPermission: PermissionExplanation
   listUserIdentities: ExternalIdentityPage
   readLocalCredential: LocalCredentialRecord
   setLocalPassword: LocalCredentialRecord
@@ -192,6 +199,7 @@ export const accessOperations = {
   saveLocalMembership: { method: "PUT", path: "/api/v1/groups/{group}/members/{user}" },
   restoreGroup: { method: "POST", path: "/api/v1/groups/{group}/restore" },
   currentProfile: { method: "GET", path: "/api/v1/me" },
+  explainOwnPermission: { method: "GET", path: "/api/v1/me/effective-permissions" },
   readOwnLocalCredential: { method: "GET", path: "/api/v1/me/local-credential" },
   permissionCatalog: { method: "GET", path: "/api/v1/permissions" },
   listInstallationGrants: { method: "GET", path: "/api/v1/permissions/grants" },
@@ -227,6 +235,7 @@ export const accessOperations = {
   readUser: { method: "GET", path: "/api/v1/users/{user}" },
   editUser: { method: "PUT", path: "/api/v1/users/{user}" },
   disableUser: { method: "POST", path: "/api/v1/users/{user}/disable" },
+  explainUserPermission: { method: "GET", path: "/api/v1/users/{user}/effective-permissions" },
   listUserIdentities: { method: "GET", path: "/api/v1/users/{user}/identities" },
   readLocalCredential: { method: "GET", path: "/api/v1/users/{user}/local-credential" },
   setLocalPassword: { method: "PUT", path: "/api/v1/users/{user}/local-credential" },

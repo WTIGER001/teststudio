@@ -109,6 +109,16 @@ try {
   const reviewerCookie = cookie
   cookie = rootCookie; csrf = rootCSRF
   assert.equal((await request('GET', '/api/v1/me/capabilities?project=access-example', undefined, undefined, 200, reviewerCookie))['teststudio.runs.cancel'], false)
+  const explanationQuery = '?project=access-example&object=suite%2Fhealth&permission=teststudio.catalog.read'
+  const healthExplanation = '/api/v1/users/pending-reviewer/effective-permissions' + explanationQuery
+  const firstExplanation = await request('GET', healthExplanation)
+  assert.equal(firstExplanation.allowed, true)
+  const inheritedSource = firstExplanation.items.find(item => item.roleId === role.id && item.assignedRoleId === composite.id)
+  assert.ok(inheritedSource)
+  assert.equal(inheritedSource.principalId, 'reviewers')
+  const ownExplanation = await request('GET', '/api/v1/me/effective-permissions' + explanationQuery, undefined, undefined, 200, reviewerCookie)
+  assert.equal(ownExplanation.allowed, true)
+  assert.equal(ownExplanation.canInspectOthers, false)
   await stop()
 
   await start()
@@ -127,6 +137,8 @@ try {
   assert.equal((await request('GET', '/api/v1/roles/' + role.id)).revision, reader.revision)
   assert.deepEqual((await request('GET', '/api/v1/roles/' + composite.id)).data.inherits, [role.id])
   await request('DELETE', assignmentPath, { reason: 'Revoke before the next restart' }, assigned.revision)
+  const retainedExplanation = await request('GET', healthExplanation)
+  assert.equal(retainedExplanation.items.find(item => item.roleId === role.id).id, inheritedSource.id)
   const runHistory = '/api/v1/projects/access-example/runs'
   assert.equal((await request('GET', grantsPath + '/' + direct.id)).revision, direct.revision)
   await request('GET', runHistory, undefined, undefined, 403, reviewerCookie)
@@ -146,6 +158,10 @@ try {
   await request('GET', '/api/v1/roles/' + composite.id, undefined, undefined, 403, reviewerCookie)
   const disabledRole = await request('PUT', '/api/v1/roles/' + composite.id, { ...composite.data, disabled: true, reason: 'Disable inherited access before restart' }, composite.revision)
   await request('GET', healthDrafts, undefined, undefined, 403, reviewerCookie)
+  const disabledExplanation = await request('GET', healthExplanation)
+  assert.equal(disabledExplanation.allowed, false)
+  assert.equal(disabledExplanation.reason, 'no-matching-allow')
+  assert.equal(disabledExplanation.items.length, 0)
   await stop()
 
   await start(true)
@@ -164,6 +180,9 @@ try {
   await request('GET', healthDrafts, undefined, undefined, 403, reviewerCookie)
   await request('PUT', '/api/v1/roles/' + composite.id, { ...retainedRole.data, disabled: false, reason: 'Restore retained inherited policy' }, retainedRole.revision)
   await request('GET', healthDrafts, undefined, undefined, 200, reviewerCookie)
+  const restoredExplanation = await request('GET', healthExplanation)
+  assert.equal(restoredExplanation.allowed, true)
+  assert.equal(restoredExplanation.items.find(item => item.roleId === role.id).id, inheritedSource.id)
   await request('GET', assignmentPath, undefined, undefined, 404)
   const recreated = await request('POST', assignmentBase, { principalKind: 'user', principalId: 'pending-reviewer', roleId: 'builtin.teststudio.editor', reason: 'Recreate with a new revision' })
   assert.equal(recreated.id, assigned.id)
@@ -203,7 +222,7 @@ try {
     const code = await new Promise((resolve, reject) => { child.once('exit', resolve); child.once('error', reject) })
     assert.equal(code, 1, 'Recovery accepted an invalid listen mode')
   }
-  const summary = { builtinOverridesPreserved: true, retainedBuiltinAccessRestored: true, ordinaryStartupPreservesDisabledBuiltin: true, explicitRecoveryRestoresBuiltinAdministrator: true, builtinRecoveryAdvancesRevision: true, directGrantsPreserved: true, directDenyPrecedenceVerified: true, expiredDeniesPreserved: true, directRevocationVerified: true, recreatedDirectRevisionAdvanced: true, customRoleRulesPreserved: true, customRoleInheritancePreserved: true, exactObjectAccessVerified: true, disabledInheritedAccessPreserved: true, enabledInheritedAccessRestored: true, assignmentsPreserved: true, assignmentRevocationPreserved: true, recreatedAssignmentRevisionAdvanced: true, usersPreserved: true, membershipsPreserved: true, paginationSurvivedRestart: true, oldSessionSurvivedOrdinaryRestart: true, oldSessionRejectedAfterRecovery: true, lastAdministratorRemovalRejected: true, recoveryRequiresLoopbackLocalMode: true, ownedControllersExited: true }
+  const summary = { permissionExplanationsPreserved: true, inactiveInheritedAccessExplained: true, ownExactObjectExplanationVerified: true, builtinOverridesPreserved: true, retainedBuiltinAccessRestored: true, ordinaryStartupPreservesDisabledBuiltin: true, explicitRecoveryRestoresBuiltinAdministrator: true, builtinRecoveryAdvancesRevision: true, directGrantsPreserved: true, directDenyPrecedenceVerified: true, expiredDeniesPreserved: true, directRevocationVerified: true, recreatedDirectRevisionAdvanced: true, customRoleRulesPreserved: true, customRoleInheritancePreserved: true, exactObjectAccessVerified: true, disabledInheritedAccessPreserved: true, enabledInheritedAccessRestored: true, assignmentsPreserved: true, assignmentRevocationPreserved: true, recreatedAssignmentRevisionAdvanced: true, usersPreserved: true, membershipsPreserved: true, paginationSurvivedRestart: true, oldSessionSurvivedOrdinaryRestart: true, oldSessionRejectedAfterRecovery: true, lastAdministratorRemovalRejected: true, recoveryRequiresLoopbackLocalMode: true, ownedControllersExited: true }
   const output = path.resolve('output/access', path.basename(root))
   mkdirSync(output, { recursive: true })
   writeFileSync(path.join(output, 'summary.json'), JSON.stringify(summary, null, 2))

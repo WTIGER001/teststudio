@@ -65,8 +65,10 @@ import { HelpComponent } from './features/help/help.component'
           </div>
           <nav aria-label="Main navigation">
             <a routerLink="/projects" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><span aria-hidden="true">▦</span> Projects</a>
-            <a routerLink="/account" routerLinkActive="active"><span aria-hidden="true">♙</span> Your account</a>
+            <a routerLink="/account" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"><span aria-hidden="true">♙</span> Your account</a>
+            <a routerLink="/account/access" routerLinkActive="active"><span aria-hidden="true">♧</span> Explain installation access</a>
             @if (app.workspace.projectId()) {
+              <a [routerLink]="['/projects', app.workspace.projectId(), 'explain-access']" routerLinkActive="active"><span aria-hidden="true">♧</span> Explain project access</a>
               <a [routerLink]="['/projects', app.workspace.projectId(), 'catalog']" routerLinkActive="active"><span aria-hidden="true">≡</span> Test catalog</a>
               <a [routerLink]="['/projects', app.workspace.projectId(), 'runs']" routerLinkActive="active"><span aria-hidden="true">▷</span> Test runs</a>
               <a [routerLink]="['/projects', app.workspace.projectId(), 'trends']" routerLinkActive="active"><span aria-hidden="true">▥</span> Trends</a>

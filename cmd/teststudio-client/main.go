@@ -166,6 +166,7 @@ func generate(data []byte) ([]byte, error) {
 			}
 			seen[op.ID] = true
 			fields, query := []string{}, []string{}
+			queryRequired := false
 			for _, p := range op.Parameters {
 				if p.Ref != "" {
 					ref := strings.TrimPrefix(p.Ref, "#/components/parameters/")
@@ -188,6 +189,7 @@ func generate(data []byte) ([]byte, error) {
 					fields = append(fields, quote(p.Name)+optional+": "+t)
 				case "query":
 					query = append(query, quote(p.Name)+optional+": "+t)
+					queryRequired = queryRequired || p.Required
 				case "header":
 					if p.Name == "If-Match" {
 						fields = append(fields, "revision: number")
@@ -199,7 +201,11 @@ func generate(data []byte) ([]byte, error) {
 				}
 			}
 			if len(query) > 0 {
-				fields = append(fields, "query?: { "+strings.Join(query, "; ")+" }")
+				optional := "?"
+				if queryRequired {
+					optional = ""
+				}
+				fields = append(fields, "query"+optional+": { "+strings.Join(query, "; ")+" }")
 			}
 			if op.Body != nil {
 				t, err := schemaType(op.Body.Content["application/json"].Schema)
