@@ -14,7 +14,12 @@ type PermissionChoice struct {
 
 func (s *Service) PermissionCatalog(ctx context.Context, actor, project, object string) ([]PermissionChoice, error) {
 	if _, err := s.assignmentScope(ctx, actor, project, "roles.read"); err != nil {
-		return nil, err
+		if !errors.Is(err, authorization.ErrForbidden) {
+			return nil, err
+		}
+		if _, err := s.assignmentScope(ctx, actor, project, "permissions.read"); err != nil {
+			return nil, err
+		}
 	}
 	if err := s.checkPolicyObject(ctx, project, object); err != nil {
 		return nil, err

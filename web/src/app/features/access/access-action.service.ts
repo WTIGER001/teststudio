@@ -26,7 +26,7 @@ export class AccessActionService {
       const message = await action.submit(this.reason().trim())
       if (generation !== this.generation) return
       this.pending.set(null); this.message.set(message); accessFocus(action.returnFocus)
-    } catch (error) { if (generation === this.generation) { this.error.set(error instanceof Error ? error.message : 'The action failed.'); this.conflict.set(error instanceof ApiError && error.status === 409) } }
+    } catch (error) { if (generation === this.generation) { this.error.set(error instanceof ApiError ? error.message : 'The action could not be confirmed. Refresh state before retrying.'); this.conflict.set(!(error instanceof ApiError) || error.status === 409 || error.status >= 500) } }
     finally { if (generation === this.generation) this.busy.set(false) }
   }
 }

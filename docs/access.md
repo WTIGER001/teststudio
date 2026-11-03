@@ -7,6 +7,7 @@ Users and Groups screens use the administrative APIs for profiles, account state
 Managed password screens use the same directory, sessions, and permission checks.
 Managed custom role APIs support scoped rules, inheritance, disabled state, and assignment.
 Custom role screens use the same typed API, scope checks, and revision guards.
+Direct permission screens manage user and group rules through the same generated client.
 Identity linking and pending project access remain pending.
 The full acceptance ledger remains in [Implementation verification](implementation.md).
 The [OpenAPI contract](../contracts/openapi.yaml) describes identity, role policy, direct grants, permission catalog, and assignment routes. Other route families remain pending.
@@ -266,7 +267,7 @@ All access decisions continue through the permission library.
 Focused SQLite and local PostgreSQL checks cover pending evaluation, complete rollback, exact object boundaries, direct reports, and grant pagination.
 They also cover disabled overrides, expired denies, independent connections, retained grant identifiers, and alternate inheritance paths.
 Managed role APIs use this storage foundation.
-Direct principal grant APIs use this transaction. Their editor workflows and complete effective-access explanations remain pending.
+Direct principal grant APIs and editors use this transaction. Complete effective-access explanations remain pending.
 
 ## Managed custom role policies
 
@@ -657,4 +658,51 @@ bash scripts/test-postgres.sh ./internal/access ./internal/httpapi -run TestDire
 ```
 
 The built-service access verifier checks actual SQLite restarts, retained expiry, deny precedence, revoked access through existing sessions, and recreation revisions.
-Direct grant screens and complete source explanations remain pending.
+Complete effective-access source explanations remain pending.
+
+## Direct grant interface
+
+Open Project permissions from the selected workspace or Installation permissions from installation navigation.
+Each page requires membership and permission read authority in its displayed scope.
+The table shows the principal, activity, permission, exact object, effect, precise expiry, last change, and permitted actions.
+Grant identity expands to show the public identifier and revision.
+More grants continues a bounded scan. Refresh permissions returns to the first scan.
+
+Select Add direct grant to open the creation form.
+Choose User or Group and enter its registered identifier.
+Set an optional exact object, then select Refresh grant permissions.
+Permission choices show registered descriptions and current delegation authority for that object.
+Changing the object invalidates loaded choices until refresh.
+Registered action inspection accepts role read authority or permission read authority.
+The server still checks current delegation, actual rule actions, principal ownership, and lifecycle state when saving.
+
+Select an effect, optional complete expiry timestamp, and a reason. Select Create grant to save.
+An installation rule shows that its scope includes all projects.
+An active deny overrides matching allows. Removing a deny can restore access through other grants and roles.
+
+Edit expiry preserves the revision captured when opened.
+Refreshing the visible list does not change that revision or unsaved fields.
+Conflicts preserve values and require explicit Reload stored grant before another save.
+Identity fields remain fixed. Expiry updates send only expiry and reason.
+Empty expiry removes the time limit. Past expiry remains visible and grants no access.
+
+Remove grant shows the exact target and impact, then requires a reason.
+After a conflict, cancel, refresh, and open a new action against the current revision.
+Unconfirmed saves and removals preserve reasons and block repeat submission until explicit state review.
+An unreadable rejection retains its original HTTP status. Authorization failures clear private list and editor data.
+Scope changes discard previous editors and invalidate late responses.
+
+Both pages provide Introduction, Concepts, and Tutorials help without discarding unsaved values.
+Shared theme tokens support light and dark modes. Tables scroll within labeled keyboard-focusable regions on narrow screens.
+
+Run the focused browser workflow through normal TestStudio publication, execution, timing, and evidence storage:
+
+```sh
+bash scripts/test-self.sh --test=STUDIO-GRANTS-001
+```
+
+Run the pure form utility checks:
+
+```sh
+node scripts/test-ui-utils.mjs web/src/app/features/access/grant.utils.test.ts
+```

@@ -161,3 +161,16 @@ Changing scope closes previous editors and invalidates old responses.
 Each page includes contextual help and uses shared light and dark tokens.
 Narrow screens keep readable table columns inside a keyboard-focusable horizontal scroll region.
 The focused self-test exercises real project-administrator and read-only sessions, mutations, conflicts, pagination, help, and administrator protection.
+
+## Direct permission grants
+
+Project permissions and Installation permissions provide scoped direct user and group grant administration.
+Structured creation fields show principal ownership, exact objects, registered action descriptions, effect, precise UTC expiry, and change reason.
+Object changes invalidate action choices until explicit refresh.
+Expiry editors retain their opened revisions and preserve unsaved values during list refresh and conflicts.
+Removal displays the exact rule and its effect on access before requesting a reason.
+The interface blocks repeat submission after an unconfirmed change until explicit state review.
+Authorization failures clear private editor and list data, including responses with unreadable bodies.
+Scope changes discard old editors and responses.
+Server capabilities control creation, expiry editing, and removal. Read-only sessions retain inspection controls.
+Each page provides contextual help. Shared tokens support both themes, and labeled table regions contain horizontal scrolling on narrow screens.

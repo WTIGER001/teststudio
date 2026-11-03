@@ -3,6 +3,7 @@
   "source": "teststudio-selftests",
   "tests": [
     { "id": "STUDIO-POLICY-001", "title": "Custom policies, inheritance, previews, and guarded role editors", "selector": "@STUDIO-POLICY-001", "category": "Administration" },
+    { "id": "STUDIO-GRANTS-001", "title": "Direct grant editors, expiry, deny precedence, and guarded removal", "selector": "@STUDIO-GRANTS-001", "category": "Administration" },
     { "id": "STUDIO-LOCAL-001", "title": "Local accounts, required password changes, and credential administration", "selector": "@STUDIO-LOCAL-001", "category": "Administration" },
     { "id": "STUDIO-ROLES-001", "title": "Scoped role assignments, delegation, and durable revocation controls", "selector": "@STUDIO-ROLES-001", "category": "Administration" },
     { "id": "STUDIO-ACCESS-001", "title": "Identity administration, scoped groups, and session controls", "selector": "@STUDIO-ACCESS-001", "category": "Administration" },

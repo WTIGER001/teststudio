@@ -1350,7 +1350,7 @@
   "/api/v1/permissions":
     "get":
       "operationId": "permissionCatalog"
-      "summary": "Read registered action descriptions and current grantability for an exact project and optional object."
+      "summary": "Read registered action descriptions and current grantability for an exact project and optional object. Requires role read or permission read authority."
       "parameters":
         -
           "$ref": "#/components/parameters/RoleProject"

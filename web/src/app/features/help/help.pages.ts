@@ -1,6 +1,22 @@
 import type { HelpPage } from './help.models'
 
 export const helpPages: Record<string, HelpPage> = {
+  grants: {
+    id: 'grants', title: 'Direct permissions',
+    introduction: ['Manage direct allow and deny rules for registered users and groups in the displayed scope. These rules apply alongside roles and inherited access.'],
+    concepts: [
+      { title: 'Exact ownership and objects', description: 'Project grants apply only within that project. Installation grants apply across projects. Empty object means the displayed scope. Exact objects do not include descendant resources.' },
+      { title: 'Allow, deny, and expiry', description: 'An active deny overrides matching allows. Expired rules remain visible and grant no access. Removing a deny can restore access from other grants or roles.' },
+      { title: 'Permanent identity', description: 'Principal, permission, effect, object, and ownership are permanent. Edit expiry to change the time limit. Remove and create a grant to change its identity. Every change requires a reason.' },
+      { title: 'Current authority', description: 'Controls follow current server permissions. Shared groups require installation group authority. Inactive principals permit authorized removal. The last usable administrator remains protected.' },
+      { title: 'Bounded management list', description: 'This list contains grants managed through TestStudio. It does not explain all effective access. More grants continues a bounded scan, including after an empty filtered page.' }
+    ],
+    tutorials: [
+      { title: 'Create a grant', steps: ['Read the ownership scope and select + Add direct grant.', 'Choose Principal type and enter the Registered principal identifier.', 'Leave Exact object empty or enter an existing exact resource such as suite/health. Select Refresh grant permissions after changing it.', 'Select Permission and Effect. Enter an optional full UTC expiry timestamp.', 'Enter Grant change reason and select Create grant. Inspect the saved rule.'] },
+      { title: 'Change expiry', steps: ['Find the rule and select Edit expiry.', 'Enter Expiry in UTC or leave it empty for no expiry. Enter Grant change reason and select Save grant expiry.', 'A conflict preserves your values. Select Reload stored grant to review the current revision before saving again.'] },
+      { title: 'Remove an exact rule', steps: ['Select Remove grant on the intended rule.', 'Read the principal, effect, permission, object, and impact. Enter a Reason and select Confirm action.', 'After a conflict, cancel, refresh permissions, and open a new action. Other grants and roles can still provide access.'] }
+    ]
+  },
   roles: {
     id: 'roles', title: 'Roles and permissions',
     introduction: ['Inspect predefined roles and manage custom policies in the displayed installation or project scope.'],

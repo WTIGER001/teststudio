@@ -23,7 +23,7 @@ export class ApiService {
     if (response.status === 401 && path !== '/auth/password') this.onUnauthenticated?.(csrf)
     let data
     try { data = await response.json() }
-    catch { throw new ApiError(502, 'The server returned an unreadable response. Refresh state before retrying a change.') }
+    catch { throw new ApiError(response.ok ? 502 : response.status, response.ok ? 'The server returned an unreadable response. Refresh state before retrying a change.' : 'The request was rejected with an unreadable response. Refresh state to review current access.') }
     if (!response.ok) {
       throw new ApiError(response.status, data.message || 'The request failed.')
     }

@@ -66,6 +66,36 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Record feature commits and targeted validation here.
 
+### Direct user and group grant interface
+
+Added Project permissions and Installation permissions pages through the generated access client.
+Focused services manage bounded lists, exact context permission choices, creation, expiry editing, and reason-based removal.
+Server capabilities control actions. Principal activity, exact objects, explicit effects, UTC expiry, and retained public revisions remain inspectable.
+Expiry editors preserve their opened revision and unsaved values during visible refresh and conflict.
+Changing the creation object invalidates permission choices until explicit refresh.
+Permission catalog inspection accepts role read or permission read authority without granting delegation.
+Both pages provide contextual Introduction, Concepts, and Tutorials help.
+Shared theme tokens and contained table regions support light, dark, and mobile layouts.
+The mobile editor constrains native select width while retaining readable permission descriptions.
+
+Unconfirmed saves and removals preserve entered reasons and block repeat submission until explicit state review.
+Shared reason actions now apply the same uncertainty guard to other administration pages.
+Unreadable error bodies retain their HTTP rejection status. Revoked access clears private editor and list state even with unreadable responses.
+Scope changes discard old editors and late responses.
+
+STUDIO-GRANTS-001 verifies actual exact-object access, inherited group deny precedence, expiry, deny removal, recreation conflicts, and retained reasons.
+It verifies unconfirmed successful saves and removals, read-only sessions, unreadable revoked-access rejections, administrator protection, and bounded continuation.
+Editor and list screenshots pass visual review. Both themes and mobile widths pass without document overflow or unexpected browser runtime errors.
+The final grant workflow passes with complete evidence: `20261103T054254.219959000-9b9843d7565b8b368a65afe9`.
+Expanded help passes: `20261103T054307.513038000-2605cdc5ba5b126228486c7a`.
+Role assignment regression passes: `20261103T054324.533775000-77f7006d6f403d91f7516e52`.
+Managed local account regression passes: `20261103T054337.613978000-91e050a3ec98e3f8ead552ba`.
+Focused direct grant, custom role, and preview race checks pass on SQLite and disposable local PostgreSQL after the catalog authority change.
+Four pure form utility checks, generated-client checks, targeted vet checks, and production Angular builds pass.
+Owned controllers, browser containers, output volumes, and disposable PostgreSQL containers exit after successful and failed verification runs.
+
+Complete effective-access source explanations, built-in override administration, identity and provider workflows, and the remaining full plan stay pending.
+
 ### Managed direct user and group grant APIs
 
 Added scoped direct grant listing, creation, detail, expiry updates, and revision-controlled removal.

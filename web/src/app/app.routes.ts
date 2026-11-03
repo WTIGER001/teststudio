@@ -5,6 +5,8 @@ export const routes: Routes = [
   { path: 'account', data: { helpTopic: 'account' }, loadComponent: () => import('./features/account/account.page').then(m => m.AccountPage) },
   { path: 'projects', data: { helpTopic: 'projects' }, loadComponent: () => import('./features/projects/projects.page').then(m => m.ProjectsPage) },
   { path: 'settings/access', data: { helpTopic: 'installation-access' }, loadComponent: () => import('./features/access/assignments.page').then(m => m.AssignmentsPage) },
+  { path: 'settings/permissions', data: { helpTopic: 'grants' }, loadComponent: () => import('./features/access/grants.page').then(m => m.GrantsPage) },
+  { path: 'projects/:projectId/permissions', data: { helpTopic: 'grants' }, loadComponent: () => import('./features/access/grants.page').then(m => m.GrantsPage) },
   { path: 'settings/roles', data: { helpTopic: 'roles' }, loadComponent: () => import('./features/access/role-policies.page').then(m => m.RolePoliciesPage) },
   { path: 'settings/roles/:roleId', data: { helpTopic: 'role' }, loadComponent: () => import('./features/access/role-policy-detail.page').then(m => m.RolePolicyDetailPage) },
   { path: 'projects/:projectId/roles', data: { helpTopic: 'roles' }, loadComponent: () => import('./features/access/role-policies.page').then(m => m.RolePoliciesPage) },

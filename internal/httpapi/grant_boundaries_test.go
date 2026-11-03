@@ -22,6 +22,12 @@ func TestDirectGrantReadOnlyAndObjectDeniesControlCapabilities(t *testing.T) {
 		}
 	}
 	assignmentSignInAs(t, c, "member")
+	catalog := accessCall(t, c, "GET", "/api/v1/permissions?project=alpha", nil, "", 200)
+	for _, choice := range catalog["items"].([]any) {
+		if choice.(map[string]any)["canGrant"] != false {
+			t.Fatal("read-only principal can delegate", choice)
+		}
+	}
 	read := accessCall(t, c, "GET", path+"/"+first["id"].(string), nil, "", 200)
 	if read["data"].(map[string]any)["canUpdate"] != false || read["data"].(map[string]any)["canRemove"] != false {
 		t.Fatal(read)
