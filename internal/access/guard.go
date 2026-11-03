@@ -49,22 +49,30 @@ func (v *directoryView) IsUserInGroup(ctx context.Context, user, group string) (
 func (*directoryView) GetUserTeams(context.Context, string) ([]string, error)     { return []string{}, nil }
 func (*directoryView) IsUserInTeam(context.Context, string, string) (bool, error) { return false, nil }
 
-func (s *Service) preserveAdministrator(ctx context.Context, changes ...storage.Change) error {
+func (s *Service) hasUsableAdministrator(ctx context.Context) (bool, error) {
+	engine, view, logins, err := s.administratorState(ctx)
+	if err != nil {
+		return false, err
+	}
+	return usableAdministrator(ctx, engine, view, logins)
+}
+
+func (s *Service) administratorState(ctx context.Context) (*permissions.Service, *directoryView, map[string]bool, error) {
 	v := &directoryView{users: map[string]identity.User{}, groups: map[string]identity.Group{}, memberships: map[string]identity.Membership{}}
 	for _, bucket := range []string{"users", "groups", "memberships"} {
 		rows, err := s.Store.All(ctx, bucket, "")
 		if err != nil {
-			return err
+			return nil, nil, nil, err
 		}
 		for _, row := range rows {
 			if err := v.apply(row, false); err != nil {
-				return err
+				return nil, nil, nil, err
 			}
 		}
 	}
 	engine, err := authorization.NewEngine(ctx, s.Auth.Engine.GetStore(), v)
 	if err != nil {
-		return err
+		return nil, nil, nil, err
 	}
 	logins := map[string]bool{}
 	if s.LocalUser != "" {
@@ -72,7 +80,7 @@ func (s *Service) preserveAdministrator(ctx context.Context, changes ...storage.
 	}
 	providers, err := s.Store.All(ctx, "providers", "")
 	if err != nil {
-		return err
+		return nil, nil, nil, err
 	}
 	issuers := map[string]bool{}
 	for _, row := range providers {
@@ -82,7 +90,7 @@ func (s *Service) preserveAdministrator(ctx context.Context, changes ...storage.
 			Disabled bool   `json:"disabled"`
 		}](row)
 		if err != nil {
-			return err
+			return nil, nil, nil, err
 		}
 		if !p.Disabled && p.Issuer != "" && p.ClientID != "" {
 			issuers[p.Issuer] = true
@@ -90,16 +98,24 @@ func (s *Service) preserveAdministrator(ctx context.Context, changes ...storage.
 	}
 	links, err := s.Store.All(ctx, "external-identities", "")
 	if err != nil {
-		return err
+		return nil, nil, nil, err
 	}
 	for _, row := range links {
 		link, err := storage.Decode[identity.ExternalIdentity](row)
 		if err != nil {
-			return err
+			return nil, nil, nil, err
 		}
 		if issuers[link.Issuer] && link.Subject != "" {
 			logins[link.UserID] = true
 		}
+	}
+	return engine, v, logins, nil
+}
+
+func (s *Service) preserveAdministrator(ctx context.Context, changes ...storage.Change) error {
+	engine, v, logins, err := s.administratorState(ctx)
+	if err != nil {
+		return err
 	}
 	before, err := usableAdministrator(ctx, engine, v, logins)
 	if err != nil || !before {

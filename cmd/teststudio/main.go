@@ -127,28 +127,12 @@ func run() error {
 	localUser := ""
 	if *local {
 		localUser = "local-administrator"
-		if _, err := directory.User(ctx, localUser); errors.Is(err, storage.ErrNotFound) {
-			if err := directory.SaveUser(ctx, identity.User{ID: localUser, Name: "Local administrator"}, 0); err != nil {
-				return err
-			}
-		} else if err != nil {
-			return err
-		}
-		if *recoverLocal {
-			if err := recoverLocalAdministrator(ctx, directory, localUser); err != nil {
-				return err
-			}
-		}
-		if err := auth.Engine.AssignRole(ctx, permissions.PrincipalRef{Kind: permissions.PrincipalUser, ID: localUser}, "builtin.teststudio.installation-admin", nil); err != nil {
+		if err := bootstrapLocalAdministrator(ctx, auth, *recoverLocal); err != nil {
 			return err
 		}
 	}
 	if *bootstrapIssuer != "" || *bootstrapSubject != "" {
-		u, err := directory.ResolveExternal(ctx, *bootstrapIssuer, *bootstrapSubject, "Installation administrator", "", false, true)
-		if err != nil {
-			return err
-		}
-		if err := auth.Engine.AssignRole(ctx, permissions.PrincipalRef{Kind: permissions.PrincipalUser, ID: u.ID}, "builtin.teststudio.installation-admin", nil); err != nil {
+		if err := bootstrapExternalAdministrator(ctx, auth, *bootstrapIssuer, *bootstrapSubject); err != nil {
 			return err
 		}
 	}

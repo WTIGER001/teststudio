@@ -74,6 +74,12 @@ try {
   await request('PUT', '/api/v1/groups/reviewers/members/pending-reviewer', {}, 0)
   const membership = await request('GET', '/api/v1/groups/reviewers/members')
   assert.equal(membership.items[0].data.source, 'local')
+  const assignmentBase = '/api/v1/projects/access-example/role-assignments'
+  const assignmentPath = assignmentBase + '/user/pending-reviewer/builtin.teststudio.editor'
+  const assigned = await request('POST', assignmentBase, { principalKind: 'user', principalId: 'pending-reviewer', roleId: 'builtin.teststudio.editor', reason: 'Verify durable scoped access' })
+  const rootAssignment = '/api/v1/role-assignments/user/local-administrator/builtin.teststudio.installation-admin'
+  const rootRole = await request('GET', rootAssignment)
+  await request('DELETE', rootAssignment, { reason: 'Reject removal of the only usable role' }, rootRole.revision, 422)
   const administrator = await request('GET', '/api/v1/users/local-administrator')
   await request('POST', '/api/v1/users/local-administrator/disable', { reason: 'Reject removal of the only administrator' }, administrator.revision, 422)
   const sessions = await request('GET', '/api/v1/users/local-administrator/sessions')
@@ -87,12 +93,22 @@ try {
   assert.equal((await request('GET', '/api/v1/groups/reviewers/members')).items.length, 1)
   const continued = await request('GET', '/api/v1/groups?project=access-example&limit=1&cursor=' + encodeURIComponent(firstPage.cursor))
   assert.equal(continued.items[0].id, 'watchers')
+  const retainedAssignment = await request('GET', assignmentPath)
+  assert.equal(retainedAssignment.id, assigned.id)
+  assert.equal(retainedAssignment.revision, assigned.revision)
+  await request('DELETE', assignmentPath, { reason: 'Revoke before the next restart' }, assigned.revision)
   await stop()
 
   await start(true)
   const invalidated = await request('GET', '/auth/session', undefined, undefined, 200, oldCookie)
   assert.equal(invalidated.user, null)
   assert.equal((await signIn()).user.sessionEpoch, 2)
+  await request('GET', assignmentPath, undefined, undefined, 404)
+  const recreated = await request('POST', assignmentBase, { principalKind: 'user', principalId: 'pending-reviewer', roleId: 'builtin.teststudio.editor', reason: 'Recreate with a new revision' })
+  assert.equal(recreated.id, assigned.id)
+  assert.ok(recreated.revision > assigned.revision)
+  await request('DELETE', assignmentPath, { reason: 'Reject stale removal' }, assigned.revision, 409)
+  await request('DELETE', assignmentPath, { reason: 'Remove the current assignment' }, recreated.revision)
   const users = await request('GET', '/api/v1/users')
   assert.equal(users.items.some(item => item.id === 'pending-reviewer'), true)
   await stop()
@@ -102,7 +118,7 @@ try {
     const code = await new Promise((resolve, reject) => { child.once('exit', resolve); child.once('error', reject) })
     assert.equal(code, 1, 'Recovery accepted an invalid listen mode')
   }
-  const summary = { usersPreserved: true, membershipsPreserved: true, paginationSurvivedRestart: true, oldSessionSurvivedOrdinaryRestart: true, oldSessionRejectedAfterRecovery: true, lastAdministratorRemovalRejected: true, recoveryRequiresLoopbackLocalMode: true, ownedControllersExited: true }
+  const summary = { assignmentsPreserved: true, assignmentRevocationPreserved: true, recreatedAssignmentRevisionAdvanced: true, usersPreserved: true, membershipsPreserved: true, paginationSurvivedRestart: true, oldSessionSurvivedOrdinaryRestart: true, oldSessionRejectedAfterRecovery: true, lastAdministratorRemovalRejected: true, recoveryRequiresLoopbackLocalMode: true, ownedControllersExited: true }
   const output = path.resolve('output/access', path.basename(root))
   mkdirSync(output, { recursive: true })
   writeFileSync(path.join(output, 'summary.json'), JSON.stringify(summary, null, 2))

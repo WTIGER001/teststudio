@@ -24,16 +24,30 @@ func externalID(issuer, subject string) string {
 	return hex.EncodeToString(h[:])
 }
 
+func (d *Directory) ExternalLink(ctx context.Context, issuer, subject string) (ExternalIdentity, error) {
+	if issuer == "" || subject == "" {
+		return ExternalIdentity{}, errors.New("issuer and subject are required")
+	}
+	row, err := d.Store.Get(ctx, "external-identities", externalID(issuer, subject))
+	if err != nil {
+		return ExternalIdentity{}, err
+	}
+	link, err := storage.Decode[ExternalIdentity](row)
+	if err != nil {
+		return ExternalIdentity{}, err
+	}
+	if link.Issuer != issuer || link.Subject != subject {
+		return ExternalIdentity{}, storage.ErrNotFound
+	}
+	return link, nil
+}
+
 func (d *Directory) ResolveExternal(ctx context.Context, issuer, subject, name, email string, verified, provision bool) (User, error) {
 	if issuer == "" || subject == "" {
 		return User{}, errors.New("issuer and subject are required")
 	}
 	id := externalID(issuer, subject)
-	if r, err := d.Store.Get(ctx, "external-identities", id); err == nil {
-		i, err := storage.Decode[ExternalIdentity](r)
-		if err != nil {
-			return User{}, err
-		}
+	if i, err := d.ExternalLink(ctx, issuer, subject); err == nil {
 		u, err := d.User(ctx, i.UserID)
 		if err == nil && u.Disabled {
 			err = errors.New("account is disabled")

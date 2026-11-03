@@ -92,6 +92,33 @@ STUDIO-NOTIFY-001 passes again after the shared fixture and shutdown changes.
 Owned verification controllers and browser containers stop after checks. The disposable PostgreSQL service also stops.
 Identity linking, pending project access, personal profile UI, role and grant editors, deployment verification, and the remaining full plan stay pending.
 
+### Scoped predefined assignment APIs
+
+Added predefined role choices and bounded assignment APIs for installation and project scopes.
+The route determines exact bindings. Unknown body fields cannot widen them.
+User and group assignments require role, principal, membership, and delegation checks.
+Group mutations also require authority in the group's stored ownership scope.
+Project administrators can delegate predefined project roles without receiving each delegated action themselves.
+Installation groups can hold different project roles. Project administrators cannot change those shared groups' assignments.
+Single-assignment removal uses a reason and current revision. Retained revision history prevents stale removal after recreation.
+Legacy bootstrap assignments remain visible before their first managed mutation.
+Assignment, management metadata, audit, and directory changes share one transaction.
+Last-administrator checks use the proposed permission state and serialize against competing account disabling across independent connections.
+
+Added nine operations to OpenAPI and generated identity clients. The generated contract now contains 30 operations.
+Targeted assignment, guard, bootstrap, and client checks pass on SQLite and local PostgreSQL with race detection.
+The generated client passes the TypeScript check.
+The built-service smoke verifies assignment persistence, revocation, and recreation across actual local restarts.
+It retains evidence in `output/access/access-verification.7FBjxj/summary.json`.
+
+Ordinary startup now preserves revoked administrator roles.
+Bootstrap creation, role assignment, initialization markers, and audit records share a transaction.
+Existing local and external bootstrap profiles retain their disabled state and current assignments during marker adoption.
+Explicit loopback recovery restores the local role and invalidates earlier sessions atomically.
+Recovery cannot validate a stale assignment-removal revision.
+
+Assignment interfaces, custom policy management, pending project access, managed local credentials, and the remaining full plan stay pending.
+
 ### Local and OIDC account decision
 
 The plan now supports local accounts, OIDC accounts, or both in one installation.

@@ -127,6 +127,7 @@ func (s *Server) Handler() http.Handler {
 	})
 	s.authRoutes(mux)
 	s.accessRoutes(mux)
+	s.assignmentRoutes(mux)
 	s.projectRoutes(mux)
 	s.catalogRoutes(mux)
 	s.catalogTransferRoutes(mux)

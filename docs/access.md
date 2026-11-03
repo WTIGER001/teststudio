@@ -4,9 +4,9 @@ TestStudio stores user profiles, external identity links, groups, and membership
 The permission library evaluates access. The directory does not infer project authority from an email address or group name.
 
 Users and Groups screens use the administrative APIs for profiles, account state, group metadata, local membership, and session revocation.
-Identity linking, custom role management, assignment editors, pending project access, and the personal profile screen remain pending.
+Managed local credentials, identity linking, custom role management, assignment editors, pending project access, and the personal profile screen remain pending.
 The full acceptance ledger remains in [Implementation verification](implementation.md).
-The [OpenAPI contract](../contracts/openapi.yaml) describes the implemented identity routes. Other route families remain pending in that contract.
+The [OpenAPI contract](../contracts/openapi.yaml) describes the implemented identity and predefined assignment routes. Other route families remain pending.
 
 ## Typed client contract
 
@@ -18,7 +18,7 @@ go run ./cmd/teststudio-client --check
 ```
 
 Run these commands from the repository root.
-The generated module contains all 21 implemented identity operations, including direct membership reads.
+The generated module contains all 30 implemented identity and access operations, including direct membership reads and scoped predefined assignments.
 The shared client adapter supplies same-origin sessions, request-forgery protection, and revision headers.
 The client escapes path identifiers and preserves explicit query values.
 Generator checks reject stale output. Nullable expiry and required fields retain their contract types.
@@ -106,7 +106,7 @@ Cursors cannot reveal filtered identifiers or move between query contexts.
 
 ## Administrator protection
 
-Ordinary account disabling, group archival, and membership removal preserve the last usable installation administrator.
+Ordinary account disabling, group archival, membership removal, and installation role revocation preserve the last usable installation administrator.
 The check evaluates the proposed directory state through the same permission library and built-in definitions used for requests.
 Explicit denies and active membership remain authoritative. Alternate group paths can preserve access.
 Unlinked accounts and accounts with disabled sign-in providers do not count as usable recovery accounts.
@@ -127,9 +127,18 @@ go run ./cmd/teststudio --local --recover-local-admin \
 ```
 
 The command requires explicit local mode and a loopback listen address.
-It enables the dedicated local administrator, advances its session generation, and records the recovery action.
+It enables the dedicated local administrator, restores its administrator assignment, advances its session generation, and records the recovery action.
+These changes share one database transaction.
 Select Open local workspace to create a fresh session.
 After recovery, stop this process and return to the installation's normal startup command.
+
+Ordinary startup does not restore revoked administrator assignments.
+Local and external bootstrap operations persist initialization markers.
+They grant administration only when they create a new bootstrap profile.
+Existing profiles retain their account state and assignments when an older installation adopts these markers.
+A disabled or revoked external bootstrap account does not prevent startup.
+Use authorized role management or explicit operator recovery to restore administration.
+Changing an existing profile's bootstrap configuration does not elevate that profile.
 Ordinary local startup does not restore disabled users or advance session generations.
 Keep operator access to the database and host under installation control.
 
@@ -153,6 +162,12 @@ Keep operator access to the database and host under installation control.
 | GET | `/api/v1/groups/{group}/members` | Inspect membership origin, expiry, and activity. |
 | GET | `/api/v1/groups/{group}/members/{user}` | Read one membership and its current revision. Optional `source` defaults to `local`. |
 | PUT, DELETE | `/api/v1/groups/{group}/members/{user}` | Save or remove local membership with a revision. |
+| GET | `/api/v1/roles?project={project}` | List readable predefined project roles and delegation capabilities. Empty scope selects installation roles. |
+| GET, POST | `/api/v1/projects/{project}/role-assignments` | Scan or create predefined project assignments. |
+| GET, DELETE | `/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}` | Read or revoke one exact project assignment. |
+| GET, POST | `/api/v1/role-assignments` | Scan or create predefined installation assignments. |
+| GET, DELETE | `/api/v1/role-assignments/{kind}/{principal}/{role}` | Read or revoke one exact installation assignment. |
+
 
 ## Local verification
 
@@ -161,7 +176,7 @@ Run the focused API and concurrency checks:
 ```sh
 go test -race ./internal/access ./internal/httpapi ./internal/sessions \
   ./internal/authorization ./adapters/auth/oidc ./cmd/teststudio \
-  -run 'TestAccess|TestSession|TestPermission|TestOIDC|TestIncompleteGroups|TestLocalRecovery' -count=1
+  -run 'TestAccess|TestSession|TestPermission|TestOIDC|TestIncompleteGroups|TestLocalRecovery|TestBootstrap' -count=1
 ```
 
 Run the same checks on a disposable local PostgreSQL service:
@@ -169,7 +184,7 @@ Run the same checks on a disposable local PostgreSQL service:
 ```sh
 bash scripts/test-postgres.sh ./internal/access ./internal/httpapi ./internal/sessions \
   ./internal/authorization ./adapters/auth/oidc ./cmd/teststudio \
-  -run 'TestAccess|TestSession|TestPermission|TestOIDC|TestIncompleteGroups|TestLocalRecovery'
+  -run 'TestAccess|TestSession|TestPermission|TestOIDC|TestIncompleteGroups|TestLocalRecovery|TestBootstrap'
 ```
 
 Run the built service with a fresh SQLite installation and actual restart and recovery operations:
@@ -178,7 +193,7 @@ Run the built service with a fresh SQLite installation and actual restart and re
 bash scripts/test-access.sh
 ```
 
-The smoke script also continues an encrypted history cursor after restart.
+The smoke script continues an encrypted group cursor and verifies assignment persistence, revocation, and recreation revisions across actual service restarts.
 It uses no cloud credentials. It stops its owned controllers and retains an isolated database and redacted summary.
 
 Run the focused interface workflow through normal TestStudio publication, execution, timing, and evidence storage:
@@ -207,4 +222,44 @@ Its transaction adapter supports assignment changes and rejects other policy wri
 SQLite uses transaction-bound record storage.
 An exact revocation removes one role and binding combination.
 An empty binding map does not remove assignments with project bindings.
-The administrator-facing assignment API and interface remain pending.
+The assignment API uses this transaction. The assignment interface and custom policy transactions remain pending.
+
+## Predefined role assignments
+
+Create an assignment with `principalKind`, `principalId`, `roleId`, and a nonblank `reason`.
+Use an existing user or group. Local and OIDC profiles use the same permanent internal user identifiers.
+The API creates no credentials, identity links, or invitation messages.
+The project route determines the exact `team` binding. Request bodies cannot supply bindings or widen the scope.
+The installation route supports the installation administrator role.
+Project routes support viewer, operator, editor, publisher, and project administrator roles.
+Custom roles and object bindings remain pending in this API slice.
+
+Adding an assignment requires membership management and permission delegation in the selected scope.
+Checks include the target role and principal objects. Explicit denies remain authoritative.
+Project administrators can delegate these predefined project roles without receiving every delegated action themselves.
+They cannot assign installation administration through a project route.
+Group assignments also require group management in the group's stored ownership scope.
+Project groups cannot receive roles outside their project.
+Installation groups require installation group authority, even when their assignment targets one project.
+An authorized installation manager can assign the same installation group different roles in different projects.
+
+Assignment inspection requires membership and permission read authority in the assignment scope.
+It exposes the assigned principal's identifier, display name, and activity state.
+It does not grant access to that principal's directory profile, group membership, or identity links.
+Assignment pages scan a bounded number of native records before applying scope and object permissions.
+An empty filtered page can have another continuation cursor. Cursors bind to actor, route family, and exact scope.
+
+Creation rejects disabled users, archived groups, disabled roles, and archived projects.
+Revocation remains available for retained inactive assignments when the caller has current authority.
+Use `If-Match` and a reason to revoke the exact role and route-derived binding combination.
+Removing one project assignment preserves the principal's assignments in other projects.
+Revocation retains revision history. Recreating the same assignment does not reuse its previous revision.
+Legacy bootstrap assignments remain readable before their first managed mutation.
+Operator recovery cannot make an old removal revision valid again.
+Assignments without a matching management record omit the management timestamp.
+
+Permission checks use the library's service and current identity records.
+Changes reach existing service instances without another sign-in.
+The shared directory revision serializes competing role revocation and account-state changes.
+The last-administrator check uses the proposed assignment state inside the transaction.
+A rejected change leaves its assignment, management record, audit history, and directory revision unchanged.

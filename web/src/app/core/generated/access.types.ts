@@ -1,5 +1,10 @@
-export const accessContractVersion = "0.1.0"
+export const accessContractVersion = "0.2.0"
 
+export type Assignment = { "bindingValues": AssignmentBindings; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
+export type AssignmentBindings = { "team"?: string }
+export type AssignmentDefinition = { "principalId": string; "principalKind": "user" | "group"; "reason": string; "roleId": string }
+export type AssignmentPage = { "cursor"?: string; "items": (AssignmentRecord)[]; "partial": boolean }
+export type AssignmentRecord = { "data": Assignment; "id": string; "projectId"?: string; "revision": number; "updatedAt"?: string }
 export type ExternalIdentity = { "issuer": string; "subject": string; "userId": string }
 export type ExternalIdentityPage = { "cursor"?: string; "items": (ExternalIdentityRecord)[]; "partial": boolean }
 export type ExternalIdentityRecord = { "data": ExternalIdentity; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
@@ -15,6 +20,8 @@ export type Problem = { "message": string; "status"?: number }
 export type Profile = { "identities": ExternalIdentityPage; "localAccount": boolean; "user": User }
 export type Reason = { "reason": string }
 export type Revoked = { "revoked": boolean }
+export type Role = { "builtIn": boolean; "delegatable": boolean; "disabled": boolean; "id": string; "name": string; "permissions": (string)[]; "scope": "project" | "installation" }
+export type RolePage = { "items": (Role)[] }
 export type Saved = { "saved": boolean }
 export type Session = { "authenticationUntil": string; "createdAt": string; "current": boolean; "expiresAt": string; "id": string; "lastSeen": string; "provider": string }
 export type SessionPage = { "cursor"?: string; "items": (SessionRecord)[]; "partial": boolean }
@@ -36,6 +43,15 @@ export interface AccessRequests {
   saveLocalMembership: { "user": string; "group": string; revision: number; body: MembershipDefinition }
   restoreGroup: { "group": string; revision: number; body: Reason }
   currentProfile: { query?: { "limit"?: number; "cursor"?: string } }
+  listProjectAssignments: { "project": string; query?: { "limit"?: number; "cursor"?: string } }
+  createProjectAssignment: { "project": string; body: AssignmentDefinition }
+  revokeProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
+  readProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string }
+  listInstallationAssignments: { query?: { "limit"?: number; "cursor"?: string } }
+  createInstallationAssignment: { body: AssignmentDefinition }
+  revokeInstallationAssignment: { "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
+  readInstallationAssignment: { "kind": "user" | "group"; "principal": string; "role": string }
+  listRoles: { query?: { "project"?: string } }
   listUsers: { query?: { "limit"?: number; "cursor"?: string } }
   createUser: { body: UserDefinition }
   readUser: { "user": string }
@@ -60,6 +76,15 @@ export interface AccessResponses {
   saveLocalMembership: Saved
   restoreGroup: GroupRecord
   currentProfile: Profile
+  listProjectAssignments: AssignmentPage
+  createProjectAssignment: AssignmentRecord
+  revokeProjectAssignment: Revoked
+  readProjectAssignment: AssignmentRecord
+  listInstallationAssignments: AssignmentPage
+  createInstallationAssignment: AssignmentRecord
+  revokeInstallationAssignment: Revoked
+  readInstallationAssignment: AssignmentRecord
+  listRoles: RolePage
   listUsers: UserPage
   createUser: UserRecord
   readUser: UserRecord
@@ -84,6 +109,15 @@ export const accessOperations = {
   saveLocalMembership: { method: "PUT", path: "/api/v1/groups/{group}/members/{user}" },
   restoreGroup: { method: "POST", path: "/api/v1/groups/{group}/restore" },
   currentProfile: { method: "GET", path: "/api/v1/me" },
+  listProjectAssignments: { method: "GET", path: "/api/v1/projects/{project}/role-assignments" },
+  createProjectAssignment: { method: "POST", path: "/api/v1/projects/{project}/role-assignments" },
+  revokeProjectAssignment: { method: "DELETE", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
+  readProjectAssignment: { method: "GET", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
+  listInstallationAssignments: { method: "GET", path: "/api/v1/role-assignments" },
+  createInstallationAssignment: { method: "POST", path: "/api/v1/role-assignments" },
+  revokeInstallationAssignment: { method: "DELETE", path: "/api/v1/role-assignments/{kind}/{principal}/{role}" },
+  readInstallationAssignment: { method: "GET", path: "/api/v1/role-assignments/{kind}/{principal}/{role}" },
+  listRoles: { method: "GET", path: "/api/v1/roles" },
   listUsers: { method: "GET", path: "/api/v1/users" },
   createUser: { method: "POST", path: "/api/v1/users" },
   readUser: { method: "GET", path: "/api/v1/users/{user}" },

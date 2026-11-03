@@ -18,39 +18,54 @@ func queryScope(actor, kind, resource string, archived bool) string {
 }
 
 func (s *Service) page(ctx context.Context, bucket, project, scope, cursor string, limit int) (storage.Page, error) {
-	raw := ""
-	if cursor != "" {
-		if len(cursor) > 6000 {
-			return storage.Page{}, errors.New("cursor does not match the access query")
-		}
-		aead, err := s.cursorCipher(ctx)
-		if err != nil {
-			return storage.Page{}, err
-		}
-		data, err := base64.RawURLEncoding.DecodeString(cursor)
-		if err != nil || len(data) < aead.NonceSize() || len(data) > 4096 {
-			return storage.Page{}, errors.New("cursor does not match the access query")
-		}
-		decoded, err := aead.Open(nil, data[:aead.NonceSize()], data[aead.NonceSize():], []byte(scope))
-		if err != nil {
-			return storage.Page{}, errors.New("cursor does not match the access query")
-		}
-		raw = string(decoded)
+	raw, err := s.openCursor(ctx, scope, cursor)
+	if err != nil {
+		return storage.Page{}, err
 	}
 	page, err := s.Store.List(ctx, bucket, project, raw, limit)
 	if err != nil || page.Cursor == "" {
 		return page, err
 	}
+	page.Cursor, err = s.sealCursor(ctx, scope, page.Cursor)
+	return page, err
+}
+
+func (s *Service) openCursor(ctx context.Context, scope, cursor string) (string, error) {
+	raw := ""
+	if cursor != "" {
+		if len(cursor) > 6000 {
+			return "", errors.New("cursor does not match the access query")
+		}
+		aead, err := s.cursorCipher(ctx)
+		if err != nil {
+			return "", err
+		}
+		data, err := base64.RawURLEncoding.DecodeString(cursor)
+		if err != nil || len(data) < aead.NonceSize() || len(data) > 4096 {
+			return "", errors.New("cursor does not match the access query")
+		}
+		decoded, err := aead.Open(nil, data[:aead.NonceSize()], data[aead.NonceSize():], []byte(scope))
+		if err != nil {
+			return "", errors.New("cursor does not match the access query")
+		}
+		raw = string(decoded)
+	}
+	return raw, nil
+}
+
+func (s *Service) sealCursor(ctx context.Context, scope, raw string) (string, error) {
+	if raw == "" {
+		return "", nil
+	}
 	aead, err := s.cursorCipher(ctx)
 	if err != nil {
-		return storage.Page{}, err
+		return "", err
 	}
 	nonce := make([]byte, aead.NonceSize())
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		return storage.Page{}, err
+		return "", err
 	}
-	page.Cursor = base64.RawURLEncoding.EncodeToString(aead.Seal(nonce, nonce, []byte(page.Cursor), []byte(scope)))
-	return page, nil
+	return base64.RawURLEncoding.EncodeToString(aead.Seal(nonce, nonce, []byte(raw), []byte(scope))), nil
 }
 
 func (s *Service) cursorCipher(ctx context.Context) (cipher.AEAD, error) {

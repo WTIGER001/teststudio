@@ -1,8 +1,8 @@
 "openapi": "3.1.0"
 "info":
-  "title": "TestStudio identity administration"
-  "version": "0.1.0"
-  "description": "Implemented user, group, membership, current-profile, and session administration. Other API families and role administration remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
+  "title": "TestStudio identity and access administration"
+  "version": "0.2.0"
+  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments. Custom policy administration and other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
     "url": "/"
@@ -693,6 +693,294 @@
           "application/json":
             "schema":
               "$ref": "#/components/schemas/Reason"
+  "/api/v1/roles":
+    "get":
+      "operationId": "listRoles"
+      "summary": "List readable predefined roles for the exact scope. Custom role administration remains pending."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/RoleProject"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/RolePage"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+  "/api/v1/role-assignments":
+    "get":
+      "operationId": "listInstallationAssignments"
+      "summary": "Scan a bounded assignment page in this scope. Filtered pages can be empty with a continuation cursor."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Limit"
+        -
+          "$ref": "#/components/parameters/Cursor"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/AssignmentPage"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+    "post":
+      "operationId": "createInstallationAssignment"
+      "summary": "Assign a predefined role to an existing user or group. The route determines exact bindings. A reason is required."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/AssignmentRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/AssignmentDefinition"
+  "/api/v1/role-assignments/{kind}/{principal}/{role}":
+    "get":
+      "operationId": "readInstallationAssignment"
+      "summary": "Read one exact role assignment, including legacy assignments created during bootstrap."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/PrincipalKind"
+        -
+          "$ref": "#/components/parameters/AssignmentPrincipal"
+        -
+          "$ref": "#/components/parameters/AssignmentRole"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/AssignmentRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+    "delete":
+      "operationId": "revokeInstallationAssignment"
+      "summary": "Remove this exact role and binding combination using the current revision and a reason. Preserve the last usable installation administrator."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/PrincipalKind"
+        -
+          "$ref": "#/components/parameters/AssignmentPrincipal"
+        -
+          "$ref": "#/components/parameters/AssignmentRole"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/Revoked"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/Reason"
+  "/api/v1/projects/{project}/role-assignments":
+    "get":
+      "operationId": "listProjectAssignments"
+      "summary": "Scan a bounded assignment page in this scope. Filtered pages can be empty with a continuation cursor."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/AssignmentProject"
+        -
+          "$ref": "#/components/parameters/Limit"
+        -
+          "$ref": "#/components/parameters/Cursor"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/AssignmentPage"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+    "post":
+      "operationId": "createProjectAssignment"
+      "summary": "Assign a predefined role to an existing user or group. The route determines exact bindings. A reason is required."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/AssignmentProject"
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/AssignmentRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/AssignmentDefinition"
+  "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}":
+    "get":
+      "operationId": "readProjectAssignment"
+      "summary": "Read one exact role assignment, including legacy assignments created during bootstrap."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/AssignmentProject"
+        -
+          "$ref": "#/components/parameters/PrincipalKind"
+        -
+          "$ref": "#/components/parameters/AssignmentPrincipal"
+        -
+          "$ref": "#/components/parameters/AssignmentRole"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/AssignmentRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+    "delete":
+      "operationId": "revokeProjectAssignment"
+      "summary": "Remove this exact role and binding combination using the current revision and a reason. Preserve the last usable installation administrator."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/AssignmentProject"
+        -
+          "$ref": "#/components/parameters/PrincipalKind"
+        -
+          "$ref": "#/components/parameters/AssignmentPrincipal"
+        -
+          "$ref": "#/components/parameters/AssignmentRole"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/Revoked"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/Reason"
 "components":
   "securitySchemes":
     "SessionCookie":
@@ -774,6 +1062,41 @@
         "type": "string"
         "format": "uri"
       "description": "Configured application origin."
+    "RoleProject":
+      "name": "project"
+      "in": "query"
+      "description": "Exact project scope. Empty means installation roles."
+      "schema":
+        "type": "string"
+    "AssignmentProject":
+      "name": "project"
+      "in": "path"
+      "required": true
+      "schema":
+        "type": "string"
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    "PrincipalKind":
+      "name": "kind"
+      "in": "path"
+      "required": true
+      "schema":
+        "type": "string"
+        "enum":
+          - "user"
+          - "group"
+    "AssignmentPrincipal":
+      "name": "principal"
+      "in": "path"
+      "required": true
+      "schema":
+        "type": "string"
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    "AssignmentRole":
+      "name": "role"
+      "in": "path"
+      "required": true
+      "schema":
+        "type": "string"
   "responses":
     "Problem":
       "description": "401 requires sign-in; 403 denies access; 404 hides missing or mismatched resources; 409 requires a fresh revision; 422 rejects invalid requests or administrator lockout."
@@ -1189,3 +1512,145 @@
           "type": "string"
       "required":
         - "message"
+    "AssignmentDefinition":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "principalKind":
+          "type": "string"
+          "enum":
+            - "user"
+            - "group"
+        "principalId":
+          "type": "string"
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        "roleId":
+          "type": "string"
+        "reason":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 1024
+      "required":
+        - "principalKind"
+        - "principalId"
+        - "roleId"
+        - "reason"
+    "AssignmentBindings":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "team":
+          "type": "string"
+      "required": []
+    "Assignment":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "principalKind":
+          "type": "string"
+          "enum":
+            - "user"
+            - "group"
+        "principalId":
+          "type": "string"
+        "roleId":
+          "type": "string"
+        "bindingValues":
+          "$ref": "#/components/schemas/AssignmentBindings"
+        "principalName":
+          "type": "string"
+        "principalActive":
+          "type": "boolean"
+        "roleName":
+          "type": "string"
+        "roleDisabled":
+          "type": "boolean"
+        "managed":
+          "type": "boolean"
+      "required":
+        - "principalKind"
+        - "principalId"
+        - "roleId"
+        - "bindingValues"
+        - "principalName"
+        - "principalActive"
+        - "roleName"
+        - "roleDisabled"
+        - "managed"
+    "AssignmentRecord":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "id":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "revision":
+          "type": "integer"
+          "minimum": 1
+        "updatedAt":
+          "type": "string"
+          "format": "date-time"
+        "data":
+          "$ref": "#/components/schemas/Assignment"
+      "required":
+        - "id"
+        - "revision"
+        - "data"
+    "AssignmentPage":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "items":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/AssignmentRecord"
+        "cursor":
+          "type": "string"
+          "description": "Opaque encrypted cursor bound to actor, family, and exact project scope."
+        "partial":
+          "type": "boolean"
+      "required":
+        - "items"
+        - "partial"
+    "Role":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "id":
+          "type": "string"
+        "name":
+          "type": "string"
+        "scope":
+          "type": "string"
+          "enum":
+            - "project"
+            - "installation"
+        "permissions":
+          "type": "array"
+          "items":
+            "type": "string"
+        "builtIn":
+          "type": "boolean"
+        "disabled":
+          "type": "boolean"
+        "delegatable":
+          "type": "boolean"
+      "required":
+        - "id"
+        - "name"
+        - "scope"
+        - "permissions"
+        - "builtIn"
+        - "disabled"
+        - "delegatable"
+    "RolePage":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "items":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/Role"
+      "required":
+        - "items"
