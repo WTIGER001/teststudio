@@ -585,6 +585,36 @@
         "422":
           "$ref": "#/components/responses/Problem"
   "/api/v1/groups/{group}/members/{user}":
+    "get":
+      "operationId": "readGroupMember"
+      "summary": "Read one membership with its current revision and provenance."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Group"
+        -
+          "$ref": "#/components/parameters/User"
+        -
+          "name": "source"
+          "in": "query"
+          "schema":
+            "type": "string"
+            "default": "local"
+            "maxLength": 256
+      "responses":
+        "200":
+          "description": "Current readable membership."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/MembershipRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
     "put":
       "operationId": "saveLocalMembership"
       "summary": "Add or update local membership. External membership remains read-only."

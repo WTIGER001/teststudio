@@ -64,6 +64,18 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Record feature commits and targeted validation here.
 
+### Generated identity client and direct membership reads
+
+Added deterministic TypeScript request types, response types, operation methods, and route templates from the identity OpenAPI contract.
+The shared adapter preserves session, request-forgery, revision, identifier escaping, and explicit query semantics.
+Added generation and stale-output checks to the Go tooling.
+Added direct, authorized membership reads with current revisions and source metadata for explicit editor reloads.
+Local and external sources use the same ownership and member-read checks as membership pages.
+User read views supply missing legacy session generations without rewriting stored revisions.
+Validation: generator checks, client-path checks, focused API race tests, and local PostgreSQL checks pass.
+The Angular build accepts the generated types and adapter.
+The full plan and remaining API contract families stay pending.
+
 ### Identity administration API and durable session invalidation
 
 Added user profiles, account state, linked identity inspection, active session inspection, and single-session revocation through authorized APIs.

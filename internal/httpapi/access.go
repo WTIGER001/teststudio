@@ -257,4 +257,12 @@ func (s *Server) accessRoutes(m *http.ServeMux) {
 			JSON(w, 200, map[string]bool{"saved": true})
 		}))
 	}
+	m.HandleFunc("GET /api/v1/groups/{group}/members/{user}", s.authorized(func(w http.ResponseWriter, r *http.Request) {
+		row, err := a.ReadMember(r.Context(), actor(r), r.PathValue("group"), r.PathValue("user"), r.URL.Query().Get("source"))
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		JSON(w, 200, row)
+	}))
 }

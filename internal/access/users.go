@@ -2,6 +2,7 @@ package access
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/mail"
 	"strings"
@@ -35,6 +36,10 @@ func (s *Service) ListUsers(ctx context.Context, actor, cursor string, limit int
 			}
 			return page, err
 		}
+		row, err = userRecord(row)
+		if err != nil {
+			return page, err
+		}
 		allowed = append(allowed, row)
 	}
 	page.Items = allowed
@@ -45,7 +50,20 @@ func (s *Service) ReadUser(ctx context.Context, actor, id string) (storage.Recor
 	if err := s.Auth.Check(ctx, actor, "", "user/"+id, "users.read"); err != nil {
 		return storage.Record{}, err
 	}
-	return s.Store.Get(ctx, "users", id)
+	row, err := s.Store.Get(ctx, "users", id)
+	if err != nil {
+		return row, err
+	}
+	return userRecord(row)
+}
+
+func userRecord(row storage.Record) (storage.Record, error) {
+	user, err := storage.Decode[identity.User](row)
+	if err != nil {
+		return row, err
+	}
+	row.Data, err = json.Marshal(user)
+	return row, err
 }
 
 func (s *Service) SaveUser(ctx context.Context, actor string, d UserDefinition, revision int64) error {

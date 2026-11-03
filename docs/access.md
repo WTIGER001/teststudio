@@ -7,6 +7,22 @@ This checkpoint provides administrative APIs. Users and Groups screens, invitati
 The full acceptance ledger remains in [Implementation verification](implementation.md).
 The [OpenAPI contract](../contracts/openapi.yaml) describes the implemented identity routes. Other route families remain pending in that contract.
 
+## Typed client contract
+
+Generate identity request types, response types, operation methods, and route templates from the OpenAPI contract:
+
+```sh
+go run ./cmd/teststudio-client
+go run ./cmd/teststudio-client --check
+```
+
+Run these commands from the repository root.
+The generated module contains all 21 implemented identity operations, including direct membership reads.
+The shared client adapter supplies same-origin sessions, request-forgery protection, and revision headers.
+The client escapes path identifiers and preserves explicit query values.
+Generator checks reject stale output. Nullable expiry and required fields retain their contract types.
+User read views fill missing legacy session generations without rewriting stored records or revisions.
+
 ## Users and sessions
 
 Installation user permissions control directory listing, profile edits, account state, external identity inspection, and active session inspection.
@@ -106,6 +122,7 @@ Keep operator access to the database and host under installation control.
 | POST | `/api/v1/groups/{group}/archive` | Archive while preserving records and assignments. |
 | POST | `/api/v1/groups/{group}/restore` | Restore retained membership access. |
 | GET | `/api/v1/groups/{group}/members` | Inspect membership origin, expiry, and activity. |
+| GET | `/api/v1/groups/{group}/members/{user}` | Read one membership and its current revision. Optional `source` defaults to `local`. |
 | PUT, DELETE | `/api/v1/groups/{group}/members/{user}` | Save or remove local membership with a revision. |
 
 ## Local verification

@@ -18,6 +18,46 @@ type MembershipView struct {
 	ReadOnly bool   `json:"readOnly"`
 }
 
+func (s *Service) ReadMember(ctx context.Context, actor, group, user, source string) (storage.Record, error) {
+	g, _, err := s.group(ctx, actor, group, "groups.read")
+	if err != nil {
+		return storage.Record{}, err
+	}
+	if g.Project != "" {
+		if err := s.Auth.Check(ctx, actor, g.Project, "group/"+group, "members.read"); err != nil {
+			return storage.Record{}, err
+		}
+	}
+	if source == "" {
+		source = "local"
+	}
+	if !domain.ValidID(user) || len(source) > 256 {
+		return storage.Record{}, errors.New("valid user and membership source are required")
+	}
+	row, err := s.Store.Get(ctx, "memberships", identity.MembershipID(user, group, source))
+	if err != nil {
+		return storage.Record{}, err
+	}
+	return s.memberView(ctx, row, g)
+}
+
+func (s *Service) memberView(ctx context.Context, row storage.Record, g identity.Group) (storage.Record, error) {
+	m, err := storage.Decode[identity.Membership](row)
+	if err != nil {
+		return row, err
+	}
+	if m.GroupID != g.ID || row.Project != g.Project {
+		return storage.Record{}, storage.ErrNotFound
+	}
+	u, err := s.Auth.Directory.User(ctx, m.UserID)
+	if err != nil {
+		return row, err
+	}
+	view := MembershipView{Membership: m, Name: u.Name, Active: !g.Archived && !u.Disabled && (m.ExpiresAt == nil || time.Now().Before(*m.ExpiresAt)), ReadOnly: g.ManagedBy != "" || m.Source != "local"}
+	row.Data, err = json.Marshal(view)
+	return row, err
+}
+
 func (s *Service) ListMembers(ctx context.Context, actor, group, cursor string, limit int) (Page, error) {
 	g, _, err := s.group(ctx, actor, group, "groups.read")
 	if err != nil {
@@ -41,12 +81,7 @@ func (s *Service) ListMembers(ctx context.Context, actor, group, cursor string, 
 		if m.GroupID != group || row.Project != g.Project {
 			continue
 		}
-		u, err := s.Auth.Directory.User(ctx, m.UserID)
-		if err != nil {
-			return result, err
-		}
-		view := MembershipView{Membership: m, Name: u.Name, Active: !g.Archived && !u.Disabled && (m.ExpiresAt == nil || time.Now().Before(*m.ExpiresAt)), ReadOnly: g.ManagedBy != "" || m.Source != "local"}
-		row.Data, err = json.Marshal(view)
+		row, err = s.memberView(ctx, row, g)
 		if err != nil {
 			return result, err
 		}

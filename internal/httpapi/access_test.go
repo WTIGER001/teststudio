@@ -122,6 +122,10 @@ func TestAccessGroupScopesProvenanceAndMembershipRevisions(t *testing.T) {
 		accessCall(t, c, "POST", "/api/v1/groups", d, "", 200)
 	}
 	accessCall(t, c, "PUT", "/api/v1/groups/alpha-group/members/member", map[string]any{}, "0", 200)
+	single := accessCall(t, c, "GET", "/api/v1/groups/alpha-group/members/member", nil, "", 200)
+	if single["revision"] != float64(1) || single["data"].(map[string]any)["source"] != "local" {
+		t.Fatal(single)
+	}
 	accessCall(t, c, "PUT", "/api/v1/groups/alpha-group/members/member", map[string]any{}, "0", 409)
 	page := accessCall(t, c, "GET", "/api/v1/groups/alpha-group/members", nil, "", 200)
 	member := page["items"].([]any)[0].(map[string]any)["data"].(map[string]any)
@@ -139,6 +143,10 @@ func TestAccessGroupScopesProvenanceAndMembershipRevisions(t *testing.T) {
 		t.Fatal(err)
 	}
 	page = accessCall(t, c, "GET", "/api/v1/groups/external/members", nil, "", 200)
+	external := accessCall(t, c, "GET", "/api/v1/groups/external/members/member?source=oidc:example", nil, "", 200)
+	if external["data"].(map[string]any)["readOnly"] != true {
+		t.Fatal(external)
+	}
 	if page["items"].([]any)[0].(map[string]any)["data"].(map[string]any)["readOnly"] != true {
 		t.Fatal(page)
 	}
@@ -171,6 +179,7 @@ func TestAccessGroupScopesProvenanceAndMembershipRevisions(t *testing.T) {
 	accessCall(t, c, "GET", "/api/v1/groups", nil, "", 403)
 	accessCall(t, c, "GET", "/api/v1/groups?project=beta", nil, "", 403)
 	accessCall(t, c, "GET", "/api/v1/groups/beta-group", nil, "", 403)
+	accessCall(t, c, "GET", "/api/v1/groups/beta-group/members/member", nil, "", 403)
 	accessCall(t, c, "GET", "/api/v1/groups/shared-group", nil, "", 403)
 	page = accessCall(t, c, "GET", "/api/v1/groups?project=alpha", nil, "", 200)
 	if len(page["items"].([]any)) != 2 {
@@ -282,4 +291,34 @@ func TestAccessPagesFilterObjectDeniesAndBindOpaqueCursors(t *testing.T) {
 	}
 	c.http.Jar.SetCookies(origin, w.Result().Cookies())
 	accessCall(t, c, "GET", "/api/v1/groups?project=alpha&limit=1&cursor="+url.QueryEscape(cursor), nil, "", 422)
+}
+
+func TestAccessLegacyUserViewsIncludeSessionGenerationWithoutRewritingHistory(t *testing.T) {
+	c := fixture(t)
+	c.signIn()
+	change, err := storage.Put("users", "legacy-user", "", 0, map[string]any{"id": "legacy-user", "name": "Legacy user", "disabled": false, "emailVerified": false, "createdAt": time.Now().UTC()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := c.api.Store.Commit(t.Context(), change); err != nil {
+		t.Fatal(err)
+	}
+	view := accessCall(t, c, "GET", "/api/v1/users/legacy-user", nil, "", 200)
+	if view["data"].(map[string]any)["sessionEpoch"] != float64(0) || view["revision"] != float64(1) {
+		t.Fatal(view)
+	}
+	page := accessCall(t, c, "GET", "/api/v1/users", nil, "", 200)
+	for _, value := range page["items"].([]any) {
+		row := value.(map[string]any)
+		if row["id"] == "legacy-user" && row["data"].(map[string]any)["sessionEpoch"] != float64(0) {
+			t.Fatal(row)
+		}
+	}
+	raw, err := c.api.Store.Get(t.Context(), "users", "legacy-user")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(raw.Data), "sessionEpoch") || raw.Revision != 1 {
+		t.Fatal("compatible reads rewrote the original record")
+	}
 }
