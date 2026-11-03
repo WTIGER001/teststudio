@@ -42,6 +42,8 @@ type Page struct {
 type Store struct {
 	DB      *sql.DB
 	Dialect string
+	tx      *sql.Tx
+	failed  error
 }
 
 func Open(ctx context.Context, dsn string) (*Store, error) {
@@ -117,7 +119,7 @@ func (s *Store) migrate(ctx context.Context) error {
 func (s *Store) Get(ctx context.Context, bucket, id string) (Record, error) {
 	r := Record{Bucket: bucket, ID: id}
 	var data, updated string
-	err := s.DB.QueryRowContext(ctx, `SELECT project, revision, payload, updated_at FROM records WHERE bucket=$1 AND id=$2`, bucket, id).Scan(&r.Project, &r.Revision, &data, &updated)
+	err := s.executor().QueryRowContext(ctx, `SELECT project, revision, payload, updated_at FROM records WHERE bucket=$1 AND id=$2`, bucket, id).Scan(&r.Project, &r.Revision, &data, &updated)
 	if errors.Is(err, sql.ErrNoRows) {
 		return r, ErrNotFound
 	}
@@ -157,7 +159,7 @@ func (s *Store) list(ctx context.Context, bucket, project, cursor string, limit 
 		}
 		after = values.Get("after")
 	}
-	rows, err := s.DB.QueryContext(ctx, fmt.Sprintf(`SELECT id, project, revision, payload, updated_at FROM records WHERE bucket=$1 AND ($2='' OR project=$2) AND ($3='' OR id%s$3) ORDER BY id %s LIMIT $4`, comparison, order), bucket, project, after, limit+1)
+	rows, err := s.executor().QueryContext(ctx, fmt.Sprintf(`SELECT id, project, revision, payload, updated_at FROM records WHERE bucket=$1 AND ($2='' OR project=$2) AND ($3='' OR id%s$3) ORDER BY id %s LIMIT $4`, comparison, order), bucket, project, after, limit+1)
 	if err != nil {
 		return Page{}, err
 	}
@@ -218,11 +220,23 @@ func (s *Store) Commit(ctx context.Context, changes ...Change) error {
 	if len(changes) == 0 || len(changes) > 100 {
 		return errors.New("transaction must contain between 1 and 100 changes")
 	}
-	tx, err := s.DB.BeginTx(ctx, nil)
-	if err != nil {
+	if s.tx != nil {
+		if s.failed != nil {
+			return s.failed
+		}
+		err := s.apply(ctx, changes)
+		if err != nil {
+			s.failed = err
+		}
 		return err
 	}
-	defer tx.Rollback()
+	return s.Transaction(ctx, func(bound *Store, _ *sql.Tx) error {
+		return bound.Commit(ctx, changes...)
+	})
+}
+
+func (s *Store) apply(ctx context.Context, changes []Change) error {
+	var err error
 	seen := map[string]bool{}
 	for _, c := range changes {
 		key := c.Bucket + "\x00" + c.ID
@@ -232,13 +246,13 @@ func (s *Store) Commit(ctx context.Context, changes ...Change) error {
 		seen[key] = true
 		var result sql.Result
 		if c.Assert {
-			result, err = tx.ExecContext(ctx, `UPDATE records SET revision=revision WHERE bucket=$1 AND id=$2 AND revision=$3`, c.Bucket, c.ID, c.Revision)
+			result, err = s.executor().ExecContext(ctx, `UPDATE records SET revision=revision WHERE bucket=$1 AND id=$2 AND revision=$3`, c.Bucket, c.ID, c.Revision)
 		} else if c.Delete {
-			result, err = tx.ExecContext(ctx, `DELETE FROM records WHERE bucket=$1 AND id=$2 AND revision=$3`, c.Bucket, c.ID, c.Revision)
+			result, err = s.executor().ExecContext(ctx, `DELETE FROM records WHERE bucket=$1 AND id=$2 AND revision=$3`, c.Bucket, c.ID, c.Revision)
 		} else if c.Revision == 0 {
-			result, err = tx.ExecContext(ctx, `INSERT INTO records (bucket,id,project,revision,payload,updated_at) VALUES ($1,$2,$3,1,$4,$5) ON CONFLICT (bucket,id) DO NOTHING`, c.Bucket, c.ID, c.Project, string(c.Data), time.Now().UTC().Format(time.RFC3339Nano))
+			result, err = s.executor().ExecContext(ctx, `INSERT INTO records (bucket,id,project,revision,payload,updated_at) VALUES ($1,$2,$3,1,$4,$5) ON CONFLICT (bucket,id) DO NOTHING`, c.Bucket, c.ID, c.Project, string(c.Data), time.Now().UTC().Format(time.RFC3339Nano))
 		} else {
-			result, err = tx.ExecContext(ctx, `UPDATE records SET project=$1,revision=revision+1,payload=$2,updated_at=$3 WHERE bucket=$4 AND id=$5 AND revision=$6`, c.Project, string(c.Data), time.Now().UTC().Format(time.RFC3339Nano), c.Bucket, c.ID, c.Revision)
+			result, err = s.executor().ExecContext(ctx, `UPDATE records SET project=$1,revision=revision+1,payload=$2,updated_at=$3 WHERE bucket=$4 AND id=$5 AND revision=$6`, c.Project, string(c.Data), time.Now().UTC().Format(time.RFC3339Nano), c.Bucket, c.ID, c.Revision)
 		}
 		if err != nil {
 			return err
@@ -251,11 +265,11 @@ func (s *Store) Commit(ctx context.Context, changes ...Change) error {
 			return ErrConflict
 		}
 	}
-	return tx.Commit()
+	return nil
 }
 
 func (s *Store) Next(ctx context.Context, name string) (int64, error) {
 	var result int64
-	err := s.DB.QueryRowContext(ctx, `INSERT INTO counters (name,value) VALUES ($1,1) ON CONFLICT (name) DO UPDATE SET value=counters.value+1 RETURNING value`, name).Scan(&result)
+	err := s.executor().QueryRowContext(ctx, `INSERT INTO counters (name,value) VALUES ($1,1) ON CONFLICT (name) DO UPDATE SET value=counters.value+1 RETURNING value`, name).Scan(&result)
 	return result, err
 }

@@ -88,7 +88,20 @@ Light, dark, and 390-pixel views pass workflow and document-width checks. Visual
 STUDIO-HELP-001 passes with all four new guides and existing keyboard, focus, dismissal, theme, and mobile behavior.
 STUDIO-NOTIFY-001 passes again after the shared fixture and shutdown changes.
 Owned verification controllers and browser containers stop after checks. The disposable PostgreSQL service also stops.
-Invitations, identity linking, personal profile UI, role and grant editors, deployment verification, and the remaining full plan stay pending.
+Identity linking, pending project access, personal profile UI, role and grant editors, deployment verification, and the remaining full plan stay pending.
+
+### Atomic assignment storage
+
+Added transaction-bound record reads, writes, assertions, pages, and counters.
+SQLite permission assignments now share the metadata transaction.
+PostgreSQL uses its existing native assignment tables inside that same transaction.
+PostgreSQL rejects unrelated policy writes through the assignment transaction adapter.
+Authorization uses a fresh permission service and transaction-bound identity directory.
+The directory revision advances before authorization reads and serializes competing identity and assignment changes.
+Targeted checks pass with race detection on SQLite and local PostgreSQL.
+They verify pending permission evaluation, explicit denies, exact revocation, idempotent assignment, concurrent conflicts, and complete rollback with audit and directory records.
+Existing access API and administrator guard checks also pass on both databases.
+The administrator-facing assignment API, editors, and custom policy transactions remain pending.
 
 ### Direct project membership decision
 

@@ -4,7 +4,7 @@ TestStudio stores user profiles, external identity links, groups, and membership
 The permission library evaluates access. The directory does not infer project authority from an email address or group name.
 
 Users and Groups screens use the administrative APIs for profiles, account state, group metadata, local membership, and session revocation.
-Invitations, identity linking, custom role management, assignment editors, and the personal profile screen remain pending.
+Identity linking, custom role management, assignment editors, pending project access, and the personal profile screen remain pending.
 The full acceptance ledger remains in [Implementation verification](implementation.md).
 The [OpenAPI contract](../contracts/openapi.yaml) describes the implemented identity routes. Other route families remain pending in that contract.
 
@@ -194,3 +194,17 @@ The expiry check runs in a non-UTC browser timezone and compares the stored UTC 
 Expected rejected requests bind to exact methods, addresses, statuses, and individual browser resource diagnostics.
 Other browser runtime errors still fail the workflow.
 The worker retains diagnostic evidence and removes its owned browser container after verification.
+
+## Atomic assignment storage
+
+Assignment changes use a shared database transaction for permission assignments, metadata, and audit records.
+The transaction advances the directory revision before it reads authorization or administrator state.
+Competing directory changes use revision checks against that same record.
+A rejected workflow rolls back its assignment changes, audit records, and directory revision together.
+The permission library reads pending assignments through the transaction before it evaluates access.
+PostgreSQL keeps assignments in its existing native permission tables.
+Its transaction adapter supports assignment changes and rejects other policy writes.
+SQLite uses transaction-bound record storage.
+An exact revocation removes one role and binding combination.
+An empty binding map does not remove assignments with project bindings.
+The administrator-facing assignment API and interface remain pending.

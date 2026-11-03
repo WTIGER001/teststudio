@@ -33,6 +33,11 @@ func (s *Store) AssignRole(ctx context.Context, principal permissions.PrincipalR
 		bindings = map[string]any{}
 	}
 	a := assignment{Principal: principal, Value: permissions.RoleAssignment{RoleID: role, BindingValues: bindings}}
+	if _, err := s.db.Get(ctx, "permission-assignments", key(a)); err == nil {
+		return nil
+	} else if !errors.Is(err, storage.ErrNotFound) {
+		return err
+	}
 	err := s.create(ctx, "permission-assignments", key(a), a)
 	if errors.Is(err, storage.ErrConflict) {
 		return nil
