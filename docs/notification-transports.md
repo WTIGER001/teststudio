@@ -52,4 +52,5 @@ See the [Discord webhook contract](https://docs.discord.com/developers/resources
 
 Focused local checks verify project and purpose isolation, bounded secret reads, payloads, stable delivery identifiers, and redacted errors.
 They also verify network scope, redirect rejection, Discord confirmation, mention suppression, and rate-limit parsing.
-The durable outbox, service configuration, notification interface, and complete delivery workflow remain under implementation at this transport checkpoint.
+See [Durable completion notifications](notifications.md) for the outbox, service configuration, scoped API, and local verification.
+The notification interface, its Playwright workflow, and hosted secret adapters remain pending.

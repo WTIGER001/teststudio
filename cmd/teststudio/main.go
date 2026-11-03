@@ -22,14 +22,17 @@ import (
 	authoidc "github.com/wtiger001/teststudio/adapters/auth/oidc"
 	"github.com/wtiger001/teststudio/adapters/execution/localcontainer"
 	"github.com/wtiger001/teststudio/adapters/execution/localplaywright"
+	"github.com/wtiger001/teststudio/adapters/notifications/webhook"
 	permissionpg "github.com/wtiger001/teststudio/adapters/permissions/postgres"
 	permissionsqlite "github.com/wtiger001/teststudio/adapters/permissions/sqlite"
+	localsecrets "github.com/wtiger001/teststudio/adapters/secrets/local"
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/evidence"
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/httpapi"
 	"github.com/wtiger001/teststudio/internal/identity"
+	"github.com/wtiger001/teststudio/internal/notifications"
 	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/schedules"
@@ -55,6 +58,8 @@ func run() error {
 	playwrightImages := flag.String("playwright-images", "", "Comma-separated immutable local Playwright image references; enables the isolated local worker")
 	goImages := flag.String("go-images", "", "Comma-separated immutable local Go suite image references; enables the isolated local Go worker")
 	scheduler := flag.Bool("scheduler", true, "Process durable project schedules on this instance")
+	notificationWorker := flag.Bool("notification-worker", true, "Process durable notification deliveries on this instance")
+	secretBindings := flag.String("secret-bindings", "", "Project and purpose scoped environment or mounted-file secret binding configuration")
 	local := flag.Bool("local", false, "Enable explicit loopback-only local administrator sign-in")
 	providers := flag.String("oidc-config", "", "Initial JSON provider configuration file")
 	bootstrapIssuer := flag.String("bootstrap-issuer", "", "OIDC issuer for the initial installation administrator")
@@ -65,6 +70,13 @@ func run() error {
 	parsed, err := url.Parse(*public)
 	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Path != "" || parsed.RawQuery != "" || parsed.Fragment != "" || parsed.User != nil {
 		return errors.New("public-url must be an HTTP or HTTPS origin")
+	}
+	if err := notifications.ValidateOrigin(*public); err != nil {
+		return err
+	}
+	secretProvider, err := localsecrets.Load(*secretBindings)
+	if err != nil {
+		return err
 	}
 	artifactURL, err := url.Parse(*artifactOrigin)
 	if err != nil || artifactURL.Host == "" || (artifactURL.Scheme != "http" && artifactURL.Scheme != "https") || artifactURL.User != nil || artifactURL.Path != "" || artifactURL.RawQuery != "" || artifactURL.Fragment != "" || (artifactURL.Scheme == parsed.Scheme && strings.EqualFold(artifactURL.Host, parsed.Host)) {
@@ -172,7 +184,9 @@ func run() error {
 		runService.Go = &localcontainer.Executor{Runner: "go", Images: strings.Split(*goImages, ",")}
 	}
 	scheduleService := &schedules.Service{Store: db, Auth: auth, Runs: runService}
-	api := &httpapi.Server{Store: db, Auth: auth, Projects: &projects.Service{Store: db, Auth: auth}, Catalog: catalogService, Runs: runService, Schedules: scheduleService, Evidence: evidenceService, ArtifactOrigin: *artifactOrigin, Sessions: sessionService, OIDC: oidc, LocalUser: localUser, UI: *ui}
+	notificationService := &notifications.Service{Store: db, Auth: auth, Secrets: secretProvider, Sender: &webhook.Sender{}, Origin: *public}
+	runService.Completion = notificationService
+	api := &httpapi.Server{Store: db, Auth: auth, Projects: &projects.Service{Store: db, Auth: auth}, Catalog: catalogService, Runs: runService, Schedules: scheduleService, Notifications: notificationService, Evidence: evidenceService, ArtifactOrigin: *artifactOrigin, Sessions: sessionService, OIDC: oidc, LocalUser: localUser, UI: *ui}
 	server := &http.Server{Addr: *addr, Handler: api.Handler(), ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 30 * time.Second, WriteTimeout: 60 * time.Second, IdleTimeout: 90 * time.Second}
 	artifactServer := &http.Server{Addr: *artifactAddr, Handler: api.ArtifactHandler(), ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 30 * time.Second, IdleTimeout: 90 * time.Second}
 	listener, err := net.Listen("tcp", *addr)
@@ -192,12 +206,19 @@ func run() error {
 	if *scheduler {
 		schedulesDone = scheduleService.Start(workerContext)
 	}
+	var notificationsDone <-chan struct{}
+	if *notificationWorker {
+		notificationsDone = notificationService.Start(workerContext)
+	}
 	defer func() {
 		cancelWorkers()
 		<-workersDone
 		<-maintenanceDone
 		if schedulesDone != nil {
 			<-schedulesDone
+		}
+		if notificationsDone != nil {
+			<-notificationsDone
 		}
 	}()
 	failed := make(chan error, 2)

@@ -104,6 +104,13 @@ func (s *Service) claim(ctx context.Context, entry storage.Record, worker string
 		return v, false, err
 	}
 	changes = append(changes, change)
+	if Terminal(v.State) && s.Completion != nil {
+		notifications, err := s.Completion.Complete(ctx, v)
+		if err != nil {
+			return v, false, err
+		}
+		changes = append(changes, notifications...)
+	}
 	err = s.Store.Commit(ctx, changes...)
 	return v, err == nil && v.State == "running", err
 }

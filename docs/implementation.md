@@ -64,6 +64,23 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Record feature commits and targeted validation here.
 
+### Durable completion outbox and notification API
+
+Run creation freezes channel scope and outcome rules without exposing resolved secrets.
+Terminal transitions save delivery work atomically for manual, scheduled, cancelled, timed-out, and interrupted runs.
+Delivery workers claim durable attempts, retain bounded retry budgets, and recover unknown acceptance after restart.
+Stable identifiers allow receiver deduplication. Recovery preserves at-least-once uncertainty without rerunning tests.
+Destination and Discord global cooldowns respect provider delays.
+Pausing and destination changes invalidate earlier delivery epochs. Explicit retry records new authorization while retaining the original snapshot.
+Every send checks current channel ownership, project state, notification management, and run access.
+Added scoped configuration, reference, delivery, attempt, retry, stop, archive, and restore APIs.
+Delivery history uses query-bound cursors, bounded scans, per-run access checks, and visible partial coverage.
+The local service loads environment or mounted-file bindings and starts durable delivery workers by default.
+Validation: focused race checks pass on SQLite and local PostgreSQL.
+Actual local HTTP receivers verify manual and scheduled delivery, retry delays, permanent failures, policy snapshots, revocation, and uncertainty after restart.
+The built-service smoke workflow verifies native publication, real scheduling, retained 503 retries, stable identifiers, configured links, and secret-free API data.
+The notification interface, its Playwright workflow, hosted secret services, and the remaining full plan stay pending at this backend checkpoint.
+
 ### Notification transports and scoped local secret bindings
 
 Added purpose-scoped environment and mounted-file secret bindings with project isolation and bounded reads.

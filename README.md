@@ -134,3 +134,9 @@ Manage interval and cron schedules from the project Schedules page.
 Preview future times, select published tests, and inspect firing history and normal run evidence.
 The local server processes schedules by default.
 See [Durable schedules](docs/schedules.md) for permissions, release pins, overlap, downtime, and replica behavior.
+
+## Completion notifications
+
+Project channels use scoped secret references and one durable delivery path for manual and scheduled runs.
+Run `bash scripts/test-notifications.sh` for a fresh local receiver and built-service verification.
+See [Durable completion notifications](docs/notifications.md) for configuration, retries, permissions, and API routes.

@@ -15,6 +15,7 @@ func (s *Service) mutate(ctx context.Context, project, id string, change func(*R
 		if err != nil {
 			return v, err
 		}
+		wasTerminal := Terminal(v.State)
 		if err := change(&v); err != nil {
 			return v, err
 		}
@@ -24,6 +25,13 @@ func (s *Service) mutate(ctx context.Context, project, id string, change func(*R
 			return v, err
 		}
 		changes := append([]storage.Change{c}, extra...)
+		if !wasTerminal && Terminal(v.State) && s.Completion != nil {
+			notifications, err := s.Completion.Complete(ctx, v)
+			if err != nil {
+				return v, err
+			}
+			changes = append(changes, notifications...)
+		}
 		if err := s.Store.Commit(ctx, changes...); errors.Is(err, storage.ErrConflict) {
 			continue
 		} else {

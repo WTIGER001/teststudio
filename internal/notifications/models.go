@@ -26,6 +26,7 @@ type Channel struct {
 	Project  string `json:"projectId"`
 	Owner    string `json:"owner"`
 	Archived bool   `json:"archived"`
+	Epoch    int64  `json:"deliveryEpoch"`
 }
 type subscription struct {
 	Channel  Channel `json:"channel"`
@@ -63,6 +64,7 @@ type Delivery struct {
 	Run               string       `json:"runId"`
 	Channel           string       `json:"channelId"`
 	ChannelName       string       `json:"channelName"`
+	DispatchEpoch     int64        `json:"deliveryEpoch"`
 	Destination       subscription `json:"destination"`
 	Message           Message      `json:"message"`
 	State             string       `json:"state"`
@@ -93,6 +95,7 @@ type Outcome struct {
 	RetryAfter        time.Duration
 	Error             string
 	AcceptanceUnknown bool
+	GlobalRateLimit   bool
 }
 type Sender interface {
 	Send(context.Context, string, secrets.Value, Message) Outcome

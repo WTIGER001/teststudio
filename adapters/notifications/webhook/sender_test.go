@@ -62,11 +62,11 @@ func TestDiscordConfirmsAcceptanceSuppressesMentionsAndHonorsRateLimits(t *testi
 		}
 		w.Header().Set("Retry-After", "1.25")
 		w.WriteHeader(429)
-		w.Write([]byte(`{"retry_after":2.5,"message":"private-token"}`))
+		w.Write([]byte(`{"retry_after":2.5,"global":true,"message":"private-token"}`))
 	}))
 	defer server.Close()
 	r := (&Sender{}).Send(t.Context(), "discord", secrets.Value{Bytes: []byte(server.URL + "/private-token"), Network: networkguard.Loopback}, message())
-	if r.HTTPStatus != 429 || !r.Retryable || r.RetryAfter != 2500*time.Millisecond || strings.Contains(r.Error, "private-token") {
+	if r.HTTPStatus != 429 || !r.Retryable || !r.GlobalRateLimit || r.RetryAfter != 2500*time.Millisecond || strings.Contains(r.Error, "private-token") {
 		t.Fatalf("Discord retry contract: %+v", r)
 	}
 }

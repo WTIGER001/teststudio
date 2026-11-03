@@ -84,12 +84,15 @@ func (s *Sender) Send(ctx context.Context, kind string, secret secrets.Value, me
 		result.RetryAfter = retryAfter(response.Header.Get("Retry-After"), time.Now())
 	}
 	if kind == "discord" && response.StatusCode == 429 {
+		result.GlobalRateLimit = strings.EqualFold(response.Header.Get("X-RateLimit-Global"), "true")
 		data, err := io.ReadAll(io.LimitReader(response.Body, 4097))
 		var limit struct {
 			Seconds float64 `json:"retry_after"`
+			Global  bool    `json:"global"`
 		}
 		if err == nil && len(data) <= 4096 && json.Unmarshal(data, &limit) == nil {
 			result.RetryAfter = max(result.RetryAfter, seconds(limit.Seconds))
+			result.GlobalRateLimit = result.GlobalRateLimit || limit.Global
 		}
 	}
 	return result

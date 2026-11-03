@@ -17,12 +17,15 @@ import (
 	permissions "github.com/wtiger001/go-permissions"
 	"github.com/wtiger001/teststudio/adapters/artifacts/filesystem"
 	authoidc "github.com/wtiger001/teststudio/adapters/auth/oidc"
+	"github.com/wtiger001/teststudio/adapters/notifications/webhook"
+	localsecrets "github.com/wtiger001/teststudio/adapters/secrets/local"
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/evidence"
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/httpapi"
 	"github.com/wtiger001/teststudio/internal/identity"
+	"github.com/wtiger001/teststudio/internal/notifications"
 	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/schedules"
@@ -81,12 +84,19 @@ func fixture(t *testing.T) *client {
 	t.Cleanup(func() { cancelWorkers(); <-workersDone })
 	api := &httpapi.Server{Store: db, Auth: auth, Projects: &projects.Service{Store: db, Auth: auth}, Catalog: &catalog.Service{Store: db, Auth: auth}, Sessions: sessions, OIDC: oidc, LocalUser: "admin", UI: uiRoot, Runs: runService, Evidence: evidenceService}
 	api.Schedules = &schedules.Service{Store: db, Auth: auth, Runs: runService}
+	secretProvider, err := localsecrets.New(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	api.Notifications = &notifications.Service{Store: db, Auth: auth, Secrets: secretProvider, Sender: &webhook.Sender{}}
+	runService.Completion = api.Notifications
 	artifactServer := httptest.NewServer(api.ArtifactHandler())
 	t.Cleanup(artifactServer.Close)
 	api.ArtifactOrigin = artifactServer.URL
 	server := httptest.NewServer(api.Handler())
 	t.Cleanup(server.Close)
 	sessions.Origin = server.URL
+	api.Notifications.Origin = server.URL
 	oidc.Origin = server.URL
 	jar, err := cookiejar.New(nil)
 	if err != nil {

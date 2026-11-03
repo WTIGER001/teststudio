@@ -16,6 +16,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/evidence"
+	"github.com/wtiger001/teststudio/internal/notifications"
 	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/schedules"
@@ -30,6 +31,7 @@ type Server struct {
 	Catalog        *catalog.Service
 	Runs           *runs.Service
 	Schedules      *schedules.Service
+	Notifications  *notifications.Service
 	Evidence       *evidence.Service
 	ArtifactOrigin string
 	Sessions       *sessions.Service
@@ -129,6 +131,7 @@ func (s *Server) Handler() http.Handler {
 	s.catalogTransferRoutes(mux)
 	s.runRoutes(mux)
 	s.scheduleRoutes(mux)
+	s.notificationRoutes(mux)
 	s.timingRoutes(mux)
 	s.trendRoutes(mux)
 	s.evidenceRetentionRoutes(mux)

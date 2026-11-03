@@ -29,6 +29,7 @@ type HTTPExecutor interface {
 }
 
 type Service struct {
+	Completion        CompletionHook
 	Store             *storage.Store
 	Auth              *authorization.Service
 	Catalog           *catalog.Service
@@ -43,6 +44,11 @@ type Service struct {
 	Concurrency       int
 	PollInterval      time.Duration
 	HeartbeatInterval time.Duration
+}
+
+type CompletionHook interface {
+	Prepare(context.Context, Run) ([]storage.Change, error)
+	Complete(context.Context, Run) ([]storage.Change, error)
 }
 
 type receipt struct {
@@ -116,6 +122,13 @@ func (s *Service) create(ctx context.Context, user, project string, req Request,
 	}
 	v.Trigger = trigger
 	v.Schedule = schedule
+	var completionChanges []storage.Change
+	if s.Completion != nil {
+		completionChanges, err = s.Completion.Prepare(ctx, v)
+		if err != nil {
+			return v, err
+		}
+	}
 	run, err := storage.Put("runs", v.ID, project, 0, v)
 	if err != nil {
 		return v, err
@@ -133,6 +146,7 @@ func (s *Service) create(ctx context.Context, user, project string, req Request,
 		return v, err
 	}
 	changes := []storage.Change{run, queued, idempotency, audit, {Record: projectRow, Assert: true}}
+	changes = append(changes, completionChanges...)
 	if checkpoint != nil {
 		extra, err := checkpoint(v)
 		if err != nil {
