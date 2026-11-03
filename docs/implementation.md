@@ -74,6 +74,58 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Guided configuration and reviewed local execution
+
+Project setup now uses Project, Application, Target, and Review steps.
+Users can include a first application, optional target, and empty Availability suite.
+The wizard lists every selected resource before creation. Setup creates no tests and starts no runs.
+Generated identifiers stay editable under Advanced details. Back preserves entries.
+Successful setup steps remain confirmed after a later failure. Retry continues the remaining work.
+An uncertain save reconciles its stable identifier and intended data through the existing read contract.
+A first-attempt conflict does not adopt or overwrite another record.
+
+Application, environment, and suite registration share Name, Options, and Review steps.
+The target URL, stage, and protection remain visible. Endpoint aliases stay under Advanced options.
+The related-resource wizard preserves its fixed application association.
+HTTPS creation uses Name, Request, and Review with the canonical catalog save and validation services.
+A target picker filters enabled environments by the suite's linked applications.
+Named Advanced sections contain response assertions, TLS, timing, and identifier controls.
+Invalid hidden options reopen and receive focus. Step headings receive focus after navigation.
+Review shows the request, target protection, safety label, rationale, and advanced settings.
+New tests keep needs-review safety until the user makes a deliberate choice.
+Save draft remains separate from execution.
+Save and run validates and publishes a suite snapshot without changing its active release.
+It runs the selected test and dependencies through the normal local run API.
+Save and publication receipts survive in-page retries. Publication and run requests retain idempotency keys.
+An interrupted run response does not create a second logical run on retry.
+Run creation now uses Selection and Review steps.
+Saved selections, test identifiers, limits, and retries stay under Advanced options.
+The existing saved-selection preview and frozen-release contracts remain intact.
+Contextual help and walkthrough documentation describe the new steps.
+
+The production Angular build passes. Five focused utility checks pass.
+The changed browser workflows pass through normal local TestStudio execution:
+- STUDIO-WIZARD-001: 6.953 seconds. First-project setup, denied child registration, uncertain target save, preserved entries, invalid Advanced options, mobile review, interrupted run response, and normal run review.
+- STUDIO-APPS-001: 2.470 seconds. Shared registration, locked application association, scoped navigation, and mobile view.
+- STUDIO-SELECTIONS-001: 4.221 seconds. Saved-selection preview and retained run snapshots with the new stepper.
+- STUDIO-HTTPS-001: 2.618 seconds. Advanced assertions, validation, HEAD editing, and retained diagnostics.
+- STUDIO-CATALOG-001: 3.878 seconds. Draft publication, reviewed native execution, timing estimate, and evidence.
+
+Final wizard evidence is output/selftest/20261103T235018.292921000-0ea939035701cda28c317f16/summary.json and cleanup.json.
+Application evidence is output/selftest/20261103T234854.252019000-63afe8a2be4fbd7d50638ecd/summary.json and cleanup.json.
+Other targeted evidence is output/selftest/20261103T234601.999273000-6911eea4d76742eeed63862b/summary.json and cleanup.json.
+The first pass found early suite-selection loading and disabled-control validation defects. Both are corrected.
+The second wizard pass found an unsupported read path in its final test assertion. The corrected check passes.
+Only failed workflows repeat after corrections. Unchanged Go fixture binaries remain cached.
+Repeated --test options now select several affected workflows in one build and run.
+All owned verification browsers, controllers, containers, and volumes stop after verification.
+The existing local demo receives the new private UI snapshot. Its database, examples, and history stay retained.
+No cloud verification or unrelated broad test matrix runs for this delivery.
+
+The ledger remains **26 verified, 31 open, 57 total**.
+This extends **05**, **33**, **49**, and **50**. Catalog work advances **21**, which remains open.
+Continuation: resume environment-backed execution for recorded website journeys, then the remaining full ledger.
+
 ### Applications sidebar and project application views
 
 Applications now appears before Test catalog in the project's visible Testing sidebar section.

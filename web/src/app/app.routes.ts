@@ -1,3 +1,4 @@
+import type { ProjectsPage } from './features/projects/projects.page'
 import type { ApplicationsPage } from './features/applications/applications.page'
 import type { CreateTestPage } from './features/catalog/create-test.page'
 import type { SourcesPage } from './features/sources/sources.page'
@@ -17,7 +18,7 @@ export const routes: Routes = [
   { path: 'account', data: { helpTopic: 'account' }, loadComponent: () => import('./features/account/account.page').then(m => m.AccountPage) },
   { path: 'account/access', data: { helpTopic: 'effective-permissions' }, loadComponent: () => import('./features/access/permission-explanation.page').then(m => m.PermissionExplanationPage) },
   { path: 'projects/:projectId/explain-access', data: { helpTopic: 'effective-permissions' }, loadComponent: () => import('./features/access/permission-explanation.page').then(m => m.PermissionExplanationPage) },
-  { path: 'projects', data: { helpTopic: 'projects' }, loadComponent: () => import('./features/projects/projects.page').then(m => m.ProjectsPage) },
+  { path: 'projects', canDeactivate: [(page: ProjectsPage) => page.canLeave()], data: { helpTopic: 'projects' }, loadComponent: () => import('./features/projects/projects.page').then(m => m.ProjectsPage) },
   { path: 'settings/access', data: { helpTopic: 'installation-access' }, loadComponent: () => import('./features/access/assignments.page').then(m => m.AssignmentsPage) },
   { path: 'settings/permissions', data: { helpTopic: 'grants' }, loadComponent: () => import('./features/access/grants.page').then(m => m.GrantsPage) },
   { path: 'projects/:projectId/permissions', data: { helpTopic: 'grants' }, loadComponent: () => import('./features/access/grants.page').then(m => m.GrantsPage) },

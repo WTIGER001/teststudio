@@ -5,10 +5,12 @@ import type { Suite } from '../configuration/configuration.service'
 import { TimingPolicyEditorService } from '../timing/timing-policy-editor.service'
 import { HTTPCheckEditorService } from './http-check-editor.service'
 import type { CatalogItem, TestDefinition } from './catalog.models'
+import { RecordCreationService } from '../../core/record-creation.service'
 
 @Injectable()
 export class CatalogTestEditorService {
   private readonly api = inject(ApiService)
+  private readonly creation = inject(RecordCreationService)
   readonly timingEditor = inject(TimingPolicyEditorService)
   readonly checkEditor = inject(HTTPCheckEditorService)
   readonly suites = signal<RecordValue<Suite>[]>([])
@@ -34,7 +36,7 @@ export class CatalogTestEditorService {
     this.editing.set(null)
     this.timingEditor.reset()
     this.checkEditor.reset()
-    this.form.reset({ suite: this.suites()[0]?.id ?? '', id: '', title: '', category: 'Availability', timeout: 10, safety: 'needs-review', rationale: '' })
+    this.form.reset({ suite: this.suites()[0]?.id ?? '', id: '', title: '', category: 'Availability', timeout: 10, safety: 'needs-review', rationale: 'Production safety has not been reviewed.' })
     this.form.controls.id.enable(); this.form.controls.suite.enable()
     this.editorOpen.set(true); this.error.set('')
   }
@@ -62,7 +64,8 @@ export class CatalogTestEditorService {
       }
       if (this.editingHTTP()) test.check = { ...test.check, ...this.checkEditor.check()! }
       const base = `/api/v1/projects/${this.project}/suites/${value.suite}/tests`
-      await this.api.request(existing ? `${base}/${value.id}` : base, existing ? 'PUT' : 'POST', test, existing?.revision)
+      if (existing) await this.api.request(`${base}/${value.id}`, 'PUT', test, existing.revision)
+      else await this.creation.create(base, test, 'POST', `${base}/${value.id}`)
       this.editorOpen.set(false); this.form.markAsPristine(); this.checkEditor.form.markAsPristine(); this.timingEditor.form.markAsPristine(); this.timingEditor.override.markAsPristine()
       return true
     } catch (error) { this.error.set(error instanceof Error ? error.message : 'The test could not be saved.'); return false }

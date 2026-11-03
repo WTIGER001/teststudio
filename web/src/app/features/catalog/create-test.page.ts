@@ -1,3 +1,4 @@
+import { RecordCreationService } from '../../core/record-creation.service'
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { ReactiveFormsModule } from '@angular/forms'
 import { RouterLink } from '@angular/router'
@@ -7,12 +8,12 @@ import { PreparationComponent } from '../sources/preparation.component'
 import { SourcePreviewComponent } from '../sources/source-preview.component'
 import { HTTPCheckEditorService } from './http-check-editor.service'
 import { CatalogTestEditorService } from './catalog-test-editor.service'
-import { CatalogTestFormComponent } from './catalog-test-form.component'
+import { HTTPSWizardComponent } from './https-wizard.component'
 import { CreateTestService } from './create-test.service'
 
 @Component({
-  standalone: true, imports: [RouterLink, ReactiveFormsModule, CatalogTestFormComponent, PreparationComponent, SourcePreviewComponent],
-  providers: [SourcesService, TimingPolicyEditorService, HTTPCheckEditorService, CatalogTestEditorService, CreateTestService], changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true, imports: [RouterLink, ReactiveFormsModule, HTTPSWizardComponent, PreparationComponent, SourcePreviewComponent],
+  providers: [RecordCreationService, SourcesService, TimingPolicyEditorService, HTTPCheckEditorService, CatalogTestEditorService, CreateTestService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-heading"><div><span class="eyebrow">{{ service.sources.workspace.project()?.name || 'Project' }}</span><h1>Create test</h1><p class="muted">Choose what you want to test, then follow its creation workflow.</p></div><a class="button secondary" [routerLink]="['/projects', service.sources.project(), 'catalog']">Back to catalog</a></div>
     @if (!service.kind()) {
@@ -26,7 +27,7 @@ import { CreateTestService } from './create-test.service'
       @if (service.sources.loading()) { <p role="status">Loading suites…</p> }
       @else if (!service.sources.suites().length) { <section class="panel"><h2>Create a suite first</h2><p class="muted">Tests belong to a suite, which holds their releases and run settings.</p><a class="button primary" [routerLink]="['/projects', service.sources.project(), 'configuration']">Create or manage suites</a></section> }
       @else if (service.kind() === 'https') {
-        @if (service.sources.workspace.can('catalog.create')) { <section class="panel" aria-labelledby="create-probe-title"><h2 id="create-probe-title">Configure an HTTPS probe</h2><p class="muted">Save the check as a draft, then publish a release from the catalog.</p><ts-catalog-test-form (saved)="service.afterCreate()" /></section> }
+        @if (service.sources.workspace.can('catalog.create')) { <section class="panel" aria-labelledby="create-probe-title"><h2 id="create-probe-title">Configure an HTTPS probe</h2><p class="muted">Name the test, configure its request, then review before saving.</p><ts-https-wizard /></section> }
         @else { <p class="notice">You need catalog creation permission to add an HTTPS probe.</p> }
       } @else {
         <section class="panel" aria-labelledby="creation-suite-title"><h2 id="creation-suite-title">Destination suite</h2><fieldset [disabled]="service.sources.draftDirty()" [formGroup]="service.sources.form"><div class="field"><label for="creation-suite">Suite for this test</label><select id="creation-suite" formControlName="suite"><option value="">Choose a suite</option>@for (suite of service.sources.suites(); track suite.id) { <option [value]="suite.id">{{ suite.data.name }}</option> }</select></div></fieldset><a class="small" [routerLink]="['/projects', service.sources.project(), 'configuration']">Create or manage suites</a></section>

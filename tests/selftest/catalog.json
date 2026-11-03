@@ -2,6 +2,7 @@
   "schemaVersion": "teststudio.selftest/v1",
   "source": "teststudio-selftests",
   "tests": [
+    { "id": "STUDIO-WIZARD-001", "title": "Guided setup, advanced validation, reviewed probes and recoverable local runs", "selector": "@STUDIO-WIZARD-001", "category": "Interface" },
     { "id": "STUDIO-APPS-001", "title": "Applications navigation, linked suites, environment registration, and scoped views", "selector": "@STUDIO-APPS-001", "category": "Interface" },
     { "id": "STUDIO-CREATE-001", "title": "Dedicated typed creation, browser recording drafts, native probes, and retained source copies", "selector": "@STUDIO-CREATE-001", "category": "Catalog" },
     { "id": "STUDIO-EDITOR-001", "title": "Playwright editor, persistent drafts, conflicts, and immutable preparation", "selector": "@STUDIO-EDITOR-001", "category": "Sources" },

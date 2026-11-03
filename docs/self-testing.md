@@ -33,7 +33,9 @@ It saves a local result summary and downloaded screenshots and traces under `out
 The printed installation path contains `installation.json` with its origins and immutable image reference.
 No cloud account or remote deployment is required.
 
-Use `--test=ID` to execute one normal workflow with its usual publication, execution, and evidence checks:
+Use `--test=ID` to execute one normal workflow with its usual publication, execution, and evidence checks.
+Repeat `--test=ID` to select several affected workflows in one build and run.
+Unselected workflows do not execute. Unchanged Go fixture binaries remain cached.
 
 ```sh
 bash scripts/test-self.sh --test=STUDIO-HELP-001
@@ -230,3 +232,12 @@ Provider edits invalidate earlier sessions and memberships. Fresh validated sign
 Self-provider edits refresh public sign-in choices after authentication expires.
 The workflow also checks conflicts, unconfirmed saves, revoked management, retained read-only views, help, and both themes.
 The wrapper and all fixture state end with the owned test container.
+
+## Configuration wizard checks
+
+STUDIO-WIZARD-001 covers first-project setup, generated identifiers, preserved entries, and reviewed HTTPS creation.
+It checks hidden invalid options, mobile layout, partial setup recovery, and duplicate run prevention after an interrupted response.
+STUDIO-APPS-001 covers the shared registration wizard and locked application association.
+STUDIO-HTTPS-001 covers advanced assertions and retained diagnostics.
+STUDIO-CATALOG-001 and STUDIO-SELECTIONS-001 cover reviewed normal runs and saved selection previews.
+Select only these workflows for wizard changes. Cloud verification remains separate.

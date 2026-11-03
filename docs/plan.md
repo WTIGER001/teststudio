@@ -40,7 +40,12 @@ Playwright creation leads with native recording and reviewed generated source.
 The demo enables the local desktop recorder. Hosted recording needs a separate companion or streamed browser.
 See create-tests.md and browser-recording.md for the implemented flows and limits.
 Retained Playwright bundles can also open as editable source copies without changing their original releases.
-The next priority is environment-backed execution for recorded website journeys.
+The user next requests steppers and progressive disclosure during the walkthrough.
+Project setup now groups the first application, optional target, and empty suite behind a final review.
+Resource registration uses Name, Options, and Review. HTTPS creation uses Name, Request, and Review.
+Run creation uses Selection and Review. Named Advanced sections hold uncommon controls.
+HTTPS Save and run explicitly publishes a snapshot without replacing the active release and starts a local run.
+Continue environment-backed execution for recorded website journeys after this interface delivery.
 The current isolated profile deliberately blocks recorded website drafts. That execution work remains open.
 
 Item **01** now passes a build from an isolated copy of the current source tree.

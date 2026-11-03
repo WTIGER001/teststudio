@@ -7,7 +7,7 @@ Choose the test type before entering its definition.
 | Type | Route suffix | Workflow |
 | --- | --- | --- |
 | Playwright browser test | /playwright | Record browser actions, then review and save generated source. |
-| HTTPS probe | /https | Enter request settings and assertions in the native form. |
+| HTTPS probe | /https | Follow Name, Request, and Review. Save a draft or explicitly save and run. |
 | Go suite | /go | Upload a complete source bundle and review discovered tests. |
 
 The creation page has its own contextual help.
@@ -28,11 +28,26 @@ See browser-recording.md for local setup, privacy, recovery, and current executi
 
 ## HTTPS probes
 
-Choose a suite and permanent identifier. Enter the title, category, timeout, safety label, and rationale.
-Configure the request and expected response with the native check form.
-Select Save draft changes. The catalog opens and shows the new definition.
-Validate and publish a suite release before starting a run.
-Catalog edits and new probe creation use the same form, validation, and save service.
+Enter a title and choose a suite. Select Continue.
+The wizard generates a permanent identifier. Advanced details contains its editor and the category.
+Choose a registered target environment. The picker shows its stage and protection.
+Choose its endpoint alias, then enter the relative path and accepted status codes.
+The wizard previews the resolved address. Other runs can use the same alias in another environment.
+Open named Advanced sections for response assertions, method, TLS, timeout, or slowdown settings.
+Select Continue. Invalid options reopen their section and receive focus.
+Back and completed step buttons preserve entered values.
+Review the request, target, safety label, and rationale.
+GET and HEAD do not establish production safety. New probes require review by default.
+Select Save draft to add the definition and return to the catalog.
+Save and run requires publication and run permissions, plus a registered target.
+Protected targets also require safe definitions and protected execution permission.
+This action validates and publishes a suite snapshot without changing its active release.
+It starts only the selected test and its dependencies through the normal local run API.
+The action keeps successful save and publication receipts during a retry.
+Publication and run creation reuse stable idempotency keys.
+After a partial failure, entries stay locked. Retry run continues the action. Open saved draft returns to the catalog.
+Reloading ends this in-page continuation. Saved resources remain in the catalog and history.
+The wizard shares check parsing, timing rules, and saving with the catalog editor.
 See http-checks.md for supported assertions.
 
 ## Go suites

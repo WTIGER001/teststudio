@@ -19,13 +19,15 @@ export class CreateTestService {
   constructor() {
     effect(() => {
       const project = this.sources.project(), suites = this.sources.suites(), kind = this.kind()
-      const key = `${project}:${kind}:${suites.map(row => row.id).join(',')}`
+      const key = `${project}:${kind}`
       untracked(() => {
-        if (key === this.initialized) return
-        this.initialized = key
-        this.native.configure(project, suites); this.native.create()
+        this.native.configure(project, suites)
         const preferred = this.route.snapshot.queryParamMap.get('suite')
-        if (preferred && suites.some(row => row.id === preferred)) { this.native.form.controls.suite.setValue(preferred); this.sources.form.controls.suite.setValue(preferred) }
+        if (preferred && suites.some(row => row.id === preferred) && !this.sources.form.controls.suite.value) this.sources.form.controls.suite.setValue(preferred)
+        if (key === this.initialized) { if (!this.native.form.controls.suite.value && suites.length) this.native.form.controls.suite.setValue(suites[0].id); return }
+        this.initialized = key
+        this.native.create()
+        if (preferred) this.native.form.controls.suite.setValue(preferred)
       })
     })
   }

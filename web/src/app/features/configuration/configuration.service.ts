@@ -28,6 +28,7 @@ export class ConfigurationService {
   readonly saving = signal(false)
   readonly error = signal('')
   readonly success = signal('')
+  readonly created = signal(0)
   readonly form = new FormGroup({
     id: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/)] }),
     name: new FormControl('', { nonNullable: true, validators: Validators.required }),
@@ -74,7 +75,7 @@ export class ConfigurationService {
 
   applySuite(state: SuiteLifecycle): void { this.suites.update(rows => replaceConfiguredSuite(rows, state)) }
 
-  select(kind: Kind): void { this.kind.set(kind); this.success.set(''); this.error.set(''); this.form.controls.id.setValue(''); this.form.controls.name.setValue('') }
+  select(kind: Kind): void { this.kind.set(kind); this.success.set(''); this.error.set(''); this.form.reset({ id: '', name: '', application: '', stage: 'development', protected: false, endpoint: 'api', url: '', requiresTarget: true }); this.form.controls.application.enable() }
 
   async create(): Promise<boolean> {
     if (this.form.invalid || this.saving()) return false
@@ -87,7 +88,7 @@ export class ConfigurationService {
       await this.api.request(`/api/v1/projects/${this.projectId()}/${this.kind()}/${value.id}`, 'PUT', data, 0)
       this.success.set(`${value.name} was created.`)
       this.form.controls.id.setValue(''); this.form.controls.name.setValue('')
-      this.form.markAsPristine()
+      this.form.markAsPristine(); this.created.update(value => value + 1)
       await this.load()
       return true
     } catch (error) { this.error.set(error instanceof Error ? error.message : 'Creation failed.'); return false }

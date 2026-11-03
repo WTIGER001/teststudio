@@ -10,6 +10,7 @@ import { WorkspaceService } from '../../core/workspace.service'
 import { RunLookupsService } from './run-lookups.service'
 import type { Run } from './run.models'
 import { errorMessage, requestFromForm } from './run.utils'
+import { WizardController } from '../../shared/wizard/wizard-controller'
 
 @Injectable()
 export class NewRunService {
@@ -24,6 +25,7 @@ export class NewRunService {
   private estimateGeneration = 0
   private readonly destroy = inject(DestroyRef)
   readonly error = signal('')
+  readonly flow = new WizardController(2, () => { this.form.markAllAsTouched(); if (this.form.invalid || this.needsSelectionPreview()) { this.error.set('Choose a suite, check the options, and preview any saved selection before continuing.'); return false }; this.error.set(''); return true })
   readonly selections = signal<SavedSelectionRecord[]>([])
   readonly selectionCursor = signal('')
   readonly selectionLoading = signal(false)
@@ -85,8 +87,12 @@ export class NewRunService {
     finally { if (generation === this.estimateGeneration) this.estimating.set(false) }
   }
 
+  suiteName(): string { const id = this.form.controls.suite.value; return this.lookups.suites().find(row => row.id === id)?.data.name || id }
+  environmentName(): string { const id = this.form.controls.environment.value; const target = this.lookups.environments().find(row => row.id === id); return target ? `${target.data.name} · ${target.data.stage}${target.data.protected ? ' · Protected' : ''}` : id || 'No target' }
+  targetWarning(): string { const target = this.lookups.environments().find(row => row.id === this.form.controls.environment.value); return target?.data.protected ? 'Protected target: only safe tests can run, with protected execution permission.' : target?.data.stage === 'production' ? 'Production target: this environment is not protected. Review the selected tests before starting.' : 'Starting creates a run from the published release. Review the target and selected tests before continuing.' }
+
   async create(): Promise<void> {
-    if (this.form.invalid || this.saving() || this.needsSelectionPreview()) return
+    if (!this.flow.ready() || this.saving()) return
     this.saving.set(true); this.error.set('')
     try {
       const input = requestFromForm(this.form.getRawValue(), this.selectionPreview()?.id)

@@ -19,12 +19,12 @@ The chooser preserves the suite while its data loads.
 
 ## Registration
 
-Select Add application on the list page. Enter its name and permanent identifier, then select Create.
+Select Add application on the list page. Follow Name, Options, and Review, then select Create.
 The new application's detail page opens after successful registration.
 Select Add environment or Add suite to register a related resource.
 The current application is preselected and fixed in these forms.
-Complete the existing registration fields and select Create.
-These forms share the Project settings registration component and service.
+Complete the wizard and select Create on its Review step.
+These wizards share the Project settings registration component and service.
 Project settings remains available for the existing configuration and suite lifecycle workflows.
 
 Unsaved registration changes require confirmation before navigation or cancellation.
@@ -48,3 +48,21 @@ Management permissions control the environment and suite registration buttons.
 | /projects/{project}/applications/{application} | Application environments and linked suites. |
 
 Both routes provide Introduction, Concepts, and Tutorials in the shared help drawer.
+
+## Guided registration
+
+Application, suite, and environment registration share Name, Options, and Review steps.
+The name generates a permanent identifier. Advanced details contains its editor.
+Environment options keep the target URL, stage, and protection visible.
+The endpoint alias defaults to api. Advanced endpoint options contains its editor.
+Completed step buttons and Back preserve entries. Create remains the final action.
+
+## First project setup
+
+Projects provides Project, Application, Target, and Review steps.
+Users can include a first application, target environment, and empty Availability suite.
+Review lists the selected resources before creation. Setup creates no tests and starts no runs.
+Each resource uses the existing API and current permissions.
+If setup stops, successful resources remain. Retry remaining setup skips confirmed successful steps.
+Entries lock after project creation. Open the created project provides access to existing resources.
+Reloading ends the in-page continuation. Users can manage retained resources from Applications or Project settings.

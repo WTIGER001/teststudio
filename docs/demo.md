@@ -30,13 +30,18 @@ Open **TestStudio local demo**.
 
 Select Applications in the sidebar. Open an application to see its environments and linked suites.
 View tests opens a suite-filtered catalog. Create test keeps that suite selected through the type chooser.
-Authorized users can add applications, environments, and linked suites through the shared registration forms.
+Authorized users add applications, environments, and linked suites through Name, Options, and Review steps.
 See applications.md for details.
 
 ## Create a test
 
 Select Create test from the catalog. Choose Playwright browser test, HTTPS probe, or Go suite.
 The dedicated creation page shows only the selected type's workflow.
+HTTPS probes follow Name, Request, and Review. Named Advanced sections hold uncommon options.
+Save draft retains a definition. Save and run explicitly publishes a snapshot and starts the chosen local check.
+The suite's active release stays unchanged.
+Projects also provides a wizard for a first application, optional target, and empty suite.
+Test runs uses Selection and Review steps. Saved selections, limits, and retries stay under Advanced options.
 The local demo enables native Playwright recording on this computer.
 Recorded journeys can be reviewed and saved. Website execution remains pending.
 See create-tests.md and browser-recording.md for details.
