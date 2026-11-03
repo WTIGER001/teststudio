@@ -74,6 +74,34 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Applications sidebar and project application views
+
+Applications now appears before Test catalog in the project's visible Testing sidebar section.
+The link requires project read permission and stays active on application detail routes.
+The dedicated list opens each application's environments and linked suites.
+The view preserves the current model. Environments belong to an application; project suites can link to several applications.
+Archived and shared suites remain represented. Unassigned suites remain outside an application's linked list.
+View tests opens a suite-filtered catalog. Create test carries an active suite through the test-type chooser.
+The first local browser check identifies a dropped query during fast type selection.
+Preserving query parameters fixes that handoff without waiting for suite data to load.
+
+Application, environment, and suite registration reuse the extracted Project settings form and its existing service.
+Related registration fixes the application field to the current application.
+Unsaved registrations require confirmation. Context changes clear stale view state and fence delayed navigation.
+Configuration loading waits for current project capabilities and skips unreadable environment and suite registries.
+Missing read access shows an explanation instead of zero resource counts.
+The application routes provide contextual Introduction, Concepts, and Tutorials help.
+
+Three focused utility checks pass for sidebar gates, shared suites, unassigned suites, environment ownership, and immutable view data.
+STUDIO-APPS-001 passes through normal TestStudio execution with complete evidence.
+It covers sidebar discovery, registration, persisted associations, suite-filtered tests, creation handoff, unsaved navigation, help, dark mobile layout, limited read capabilities, and project switching.
+The read-capability check controls client capabilities and verifies that restricted registries receive no requests. It does not claim new backend authorization coverage.
+Evidence is output/selftest/20261103T231947.114208000-31c311c7670744d0abb77a2b/summary.json and cleanup.json.
+The production UI build passes. Existing application binaries and the trusted browser runtime remain unchanged.
+No broad test matrix, native recorder check, or cloud verification repeats for this interface change.
+The user's demo retains its database, examples, runs, and evidence while receiving the updated private UI snapshot.
+The ledger remains **26 verified, 31 open, 57 total**. This extends **05**, **49**, and **50**, and advances catalog navigation under **21**.
+
 ### Dedicated test creation, native recording, and retained source editing
 
 Create test now opens /projects/{project}/tests/new instead of expanding the catalog page.

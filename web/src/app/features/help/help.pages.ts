@@ -322,7 +322,7 @@ export const helpPages: Record<string, HelpPage> = {
     ],
     tutorials: [
       { title: 'Create your first project', steps: ['Enter a project name and permanent identifier in Create a project.', 'Add an optional description, then select Create project.', 'Open the project and use Project settings to register a suite.'] },
-      { title: 'Return to existing work', steps: ['Open a project card to view its test catalog.', 'Use Test runs for execution history or Project settings for applications, suites, and environments.', 'Use the Workspace selector to switch projects.'] }
+      { title: 'Return to existing work', steps: ['Open a project card to view its test catalog.', 'Use Applications to explore application environments and linked suites. Use Test runs for execution history or Project settings for other configuration.', 'Use the Workspace selector to switch projects.'] }
     ]
   },
   catalog: {
@@ -342,6 +342,20 @@ export const helpPages: Record<string, HelpPage> = {
       { title: 'Find and maintain a test', steps: ['Search by title, identifier, category, or tag. Use suite and lifecycle filters to narrow the list.', 'Use History to inspect retained definitions, or Edit to change the draft.', 'Use Archive to remove a test from normal selection. Choose Archived in the lifecycle filter to find and restore it.', 'Publish a new release when draft changes should apply to future runs.'] },
       { title: 'Save and reuse a selection', steps: ['Select tests from one suite and use Use selected tests under Saved selections, or choose Suite for saved selections and New saved selection.', 'Enter a name and permanent identifier. Choose explicit identifiers or a versioned filter. Select Save selection.', 'Select Preview saved selection and inspect the resolved tests, dependencies, and published release.', 'Open Test runs. Choose the suite, target, and saved selection. Preview it in the run form, then start the reviewed run.', 'Use Inspect to edit a saved selection. After a conflict, reload before saving. Archive preserves existing run snapshots; restore makes the selection available again.'] },
       { title: 'Edit metadata across tests', steps: ['Filter by suite and select between 1 and 30 tests. Choose Edit metadata under Bulk action.', 'Select Change for each field to replace, then enter its shared value. Unselected fields remain unchanged.', 'Separate tags with commas. Select an empty Owner, Tags, Description, or Operating conditions value to clear that field.', 'Select Safety rationale and enter its explanation when changing a safety label. Current publishing permission is required for safety changes.', 'Select Preview bulk changes. Review the displayed before and after values, then Apply reviewed changes.', 'After a conflict, reload the catalog and prepare a new preview. Publish separately when the new metadata should enter a release.'] }
+    ]
+  },
+  applications: {
+    id: 'applications', title: 'Applications',
+    introduction: ['Applications identify the systems tested by this project. Open an application to see its environments and linked test suites.'],
+    concepts: [
+      { title: 'Ownership and links', description: 'An environment belongs to one application. Suites belong to the project and can link to several applications. A suite without an application link remains available in the project catalog.' },
+      { title: 'Environment targets', description: 'The environment list shows the current application only. Stage and protection describe its target. Endpoint names remain part of environment registration.' },
+      { title: 'Linked suites', description: 'View tests opens the catalog filtered to a suite. Create test carries that suite into the test-type chooser. Archived suites retain their visible history and do not offer new test creation here.' },
+      { title: 'Current access', description: 'Application visibility requires project read permission. Read permissions control the environment and suite lists. Management permissions control registration buttons. Missing read permission does not imply that the application has no resources.' }
+    ],
+    tutorials: [
+      { title: 'Find an application', steps: ['Choose a project, then select Applications in the sidebar.', 'Select Open application on its card.', 'Review Environments and Linked suites. Select View tests to inspect one suite in the catalog.'] },
+      { title: 'Register related resources', steps: ['Select Add application on the application list. Enter its name and permanent identifier, then select Create.', 'On its detail page, select Add environment or Add suite. The application is already selected.', 'Complete the existing registration form. Select Create. Unsaved registration changes require confirmation before leaving.'] }
     ]
   },
   configuration: {

@@ -14,6 +14,7 @@ export function navigationSections(project: string, capabilities: Capabilities, 
   if (project) {
     const base = `/projects/${project}`
     add('testing', 'Testing', false, [
+      ...(allowed(capabilities, 'projects.read') ? [link('Applications', `${base}/applications`, '▦')] : []),
       link('Test catalog', `${base}/catalog`, '≡'), link('Test runs', `${base}/runs`, '▷'),
       ...(allowed(capabilities, 'schedules.read') ? [link('Schedules', `${base}/schedules`, '◷')] : []),
       link('Trends', `${base}/trends`, '▥'),

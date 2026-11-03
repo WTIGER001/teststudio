@@ -16,12 +16,12 @@ import { CreateTestService } from './create-test.service'
   template: `
     <div class="page-heading"><div><span class="eyebrow">{{ service.sources.workspace.project()?.name || 'Project' }}</span><h1>Create test</h1><p class="muted">Choose what you want to test, then follow its creation workflow.</p></div><a class="button secondary" [routerLink]="['/projects', service.sources.project(), 'catalog']">Back to catalog</a></div>
     @if (!service.kind()) {
-      <section aria-labelledby="test-type-title"><h2 id="test-type-title">What type of test?</h2><div class="type-choices">@for (choice of service.choices; track choice.id) { <a class="panel type-choice" [routerLink]="['/projects', service.sources.project(), 'tests', 'new', choice.id]" [queryParams]="{ suite: service.sources.form.controls.suite.value || undefined }" [attr.aria-label]="choice.title"><span class="type-symbol" aria-hidden="true">{{ choice.symbol }}</span><h3>{{ choice.title }}</h3><p class="muted">{{ choice.description }}</p><span class="choose-type">Choose {{ choice.title }} →</span></a> }</div></section>
+      <section aria-labelledby="test-type-title"><h2 id="test-type-title">What type of test?</h2><div class="type-choices">@for (choice of service.choices; track choice.id) { <a class="panel type-choice" [routerLink]="['/projects', service.sources.project(), 'tests', 'new', choice.id]" queryParamsHandling="preserve" [attr.aria-label]="choice.title"><span class="type-symbol" aria-hidden="true">{{ choice.symbol }}</span><h3>{{ choice.title }}</h3><p class="muted">{{ choice.description }}</p><span class="choose-type">Choose {{ choice.title }} →</span></a> }</div></section>
       <p class="muted">Already have tests? <a [routerLink]="['/projects', service.sources.project(), 'sources']">Upload a source bundle or connect a repository.</a></p>
     } @else if (service.kind() === 'unknown') {
       <p class="notice error" role="alert">This test type is unavailable. Choose a supported type.</p><a class="button secondary" [routerLink]="['/projects', service.sources.project(), 'tests', 'new']">Choose a test type</a>
     } @else {
-      <p class="type-return"><a [routerLink]="['/projects', service.sources.project(), 'tests', 'new']">← Choose another test type</a></p>
+      <p class="type-return"><a [routerLink]="['/projects', service.sources.project(), 'tests', 'new']" queryParamsHandling="preserve">← Choose another test type</a></p>
       @if (service.sources.error()) { <p class="notice error" role="alert">{{ service.sources.error() }}</p> }
       @if (service.sources.loading()) { <p role="status">Loading suites…</p> }
       @else if (!service.sources.suites().length) { <section class="panel"><h2>Create a suite first</h2><p class="muted">Tests belong to a suite, which holds their releases and run settings.</p><a class="button primary" [routerLink]="['/projects', service.sources.project(), 'configuration']">Create or manage suites</a></section> }

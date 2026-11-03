@@ -26,6 +26,13 @@ An existing installation refuses to start if another process uses its saved port
 Open the application address and select **Open local workspace**.
 Open **TestStudio local demo**.
 
+## Explore applications
+
+Select Applications in the sidebar. Open an application to see its environments and linked suites.
+View tests opens a suite-filtered catalog. Create test keeps that suite selected through the type chooser.
+Authorized users can add applications, environments, and linked suites through the shared registration forms.
+See applications.md for details.
+
 ## Create a test
 
 Select Create test from the catalog. Choose Playwright browser test, HTTPS probe, or Go suite.

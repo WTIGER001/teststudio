@@ -1,4 +1,4 @@
-import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core'
+import { computed, DestroyRef, effect, inject, Injectable, signal, untracked } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
 import { ActivatedRoute } from '@angular/router'
@@ -10,7 +10,7 @@ import { WorkspaceService } from '../../core/workspace.service'
 export interface Application { id: string; name: string; description: string }
 export interface Suite { id: string; name: string; description: string; applications: string[]; requiresTarget: boolean; activeReleaseId?: string; archived: boolean }
 export interface Environment { id: string; name: string; applicationId: string; stage: string; protected: boolean; disabled: boolean; endpoints: Record<string, string> }
-type Kind = 'applications' | 'suites' | 'environments'
+export type Kind = 'applications' | 'suites' | 'environments'
 
 @Injectable()
 export class ConfigurationService {
@@ -41,7 +41,18 @@ export class ConfigurationService {
   private generation = 0
 
   constructor() {
-    this.route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => { this.projectId.set(params.get('projectId') ?? ''); void this.load() })
+    this.route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => {
+      this.generation++; this.error.set(''); this.success.set(''); this.projectId.set(params.get('projectId') ?? ''); this.applications.set([]); this.suites.set([]); this.environments.set([]); this.loading.set(true)
+    })
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => {
+      const kind = params.get('kind')
+      if (kind === 'applications' || kind === 'suites' || kind === 'environments') this.select(kind)
+    })
+    effect(() => {
+      const project = this.projectId(), capabilities = this.workspace.capabilities()
+      if (project && this.workspace.projectId() === project && Object.keys(capabilities).length) untracked(() => { void this.load() })
+    })
+    this.destroy.onDestroy(() => { this.generation++ })
   }
 
   async load(): Promise<void> {
@@ -52,8 +63,8 @@ export class ConfigurationService {
       const base = `/api/v1/projects/${this.projectId()}`
       const [applications, suites, environments] = await Promise.all([
         this.api.request<Page<RecordValue<Application>>>(`${base}/applications`),
-        this.api.request<Page<RecordValue<Suite>>>(`${base}/suites`),
-        this.api.request<Page<RecordValue<Environment>>>(`${base}/environments`)
+        this.workspace.can('suites.read') ? this.api.request<Page<RecordValue<Suite>>>(`${base}/suites`) : Promise.resolve({ items: [] }),
+        this.workspace.can('environments.read') ? this.api.request<Page<RecordValue<Environment>>>(`${base}/environments`) : Promise.resolve({ items: [] })
       ])
       if (generation !== this.generation) return
       this.applications.set(applications.items); this.suites.set(suites.items); this.environments.set(environments.items)
@@ -65,8 +76,8 @@ export class ConfigurationService {
 
   select(kind: Kind): void { this.kind.set(kind); this.success.set(''); this.error.set(''); this.form.controls.id.setValue(''); this.form.controls.name.setValue('') }
 
-  async create(): Promise<void> {
-    if (this.form.invalid || this.saving()) return
+  async create(): Promise<boolean> {
+    if (this.form.invalid || this.saving()) return false
     this.saving.set(true); this.error.set(''); this.success.set('')
     try {
       const value = this.form.getRawValue()
@@ -76,8 +87,10 @@ export class ConfigurationService {
       await this.api.request(`/api/v1/projects/${this.projectId()}/${this.kind()}/${value.id}`, 'PUT', data, 0)
       this.success.set(`${value.name} was created.`)
       this.form.controls.id.setValue(''); this.form.controls.name.setValue('')
+      this.form.markAsPristine()
       await this.load()
-    } catch (error) { this.error.set(error instanceof Error ? error.message : 'Creation failed.') }
+      return true
+    } catch (error) { this.error.set(error instanceof Error ? error.message : 'Creation failed.'); return false }
     finally { this.saving.set(false) }
   }
 }

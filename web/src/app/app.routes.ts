@@ -1,8 +1,11 @@
+import type { ApplicationsPage } from './features/applications/applications.page'
 import type { CreateTestPage } from './features/catalog/create-test.page'
 import type { SourcesPage } from './features/sources/sources.page'
 import type { Routes } from '@angular/router'
 
 export const routes: Routes = [
+  { path: 'projects/:projectId/applications', canDeactivate: [(page: ApplicationsPage) => page.canLeave()], data: { helpTopic: 'applications' }, loadComponent: () => import('./features/applications/applications.page').then(m => m.ApplicationsPage) },
+  { path: 'projects/:projectId/applications/:applicationId', canDeactivate: [(page: ApplicationsPage) => page.canLeave()], data: { helpTopic: 'applications' }, loadComponent: () => import('./features/applications/applications.page').then(m => m.ApplicationsPage) },
   { path: 'projects/:projectId/tests/new', canDeactivate: [(page: CreateTestPage) => page.canLeave()], data: { helpTopic: 'create-test' }, loadComponent: () => import('./features/catalog/create-test.page').then(m => m.CreateTestPage) },
   { path: 'projects/:projectId/tests/new/:kind', canDeactivate: [(page: CreateTestPage) => page.canLeave()], data: { helpTopic: 'create-test' }, loadComponent: () => import('./features/catalog/create-test.page').then(m => m.CreateTestPage) },
   { path: 'projects/:projectId/releases', data: { helpTopic: 'releases' }, loadComponent: () => import('./features/releases/releases.page').then(m => m.ReleasesPage) },

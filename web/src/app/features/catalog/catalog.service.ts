@@ -43,7 +43,7 @@ export class CatalogService {
 
   constructor() {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => {
-      this.projectId.set(params.get('projectId') ?? ''); this.suiteFilter.set(''); this.typeFilter.set(''); this.releaseSuite.set(''); this.draft.set(null)
+      this.projectId.set(params.get('projectId') ?? ''); this.suiteFilter.set(this.route.snapshot.queryParamMap.get('suite') ?? ''); this.typeFilter.set(''); this.releaseSuite.set(''); this.draft.set(null)
       this.editorOpen.set(false); this.editing.set(null); this.items.set([]); this.suites.set([]); this.success.set(this.route.snapshot.queryParamMap.has('created') ? 'Draft changes saved. Publish a release to use the updated definition.' : '')
       void this.load()
     })

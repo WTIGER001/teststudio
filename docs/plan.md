@@ -23,6 +23,11 @@ Keep that demo available while the user works through its pages.
 The user requests grouped sidebar sections during the walkthrough.
 The sidebar now separates Workspace, Testing, Project administration, and Installation administration.
 The administration sections collapse by default. The current administration page opens its section.
+The user also requests Applications in the sidebar.
+Applications now opens a dedicated project list and detail route with environment and linked suite views.
+Those pages reuse the existing registration workflow and preserve the current data ownership model.
+View tests opens a suite-filtered catalog. Create test preserves the selected suite through the type chooser.
+See applications.md for routes, current access, and registration behavior.
 The refreshed local demo serves a private UI snapshot and retains its existing database and evidence.
 Future builds do not replace assets used by this running demo.
 The user also requests in-app Playwright authoring during the walkthrough.
