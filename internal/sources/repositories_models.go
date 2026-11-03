@@ -14,17 +14,21 @@ type RepositoryBinding struct {
 }
 
 type RepositoryConfig struct {
-	Name         string              `json:"name"`
-	Provider     string              `json:"provider"`
-	Repository   string              `json:"repository"`
-	Reference    string              `json:"reference"`
-	Credential   string              `json:"credentialReference,omitempty"`
-	Enabled      bool                `json:"enabled"`
-	AutoActivate bool                `json:"autoActivate"`
-	Bindings     []RepositoryBinding `json:"bindings"`
+	Push              bool                `json:"pushEnabled,omitempty"`
+	WebhookCredential string              `json:"webhookCredentialReference,omitempty"`
+	IntervalSeconds   int                 `json:"syncIntervalSeconds,omitempty"`
+	Name              string              `json:"name"`
+	Provider          string              `json:"provider"`
+	Repository        string              `json:"repository"`
+	Reference         string              `json:"reference"`
+	Credential        string              `json:"credentialReference,omitempty"`
+	Enabled           bool                `json:"enabled"`
+	AutoActivate      bool                `json:"autoActivate"`
+	Bindings          []RepositoryBinding `json:"bindings"`
 }
 
 type RepositorySource struct {
+	NextSyncAt    *time.Time       `json:"nextSyncAt,omitempty"`
 	ID            string           `json:"id"`
 	Project       string           `json:"projectId"`
 	Configuration RepositoryConfig `json:"configuration"`
@@ -44,6 +48,9 @@ type SyncInput struct {
 }
 
 type RepositorySync struct {
+	Trigger          string                   `json:"trigger,omitempty"`
+	Delivery         string                   `json:"deliveryId,omitempty"`
+	EventDigest      string                   `json:"eventDigest,omitempty"`
 	ID               string                   `json:"id"`
 	Project          string                   `json:"projectId"`
 	Source           string                   `json:"sourceId"`

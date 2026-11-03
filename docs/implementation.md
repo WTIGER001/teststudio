@@ -74,6 +74,29 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Signed push events and durable periodic synchronization
+
+Added signed GitHub push notifications through a provider-neutral verification port and a separate provider endpoint contract.
+The receiver authenticates exact body bytes before parsing and verifies the pinned repository identity and watched reference.
+Duplicate delivery identifiers return their original sync. Conflicting payloads are rejected.
+Delayed pushes queue resolution of the current reference, which prevents old payload commits from replacing the current source.
+Unwatched references and deletions create no work. Signing secrets remain separate server-side references.
+
+The existing service scheduler now processes durable repository timers.
+Atomic source and timer updates prevent competing local replicas from queueing duplicate firings.
+Missed intervals and pending source work coalesce. Blocked authority leaves a visible diagnostic and advances the next timer.
+The Sources UI edits push and interval policy and displays the webhook address, next due time, and trigger history.
+Source summaries retain current worker and recovery states.
+
+Focused local checks cover signatures, payload tampering, project-scoped secrets, duplicate deliveries, delayed pushes, scheduler contention, coalescing, disabling, and revoked authority.
+The signed provider endpoint passes without a browser session. Unsigned requests are rejected.
+The Angular build and updated STUDIO-GIT-001 pass with periodic settings and retained next-due state.
+Evidence is output/selftest/20261103T163150.954443000-181a4e4001c3776a1f6876e3/summary.json.
+Evidence is complete, execution is cleaned, and the owned browser container, volume, and controller are absent.
+Only the affected UI selector runs. No repeated Go image integration, broad self-test matrix, live GitHub, or cloud verification runs.
+The ledger remains **24 verified, 33 open**. Items **22**, **25**, and **26** advance.
+Playwright source assembly and dependency preparation profiles remain required.
+
 ### Registered GitHub sources and shared suite snapshots
 
 Added provider-neutral repository registration, manual sync, and private GitHub App access.

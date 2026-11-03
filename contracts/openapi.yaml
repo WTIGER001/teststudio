@@ -1,7 +1,7 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio API"
-  "version": "0.16.0"
+  "version": "0.17.0"
   "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Includes optional client-identifier RP-initiated provider logout after local session revocation. Includes staged native JSON and YAML sources with atomic catalog publication and retained source provenance. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
@@ -3420,9 +3420,14 @@
           "items":
             "type": "string"
           "type": "array"
+        "webhookCredentials":
+          "items":
+            "$ref": "#/components/schemas/SourceCredentialReference"
+          "type": "array"
       "required":
         - "providers"
         - "credentials"
+        - "webhookCredentials"
       "type": "object"
     "SourceRevision":
       "properties":
@@ -3491,9 +3496,15 @@
           "type": "string"
         "provider":
           "type": "string"
+        "pushEnabled":
+          "type": "boolean"
         "reference":
           "type": "string"
         "repository":
+          "type": "string"
+        "syncIntervalSeconds":
+          "type": "integer"
+        "webhookCredentialReference":
           "type": "string"
       "required":
         - "name"
@@ -3577,7 +3588,11 @@
         "createdAt":
           "format": "date-time"
           "type": "string"
+        "deliveryId":
+          "type": "string"
         "error":
+          "type": "string"
+        "eventDigest":
           "type": "string"
         "finishedAt":
           "format": "date-time"
@@ -3610,6 +3625,8 @@
         "sourceId":
           "type": "string"
         "state":
+          "type": "string"
+        "trigger":
           "type": "string"
         "worker":
           "type": "string"
@@ -3647,6 +3664,9 @@
           "format": "date-time"
           "type": "string"
         "lastSyncId":
+          "type": "string"
+        "nextSyncAt":
+          "format": "date-time"
           "type": "string"
         "projectId":
           "type": "string"

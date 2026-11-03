@@ -232,7 +232,7 @@ func run() error {
 		}
 		runService.Go = driver
 	}
-	scheduleService := &schedules.Service{Store: db, Auth: auth, Runs: runService}
+	scheduleService := &schedules.Service{Store: db, Auth: auth, Runs: runService, RepositorySources: sourceService}
 	notificationService := &notifications.Service{Store: db, Auth: auth, Secrets: secretProvider, Sender: &webhook.Sender{}, Origin: *public}
 	runService.Completion = notificationService
 	api := &httpapi.Server{Sources: sourceService, Store: db, Auth: auth, Projects: &projects.Service{Store: db, Auth: auth}, Catalog: catalogService, Runs: runService, Schedules: scheduleService, Notifications: notificationService, Evidence: evidenceService, ArtifactOrigin: *artifactOrigin, Sessions: sessionService, OIDC: oidc, LocalUser: localUser, UI: *ui}

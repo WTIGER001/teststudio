@@ -58,3 +58,26 @@ func ValidReference(value string) bool {
 }
 
 var ErrUnavailable = errors.New("source provider is unavailable")
+
+type WebhookRequest struct {
+	Delivery  string
+	Event     string
+	Signature string
+	Body      []byte
+}
+
+type WebhookEvent struct {
+	Delivery     string
+	Kind         string
+	RepositoryID string
+	Repository   string
+	Reference    string
+	Commit       string
+	Deleted      bool
+}
+
+type WebhookVerifier interface {
+	VerifyWebhook(context.Context, Access, string, WebhookRequest) (WebhookEvent, error)
+}
+
+var ErrWebhookRejected = errors.New("source webhook authentication or configuration is invalid")

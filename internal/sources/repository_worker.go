@@ -110,7 +110,11 @@ func (s *Service) ProcessRepositorySync(ctx context.Context, worker string) (boo
 				changes = append(changes, lease)
 				claimed = sync
 			}
-			return bound.Store.Commit(ctx, changes...)
+			summary, err := repositorySyncSummary(ctx, bound.Store, sync)
+			if err != nil {
+				return err
+			}
+			return bound.Store.Commit(ctx, append(changes, summary...)...)
 		})
 		if errors.Is(err, storage.ErrConflict) {
 			continue

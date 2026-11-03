@@ -1,0 +1,64 @@
+openapi: 3.1.0
+info:
+  title: TestStudio source provider webhooks
+  version: 0.1.0
+paths:
+  /api/v1/projects/{project}/repository-sources/{source}/webhooks/github:
+    post:
+      operationId: receiveGitHubSourceWebhook
+      summary: Authenticate a repository event and enqueue synchronization
+      description: >-
+        This provider endpoint uses no browser session or CSRF token. Validate the
+        HMAC-SHA256 signature over the exact request bytes before parsing JSON.
+        Source settings must enable push and reference a server-side source-webhook
+        secret. A prior manual sync must pin the repository identity. An accepted
+        push queues resolution of the current watched reference. It starts no build
+        or test within the request. Duplicate delivery identifiers return their
+        original sync. Unsupported events, unwatched references, and deletions are ignored.
+      security:
+        - GitHubSignature: []
+      parameters:
+        - {name: project, in: path, required: true, schema: {type: string}}
+        - {name: source, in: path, required: true, schema: {type: string}}
+        - {name: X-GitHub-Delivery, in: header, required: true, schema: {type: string, maxLength: 128}}
+        - {name: X-GitHub-Event, in: header, required: true, schema: {type: string}}
+      requestBody:
+        required: true
+        description: Original UTF-8 JSON bytes. The body limit is 2 MiB.
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [repository]
+              properties:
+                repository:
+                  type: object
+                  required: [id, full_name]
+                  properties:
+                    id: {type: integer, minimum: 1}
+                    full_name: {type: string}
+                  additionalProperties: true
+                ref: {type: string}
+                after: {type: string}
+                deleted: {type: boolean}
+              additionalProperties: true
+      responses:
+        '202':
+          description: Queued or authenticated and ignored
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [state]
+                properties:
+                  state: {type: string, enum: [queued, ignored]}
+                  syncId: {type: string}
+        '403': {description: Signature, source identity, settings, or current authority reject the delivery}
+        '413': {description: The original request body exceeds 2 MiB}
+components:
+  securitySchemes:
+    GitHubSignature:
+      type: apiKey
+      in: header
+      name: X-Hub-Signature-256
+      description: sha256= followed by the hexadecimal HMAC-SHA256 of the original body

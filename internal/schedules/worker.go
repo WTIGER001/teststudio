@@ -21,13 +21,16 @@ func (s *Service) Start(ctx context.Context) <-chan struct{} {
 		}
 		ticker := time.NewTicker(interval)
 		defer ticker.Stop()
-		cursor := ""
+		cursor, sourceCursor := "", ""
 		for {
 			if ctx.Err() != nil {
 				return
 			}
 			cursor, _ = s.Tick(ctx, cursor)
-			if cursor != "" {
+			if s.RepositorySources != nil {
+				sourceCursor, _ = s.RepositorySources.TickRepositorySchedules(ctx, sourceCursor, s.now())
+			}
+			if cursor != "" || sourceCursor != "" {
 				continue
 			}
 			select {

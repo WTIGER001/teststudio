@@ -14,12 +14,17 @@ import (
 	"github.com/wtiger001/teststudio/internal/storage"
 )
 
+type RepositoryScheduler interface {
+	TickRepositorySchedules(context.Context, string, time.Time) (string, error)
+}
+
 type Service struct {
-	Store        *storage.Store
-	Auth         *authorization.Service
-	Runs         *runs.Service
-	Now          func() time.Time
-	PollInterval time.Duration
+	RepositorySources RepositoryScheduler
+	Store             *storage.Store
+	Auth              *authorization.Service
+	Runs              *runs.Service
+	Now               func() time.Time
+	PollInterval      time.Duration
 }
 
 func (s *Service) now() time.Time {

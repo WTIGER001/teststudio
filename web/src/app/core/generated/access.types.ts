@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.16.0"
+export const accessContractVersion = "0.17.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -98,12 +98,12 @@ export type SourcePreparationRecord = { "data": SourcePreparationJob; "id": stri
 export type SourcePreparationReference = { "attempt": number; "container": string; "id": string; "installationId": string; "profile": string; "projectId": string; "runId": string; "testId": string; "volume": string; "workerId": string }
 export type SourcePublishInput = { "activate": boolean }
 export type SourceRepositoryBinding = { "buildProfile": string; "manifestPath": string; "runner": string; "suiteId": string }
-export type SourceRepositoryConfig = { "autoActivate": boolean; "bindings": (SourceRepositoryBinding)[]; "credentialReference"?: string; "enabled": boolean; "name": string; "provider": string; "reference": string; "repository": string }
-export type SourceRepositoryOptions = { "credentials": (SourceCredentialReference)[]; "providers": (string)[] }
+export type SourceRepositoryConfig = { "autoActivate": boolean; "bindings": (SourceRepositoryBinding)[]; "credentialReference"?: string; "enabled": boolean; "name": string; "provider": string; "pushEnabled"?: boolean; "reference": string; "repository": string; "syncIntervalSeconds"?: number; "webhookCredentialReference"?: string }
+export type SourceRepositoryOptions = { "credentials": (SourceCredentialReference)[]; "providers": (string)[]; "webhookCredentials": (SourceCredentialReference)[] }
 export type SourceRepositoryPage = { "cursor"?: string; "items": (SourceRepositoryRecord)[] }
 export type SourceRepositoryRecord = { "data": SourceRepositorySource; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
-export type SourceRepositorySource = { "actor": string; "configuration": SourceRepositoryConfig; "generation": number; "id": string; "lastCommit"?: string; "lastError"?: string; "lastState"?: string; "lastSyncAt"?: string; "lastSyncId"?: string; "projectId": string; "repositoryId"?: string; "sequence": number }
-export type SourceRepositorySync = { "actor": string; "configuration": SourceRepositoryConfig; "createdAt": string; "error"?: string; "finishedAt"?: string; "force": boolean; "id": string; "leaseUntil"?: string; "preparations": { [key: string]: string }; "projectId": string; "repositoryId"?: string; "requestedBy": string; "revision"?: SourceRevision; "sequence": number; "snapshotId"?: string; "sourceGeneration": number; "sourceId": string; "state": string; "worker"?: string }
+export type SourceRepositorySource = { "actor": string; "configuration": SourceRepositoryConfig; "generation": number; "id": string; "lastCommit"?: string; "lastError"?: string; "lastState"?: string; "lastSyncAt"?: string; "lastSyncId"?: string; "nextSyncAt"?: string; "projectId": string; "repositoryId"?: string; "sequence": number }
+export type SourceRepositorySync = { "actor": string; "configuration": SourceRepositoryConfig; "createdAt": string; "deliveryId"?: string; "error"?: string; "eventDigest"?: string; "finishedAt"?: string; "force": boolean; "id": string; "leaseUntil"?: string; "preparations": { [key: string]: string }; "projectId": string; "repositoryId"?: string; "requestedBy": string; "revision"?: SourceRevision; "sequence": number; "snapshotId"?: string; "sourceGeneration": number; "sourceId": string; "state": string; "trigger"?: string; "worker"?: string }
 export type SourceRepositorySyncPage = { "cursor"?: string; "items": (SourceRepositorySyncRecord)[] }
 export type SourceRepositorySyncRecord = { "data": SourceRepositorySync; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
 export type SourceRevision = { "commit": string; "private": boolean; "reference": string; "repository": string; "repositoryId": string; "url": string }

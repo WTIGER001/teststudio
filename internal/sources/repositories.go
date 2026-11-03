@@ -5,6 +5,7 @@ import (
 	"errors"
 	"slices"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
 
@@ -62,27 +63,38 @@ func (s *Service) SaveRepository(ctx context.Context, user, project, id string, 
 	if err := provider.Validate(sourceprovider.Access{Project: project, Repository: input.Repository, Credential: input.Credential}, input.Reference); err != nil {
 		return err
 	}
-	if input.Credential != "" {
+	if input.IntervalSeconds != 0 && (input.IntervalSeconds < 60 || input.IntervalSeconds > 86400 || !domain.ValidID(s.Location)) {
+		return errors.New("periodic source sync requires 60 through 86400 seconds, or zero to disable it")
+	}
+	if input.Push {
+		if _, ok := provider.(sourceprovider.WebhookVerifier); !ok || input.WebhookCredential == "" || sourceprovider.ValidCommit(input.Reference) {
+			return errors.New("push synchronization requires a supported provider, webhook credential reference, and watched branch or tag")
+		}
+	}
+	for purpose, credential := range map[string]string{sourceprovider.CredentialPurpose: input.Credential, sourceprovider.WebhookPurpose: input.WebhookCredential} {
+		if credential == "" {
+			continue
+		}
 		if s.Secrets == nil {
 			return errors.New("source credential reference is unavailable")
 		}
-		refs, err := s.Secrets.References(ctx, project, sourceprovider.CredentialPurpose)
+		refs, err := s.Secrets.References(ctx, project, purpose)
 		if err != nil {
 			return err
 		}
 		found := false
 		for _, ref := range refs {
-			found = found || ref.ID == input.Credential
+			found = found || ref.ID == credential
 		}
 		if !found {
-			return errors.New("source credential reference is not approved for this project")
+			return errors.New("source credential reference is not approved for this project and purpose")
 		}
 	}
 	if err := s.validateRepositoryBindings(ctx, user, project, input); err != nil {
 		return err
 	}
 	return s.Auth.WithAssignmentTransaction(ctx, func(auth *authorization.Service) error {
-		bound := &Service{Store: auth.Directory.Store, Auth: auth, BundleRunners: s.BundleRunners}
+		bound := &Service{Store: auth.Directory.Store, Auth: auth, BundleRunners: s.BundleRunners, Location: s.Location}
 		if err := bound.checkRepository(ctx, user, project, id, "manage"); err != nil {
 			return err
 		}
@@ -118,6 +130,11 @@ func (s *Service) SaveRepository(ctx context.Context, user, project, id string, 
 				source.LastError = ""
 			}
 		}
+
+		timerChanges, err := bound.configureRepositoryTimer(ctx, &source, time.Now().UTC())
+		if err != nil {
+			return err
+		}
 		row, err := storage.Put(repositoryBucket(project), id, project, revision, source)
 		if err != nil {
 			return err
@@ -126,7 +143,7 @@ func (s *Service) SaveRepository(ctx context.Context, user, project, id string, 
 		if err != nil {
 			return err
 		}
-		return bound.Store.Commit(ctx, row, audit)
+		return bound.Store.Commit(ctx, append(timerChanges, row, audit)...)
 	})
 }
 func (s *Service) validateRepositoryBindings(ctx context.Context, user, project string, input RepositoryConfig) error {
@@ -164,12 +181,13 @@ func (s *Service) validateRepositoryBindings(ctx context.Context, user, project 
 }
 
 type RepositoryOptions struct {
-	Providers   []string            `json:"providers"`
-	Credentials []secrets.Reference `json:"credentials"`
+	Providers          []string            `json:"providers"`
+	Credentials        []secrets.Reference `json:"credentials"`
+	WebhookCredentials []secrets.Reference `json:"webhookCredentials"`
 }
 
 func (s *Service) RepositoryOptions(ctx context.Context, user, project string) (RepositoryOptions, error) {
-	result := RepositoryOptions{Providers: []string{}, Credentials: []secrets.Reference{}}
+	result := RepositoryOptions{Providers: []string{}, Credentials: []secrets.Reference{}, WebhookCredentials: []secrets.Reference{}}
 	if err := s.Auth.Check(ctx, user, project, "", "sources.read"); err != nil {
 		return result, err
 	}
@@ -183,6 +201,10 @@ func (s *Service) RepositoryOptions(ctx context.Context, user, project string) (
 			return result, err
 		}
 		result.Credentials = refs
+		result.WebhookCredentials, err = s.Secrets.References(ctx, project, sourceprovider.WebhookPurpose)
+		if err != nil {
+			return result, err
+		}
 	} else if err != nil && !errors.Is(err, authorization.ErrForbidden) {
 		return result, err
 	}

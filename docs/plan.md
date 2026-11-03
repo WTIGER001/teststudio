@@ -35,8 +35,10 @@ The self-test launcher reuses unchanged UI builds, binaries, and immutable runne
 Use --test=ID to run only the affected workflow. Do not repeat the broad matrix without a specific integration concern.
 No live GitHub or cloud deployment checks run for this milestone.
 
-Continue signed push webhooks and periodic repository sync through the durable manual-sync queue.
-Then complete Playwright bundle assembly, dependency preparation profiles, and CLI OIDC browser sign-in.
+Signed push events and durable periodic sync now use the same source queue and current authority checks.
+The Sources UI manages both policies, next due time, webhook address, and trigger history.
+Focused signature, delivery replay, delayed push, scheduler contention, coalescing, and revocation checks pass locally.
+Continue Playwright bundle assembly, dependency preparation profiles, and CLI OIDC browser sign-in.
 The current source builder supports offline Go bundles with a trusted runtime and fixed copy instructions.
 Items **22**, **25**, **26**, and **29** advance but remain open for their broader scope.
 Keep the full 57-item plan required. Do not narrow the goal to this milestone.

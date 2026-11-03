@@ -1,7 +1,16 @@
 package httpapi_test
 
 import (
+	"bytes"
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	localsecrets "github.com/wtiger001/teststudio/adapters/secrets/local"
+	githubsource "github.com/wtiger001/teststudio/adapters/sources/github"
+	"github.com/wtiger001/teststudio/internal/storage"
+	"net/http"
 	"strconv"
 	"strings"
 	"testing"
@@ -88,4 +97,79 @@ func TestRepositoryAPIRegistersAndQueuesWithoutRemoteRequests(t *testing.T) {
 }
 func jsonRevision(row map[string]any) string {
 	return strconv.FormatInt(int64(row["revision"].(float64)), 10)
+}
+
+func TestRepositoryWebhookRequiresSignatureWithoutBrowserSession(t *testing.T) {
+	t.Setenv("TESTSTUDIO_API_WEBHOOK", strings.Repeat("secret", 8))
+	credentials, err := localsecrets.New([]localsecrets.Binding{{ID: "hook", Project: "repository", Purpose: sourceprovider.WebhookPurpose, Environment: "TESTSTUDIO_API_WEBHOOK"}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := fixture(t, func(api *httpapi.Server) {
+		api.Sources = &sources.Service{Store: api.Store, Auth: api.Auth, Location: "local", BundleRunners: []string{"go"}, Secrets: credentials, Providers: map[string]sourceprovider.Provider{"github": &githubsource.Client{Secrets: credentials}}}
+	})
+	c.signIn()
+	if status, value := c.call("POST", "/api/v1/projects", map[string]string{"id": "repository", "name": "Repository"}, nil); status != 200 {
+		t.Fatal(value)
+	}
+	base := "/api/v1/projects/repository"
+	if status, value := c.call("PUT", base+"/suites/unit", map[string]any{"id": "unit", "name": "Unit", "requiresTarget": false, "applications": []string{}}, map[string]string{"If-Match": "0"}); status != 200 {
+		t.Fatal(value)
+	}
+	config := sources.RepositoryConfig{Name: "Repository", Provider: "github", Repository: "owner/suite", Reference: "heads/main", Enabled: true, Push: true, WebhookCredential: "hook", Bindings: []sources.RepositoryBinding{{Suite: "unit", Manifest: "suite.json", Runner: "go", Profile: "go-module"}}}
+	if err := c.api.Sources.SaveRepository(t.Context(), "admin", "repository", "source", config, 0); err != nil {
+		t.Fatal(err)
+	}
+	row, err := c.api.Sources.ReadRepository(t.Context(), "admin", "repository", "source")
+	if err != nil {
+		t.Fatal(err)
+	}
+	source, _ := storage.Decode[sources.RepositorySource](row)
+	source.RepositoryID = "42"
+	change, _ := storage.Put(row.Bucket, row.ID, row.Project, row.Revision, source)
+	if err := c.api.Store.Commit(t.Context(), change); err != nil {
+		t.Fatal(err)
+	}
+	data := []byte(`{"ref":"refs/heads/main","after":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","repository":{"id":42,"full_name":"owner/suite"}}`)
+	mac := hmac.New(sha256.New, []byte(strings.Repeat("secret", 8)))
+	mac.Write(data)
+	signature := "sha256=" + hex.EncodeToString(mac.Sum(nil))
+	deliver := func(signature string) (int, map[string]any) {
+		t.Helper()
+		request, err := http.NewRequestWithContext(t.Context(), "POST", c.origin+base+"/repository-sources/source/webhooks/github", bytes.NewReader(data))
+		if err != nil {
+			t.Fatal(err)
+		}
+		request.Header.Set("X-GitHub-Delivery", "delivery-one")
+		request.Header.Set("X-GitHub-Event", "push")
+		request.Header.Set("X-Hub-Signature-256", signature)
+		response, err := http.DefaultClient.Do(request)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer response.Body.Close()
+		var result map[string]any
+		if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
+			t.Fatal(err)
+		}
+		return response.StatusCode, result
+	}
+	if status, _ := deliver(""); status != 403 {
+		t.Fatal("unsigned webhook accepted", status)
+	}
+	status, receipt := deliver(signature)
+	if status != 202 || receipt["state"] != "queued" {
+		t.Fatal(status, receipt)
+	}
+	status, repeated := deliver(signature)
+	if status != 202 || repeated["syncId"] != receipt["syncId"] {
+		t.Fatal("duplicate delivery", status, repeated)
+	}
+	history, err := c.api.Sources.ListRepositorySyncs(t.Context(), "admin", "repository", "source", "", 30)
+	if err != nil || len(history.Items) != 1 {
+		t.Fatal("webhook did not queue exactly once", err)
+	}
+	if rows, err := c.api.Store.All(t.Context(), "runs", "repository"); err != nil || len(rows) != 0 {
+		t.Fatal("webhook executed tests")
+	}
 }

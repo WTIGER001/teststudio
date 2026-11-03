@@ -1,6 +1,8 @@
 package httpapi
 
 import (
+	"github.com/wtiger001/teststudio/internal/sourceprovider"
+	"io"
 	"net/http"
 
 	"github.com/wtiger001/teststudio/internal/sources"
@@ -8,6 +10,20 @@ import (
 
 func (s *Server) repositoryRoutes(m *http.ServeMux, service *sources.Service) {
 	base := "/api/v1/projects/{project}/repository-sources"
+	m.HandleFunc("POST "+base+"/{source}/webhooks/github", func(w http.ResponseWriter, r *http.Request) {
+		r.Body = http.MaxBytesReader(w, r.Body, 2<<20)
+		data, err := io.ReadAll(r.Body)
+		if err != nil {
+			JSON(w, 413, map[string]string{"message": "Source webhook exceeds its body limit."})
+			return
+		}
+		receipt, err := service.ReceiveRepositoryWebhook(r.Context(), r.PathValue("project"), r.PathValue("source"), sourceprovider.WebhookRequest{Delivery: r.Header.Get("X-GitHub-Delivery"), Event: r.Header.Get("X-GitHub-Event"), Signature: r.Header.Get("X-Hub-Signature-256"), Body: data})
+		if err != nil {
+			JSON(w, 403, map[string]string{"message": "Source webhook authentication or current configuration does not permit this delivery."})
+			return
+		}
+		JSON(w, 202, receipt)
+	})
 	m.HandleFunc("GET /api/v1/projects/{project}/repository-source-options", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		value, err := service.RepositoryOptions(r.Context(), actor(r), r.PathValue("project"))
 		if err != nil {

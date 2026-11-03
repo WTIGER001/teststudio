@@ -1,12 +1,12 @@
 import type { SourceRepositoryConfig } from '../../core/generated/access.types'
 
 export interface RepositoryFormValue {
-  id: string; name: string; repository: string; referenceKind: string; reference: string; credential: string; enabled: boolean; autoActivate: boolean
+  id: string; name: string; repository: string; referenceKind: string; reference: string; credential: string; enabled: boolean; autoActivate: boolean; push: boolean; webhookCredential: string; intervalSeconds: number
   bindings: { suite: string; manifest: string }[]
 }
 export function repositoryConfig(value: RepositoryFormValue): SourceRepositoryConfig {
   const reference = value.referenceKind === 'commit' ? value.reference : `${value.referenceKind === 'tag' ? 'tags' : 'heads'}/${value.reference}`
-  return { name: value.name, provider: 'github', repository: value.repository, reference, credentialReference: value.credential || undefined, enabled: value.enabled, autoActivate: value.autoActivate, bindings: value.bindings.map(item => ({ suiteId: item.suite, manifestPath: item.manifest, runner: 'go', buildProfile: 'go-module' })) }
+  return { pushEnabled: value.push, webhookCredentialReference: value.webhookCredential || undefined, syncIntervalSeconds: value.intervalSeconds || undefined, name: value.name, provider: 'github', repository: value.repository, reference, credentialReference: value.credential || undefined, enabled: value.enabled, autoActivate: value.autoActivate, bindings: value.bindings.map(item => ({ suiteId: item.suite, manifestPath: item.manifest, runner: 'go', buildProfile: 'go-module' })) }
 }
 export function repositoryReference(reference: string): { kind: string; value: string } {
   if (reference.startsWith('heads/')) return { kind: 'branch', value: reference.slice(6) }
@@ -17,3 +17,5 @@ export function repositoryPreparations(values: Record<string, string>): { suite:
   return Object.entries(values).map(([suite, id]) => ({ suite, id })).sort((a, b) => a.suite.localeCompare(b.suite))
 }
 export function repositorySyncActive(state: string | undefined): boolean { return state === 'received' || state === 'fetching' }
+
+export function repositoryWebhookAddress(origin: string, project: string, source: string): string { return `${origin}/api/v1/projects/${encodeURIComponent(project)}/repository-sources/${encodeURIComponent(source)}/webhooks/github` }

@@ -193,25 +193,11 @@ func (s *Service) finishRepositorySync(ctx context.Context, claimed RepositorySy
 			return err
 		}
 		changes := []storage.Change{updated, {Record: lease, Delete: true}}
-		sourceRow, err := store.Get(ctx, repositoryBucket(sync.Project), sync.Source)
+		summary, err := repositorySyncSummary(ctx, store, sync)
 		if err != nil {
 			return err
 		}
-		source, err := storage.Decode[RepositorySource](sourceRow)
-		if err != nil {
-			return err
-		}
-		if source.Generation == sync.SourceGeneration && source.LastSync == sync.ID {
-			source.LastState, source.LastError, source.LastSyncAt = sync.State, sync.Error, &now
-			if sync.Revision != nil {
-				source.LastCommit = sync.Revision.Commit
-			}
-			saved, err := storage.Put(sourceRow.Bucket, sourceRow.ID, sourceRow.Project, sourceRow.Revision, source)
-			if err != nil {
-				return err
-			}
-			changes = append(changes, saved)
-		}
+		changes = append(changes, summary...)
 		return store.Commit(ctx, changes...)
 	})
 }
@@ -256,11 +242,41 @@ func (s *Service) RecoverRepositorySyncs(ctx context.Context) error {
 			if err != nil {
 				return err
 			}
-			return store.Commit(ctx, saved, storage.Change{Record: index, Delete: true})
+			summary, err := repositorySyncSummary(ctx, store, sync)
+			if err != nil {
+				return err
+			}
+			return store.Commit(ctx, append(summary, saved, storage.Change{Record: index, Delete: true})...)
 		})
 		if err != nil && !errors.Is(err, storage.ErrConflict) {
 			return err
 		}
 	}
 	return nil
+}
+
+func repositorySyncSummary(ctx context.Context, store *storage.Store, sync RepositorySync) ([]storage.Change, error) {
+	row, err := store.Get(ctx, repositoryBucket(sync.Project), sync.Source)
+	if err != nil {
+		return nil, err
+	}
+	source, err := storage.Decode[RepositorySource](row)
+	if err != nil {
+		return nil, err
+	}
+	if source.Generation != sync.SourceGeneration || source.LastSync != sync.ID {
+		return nil, nil
+	}
+	source.LastState, source.LastError = sync.State, sync.Error
+	if sync.FinishedAt != nil {
+		source.LastSyncAt = sync.FinishedAt
+	}
+	if sync.Revision != nil {
+		source.LastCommit = sync.Revision.Commit
+	}
+	change, err := storage.Put(row.Bucket, row.ID, row.Project, row.Revision, source)
+	if err != nil {
+		return nil, err
+	}
+	return []storage.Change{change}, nil
 }

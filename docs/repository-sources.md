@@ -125,9 +125,47 @@ Published snapshots remain retained for release provenance and history.
 Failed synchronization and preparation leave the active release unchanged.
 Tests start through the normal run API, UI, or schedule after publication.
 
+## Signed push synchronization
+
+Choose an approved Push webhook access reference and enable signed push synchronization in source settings.
+The reference uses purpose source-webhook. Its secret value contains 32 through 4096 bytes.
+Use a high-entropy random secret. Keep repository App credentials and webhook secrets in separate bindings.
+
+Complete one manual sync to pin the repository identity.
+Inspect the source and configure its Webhook address as a GitHub repository webhook URL.
+Select JSON content and push events. Use the same signing secret in GitHub and the server-side binding.
+Hosted endpoints use HTTPS. A local server can use periodic sync when GitHub cannot reach it.
+
+The receiver authenticates the exact body bytes with HMAC-SHA256 before parsing JSON.
+It compares signatures in constant time and checks the registered repository identity and watched reference.
+It accepts no browser session or CSRF token as a substitute for the signature.
+The body limit is 2 MiB. Larger deliveries need periodic or manual sync.
+Unsupported events, unwatched references, and reference deletions create no work.
+
+A repeated delivery identifier returns its original sync. A changed payload with the same identifier is rejected.
+A signed push is a change notification. The worker resolves the current watched reference after queueing.
+Delayed deliveries cannot force execution of their old payload commit.
+Every queued sync records its push trigger, delivery identifier, and body digest without retaining credentials or the raw payload.
+
+The provider endpoint has a separate [webhook contract](../contracts/source-webhooks.openapi.yaml).
+See [GitHub signature validation](https://docs.github.com/en/webhooks/using-webhooks/validating-webhook-deliveries) for provider configuration.
+
+## Periodic synchronization
+
+Set Periodic sync interval to 60 through 86400 seconds. Set 0 to disable periodic synchronization.
+The main service scheduler processes these timers when scheduler is enabled.
+It queues ordinary source synchronization. It performs no source fetch, build, or test within the scheduler tick.
+The separate preparation worker still needs github-sources and the approved Go runtime.
+
+Timers persist in the metadata database. Competing replicas atomically advance one due timer and queue one sync.
+Missed intervals coalesce into one request. An existing pending sync advances the timer without adding more work.
+Current source ownership, permissions, settings generation, and enabled state apply at each firing.
+A blocked timer displays its problem and advances to the next interval without creating a test result.
+Disabling the source removes its timer. Changing settings schedules the next interval from the settings change.
+The source details show the next due time. Sync details distinguish manual, push, and periodic triggers.
+
 ## Remaining source work
 
-Signed push webhooks and periodic synchronization remain pending.
 Playwright source assembly and online dependency preparation remain pending.
-The current implementation supports manual public or GitHub App synchronization and offline Go source assembly.
+The current implementation supports manual, push, and periodic public or GitHub App synchronization with offline Go source assembly.
 All verification for this milestone runs locally. No live GitHub or cloud deployment is required for these checks.

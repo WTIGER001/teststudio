@@ -6,18 +6,19 @@ import { AccessClientService } from '../../core/access-client.service'
 import { ApiError } from '../../core/api.service'
 import type { SourcePreparationRecord, SourceRepositoryOptions, SourceRepositoryRecord, SourceRepositorySyncRecord } from '../../core/generated/access.types'
 import { SourcesService } from './sources.service'
-import { repositoryConfig, repositoryPreparations, repositoryReference, repositorySyncActive } from './repository.utils'
+import { repositoryConfig, repositoryPreparations, repositoryReference, repositorySyncActive, repositoryWebhookAddress } from './repository.utils'
 
 @Injectable()
 export class RepositoriesService {
   readonly sources = inject(SourcesService)
   private readonly client = inject(AccessClientService)
-  readonly options = signal<SourceRepositoryOptions>({ providers: [], credentials: [] })
+  readonly options = signal<SourceRepositoryOptions>({ providers: [], credentials: [], webhookCredentials: [] })
   readonly rows = signal<SourceRepositoryRecord[]>([])
   readonly selected = signal<SourceRepositoryRecord | null>(null)
   readonly history = signal<SourceRepositorySyncRecord[]>([])
   readonly sync = signal<SourceRepositorySyncRecord | null>(null)
   readonly prepared = signal<SourcePreparationRecord | null>(null)
+  readonly webhookAddress = computed(() => repositoryWebhookAddress(location.origin, this.sources.project(), this.selected()?.id ?? ''))
   readonly preparations = computed(() => repositoryPreparations(this.sync()?.data.preparations ?? {}))
   readonly cursor = signal('')
   readonly syncCursor = signal('')
@@ -37,6 +38,9 @@ export class RepositoriesService {
     credential: new FormControl('', { nonNullable: true }),
     enabled: new FormControl(true, { nonNullable: true }),
     autoActivate: new FormControl(false, { nonNullable: true }),
+    push: new FormControl(false, { nonNullable: true }),
+    webhookCredential: new FormControl('', { nonNullable: true }),
+    intervalSeconds: new FormControl(0, { nonNullable: true, validators: [Validators.min(0), Validators.max(86400)] }),
     bindings: new FormArray<FormGroup<{ suite: FormControl<string>; manifest: FormControl<string> }>>([])
   })
   private generation = 0
@@ -50,7 +54,7 @@ export class RepositoriesService {
     const destroy = inject(DestroyRef)
     this.force.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.syncKey = crypto.randomUUID() })
     inject(ActivatedRoute).paramMap.pipe(takeUntilDestroyed(destroy)).subscribe(() => {
-      this.generation++; this.detailGeneration++; this.rows.set([]); this.selected.set(null); this.history.set([]); this.sync.set(null); this.prepared.set(null); this.editor.set(false); this.cursor.set(''); this.syncCursor.set(''); this.options.set({ providers: [], credentials: [] }); this.busy.set(false); void this.load()
+      this.generation++; this.detailGeneration++; this.rows.set([]); this.selected.set(null); this.history.set([]); this.sync.set(null); this.prepared.set(null); this.editor.set(false); this.cursor.set(''); this.syncCursor.set(''); this.options.set({ providers: [], credentials: [], webhookCredentials: [] }); this.busy.set(false); void this.load()
     })
     const timer = setInterval(() => { if (repositorySyncActive(this.sync()?.data.state) && !this.busy() && !this.polling) void this.refreshSync() }, 5000)
     destroy.onDestroy(() => { this.generation++; this.detailGeneration++; clearInterval(timer) })
@@ -81,7 +85,7 @@ export class RepositoriesService {
     this.selected.set(row ?? null); this.editor.set(true); this.error.set(''); this.message.set('')
     const config = row?.data.configuration, reference = repositoryReference(config?.reference ?? 'heads/main')
     this.form.controls.id.enable()
-    this.form.reset({ id: row?.id ?? '', name: config?.name ?? '', repository: config?.repository ?? '', referenceKind: reference.kind, reference: reference.value, credential: config?.credentialReference ?? '', enabled: config?.enabled ?? true, autoActivate: config?.autoActivate ?? false })
+    this.form.reset({ id: row?.id ?? '', name: config?.name ?? '', repository: config?.repository ?? '', referenceKind: reference.kind, reference: reference.value, credential: config?.credentialReference ?? '', enabled: config?.enabled ?? true, autoActivate: config?.autoActivate ?? false, push: config?.pushEnabled ?? false, webhookCredential: config?.webhookCredentialReference ?? '', intervalSeconds: config?.syncIntervalSeconds ?? 0 })
     this.form.controls.bindings.clear()
     if (config) for (const binding of config.bindings) this.addBinding(binding.suiteId, binding.manifestPath)
     else this.addBinding(this.sources.form.controls.suite.value)
@@ -163,6 +167,6 @@ export class RepositoriesService {
 
   private fail(error: unknown): void {
     this.error.set(error instanceof ApiError && error.status === 409 ? 'The source changed. Refresh its details before saving or syncing again.' : error instanceof Error ? error.message : 'Repository source request failed.')
-    if (error instanceof ApiError && (error.status === 401 || error.status === 403)) { this.rows.set([]); this.selected.set(null); this.history.set([]); this.sync.set(null); this.prepared.set(null); this.editor.set(false); this.options.set({ providers: [], credentials: [] }) }
+    if (error instanceof ApiError && (error.status === 401 || error.status === 403)) { this.rows.set([]); this.selected.set(null); this.history.set([]); this.sync.set(null); this.prepared.set(null); this.editor.set(false); this.options.set({ providers: [], credentials: [], webhookCredentials: [] }) }
   }
 }
