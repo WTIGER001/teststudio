@@ -5,8 +5,8 @@ export function terminal(state: string): boolean {
 }
 
 export function canRerun(run: Run): boolean { return terminal(run.state) && run.results.some(r => ['failed', 'timed-out', 'flaky'].includes(r.state)) }
-export function requestFromForm(value: { suite: string; environment: string; tests: string; timeout: number; retries: number }): RunRequest {
-  return { suiteId: value.suite, environmentId: value.environment || undefined, testIds: value.tests.split(/[\s,]+/).filter(Boolean), executionLocation: 'local', timeoutSeconds: value.timeout, retries: value.retries }
+export function requestFromForm(value: { suite: string; environment: string; tests: string; timeout: number; retries: number }, preview = ''): RunRequest {
+  return { suiteId: value.suite, environmentId: value.environment || undefined, ...(preview ? { savedSelectionPreviewId: preview } : { testIds: value.tests.split(/[\s,]+/).filter(Boolean) }), executionLocation: 'local', timeoutSeconds: value.timeout, retries: value.retries }
 }
 
 export function queryString(values: Record<string, string>): string {

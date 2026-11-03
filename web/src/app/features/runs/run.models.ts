@@ -1,9 +1,10 @@
 import type { TimingEstimate, TimingAssessment } from '../timing/timing.models'
 import type { TestDefinition } from '../catalog/catalog.models'
 import type { Environment } from '../configuration/configuration.service'
+import type { SavedSelectionRunReference, SavedSelectionSnapshot } from '../../core/generated/access.types'
 
 export interface Counts { total: number; passed: number; failed: number; timedOut: number; flaky: number; skipped: number; completed: number }
-export interface RunRequest { suiteId: string; environmentId?: string; releaseId?: string; testIds?: string[]; executionLocation: string; timeoutSeconds: number; retries?: number; parentRunId?: string }
+export interface RunRequest extends SavedSelectionRunReference { suiteId: string; environmentId?: string; releaseId?: string; testIds?: string[]; executionLocation: string; timeoutSeconds: number; retries?: number; parentRunId?: string }
 export interface RunSummary {
   id: string; projectId: string; suiteId: string; environmentId?: string; environmentName?: string; stage?: string; protected: boolean
   state: string; outcome: string; phase: string; counts: Counts; createdAt: string; finishedAt?: string; evidenceState: string; actor: string; trigger: string; selection: string
@@ -22,6 +23,7 @@ export interface Attempt {
   go?: GoObservation
 }
 export interface Run {
+  savedSelection?: SavedSelectionSnapshot
   schedule?: { id: string; firingId: string; dueAt: string }
   id: string; projectId: string; request: RunRequest; release: { id: string }; environment?: Environment; tests: TestDefinition[]
   timing?: TimingEstimate; currentTestStartedAt?: string; currentAttempt?: number

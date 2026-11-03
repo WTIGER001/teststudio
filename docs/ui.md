@@ -5,6 +5,8 @@ Components delegate workflows to focused feature services.
 Pure utilities handle catalog filtering and counts.
 Bulk metadata uses a focused editor, signal-based service, and pure field validation utilities.
 Review previews show compact before and after values beside optional complete definitions.
+The catalog manages reusable saved selections and versioned filters.
+Run forms require a resolved preview for saved selections. Run details shows the retained selection name and revision.
 
 Project settings provides suite inspection, editable settings, archive, and restoration.
 The focused manager shows readable affected schedules and preserves release pins.

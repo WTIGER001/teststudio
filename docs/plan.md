@@ -37,7 +37,11 @@ Bulk metadata edits now support reviewed category, tags, owner, title, descripti
 The API and UI preserve source-owned definitions and use atomic revision-controlled preview plans.
 Safety changes recheck current publishing permission. Stored previews recheck exact read and editing authority.
 Focused catalog checks and STUDIO-BULK-METADATA-001 pass locally. The implementation ledger records evidence and cleanup.
-Catalog category-tree navigation, saved selections, broader filters, and remaining item 21 workflows still require implementation.
+Saved explicit selections and versioned filters now work through catalog API and UI controls.
+Their previews pin a release and dependency closure before normal run creation.
+Runs retain saved definition snapshots. Later active releases or saved selection edits cannot rewrite those runs.
+Focused API checks and STUDIO-SELECTIONS-001 pass locally. The implementation ledger records evidence and cleanup.
+Catalog category-tree navigation, broader filters, and remaining item 21 workflows still require implementation.
 Item **23** now passes a real local repository snapshot with two suites beside shared application source.
 Both suites build separate images, publish, and pass normal runs with one result and complete evidence.
 Item **24** previously passes two-image publication and execution without restarting the server.

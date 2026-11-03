@@ -11,14 +11,16 @@ import { CatalogPlanComponent } from './catalog-plan.component'
 import { CatalogSelectionService } from './catalog-selection.service'
 import { CatalogBulkComponent } from './catalog-bulk.component'
 import { CatalogBulkMetadataService } from './catalog-bulk-metadata.service'
+import { CatalogSavedSelectionsComponent } from './catalog-saved-selections.component'
+import { CatalogSavedSelectionsService } from './catalog-saved-selections.service'
 import { CatalogTransferComponent } from './catalog-transfer.component'
 import { HTTPCheckEditorComponent } from './http-check-editor.component'
 import { HTTPCheckEditorService } from './http-check-editor.service'
 
 @Component({
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, RouterLink, CatalogEntryComponent, CatalogPlanComponent, CatalogBulkComponent, CatalogTransferComponent, TimingPolicyEditorComponent, HTTPCheckEditorComponent],
-  providers: [HTTPCheckEditorService, TimingPolicyEditorService, CatalogService, CatalogEntryService, CatalogPlanService, CatalogSelectionService, CatalogBulkMetadataService],
+  imports: [FormsModule, ReactiveFormsModule, RouterLink, CatalogEntryComponent, CatalogPlanComponent, CatalogBulkComponent, CatalogTransferComponent, TimingPolicyEditorComponent, HTTPCheckEditorComponent, CatalogSavedSelectionsComponent],
+  providers: [HTTPCheckEditorService, TimingPolicyEditorService, CatalogService, CatalogEntryService, CatalogPlanService, CatalogSelectionService, CatalogBulkMetadataService, CatalogSavedSelectionsService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Test catalog</h1><p class="muted">Know what you test. Keep every release accountable.</p></div>
@@ -77,6 +79,7 @@ import { HTTPCheckEditorService } from './http-check-editor.service'
     </section>
     @if (service.suites().length && (service.workspace.can('catalog.import') || service.workspace.can('catalog.export'))) { <ts-catalog-transfer /> }
     @if (service.suites().length) { <p><a class="button secondary" [routerLink]="['/projects', service.projectId(), 'releases']">Browse retained releases</a></p> }
+    @if (service.suites().length) { <ts-catalog-saved-selections /> }
     @if (service.suites().length && service.workspace.can('catalog.update')) {
     <section class="panel release-panel" aria-labelledby="release-title"><div><h2 id="release-title">Publish a release</h2><p class="small muted">Validate draft definitions and freeze an executable catalog.</p></div>
         <div class="inline-form"><label class="sr-only" for="release-suite">Suite to publish</label><select id="release-suite" [ngModel]="service.releaseSuite()" (ngModelChange)="service.releaseSuite.set($event); service.draft.set(null)">@for (suite of service.suites(); track suite.id) { <option [value]="suite.id">{{ suite.data.name }}</option> }</select><button class="button secondary" type="button" (click)="service.prepareRelease()" [disabled]="service.saving()">Validate and preview</button></div>

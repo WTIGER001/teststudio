@@ -2,6 +2,7 @@
   "schemaVersion": "teststudio.selftest/v1",
   "source": "teststudio-selftests",
   "tests": [
+    { "id": "STUDIO-SELECTIONS-001", "title": "Saved selections, versioned filters, resolved dependencies, and frozen runs", "selector": "@STUDIO-SELECTIONS-001", "category": "Catalog" },
     { "id": "STUDIO-BULK-METADATA-001", "title": "Reviewed bulk metadata, atomic conflicts, explicit clearing, and frozen definitions", "selector": "@STUDIO-BULK-METADATA-001", "category": "Catalog" },
     { "id": "STUDIO-SUITES-001", "title": "Suite settings, archive and restoration with retained evidence and schedule pins", "selector": "@STUDIO-SUITES-001", "category": "Catalog" },
     { "id": "STUDIO-RELEASES-001", "title": "Retained release comparisons, activation conflicts, rollback, and frozen runs", "selector": "@STUDIO-RELEASES-001", "category": "Catalog" },

@@ -49,6 +49,7 @@ Add native HTTPS checks, save catalog changes, validate a draft, and publish a r
 Use Import and export to transfer native JSON definitions through a reviewed preview.
 Use table selection for bulk lifecycle actions. Duplicate and History appear on each test row.
 The [catalog guide](docs/catalog.md) describes schemas, revision checks, and request limits.
+The [saved selection guide](docs/saved-selections.md) describes reusable identifiers, versioned filters, previewed dependencies, and frozen run selections.
 The [source upload guide](docs/sources.md) describes reviewed JSON and YAML publication, source digests, and retained snapshots.
 The [CLI sign-in guide](docs/cli-sign-in.md) describes browser confirmation for local and OIDC accounts and private managed sessions.
 The [release guide](docs/releases.md) describes retained catalogs, comparisons, activation, rollback, and frozen run selections.

@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.21.0"
+export const accessContractVersion = "0.22.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -84,6 +84,15 @@ export type RolePreview = { "decisions": (PermissionComparison)[]; "object": str
 export type RolePreviewInput = { "object"?: string; "policy": RolePolicyMutation; "revision": number; "userId": string }
 export type RoleRule = { "effect": "allow" | "deny"; "expiresAt"?: string | null; "object"?: string; "permission": string }
 export type Saved = { "saved": boolean }
+export type SavedSelection = { "archived": boolean; "description": string; "id": string; "name": string; "spec": SavedSelectionSpec }
+export type SavedSelectionFilter = { "applicationId"?: string; "category"?: string; "includeCategoryDescendants"?: boolean; "owner"?: string; "query"?: string; "runner"?: string; "safety"?: string; "source"?: string; "tags"?: (string)[]; "type"?: string }
+export type SavedSelectionPage = { "cursor"?: string; "items": (SavedSelectionRecord)[] }
+export type SavedSelectionPreview = { "actor": string; "createdAt": string; "expiresAt": string; "id": string; "projectId": string; "releaseId": string; "requestedTestIds": (string)[]; "resolvedTestIds": (string)[]; "selection": SavedSelectionSnapshot; "suiteId": string }
+export type SavedSelectionPreviewInput = { "releaseId"?: string }
+export type SavedSelectionRecord = { "data": SavedSelection; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type SavedSelectionRunReference = { "savedSelectionPreviewId"?: string }
+export type SavedSelectionSnapshot = { "definition": SavedSelection; "previewId": string; "revision": number }
+export type SavedSelectionSpec = { "filter"?: SavedSelectionFilter; "kind": "explicit" | "filter"; "schemaVersion": number; "testIds"?: (string)[] }
 export type Session = { "authenticationUntil": string; "client"?: string; "clientName"?: string; "createdAt": string; "current": boolean; "expiresAt": string; "id": string; "lastSeen": string; "provider": string }
 export type SessionPage = { "cursor"?: string; "items": (SessionRecord)[]; "partial": boolean }
 export type SessionRecord = { "data": Session; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
@@ -193,6 +202,12 @@ export interface AccessRequests {
   readSuiteLifecycle: { "project": string; "suite": string }
   readReleaseRegistry: { "project": string; "suite": string }
   activateRetainedRelease: { "project": string; "suite": string; "id": string; revision: number }
+  listSavedSelections: { "project": string; "suite": string; query?: { "cursor"?: string; "limit"?: number; "archived"?: boolean } }
+  createSavedSelection: { "project": string; "suite": string; body: SavedSelection }
+  readSavedSelection: { "project": string; "suite": string; "id": string }
+  updateSavedSelection: { "project": string; "suite": string; "id": string; revision: number; body: SavedSelection }
+  changeSavedSelectionState: { "project": string; "suite": string; "id": string; "action": "archive" | "restore"; revision: number }
+  previewSavedSelection: { "project": string; "suite": string; "id": string; body: SavedSelectionPreviewInput }
   updateSuiteSettings: { "project": string; "suite": string; revision: number; body: SuiteSettings }
   uploadSourceBundle: { "project": string; "suite": string; key: string; query: { "name": string; "manifest": string }; body: Blob }
   readPreparationOptions: { "project": string; "suite": string }
@@ -302,6 +317,12 @@ export interface AccessResponses {
   readSuiteLifecycle: SuiteLifecycle
   readReleaseRegistry: ReleaseRegistry
   activateRetainedRelease: {  }
+  listSavedSelections: SavedSelectionPage
+  createSavedSelection: SavedSelectionRecord
+  readSavedSelection: SavedSelectionRecord
+  updateSavedSelection: SavedSelectionRecord
+  changeSavedSelectionState: SavedSelectionRecord
+  previewSavedSelection: SavedSelectionPreview
   updateSuiteSettings: SuiteLifecycle
   uploadSourceBundle: SourcePreparationRecord
   readPreparationOptions: SourcePreparationOptions
@@ -411,6 +432,12 @@ export const accessOperations = {
   readSuiteLifecycle: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/lifecycle" },
   readReleaseRegistry: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/release-registry" },
   activateRetainedRelease: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/releases/{id}/activate" },
+  listSavedSelections: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/saved-selections" },
+  createSavedSelection: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/saved-selections" },
+  readSavedSelection: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/saved-selections/{id}" },
+  updateSavedSelection: { method: "PUT", path: "/api/v1/projects/{project}/suites/{suite}/saved-selections/{id}" },
+  changeSavedSelectionState: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/saved-selections/{id}/actions/{action}" },
+  previewSavedSelection: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/saved-selections/{id}/previews" },
   updateSuiteSettings: { method: "PATCH", path: "/api/v1/projects/{project}/suites/{suite}/settings" },
   uploadSourceBundle: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/source-bundles" },
   readPreparationOptions: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-preparation-options" },

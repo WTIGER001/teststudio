@@ -1,7 +1,7 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio API"
-  "version": "0.21.0"
+  "version": "0.22.0"
   "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Includes optional client-identifier RP-initiated provider logout after local session revocation. Includes staged native JSON and YAML sources with atomic catalog publication and retained source provenance. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
@@ -10,6 +10,299 @@
   -
     "SessionCookie": []
 "paths":
+  "/api/v1/projects/{project}/suites/{suite}/saved-selections":
+    "get":
+      "operationId": "listSavedSelections"
+      "parameters":
+        -
+          "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "in": "query"
+          "name": "cursor"
+          "schema":
+            "type": "string"
+        -
+          "in": "query"
+          "name": "limit"
+          "schema":
+            "type": "integer"
+            "minimum": 1
+            "maximum": 100
+            "default": 30
+        -
+          "in": "query"
+          "name": "archived"
+          "schema":
+            "type": "boolean"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SavedSelectionPage"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+    "post":
+      "operationId": "createSavedSelection"
+      "parameters":
+        -
+          "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SavedSelectionRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/SavedSelection"
+      "security":
+        -
+          "CSRFToken": []
+          "SessionCookie": []
+  "/api/v1/projects/{project}/suites/{suite}/saved-selections/{id}":
+    "get":
+      "operationId": "readSavedSelection"
+      "parameters":
+        -
+          "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "in": "path"
+          "name": "id"
+          "required": true
+          "schema":
+            "type": "string"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SavedSelectionRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+    "put":
+      "operationId": "updateSavedSelection"
+      "parameters":
+        -
+          "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "in": "path"
+          "name": "id"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SavedSelectionRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/SavedSelection"
+      "security":
+        -
+          "CSRFToken": []
+          "SessionCookie": []
+  "/api/v1/projects/{project}/suites/{suite}/saved-selections/{id}/actions/{action}":
+    "post":
+      "operationId": "changeSavedSelectionState"
+      "parameters":
+        -
+          "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "in": "path"
+          "name": "id"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "in": "path"
+          "name": "action"
+          "required": true
+          "schema":
+            "type": "string"
+            "enum":
+              - "archive"
+              - "restore"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SavedSelectionRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        -
+          "CSRFToken": []
+          "SessionCookie": []
+  "/api/v1/projects/{project}/suites/{suite}/saved-selections/{id}/previews":
+    "post":
+      "operationId": "previewSavedSelection"
+      "parameters":
+        -
+          "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "in": "path"
+          "name": "id"
+          "required": true
+          "schema":
+            "type": "string"
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SavedSelectionPreview"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/SavedSelectionPreviewInput"
+      "security":
+        -
+          "CSRFToken": []
+          "SessionCookie": []
   "/api/v1/projects/{project}/suites/{suite}/tests/bulk-preview":
     "post":
       "operationId": "previewCatalogBulk"
@@ -3888,6 +4181,178 @@
           "schema":
             "$ref": "#/components/schemas/Problem"
   "schemas":
+    "SavedSelectionFilter":
+      "type": "object"
+      "properties":
+        "query":
+          "type": "string"
+        "category":
+          "type": "string"
+        "owner":
+          "type": "string"
+        "applicationId":
+          "type": "string"
+        "type":
+          "type": "string"
+        "runner":
+          "type": "string"
+        "safety":
+          "type": "string"
+        "source":
+          "type": "string"
+        "includeCategoryDescendants":
+          "type": "boolean"
+        "tags":
+          "type": "array"
+          "items":
+            "type": "string"
+          "maxItems": 30
+      "required": []
+      "additionalProperties": false
+    "SavedSelectionSpec":
+      "type": "object"
+      "properties":
+        "schemaVersion":
+          "type": "integer"
+        "kind":
+          "type": "string"
+          "enum":
+            - "explicit"
+            - "filter"
+        "testIds":
+          "type": "array"
+          "items":
+            "type": "string"
+          "maxItems": 1000
+        "filter":
+          "$ref": "#/components/schemas/SavedSelectionFilter"
+      "required":
+        - "schemaVersion"
+        - "kind"
+      "additionalProperties": false
+    "SavedSelection":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+        "name":
+          "type": "string"
+        "description":
+          "type": "string"
+        "spec":
+          "$ref": "#/components/schemas/SavedSelectionSpec"
+        "archived":
+          "type": "boolean"
+      "required":
+        - "id"
+        - "name"
+        - "description"
+        - "spec"
+        - "archived"
+      "additionalProperties": false
+    "SavedSelectionRecord":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "revision":
+          "type": "integer"
+        "updatedAt":
+          "type": "string"
+          "format": "date-time"
+        "data":
+          "$ref": "#/components/schemas/SavedSelection"
+      "required":
+        - "id"
+        - "revision"
+        - "updatedAt"
+        - "data"
+      "additionalProperties": false
+    "SavedSelectionPage":
+      "type": "object"
+      "properties":
+        "items":
+          "type": "array"
+          "items":
+            "$ref": "#/components/schemas/SavedSelectionRecord"
+        "cursor":
+          "type": "string"
+      "required":
+        - "items"
+      "additionalProperties": false
+    "SavedSelectionSnapshot":
+      "type": "object"
+      "properties":
+        "definition":
+          "$ref": "#/components/schemas/SavedSelection"
+        "revision":
+          "type": "integer"
+        "previewId":
+          "type": "string"
+      "required":
+        - "definition"
+        - "revision"
+        - "previewId"
+      "additionalProperties": false
+    "SavedSelectionPreview":
+      "type": "object"
+      "properties":
+        "id":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "suiteId":
+          "type": "string"
+        "actor":
+          "type": "string"
+        "releaseId":
+          "type": "string"
+        "selection":
+          "$ref": "#/components/schemas/SavedSelectionSnapshot"
+        "requestedTestIds":
+          "type": "array"
+          "items":
+            "type": "string"
+          "maxItems": 1000
+        "resolvedTestIds":
+          "type": "array"
+          "items":
+            "type": "string"
+          "maxItems": 1000
+        "createdAt":
+          "type": "string"
+          "format": "date-time"
+        "expiresAt":
+          "type": "string"
+          "format": "date-time"
+      "required":
+        - "id"
+        - "projectId"
+        - "suiteId"
+        - "actor"
+        - "releaseId"
+        - "selection"
+        - "requestedTestIds"
+        - "resolvedTestIds"
+        - "createdAt"
+        - "expiresAt"
+      "additionalProperties": false
+    "SavedSelectionPreviewInput":
+      "type": "object"
+      "properties":
+        "releaseId":
+          "type": "string"
+      "required": []
+      "additionalProperties": false
+    "SavedSelectionRunReference":
+      "type": "object"
+      "properties":
+        "savedSelectionPreviewId":
+          "type": "string"
+      "required": []
+      "additionalProperties": false
     "CatalogBulkMetadata":
       "type": "object"
       "additionalProperties": false

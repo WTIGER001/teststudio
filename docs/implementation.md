@@ -74,6 +74,36 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Saved catalog selections and frozen run reviews
+
+Suites now store shared saved selections with explicit identifiers or schema-versioned filter expressions.
+Filters support text, categories and descendants, tags, owner, application, test type, runner, safety, and source.
+The catalog UI creates, inspects, edits, archives, restores, and resolves these definitions through generated API operations.
+Explicit definitions require valid distinct identifiers. Unsupported filter versions and conflicting definition shapes fail validation.
+Edits use revision checks and current suite catalog authority inside the shared assignment transaction.
+Lists paginate and omit explicit selections whose identifiers fail current exact read checks.
+
+Resolved previews pin one retained release, selection definition and revision, root identifiers, and dependency closure.
+Previews expire after 15 minutes and belong to the creating actor.
+Empty matches, missing or disabled dependencies, revoked read permissions, and current disabled test state block execution explicitly.
+Run creation accepts savedSelectionPreviewId and asserts the saved definition revision when committing its frozen run snapshot.
+The run form requires a preview before timing estimates or execution. Run details shows the retained selection name and revision.
+Later active releases, saved definition edits, and archival do not rewrite existing runs.
+Failure reruns use the parent's frozen release and failed identifiers instead of the saved preview.
+
+Focused API checks pass for frozen releases, retained definitions, stale and expired previews, current lifecycle, actor ownership, dependency closure, read revocation, archive, and restoration.
+An actual failed saved-selection run reruns its failed identifiers after the saved selection is archived.
+Ordinary run evidence and legacy timeout reruns remain covered by targeted checks after the run request change.
+The Angular production build and generated OpenAPI client synchronization pass.
+STUDIO-SELECTIONS-001 passes through normal TestStudio execution with complete evidence.
+It creates explicit and filtered selections, handles a revision conflict, reviews dependencies, and executes an older reviewed release after a new activation.
+It also verifies the stored run selection after later definition edits.
+Evidence is output/selftest/20261103T183650.273193000-92ddbebefae1e75c5eb9494c/summary.json and cleanup.json.
+The owned controller, browser container, and output volume are removed after verification.
+Only the affected browser workflow and selected local backend checks run. No cloud verification runs.
+Items **21** and **28** advance. Category-tree navigation, broader catalog controls, and the full admission requirement keep them open.
+The ledger remains **26 verified, 31 open, 57 total**.
+
 ### Reviewed bulk metadata editing
 
 The existing bulk preview route now supports explicit metadata changes for 1 through 30 tests from one suite.

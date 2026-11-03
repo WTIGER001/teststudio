@@ -79,6 +79,7 @@ func (s *Service) RerunFailures(ctx context.Context, user, project, id, key stri
 		return Run{}, errors.New("run has no failed, timed-out, or flaky tests")
 	}
 	req := parent.Request
+	req.SelectionPreview = ""
 	req.IDs = ids
 	req.Parent = id
 	req.Release = parent.Release.ID

@@ -50,6 +50,10 @@ Validation errors identify the test and field. Invalid plans cannot apply.
 History shows retained definitions, actor, timestamp, and revision number.
 Duplicate asks for a new permanent identifier and creates a draft entry.
 Opening a preview or history panel moves keyboard focus to its heading.
+Saved selections support explicit identifiers and versioned filters through the same catalog permissions.
+The catalog manages their definitions, previews, archive, and restoration.
+The run form previews a saved selection before using its frozen release and resolved identifiers.
+See [Saved test selections](saved-selections.md).
 
 ## Bulk metadata
 
