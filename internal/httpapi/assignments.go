@@ -7,7 +7,7 @@ import (
 )
 
 func (s *Server) assignmentRoutes(m *http.ServeMux) {
-	a := &access.Service{Store: s.Store, Auth: s.Auth, LocalUser: s.LocalUser, SessionIdleTimeout: s.Sessions.IdleTimeout}
+	a := s.accessService()
 	m.HandleFunc("GET /api/v1/roles", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		roles, err := a.ListRoles(r.Context(), actor(r), r.URL.Query().Get("project"))
 		if err != nil {

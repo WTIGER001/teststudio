@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.2.0"
+export const accessContractVersion = "0.3.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -12,10 +12,17 @@ export type Group = { "archived": boolean; "description": string; "id": string; 
 export type GroupDefinition = { "description"?: string; "id": string; "name": string; "projectId"?: string }
 export type GroupPage = { "cursor"?: string; "items": (GroupRecord)[]; "partial": boolean }
 export type GroupRecord = { "data": Group; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type LocalCredential = { "canManage": boolean; "configured": boolean; "createdAt"?: string; "disabled": boolean; "localAccountsEnabled": boolean; "mustChangePassword": boolean; "updatedAt"?: string; "userId": string }
+export type LocalCredentialRecord = { "data": LocalCredential; "id": string; "revision": number }
+export type LocalPasswordDefinition = { "password": string; "reason": string }
 export type Membership = { "active": boolean; "expiresAt"?: string | null; "groupId": string; "groupName"?: string; "name": string; "projectId"?: string; "readOnly": boolean; "source": string; "userId": string }
 export type MembershipDefinition = { "expiresAt"?: string | null }
 export type MembershipPage = { "cursor"?: string; "items": (MembershipRecord)[]; "partial": boolean }
 export type MembershipRecord = { "data": Membership; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type PasswordChange = { "currentPassword": string; "newPassword": string }
+export type PasswordChanged = { "changed": boolean }
+export type PasswordLogin = { "password": string; "userId": string }
+export type PasswordSignedIn = { "mustChangePassword": boolean; "signedIn": boolean }
 export type Problem = { "message": string; "status"?: number }
 export type Profile = { "identities": ExternalIdentityPage; "localAccount": boolean; "user": User }
 export type Reason = { "reason": string }
@@ -43,6 +50,7 @@ export interface AccessRequests {
   saveLocalMembership: { "user": string; "group": string; revision: number; body: MembershipDefinition }
   restoreGroup: { "group": string; revision: number; body: Reason }
   currentProfile: { query?: { "limit"?: number; "cursor"?: string } }
+  readOwnLocalCredential: {  }
   listProjectAssignments: { "project": string; query?: { "limit"?: number; "cursor"?: string } }
   createProjectAssignment: { "project": string; body: AssignmentDefinition }
   revokeProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
@@ -58,10 +66,16 @@ export interface AccessRequests {
   editUser: { "user": string; revision: number; body: UserDefinition }
   disableUser: { "user": string; revision: number; body: Reason }
   listUserIdentities: { "user": string; query?: { "limit"?: number; "cursor"?: string } }
+  readLocalCredential: { "user": string }
+  setLocalPassword: { "user": string; revision: number; body: LocalPasswordDefinition }
+  disableLocalCredential: { "user": string; revision: number; body: Reason }
+  enableLocalCredential: { "user": string; revision: number; body: Reason }
   listUserMemberships: { "user": string; query?: { "limit"?: number; "cursor"?: string } }
   restoreUser: { "user": string; revision: number; body: Reason }
   listUserSessions: { "user": string; query?: { "limit"?: number; "cursor"?: string } }
   revokeUserSession: { "user": string; "session": string; revision: number; body: Reason }
+  signInWithPassword: { body: PasswordLogin }
+  changeLocalPassword: { body: PasswordChange }
 }
 
 export interface AccessResponses {
@@ -76,6 +90,7 @@ export interface AccessResponses {
   saveLocalMembership: Saved
   restoreGroup: GroupRecord
   currentProfile: Profile
+  readOwnLocalCredential: LocalCredentialRecord
   listProjectAssignments: AssignmentPage
   createProjectAssignment: AssignmentRecord
   revokeProjectAssignment: Revoked
@@ -91,10 +106,16 @@ export interface AccessResponses {
   editUser: UserRecord
   disableUser: UserRecord
   listUserIdentities: ExternalIdentityPage
+  readLocalCredential: LocalCredentialRecord
+  setLocalPassword: LocalCredentialRecord
+  disableLocalCredential: LocalCredentialRecord
+  enableLocalCredential: LocalCredentialRecord
   listUserMemberships: MembershipPage
   restoreUser: UserRecord
   listUserSessions: SessionPage
   revokeUserSession: Revoked
+  signInWithPassword: PasswordSignedIn
+  changeLocalPassword: PasswordChanged
 }
 
 export const accessOperations = {
@@ -109,6 +130,7 @@ export const accessOperations = {
   saveLocalMembership: { method: "PUT", path: "/api/v1/groups/{group}/members/{user}" },
   restoreGroup: { method: "POST", path: "/api/v1/groups/{group}/restore" },
   currentProfile: { method: "GET", path: "/api/v1/me" },
+  readOwnLocalCredential: { method: "GET", path: "/api/v1/me/local-credential" },
   listProjectAssignments: { method: "GET", path: "/api/v1/projects/{project}/role-assignments" },
   createProjectAssignment: { method: "POST", path: "/api/v1/projects/{project}/role-assignments" },
   revokeProjectAssignment: { method: "DELETE", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
@@ -124,8 +146,14 @@ export const accessOperations = {
   editUser: { method: "PUT", path: "/api/v1/users/{user}" },
   disableUser: { method: "POST", path: "/api/v1/users/{user}/disable" },
   listUserIdentities: { method: "GET", path: "/api/v1/users/{user}/identities" },
+  readLocalCredential: { method: "GET", path: "/api/v1/users/{user}/local-credential" },
+  setLocalPassword: { method: "PUT", path: "/api/v1/users/{user}/local-credential" },
+  disableLocalCredential: { method: "POST", path: "/api/v1/users/{user}/local-credential/disable" },
+  enableLocalCredential: { method: "POST", path: "/api/v1/users/{user}/local-credential/enable" },
   listUserMemberships: { method: "GET", path: "/api/v1/users/{user}/memberships" },
   restoreUser: { method: "POST", path: "/api/v1/users/{user}/restore" },
   listUserSessions: { method: "GET", path: "/api/v1/users/{user}/sessions" },
-  revokeUserSession: { method: "DELETE", path: "/api/v1/users/{user}/sessions/{session}" }
+  revokeUserSession: { method: "DELETE", path: "/api/v1/users/{user}/sessions/{session}" },
+  signInWithPassword: { method: "POST", path: "/auth/password" },
+  changeLocalPassword: { method: "POST", path: "/auth/password/change" }
 } as const

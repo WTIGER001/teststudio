@@ -138,7 +138,7 @@ func (s *Server) serveArtifact(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	session, err := s.Sessions.Validate(r.Context(), g.Session)
-	if err != nil || session.UserID != g.User {
+	if err != nil || session.MustChangePassword || session.UserID != g.User {
 		problem(w, sessions.ErrUnauthenticated)
 		return
 	}

@@ -10,7 +10,7 @@ import (
 )
 
 func (s *Server) accessRoutes(m *http.ServeMux) {
-	a := &access.Service{Store: s.Store, Auth: s.Auth, LocalUser: s.LocalUser, SessionIdleTimeout: s.Sessions.IdleTimeout}
+	a := s.accessService()
 	m.HandleFunc("GET /api/v1/me", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		limit, err := pageLimit(r, 30)
 		if err != nil {
@@ -265,4 +265,8 @@ func (s *Server) accessRoutes(m *http.ServeMux) {
 		}
 		JSON(w, 200, row)
 	}))
+}
+
+func (s *Server) accessService() *access.Service {
+	return &access.Service{Store: s.Store, Auth: s.Auth, LocalUser: s.LocalUser, LocalAccounts: s.LocalAccounts != nil, SessionIdleTimeout: s.Sessions.IdleTimeout}
 }

@@ -9,13 +9,16 @@ import (
 	permissions "github.com/wtiger001/go-permissions"
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/identity"
+	"github.com/wtiger001/teststudio/internal/passwords"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
 
 type directoryView struct {
-	users       map[string]identity.User
-	groups      map[string]identity.Group
-	memberships map[string]identity.Membership
+	localAccounts bool
+	local         map[string]bool
+	users         map[string]identity.User
+	groups        map[string]identity.Group
+	memberships   map[string]identity.Membership
 }
 
 func (v *directoryView) GetUserGroups(_ context.Context, user string) ([]string, error) {
@@ -58,8 +61,22 @@ func (s *Service) hasUsableAdministrator(ctx context.Context) (bool, error) {
 }
 
 func (s *Service) administratorState(ctx context.Context) (*permissions.Service, *directoryView, map[string]bool, error) {
-	v := &directoryView{users: map[string]identity.User{}, groups: map[string]identity.Group{}, memberships: map[string]identity.Membership{}}
-	for _, bucket := range []string{"users", "groups", "memberships"} {
+	v := &directoryView{localAccounts: s.LocalAccounts, local: map[string]bool{}, users: map[string]identity.User{}, groups: map[string]identity.Group{}, memberships: map[string]identity.Membership{}}
+	if v.localAccounts {
+		mode, err := s.Store.Get(ctx, "local-auth-mode", "installation")
+		if err != nil && !errors.Is(err, storage.ErrNotFound) {
+			return nil, nil, nil, err
+		}
+		state := identity.LocalAuthMode{}
+		if mode.Revision > 0 {
+			state, err = storage.Decode[identity.LocalAuthMode](mode)
+			if err != nil {
+				return nil, nil, nil, err
+			}
+		}
+		v.localAccounts = state.Enabled
+	}
+	for _, bucket := range []string{"users", "groups", "memberships", "local-credentials"} {
 		rows, err := s.Store.All(ctx, bucket, "")
 		if err != nil {
 			return nil, nil, nil, err
@@ -138,7 +155,7 @@ func (s *Service) preserveAdministrator(ctx context.Context, changes ...storage.
 
 func usableAdministrator(ctx context.Context, engine *permissions.Service, v *directoryView, logins map[string]bool) (bool, error) {
 	for id, user := range v.users {
-		if user.Disabled || !logins[id] {
+		if user.Disabled || (!logins[id] && !v.local[id]) {
 			continue
 		}
 		usable := true
@@ -161,6 +178,16 @@ func usableAdministrator(ctx context.Context, engine *permissions.Service, v *di
 
 func (v *directoryView) apply(row storage.Record, remove bool) error {
 	switch row.Bucket {
+	case "local-credentials":
+		if !v.localAccounts {
+			return nil
+		}
+		c, err := storage.Decode[identity.LocalCredential](row)
+		if err != nil {
+			return err
+		}
+		v.local[row.ID] = !remove && !c.Disabled && c.UserID == row.ID && passwords.ValidHash(c.Hash)
+
 	case "users":
 		value, err := storage.Decode[identity.User](row)
 		if err != nil {

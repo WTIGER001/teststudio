@@ -32,6 +32,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/httpapi"
 	"github.com/wtiger001/teststudio/internal/identity"
+	"github.com/wtiger001/teststudio/internal/localauth"
 	"github.com/wtiger001/teststudio/internal/notifications"
 	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/runs"
@@ -60,6 +61,7 @@ func run() error {
 	scheduler := flag.Bool("scheduler", true, "Process durable project schedules on this instance")
 	notificationWorker := flag.Bool("notification-worker", true, "Process durable notification deliveries on this instance")
 	secretBindings := flag.String("secret-bindings", "", "Project and purpose scoped environment or mounted-file secret binding configuration")
+	localAccounts := flag.Bool("local-accounts", false, "Enable managed local password accounts alongside configured OIDC providers")
 	local := flag.Bool("local", false, "Enable explicit loopback-only local administrator sign-in")
 	recoverLocal := flag.Bool("recover-local-admin", false, "Reenable the loopback local administrator and invalidate its earlier sessions; requires --local")
 	providers := flag.String("oidc-config", "", "Initial JSON provider configuration file")
@@ -74,6 +76,11 @@ func run() error {
 	parsed, err := url.Parse(*public)
 	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Path != "" || parsed.RawQuery != "" || parsed.Fragment != "" || parsed.User != nil {
 		return errors.New("public-url must be an HTTP or HTTPS origin")
+	}
+	if *localAccounts {
+		if err := validateLocalAccountOrigin(parsed); err != nil {
+			return err
+		}
 	}
 	if err := notifications.ValidateOrigin(*public); err != nil {
 		return err
@@ -98,7 +105,7 @@ func run() error {
 	if err != nil || (relative != ".." && !strings.HasPrefix(relative, ".."+string(filepath.Separator))) {
 		return errors.New("artifact-directory must be outside the public UI directory")
 	}
-	if *local {
+	if *local || (*localAccounts && parsed.Scheme == "http") {
 		host, _, err := net.SplitHostPort(*addr)
 		ip := net.ParseIP(host)
 		if err != nil || (host != "localhost" && (ip == nil || !ip.IsLoopback())) {
@@ -158,7 +165,7 @@ func run() error {
 			}
 		}
 	}
-	sessionService := &sessions.Service{Store: db, Directory: directory, Origin: *public, Secure: parsed.Scheme == "https"}
+	sessionService := &sessions.Service{LocalAccounts: *localAccounts, Store: db, Directory: directory, Origin: *public, Secure: parsed.Scheme == "https"}
 	oidc := &authoidc.Service{Store: db, Directory: directory, Sessions: sessionService, Origin: *public}
 	files, err := filesystem.New(*artifactDirectory)
 	if err != nil {
@@ -180,6 +187,14 @@ func run() error {
 	notificationService := &notifications.Service{Store: db, Auth: auth, Secrets: secretProvider, Sender: &webhook.Sender{}, Origin: *public}
 	runService.Completion = notificationService
 	api := &httpapi.Server{Store: db, Auth: auth, Projects: &projects.Service{Store: db, Auth: auth}, Catalog: catalogService, Runs: runService, Schedules: scheduleService, Notifications: notificationService, Evidence: evidenceService, ArtifactOrigin: *artifactOrigin, Sessions: sessionService, OIDC: oidc, LocalUser: localUser, UI: *ui}
+	if *localAccounts {
+		api.LocalAccounts, err = localauth.New(ctx, sessionService)
+		if err != nil {
+			return err
+		}
+	} else if err := localauth.Configure(ctx, directory, false); err != nil {
+		return err
+	}
 	server := &http.Server{Addr: *addr, Handler: api.Handler(), ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 30 * time.Second, WriteTimeout: 60 * time.Second, IdleTimeout: 90 * time.Second}
 	artifactServer := &http.Server{Addr: *artifactAddr, Handler: api.ArtifactHandler(), ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 30 * time.Second, IdleTimeout: 90 * time.Second}
 	listener, err := net.Listen("tcp", *addr)

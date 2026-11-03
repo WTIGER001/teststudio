@@ -29,7 +29,15 @@ func (s *Server) authRoutes(m *http.ServeMux) {
 				list = append(list, map[string]string{"id": p.ID, "name": p.Name})
 			}
 		}
-		JSON(w, 200, map[string]any{"providers": list, "localEnabled": s.LocalUser != ""})
+		enabled := false
+		if s.LocalAccounts != nil {
+			enabled, err = s.Auth.Directory.LocalAccountsEnabled(r.Context())
+			if err != nil {
+				problem(w, err)
+				return
+			}
+		}
+		JSON(w, 200, map[string]any{"providers": list, "localEnabled": s.LocalUser != "", "localAccountsEnabled": enabled})
 	})
 	m.HandleFunc("POST /auth/local", func(w http.ResponseWriter, r *http.Request) {
 		host, _, err := net.SplitHostPort(r.RemoteAddr)
@@ -60,7 +68,7 @@ func (s *Server) authRoutes(m *http.ServeMux) {
 		}
 		JSON(w, 200, map[string]any{"user": u, "session": v})
 	})
-	m.HandleFunc("POST /auth/logout", s.authorized(func(w http.ResponseWriter, r *http.Request) {
+	m.HandleFunc("POST /auth/logout", s.authenticated(func(w http.ResponseWriter, r *http.Request) {
 		v := r.Context().Value(sessionKey{}).(sessions.Session)
 		if err := s.Sessions.Revoke(r.Context(), v.ID); err != nil {
 			problem(w, err)
@@ -68,7 +76,7 @@ func (s *Server) authRoutes(m *http.ServeMux) {
 		}
 		s.Sessions.Clear(w)
 		JSON(w, 200, map[string]bool{"signedOut": true})
-	}))
+	}, true))
 	m.HandleFunc("GET /auth/login/{provider}", func(w http.ResponseWriter, r *http.Request) {
 		if err := s.OIDC.Login(w, r, r.PathValue("provider")); err != nil {
 			problem(w, errors.New("sign-in provider is unavailable"))

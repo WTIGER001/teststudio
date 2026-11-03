@@ -41,7 +41,7 @@ type client struct {
 	api    *httpapi.Server
 }
 
-func fixture(t *testing.T) *client {
+func fixture(t *testing.T, configure ...func(*httpapi.Server)) *client {
 	t.Helper()
 	root := t.TempDir()
 	uiRoot := filepath.Join(root, "ui")
@@ -90,6 +90,9 @@ func fixture(t *testing.T) *client {
 	}
 	api.Notifications = &notifications.Service{Store: db, Auth: auth, Secrets: secretProvider, Sender: &webhook.Sender{}}
 	runService.Completion = api.Notifications
+	for _, apply := range configure {
+		apply(api)
+	}
 	artifactServer := httptest.NewServer(api.ArtifactHandler())
 	t.Cleanup(artifactServer.Close)
 	api.ArtifactOrigin = artifactServer.URL

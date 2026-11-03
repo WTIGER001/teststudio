@@ -1,8 +1,8 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio identity and access administration"
-  "version": "0.2.0"
-  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments. Custom policy administration and other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
+  "version": "0.3.0"
+  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Custom policy administration and other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
     "url": "/"
@@ -981,6 +981,250 @@
           "application/json":
             "schema":
               "$ref": "#/components/schemas/Reason"
+  "/auth/password":
+    "post":
+      "operationId": "signInWithPassword"
+      "summary": "Sign in with an internal user identifier and local password. Origin is required. A reset password creates a restricted session."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/PasswordSignedIn"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+        "429":
+          "$ref": "#/components/responses/Problem"
+        "503":
+          "$ref": "#/components/responses/Problem"
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/PasswordLogin"
+      "security": []
+  "/auth/password/change":
+    "post":
+      "operationId": "changeLocalPassword"
+      "summary": "Verify the current password, change it, revoke earlier sessions, and rotate the cookie atomically. Restricted reset sessions can use this route."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/Origin"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/PasswordChanged"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+        "429":
+          "$ref": "#/components/responses/Problem"
+        "503":
+          "$ref": "#/components/responses/Problem"
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/PasswordChange"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+  "/api/v1/users/{user}/local-credential":
+    "get":
+      "operationId": "readLocalCredential"
+      "summary": "Read redacted local credential state with installation user authority. Unconfigured credentials have revision zero."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/User"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/LocalCredentialRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+        "429":
+          "$ref": "#/components/responses/Problem"
+        "503":
+          "$ref": "#/components/responses/Problem"
+    "put":
+      "operationId": "setLocalPassword"
+      "summary": "Provision or reset a local password. Require a change before normal access. Preserve disabled credential state and revoke existing sessions."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/User"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/CredentialRevision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/LocalCredentialRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+        "429":
+          "$ref": "#/components/responses/Problem"
+        "503":
+          "$ref": "#/components/responses/Problem"
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/LocalPasswordDefinition"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+  "/api/v1/users/{user}/local-credential/disable":
+    "post":
+      "operationId": "disableLocalCredential"
+      "summary": "Disable local sign-in with a reason and current revision. Preserve the last usable administrator and revoke earlier sessions."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/User"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/LocalCredentialRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+        "429":
+          "$ref": "#/components/responses/Problem"
+        "503":
+          "$ref": "#/components/responses/Problem"
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/Reason"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+  "/api/v1/users/{user}/local-credential/enable":
+    "post":
+      "operationId": "enableLocalCredential"
+      "summary": "Enable local sign-in with a reason and current revision. Preserve the last usable administrator and revoke earlier sessions."
+      "parameters":
+        -
+          "$ref": "#/components/parameters/User"
+        -
+          "$ref": "#/components/parameters/Origin"
+        -
+          "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/LocalCredentialRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+        "429":
+          "$ref": "#/components/responses/Problem"
+        "503":
+          "$ref": "#/components/responses/Problem"
+      "requestBody":
+        "required": true
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/Reason"
+      "security":
+        -
+          "SessionCookie": []
+          "CSRFToken": []
+  "/api/v1/me/local-credential":
+    "get":
+      "operationId": "readOwnLocalCredential"
+      "summary": "Read your own redacted local credential state without installation directory authority."
+      "responses":
+        "200":
+          "description": "Operation completed."
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/LocalCredentialRecord"
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "503":
+          "$ref": "#/components/responses/Problem"
+
 "components":
   "securitySchemes":
     "SessionCookie":
@@ -1097,6 +1341,14 @@
       "required": true
       "schema":
         "type": "string"
+    "CredentialRevision":
+      "name": "If-Match"
+      "in": "header"
+      "required": true
+      "schema":
+        "type": "string"
+        "pattern": "^\"?[0-9]+\"?$"
+      "description": "Use zero to provision local credentials. Use the current positive revision to reset a password."
   "responses":
     "Problem":
       "description": "401 requires sign-in; 403 denies access; 404 hides missing or mismatched resources; 409 requires a fresh revision; 422 rejects invalid requests or administrator lockout."
@@ -1658,3 +1910,117 @@
             "$ref": "#/components/schemas/Role"
       "required":
         - "items"
+    "PasswordLogin":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "userId":
+          "type": "string"
+        "password":
+          "type": "string"
+          "format": "password"
+          "writeOnly": true
+          "maxLength": 1024
+      "required":
+        - "userId"
+        - "password"
+    "PasswordChange":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "currentPassword":
+          "type": "string"
+          "format": "password"
+          "writeOnly": true
+          "maxLength": 1024
+        "newPassword":
+          "type": "string"
+          "format": "password"
+          "writeOnly": true
+          "minLength": 15
+          "maxLength": 256
+          "description": "15 through 256 Unicode characters, at most 1024 UTF-8 bytes. NFC normalization preserves spaces."
+      "required":
+        - "currentPassword"
+        - "newPassword"
+    "LocalPasswordDefinition":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "password":
+          "type": "string"
+          "format": "password"
+          "writeOnly": true
+          "minLength": 15
+          "maxLength": 256
+          "description": "15 through 256 Unicode characters, at most 1024 UTF-8 bytes. NFC normalization preserves spaces."
+        "reason":
+          "type": "string"
+          "minLength": 1
+          "maxLength": 1024
+      "required":
+        - "password"
+        - "reason"
+    "PasswordSignedIn":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "signedIn":
+          "type": "boolean"
+        "mustChangePassword":
+          "type": "boolean"
+      "required":
+        - "signedIn"
+        - "mustChangePassword"
+    "PasswordChanged":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "changed":
+          "type": "boolean"
+      "required":
+        - "changed"
+    "LocalCredential":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "userId":
+          "type": "string"
+        "configured":
+          "type": "boolean"
+        "disabled":
+          "type": "boolean"
+        "mustChangePassword":
+          "type": "boolean"
+        "localAccountsEnabled":
+          "type": "boolean"
+        "canManage":
+          "type": "boolean"
+        "createdAt":
+          "type": "string"
+          "format": "date-time"
+        "updatedAt":
+          "type": "string"
+          "format": "date-time"
+      "required":
+        - "userId"
+        - "configured"
+        - "disabled"
+        - "mustChangePassword"
+        - "localAccountsEnabled"
+        - "canManage"
+    "LocalCredentialRecord":
+      "type": "object"
+      "additionalProperties": false
+      "properties":
+        "id":
+          "type": "string"
+        "revision":
+          "type": "integer"
+          "minimum": 0
+        "data":
+          "$ref": "#/components/schemas/LocalCredential"
+      "required":
+        - "id"
+        - "revision"
+        - "data"

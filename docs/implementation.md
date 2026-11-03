@@ -92,6 +92,36 @@ STUDIO-NOTIFY-001 passes again after the shared fixture and shutdown changes.
 Owned verification controllers and browser containers stop after checks. The disposable PostgreSQL service also stops.
 Identity linking, pending project access, personal profile UI, role and grant editors, deployment verification, and the remaining full plan stay pending.
 
+### Managed local account backend
+
+Added opt-in `--local-accounts` alongside OIDC and the separate loopback development administrator.
+Managed credentials use permanent internal user identifiers and grant no implicit project access.
+Added redacted credential reads, administrator provisioning and reset, enable, disable, local sign-in, and own-password change APIs.
+The OpenAPI contract and generated client now contain 37 identity and access operations.
+
+Passwords use the pinned Argon2id implementation, independent salts, bounded memory concurrency, Unicode normalization, and explicit length limits.
+Durable bounded counters include unknown identifiers and serialize reservations across connections.
+Login errors conceal credential existence. Origin checks protect login; authenticated password changes also require the session token.
+Public password deployments require HTTPS. Loopback HTTP also requires a loopback listener.
+
+Resets create restricted sessions until the password changes.
+A successful change rotates the cookie and atomically saves the credential, account session generation, audit, and replacement session.
+The response sends no cookie before commit.
+Credential revisions reject password proof obtained before a reset.
+Durable mode revisions prevent old cookies from reviving after authentication is disabled and enabled again.
+OIDC provider identifiers cannot be confused with the password authentication method.
+Credential responses and audit records contain no passwords or hashes.
+
+Last-administrator checks now include usable local credentials and actual authentication mode.
+The common directory revision locks before record changes, including ordinary identity and session writes.
+Targeted password, limiter, session, credential, administrator, assignment, bootstrap, and client checks pass with race detection on SQLite and local PostgreSQL.
+The generated client passes the TypeScript check.
+The built-service smoke passes across actual restarts with complete redacted evidence in `output/local-accounts/local-accounts-verification.dWb0S1/summary.json`.
+It verifies password-only administration, forced change, cookie rotation, last-administrator protection, mode revocation, generic errors, and transport rejection.
+Owned test controllers and the PostgreSQL container exit after verification.
+
+Managed password screens, browser acceptance, identity linking, custom policy management, hosted verification, and the remaining full plan stay pending.
+
 ### Scoped assignment interface
 
 Added Project access and Installation access screens with predefined role choices and permission details.

@@ -12,30 +12,38 @@ import (
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/identity"
+	"github.com/wtiger001/teststudio/internal/passwords"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
+
+var ErrPasswordChangeRequired = errors.New("change your password before continuing")
 
 var ErrUnauthenticated = errors.New("sign-in is required")
 
 type Session struct {
-	ID                  string    `json:"-"`
-	UserID              string    `json:"userId"`
-	Provider            string    `json:"provider"`
-	UserEpoch           int64     `json:"userEpoch"`
-	CSRF                string    `json:"csrfToken"`
-	CreatedAt           time.Time `json:"createdAt"`
-	LastSeen            time.Time `json:"lastSeen"`
-	ExpiresAt           time.Time `json:"expiresAt"`
-	AuthenticationUntil time.Time `json:"authenticationUntil"`
+	ID                   string    `json:"-"`
+	UserID               string    `json:"userId"`
+	Provider             string    `json:"provider"`
+	AuthenticationMethod string    `json:"authenticationMethod,omitempty"`
+	LocalModeRevision    int64     `json:"localModeRevision,omitempty"`
+	CredentialRevision   int64     `json:"credentialRevision,omitempty"`
+	MustChangePassword   bool      `json:"mustChangePassword,omitempty"`
+	UserEpoch            int64     `json:"userEpoch"`
+	CSRF                 string    `json:"csrfToken"`
+	CreatedAt            time.Time `json:"createdAt"`
+	LastSeen             time.Time `json:"lastSeen"`
+	ExpiresAt            time.Time `json:"expiresAt"`
+	AuthenticationUntil  time.Time `json:"authenticationUntil"`
 }
 
 type Service struct {
-	Store       *storage.Store
-	Directory   *identity.Directory
-	Origin      string
-	Secure      bool
-	IdleTimeout time.Duration
-	Lifetime    time.Duration
+	Store         *storage.Store
+	Directory     *identity.Directory
+	Origin        string
+	Secure        bool
+	IdleTimeout   time.Duration
+	Lifetime      time.Duration
+	LocalAccounts bool
 }
 
 func Random() string {
@@ -52,6 +60,21 @@ func Digest(value string) string {
 }
 
 func (s *Service) Create(ctx context.Context, w http.ResponseWriter, user, provider string, authUntil time.Time) (Session, error) {
+	session, cookie, err := s.create(ctx, user, provider, authUntil, 0, "")
+	if err == nil {
+		http.SetCookie(w, cookie)
+	}
+	return session, err
+}
+
+func (s *Service) CreatePassword(ctx context.Context, user string, credentialRevision int64, previous string) (Session, *http.Cookie, error) {
+	if !s.LocalAccounts || credentialRevision < 1 {
+		return Session{}, nil, ErrUnauthenticated
+	}
+	return s.create(ctx, user, "password", time.Time{}, credentialRevision, previous)
+}
+
+func (s *Service) create(ctx context.Context, user, provider string, authUntil time.Time, credentialRevision int64, previous string) (Session, *http.Cookie, error) {
 	lifetime := s.Lifetime
 	if lifetime == 0 {
 		lifetime = 8 * time.Hour
@@ -59,18 +82,52 @@ func (s *Service) Create(ctx context.Context, w http.ResponseWriter, user, provi
 	for range 8 {
 		version, err := s.Directory.Revision(ctx)
 		if err != nil {
-			return Session{}, err
+			return Session{}, nil, err
 		}
 		row, err := s.Store.Get(ctx, "users", user)
 		if err != nil {
-			return Session{}, err
+			return Session{}, nil, err
 		}
 		u, err := storage.Decode[identity.User](row)
 		if err != nil {
-			return Session{}, err
+			return Session{}, nil, err
 		}
 		if u.Disabled {
-			return Session{}, ErrUnauthenticated
+			return Session{}, nil, ErrUnauthenticated
+		}
+		mustChange := false
+		localModeRevision := int64(0)
+		if credentialRevision > 0 {
+			mode, err := s.Store.Get(ctx, "local-auth-mode", "installation")
+			if errors.Is(err, storage.ErrNotFound) {
+				return Session{}, nil, ErrUnauthenticated
+			}
+			if err != nil {
+				return Session{}, nil, err
+			}
+			state, err := storage.Decode[identity.LocalAuthMode](mode)
+			if err != nil {
+				return Session{}, nil, err
+			}
+			if !state.Enabled {
+				return Session{}, nil, ErrUnauthenticated
+			}
+			localModeRevision = mode.Revision
+			credential, err := s.Store.Get(ctx, "local-credentials", user)
+			if errors.Is(err, storage.ErrNotFound) {
+				return Session{}, nil, ErrUnauthenticated
+			}
+			if err != nil {
+				return Session{}, nil, err
+			}
+			value, err := storage.Decode[identity.LocalCredential](credential)
+			if err != nil {
+				return Session{}, nil, err
+			}
+			if value.Disabled || !passwords.ValidHash(value.Hash) || value.UserID != user || credential.Revision != credentialRevision {
+				return Session{}, nil, ErrUnauthenticated
+			}
+			mustChange = value.MustChange
 		}
 		now := time.Now().UTC()
 		until := authUntil
@@ -78,25 +135,39 @@ func (s *Service) Create(ctx context.Context, w http.ResponseWriter, user, provi
 			until = now.Add(lifetime)
 		}
 		token := Random()
-		v := Session{ID: Digest(token), UserID: user, Provider: provider, UserEpoch: u.SessionEpoch, CSRF: Random(), CreatedAt: now, LastSeen: now, ExpiresAt: now.Add(lifetime), AuthenticationUntil: until}
+		method := ""
+		if credentialRevision > 0 {
+			method = "password"
+		}
+		v := Session{LocalModeRevision: localModeRevision, AuthenticationMethod: method, ID: Digest(token), UserID: user, Provider: provider, CredentialRevision: credentialRevision, MustChangePassword: mustChange, UserEpoch: u.SessionEpoch, CSRF: Random(), CreatedAt: now, LastSeen: now, ExpiresAt: now.Add(lifetime), AuthenticationUntil: until}
 		c, err := storage.Put("sessions", v.ID, "", 0, v)
 		if err != nil {
-			return Session{}, err
+			return Session{}, nil, err
 		}
 		u.LastSignIn = &now
 		profile, err := storage.Put("users", user, "", row.Revision, u)
 		if err != nil {
-			return Session{}, err
+			return Session{}, nil, err
 		}
-		if err := s.Directory.CommitAt(ctx, version, profile, c); errors.Is(err, storage.ErrConflict) {
+		changes := []storage.Change{profile, c}
+		if previous != "" {
+			prior, err := s.Store.Get(ctx, "sessions", previous)
+			if err != nil && !errors.Is(err, storage.ErrNotFound) {
+				return Session{}, nil, err
+			}
+			if prior.Revision > 0 {
+				changes = append(changes, storage.Change{Record: prior, Delete: true})
+			}
+		}
+		if err := s.Directory.CommitAt(ctx, version, changes...); errors.Is(err, storage.ErrConflict) {
 			continue
 		} else if err != nil {
-			return Session{}, err
+			return Session{}, nil, err
 		}
-		http.SetCookie(w, &http.Cookie{Name: "teststudio_session", Value: token, Path: "/", HttpOnly: true, Secure: s.Secure, SameSite: http.SameSiteLaxMode, Expires: v.ExpiresAt})
-		return v, nil
+		cookie := &http.Cookie{Name: "teststudio_session", Value: token, Path: "/", HttpOnly: true, Secure: s.Secure, SameSite: http.SameSiteLaxMode, Expires: v.ExpiresAt}
+		return v, cookie, nil
 	}
-	return Session{}, storage.ErrConflict
+	return Session{}, nil, storage.ErrConflict
 }
 
 func (s *Service) Read(ctx context.Context, r *http.Request) (Session, error) {
@@ -131,6 +202,9 @@ func (s *Service) Read(ctx context.Context, r *http.Request) (Session, error) {
 		}
 		if u.Disabled || u.SessionEpoch != v.UserEpoch {
 			return Session{}, ErrUnauthenticated
+		}
+		if err := s.checkCredential(ctx, v); err != nil {
+			return Session{}, err
 		}
 		if now.Sub(v.LastSeen) < time.Minute {
 			return v, nil
@@ -178,7 +252,48 @@ func (s *Service) Validate(ctx context.Context, id string) (Session, error) {
 	if u.Disabled || u.SessionEpoch != v.UserEpoch {
 		return Session{}, ErrUnauthenticated
 	}
+	if err := s.checkCredential(ctx, v); err != nil {
+		return Session{}, err
+	}
 	return v, nil
+}
+
+func (s *Service) checkCredential(ctx context.Context, v Session) error {
+	if v.AuthenticationMethod != "password" {
+		return nil
+	}
+	if !s.LocalAccounts {
+		return ErrUnauthenticated
+	}
+	mode, err := s.Store.Get(ctx, "local-auth-mode", "installation")
+	if errors.Is(err, storage.ErrNotFound) {
+		return ErrUnauthenticated
+	}
+	if err != nil {
+		return err
+	}
+	state, err := storage.Decode[identity.LocalAuthMode](mode)
+	if err != nil {
+		return err
+	}
+	if !state.Enabled || v.LocalModeRevision < 1 || mode.Revision != v.LocalModeRevision {
+		return ErrUnauthenticated
+	}
+	row, err := s.Store.Get(ctx, "local-credentials", v.UserID)
+	if errors.Is(err, storage.ErrNotFound) {
+		return ErrUnauthenticated
+	}
+	if err != nil {
+		return err
+	}
+	c, err := storage.Decode[identity.LocalCredential](row)
+	if err != nil {
+		return err
+	}
+	if c.Disabled || !passwords.ValidHash(c.Hash) || c.UserID != v.UserID || v.CredentialRevision < 1 || row.Revision != v.CredentialRevision || c.MustChange != v.MustChangePassword {
+		return ErrUnauthenticated
+	}
+	return nil
 }
 
 func (s *Service) CheckMutation(r *http.Request, v Session) error {

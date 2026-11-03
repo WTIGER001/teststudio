@@ -16,6 +16,7 @@ type Service struct {
 	Store              *storage.Store
 	Auth               *authorization.Service
 	LocalUser          string
+	LocalAccounts      bool
 	SessionIdleTimeout time.Duration
 }
 

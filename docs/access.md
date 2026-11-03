@@ -4,7 +4,7 @@ TestStudio stores user profiles, external identity links, groups, and membership
 The permission library evaluates access. The directory does not infer project authority from an email address or group name.
 
 Users and Groups screens use the administrative APIs for profiles, account state, group metadata, local membership, and session revocation.
-Managed local credentials, identity linking, custom role management, pending project access, and the personal profile screen remain pending.
+Managed local credential screens, identity linking, custom role management, pending project access, and the personal profile screen remain pending.
 The full acceptance ledger remains in [Implementation verification](implementation.md).
 The [OpenAPI contract](../contracts/openapi.yaml) describes the implemented identity and predefined assignment routes. Other route families remain pending.
 
@@ -18,7 +18,7 @@ go run ./cmd/teststudio-client --check
 ```
 
 Run these commands from the repository root.
-The generated module contains all 30 implemented identity and access operations, including direct membership reads and scoped predefined assignments.
+The generated module contains all 37 implemented identity and access operations, including direct membership reads and scoped predefined assignments.
 The shared client adapter supplies same-origin sessions, request-forgery protection, and revision headers.
 The client escapes path identifiers and preserves explicit query values.
 Generator checks reject stale output. Nullable expiry and required fields retain their contract types.
@@ -305,3 +305,102 @@ node scripts/test-ui-utils.mjs web/src/app/features/access/assignment.utils.test
 
 The utility runner compiles temporary CommonJS files through the pinned TypeScript dependency.
 It preserves runtime relative dependencies, accepts Node built-ins, rejects framework imports, and removes temporary output after execution.
+
+## Managed local account API
+
+Enable managed local passwords with `--local-accounts`.
+This option can operate alone or alongside configured OIDC providers.
+It is separate from `--local`, which enables the explicit loopback development administrator.
+Normal password-only operation does not require `--local`.
+Use the internal user identifier for password sign-in. Email matching never selects or links an account.
+Local credential creation grants no project permissions.
+
+The public origin must use HTTPS. Loopback HTTP is available only with a loopback listener.
+A TLS-terminating proxy can forward requests to the configured private service listener.
+Use the same authentication flags on replicas that share a database.
+The database stores the enabled mode and its revision.
+Changing this mode revokes earlier password sessions, including after later reactivation.
+OIDC sessions keep their own authentication method and do not inherit password restrictions from a provider's name.
+
+Local passwords use Argon2id with independent random salts.
+The parameters use 64 MiB, three passes, four lanes, and a 32-byte output.
+These values follow the memory-constrained option in [RFC 9106](https://www.rfc-editor.org/rfc/rfc9106.html#section-7.4).
+The implementation uses the pinned [Go crypto package](https://pkg.go.dev/golang.org/x/crypto/argon2).
+At most two password operations run concurrently in each process.
+
+Passwords require 15 through 256 Unicode characters and at most 1024 UTF-8 bytes.
+NFC normalization applies before hashing. Spaces remain significant.
+Control characters, one-character repetitions, and a small built-in list of common values are rejected.
+The minimum length follows [NIST password guidance](https://pages.nist.gov/800-63-4/sp800-63b.html#passwordver).
+No composition rule requires a particular mixture of character types.
+Hashes stay in private credential records. Profile views, credential views, audit records, and application logs do not return them.
+Request bodies for password sign-in and password change have an 8 KiB limit.
+
+| Method | Route | Operation |
+| --- | --- | --- |
+| POST | `/auth/password` | Sign in with `userId` and `password`. Require the configured Origin. |
+| POST | `/auth/password/change` | Verify `currentPassword`, set `newPassword`, revoke earlier sessions, and rotate the cookie. |
+| GET | `/api/v1/me/local-credential` | Read your own redacted credential state without directory authority. |
+| GET | `/api/v1/users/{user}/local-credential` | Read redacted state with installation user read authority. |
+| PUT | `/api/v1/users/{user}/local-credential` | Provision or reset a password with installation user management authority, reason, and revision. |
+| POST | `/api/v1/users/{user}/local-credential/disable` | Disable local sign-in with a reason and current revision. |
+| POST | `/api/v1/users/{user}/local-credential/enable` | Enable an existing valid local credential with a reason and current revision. |
+
+An unconfigured credential reads as revision zero.
+Use `If-Match: 0` to provision it. Resets and state changes require the current positive revision.
+Administrator provisioning and resets always require a password change.
+Reset preserves a credential's disabled state. Enabling remains a separate action.
+Password changes, resets, and credential state changes invalidate earlier sessions for that account.
+New password sessions bind to the current credential and mode revisions.
+A reset cannot reuse password proof obtained against an earlier credential revision.
+
+A reset password creates a restricted session.
+That session can inspect its own session, change its password, or sign out.
+It cannot use ordinary project, administration, or evidence APIs.
+Password change requires the current password and the session's request-forgery token.
+Successful change updates the credential, session generation, audit record, and replacement session in one transaction.
+The server sends the new cookie only after that transaction commits.
+Existing cookie tokens cannot revive after password changes, credential restoration, or authentication mode reactivation.
+
+Sign-in errors use the same response for unknown users, incorrect passwords, and inactive accounts.
+Durable counters limit each identifier bucket to ten attempts per fifteen minutes.
+Peer buckets permit one hundred attempts in that interval.
+The counters include unknown identifiers and use secret-keyed bounded buckets.
+There are at most 4096 identifier buckets and 256 peer buckets. Raw identifiers and peer addresses are not stored in those counters.
+Peer selection uses the connection address. Forwarded headers do not override it.
+A shared proxy can aggregate clients into one peer bucket.
+Limits apply across instances and restarts. A limited response includes `Retry-After`.
+
+Enabled local credentials count as administrator sign-in paths only when managed local authentication is active.
+Last-administrator checks include local, configured OIDC, and explicit development paths.
+Credential disabling, account disabling, group changes, and role revocation use the same directory revision.
+Identity transactions lock that revision before they change individual records.
+A rejected credential change rolls back its session generation, credential state, audit, and directory revision.
+
+For initial setup, run an explicit loopback administrator with managed local accounts enabled:
+
+```sh
+go run ./cmd/teststudio --local --local-accounts
+```
+
+Use the administrative APIs to provision credentials and assign permitted roles.
+Then restart normal local operation without the development administrator:
+
+```sh
+go run ./cmd/teststudio --local-accounts
+```
+
+Keep the same database and private artifact directory.
+Operator recovery remains available through the explicit loopback recovery command.
+Include `--local-accounts` when recovery must manage local credentials.
+Managed password sign-in, password change, and credential administration screens remain pending at this backend checkpoint.
+
+Verify native local account operation and actual restarts with:
+
+```sh
+bash scripts/test-local-accounts.sh
+```
+
+The script uses fresh passwords held in memory and an isolated database.
+It preserves a redacted summary and stops every controller it starts.
+It verifies forced change, cookie rotation, ordinary restart continuity, local-only administration, mode revocation, and protected transport requirements.

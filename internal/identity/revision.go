@@ -20,7 +20,7 @@ func (d *Directory) CommitAt(ctx context.Context, version storage.Record, change
 	if err != nil {
 		return err
 	}
-	return d.Store.Commit(ctx, append(changes, c)...)
+	return d.Store.Commit(ctx, append([]storage.Change{c}, changes...)...)
 }
 
 func (d *Directory) commit(ctx context.Context, changes ...storage.Change) error {

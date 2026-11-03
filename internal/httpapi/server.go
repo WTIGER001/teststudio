@@ -16,7 +16,9 @@ import (
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/evidence"
+	"github.com/wtiger001/teststudio/internal/localauth"
 	"github.com/wtiger001/teststudio/internal/notifications"
+	"github.com/wtiger001/teststudio/internal/passwords"
 	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/schedules"
@@ -37,6 +39,7 @@ type Server struct {
 	Sessions       *sessions.Service
 	OIDC           *authoidc.Service
 	LocalUser      string
+	LocalAccounts  *localauth.Service
 	UI             string
 }
 
@@ -55,6 +58,12 @@ func JSON(w http.ResponseWriter, status int, value any) {
 
 func problem(w http.ResponseWriter, err error) {
 	status := http.StatusUnprocessableEntity
+	if errors.Is(err, passwords.ErrBusy) {
+		status = http.StatusTooManyRequests
+	}
+	if errors.Is(err, sessions.ErrPasswordChangeRequired) {
+		status = http.StatusForbidden
+	}
 	if errors.Is(err, storage.ErrNotFound) {
 		status = http.StatusNotFound
 	}
@@ -100,10 +109,18 @@ func revision(r *http.Request) (int64, error) {
 }
 
 func (s *Server) authorized(handler http.HandlerFunc) http.HandlerFunc {
+	return s.authenticated(handler, false)
+}
+
+func (s *Server) authenticated(handler http.HandlerFunc, allowPasswordChange bool) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		v, err := s.Sessions.Read(r.Context(), r)
 		if err != nil {
 			problem(w, err)
+			return
+		}
+		if v.MustChangePassword && !allowPasswordChange {
+			problem(w, sessions.ErrPasswordChangeRequired)
 			return
 		}
 		if r.Method != "GET" && r.Method != "HEAD" {
@@ -126,6 +143,7 @@ func (s *Server) Handler() http.Handler {
 		JSON(w, 200, map[string]string{"status": "up", "service": "teststudio"})
 	})
 	s.authRoutes(mux)
+	s.localAccountRoutes(mux)
 	s.accessRoutes(mux)
 	s.assignmentRoutes(mux)
 	s.projectRoutes(mux)

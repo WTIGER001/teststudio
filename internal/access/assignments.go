@@ -166,7 +166,7 @@ func (s *Service) changeAssignment(ctx context.Context, actor, project string, d
 	}
 	var result AssignmentRecord
 	err := s.Auth.WithAssignmentTransaction(ctx, func(auth *authorization.Service) error {
-		bound := &Service{Store: auth.Directory.Store, Auth: auth, LocalUser: s.LocalUser, SessionIdleTimeout: s.SessionIdleTimeout}
+		bound := &Service{Store: auth.Directory.Store, Auth: auth, LocalUser: s.LocalUser, LocalAccounts: s.LocalAccounts, SessionIdleTimeout: s.SessionIdleTimeout}
 		projectRow, err := bound.assignmentScope(ctx, actor, project, "members.manage")
 		if err != nil {
 			return err
