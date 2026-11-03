@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"slices"
@@ -26,6 +27,7 @@ import (
 	"github.com/wtiger001/teststudio/adapters/notifications/webhook"
 	permissionpg "github.com/wtiger001/teststudio/adapters/permissions/postgres"
 	permissionsqlite "github.com/wtiger001/teststudio/adapters/permissions/sqlite"
+	recordinglocal "github.com/wtiger001/teststudio/adapters/recording/localplaywright"
 	localsecrets "github.com/wtiger001/teststudio/adapters/secrets/local"
 	githubsource "github.com/wtiger001/teststudio/adapters/sources/github"
 	"github.com/wtiger001/teststudio/internal/authorization"
@@ -39,6 +41,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/notifications"
 	"github.com/wtiger001/teststudio/internal/preparation"
 	"github.com/wtiger001/teststudio/internal/projects"
+	"github.com/wtiger001/teststudio/internal/recording"
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/schedules"
 	"github.com/wtiger001/teststudio/internal/sessions"
@@ -77,7 +80,13 @@ func run() error {
 	oidcSecretRefs := flag.String("oidc-secret-refs", "", "Comma-separated server credential references approved for OIDC provider configuration")
 	bootstrapIssuer := flag.String("bootstrap-issuer", "", "OIDC issuer for the initial installation administrator")
 	bootstrapSubject := flag.String("bootstrap-subject", "", "Exact OIDC subject for the initial installation administrator")
+	recordingCLI := flag.String("recording-cli", "", "Trusted installed Playwright CLI path; enables native desktop recording with --local")
+	recordingHelper := flag.String("recording-helper", "scripts/record-browser.mjs", "Trusted desktop recording helper script")
+	recordingDirectory := flag.String("recording-directory", ".data/recordings", "Private local browser recording directory")
 	flag.Parse()
+	if *recordingCLI != "" && !*local {
+		return errors.New("native browser recording requires explicit loopback-only local mode")
+	}
 	if *recoverLocal && !*local {
 		return errors.New("recover-local-admin requires explicit loopback-only local mode")
 	}
@@ -236,7 +245,20 @@ func run() error {
 	scheduleService := &schedules.Service{Store: db, Auth: auth, Runs: runService, RepositorySources: sourceService}
 	notificationService := &notifications.Service{Store: db, Auth: auth, Secrets: secretProvider, Sender: &webhook.Sender{}, Origin: *public}
 	runService.Completion = notificationService
-	api := &httpapi.Server{Sources: sourceService, Store: db, Auth: auth, Projects: &projects.Service{Store: db, Auth: auth}, Catalog: catalogService, Runs: runService, Schedules: scheduleService, Notifications: notificationService, Evidence: evidenceService, ArtifactOrigin: *artifactOrigin, Sessions: sessionService, OIDC: oidc, LocalUser: localUser, UI: *ui}
+	recordingService := &recording.Service{Store: db, Auth: auth}
+	if *recordingCLI != "" {
+		node, err := exec.LookPath("node")
+		if err != nil {
+			return errors.New("native browser recording requires Node.js")
+		}
+		driver, err := recordinglocal.New(ctx, node, *recordingCLI, *recordingHelper, *recordingDirectory)
+		if err != nil {
+			return err
+		}
+		defer driver.Close()
+		recordingService.Driver = driver
+	}
+	api := &httpapi.Server{Recordings: recordingService, Sources: sourceService, Store: db, Auth: auth, Projects: &projects.Service{Store: db, Auth: auth}, Catalog: catalogService, Runs: runService, Schedules: scheduleService, Notifications: notificationService, Evidence: evidenceService, ArtifactOrigin: *artifactOrigin, Sessions: sessionService, OIDC: oidc, LocalUser: localUser, UI: *ui}
 	if *localAccounts {
 		api.LocalAccounts, err = localauth.New(ctx, sessionService)
 		if err != nil {
@@ -259,6 +281,7 @@ func run() error {
 	defer artifactListener.Close()
 	workerContext, cancelWorkers := context.WithCancel(ctx)
 	workersDone := runService.Start(workerContext)
+	recordingMaintenanceDone := recordingService.StartMaintenance(workerContext)
 	cliMaintenanceDone := (&cliauth.Service{Sessions: sessionService}).StartMaintenance(workerContext)
 	maintenanceDone := evidenceService.StartMaintenance(workerContext, 5*time.Second)
 	sourceMaintenanceDone := sourceService.StartMaintenance(workerContext, 5*time.Second)
@@ -276,6 +299,7 @@ func run() error {
 		cancelWorkers()
 		<-workersDone
 		<-cliMaintenanceDone
+		<-recordingMaintenanceDone
 		<-maintenanceDone
 		<-sourceMaintenanceDone
 		if preparationDone != nil {

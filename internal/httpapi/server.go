@@ -20,6 +20,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/notifications"
 	"github.com/wtiger001/teststudio/internal/passwords"
 	"github.com/wtiger001/teststudio/internal/projects"
+	"github.com/wtiger001/teststudio/internal/recording"
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/schedules"
 	"github.com/wtiger001/teststudio/internal/sessions"
@@ -28,6 +29,7 @@ import (
 )
 
 type Server struct {
+	Recordings     *recording.Service
 	Sources        *sources.Service
 	Store          *storage.Store
 	Auth           *authorization.Service
@@ -160,6 +162,7 @@ func (s *Server) Handler() http.Handler {
 	s.catalogTransferRoutes(mux)
 	s.savedSelectionRoutes(mux)
 	s.sourceRoutes(mux)
+	s.recordingRoutes(mux)
 	s.runRoutes(mux)
 	s.scheduleRoutes(mux)
 	s.notificationRoutes(mux)

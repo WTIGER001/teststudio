@@ -1,4 +1,3 @@
-import { TimingPolicyEditorComponent } from '../timing/timing-policy-editor.component'
 import { TimingPolicyEditorService } from '../timing/timing-policy-editor.service'
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
@@ -14,17 +13,18 @@ import { CatalogBulkMetadataService } from './catalog-bulk-metadata.service'
 import { CatalogSavedSelectionsComponent } from './catalog-saved-selections.component'
 import { CatalogSavedSelectionsService } from './catalog-saved-selections.service'
 import { CatalogTransferComponent } from './catalog-transfer.component'
-import { HTTPCheckEditorComponent } from './http-check-editor.component'
 import { HTTPCheckEditorService } from './http-check-editor.service'
+import { CatalogTestEditorService } from './catalog-test-editor.service'
+import { CatalogTestFormComponent } from './catalog-test-form.component'
 
 @Component({
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, RouterLink, CatalogEntryComponent, CatalogPlanComponent, CatalogBulkComponent, CatalogTransferComponent, TimingPolicyEditorComponent, HTTPCheckEditorComponent, CatalogSavedSelectionsComponent],
-  providers: [HTTPCheckEditorService, TimingPolicyEditorService, CatalogService, CatalogEntryService, CatalogPlanService, CatalogSelectionService, CatalogBulkMetadataService, CatalogSavedSelectionsService],
+  imports: [FormsModule, ReactiveFormsModule, RouterLink, CatalogEntryComponent, CatalogPlanComponent, CatalogBulkComponent, CatalogTransferComponent, CatalogSavedSelectionsComponent, CatalogTestFormComponent],
+  providers: [CatalogTestEditorService, HTTPCheckEditorService, TimingPolicyEditorService, CatalogService, CatalogEntryService, CatalogPlanService, CatalogSelectionService, CatalogBulkMetadataService, CatalogSavedSelectionsService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Test catalog</h1><p class="muted">Know what you test. Keep every release accountable.</p></div>
-      @if (service.workspace.can('catalog.create')) { <button class="button primary" type="button" (click)="service.create()" [disabled]="service.suites().length === 0">+ Create test</button> }
+      @if (service.workspace.can('catalog.create')) { <a class="button primary" [routerLink]="['/projects', service.projectId(), 'tests', 'new']" [queryParams]="{ suite: service.suiteFilter() || undefined }">+ Create test</a> }
     </div>
     <section class="metrics" aria-label="Catalog summary">
       <article class="metric"><span class="eyebrow">Catalog entries</span><strong>{{ service.counts().total }}</strong><span class="small muted">Across this project</span></article>
@@ -40,20 +40,7 @@ import { HTTPCheckEditorService } from './http-check-editor.service'
       <section class="panel editor-panel" aria-labelledby="test-editor-title">
         <div class="section-top"><h2 id="test-editor-title">{{ service.editing() ? 'Edit test' : 'Create HTTPS check' }}</h2><button class="button subtle" type="button" (click)="service.editorOpen.set(false)">Close editor</button></div>
         @if (service.editing()?.data?.definitionSourceId) { <p class="notice">The registered source owns the executable definition. Edit its metadata here and use Sources to update its code or selectors.</p> }
-        <form [formGroup]="service.form" (ngSubmit)="service.save()">
-          <div class="form-grid">
-            <div class="field"><label for="test-suite">Suite</label><select id="test-suite" formControlName="suite" required>@for (suite of service.suites(); track suite.id) { <option [value]="suite.id">{{ suite.data.name }}</option> }</select></div>
-            <div class="field"><label for="test-id">Permanent identifier</label><input id="test-id" formControlName="id" required pattern="[A-Za-z0-9](?:[A-Za-z0-9._]|-){0,127}" placeholder="HEALTH-001"></div>
-            <div class="field"><label for="test-title">Title</label><input id="test-title" formControlName="title" required></div>
-            <div class="field"><label for="test-category">Category</label><input id="test-category" formControlName="category" required></div>
-            <div class="field"><label for="test-timeout">Catalog timeout ceiling (seconds)</label><input id="test-timeout" type="number" formControlName="timeout" min="1" max="3600" step="1" required><small>Adaptive timeouts cannot exceed this ceiling.</small></div>
-            <div class="field"><label for="test-safety">Production-safety label</label><select id="test-safety" formControlName="safety"><option value="needs-review">Needs review</option><option value="safe">Safe</option><option value="unsafe">Unsafe</option></select></div>
-            <div class="field"><label for="test-rationale">Safety rationale</label><textarea id="test-rationale" formControlName="rationale" rows="2" required placeholder="Describe requests, side effects, and required conditions."></textarea></div>
-          </div>
-          @if (service.editingHTTP()) { <ts-http-check-editor /> }
-          <ts-timing-policy-editor />
-          <button class="button primary" type="submit" [disabled]="service.saving() || service.form.invalid || !service.timingEditor.valid() || (service.editingHTTP() && !service.checkEditor.valid())">{{ service.saving() ? 'Saving…' : 'Save draft changes' }}</button>
-        </form>
+        <ts-catalog-test-form (saved)="service.afterEdit()" />
       </section>
     }
     <section class="panel catalog-panel" aria-labelledby="catalog-title">

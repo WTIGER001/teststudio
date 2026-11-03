@@ -19,9 +19,10 @@ test('Page help, keyboard access, and responsive drawer', { tag: '@STUDIO-HELP-0
 
   await test.step('Keep catalog edits and keyboard focus when help closes', async () => {
     await page.goto(`/projects/${project}/catalog`)
-    await page.getByRole('button', { name: '+ Create test' }).click()
+    await page.getByRole('link', { name: '+ Create test' }).click()
+    await page.getByRole('link', { name: 'HTTPS probe', exact: true }).click()
     await page.getByLabel('Title', { exact: true }).fill('Unsaved help check')
-    const drawer = await openHelp(page, 'Test catalog')
+    const drawer = await openHelp(page, 'Create test')
     const close = drawer.getByRole('button', { name: 'Close help' })
     await expect(close).toBeFocused()
     await page.keyboard.press('Shift+Tab')
@@ -37,6 +38,7 @@ test('Page help, keyboard access, and responsive drawer', { tag: '@STUDIO-HELP-0
   })
 
   await test.step('Follow the current page through normal navigation', async () => {
+    page.once('dialog', dialog => dialog.accept())
     await followNavigation(page, 'Your account')
     const account = await openHelp(page, 'Your account')
     await expect(account).toContainText('Password changes')

@@ -7,9 +7,8 @@ import { ApiError, ApiService, type Page, type RecordValue } from '../../core/ap
 import type { SourceUploadPreview, SourceUploadRecord } from '../../core/generated/access.types'
 import { SessionService } from '../../core/session.service'
 import { WorkspaceService } from '../../core/workspace.service'
+import type { Suite } from '../configuration/configuration.service'
 import { sourceFormat } from './source.utils'
-
-interface Suite { id: string; name: string; archived: boolean }
 
 @Injectable()
 export class SourcesService {

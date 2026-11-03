@@ -26,7 +26,8 @@ test('Declarative HTTP assertions, HEAD edits, and retained diagnostics', { tag:
 
     await test.step('Create a structured GET check and reject invalid fields locally', async () => {
       await page.goto(`/projects/${project}/catalog`)
-      await page.getByRole('button', { name: '+ Create test', exact: true }).click()
+      await page.getByRole('link', { name: '+ Create test', exact: true }).click()
+      await page.getByRole('link', { name: 'HTTPS probe', exact: true }).click()
       await page.getByLabel('Permanent identifier', { exact: true }).fill('HTTP-ASSERT-1')
       await page.getByLabel('Title', { exact: true }).fill('Structured health')
       await page.getByLabel('Relative path', { exact: true }).fill('/health')

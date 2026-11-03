@@ -19,7 +19,7 @@ function fingerprint(roots, omitGoTests = false, omitTypeScriptTests = false) {
     if (!fs.existsSync(filename)) return
     const stat = fs.lstatSync(filename)
     if (stat.isSymbolicLink()) throw new Error(`Self-test build input must not be a symbolic link: ${filename}`)
-    if (stat.isDirectory()) { for (const name of fs.readdirSync(filename).sort()) visit(path.join(filename, name)); return }
+    if (stat.isDirectory()) { if (path.basename(filename) === 'node_modules') return; for (const name of fs.readdirSync(filename).sort()) visit(path.join(filename, name)); return }
     if (!stat.isFile() || omitGoTests && filename.endsWith('_test.go') || omitTypeScriptTests && /\.(?:test|spec)\.ts$/.test(filename)) return
     hash.update(filename + '\0'); hash.update(fs.readFileSync(filename)); hash.update('\0')
   }

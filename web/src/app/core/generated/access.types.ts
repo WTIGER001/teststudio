@@ -1,10 +1,15 @@
-export const accessContractVersion = "0.23.0"
+export const accessContractVersion = "0.25.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
 export type AssignmentDefinition = { "principalId": string; "principalKind": "user" | "group"; "reason": string; "roleId": string }
 export type AssignmentPage = { "cursor"?: string; "items": (AssignmentRecord)[]; "partial": boolean }
 export type AssignmentRecord = { "data": Assignment; "id": string; "projectId"?: string; "revision": number; "updatedAt"?: string }
+export type BrowserRecording = { "actor": string; "code"?: string; "createdAt": string; "deadlineAt": string; "error"?: string; "id": string; "projectId": string; "state": string; "suiteId": string; "testId": string; "title": string; "url": string }
+export type BrowserRecordingInput = { "id": string; "testId": string; "title": string; "url": string }
+export type BrowserRecordingOptions = { "durationLimitSeconds": number; "enabled": boolean; "mode": string }
+export type BrowserRecordingPage = { "cursor"?: string; "items": (BrowserRecordingRecord)[] }
+export type BrowserRecordingRecord = { "data": BrowserRecording; "id": string; "revision": number; "updatedAt": string }
 export type CLIConfirmation = { "approve": boolean; "clientName": string; "code": string }
 export type CLIExchange = { "session"?: CLIGrant; "state": string }
 export type CLIGrant = { "cookie": string; "csrfToken": string; "expiresAt": string }
@@ -15,7 +20,7 @@ export type CatalogBulkMetadata = { "category"?: string | null; "conditions"?: s
 export type CatalogBulkRequest = { "action": "metadata" | "disable" | "enable" | "archive" | "restore"; "metadata"?: CatalogBulkMetadata; "tests": (CatalogBulkTarget)[] }
 export type CatalogBulkTarget = { "id": string; "revision": number }
 export type CatalogPlanRecord = { "data": SourceCatalogImportPlan; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
-export type EditorFile = { "content": string; "path": string }
+export type EditorFile = { "content": string; "executable"?: boolean; "path": string }
 export type ExternalIdentity = { "issuer": string; "subject": string; "userId": string }
 export type ExternalIdentityPage = { "cursor"?: string; "items": (ExternalIdentityRecord)[]; "partial": boolean }
 export type ExternalIdentityRecord = { "data": ExternalIdentity; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
@@ -58,7 +63,7 @@ export type PermissionComparison = { "after": boolean; "before": boolean; "permi
 export type PermissionDefinition = { "action": string; "area": string; "description": string; "id": string; "installationOnly": boolean }
 export type PermissionExplanation = { "allowed": boolean; "canInspectOthers": boolean; "checkedAt": string; "cursor"?: string; "items": (PermissionSource)[]; "object": string; "partial": boolean; "permission": string; "permissions": (PermissionDefinition)[]; "projectId": string; "reason": "allowed" | "explicit-deny" | "no-matching-allow" | "user-disabled"; "userDisabled": boolean; "userId": string; "userName": string }
 export type PermissionSource = { "assignedRoleId"?: string; "assignedRoleName"?: string; "assignmentProject"?: string; "effect": "allow" | "deny"; "expiresAt"?: string; "grantId"?: string; "id": string; "kind": "direct" | "role"; "objectScope"?: string; "principalId"?: string; "principalKind"?: "user" | "group"; "principalName"?: string; "projectId"?: string; "restricted": boolean; "restrictedFields"?: (string)[]; "roleId"?: string; "roleName"?: string; "scopeKnown": boolean; "status": "matching" | "expired"; "teamScope"?: string }
-export type PlaywrightDraft = { "files": (EditorFile)[]; "id": string; "name": string }
+export type PlaywrightDraft = { "files": (EditorFile)[]; "id": string; "manifestPath"?: string; "name": string; "targetUrl"?: string }
 export type PlaywrightDraftPage = { "cursor"?: string; "items": (PlaywrightDraftRecord)[] }
 export type PlaywrightDraftRecord = { "data": PlaywrightDraft; "id": string; "revision": number; "updatedAt": string }
 export type PredefinedRole = { "canManage": boolean; "disabled": boolean; "id": string; "name": string; "permissions": (string)[]; "scope": "project" | "installation" }
@@ -201,6 +206,12 @@ export interface AccessRequests {
   revokeProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
   readProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string }
   changeSuiteLifecycle: { "project": string; "suite": string; "action": "archive" | "restore"; revision: number }
+  listBrowserRecordings: { "project": string; "suite": string; query?: { "cursor"?: string; "limit"?: number } }
+  startBrowserRecording: { "project": string; "suite": string; body: BrowserRecordingInput }
+  readBrowserRecordingOptions: { "project": string; "suite": string }
+  readBrowserRecording: { "project": string; "suite": string; "id": string }
+  changeBrowserRecordingState: { "project": string; "suite": string; "id": string; "action": string }
+  readBrowserRecordingSource: { "project": string; "suite": string; "id": string }
   readCatalogPlan: { "project": string; "suite": string; "id": string }
   applyCatalogPlan: { "project": string; "suite": string; "id": string; revision: number }
   readSuiteLifecycle: { "project": string; "suite": string }
@@ -225,6 +236,7 @@ export interface AccessRequests {
   readSourcePreparation: { "project": string; "suite": string; "id": string }
   downloadSourceBundle: { "project": string; "suite": string; "id": string }
   cancelSourcePreparation: { "project": string; "suite": string; "id": string; revision: number }
+  readPreparationEditorSource: { "project": string; "suite": string; "id": string }
   listSourceUploads: { "project": string; "suite": string; query?: { "limit"?: number; "cursor"?: string } }
   stageSourceUpload: { "project": string; "suite": string; body: SourceUploadInput }
   readSourceUpload: { "project": string; "suite": string; "id": string }
@@ -321,6 +333,12 @@ export interface AccessResponses {
   revokeProjectAssignment: Revoked
   readProjectAssignment: AssignmentRecord
   changeSuiteLifecycle: SuiteLifecycle
+  listBrowserRecordings: BrowserRecordingPage
+  startBrowserRecording: BrowserRecordingRecord
+  readBrowserRecordingOptions: BrowserRecordingOptions
+  readBrowserRecording: BrowserRecordingRecord
+  changeBrowserRecordingState: BrowserRecordingRecord
+  readBrowserRecordingSource: PlaywrightDraft
   readCatalogPlan: CatalogPlanRecord
   applyCatalogPlan: CatalogPlanRecord
   readSuiteLifecycle: SuiteLifecycle
@@ -345,6 +363,7 @@ export interface AccessResponses {
   readSourcePreparation: SourcePreparationRecord
   downloadSourceBundle: Blob
   cancelSourcePreparation: SourcePreparationRecord
+  readPreparationEditorSource: PlaywrightDraft
   listSourceUploads: SourceUploadPage
   stageSourceUpload: SourceUploadPreview
   readSourceUpload: SourceUploadPreview
@@ -441,6 +460,12 @@ export const accessOperations = {
   revokeProjectAssignment: { method: "DELETE", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
   readProjectAssignment: { method: "GET", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
   changeSuiteLifecycle: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/actions/{action}" },
+  listBrowserRecordings: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings" },
+  startBrowserRecording: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings" },
+  readBrowserRecordingOptions: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/options" },
+  readBrowserRecording: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}" },
+  changeBrowserRecordingState: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/actions/{action}" },
+  readBrowserRecordingSource: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/source" },
   readCatalogPlan: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/catalog-imports/{id}" },
   applyCatalogPlan: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/catalog-imports/{id}/apply" },
   readSuiteLifecycle: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/lifecycle" },
@@ -465,6 +490,7 @@ export const accessOperations = {
   readSourcePreparation: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-preparations/{id}" },
   downloadSourceBundle: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-preparations/{id}/bundle", responseType: "blob" },
   cancelSourcePreparation: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/source-preparations/{id}/cancel" },
+  readPreparationEditorSource: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-preparations/{id}/editor-source" },
   listSourceUploads: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads" },
   stageSourceUpload: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads" },
   readSourceUpload: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads/{id}" },

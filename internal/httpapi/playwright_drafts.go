@@ -8,6 +8,14 @@ import (
 )
 
 func (s *Server) playwrightDraftRoutes(m *http.ServeMux, service *sources.Service) {
+	m.HandleFunc("GET /api/v1/projects/{project}/suites/{suite}/source-preparations/{id}/editor-source", s.authorized(func(w http.ResponseWriter, r *http.Request) {
+		value, err := service.EditorSource(r.Context(), actor(r), r.PathValue("project"), r.PathValue("suite"), r.PathValue("id"))
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		JSON(w, 200, value)
+	}))
 	base := "/api/v1/projects/{project}/suites/{suite}/playwright-drafts"
 	m.HandleFunc("GET "+base+"/starter", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		if _, err := service.Drafts(r.Context(), actor(r), r.PathValue("project"), r.PathValue("suite"), "", 1); err != nil {

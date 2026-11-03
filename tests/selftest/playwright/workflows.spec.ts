@@ -20,7 +20,8 @@ test('Publish a catalog and inspect an executed check', { tag: '@STUDIO-CATALOG-
   const { project } = await api.scaffold()
   await test.step('Create and publish an HTTP test from the catalog UI', async () => {
     await page.goto(`/projects/${project}/catalog`)
-    await page.getByRole('button', { name: '+ Create test' }).click()
+    await page.getByRole('link', { name: '+ Create test' }).click()
+    await page.getByRole('link', { name: 'HTTPS probe', exact: true }).click()
     await page.getByLabel('Permanent identifier').fill('SELF-CHECK')
     await page.getByLabel('Title', { exact: true }).fill('TestStudio health')
     await page.getByLabel('Production-safety label').selectOption('safe')

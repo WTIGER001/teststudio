@@ -4,6 +4,7 @@ import (
 	"archive/zip"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"slices"
 
 	"github.com/wtiger001/teststudio/internal/catalog"
@@ -27,15 +28,10 @@ func assembleDraft(suite string, value PlaywrightDraft) ([]byte, error) {
 	if err := validateDraft(value); err != nil {
 		return nil, err
 	}
-	manifest := suitespec.Manifest{Schema: 1, Suite: suite, Type: "browser", Runner: "playwright", Applications: []string{}, ModuleRoot: ".", Tests: suitespec.Tests{Config: "playwright.config.ts", Project: "chromium"}, Catalog: "catalog.json", BuildProfile: "playwright-node"}
-	manifestBytes, err := json.Marshal(manifest)
-	if err != nil {
-		return nil, err
-	}
-	packageBytes, _ := json.Marshal(map[string]any{"name": "teststudio-editor-suite", "private": true, "type": "module", "devDependencies": map[string]string{"@playwright/test": editorPlaywrightVersion}})
-	lockBytes, _ := json.Marshal(map[string]any{"lockfileVersion": 3, "packages": map[string]any{"": map[string]any{"devDependencies": map[string]string{"@playwright/test": editorPlaywrightVersion}}, "node_modules/@playwright/test": map[string]string{"version": editorPlaywrightVersion}, "node_modules/playwright": map[string]string{"version": editorPlaywrightVersion}, "node_modules/playwright-core": map[string]string{"version": editorPlaywrightVersion}}})
 	files := slices.Clone(value.Files)
-	files = append(files, EditorFile{"teststudio-suite.json", string(manifestBytes)}, EditorFile{"package.json", string(packageBytes)}, EditorFile{"package-lock.json", string(lockBytes)})
+	if value.ManifestPath == "" {
+		files = append(files, generatedEditorFiles(suite)...)
+	}
 	slices.SortFunc(files, func(a, b EditorFile) int {
 		if a.Path < b.Path {
 			return -1
@@ -48,7 +44,12 @@ func assembleDraft(suite string, value PlaywrightDraft) ([]byte, error) {
 	var buffer bytes.Buffer
 	writer := zip.NewWriter(&buffer)
 	for _, file := range files {
-		entry, err := writer.Create(file.Path)
+		header := &zip.FileHeader{Name: file.Path, Method: zip.Deflate}
+		header.SetMode(0644)
+		if file.Executable {
+			header.SetMode(0755)
+		}
+		entry, err := writer.CreateHeader(header)
 		if err != nil {
 			return nil, err
 		}
@@ -59,8 +60,27 @@ func assembleDraft(suite string, value PlaywrightDraft) ([]byte, error) {
 	if err := writer.Close(); err != nil {
 		return nil, err
 	}
-	if _, err := sourcebundle.Validate(buffer.Bytes(), "teststudio-suite.json", suite); err != nil {
+	snapshot, err := sourcebundle.Validate(buffer.Bytes(), draftManifestPath(value), suite)
+	if err != nil {
 		return nil, err
 	}
+	if snapshot.Manifest.Runner != "playwright" || snapshot.Manifest.BuildProfile != "playwright-node" {
+		return nil, errors.New("the editor prepares only Playwright source with the offline playwright-node profile")
+	}
 	return buffer.Bytes(), nil
+}
+
+func draftManifestPath(value PlaywrightDraft) string {
+	if value.ManifestPath != "" {
+		return value.ManifestPath
+	}
+	return "teststudio-suite.json"
+}
+
+func generatedEditorFiles(suite string) []EditorFile {
+	manifest := suitespec.Manifest{Schema: 1, Suite: suite, Type: "browser", Runner: "playwright", Applications: []string{}, ModuleRoot: ".", Tests: suitespec.Tests{Config: "playwright.config.ts", Project: "chromium"}, Catalog: "catalog.json", BuildProfile: "playwright-node"}
+	manifestBytes, _ := json.Marshal(manifest)
+	packageBytes, _ := json.Marshal(map[string]any{"name": "teststudio-editor-suite", "private": true, "type": "module", "devDependencies": map[string]string{"@playwright/test": editorPlaywrightVersion}})
+	lockBytes, _ := json.Marshal(map[string]any{"lockfileVersion": 3, "packages": map[string]any{"": map[string]any{"devDependencies": map[string]string{"@playwright/test": editorPlaywrightVersion}}, "node_modules/@playwright/test": map[string]string{"version": editorPlaywrightVersion}, "node_modules/playwright": map[string]string{"version": editorPlaywrightVersion}, "node_modules/playwright-core": map[string]string{"version": editorPlaywrightVersion}}})
+	return []EditorFile{{Path: "teststudio-suite.json", Content: string(manifestBytes)}, {Path: "package.json", Content: string(packageBytes)}, {Path: "package-lock.json", Content: string(lockBytes)}}
 }

@@ -2,9 +2,10 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms'
 import { CodeEditorComponent } from './code-editor.component'
 import { PlaywrightEditorService } from './playwright-editor.service'
+import { protectedEditorFile } from './playwright-editor.utils'
 
 @Component({
-  selector: 'ts-playwright-editor', standalone: true, imports: [FormsModule, CodeEditorComponent], providers: [PlaywrightEditorService], changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'ts-playwright-editor', standalone: true, imports: [FormsModule, CodeEditorComponent], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="panel" aria-labelledby="playwright-editor-title">
       <div class="section-top"><div><h2 id="playwright-editor-title">Playwright editor</h2><p class="small muted">Write tests here. Each draft contains a complete suite workspace. TestStudio handles the source bundle.</p></div>
@@ -16,19 +17,21 @@ import { PlaywrightEditorService } from './playwright-editor.service'
       @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }
       @if (service.message()) { <p class="notice success" role="status">{{ service.message() }}</p> }
       @if (service.document(); as document) {
+        @if (document.targetUrl) { <p class="notice warning">Recorded start address: {{ document.targetUrl }}. Review and save these steps. Running recorded website tests requires environment-backed browser execution, which is not available yet.</p> }
+        @if (document.manifestPath) { <p class="notice">This imported workspace retains its source paths and package declarations. Its manifest is {{ document.manifestPath }}. The offline worker uses only the trusted runtime dependencies.</p> }
         <fieldset [disabled]="service.busy() || !service.sources.workspace.can('sources.manage')">
           <div class="section-top"><div class="field draft-name"><label for="playwright-draft-name">Draft name</label><input id="playwright-draft-name" maxlength="120" [ngModel]="document.name" (ngModelChange)="service.editName($event)"></div><span class="small muted" role="status">{{ service.sources.draftDirty() ? 'Unsaved changes' : 'Saved revision ' + service.saved()?.revision }}</span></div>
           <div class="file-actions"><label for="playwright-editor-file">File</label><select id="playwright-editor-file" [ngModel]="service.selectedPath()" (ngModelChange)="service.selectedPath.set($event)">@for (file of document.files; track file.path) { <option [value]="file.path">{{ file.path }}</option> }</select>
-            @if (service.selectedPath() !== 'catalog.json' && service.selectedPath() !== 'playwright.config.ts' && document.files.length > 1) { <button type="button" class="button small secondary" (click)="service.removeFile(service.selectedPath())">Remove selected file</button> }
+            @if (!protectedFile(document, service.selectedPath())) { <button type="button" class="button small secondary" (click)="service.removeFile(service.selectedPath())">Remove selected file</button> }
           </div>
-          <p id="playwright-code-hint" class="small muted editor-hint">Edit the .spec.ts file to change browser steps and assertions. Keep each test tag in sync with its catalog.json selector. Edit the catalog for test IDs, titles, timeouts, and capture settings. Ctrl/Cmd+F searches; Tab moves focus.</p>
+          <p id="playwright-code-hint" class="small muted editor-hint">Edit a test file to change browser steps and assertions. Keep each test tag in sync with its catalog selector. Edit the catalog for test IDs, titles, timeouts, and capture settings. Ctrl/Cmd+F searches; Tab moves focus.</p>
           @for (file of document.files; track file.path) {
             @if (file.path === service.selectedPath()) { <ts-code-editor [path]="file.path" [content]="file.content" [disabled]="service.busy() || !service.sources.workspace.can('sources.manage')" (changed)="service.editFile(file.path, $event)" /> }
           }
-          <details class="add-file"><summary>Add a source or helper file</summary><div class="file-actions"><label for="playwright-new-file">New file path</label><input id="playwright-new-file" placeholder="checks/another.spec.ts" [ngModel]="newPath()" (ngModelChange)="newPath.set($event)"><button type="button" class="button secondary" (click)="addFile()">Add file</button></div><p class="small muted">Up to 50 files and 1 MiB of text. TestStudio generates the manifest and pinned package files.</p></details>
+          <details class="add-file"><summary>Add a source or helper file</summary><div class="file-actions"><label for="playwright-new-file">New file path</label><input id="playwright-new-file" placeholder="checks/another.spec.ts" [ngModel]="newPath()" (ngModelChange)="newPath.set($event)"><button type="button" class="button secondary" (click)="addFile()">Add file</button></div><p class="small muted">Up to 50 files and 1 MiB of text. New starter drafts use generated package files. Imported workspaces retain their own declarations.</p></details>
           <div class="row-actions wrap-actions">
             <button type="button" class="button primary" [disabled]="!service.sources.draftDirty() || !document.name.trim()" (click)="service.save()">Save Playwright draft</button>
-            <button type="button" class="button secondary" [disabled]="!service.saved() || service.sources.draftDirty() || service.preparation.busy() || !service.preparation.bundleRunners().includes('playwright') || !service.sources.workspace.can('catalog.import')" (click)="service.prepare()">Validate and prepare draft</button>
+            <button type="button" class="button secondary" [disabled]="!!document.targetUrl || !service.saved() || service.sources.draftDirty() || service.preparation.busy() || !service.preparation.bundleRunners().includes('playwright') || !service.sources.workspace.can('catalog.import')" (click)="service.prepare()">Validate and prepare draft</button>
             @if (service.sources.draftDirty()) { <button type="button" class="button secondary" (click)="service.discard()">Discard local changes</button> }
           </div>
         </fieldset>
@@ -45,5 +48,6 @@ import { PlaywrightEditorService } from './playwright-editor.service'
 export class PlaywrightEditorComponent {
   readonly service = inject(PlaywrightEditorService)
   readonly newPath = signal('')
+  readonly protectedFile = protectedEditorFile
   addFile(): void { if (this.service.addFile(this.newPath())) this.newPath.set('') }
 }

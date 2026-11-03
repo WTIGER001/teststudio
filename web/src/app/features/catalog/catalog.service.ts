@@ -1,14 +1,12 @@
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
-import { FormControl, FormGroup, Validators } from '@angular/forms'
 import { ActivatedRoute } from '@angular/router'
 import { ApiService, type Page, type RecordValue } from '../../core/api.service'
 import { WorkspaceService } from '../../core/workspace.service'
 import type { Suite } from '../configuration/configuration.service'
-import type { CatalogItem, Draft, Issue, TestDefinition } from './catalog.models'
-import { TimingPolicyEditorService } from '../timing/timing-policy-editor.service'
+import type { CatalogItem, Draft, Issue } from './catalog.models'
 import { catalogCounts, catalogTypes, filterCatalog } from './catalog.utils'
-import { HTTPCheckEditorService } from './http-check-editor.service'
+import { CatalogTestEditorService } from './catalog-test-editor.service'
 
 @Injectable()
 export class CatalogService {
@@ -16,8 +14,9 @@ export class CatalogService {
   private readonly route = inject(ActivatedRoute)
   private readonly destroy = inject(DestroyRef)
   readonly workspace = inject(WorkspaceService)
-  readonly timingEditor = inject(TimingPolicyEditorService)
-  readonly checkEditor = inject(HTTPCheckEditorService)
+  readonly testEditor = inject(CatalogTestEditorService)
+  readonly timingEditor = this.testEditor.timingEditor
+  readonly checkEditor = this.testEditor.checkEditor
   readonly projectId = signal('')
   readonly items = signal<CatalogItem[]>([])
   readonly suites = signal<RecordValue<Suite>[]>([])
@@ -32,28 +31,20 @@ export class CatalogService {
   readonly types = computed(() => catalogTypes(this.items()))
   readonly visible = computed(() => filterCatalog(this.items(), this.query(), this.state(), this.suiteFilter(), this.typeFilter()))
   readonly counts = computed(() => catalogCounts(this.items()))
-  readonly editorOpen = signal(false)
-  readonly editing = signal<CatalogItem | null>(null)
-  readonly editingHTTP = computed(() => !this.editing() || this.editing()?.data.runner === 'http')
+  readonly editorOpen = this.testEditor.editorOpen
+  readonly editing = this.testEditor.editing
+  readonly editingHTTP = this.testEditor.editingHTTP
   readonly releaseSuite = signal('')
   readonly draft = signal<RecordValue<Draft> | null>(null)
   readonly issues = signal<Issue[]>([])
-  readonly form = new FormGroup({
-    suite: new FormControl('', { nonNullable: true, validators: Validators.required }),
-    id: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/)] }),
-    title: new FormControl('', { nonNullable: true, validators: Validators.required }),
-    category: new FormControl('Availability', { nonNullable: true, validators: Validators.required }),
-    timeout: new FormControl(10, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(3600), Validators.pattern(/^\d+$/)] }),
-    safety: new FormControl('needs-review', { nonNullable: true }),
-    rationale: new FormControl('', { nonNullable: true, validators: Validators.required })
-  })
+  readonly form = this.testEditor.form
   private generation = 0
   private publicationKey = ''
 
   constructor() {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => {
       this.projectId.set(params.get('projectId') ?? ''); this.suiteFilter.set(''); this.typeFilter.set(''); this.releaseSuite.set(''); this.draft.set(null)
-      this.editorOpen.set(false); this.editing.set(null); this.items.set([]); this.suites.set([]); this.success.set('')
+      this.editorOpen.set(false); this.editing.set(null); this.items.set([]); this.suites.set([]); this.success.set(this.route.snapshot.queryParamMap.has('created') ? 'Draft changes saved. Publish a release to use the updated definition.' : '')
       void this.load()
     })
   }
@@ -74,44 +65,13 @@ export class CatalogService {
     finally { if (generation === this.generation) this.loading.set(false) }
   }
 
-  create(): void {
-    this.editing.set(null)
-    this.timingEditor.reset()
-    this.checkEditor.reset()
-    this.form.reset({ suite: this.suites()[0]?.id ?? '', id: '', title: '', category: 'Availability', timeout: 10, safety: 'needs-review', rationale: '' })
-    this.form.controls.id.enable(); this.form.controls.suite.enable()
-    this.editorOpen.set(true); this.error.set(''); this.success.set('')
-  }
-
   edit(item: CatalogItem): void {
-    this.editing.set(item)
-    this.timingEditor.reset(item.data.timing)
-    this.checkEditor.reset(item.data.check)
-    this.form.reset({ suite: item.suiteId, id: item.id, title: item.data.title, category: item.data.category, timeout: item.data.timeoutSeconds, safety: item.data.safety, rationale: item.data.rationale })
-    this.form.controls.id.disable(); this.form.controls.suite.disable()
-    this.editorOpen.set(true); this.error.set(''); this.success.set('')
+    this.testEditor.configure(this.projectId(), this.suites()); this.testEditor.edit(item); this.error.set(''); this.success.set('')
   }
 
-  async save(): Promise<void> {
-    this.form.markAllAsTouched()
-    this.checkEditor.form.markAllAsTouched()
-    if (this.form.invalid || !this.timingEditor.valid() || (this.editingHTTP() && !this.checkEditor.valid()) || this.saving()) return
-    this.saving.set(true); this.error.set(''); this.success.set('')
-    try {
-      const value = this.form.getRawValue()
-      const existing = this.editing()
-      const test: TestDefinition = {
-        ...(existing?.data ?? { description: '', tags: [], dependencies: [], requiredBindings: [], type: 'https', runner: 'http', state: 'enabled', timeoutSeconds: 10 }),
-        id: value.id, title: value.title, category: value.category, timeoutSeconds: value.timeout, timing: this.timingEditor.policy(), safety: value.safety, rationale: value.rationale
-      }
-      if (this.editingHTTP()) test.check = { ...test.check, ...this.checkEditor.check()! }
-      const base = `/api/v1/projects/${this.projectId()}/suites/${value.suite}/tests`
-      await this.api.request(existing ? `${base}/${value.id}` : base, existing ? 'PUT' : 'POST', test, existing?.revision)
-      this.editorOpen.set(false); this.success.set('Draft changes saved. Publish a release to use the updated definition.')
-      this.draft.set(null)
-      await this.load()
-    } catch (error) { this.error.set(error instanceof Error ? error.message : 'The test could not be saved.') }
-    finally { this.saving.set(false) }
+  async afterEdit(): Promise<void> {
+    this.success.set('Draft changes saved. Publish a release to use the updated definition.'); this.draft.set(null)
+    await this.load()
   }
 
   async action(item: CatalogItem, action: 'disable' | 'enable' | 'archive' | 'restore'): Promise<void> {

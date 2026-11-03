@@ -29,7 +29,14 @@ The user also requests in-app Playwright authoring during the walkthrough.
 The Sources page now provides saved browser workspaces and the common preparation, review, and publication flow.
 The editor generates package and manifest files. It keeps source editing separate from catalog metadata management.
 See playwright-editor.md for the workflow, API, revision rules, and current isolated profile limits.
-Environment-backed website execution and browser recording remain open work.
+The user chooses browser recording first and requests a dedicated typed creation route.
+Create test now opens a chooser for Playwright browser tests, HTTPS probes, and Go suites.
+Playwright creation leads with native recording and reviewed generated source.
+The demo enables the local desktop recorder. Hosted recording needs a separate companion or streamed browser.
+See create-tests.md and browser-recording.md for the implemented flows and limits.
+Retained Playwright bundles can also open as editable source copies without changing their original releases.
+The next priority is environment-backed execution for recorded website journeys.
+The current isolated profile deliberately blocks recorded website drafts. That execution work remains open.
 
 Item **01** now passes a build from an isolated copy of the current source tree.
 Go uses no workspace or local module replacements. A clean offline npm installation and Angular build also pass.

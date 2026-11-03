@@ -63,8 +63,12 @@ func TestPlaywrightEditorDraftRevisionAndImmutablePreparation(t *testing.T) {
 	if _, err := s.Draft(t.Context(), "admin", "beta", "health", value.ID); !errors.Is(err, storage.ErrNotFound) {
 		t.Fatal("draft crossed project boundary", err)
 	}
-	if _, err := s.SaveDraft(t.Context(), "admin", "beta", "health", value, 0); err == nil {
-		t.Fatal("target environment suite accepted isolated editor")
+	targetDraft, err := s.SaveDraft(t.Context(), "admin", "beta", "health", value, 0)
+	if err != nil {
+		t.Fatal("target suite could not retain authored source", err)
+	}
+	if _, err := s.PrepareDraft(t.Context(), "admin", "beta", "health", value.ID, "target", targetDraft.Revision); err == nil {
+		t.Fatal("target suite used the isolated preparation profile")
 	}
 	if _, err := s.PrepareDraft(t.Context(), "admin", "alpha", "health", value.ID, "once", updated.Revision); err == nil {
 		t.Fatal("idempotency key accepted a different draft revision")

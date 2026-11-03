@@ -26,6 +26,14 @@ An existing installation refuses to start if another process uses its saved port
 Open the application address and select **Open local workspace**.
 Open **TestStudio local demo**.
 
+## Create a test
+
+Select Create test from the catalog. Choose Playwright browser test, HTTPS probe, or Go suite.
+The dedicated creation page shows only the selected type's workflow.
+The local demo enables native Playwright recording on this computer.
+Recorded journeys can be reviewed and saved. Website execution remains pending.
+See create-tests.md and browser-recording.md for details.
+
 ## Walkthrough
 
 1. Open **Test catalog**. Inspect the three availability checks and the browser check.

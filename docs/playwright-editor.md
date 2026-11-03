@@ -1,8 +1,19 @@
 # Playwright editor
 
 Open Sources and choose a destination suite. Select New Playwright draft.
-The suite must remain active and must not require a target environment.
+Drafts require an active suite. The current isolated preparation profile also requires a suite without a target environment.
 Each draft contains the complete source workspace for one suite.
+
+## Open retained source
+
+Inspect a Playwright source preparation and select Edit a copy in Playwright.
+The editor opens an unsaved copy of the retained source context.
+It preserves nested manifest paths, package declarations, helper files, and executable flags.
+Save the copy before preparing it. The original bundle, published releases, and existing runs remain unchanged.
+The application does not change a registered repository through this copy.
+Binary files and workspaces above the editor limits produce an explicit error.
+Continue using the complete ZIP or repository workflow for those sources.
+Runtime provenance is generated again when the copied source is prepared.
 
 ## Write and save
 
@@ -27,8 +38,9 @@ Copy useful local edits before discarding them. Reopen the saved draft to load t
 ## Prepare and publish
 
 Select Validate and prepare draft after saving.
-TestStudio generates the suite manifest and exact package declarations for the trusted Playwright runtime.
-The current runtime uses Playwright 1.64.1. Users do not upload package files through this editor.
+New starter drafts use a generated suite manifest and exact package declarations for the trusted Playwright runtime.
+Imported workspaces retain their declared manifest and package files.
+The current runtime uses Playwright 1.64.1. Imported package declarations must still match the offline runtime profile.
 The API validates the workspace structure and snapshots its exact saved revision.
 A separate worker performs normal bundle assembly and browser discovery.
 Syntax errors, import errors, missing tests, and tag mismatches appear in preparation diagnostics.
@@ -46,9 +58,10 @@ Start execution separately from Test runs.
 The editor uses the existing offline, isolated browser profile.
 It has no network access to external websites or configured application environments.
 The starter renders a local HTML fixture inside Chromium and attaches a screenshot.
-Environment-backed website execution and browser recording remain separate work.
+[Browser recording](browser-recording.md) captures website actions and creates reviewed source drafts.
+Environment-backed website execution remains pending. Recorded website drafts cannot use the isolated preparation profile.
 The editor supports 50 text files, 256 KiB per file, and 1 MiB of source text per draft.
-Paths must remain relative, unique, and outside generated package and manifest files.
+Paths must remain relative and unique. New starter drafts keep generated package and manifest paths reserved.
 ZIP uploads and GitHub sources remain available for larger source contexts and normal repository development.
 
 ## API
@@ -66,3 +79,6 @@ All routes use /api/v1/projects/{project}/suites/{suite}/playwright-drafts.
 Mutations require managed sessions, Origin, and request-forgery protection.
 Preparation rechecks source authority, catalog import authority, suite state, and the saved revision in one transaction.
 It uses the same isolated source preparation and immutable release contracts as ZIP uploads.
+
+GET /api/v1/projects/{project}/suites/{suite}/source-preparations/{id}/editor-source opens a bounded text copy of retained Playwright source.
+Current source and repository read checks still protect that copy.

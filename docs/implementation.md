@@ -74,6 +74,51 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Dedicated test creation, native recording, and retained source editing
+
+Create test now opens /projects/{project}/tests/new instead of expanding the catalog page.
+The chooser offers Playwright browser tests, HTTPS probes, and Go suites.
+Each type has a dedicated route and a focused workflow.
+The HTTPS creation form and catalog edit form share one editor component and save service.
+Saving a new probe returns to the catalog with its draft confirmation.
+Unsaved forms and source buffers prompt before navigation. Empty projects link to suite setup.
+The new creation routes provide contextual Introduction, Concepts, and Tutorials help.
+
+The user chooses browser recording first. Playwright creation now leads with the recorder.
+Explicit local server configuration opens the trusted native Playwright browser and Inspector.
+Users record actions and assertions, stop the recorder, and review generated code before saving a source draft.
+The converter adds a permanent test tag and matching catalog selector. Recorded tests start with needs-review safety.
+Sessions retain their generated code and remain private to their actor until saved through normal source permissions.
+History resumes active polling after page reload. Identical session identifiers reuse existing recordings.
+A 20-minute limit, current-authority maintenance checks, and helper input closure stop abandoned recording processes.
+The adapter retains source privately across restarts and closes only owned processes.
+The local demo configures recording. Ordinary installations require explicit loopback-only local mode and trusted recorder paths.
+Hosted recording still needs a companion or streamed browser.
+Recorded website drafts remain saveable, but cannot use the isolated execution profile.
+Environment-backed browser execution is the next priority and remains required work.
+
+Retained Playwright ZIPs can open as unsaved editable copies.
+Copies preserve nested manifest paths, package declarations, helper source, and executable flags.
+Binary or oversized sources return explicit editor limits. Original ZIPs and releases remain unchanged.
+The API contract and generated client advance to version 0.25.0.
+Explicit sidebar link labels also remove hidden-link name ambiguity in the shared browser navigation helper.
+The native browser dependency installation no longer invalidates source-runtime cache fingerprints.
+
+Focused source and API checks pass for retained source preservation, unfinished drafts, authority, revisions, and current execution guards.
+The recording API check passes for request-forgery protection, owner privacy, replay, durable code, reviewed source, and no unintended runs.
+The maintenance check passes for expired and revoked sessions with retained captured code.
+The real native recorder check passes in 2.54 seconds after a corrected readiness condition removes a redundant 20-second wait.
+It records a local navigation, converts actual Playwright output to tagged source, and verifies all 18 observed owned processes exit.
+Native evidence is output/recording/native.json.
+STUDIO-CREATE-001 passes through TestStudio with complete evidence in 2.269 seconds.
+It covers the chooser, direct typed routes, native probe creation, unsaved navigation, help, recording stop and reload, saved source, Go import controls, retained ZIP copies, sidebar navigation, and dark mobile layout.
+The UI check uses a controlled recorder helper. The separate native check verifies the actual installed Playwright recorder.
+Evidence is output/selftest/20261103T195823.296411000-23808cbc945be1ec50eaa8ea/summary.json and cleanup.json.
+The owned verification controller, browser container, and output volume are removed. The latest immutable self-test image remains cached.
+The production UI build and generated contract check pass. No broad workflow matrix or cloud tests run.
+The user's demo restarts with its existing database, examples, history, evidence, and updated private UI snapshot.
+The ledger remains **26 verified, 31 open, 57 total**. Items **21** and **22** advance and remain open.
+
 ### In-app Playwright editor and saved source workspaces
 
 The Sources page now provides an in-app TypeScript editor and an independent browser starter.

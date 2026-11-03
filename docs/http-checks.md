@@ -1,7 +1,8 @@
 # Native HTTP checks
 
 Native checks run in the Go service without a browser worker or a test image.
-Create or edit a check in the catalog, then validate and publish its suite release.
+Select Create test from the catalog, then choose HTTPS probe on the dedicated creation page.
+Edit existing checks from the catalog. Validate and publish the suite release after saving.
 Each run retains its selected definition and target snapshot.
 Later edits and publications do not change existing runs.
 

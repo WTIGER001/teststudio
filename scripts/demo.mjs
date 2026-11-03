@@ -67,7 +67,7 @@ async function requireFreePorts(ports) {
 }
 function fingerprint(roots) {
   const hash = createHash('sha256')
-  const visit = filename => { const stat = fs.lstatSync(filename); if (stat.isSymbolicLink()) throw new Error('Runtime build input cannot be a symbolic link'); if (stat.isDirectory()) for (const name of fs.readdirSync(filename).sort()) visit(path.join(filename, name)); else { hash.update(filename); hash.update(fs.readFileSync(filename)) } }
+  const visit = filename => { if (path.basename(filename) === 'node_modules') return; const stat = fs.lstatSync(filename); if (stat.isSymbolicLink()) throw new Error('Runtime build input cannot be a symbolic link'); if (stat.isDirectory()) for (const name of fs.readdirSync(filename).sort()) visit(path.join(filename, name)); else { hash.update(filename); hash.update(fs.readFileSync(filename)) } }
   for (const name of roots) visit(name)
   return hash.digest('hex')
 }
@@ -114,7 +114,7 @@ async function serve() {
   const interrupted = () => { void shutdown() }
   process.once('SIGINT', interrupted); process.once('SIGTERM', interrupted)
   function start(name, executable, arguments_, readyLine) {
-    const runtimeEnvironment = Object.fromEntries(['PATH', 'HOME', 'TMPDIR', 'TEMP', 'TMP', 'DOCKER_HOST', 'DOCKER_CONTEXT', 'DOCKER_CONFIG', 'XDG_RUNTIME_DIR'].filter(key => process.env[key] !== undefined).map(key => [key, process.env[key]]))
+    const runtimeEnvironment = Object.fromEntries(['PATH', 'HOME', 'TMPDIR', 'TEMP', 'TMP', 'DOCKER_HOST', 'DOCKER_CONTEXT', 'DOCKER_CONFIG', 'XDG_RUNTIME_DIR', 'DISPLAY', 'WAYLAND_DISPLAY', 'XAUTHORITY'].filter(key => process.env[key] !== undefined).map(key => [key, process.env[key]]))
     const child = spawn(executable, arguments_, { cwd: root, env: runtimeEnvironment, stdio: ['ignore', readyLine ? 'pipe' : log, log] })
     const item = { child, name, exited: null, listening: !readyLine }
     if (readyLine) {
@@ -158,7 +158,9 @@ async function serve() {
     status = { ready: false, directory, pid: process.pid, owner: owner.id, origin, artifactOrigin, target: target.origin, projectURL: `${origin}/projects/${demoProject}/catalog`, startedAt: new Date().toISOString() }
     progress('Starting the local TestStudio API and separate source worker.')
     const database = path.join(directory, 'teststudio.db')
-    const server = start('TestStudio server', build.server, ['--local', '--source-bundles', '--addr', `127.0.0.1:${owner.ports.api}`, '--public-url', origin, '--artifact-addr', `127.0.0.1:${owner.ports.artifacts}`, '--artifact-origin', artifactOrigin, '--database', database, '--artifact-directory', path.join(directory, 'artifacts'), '--ui', ui], `TestStudio listens at ${origin}`)
+    const recordingCLI = path.join(root, 'runners/playwright/node_modules/playwright/cli.js')
+    if (!fs.existsSync(recordingCLI)) execFileSync('npm', ['ci', '--prefix', path.join(root, 'runners/playwright'), '--ignore-scripts', '--no-audit', '--no-fund'], { stdio: 'inherit' })
+    const server = start('TestStudio server', build.server, ['--local', '--source-bundles', '--recording-cli', recordingCLI, '--recording-helper', path.join(root, 'scripts/record-browser.mjs'), '--recording-directory', path.join(directory, 'recordings'), '--addr', `127.0.0.1:${owner.ports.api}`, '--public-url', origin, '--artifact-addr', `127.0.0.1:${owner.ports.artifacts}`, '--artifact-origin', artifactOrigin, '--database', database, '--artifact-directory', path.join(directory, 'artifacts'), '--ui', ui], `TestStudio listens at ${origin}`)
     let available = false
     for (let attempt = 0; attempt < 100 && !stopping; attempt++) { if (server.listening) { try { available = (await fetch(origin + '/healthz', { signal: AbortSignal.timeout(1000) })).ok } catch {} } if (available) break; await new Promise(resolve => setTimeout(resolve, 100)) }
     if (!available || stopping) throw new Error('The local demo API did not start; inspect its process log')

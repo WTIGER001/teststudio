@@ -98,7 +98,7 @@ func (s *Service) enqueueBundle(ctx context.Context, user, project, suite, key, 
 			if current.Revision != draft.Revision {
 				return storage.ErrConflict
 			}
-			if err := bound.draftSuite(ctx, project, suite); err != nil {
+			if err := bound.draftSuite(ctx, project, suite, true); err != nil {
 				return err
 			}
 		}

@@ -1,7 +1,7 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio API"
-  "version": "0.23.0"
+  "version": "0.25.0"
   "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Includes optional client-identifier RP-initiated provider logout after local session revocation. Includes staged native JSON and YAML sources with atomic catalog publication and retained source provenance. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
@@ -10,6 +10,465 @@
   -
     "SessionCookie": []
 "paths":
+  "/api/v1/projects/{project}/suites/{suite}/browser-recordings": {
+    "get": {
+      "operationId": "listBrowserRecordings",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "suite",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "cursor",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          }
+        }
+      ],
+      "summary": "List this actor's bounded recording history for the selected suite.",
+      "responses": {
+        "200": {
+          "description": "Operation completed.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrowserRecordingPage"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      },
+      "security": [
+        {
+          "SessionCookie": []
+        }
+      ]
+    },
+    "post": {
+      "operationId": "startBrowserRecording",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "suite",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "$ref": "#/components/parameters/Origin"
+        }
+      ],
+      "summary": "Open the trusted local Playwright recorder on the server desktop. Explicit local mode and current source management are required. Repeated identical session identifiers reuse the session.",
+      "responses": {
+        "200": {
+          "description": "Operation completed.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrowserRecordingRecord"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      },
+      "security": [
+        {
+          "SessionCookie": [],
+          "CSRFToken": []
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/BrowserRecordingInput"
+            }
+          }
+        }
+      }
+    }
+  }
+  "/api/v1/projects/{project}/suites/{suite}/browser-recordings/options": {
+    "get": {
+      "operationId": "readBrowserRecordingOptions",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "suite",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "summary": "Read native desktop recording availability and its time limit.",
+      "responses": {
+        "200": {
+          "description": "Operation completed.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrowserRecordingOptions"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      },
+      "security": [
+        {
+          "SessionCookie": []
+        }
+      ]
+    }
+  }
+  "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}": {
+    "get": {
+      "operationId": "readBrowserRecording",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "suite",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "summary": "Read owner-private generated source and current recorder state.",
+      "responses": {
+        "200": {
+          "description": "Operation completed.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrowserRecordingRecord"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      },
+      "security": [
+        {
+          "SessionCookie": []
+        }
+      ]
+    }
+  }
+  "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/actions/{action}": {
+    "post": {
+      "operationId": "changeBrowserRecordingState",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "suite",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "action",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "$ref": "#/components/parameters/Origin"
+        }
+      ],
+      "summary": "Stop and retain generated source, or cancel the owned recording. Accept stop or cancel.",
+      "responses": {
+        "200": {
+          "description": "Operation completed.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BrowserRecordingRecord"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      },
+      "security": [
+        {
+          "SessionCookie": [],
+          "CSRFToken": []
+        }
+      ]
+    }
+  }
+  "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/source": {
+    "get": {
+      "operationId": "readBrowserRecordingSource",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "suite",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "summary": "Convert one finished recording into an unsaved source workspace with a permanent test tag and needs-review safety label. Does not publish or execute tests.",
+      "responses": {
+        "200": {
+          "description": "Operation completed.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaywrightDraft"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      },
+      "security": [
+        {
+          "SessionCookie": []
+        }
+      ]
+    }
+  }
+  "/api/v1/projects/{project}/suites/{suite}/source-preparations/{id}/editor-source": {
+    "get": {
+      "operationId": "readPreparationEditorSource",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "suite",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "summary": "Open an editable text copy of a retained offline Playwright bundle. Preserve manifest paths, package declarations, and executable flags. No draft, release, or run is created. Current source and repository read permissions apply. Binary or oversized workspaces return an explicit error.",
+      "responses": {
+        "200": {
+          "description": "Editable source copy.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaywrightDraft"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      }
+    }
+  }
   "/api/v1/projects/{project}/suites/{suite}/playwright-drafts": {
     "get": {
       "operationId": "listPlaywrightDrafts",
@@ -4544,6 +5003,155 @@
           "schema":
             "$ref": "#/components/schemas/Problem"
   "schemas":
+    "BrowserRecordingInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "maxLength": 2048
+        },
+        "testId": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      },
+      "required": [
+        "id",
+        "url",
+        "testId",
+        "title"
+      ]
+    }
+    "BrowserRecording": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "maxLength": 2048
+        },
+        "testId": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "suiteId": {
+          "type": "string"
+        },
+        "actor": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deadlineAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "url",
+        "testId",
+        "title",
+        "projectId",
+        "suiteId",
+        "actor",
+        "state",
+        "createdAt",
+        "deadlineAt"
+      ]
+    }
+    "BrowserRecordingRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "data": {
+          "$ref": "#/components/schemas/BrowserRecording"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "revision",
+        "data",
+        "updatedAt"
+      ]
+    }
+    "BrowserRecordingPage": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/BrowserRecordingRecord"
+          }
+        },
+        "cursor": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "items"
+      ]
+    }
+    "BrowserRecordingOptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "mode": {
+          "type": "string"
+        },
+        "durationLimitSeconds": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "enabled",
+        "mode",
+        "durationLimitSeconds"
+      ]
+    }
     "EditorFile": {
       "type": "object",
       "additionalProperties": false,
@@ -4555,6 +5163,9 @@
         "content": {
           "type": "string",
           "maxLength": 262144
+        },
+        "executable": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -4581,6 +5192,14 @@
           "items": {
             "$ref": "#/components/schemas/EditorFile"
           }
+        },
+        "manifestPath": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "targetUrl": {
+          "type": "string",
+          "maxLength": 2048
         }
       },
       "required": [

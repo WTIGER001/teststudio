@@ -3,7 +3,6 @@ package sources
 import (
 	"context"
 	"errors"
-	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -11,35 +10,51 @@ import (
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/projects"
+	"github.com/wtiger001/teststudio/internal/recording"
 	"github.com/wtiger001/teststudio/internal/sourcebundle"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
 
 type EditorFile struct {
-	Path    string `json:"path"`
-	Content string `json:"content"`
+	Path       string `json:"path"`
+	Content    string `json:"content"`
+	Executable bool   `json:"executable,omitempty"`
 }
 
 type PlaywrightDraft struct {
-	ID    string       `json:"id"`
-	Name  string       `json:"name"`
-	Files []EditorFile `json:"files"`
+	ID           string       `json:"id"`
+	Name         string       `json:"name"`
+	ManifestPath string       `json:"manifestPath,omitempty"`
+	TargetURL    string       `json:"targetUrl,omitempty"`
+	Files        []EditorFile `json:"files"`
 }
 
 func draftBucket(project, suite string) string { return "playwright-drafts/" + project + "/" + suite }
 
 func validateDraft(value PlaywrightDraft) error {
+	if value.TargetURL != "" && !recording.ValidURL(value.TargetURL) {
+		return errors.New("recorded source requires a valid HTTP or HTTPS start address")
+	}
 	if !domain.ValidID(value.ID) || !utf8.ValidString(value.Name) || strings.TrimSpace(value.Name) != value.Name || len(value.Name) < 1 || len(value.Name) > 120 || strings.ContainsFunc(value.Name, unicode.IsControl) {
 		return errors.New("draft requires a permanent identifier and a name of 1 through 120 characters")
 	}
 	if len(value.Files) < 1 || len(value.Files) > 50 {
 		return errors.New("draft requires 1 through 50 text files")
 	}
+	if value.ManifestPath != "" && !sourcebundle.SafePath(value.ManifestPath) {
+		return errors.New("draft manifest must identify a relative source file")
+	}
 	seen, size := map[string]bool{}, 0
 	for _, file := range value.Files {
 		key := strings.ToLower(file.Path)
-		if !sourcebundle.SafePath(file.Path) || seen[key] || strings.HasPrefix(key, "node_modules/") || key == "node_modules" || slices.Contains([]string{"package.json", "package-lock.json", "teststudio-suite.json", "teststudio-origin.json"}, key) {
-			return errors.New("draft paths must be unique relative files outside generated package and manifest files")
+		reserved := key == "teststudio-origin.json" || (value.ManifestPath == "" && (key == "package.json" || key == "package-lock.json" || key == "teststudio-suite.json"))
+		if !sourcebundle.SafePath(file.Path) || seen[key] || reserved {
+			return errors.New("draft paths must be unique relative files outside generated package, manifest, and provenance files")
+		}
+		for _, part := range strings.Split(key, "/") {
+			if part == "node_modules" {
+				return errors.New("drafts use the trusted runtime and must omit node_modules")
+			}
 		}
 		if !utf8.ValidString(file.Content) || strings.ContainsRune(file.Content, 0) || len(file.Content) > 256<<10 {
 			return errors.New("draft files require UTF-8 text of at most 256 KiB each")
@@ -92,7 +107,7 @@ func (s *Service) SaveDraft(ctx context.Context, user, project, suite string, va
 				return err
 			}
 		}
-		if err := bound.draftSuite(ctx, project, suite); err != nil {
+		if err := bound.draftSuite(ctx, project, suite, false); err != nil {
 			return err
 		}
 		var before any
@@ -120,7 +135,7 @@ func (s *Service) SaveDraft(ctx context.Context, user, project, suite string, va
 	return result, err
 }
 
-func (s *Service) draftSuite(ctx context.Context, project, suite string) error {
+func (s *Service) draftSuite(ctx context.Context, project, suite string, preparing bool) error {
 	row, err := s.Store.Get(ctx, projects.Bucket("suites", project), suite)
 	if err != nil {
 		return err
@@ -129,8 +144,11 @@ func (s *Service) draftSuite(ctx context.Context, project, suite string) error {
 	if err != nil {
 		return err
 	}
-	if value.Archived || value.RequiresTarget {
-		return errors.New("the Playwright editor requires an active suite without a target environment")
+	if value.Archived {
+		return errors.New("restore the suite before editing browser source")
+	}
+	if preparing && value.RequiresTarget {
+		return errors.New("browser preparation currently requires a suite without a target environment")
 	}
 	return nil
 }
@@ -147,9 +165,12 @@ func (s *Service) PrepareDraft(ctx context.Context, user, project, suite, id, ke
 	if err != nil {
 		return storage.Record{}, err
 	}
+	if value.TargetURL != "" {
+		return storage.Record{}, errors.New("recorded website execution requires an environment-backed browser profile; review and save the draft while that profile remains unavailable")
+	}
 	data, err := assembleDraft(suite, value)
 	if err != nil {
 		return storage.Record{}, err
 	}
-	return s.enqueueBundle(ctx, user, project, suite, key, "playwright-"+id+".zip", "teststudio-suite.json", data, nil, &row)
+	return s.enqueueBundle(ctx, user, project, suite, key, "playwright-"+id+".zip", draftManifestPath(value), data, nil, &row)
 }

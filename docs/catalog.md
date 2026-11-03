@@ -41,6 +41,10 @@ Publication remains a separate, explicit action.
 
 ## Interface workflows
 
+Create test opens a dedicated route and offers Playwright browser tests, HTTPS probes, and Go suites.
+Each type opens its focused creation workflow. See create-tests.md.
+
+
 The catalog table supports suite and lifecycle filters and explicit checkbox selection.
 It also filters by test type. Type remains separate from the execution runner.
 Bulk actions preview one suite at a time. Review the proposed states before applying changes.
