@@ -9,7 +9,11 @@ import (
 )
 
 func (s *Server) sourceRoutes(m *http.ServeMux) {
-	service := &sources.Service{Store: s.Store, Auth: s.Auth}
+	service := s.Sources
+	if service == nil {
+		service = &sources.Service{Store: s.Store, Auth: s.Auth}
+	}
+	s.preparationRoutes(m, service)
 	base := "/api/v1/projects/{project}/suites/{suite}/source-uploads"
 	m.HandleFunc("GET "+base, s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		limit := 30

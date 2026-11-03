@@ -12,6 +12,7 @@ import { sourceDefinition } from './source.utils'
       <section class="panel" aria-labelledby="source-review-title">
         <h2 id="source-review-title">Source review</h2>
         <dl class="detail-grid"><dt>File</dt><dd>{{ preview.upload.data.name }}</dd><dt>Suite</dt><dd>{{ preview.upload.data.suiteId }}</dd><dt>State</dt><dd>{{ preview.upload.data.state }}</dd><dt>Source digest</dt><dd class="code-input">{{ preview.upload.data.digest }}</dd><dt>Staging expires</dt><dd><time [attr.datetime]="preview.upload.data.expiresAt">{{ preview.upload.data.expiresAt | date:'medium':'UTC' }} UTC</time></dd>
+          @if (preview.upload.data.artifact; as artifact) { <dt>Prepared image</dt><dd>{{ artifact.image }}</dd>@if (artifact.provenance; as origin) { <dt>Image-reported source</dt><dd>{{ origin.repository || origin.snapshotDigest }} @if (origin.reference) { <span>· {{ origin.reference }}</span> } @if (origin.commit) { <div>{{ origin.commit }}</div> }</dd> } }
           @if (preview.upload.data.releaseId) { <dt>Immutable release</dt><dd class="code-input">{{ preview.upload.data.releaseId }}</dd><dt>Activated on publication</dt><dd>{{ preview.upload.data.activated ? 'Yes' : 'No' }}</dd> }
         </dl>
         @for (issue of preview.upload.data.issues; track $index) { <p class="notice warning">{{ issue.testId }} · {{ issue.field }}: {{ issue.message }}</p> }

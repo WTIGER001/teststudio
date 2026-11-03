@@ -36,6 +36,7 @@ import { HTTPCheckEditorService } from './http-check-editor.service'
     @if (service.editorOpen()) {
       <section class="panel editor-panel" aria-labelledby="test-editor-title">
         <div class="section-top"><h2 id="test-editor-title">{{ service.editing() ? 'Edit test' : 'Create HTTPS check' }}</h2><button class="button subtle" type="button" (click)="service.editorOpen.set(false)">Close editor</button></div>
+        @if (service.editing()?.data?.definitionSourceId) { <p class="notice">The registered source owns the executable definition. Edit its metadata here and use Sources to update its code or selectors.</p> }
         <form [formGroup]="service.form" (ngSubmit)="service.save()">
           <div class="form-grid">
             <div class="field"><label for="test-suite">Suite</label><select id="test-suite" formControlName="suite" required>@for (suite of service.suites(); track suite.id) { <option [value]="suite.id">{{ suite.data.name }}</option> }</select></div>

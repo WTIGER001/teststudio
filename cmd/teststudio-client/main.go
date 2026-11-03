@@ -205,6 +205,8 @@ func generate(data []byte) ([]byte, error) {
 				case "header":
 					if p.Name == "If-Match" {
 						fields = append(fields, "revision: number")
+					} else if p.Name == "Idempotency-Key" {
+						fields = append(fields, "key"+optional+": string")
 					} else if p.Name != "Origin" {
 						return nil, fmt.Errorf("unsupported request header %s", p.Name)
 					}

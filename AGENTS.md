@@ -9,6 +9,8 @@ Keep the complete acceptance ledger in `docs/implementation.md`.
 - Use `github.com/wtiger001/go-permissions` through `permissions.Service`.
 - Store identity and memberships in TestStudio. Enforce authorization after parsing resource context.
 - Keep permission checks inside handlers or domain services.
+- Report progress against the stable 57 acceptance numbers in docs/implementation.md.
+- Report verified totals, advanced item numbers, and the targeted local checks used.
 - Use PostgreSQL for hosted deployments and SQLite for single-instance local deployments.
 - Add no code comments unless the user requests them.
 - Write new tests and examples. Copy no existing application tests, data, or infrastructure configuration.

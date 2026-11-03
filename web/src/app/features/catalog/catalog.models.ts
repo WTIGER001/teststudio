@@ -9,6 +9,7 @@ export interface HTTPCheck {
 }
 
 export interface TestDefinition {
+  definitionSourceId?: string
   id: string
   title: string
   description: string

@@ -54,7 +54,7 @@ func (s *Service) previewImport(ctx context.Context, user, project, suite string
 	if len(document.Tests) < 1 || len(document.Tests) > MutationLimit {
 		return ImportPlan{}, fmt.Errorf("an import accepts between 1 and %d test definitions", MutationLimit)
 	}
-	return s.preview(ctx, user, project, suite, "import", document.Tests, nil, snapshot)
+	return s.preview(ctx, user, project, suite, "import", document.Tests, nil, snapshot, nil, "")
 }
 
 func (s *Service) PreviewBulk(ctx context.Context, user, project, suite string, input BulkRequest) (ImportPlan, error) {
@@ -88,10 +88,10 @@ func (s *Service) PreviewBulk(ctx context.Context, user, project, suite string, 
 		tests = append(tests, t)
 		revisions[item.ID] = item.Revision
 	}
-	return s.preview(ctx, user, project, suite, input.Action, tests, revisions, "")
+	return s.preview(ctx, user, project, suite, input.Action, tests, revisions, "", nil, "")
 }
 
-func (s *Service) preview(ctx context.Context, user, project, suite, kind string, tests []Test, revisions map[string]int64, snapshot string) (ImportPlan, error) {
+func (s *Service) preview(ctx context.Context, user, project, suite, kind string, tests []Test, revisions map[string]int64, snapshot string, artifact *Artifact, source string) (ImportPlan, error) {
 	v, suiteRow, err := s.suite(ctx, project, suite)
 	if err != nil {
 		return ImportPlan{}, err
@@ -114,7 +114,7 @@ func (s *Service) preview(ctx context.Context, user, project, suite, kind string
 		current[t.ID] = row
 		merged[t.ID] = t
 	}
-	plan := ImportPlan{SourceSnapshot: snapshot, ID: domain.NewID(), Project: project, Suite: suite, Actor: user, Kind: kind, HeadRevision: head.Revision, SuiteRevision: suiteRow.Revision, Changes: []PlannedTest{}, Issues: []Issue{}, CreatedAt: time.Now().UTC()}
+	plan := ImportPlan{Artifact: artifact, SourceSnapshot: snapshot, ID: domain.NewID(), Project: project, Suite: suite, Actor: user, Kind: kind, HeadRevision: head.Revision, SuiteRevision: suiteRow.Revision, Changes: []PlannedTest{}, Issues: []Issue{}, CreatedAt: time.Now().UTC()}
 	plan.ExpiresAt = plan.CreatedAt.Add(30 * time.Minute)
 	seen := map[string]bool{}
 	for _, test := range tests {
@@ -131,6 +131,15 @@ func (s *Service) preview(ctx context.Context, user, project, suite, kind string
 			before, err := storage.Decode[Test](row)
 			if err != nil {
 				return plan, err
+			}
+			if kind == "prepared" {
+				if before.DefinitionSource != "" && before.DefinitionSource != source {
+					plan.Issues = append(plan.Issues, Issue{TestID: test.ID, Field: "source", Message: "test belongs to another registered source"})
+				}
+				test = MergeManagedMetadata(before, test)
+				change.Test = test
+			} else if before.DefinitionSource != "" && !SameSourceFacts(before, test) {
+				plan.Issues = append(plan.Issues, Issue{TestID: test.ID, Field: "source", Message: "change source-owned definitions through their registered source"})
 			}
 			change.Before = &before
 			change.Action = "update"
@@ -153,8 +162,27 @@ func (s *Service) preview(ctx context.Context, user, project, suite, kind string
 		plan.Changes = append(plan.Changes, change)
 		merged[test.ID] = test
 	}
+	if kind == "prepared" {
+		for id, row := range current {
+			before := merged[id]
+			if seen[id] || before.DefinitionSource != source || before.State == "archived" {
+				continue
+			}
+			after := before
+			after.State = "archived"
+			change := PlannedTest{Test: after, Before: &before, Revision: row.Revision, Action: "archive"}
+			if err := s.authorizeChange(ctx, user, project, suite, kind, change); err != nil {
+				return plan, err
+			}
+			plan.Changes = append(plan.Changes, change)
+			merged[id] = after
+		}
+	}
 	all := make([]Test, 0, len(merged))
 	for _, test := range merged {
+		if kind == "prepared" && test.State == "archived" {
+			continue
+		}
 		all = append(all, test)
 	}
 	slices.SortFunc(all, func(a, b Test) int {
@@ -167,11 +195,15 @@ func (s *Service) preview(ctx context.Context, user, project, suite, kind string
 		return 0
 	})
 	validation := []Issue{}
-	if kind == "import" {
-		validation = Validate(Draft{Tests: all, Capture: DefaultCapture()})
+	if kind == "import" || kind == "prepared" {
+		draft := Draft{Tests: all, Capture: DefaultCapture()}
+		if artifact != nil {
+			draft.Artifact = *artifact
+		}
+		validation = Validate(draft)
 	}
 	for _, issue := range validation {
-		if kind != "import" && (issue.Field == "artifact.image" || issue.Field == "selector") {
+		if kind != "import" && kind != "prepared" && (issue.Field == "artifact.image" || issue.Field == "selector") {
 			continue
 		}
 		if kind == "import" && !seen[issue.TestID] && (issue.Field == "artifact.image" || issue.Field == "selector") {
@@ -198,7 +230,7 @@ func (s *Service) authorizeChange(ctx context.Context, user, project, suite, kin
 	if c.Revision == 0 {
 		permission = "catalog.create"
 	}
-	if kind == "archive" {
+	if kind == "archive" || c.Action == "archive" {
 		permission = "catalog.archive"
 	}
 	if kind == "restore" || kind == "enable" {
@@ -250,7 +282,7 @@ func (s *Service) applyImport(ctx context.Context, user, project, suite, id stri
 	if plan.SourceSnapshot != snapshot || plan.Actor != user || plan.Project != project || plan.Suite != suite {
 		return plan, authorization.ErrForbidden
 	}
-	if plan.Kind == "import" {
+	if plan.Kind == "import" || plan.Kind == "prepared" {
 		if err := s.Auth.Check(ctx, user, project, "suite/"+suite, "catalog.import"); err != nil {
 			return plan, err
 		}
@@ -314,7 +346,7 @@ func (s *Service) applyImport(ctx context.Context, user, project, suite, id stri
 	}
 	suiteGuard := storage.Change{Record: suiteRow}
 	changes = append(changes, guard, applied, suiteGuard)
-	err = s.Store.Commit(ctx, changes...)
+	err = s.Store.CommitAll(ctx, changes...)
 	if errors.Is(err, storage.ErrConflict) {
 		if current, readErr := s.Store.Get(ctx, r.Bucket, r.ID); readErr == nil {
 			if applied, decodeErr := storage.Decode[ImportPlan](current); decodeErr == nil && applied.AppliedAt != nil {
@@ -341,6 +373,7 @@ func (s *Service) Duplicate(ctx context.Context, user, project, suite, id, newID
 		return err
 	}
 	t.ID = newID
+	t.DefinitionSource = ""
 	t.Title += " (copy)"
 	t.State = "draft"
 	return s.SaveTest(ctx, user, project, suite, t, 0)

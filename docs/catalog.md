@@ -68,6 +68,16 @@ Register a parent aggregate or its independent child tests. Overlapping selector
 The immutable image manifest and discovered selector map must match each published definition.
 See [Local Go suites](go-testing.md) for the source manifest and runtime contract.
 
+## Prepared source ownership
+
+Prepared catalogs record a stable definition source identifier on each managed test.
+Direct edits preserve source facts. A new reviewed preparation updates those facts.
+Synchronization retains service-managed metadata and explicit lifecycle choices.
+Omitted tests owned by that source become archived. Unrelated definitions remain in the suite.
+History, existing releases, and run snapshots retain removed definitions.
+Preparation can review up to 1000 definitions within one atomic publication.
+See [prepared suites](prepared-suites.md) for the local image workflow and current limits.
+
 ## Timing policy
 
 Project and suite timing defaults flow into each new catalog draft.

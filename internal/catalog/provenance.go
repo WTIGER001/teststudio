@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"reflect"
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/storage"
@@ -12,6 +13,9 @@ import (
 
 func (s *Service) validateSourceSnapshot(ctx context.Context, user, project, suite string, artifact Artifact) error {
 	if artifact.SourceSnapshot == "" {
+		if artifact.SourceProject != "" {
+			return errors.New("project-bound artifacts require a verified source snapshot")
+		}
 		return nil
 	}
 	if err := s.Auth.Check(ctx, user, project, "suite/"+suite, "sources.read"); err != nil {
@@ -22,12 +26,19 @@ func (s *Service) validateSourceSnapshot(ctx context.Context, user, project, sui
 		return err
 	}
 	upload, err := storage.Decode[struct {
+		Artifact  *Artifact `json:"artifact,omitempty"`
 		Digest    string    `json:"digest"`
 		State     string    `json:"state"`
 		ExpiresAt time.Time `json:"expiresAt"`
 	}](row)
 	if err != nil {
 		return err
+	}
+	if artifact.SourceProject != "" && artifact.SourceProject != project {
+		return errors.New("artifact belongs to another project")
+	}
+	if upload.Artifact != nil && !reflect.DeepEqual(*upload.Artifact, artifact) {
+		return errors.New("artifact differs from its verified source snapshot")
 	}
 	if upload.Digest != artifact.SourceRevision || (upload.State != "published" && (upload.State != "staged" || !time.Now().Before(upload.ExpiresAt))) {
 		return errors.New("source snapshot is unavailable or does not match the artifact revision")

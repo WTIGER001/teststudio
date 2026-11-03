@@ -27,22 +27,27 @@ func (e *Executor) Inspect(ctx context.Context, input preparation.InspectionRequ
 	if err := e.validateInspection(input); err != nil {
 		return inspection, err
 	}
-	if !digest.MatchString(input.Image) || !slices.Contains(e.Images, input.Image) || (e.runner() != "go" && e.runner() != "playwright") {
+	if !digest.MatchString(input.Image) || (!slices.Contains(e.Images, input.Image) && !e.AllowProjectImages) || (e.runner() != "go" && e.runner() != "playwright") {
 		return inspection, errors.New("discovery image or runner is not enabled in this installation")
 	}
 	wall, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	defer cancel()
-	metadata, err := e.output(wall, "image", "inspect", input.Image, "--format", `{"id":{{json .Id}},"runtime":{{json (index .Config.Labels "teststudio.runtime")}}}`)
+	metadata, err := e.output(wall, "image", "inspect", input.Image, "--format", `{"id":{{json .Id}},"runtime":{{json (index .Config.Labels "teststudio.runtime")}},"project":{{json (index .Config.Labels "teststudio.project")}}}`)
 	if err != nil {
 		return inspection, errors.New("approved discovery image is unavailable locally")
 	}
 	var image struct {
+		Project string `json:"project"`
 		ID      string `json:"id"`
 		Runtime string `json:"runtime"`
 	}
 	if json.Unmarshal(metadata, &image) != nil || !strings.HasPrefix(image.ID, "sha256:") || !digest.MatchString(image.ID) || !runtimeLabel.MatchString(image.Runtime) {
 		return inspection, errors.New("prepared images require valid immutable image and runtime metadata")
 	}
+	if e.RequireProject && image.Project != ref.Project {
+		return inspection, errors.New("prepared image ownership does not match the destination project")
+	}
+	inspection.Project = image.Project
 	inspection.ImageID, inspection.Runtime = image.ID, image.Runtime
 
 	if info, exists, err := e.container(wall, ref); err != nil {
@@ -59,13 +64,13 @@ func (e *Executor) Inspect(ctx context.Context, input preparation.InspectionRequ
 	}
 	args = append(args, input.Image, "--discover")
 	if _, err := e.output(wall, args...); err != nil {
-		return inspection, errors.New("preparation container reservation failed; recover its reference before retrying")
+		return inspection, errors.Join(errors.New("preparation container reservation failed; recover its reference before retrying"), preparation.ErrCleanupIncomplete)
 	}
 	defer func() {
 		cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 15*time.Second)
 		defer cancel()
 		if err := e.Cleanup(cleanup, ref); err != nil {
-			resultErr = errors.Join(resultErr, errors.New("preparation resource cleanup is incomplete"))
+			resultErr = errors.Join(resultErr, preparation.ErrCleanupIncomplete)
 		}
 	}()
 	command := exec.CommandContext(wall, e.binary(), "start", "--attach", ref.Container)

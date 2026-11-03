@@ -1,12 +1,12 @@
-# Native source uploads
+# Test source publication
 
 The Sources page accepts native HTTP catalogs in JSON or YAML.
 Choose a project and an existing suite before uploading a file.
 Use project settings to create a suite when required.
 
-This release does not prepare ZIP bundles, Git repositories, or prebuilt images.
-Those workflows remain required by the product plan.
-The [prepared suite inspector](prepared-suites.md) validates local immutable Go and Playwright images before server registration becomes available.
+The same page prepares locally available immutable Go and Playwright images when the server enables that worker.
+See [prepared suites](prepared-suites.md) for image labels, durable jobs, cancellation, recovery, and CLI publication.
+ZIP bundles and GitHub repository preparation remain pending.
 
 ## Review and publication
 
@@ -35,9 +35,13 @@ Use Test runs to start tests explicitly.
 Omitted tests remain in the suite.
 Existing definitions change only through the reviewed import.
 This direct upload workflow can replace editable metadata shown in the preview.
-Automatic discovery with separate source and service metadata remains pending.
-Coded suites still need their prepared execution artifact.
-A native upload does not supply that artifact.
+Prepared images use separate ownership for source facts and service-managed metadata.
+Synchronization preserves titles, descriptions, categories, tags, owners, lifecycle state, safety policy, timeouts, timing, and capture settings.
+Source-owned selectors, files, runners, dependencies, and bindings change through a reviewed preparation.
+Missing definitions from that same prebuilt source become archived. Their revisions and existing release snapshots remain available.
+A native upload does not supply a coded execution artifact.
+Prebuilt preparation supplies the immutable image, discovered mapping, and image-reported provenance.
+Prepared catalogs support up to 1000 tests. Declarative uploads retain their 30-test limit.
 
 ## Conflicts and retries
 
@@ -79,6 +83,11 @@ Routes use `/api/v1/projects/{project}/suites/{suite}` as their base.
 
 | Method | Route | Result |
 | --- | --- | --- |
+| GET | `/source-preparation-options` | Read enabled runners and the execution location. |
+| GET | `/source-preparations` | Read preparation history. |
+| POST | `/source-preparations` | Queue an immutable image with an `Idempotency-Key`. |
+| GET | `/source-preparations/{id}` | Read progress, diagnostics, and review identifiers. |
+| POST | `/source-preparations/{id}/cancel` | Cancel unpublished work with `If-Match`. |
 | GET | `/source-uploads` | Read a bounded upload history page. |
 | POST | `/source-uploads` | Store a source file and prepare its review. |
 | GET | `/source-uploads/{id}` | Read an upload summary and retained plan. |

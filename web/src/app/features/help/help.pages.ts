@@ -3,8 +3,9 @@ import type { HelpPage } from './help.models'
 export const helpPages: Record<string, HelpPage> = {
   sources: {
     id: 'sources', title: 'Sources',
-    introduction: ['Upload native HTTP checks in JSON or YAML. Review the catalog changes and publish an immutable release without starting tests.'],
+    introduction: ['Upload native HTTP checks or prepare a project-owned Go or Playwright image. Review its catalog and publish an immutable release without starting tests.'],
     concepts: [
+      { title: 'Prebuilt preparation', description: 'Enabled local workers inspect immutable images already available to the installation. The image must belong to this project. Choose a suite without a target environment. Jobs retain progress and diagnostics.' },
       { title: 'Staged source', description: 'The server stores the uploaded bytes and computes their SHA-256 digest. A staged file expires after 30 minutes. Published files remain available with their release.' },
       { title: 'Review and conflicts', description: 'Review identifiers, categories, types, safety labels, and before and after definitions. Existing catalog or suite changes invalidate the preview. Create a new preview after reviewing those changes.' },
       { title: 'Publication and activation', description: 'Publication applies the reviewed native definitions and freezes a release in one transaction. Activation is optional and affects future runs. Publication never starts a test run.' },
@@ -12,6 +13,7 @@ export const helpPages: Record<string, HelpPage> = {
       { title: 'Authority', description: 'Staging requires source management and catalog import and editing permissions. Publication also requires catalog publication. Only the staging user can publish that upload.' }
     ],
     tutorials: [
+      { title: 'Prepare an image', steps: ['Choose the destination suite. Select Prebuilt runner and enter its immutable image reference.', 'Select Prepare image. Use Preparation details to follow progress or cancel active work.', 'When preparation completes, select Review prepared source. Inspect the changes and image-reported provenance.', 'Publish with optional activation. This creates no test run. Source updates preserve managed metadata and retain removed test history.'] },
       { title: 'Upload and review', steps: ['Choose Suite for sources. Use Create or manage suites if the destination does not exist.', 'Select + Upload tests. Choose a JSON or YAML source file, or enter its name, format, and document.', 'Select Validate source and preview. Inspect the test changes and resolve any validation errors.', 'Select View retained source to inspect the exact uploaded document.'] },
       { title: 'Publish a release', steps: ['Review the destination suite, digest, and discovered definitions.', 'Select Activate this release for future runs only when the new release should become active.', 'Select Publish source release. Read the immutable release identifier and confirmation.', 'Use Test runs to start checks explicitly. Tests do not run during publication.'] },
       { title: 'Recover from a conflict', steps: ['Keep the source document and inspect the current catalog and suite settings.', 'Create a new source preview. Review every change again before publication.', 'If the publication response is interrupted, inspect Upload history. A repeated publication of the same upload returns its original release.'] }

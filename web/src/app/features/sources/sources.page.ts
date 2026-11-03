@@ -2,14 +2,15 @@ import { DatePipe } from '@angular/common'
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { ReactiveFormsModule } from '@angular/forms'
 import { RouterLink } from '@angular/router'
+import { PreparationComponent } from './preparation.component'
 import { SourcesService } from './sources.service'
 import { SourceUploadComponent } from './source-upload.component'
 import { SourcePreviewComponent } from './source-preview.component'
 
 @Component({
-  standalone: true, imports: [DatePipe, ReactiveFormsModule, RouterLink, SourceUploadComponent, SourcePreviewComponent], providers: [SourcesService], changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true, imports: [DatePipe, ReactiveFormsModule, RouterLink, SourceUploadComponent, SourcePreviewComponent, PreparationComponent], providers: [SourcesService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Sources</h1><p class="muted">Review native checks and retain the source behind every uploaded release.</p></div>
+    <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Sources</h1><p class="muted">Review definitions and prepared suite images. Retain the source behind each release.</p></div>
       @if (service.workspace.can('sources.manage') && service.workspace.can('catalog.import')) { <button type="button" class="button primary" [disabled]="!service.form.controls.suite.value || service.saving()" (click)="service.openEditor()">+ Upload tests</button> }
     </div>
     @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }
@@ -19,6 +20,7 @@ import { SourcePreviewComponent } from './source-preview.component'
     </section>
     @if (service.editor()) { <ts-source-upload /> }
     <ts-source-preview />
+    @if (service.form.controls.suite.value) { <ts-source-preparation /> }
     @if (service.form.controls.suite.value) {
       <section class="panel" aria-labelledby="source-history-title"><div class="section-top"><h2 id="source-history-title">Upload history</h2><button type="button" class="button secondary" [disabled]="service.loading() || service.saving()" (click)="service.list()">Refresh uploads</button></div>
         @if (service.loading()) { <p role="status">Loading uploads…</p> }

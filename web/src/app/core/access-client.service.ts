@@ -9,7 +9,7 @@ export class AccessClientService {
 
   call<K extends keyof AccessRequests>(operation: K, parameters: AccessRequests[K]): Promise<AccessResponses[K]> {
     const route = accessOperations[operation]
-    const args = parameters as Record<string, unknown> & { query?: Record<string, string | number | boolean | undefined>; body?: unknown; revision?: number }
-    return this.api.request<AccessResponses[K]>(accessPath(route.path, args, args.query), route.method, args.body, args.revision)
+    const args = parameters as Record<string, unknown> & { query?: Record<string, string | number | boolean | undefined>; body?: unknown; revision?: number; key?: string }
+    return this.api.request<AccessResponses[K]>(accessPath(route.path, args, args.query), route.method, args.body, args.revision, args.key)
   }
 }

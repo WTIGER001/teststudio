@@ -26,6 +26,7 @@ type HTTPCheck struct {
 }
 
 type Test struct {
+	DefinitionSource string         `json:"definitionSourceId,omitempty"`
 	ID               string         `json:"id"`
 	Title            string         `json:"title"`
 	Description      string         `json:"description"`
@@ -49,7 +50,16 @@ type Test struct {
 	Capture          *CapturePolicy `json:"capture,omitempty"`
 }
 
+type Provenance struct {
+	Repository     string `json:"repository,omitempty"`
+	Reference      string `json:"reference,omitempty"`
+	Commit         string `json:"commit,omitempty"`
+	SnapshotDigest string `json:"snapshotDigest,omitempty"`
+}
+
 type Artifact struct {
+	SourceProject  string            `json:"sourceProjectId,omitempty"`
+	Provenance     *Provenance       `json:"provenance,omitempty"`
 	SourceSnapshot string            `json:"sourceSnapshotId,omitempty"`
 	Image          string            `json:"image,omitempty"`
 	SourceRevision string            `json:"sourceRevision,omitempty"`

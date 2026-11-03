@@ -47,6 +47,9 @@ func (s *Service) SaveTest(ctx context.Context, user, project, suite string, t T
 	if err != nil {
 		return err
 	}
+	if revision == 0 && t.DefinitionSource != "" {
+		return errors.New("register source-owned definitions through source preparation")
+	}
 	if err := ValidateTest(t); err != nil {
 		return err
 	}
@@ -78,6 +81,9 @@ func (s *Service) SaveTest(ctx context.Context, user, project, suite string, t T
 		old, err := storage.Decode[Test](r)
 		if err != nil {
 			return err
+		}
+		if old.DefinitionSource != t.DefinitionSource || (old.DefinitionSource != "" && !SameSourceFacts(old, t)) {
+			return errors.New("source-owned definitions are read-only; update their registered source")
 		}
 		if old.Safety != t.Safety {
 			if err := s.Auth.Check(ctx, user, project, "test/"+suite+"/"+t.ID, "catalog.publish"); err != nil {

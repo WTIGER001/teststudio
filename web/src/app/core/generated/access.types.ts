@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.13.0"
+export const accessContractVersion = "0.14.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -77,19 +77,26 @@ export type Session = { "authenticationUntil": string; "createdAt": string; "cur
 export type SessionPage = { "cursor"?: string; "items": (SessionRecord)[]; "partial": boolean }
 export type SessionRecord = { "data": Session; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
 export type SourceCapturePolicy = { "failureRetentionDays"?: number; "kindRetentionDays"?: { [key: string]: number }; "logs": boolean; "maxBytes"?: number; "maxFileBytes"?: number; "retentionDays"?: number; "screenshots": string; "trace": string; "video": string }
-export type SourceCatalogArtifact = { "discoveredSelectors"?: { [key: string]: string }; "image"?: string; "sourceRevision"?: string; "sourceSnapshotId"?: string }
+export type SourceCatalogArtifact = { "discoveredSelectors"?: { [key: string]: string }; "image"?: string; "provenance"?: SourceOrigin; "sourceProjectId"?: string; "sourceRevision"?: string; "sourceSnapshotId"?: string }
 export type SourceCatalogDraft = { "artifact": SourceCatalogArtifact; "capture": SourceCapturePolicy; "id": string; "publishedReleaseId"?: string; "tests": (SourceCatalogTest)[]; "timing": SourceTimingPolicy }
 export type SourceCatalogHTTPCheck = { "endpoint": string; "forbiddenText"?: string; "headers"?: { [key: string]: string }; "json"?: { [key: string]: SourceJSONValue }; "maxResponseMs"?: number; "method": string; "minCertificateDays"?: number; "path": string; "requiredText"?: string; "statusCodes": (number)[] }
-export type SourceCatalogImportPlan = { "actor": string; "appliedAt"?: string; "catalogRevision": number; "changes": (SourceCatalogPlannedTest)[]; "createdAt": string; "expiresAt": string; "id": string; "issues": (SourceCatalogIssue)[]; "kind": string; "projectId": string; "sourceSnapshotId"?: string; "suiteId": string; "suiteRevision": number }
+export type SourceCatalogImportPlan = { "actor": string; "appliedAt"?: string; "artifact"?: SourceCatalogArtifact; "catalogRevision": number; "changes": (SourceCatalogPlannedTest)[]; "createdAt": string; "expiresAt": string; "id": string; "issues": (SourceCatalogIssue)[]; "kind": string; "projectId": string; "sourceSnapshotId"?: string; "suiteId": string; "suiteRevision": number }
 export type SourceCatalogIssue = { "field": string; "message": string; "testId"?: string }
 export type SourceCatalogPlannedTest = { "action": string; "before"?: SourceCatalogTest; "expectedRevision": number; "test": SourceCatalogTest }
 export type SourceCatalogRelease = { "activatedOnPublication": boolean; "actor": string; "catalog": SourceCatalogDraft; "createdAt": string; "draftRevision": number; "id": string; "projectId": string; "suiteId": string }
-export type SourceCatalogTest = { "applicationId"?: string; "capture"?: SourceCapturePolicy; "category": string; "check"?: SourceCatalogHTTPCheck; "conditions"?: string; "dependencies": (string)[] | null; "description": string; "id": string; "owner"?: string; "rationale": string; "requiredBindings": (string)[] | null; "runner": string; "safety": string; "selector"?: string; "source"?: string; "state": string; "tags": (string)[] | null; "timeoutSeconds": number; "timing"?: SourceTimingPolicy; "title": string; "type": string }
+export type SourceCatalogTest = { "applicationId"?: string; "capture"?: SourceCapturePolicy; "category": string; "check"?: SourceCatalogHTTPCheck; "conditions"?: string; "definitionSourceId"?: string; "dependencies": (string)[] | null; "description": string; "id": string; "owner"?: string; "rationale": string; "requiredBindings": (string)[] | null; "runner": string; "safety": string; "selector"?: string; "source"?: string; "state": string; "tags": (string)[] | null; "timeoutSeconds": number; "timing"?: SourceTimingPolicy; "title": string; "type": string }
 export type SourceContent = { "content": string; "digest": string }
 export type SourceJSONValue = null | string | number | boolean | (SourceJSONValue)[] | { [key: string]: SourceJSONValue }
+export type SourceOrigin = { "commit"?: string; "reference"?: string; "repository"?: string; "snapshotDigest"?: string }
+export type SourcePrebuiltInput = { "image": string; "runner": string }
+export type SourcePreparationJob = { "actor": string; "cancelRequested": boolean; "cleanupPending": boolean; "createdAt": string; "error"?: string; "executionLocation": string; "finishedAt"?: string; "id": string; "image": string; "leaseUntil"?: string; "localImageId"?: string; "log"?: string; "logTruncated"?: boolean; "phase": string; "projectId": string; "reference"?: SourcePreparationReference; "releaseId"?: string; "runner": string; "runtime"?: string; "startedAt"?: string; "state": string; "suiteId": string; "uploadId"?: string; "worker"?: string }
+export type SourcePreparationOptions = { "executionLocation": string; "runners": (string)[] }
+export type SourcePreparationPage = { "cursor"?: string; "items": (SourcePreparationRecord)[] }
+export type SourcePreparationRecord = { "data": SourcePreparationJob; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type SourcePreparationReference = { "attempt": number; "container": string; "id": string; "installationId": string; "profile": string; "projectId": string; "runId": string; "testId": string; "volume": string; "workerId": string }
 export type SourcePublishInput = { "activate": boolean }
 export type SourceTimingPolicy = { "maxAgeDays": number; "minimumIncreaseMs": number; "minimumSamples": number; "minimumTimeoutMs": number; "mode": string; "slowdownFactor": number; "timeoutFactor": number; "timeoutMarginMs": number; "timeoutMode": string; "window": number }
-export type SourceUpload = { "activated": boolean; "actor": string; "bytes": number; "createdAt": string; "digest": string; "expiresAt": string; "format": "json" | "yaml"; "id": string; "issues": (SourceCatalogIssue)[]; "name": string; "planId"?: string; "projectId": string; "releaseId"?: string; "state": "staged" | "failed" | "published" | "expired"; "suiteId": string }
+export type SourceUpload = { "activated": boolean; "actor": string; "artifact"?: SourceCatalogArtifact; "bytes": number; "createdAt": string; "digest": string; "expiresAt": string; "format": "json" | "yaml"; "id": string; "issues": (SourceCatalogIssue)[]; "kind"?: string; "name": string; "planId"?: string; "preparationId"?: string; "projectId": string; "releaseId"?: string; "state": "staged" | "failed" | "published" | "expired" | "cancelled"; "suiteId": string }
 export type SourceUploadInput = { "content": string; "format": "json" | "yaml"; "name": string }
 export type SourceUploadPage = { "cursor"?: string; "items": (SourceUploadRecord)[] }
 export type SourceUploadPreview = { "plan"?: SourceCatalogImportPlan; "upload": SourceUploadRecord }
@@ -145,6 +152,11 @@ export interface AccessRequests {
   createProjectAssignment: { "project": string; body: AssignmentDefinition }
   revokeProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
   readProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string }
+  readPreparationOptions: { "project": string; "suite": string }
+  listSourcePreparations: { "project": string; "suite": string; query?: { "limit"?: number; "cursor"?: string } }
+  enqueuePrebuiltPreparation: { "project": string; "suite": string; key: string; body: SourcePrebuiltInput }
+  readSourcePreparation: { "project": string; "suite": string; "id": string }
+  cancelSourcePreparation: { "project": string; "suite": string; "id": string; revision: number }
   listSourceUploads: { "project": string; "suite": string; query?: { "limit"?: number; "cursor"?: string } }
   stageSourceUpload: { "project": string; "suite": string; body: SourceUploadInput }
   readSourceUpload: { "project": string; "suite": string; "id": string }
@@ -227,6 +239,11 @@ export interface AccessResponses {
   createProjectAssignment: AssignmentRecord
   revokeProjectAssignment: Revoked
   readProjectAssignment: AssignmentRecord
+  readPreparationOptions: SourcePreparationOptions
+  listSourcePreparations: SourcePreparationPage
+  enqueuePrebuiltPreparation: SourcePreparationRecord
+  readSourcePreparation: SourcePreparationRecord
+  cancelSourcePreparation: SourcePreparationRecord
   listSourceUploads: SourceUploadPage
   stageSourceUpload: SourceUploadPreview
   readSourceUpload: SourceUploadPreview
@@ -309,6 +326,11 @@ export const accessOperations = {
   createProjectAssignment: { method: "POST", path: "/api/v1/projects/{project}/role-assignments" },
   revokeProjectAssignment: { method: "DELETE", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
   readProjectAssignment: { method: "GET", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
+  readPreparationOptions: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-preparation-options" },
+  listSourcePreparations: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-preparations" },
+  enqueuePrebuiltPreparation: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/source-preparations" },
+  readSourcePreparation: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-preparations/{id}" },
+  cancelSourcePreparation: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/source-preparations/{id}/cancel" },
   listSourceUploads: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads" },
   stageSourceUpload: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads" },
   readSourceUpload: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads/{id}" },

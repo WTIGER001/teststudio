@@ -27,12 +27,7 @@ type Manifest struct {
 	BuildProfile     string   `json:"buildProfile"`
 }
 
-type Origin struct {
-	Repository     string `json:"repository,omitempty"`
-	Reference      string `json:"reference,omitempty"`
-	Commit         string `json:"commit,omitempty"`
-	SnapshotDigest string `json:"snapshotDigest,omitempty"`
-}
+type Origin = catalog.Provenance
 
 type DiscoveredTest struct {
 	ID         string `json:"id"`

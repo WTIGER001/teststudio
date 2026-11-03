@@ -1,7 +1,7 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio API"
-  "version": "0.13.0"
+  "version": "0.14.0"
   "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Includes optional client-identifier RP-initiated provider logout after local session revocation. Includes staged native JSON and YAML sources with atomic catalog publication and retained source provenance. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
@@ -2685,6 +2685,214 @@
         - "CSRFToken": []
           "SessionCookie": []
       "summary": "Atomically apply the reviewed catalog and publish an immutable release with source provenance. Only the staging actor can publish. Explicit activation never executes tests. Failed or stale publication preserves the catalog and active release. Retrying the same upload returns the original release."
+  "/api/v1/projects/{project}/suites/{suite}/source-preparation-options":
+    "get":
+      "operationId": "readPreparationOptions"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SourcePreparationOptions"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "SessionCookie": []
+      "summary": "Inspect enabled prebuilt preparation runners for this suite."
+  "/api/v1/projects/{project}/suites/{suite}/source-preparations":
+    "get":
+      "operationId": "listSourcePreparations"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "query"
+          "name": "limit"
+          "schema":
+            "default": 30
+            "maximum": 1000
+            "minimum": 1
+            "type": "integer"
+        - "in": "query"
+          "name": "cursor"
+          "schema":
+            "type": "string"
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SourcePreparationPage"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "SessionCookie": []
+      "summary": "Read bounded preparation history and retained diagnostics."
+    "post":
+      "operationId": "enqueuePrebuiltPreparation"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        - "$ref": "#/components/parameters/Origin"
+        - "in": "header"
+          "name": "Idempotency-Key"
+          "required": true
+          "schema":
+            "maxLength": 128
+            "minLength": 1
+            "type": "string"
+      "requestBody":
+        "content":
+          "application/json":
+            "schema":
+              "$ref": "#/components/schemas/SourcePrebuiltInput"
+        "required": true
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SourcePreparationRecord"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "CSRFToken": []
+          "SessionCookie": []
+      "summary": "Queue isolated server inspection of a project-labelled immutable prebuilt image. No tests or publication run in the request. Repeated idempotency keys return the original preparation."
+  "/api/v1/projects/{project}/suites/{suite}/source-preparations/{id}":
+    "get":
+      "operationId": "readSourcePreparation"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "id"
+          "required": true
+          "schema":
+            "type": "string"
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SourcePreparationRecord"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "SessionCookie": []
+      "summary": "Read one preparation and its source review identifier."
+  "/api/v1/projects/{project}/suites/{suite}/source-preparations/{id}/cancel":
+    "post":
+      "operationId": "cancelSourcePreparation"
+      "parameters":
+        - "in": "path"
+          "name": "project"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "suite"
+          "required": true
+          "schema":
+            "type": "string"
+        - "in": "path"
+          "name": "id"
+          "required": true
+          "schema":
+            "type": "string"
+        - "$ref": "#/components/parameters/Origin"
+        - "$ref": "#/components/parameters/Revision"
+      "responses":
+        "200":
+          "content":
+            "application/json":
+              "schema":
+                "$ref": "#/components/schemas/SourcePreparationRecord"
+          "description": "Operation completed."
+        "401":
+          "$ref": "#/components/responses/Problem"
+        "403":
+          "$ref": "#/components/responses/Problem"
+        "404":
+          "$ref": "#/components/responses/Problem"
+        "409":
+          "$ref": "#/components/responses/Problem"
+        "422":
+          "$ref": "#/components/responses/Problem"
+      "security":
+        - "CSRFToken": []
+          "SessionCookie": []
+      "summary": "Cancel queued or running preparation, or withdraw an unpublished ready review. Published releases cannot be cancelled."
 "components":
   "securitySchemes":
     "SessionCookie":
@@ -2825,6 +3033,171 @@
           "schema":
             "$ref": "#/components/schemas/Problem"
   "schemas":
+    "SourcePreparationRecord":
+      "properties":
+        "data":
+          "$ref": "#/components/schemas/SourcePreparationJob"
+        "id":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "revision":
+          "type": "integer"
+        "updatedAt":
+          "format": "date-time"
+          "type": "string"
+      "required":
+        - "id"
+        - "revision"
+        - "updatedAt"
+        - "data"
+      "type": "object"
+    "SourcePreparationPage":
+      "properties":
+        "cursor":
+          "type": "string"
+        "items":
+          "items":
+            "$ref": "#/components/schemas/SourcePreparationRecord"
+          "type": "array"
+      "required":
+        - "items"
+      "type": "object"
+    "SourceOrigin":
+      "properties":
+        "commit":
+          "type": "string"
+        "reference":
+          "type": "string"
+        "repository":
+          "type": "string"
+        "snapshotDigest":
+          "type": "string"
+      "type": "object"
+    "SourcePreparationJob":
+      "properties":
+        "localImageId":
+          "type": "string"
+        "runtime":
+          "type": "string"
+        "releaseId":
+          "type": "string"
+        "actor":
+          "type": "string"
+        "cancelRequested":
+          "type": "boolean"
+        "cleanupPending":
+          "type": "boolean"
+        "createdAt":
+          "format": "date-time"
+          "type": "string"
+        "error":
+          "type": "string"
+        "executionLocation":
+          "type": "string"
+        "finishedAt":
+          "format": "date-time"
+          "type": "string"
+        "id":
+          "type": "string"
+        "image":
+          "type": "string"
+        "leaseUntil":
+          "format": "date-time"
+          "type": "string"
+        "log":
+          "type": "string"
+        "logTruncated":
+          "type": "boolean"
+        "phase":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "reference":
+          "$ref": "#/components/schemas/SourcePreparationReference"
+        "runner":
+          "type": "string"
+        "startedAt":
+          "format": "date-time"
+          "type": "string"
+        "state":
+          "type": "string"
+        "suiteId":
+          "type": "string"
+        "uploadId":
+          "type": "string"
+        "worker":
+          "type": "string"
+      "required":
+        - "cleanupPending"
+        - "id"
+        - "projectId"
+        - "suiteId"
+        - "actor"
+        - "image"
+        - "runner"
+        - "executionLocation"
+        - "state"
+        - "phase"
+        - "cancelRequested"
+        - "createdAt"
+      "type": "object"
+    "SourcePreparationReference":
+      "properties":
+        "attempt":
+          "type": "integer"
+        "container":
+          "type": "string"
+        "id":
+          "type": "string"
+        "installationId":
+          "type": "string"
+        "profile":
+          "type": "string"
+        "projectId":
+          "type": "string"
+        "runId":
+          "type": "string"
+        "testId":
+          "type": "string"
+        "volume":
+          "type": "string"
+        "workerId":
+          "type": "string"
+      "required":
+        - "id"
+        - "installationId"
+        - "projectId"
+        - "runId"
+        - "testId"
+        - "attempt"
+        - "workerId"
+        - "profile"
+        - "container"
+        - "volume"
+      "type": "object"
+    "SourcePrebuiltInput":
+      "properties":
+        "image":
+          "type": "string"
+        "runner":
+          "type": "string"
+      "required":
+        - "image"
+        - "runner"
+      "type": "object"
+    "SourcePreparationOptions":
+      "properties":
+        "executionLocation":
+          "type": "string"
+        "runners":
+          "items":
+            "type": "string"
+          "type": "array"
+      "required":
+        - "runners"
+        - "executionLocation"
+      "type": "object"
     "SourceUpload":
       "properties":
         "activated":
@@ -2843,7 +3216,9 @@
           "type": "string"
         "format":
           "type": "string"
-          "enum": ["json", "yaml"]
+          "enum":
+            - "json"
+            - "yaml"
         "id":
           "type": "string"
         "issues":
@@ -2859,10 +3234,21 @@
         "releaseId":
           "type": "string"
         "state":
+          "enum":
+            - "staged"
+            - "failed"
+            - "published"
+            - "expired"
+            - "cancelled"
           "type": "string"
-          "enum": ["staged", "failed", "published", "expired"]
         "suiteId":
           "type": "string"
+        "kind":
+          "type": "string"
+        "preparationId":
+          "type": "string"
+        "artifact":
+          "$ref": "#/components/schemas/SourceCatalogArtifact"
       "required":
         - "id"
         - "projectId"
@@ -2893,7 +3279,9 @@
         "dependencies":
           "items":
             "type": "string"
-          "type": ["array", "null"]
+          "type":
+            - "array"
+            - "null"
         "description":
           "type": "string"
         "id":
@@ -2905,7 +3293,9 @@
         "requiredBindings":
           "items":
             "type": "string"
-          "type": ["array", "null"]
+          "type":
+            - "array"
+            - "null"
         "runner":
           "type": "string"
         "safety":
@@ -2919,7 +3309,9 @@
         "tags":
           "items":
             "type": "string"
-          "type": ["array", "null"]
+          "type":
+            - "array"
+            - "null"
         "timeoutSeconds":
           "type": "integer"
         "timing":
@@ -2927,6 +3319,8 @@
         "title":
           "type": "string"
         "type":
+          "type": "string"
+        "definitionSourceId":
           "type": "string"
       "required":
         - "id"
@@ -3012,6 +3406,10 @@
           "type": "string"
         "sourceSnapshotId":
           "type": "string"
+        "sourceProjectId":
+          "type": "string"
+        "provenance":
+          "$ref": "#/components/schemas/SourceOrigin"
       "required": []
       "type": "object"
     "SourceUploadInput":
@@ -3105,6 +3503,8 @@
           "type": "string"
         "suiteRevision":
           "type": "integer"
+        "artifact":
+          "$ref": "#/components/schemas/SourceCatalogArtifact"
       "required":
         - "id"
         - "projectId"

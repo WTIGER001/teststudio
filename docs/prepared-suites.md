@@ -1,9 +1,10 @@
 # Prepared suite inspection
 
 TestStudio has a versioned manifest and a local isolated artifact inspector.
-The publisher CLI currently provides `inspect` and `cleanup`.
-Server-side prebuilt registration, preparation queues, publication, and the related interface remain pending.
-Inspection does not create a TestStudio release or test run.
+The Sources page, API, and publisher CLI enqueue inspection jobs and publish reviewed catalogs.
+The current worker supports locally available immutable Go and Playwright images.
+Inspection does not start tests. Publication and activation remain explicit actions.
+ZIP source builds and GitHub repository preparation remain pending.
 
 ## Manifest
 
@@ -57,7 +58,9 @@ Git provenance can also include that digest.
 
 The inspector reads provenance from the immutable image.
 It does not fetch the repository or independently attest the build's claimed source origin.
-Future server publication must apply the installation's artifact policy and project authority checks.
+Server preparation requires the image label `teststudio.project` to match the destination project.
+Publication records a project-bound artifact approval.
+The execution worker accepts that exact published artifact without changing its startup image list.
 
 ## Discovery
 
@@ -100,7 +103,32 @@ Cleanup checks resource ownership before removal.
 Cancellation removes the owned container and volume.
 An existing resource reference requires explicit recovery before reuse.
 The inspection interface stays separate from test scheduling and future source builds.
-The API does not invoke this inspector yet.
+The API stores a durable job. A separate worker invokes inspection after the request completes.
+Each job retains its resource reference before container creation.
+Current source and catalog permissions are checked before dispatch and during preparation.
+
+## Server and interface
+
+Enable local preparation with the server flag `--prepared-sources`.
+Docker must contain each immutable image before preparation starts.
+Each image needs the expected runtime label and its destination `teststudio.project` label.
+The current local profiles require a suite without a target environment.
+The worker does not pull images or install source dependencies.
+
+Open Sources, select the destination suite, and enter the image digest and runner.
+Select Prepare image, inspect progress and retained logs, then open Review prepared source.
+Review catalog changes and validation issues before publication.
+Activation starts unchecked. Publication does not run tests.
+
+Jobs move from `received` to `discovering`, then `ready`, `failed`, or `cancelled`.
+Publication changes a ready job to `published` and records its release identifier.
+Cancel can stop queued or running work and withdraw an unpublished ready review.
+A published job cannot be cancelled.
+
+Preparation records bounded diagnostics and observed runtime metadata.
+Cleanup failures remain visible and retain their durable resource reference.
+After a worker lease expires, recovery removes owned resources without repeating discovery or starting tests.
+Recovery remains enabled when new preparation is disabled.
 
 ## CLI
 
@@ -109,6 +137,36 @@ Build the CLI locally:
 ```sh
 go build -o bin/teststudio-publish ./cmd/teststudio-publish
 ```
+
+Authenticate to an enabled loopback installation:
+
+```sh
+bin/teststudio-publish login --server http://127.0.0.1:8040 --local
+```
+
+Managed local accounts use `--user USER --password-env VARIABLE` instead of `--local`.
+The CLI stores a private managed session file. Use `--session-file` to choose its location.
+Remote connections require HTTPS. CLI OIDC browser sign-in remains pending.
+Use `logout` to revoke the session and remove its local file.
+
+Prepare and review a project-labelled image:
+
+```sh
+bin/teststudio-publish prepare --project example --suite arithmetic \
+  --image sha256:YOUR_IMMUTABLE_IMAGE_DIGEST --runner go --key release-one
+bin/teststudio-publish status --project example --suite arithmetic \
+  --job PREPARATION_ID --review --logs
+bin/teststudio-publish publish --project example --suite arithmetic \
+  --job PREPARATION_ID --activate
+```
+
+Reuse the preparation key after a request failure. The same input returns the original job.
+A changed image or runner requires a new key.
+Omit `--activate` to publish without changing the active release.
+Use `cancel` with the same project, suite, and job flags to cancel unpublished work.
+The CLI does not start tests after publication.
+
+### Standalone inspection
 
 Inspect an externally prepared image already present in the local Docker daemon:
 
@@ -141,9 +199,14 @@ It does not remove unrelated containers or browser sessions.
 
 ## Local verification
 
-Run `bash scripts/test-discovery.sh`.
+The inspection foundation has a dedicated `bash scripts/test-discovery.sh` check.
+Run it only when inspection changes require fresh fixture coverage.
 The script builds new independent Go and Playwright fixture images.
 It verifies discovery, source lines, dynamic child disclosure, exact project selection, isolation, cancellation, CLI privacy, and scoped cleanup.
 It also executes each inspected fixture through the existing managed runner.
 Private CLI results remain under the printed `.data/discovery-verification.*` directory.
 No cloud account or remote application is required.
+
+Targeted source, API, and CLI tests cover queued publication, retries, metadata preservation, cancellation, and interrupted-job cleanup.
+Use these focused checks after publication changes. Reuse cached images for local end-to-end checks when available.
+AWS, Kubernetes, and Azure verification remain separate work.

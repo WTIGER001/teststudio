@@ -17,21 +17,24 @@ type UploadInput struct {
 }
 
 type Upload struct {
-	ID        string          `json:"id"`
-	Project   string          `json:"projectId"`
-	Suite     string          `json:"suiteId"`
-	Name      string          `json:"name"`
-	Format    string          `json:"format"`
-	Digest    string          `json:"digest"`
-	Bytes     int             `json:"bytes"`
-	Actor     string          `json:"actor"`
-	State     string          `json:"state"`
-	PlanID    string          `json:"planId,omitempty"`
-	Issues    []catalog.Issue `json:"issues"`
-	CreatedAt time.Time       `json:"createdAt"`
-	ExpiresAt time.Time       `json:"expiresAt"`
-	ReleaseID string          `json:"releaseId,omitempty"`
-	Activated bool            `json:"activated"`
+	Kind      string            `json:"kind,omitempty"`
+	Job       string            `json:"preparationId,omitempty"`
+	Artifact  *catalog.Artifact `json:"artifact,omitempty"`
+	ID        string            `json:"id"`
+	Project   string            `json:"projectId"`
+	Suite     string            `json:"suiteId"`
+	Name      string            `json:"name"`
+	Format    string            `json:"format"`
+	Digest    string            `json:"digest"`
+	Bytes     int               `json:"bytes"`
+	Actor     string            `json:"actor"`
+	State     string            `json:"state"`
+	PlanID    string            `json:"planId,omitempty"`
+	Issues    []catalog.Issue   `json:"issues"`
+	CreatedAt time.Time         `json:"createdAt"`
+	ExpiresAt time.Time         `json:"expiresAt"`
+	ReleaseID string            `json:"releaseId,omitempty"`
+	Activated bool              `json:"activated"`
 }
 
 type Preview struct {

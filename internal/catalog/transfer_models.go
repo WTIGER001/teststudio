@@ -21,6 +21,7 @@ type PlannedTest struct {
 }
 
 type ImportPlan struct {
+	Artifact       *Artifact     `json:"artifact,omitempty"`
 	SourceSnapshot string        `json:"sourceSnapshotId,omitempty"`
 	ID             string        `json:"id"`
 	Project        string        `json:"projectId"`

@@ -90,7 +90,11 @@ func (s *Service) Publish(ctx context.Context, user, project, suite, id string, 
 		if _, err := catalogs.ApplySourceImport(ctx, user, project, suite, upload.PlanID, 1, upload.ID); err != nil {
 			return err
 		}
-		draft, err := catalogs.CreateDraft(ctx, user, project, suite, catalog.Artifact{SourceRevision: upload.Digest, SourceSnapshot: id})
+		artifact := catalog.Artifact{SourceRevision: upload.Digest, SourceSnapshot: id}
+		if upload.Artifact != nil {
+			artifact = *upload.Artifact
+		}
+		draft, err := catalogs.CreateDraft(ctx, user, project, suite, artifact)
 		if err != nil {
 			return err
 		}
@@ -111,7 +115,32 @@ func (s *Service) Publish(ctx context.Context, user, project, suite, id string, 
 		if err != nil {
 			return err
 		}
-		return bound.Store.Commit(ctx, saved, storage.Change{Record: staging, Delete: true}, audit)
+		changes := []storage.Change{saved, {Record: staging, Delete: true}, audit}
+		if upload.Kind == "prebuilt" && upload.Artifact != nil {
+			approved, err := storage.Put("prepared-artifacts/"+project, id, project, 0, *upload.Artifact)
+			if err != nil {
+				return err
+			}
+			changes = append(changes, approved)
+			jobRow, err := bound.Store.Get(ctx, JobBucket(project, suite), upload.Job)
+			if err != nil {
+				return err
+			}
+			job, err := storage.Decode[Job](jobRow)
+			if err != nil {
+				return err
+			}
+			if job.State != "ready" || job.Upload != id {
+				return errors.New("preparation is no longer ready for publication")
+			}
+			job.State, job.Phase, job.Release = "published", "finished", release.ID
+			updated, err := storage.Put(jobRow.Bucket, jobRow.ID, project, jobRow.Revision, job)
+			if err != nil {
+				return err
+			}
+			changes = append(changes, updated)
+		}
+		return bound.Store.Commit(ctx, changes...)
 	})
 	return release, resultErr
 }

@@ -20,9 +20,12 @@ var digest = regexp.MustCompile(`^(sha256:[a-f0-9]{64}|[A-Za-z0-9][A-Za-z0-9._:/
 var selector = regexp.MustCompile(`^@[A-Za-z0-9][A-Za-z0-9._-]{0,127}$`)
 
 type Executor struct {
-	Images []string
-	Docker string
-	Runner string
+	AllowProjectImages bool
+	RequireProject     bool
+	ApproveArtifact    func(context.Context, catalog.Artifact) error
+	Images             []string
+	Docker             string
+	Runner             string
 }
 
 func (e *Executor) runner() string {
@@ -42,8 +45,16 @@ func (e *Executor) Admit(ctx context.Context, test catalog.Test, artifact catalo
 	if (e.runner() != "playwright" && e.runner() != "go") || (test.Runner != "" && test.Runner != e.runner()) {
 		return errors.New("coded runner does not match the enabled execution profile")
 	}
-	if !digest.MatchString(artifact.Image) || !slices.Contains(e.Images, artifact.Image) {
-		return errors.New("coded runner image is not enabled in this installation")
+	if !digest.MatchString(artifact.Image) {
+		return errors.New("coded runner image requires an immutable digest")
+	}
+	if !slices.Contains(e.Images, artifact.Image) {
+		if e.ApproveArtifact == nil {
+			return errors.New("coded runner image is not enabled in this installation")
+		}
+		if err := e.ApproveArtifact(ctx, artifact); err != nil {
+			return err
+		}
 	}
 	if artifact.Discovered[test.ID] != test.Selector {
 		return errors.New("coded selector is absent from the immutable discovered catalog")

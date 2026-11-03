@@ -37,3 +37,27 @@ func (s *Store) Transaction(ctx context.Context, fn func(*Store, *sql.Tx) error)
 	}
 	return tx.Commit()
 }
+
+func (s *Store) CommitAll(ctx context.Context, changes ...Change) error {
+	if len(changes) == 0 || len(changes) > 10000 {
+		return errors.New("transaction must contain between 1 and 10000 changes")
+	}
+	seen := map[string]bool{}
+	for _, change := range changes {
+		key := change.Bucket + "\x00" + change.ID
+		if seen[key] {
+			return errors.New("duplicate transaction record")
+		}
+		seen[key] = true
+	}
+	if s.tx == nil {
+		return s.Transaction(ctx, func(bound *Store, _ *sql.Tx) error { return bound.CommitAll(ctx, changes...) })
+	}
+	for start := 0; start < len(changes); start += 100 {
+		end := min(start+100, len(changes))
+		if err := s.Commit(ctx, changes[start:end]...); err != nil {
+			return err
+		}
+	}
+	return nil
+}

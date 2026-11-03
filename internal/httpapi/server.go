@@ -23,10 +23,12 @@ import (
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/schedules"
 	"github.com/wtiger001/teststudio/internal/sessions"
+	"github.com/wtiger001/teststudio/internal/sources"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
 
 type Server struct {
+	Sources        *sources.Service
 	Store          *storage.Store
 	Auth           *authorization.Service
 	Projects       *projects.Service

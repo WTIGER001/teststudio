@@ -12,6 +12,23 @@ Run tests only locally. AWS, Kubernetes, and Azure verification are separate wor
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
+## Current implementation checkpoint
+
+The acceptance ledger has **23 verified, 34 open, 57 total** items.
+Item **24** now passes local verification: publish two immutable images and execute each without restarting the server.
+Durable prebuilt preparation, cancellation, recovery, API, UI, and CLI server publication are implemented.
+Source synchronization preserves managed metadata and archives omitted owned definitions.
+Inspection foundation commit: `d4ec6a0`. The following feature milestone records publication integration.
+
+Focused source, API, CLI, ownership, and generated-client checks pass. The Angular build passes.
+The real local workflow reuses the cached Go fixture without rebuilding its dependencies.
+Evidence is `.data/prebuilt-verification.Y3B1AO/result.json` with verified cleanup in `cleanup.json`.
+No cloud tests run. New preparation controls still need targeted browser verification.
+
+Continue source archive and GitHub preparation through a separate isolated build backend.
+Keep the complete acceptance ledger required and report stable item numbers.
+Implement coherent batches, then run the smallest relevant local checks. Reuse existing evidence.
+
 ## Historical shutdown checkpoint and continuation
 
 The user requests the earlier pause to power off the computer.

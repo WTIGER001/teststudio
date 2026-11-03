@@ -13,12 +13,16 @@ import (
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/domain"
+	"github.com/wtiger001/teststudio/internal/preparation"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
 
 type Service struct {
-	Store *storage.Store
-	Auth  *authorization.Service
+	Inspectors         map[string]preparation.ArtifactInspector
+	RecoveryInspectors map[string]preparation.ArtifactInspector
+	Location           string
+	Store              *storage.Store
+	Auth               *authorization.Service
 }
 
 func digest(content string) string {

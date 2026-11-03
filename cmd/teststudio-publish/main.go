@@ -47,15 +47,21 @@ func main() {
 
 func run(ctx context.Context, args []string, writer io.Writer) error {
 	if len(args) == 0 {
-		return errors.New("use teststudio-publish inspect or cleanup; server publication is not available yet")
+		return errors.New("use teststudio-publish login, prepare, status, publish, cancel, logout, inspect, or cleanup")
 	}
 	switch args[0] {
+	case "login":
+		return login(ctx, args[1:], writer)
+	case "logout":
+		return logout(ctx, args[1:], writer)
+	case "prepare", "status", "publish", "cancel":
+		return publication(ctx, args[0], args[1:], writer)
 	case "inspect":
 		return inspect(ctx, args[1:], writer)
 	case "cleanup":
 		return cleanup(ctx, args[1:], writer)
 	default:
-		return errors.New("unknown publisher operation; use inspect or cleanup")
+		return errors.New("unknown publisher operation")
 	}
 }
 

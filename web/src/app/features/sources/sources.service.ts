@@ -96,11 +96,13 @@ export class SourcesService {
     finally { if (generation === this.generation) this.saving.set(false) }
   }
 
-  async inspect(item: SourceUploadRecord): Promise<void> {
+  async inspect(item: SourceUploadRecord): Promise<void> { return this.openReview(item.id,item.data.suiteId) }
+
+  async openReview(id: string, suite: string): Promise<void> {
     const generation = ++this.generation
     this.saving.set(true); this.preview.set(null); this.content.set(''); this.editor.set(false); this.error.set(''); this.message.set(''); this.activate.set(false)
     try {
-      const response = await this.client.call('readSourceUpload', { project: this.project(), suite: item.data.suiteId, id: item.id })
+      const response = await this.client.call('readSourceUpload', { project: this.project(), suite, id })
       if (generation === this.generation) this.preview.set(response)
     } catch (error) { if (generation === this.generation) this.error.set(error instanceof Error ? error.message : 'Upload could not be loaded.') }
     finally { if (generation === this.generation) this.saving.set(false) }

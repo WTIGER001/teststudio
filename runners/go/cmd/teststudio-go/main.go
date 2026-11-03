@@ -22,6 +22,12 @@ func main() {
 		}
 		discovery, err := runner.Discover(ctx, "/suite")
 		if err != nil {
+			if discovery.Log != "" {
+				fmt.Fprint(os.Stderr, discovery.Log)
+			}
+			if discovery.LogTruncated {
+				fmt.Fprintln(os.Stderr, "Go preparation log is truncated.")
+			}
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(2)
 		}

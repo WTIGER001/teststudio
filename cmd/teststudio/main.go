@@ -35,6 +35,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/identity"
 	"github.com/wtiger001/teststudio/internal/localauth"
 	"github.com/wtiger001/teststudio/internal/notifications"
+	"github.com/wtiger001/teststudio/internal/preparation"
 	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/schedules"
@@ -60,6 +61,7 @@ func run() error {
 	location := flag.String("execution-location", "local", "Execution location identifier")
 	playwrightImages := flag.String("playwright-images", "", "Comma-separated immutable local Playwright image references; enables the isolated local worker")
 	goImages := flag.String("go-images", "", "Comma-separated immutable local Go suite image references; enables the isolated local Go worker")
+	preparedSources := flag.Bool("prepared-sources", false, "Enable local prebuilt preparation and project-labelled immutable suite images")
 	scheduler := flag.Bool("scheduler", true, "Process durable project schedules on this instance")
 	notificationWorker := flag.Bool("notification-worker", true, "Process durable notification deliveries on this instance")
 	secretBindings := flag.String("secret-bindings", "", "Project and purpose scoped environment or mounted-file secret binding configuration")
@@ -194,18 +196,35 @@ func run() error {
 	catalogService := &catalog.Service{Store: db, Auth: auth}
 	evidenceService := &evidence.Service{Store: db, Blobs: files}
 	runService := &runs.Service{Store: db, Auth: auth, Catalog: catalogService, Evidence: evidenceService, HTTP: &execution.HTTP{}, Location: *location}
+	sourceService := &sources.Service{Store: db, Auth: auth, Location: *location, RecoveryInspectors: map[string]preparation.ArtifactInspector{
+		"go": &localcontainer.Executor{Runner: "go"}, "playwright": &localcontainer.Executor{Runner: "playwright"},
+	}}
+	if *preparedSources {
+		sourceService.Inspectors = map[string]preparation.ArtifactInspector{
+			"go":         &localcontainer.Executor{Runner: "go", AllowProjectImages: true, RequireProject: true},
+			"playwright": &localcontainer.Executor{Runner: "playwright", AllowProjectImages: true, RequireProject: true},
+		}
+	}
 	runService.RecoveryDriver = &localplaywright.Executor{}
 	runService.RecoveryDrivers = []execution.ManagedExecutor{&localcontainer.Executor{Runner: "go"}}
-	if strings.TrimSpace(*playwrightImages) != "" {
-		runService.Playwright = &localplaywright.Executor{Images: strings.Split(*playwrightImages, ",")}
+	if strings.TrimSpace(*playwrightImages) != "" || *preparedSources {
+		driver := &localplaywright.Executor{Images: strings.Split(*playwrightImages, ",")}
+		if *preparedSources {
+			driver.ApproveArtifact = sourceService.ApproveArtifact
+		}
+		runService.Playwright = driver
 	}
-	if strings.TrimSpace(*goImages) != "" {
-		runService.Go = &localcontainer.Executor{Runner: "go", Images: strings.Split(*goImages, ",")}
+	if strings.TrimSpace(*goImages) != "" || *preparedSources {
+		driver := &localcontainer.Executor{Runner: "go", Images: strings.Split(*goImages, ",")}
+		if *preparedSources {
+			driver.ApproveArtifact = sourceService.ApproveArtifact
+		}
+		runService.Go = driver
 	}
 	scheduleService := &schedules.Service{Store: db, Auth: auth, Runs: runService}
 	notificationService := &notifications.Service{Store: db, Auth: auth, Secrets: secretProvider, Sender: &webhook.Sender{}, Origin: *public}
 	runService.Completion = notificationService
-	api := &httpapi.Server{Store: db, Auth: auth, Projects: &projects.Service{Store: db, Auth: auth}, Catalog: catalogService, Runs: runService, Schedules: scheduleService, Notifications: notificationService, Evidence: evidenceService, ArtifactOrigin: *artifactOrigin, Sessions: sessionService, OIDC: oidc, LocalUser: localUser, UI: *ui}
+	api := &httpapi.Server{Sources: sourceService, Store: db, Auth: auth, Projects: &projects.Service{Store: db, Auth: auth}, Catalog: catalogService, Runs: runService, Schedules: scheduleService, Notifications: notificationService, Evidence: evidenceService, ArtifactOrigin: *artifactOrigin, Sessions: sessionService, OIDC: oidc, LocalUser: localUser, UI: *ui}
 	if *localAccounts {
 		api.LocalAccounts, err = localauth.New(ctx, sessionService)
 		if err != nil {
@@ -229,7 +248,9 @@ func run() error {
 	workerContext, cancelWorkers := context.WithCancel(ctx)
 	workersDone := runService.Start(workerContext)
 	maintenanceDone := evidenceService.StartMaintenance(workerContext, 5*time.Second)
-	sourceMaintenanceDone := (&sources.Service{Store: db, Auth: auth}).StartMaintenance(workerContext, 5*time.Second)
+	sourceMaintenanceDone := sourceService.StartMaintenance(workerContext, 5*time.Second)
+	var preparationDone <-chan struct{}
+	preparationDone = sourceService.StartPreparation(workerContext)
 	var schedulesDone <-chan struct{}
 	if *scheduler {
 		schedulesDone = scheduleService.Start(workerContext)
@@ -243,6 +264,9 @@ func run() error {
 		<-workersDone
 		<-maintenanceDone
 		<-sourceMaintenanceDone
+		if preparationDone != nil {
+			<-preparationDone
+		}
 		if schedulesDone != nil {
 			<-schedulesDone
 		}
