@@ -7,6 +7,8 @@ Current verification uses local schemas and package checks only. No AWS deployme
 
 The profile currently supports the catalog, identity, native HTTP execution, schedules, and private evidence service.
 Hosted Go and Playwright execution, preparation workers, and hosted recording remain unfinished.
+The [ECS task and deadline contracts](ecs-worker-contract.md) now provide immutable SDK drafts and recovery proofs for the worker adapter.
+They do not enable hosted coded execution. Durable dispatch, private routing, and provider cleanup remain required.
 Do not enable local Docker runner flags inside this service.
 Keep acceptance 57 and the related hosted acceptance items open.
 

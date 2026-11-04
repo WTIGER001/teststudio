@@ -42,6 +42,8 @@ github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.8.8 h1:PWv+vG8aCLS8qd+HPdY
 github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.8.8/go.mod h1:xxPZEpflYHJA12366ZGyq66z9dHPCoeCIu99Jck+MPw=
 github.com/aws/aws-sdk-go-v2/internal/v4a v1.5.8 h1:WOp5De9iWdEHDPh2Kb0tBP3vGBm/dVAuRGh4a4tqduo=
 github.com/aws/aws-sdk-go-v2/internal/v4a v1.5.8/go.mod h1:z8W8YgfhbWl62XqcTtK+CxPrE+iHGRVUOtrrbIOp7ZY=
+github.com/aws/aws-sdk-go-v2/service/ecs v1.103.1 h1:DRTV+EGfif88RSqkyHvuyrHGHT9pCdT6yL0ivfALa4U=
+github.com/aws/aws-sdk-go-v2/service/ecs v1.103.1/go.mod h1:jjuJTYCyu/HPuJ0/SccHi+0I4VJFWxTPVxU7HpuZdPw=
 github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.23 h1:MCIR6iZaCKO4UE0hUvoWWLI6JVjppopV64JfAJaMjng=
 github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.23/go.mod h1:pphWFS+z0MmIPivj8c/6bATd1Z+Av7Ust75DPdEFsPA=
 github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.11.9 h1:GACgECI422Xt5n4Pojr3O0aocPv8lfH4PJe2Aon5Wv8=
@@ -52,6 +54,8 @@ github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.20.8 h1:RS1Wt+K0r4X0ci
 github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.20.8/go.mod h1:adMnTy5kyoUW86jhXnGSVc/mvMQI4GZd1qYWMeaS8M8=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.114.6 h1:to7+Vr3rLkpYRwVKJ5QRriI0eE306vrVN/6TnVHgxvY=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.114.6/go.mod h1:Jc89ASa2k7HMAskj3bSnt8bf+k+p2IApzkoXnEjkgUw=
+github.com/aws/aws-sdk-go-v2/service/scheduler v1.26.1 h1:CZSLp1uHGlw42tV+hRlqlO/AAiUbNcX3kPqqTdk9NRs=
+github.com/aws/aws-sdk-go-v2/service/scheduler v1.26.1/go.mod h1:JdylxbTjPstvkQsWw5bhA+IsYS0oP8EInKBwf37bgio=
 github.com/aws/aws-sdk-go-v2/service/signin v1.12.1 h1:WZLC+k/CZx11kZGQDqu9mpA8yhiXGX2I//jhuJE1FDo=
 github.com/aws/aws-sdk-go-v2/service/signin v1.12.1/go.mod h1:wxAk0D2oVBSjuXEIzvcKxTZfM90zticdAbh/VD42L0Y=
 github.com/aws/aws-sdk-go-v2/service/sso v1.39.1 h1:4VB/dnDo7pmXSLQMszSoBzWndENuc7mzwTpD6lQn77A=

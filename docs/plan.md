@@ -229,7 +229,17 @@ The source-profile parser passes targeted checks. UI assets, the trace viewer, a
 See [Kubernetes source preparation](kubernetes-preparation.md) for installation, drain, recovery, limits, and exact local evidence.
 This advances 51, supporting failover work in 52, and deployment packaging in 57. The total remains 48 verified and 9 open.
 
-Next implement AWS execution workers and their private HTTPS exchange route through the common managed lifecycle.
+AWS worker task and deadline contracts now build immutable SDK requests for offline Go and Playwright execution and discovery.
+They bind exact ownership, fixed non-root task settings, resource class, private launch configuration, and a separate stop schedule.
+Recovery proofs omit worker tickets and cannot generate another launch request.
+Targeted local race and signed TLS wire checks pass. Current API, preparation, and supervisor commands compile without enabling ECS workers.
+See [ECS task and deadline contracts](ecs-worker-contract.md) for current scope, verified AWS constraints, and exact remaining work.
+Acceptance 51 advances. The total remains 48 verified and 9 open.
+
+Next implement durable ECS registration and launch reservations, lost-acknowledgement discovery, provider observations, independent deadline verification, and checkpointed cleanup.
+Persist task and task-definition ARNs before stopping work. AWS removes task tags during StopTask; recovery must preserve ownership without them.
+Do not recreate uncertain tasks after the finite RunTask idempotency window. Missing live tasks remain unresolved without a saved terminal observation.
+Then add optional server settings and the private HTTPS exchange route before enabling AWS workers.
 Keep exact image approval, gated dispatch, provider ownership, cancellation, deadlines, and checkpointed cleanup.
 Use local protocol fixtures and package rendering. Do not run AWS, cluster, or Azure deployment checks in this session.
 Keep uploaded source outside the API and retain exact source approval, project ownership, catalog review, and publication boundaries.

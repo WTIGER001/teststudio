@@ -111,7 +111,41 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: Helm source preparation and private journals
+## Current delivery: ECS task, independent deadline, and recovery proof contracts
+
+Acceptance **51** advances. The total remains **48 verified of 57**, with **9 open** items.
+These contracts do not enable ECS workers or close provider acceptance.
+
+The new ECS package builds pinned SDK task definitions and launch requests for offline Go and Playwright execution and discovery.
+Task identity, immutable image, fixed supervisor arguments, ownership tags, account, region, execution pool, and deadline remain bound.
+Tasks have no AWS task role or secret references. The platform image-pull role and independent deadline role remain separate.
+Fixed non-root, read-only, resource, tmpfs, and restart settings reject unexpected mutations.
+Launch requests have one task, no public address, no ECS Exec, and only the scoped exchange identity and ticket overrides.
+
+The planner builds a separate UTC stop schedule for the exact task ARN.
+Verification checks its identity, enabled state, exact stop target, role, time, and bounded retry policy.
+The documented minute-scale Scheduler precision remains separate from exact runner and ticket deadlines.
+SDK input follows the ECS StopTask field names. An owned TLS fixture verifies it against a signed production SDK request.
+
+Serializable recovery proofs retain hashes and ownership without raw tickets. Restored plans verify resources but cannot create another launch request.
+Changed claimants or execution pools invalidate restoration. Canonical subnet order preserves timing-pool identity.
+Pinned ECS and Scheduler modules use the existing AWS core SDK and add no unrelated dependency upgrades.
+
+Focused race checks pass for both runners, both operations, definition and deadline mutation rejection, configuration bounds, private diagnostics, and restored-proof restrictions.
+The initial fixture has an oversized ticket canary; correcting its length lets it exercise the intended production contract.
+The signed StopTask fixture uses only an explicit local credential callback and owned TLS endpoint. It closes after the check.
+Current API, preparation-worker, and supervisor packages compile.
+Evidence is output/ecs-worker-contract/contract.log and compile.log.
+No cloud credential lookup, cloud account operation, registry push, browser, UI rebuild, service image build, or source-runtime rebuild occurs.
+The local demonstration and its retained data remain unchanged.
+
+Next implement durable provider dispatch and recovery, exact task observations, network admission, and checkpointed resource deletion.
+Then add optional settings, private exchange routing, and AWS worker infrastructure.
+StopTask removes task tags. Persist exact task and definition ownership before stop and preserve terminal observations across later resource expiry.
+The finite RunTask idempotency window must not become permission to redispatch uncertain work.
+See [ECS task and deadline contracts](ecs-worker-contract.md) for the implementation boundary and verified primary references.
+
+## Previous delivery: Helm source preparation and private journals
 
 Acceptances **51** and **57** advance with supporting preparation failover packaging under **52**.
 The total remains **48 verified of 57**, with **9 open** items. Local package checks do not close hosted acceptance.
