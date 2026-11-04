@@ -1,13 +1,14 @@
 import type { CatalogItem } from './catalog.models'
+import { matchesCatalogFilters, sortCatalog, type CatalogFilters } from './catalog-browse.utils'
 
-export function filterCatalog(items: CatalogItem[], query: string, state: string, suite = '', type = ''): CatalogItem[] {
+export function filterCatalog(items: CatalogItem[], query: string, state: string, suite = '', type = '', filters: CatalogFilters = {}): CatalogItem[] {
   const term = query.trim().toLowerCase()
-  return items.filter(item => {
+  return sortCatalog(items.filter(item => {
     const test = item.data
     const stateMatches = state === 'all' || (state === 'active' ? test.state !== 'archived' : test.state === state)
     const text = [test.id, test.title, test.description, test.category, item.suiteName, ...(test.tags || [])].join(' ').toLowerCase()
-    return stateMatches && (!suite || item.suiteId === suite) && (!type || test.type === type) && (!term || text.includes(term))
-  }).sort((a, b) => a.data.title.localeCompare(b.data.title) || a.suiteId.localeCompare(b.suiteId) || a.id.localeCompare(b.id))
+    return stateMatches && (!suite || item.suiteId === suite) && (!type || test.type === type) && (!term || text.includes(term)) && matchesCatalogFilters(item, filters)
+  }), filters.sort)
 }
 
 export function catalogTypes(items: CatalogItem[]): { value: string; label: string }[] {

@@ -46,7 +46,7 @@ Complete one coherent batch before adding the next. Update its user help and rel
 | Complete | Project creator access | Ordinary creator setup, managed scoped roles, publication, local execution, atomic rollback, and project boundaries pass on SQLite and local PostgreSQL. Acceptance 13 is verified. |
 | Complete | Recorded website execution locally | New native recording, reviewed local website steps, saved preparation, publication, registered target execution, guarded direct request, and blocked off-site redirect pass with retained logs, screenshot, trace, and timing. |
 | Complete | Tester operation and failure recovery | Scoped attempts, logs, screenshots, timeout and retry inspection, permission-loss recovery, and retry after a lost rerun response without another child pass. Acceptance 44 is verified. |
-| 4 | Remaining catalog and evidence gaps | Private trace viewing is implemented. Continue category navigation, remaining catalog actions, evidence recovery and retention, and timing parity against the existing acceptance ledger. |
+| 4 | Remaining catalog and evidence gaps | Private trace viewing and category browsing are implemented. Continue catalog publication review, transfer workflows, API list contracts, evidence recovery and retention, and timing parity against the existing acceptance ledger. |
 | 5 | Hosted packaging and provider adapters | Implement and document independent provider configuration, worker dispatch, private artifacts, cancellation, deadlines, and recovery. Use local contract checks first. |
 | 6 | Deployment acceptance | Verify AWS, Kubernetes, and Azure in their separate deployment work. Then close the applicable remaining ledger items with profile-specific evidence. |
 
@@ -212,7 +212,8 @@ The pinned installation-hosted viewer uses the separate artifact origin and shor
 Recorded resources replay from the archive. Expiry closes the view; refresh and authorized local downloads provide recovery.
 See [Private trace viewing](trace-viewer.md) for setup, limits, isolation, and operator requirements.
 STUDIO-TRACE-001 and focused access checks pass. The implementation ledger records exact evidence and cleanup.
-Continue remaining catalog actions and category navigation. Evidence recovery, adapter retention, and timing parity remain open.
+Category navigation, metadata filters, stable sorting, and visible lifecycle actions now pass focused local verification.
+Continue catalog publication review, transfer workflows, and API list contracts. Evidence recovery, adapter retention, and timing parity remain open.
 
 Bulk metadata edits now support reviewed category, tags, owner, title, description, safety, rationale, and condition changes.
 The API and UI preserve source-owned definitions and use atomic revision-controlled preview plans.
@@ -222,7 +223,11 @@ Saved explicit selections and versioned filters now work through catalog API and
 Their previews pin a release and dependency closure before normal run creation.
 Runs retain saved definition snapshots. Later active releases or saved selection edits cannot rewrite those runs.
 Focused API checks and STUDIO-SELECTIONS-001 pass locally. The implementation ledger records evidence and cleanup.
-Catalog category-tree navigation, broader filters, and remaining item 21 workflows still require implementation.
+The catalog now provides category navigation, combined metadata filters, stable sorting, and preserved selections with hidden-selection counts.
+Common controls stay visible. Advanced filters and row More disclosures contain less frequent options.
+Enable, Disable, Archive, Restore, Duplicate, and History pass the targeted STUDIO-BROWSE-001 workflow.
+The browser filters its authorized working catalog. Server-side list filtering and cursor contracts remain pending.
+Item 21 stays open for the remaining catalog workflow review and complete API parity.
 Item **23** now passes a real local repository snapshot with two suites beside shared application source.
 Both suites build separate images, publish, and pass normal runs with one result and complete evidence.
 Item **24** previously passes two-image publication and execution without restarting the server.

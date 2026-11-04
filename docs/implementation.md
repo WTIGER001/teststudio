@@ -74,6 +74,39 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Category browsing, metadata filters, and direct lifecycle actions
+
+Acceptance **21** advances and remains open. The ledger stays **30 verified, 27 open, 57 total**.
+The catalog now provides flat table and category navigation views over the same authorized working definitions.
+Slash-separated paths form a hierarchy. Parent selections include descendants. Exact category scope remains available under Advanced filters.
+Branch counts follow the other active filters without hiding sibling navigation entries.
+Search, suite, readable application names, type, and sort controls remain visible.
+Advanced filters contains lifecycle, category, child-category scope, tag, owner, runner, safety, and source controls.
+Source matches executable or registered definition source identity. Stable suite and test identities resolve equal sort values.
+Selections survive filtering and view changes. The bulk bar identifies selected tests hidden by the current filters.
+Common Edit, Enable, Disable, and Restore actions stay on each applicable row.
+More contains History, Duplicate, and Archive. Existing revision and permission checks protect these unchanged server mutations.
+Small standalone filter, category, and table components replace embedded page markup.
+Pure utilities handle paths, tree counts, filtering, sorting, readable options, and hidden selection counts.
+Application names load after current permission readiness and cannot block the test list. Failed name reads retain identifier fallback with a message.
+The table preserves readable test-name width and scrolls within its own container.
+Catalog help, interface rules, the catalog guide, and self-test documentation match the implementation.
+
+Four targeted pure checks and the Angular production build pass.
+STUDIO-BROWSE-001 passes through normal TestStudio execution with complete evidence in about two seconds.
+It covers nested and adjacent categories, combined filters, readable application names, stable sorts, preserved selections, and empty-result recovery.
+The same workflow verifies duplicate, enable, disable, archive, restore, revision history, category keyboard disclosure, and light mobile and dark desktop layouts.
+The first focused pass finds a permission-readiness race in application label loading. The corrected workflow passes.
+Screenshot review identifies cramped test-name cells. The final focused pass verifies a readable minimum width and bounded page overflow.
+Evidence is output/selftest/20261104T022644.041563000-3b0a14670db4c5d56df95e09/summary.json and cleanup.json.
+The concise milestone record is output/catalog-browsing/checkpoint.json.
+All three focused verification runs have confirmed controller, browser container, and output-volume cleanup.
+No Go behavior changes, broad suite, or cloud verification runs occur for this interface milestone.
+
+The browser currently filters the authorized working catalog returned by the existing list operation.
+Server list filtering and cursor contracts, complete transfer workflow evidence, and publication change review remain under the existing catalog plan.
+Do not mark acceptance 21 complete from this browsing milestone alone.
+
 ### Private trace viewing and complete run evidence inspection
 
 Acceptances **42** and **45** are complete. The current ledger has **30 verified, 27 open, 57 total** items.

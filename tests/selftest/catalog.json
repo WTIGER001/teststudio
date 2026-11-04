@@ -2,6 +2,7 @@
   "schemaVersion": "teststudio.selftest/v1",
   "source": "teststudio-selftests",
   "tests": [
+    { "id": "STUDIO-BROWSE-001", "title": "Category browsing, metadata filters, sorting, retained selections and lifecycle actions", "selector": "@STUDIO-BROWSE-001", "category": "Catalog" },
     { "id": "STUDIO-TRACE-001", "title": "Private installation-hosted trace actions, DOM snapshots, access expiry and local download fallback", "selector": "@STUDIO-TRACE-001", "category": "Results" },
     { "id": "STUDIO-DIAGNOSTICS-001", "title": "Scoped failure steps, retry logs, private screenshots, evidence gaps and rerun response recovery", "selector": "@STUDIO-DIAGNOSTICS-001", "category": "Results" },
     { "id": "STUDIO-OWNER-001", "title": "Ordinary creator onboarding, scoped administration, publication and local execution", "selector": "@STUDIO-OWNER-001", "category": "Access" },

@@ -45,8 +45,28 @@ Create test opens a dedicated route and offers Playwright browser tests, HTTPS p
 Each type opens its focused creation workflow. See create-tests.md.
 
 
-The catalog table supports suite and lifecycle filters and explicit checkbox selection.
-It also filters by test type. Type remains separate from the execution runner.
+Search, suite, application, and test type stay visible above the catalog.
+Table shows a flat list. By category adds a hierarchical category navigator beside the same test list.
+Category paths use `/` between levels. Spaces beside separators do not change the path.
+Expand or collapse a branch with its native disclosure control. Select View all in a parent to include its children.
+Category counts follow search, lifecycle, suite, application, type, and the other metadata filters.
+The selected category does not hide sibling navigation entries. Clear category returns to the broader filtered list.
+
+Sort tests offers names in either direction, identifiers, category paths, and recently updated records.
+Stable suite and test identifiers resolve equal values. Sorting changes the display, not execution order.
+Advanced filters contains lifecycle state, exact category scope, tag, owner, runner, safety label, and source.
+Include child categories is on by default. Turn it off to match only the exact category.
+A source filter matches either the executable source or its registered definition source identifier.
+Filters combine. An empty result explains how to recover. Clear filters restores the active catalog across suites.
+Application options use readable registered names when the user can read application records.
+The browser filters the authorized working catalog. Published release selections remain separate.
+
+Selections survive filtering and view changes. The bulk bar shows how many selected tests are currently hidden.
+Select visible tests replaces the selection with the current filtered list. Clear selection removes every selected test.
+Review the complete selection before applying a bulk action.
+Edit and applicable Enable, Disable, or Restore actions stay visible on each row.
+More contains History, Duplicate, and Archive. Normal removal uses Archive and retains history.
+Changing lifecycle does not publish a release or rewrite an existing run.
 Bulk actions preview one suite at a time. Review the proposed states before applying changes.
 The import panel loads a JSON file or accepts pasted definitions.
 Export fills the document field and provides a local JSON download.

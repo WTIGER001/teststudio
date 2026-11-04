@@ -5,6 +5,9 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterLink } from '@angular/router'
 import { CatalogService } from './catalog.service'
 import { CatalogEntryService } from './catalog-entry.service'
+import { CatalogTableComponent } from './catalog-table.component'
+import { CatalogFiltersComponent } from './catalog-filters.component'
+import { CatalogCategoryNodesComponent } from './catalog-category-nodes.component'
 import { CatalogEntryComponent } from './catalog-entry.component'
 import { CatalogPlanService } from './catalog-plan.service'
 import { CatalogPlanComponent } from './catalog-plan.component'
@@ -20,7 +23,7 @@ import { CatalogTestFormComponent } from './catalog-test-form.component'
 
 @Component({
   standalone: true,
-  imports: [FormsModule, ReactiveFormsModule, RouterLink, CatalogEntryComponent, CatalogPlanComponent, CatalogBulkComponent, CatalogTransferComponent, CatalogSavedSelectionsComponent, CatalogTestFormComponent],
+  imports: [CatalogTableComponent, CatalogFiltersComponent, CatalogCategoryNodesComponent, FormsModule, ReactiveFormsModule, RouterLink, CatalogEntryComponent, CatalogPlanComponent, CatalogBulkComponent, CatalogTransferComponent, CatalogSavedSelectionsComponent, CatalogTestFormComponent],
   providers: [RecordCreationService, CatalogTestEditorService, HTTPCheckEditorService, TimingPolicyEditorService, CatalogService, CatalogEntryService, CatalogPlanService, CatalogSelectionService, CatalogBulkMetadataService, CatalogSavedSelectionsService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -46,24 +49,21 @@ import { CatalogTestFormComponent } from './catalog-test-form.component'
     }
     <section class="panel catalog-panel" aria-labelledby="catalog-title">
       <div class="section-top"><h2 id="catalog-title">All tests <span class="count-label">{{ service.visible().length }}</span></h2><span class="small muted">Definitions and history use stable identifiers.</span></div>
-      <div class="toolbar">
-        <div class="search-field"><label class="sr-only" for="catalog-search">Search tests</label><span aria-hidden="true">⌕</span><input id="catalog-search" type="search" placeholder="Search by name, identifier, category, or tag…" [ngModel]="service.query()" (ngModelChange)="service.query.set($event)"></div>
-        <label class="sr-only" for="catalog-suite-filter">Filter by suite</label><select id="catalog-suite-filter" [ngModel]="service.suiteFilter()" (ngModelChange)="service.suiteFilter.set($event)"><option value="">All suites</option>@for (suite of service.suites(); track suite.id) { <option [value]="suite.id">{{ suite.data.name }}</option> }</select>
-        <label class="sr-only" for="catalog-state">Lifecycle state</label><select id="catalog-state" [ngModel]="service.state()" (ngModelChange)="service.state.set($event)"><option value="active">Active catalog</option><option value="enabled">Enabled</option><option value="disabled">Disabled</option><option value="archived">Archived</option><option value="all">All states</option></select>
-        <label class="sr-only" for="catalog-type">Filter by type</label><select id="catalog-type" [ngModel]="service.typeFilter()" (ngModelChange)="service.typeFilter.set($event)"><option value="">All types</option>@for (type of service.types(); track type.value) { <option [value]="type.value">{{ type.label }}</option> }</select>
-      </div>
+      <ts-catalog-filters />
       <ts-catalog-bulk />
+      <div class="catalog-layout" [class.with-categories]="service.view() === 'categories'">
+        @if (service.view() === 'categories') {
+          <nav class="category-navigation" aria-label="Catalog categories"><h3>Categories</h3><button class="button small secondary" type="button" [attr.aria-current]="!service.filters().category ? 'true' : null" (click)="service.filter('category', '')">All categories</button><p class="small muted">Counts follow the other filters. Parent categories include their children.</p><ts-catalog-category-nodes [nodes]="service.categories()" [selected]="service.filters().category || ''" (choose)="service.filter('category', $event); service.filter('descendants', true)" /></nav>
+        }
+        <div class="catalog-results">
       @if (service.loading()) { <p class="loading-state" role="status">Loading the catalog…</p> }
       @else if (service.visible().length) {
-        <div class="table-scroll"><table><caption class="sr-only">Tests in this project</caption><thead><tr>@if (selection.canSelect()) { <th scope="col"><span class="sr-only">Select</span></th> }<th scope="col">Test</th><th scope="col">Suite / category</th><th scope="col">Type</th><th scope="col">Safety</th><th scope="col">State</th><th scope="col">Actions</th></tr></thead><tbody>
-          @for (item of service.visible(); track item.suiteId + '/' + item.id) {
-            <tr>@if (selection.canSelect()) { <td><input class="table-checkbox" type="checkbox" [checked]="selection.contains(item)" (change)="selection.toggle(item)" [attr.aria-label]="'Select ' + item.id"></td> }<td><strong>{{ item.data.title }}</strong><code class="table-subtitle">{{ item.id }} · revision {{ item.revision }}</code></td><td>{{ item.suiteName }}<span class="table-subtitle muted">{{ item.data.category }}</span></td><td><span class="badge">{{ item.data.type }}</span></td><td><span class="badge" [class.success]="item.data.safety === 'safe'" [class.warning]="item.data.safety === 'needs-review'">{{ item.data.safety }}</span></td><td><span class="state-label"><span class="status-dot" [class.inactive]="item.data.state !== 'enabled'" aria-hidden="true"></span>{{ item.data.state }}</span></td>
-              <td><div class="row-actions wrap-actions"><button class="button small subtle" type="button" (click)="entry.open(item, 'history')">History</button>@if (service.workspace.can('catalog.create')) { <button class="button small subtle" type="button" (click)="entry.open(item, 'duplicate')">Duplicate</button> }@if (service.workspace.can('catalog.update')) { <button class="button small subtle" type="button" (click)="service.edit(item)">Edit</button> }@if (service.workspace.can('catalog.archive') && item.data.state !== 'archived') { <button class="button small subtle" type="button" [disabled]="service.saving()" (click)="service.action(item, 'archive')">Archive</button> }@if (service.workspace.can('catalog.restore') && item.data.state === 'archived') { <button class="button small subtle" type="button" [disabled]="service.saving()" (click)="service.action(item, 'restore')">Restore</button> }</div></td></tr>
-          }
-        </tbody></table></div>
+        <ts-catalog-table />
       } @else {
-        <div class="empty-state"><span class="empty-icon" aria-hidden="true">✓</span><h3>{{ service.items().length ? 'No matching tests.' : 'Your next good answer starts here.' }}</h3><p>{{ service.items().length ? 'Try a different search or lifecycle filter.' : 'Create a suite, then add checks or publish a versioned test catalog.' }}</p>@if (!service.suites().length) { <a class="button secondary" [routerLink]="['/projects', service.projectId(), 'configuration']">Set up a suite</a> }</div>
+        <div class="empty-state"><span class="empty-icon" aria-hidden="true">✓</span><h3>{{ service.items().length ? 'No matching tests.' : 'Your next good answer starts here.' }}</h3><p>{{ service.items().length ? 'Try another category or clear filters to see all active tests.' : 'Create a suite, then add checks or publish a versioned test catalog.' }}</p>@if (!service.suites().length) { <a class="button secondary" [routerLink]="['/projects', service.projectId(), 'configuration']">Set up a suite</a> }</div>
       }
+        </div>
+      </div>
     </section>
     @if (service.suites().length && (service.workspace.can('catalog.import') || service.workspace.can('catalog.export'))) { <ts-catalog-transfer /> }
     @if (service.suites().length) { <p><a class="button secondary" [routerLink]="['/projects', service.projectId(), 'releases']">Browse retained releases</a></p> }
@@ -79,6 +79,7 @@ import { CatalogTestFormComponent } from './catalog-test-form.component'
         @if (!service.issues().length) { <p class="notice success">Validation passed. This does not indicate that the tests have run or passed.</p>@if (service.workspace.can('catalog.publish')) { <button class="button primary" type="button" (click)="service.publish()" [disabled]="service.saving()">Publish and activate</button> } }
       </section>
     }
-  `
+  `,
+  styles: [`:host { display: block; } .catalog-layout { min-width: 0; } .with-categories { display: grid; grid-template-columns: minmax(180px, 240px) minmax(0, 1fr); gap: 20px; } .category-navigation { min-width: 0; border-right: 1px solid var(--border); padding-right: 12px; } .catalog-results { min-width: 0; } @media (max-width: 1000px) { .with-categories { grid-template-columns: minmax(0, 1fr); } .category-navigation { border-right: 0; border-bottom: 1px solid var(--border); padding: 0 0 16px; } }`]
 })
 export class CatalogPage { readonly service = inject(CatalogService); readonly selection = inject(CatalogSelectionService); readonly entry = inject(CatalogEntryService) }

@@ -302,3 +302,11 @@ The original fixture website stops before inspection. The viewer must replay rec
 The check expires the real server grant, refreshes access, requests a separate download, and verifies keyboard return focus.
 It permits no external network responses. Its isolated browser and controller stop with normal self-test cleanup.
 This fixture does not replace the separate real prepared-suite execution checks.
+
+## Catalog browsing workflow
+
+Run `bash scripts/test-self.sh --test=STUDIO-BROWSE-001` after catalog browsing or row-action changes.
+The workflow creates new HTTP definitions through normal APIs in its disposable project.
+It covers nested and sibling categories, combined metadata filters, readable application names, sorting, and preserved hidden selections.
+It also covers duplicate, enable, disable, archive, restore, revision history, keyboard category disclosure, and mobile themes.
+This workflow does not execute the HTTP definitions. Execution and publication retain their existing focused workflows.

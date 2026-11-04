@@ -7,6 +7,7 @@ import { CatalogPlanService } from './catalog-plan.service'
 import { CatalogBulkMetadataService } from './catalog-bulk-metadata.service'
 import type { CatalogItem } from './catalog.models'
 import type { CatalogPlan } from './catalog-operations.models'
+import { hiddenCatalogSelections } from './catalog-browse.utils'
 import { bulkInput, catalogKey, selectedItems } from './catalog-operations.utils'
 
 @Injectable()
@@ -17,6 +18,7 @@ export class CatalogSelectionService {
   readonly metadata = inject(CatalogBulkMetadataService)
   readonly keys = signal<string[]>([])
   readonly items = computed(() => selectedItems(this.catalog.items(), this.keys()))
+  readonly hiddenCount = computed(() => hiddenCatalogSelections(this.items(), this.catalog.visible()))
   readonly canSelect = computed(() => this.catalog.workspace.can('catalog.update') || this.catalog.workspace.can('catalog.archive') || this.catalog.workspace.can('catalog.restore'))
   readonly action = signal('')
   readonly loading = signal(false)
