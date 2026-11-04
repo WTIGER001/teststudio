@@ -44,9 +44,20 @@ Five focused navigation utility checks and the Angular production build pass.
 STUDIO-NAV-001 passes with project-link ordering, no Workspace heading, no sidebar account link, and mobile global account navigation.
 Run: 20261104T143706.209433000-1adab9175059225f76a47692. Evidence is complete and the execution ledger is cleaned.
 Light and dark narrow-layout checks pass. The owned test container and browser processes are removed.
-The existing local demo serves the updated UI at http://127.0.0.1:8040 without a backend restart.
+The verified build contains the navigation correction. The user demo requires a restart to replace its private UI snapshot.
 Help, application guidance, UI rules, and the plan match the navigation correction.
 This refines verified items 49 and 50. The count remains 48 verified, 9 open. No cloud verification runs.
+
+### Served demo correction
+
+The user's follow-up exposes an older UI snapshot still served by the running demo.
+The earlier report of an updated user demo was incorrect. Compiling the source did not replace its private snapshot.
+The demo now restarts through its owned launcher and serves the corrected navigation at the same address.
+Its existing database, definitions, five retained runs, and evidence remain available. Setup does not seed another history.
+A focused local Playwright check verifies Projects above the selectors and no Workspace heading or sidebar account link.
+It also verifies the Parcel desk application context and global account navigation at a 390-pixel width without document overflow.
+The demo guide explains the required stop, start, and browser reload sequence.
+Acceptance items 49 and 50 retain their verified status. The total remains 48 of 57.
 
 ## Acceptance criteria
 

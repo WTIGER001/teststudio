@@ -18,6 +18,9 @@ Initial dependency downloads require network access. Test execution uses local r
 Later starts reuse unchanged builds and preserve your edits, history, and evidence.
 Each start serves a private snapshot of its compiled UI files.
 Later development builds do not replace assets used by that running demo.
+To load a newer interface, stop and start the demo, then reload the browser page.
+This keeps the database, test definitions, history, and evidence.
+Running the start command alone leaves an already running demo unchanged.
 Setup creates three HTTP runs and one browser run only once.
 The terminal prints the application address, project address, and local target address.
 Ports default to 8040, 8041, and 8060. A new installation selects free ports when needed.
@@ -28,7 +31,12 @@ Open **TestStudio local demo**.
 
 ## Explore applications
 
-Use the Project selector to choose a project. Select Applications under Testing. Open an application to see its environments and linked suites.
+Projects appears above the Project and Application selectors. It opens the project management page.
+Use the Project selector to choose a project. Use Application to switch the active testing context.
+Application testing contains Suites, Test catalog, Test runs, and Trends for that application.
+Choose All applications for a project-wide view. Project overviews also provides HTTPS probes.
+Your account lives in the global header. Accounts apply across TestStudio; project memberships grant project access.
+Workspace is not a separate ownership level.
 View tests opens a suite-filtered catalog. Create test keeps that suite selected through the type chooser.
 Authorized users add applications, environments, and linked suites through Name, Options, and Review steps.
 Select Suites for test groups, their scoped catalog links, and the shared New suite wizard.

@@ -43,6 +43,8 @@ Do not add new dashboard pages or repeat completed demonstration setup before cl
 Prioritize the tester's reported scope confusion before further hosted adapter work.
 Use one project selector, one application selector, and a persistent project and application context band.
 Place Projects before those selectors. Keep account access in the global header and omit the ambiguous Workspace section.
+The demo serves a private UI snapshot. After interface changes, restart it and verify the served page before reporting delivery.
+Keep its database and evidence. A source build alone does not refresh an already running demo.
 Application testing contains Overview, Suites, Test catalog, Test runs, and Trends with matching data filters.
 Project overviews provides All applications and HTTPS probes. Keep project administration visibly separate.
 Use explicit application routes. Preserve context in creation and investigation links, reload, and browser history.
