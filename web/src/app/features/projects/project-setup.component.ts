@@ -44,6 +44,7 @@ import { WizardFormDirective } from '../../shared/wizard/wizard-form.directive'
           <dt>Application</dt><dd>{{ service.form.controls.addApplication.value ? service.form.controls.applicationName.value : 'Add later' }}</dd><dt>Suite</dt><dd>{{ service.form.controls.addSuite.value ? 'Availability — initially empty' : 'Add later' }}</dd><dt>Target environment</dt><dd class="wrap-anywhere">{{ service.form.controls.addTarget.value ? service.form.controls.targetName.value + ' · ' + service.form.controls.stage.value + ' · ' + service.form.controls.url.value : 'Add later' }}</dd>
           @if (service.form.controls.addTarget.value) { <dt>Protection</dt><dd>{{ service.form.controls.protected.value ? 'Only production-safe tests, with protected execution permission' : 'Not protected' }}</dd> }
           </dl>
+          <p class="notice">Creating a project gives an ordinary creator project administration, test editing, publishing, and run access in this project. Existing installation administrators keep their current authority.</p>
           <p class="small muted">Setup uses your current permissions. If a step is denied, successful resources remain available and you can retry the remaining steps.</p>
         }
       }

@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 26 verified of 57.
+The acceptance count is 27 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -23,7 +23,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **10.** Users, groups, membership, custom roles, assignments, and effective permissions are manageable through authorized API and UI workflows.
 - [x] **11.** `wtiger001/go-permissions` evaluates access on PostgreSQL and SQLite through the same service and identity contracts.
 - [ ] **12.** User, group, role, object, and project grant checks cover explicit denies, expired grants, inheritance, and assignment revocation.
-- [ ] **13.** Project administrators cannot grant installation privileges or affect another project's groups, assignments, results, or evidence.
+- [x] **13.** Project administrators cannot grant installation privileges or affect another project's groups, assignments, results, or evidence.
 - [x] **14.** Membership and grant revocation reach all instances within the documented limit. Disabled users and revoked sessions fail their next request.
 - [x] **15.** Local credential changes, resets, disabling, and recovery preserve audit records and the last usable administrator.
 - [x] **16.** OIDC sign-in supports configured providers with code flow, PKCE, state, nonce, issuer and audience validation, key rotation, and logout.
@@ -73,6 +73,38 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
+
+### Project creator access and project administration boundaries
+
+Acceptance **13** is complete. The current ledger has **27 verified, 30 open, 57 total** items.
+Project administrators cannot assign installation privileges or affect another project's groups, assignments, runs, results, or evidence.
+Targeted API checks cover original and newly bootstrapped project administrators on SQLite and local PostgreSQL.
+They reject foreign group changes, shared-group assignment, foreign assignment and grant writes, installation role assignment, and installation-only permissions.
+They reject foreign run details, attempts, events, logs, artifact metadata, cancellation, and evidence grants.
+Using an owned project path for a foreign run or artifact returns not found.
+Existing custom-policy and inherited-role checks also reject cross-project delegation and installation escalation.
+
+Ordinary authorized project creators now receive four existing project-scoped roles: administrator, editor, publisher, and operator.
+Creation commits the project, managed assignment metadata, audit records, and directory revision together.
+Disabled setup roles, unauthorized actors, duplicate identities, and failed concurrent creates leave no partial access.
+Explicit denies remain effective. Revocation survives later project edits and independent service reads.
+Full installation administrators retain their existing authority without automatic project self-assignment.
+The project-administrator role itself remains unchanged. Existing projects receive no upgrade-time role changes.
+Shared assignment identity and state types preserve the existing metadata shape, revisions, and regular revocation controls.
+The wizard explains initial creator access on Review. User help and access documentation describe the roles, conditions, and API behavior.
+
+Four targeted creator domain checks and six relevant API checks pass with the race detector on SQLite and local PostgreSQL.
+Command selection is recorded in output/project-access/checkpoint.json.
+STUDIO-OWNER-001 passes through normal TestStudio execution with complete evidence.
+It uses an ordinary creator to register project resources, publish and run a native check, and delegate a scoped reviewer role.
+The first UI pass reaches successful execution but uses an incorrect Add role button label in its final test step.
+The corrected selector passes without another application change or repeated backend suite.
+Evidence is output/selftest/20261104T003512.986489000-2efe2d2ead9eea0f371bcf8a/summary.json and cleanup.json.
+The production UI build passes. Verification browser, controllers, worker containers, output volumes, and the local PostgreSQL container stop after checks.
+No AWS, Kubernetes, or Azure verification runs.
+
+Items **05**, **10**, and **12** advance through normal creator setup and durable role handling. Item **12** remains open for its broader scope.
+The next active batch is environment-backed recorded website execution.
 
 ### Plan reconciliation after tester walkthrough
 

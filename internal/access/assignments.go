@@ -2,9 +2,6 @@ package access
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"reflect"
 	"time"
@@ -22,17 +19,9 @@ type AssignmentDefinition struct {
 	Reason        string                    `json:"reason"`
 }
 
-type assignmentIdentity struct {
-	PrincipalKind permissions.PrincipalKind `json:"principalKind"`
-	PrincipalID   string                    `json:"principalId"`
-	RoleID        string                    `json:"roleId"`
-	Bindings      map[string]any            `json:"bindingValues"`
-}
+type assignmentIdentity = authorization.AssignmentIdentity
 
-type assignmentState struct {
-	assignmentIdentity
-	Present bool `json:"present"`
-}
+type assignmentState = authorization.AssignmentState
 
 type AssignmentView struct {
 	assignmentIdentity
@@ -66,18 +55,8 @@ func assignmentKey(project string, d AssignmentDefinition) assignmentIdentity {
 	return assignmentIdentity{PrincipalKind: d.PrincipalKind, PrincipalID: d.PrincipalID, RoleID: d.RoleID, Bindings: bindings}
 }
 
-func (a assignmentIdentity) id() string {
-	raw, _ := json.Marshal(a)
-	sum := sha256.Sum256(raw)
-	return hex.EncodeToString(sum[:])
-}
-
-func (a assignmentIdentity) principal() permissions.PrincipalRef {
-	return permissions.PrincipalRef{Kind: a.PrincipalKind, ID: a.PrincipalID}
-}
-
 func (s *Service) assignmentPresent(ctx context.Context, key assignmentIdentity) (bool, error) {
-	assignments, err := s.Auth.Engine.RoleAssignmentsForPrincipal(ctx, key.principal())
+	assignments, err := s.Auth.Engine.RoleAssignmentsForPrincipal(ctx, key.Principal())
 	if err != nil {
 		return false, err
 	}
@@ -94,7 +73,7 @@ func (s *Service) assignmentPresent(ctx context.Context, key assignmentIdentity)
 }
 
 func (s *Service) assignmentRecord(ctx context.Context, project string, key assignmentIdentity) (AssignmentRecord, storage.Record, error) {
-	metadata, err := s.Store.Get(ctx, "access-assignments", key.id())
+	metadata, err := s.Store.Get(ctx, "access-assignments", key.ID())
 	if err != nil && !errors.Is(err, storage.ErrNotFound) {
 		return AssignmentRecord{}, metadata, err
 	}
@@ -105,7 +84,7 @@ func (s *Service) assignmentRecord(ctx context.Context, project string, key assi
 		if err != nil {
 			return AssignmentRecord{}, metadata, err
 		}
-		if !reflect.DeepEqual(state.assignmentIdentity, key) || metadata.Project != project {
+		if !reflect.DeepEqual(state.AssignmentIdentity, key) || metadata.Project != project {
 			return AssignmentRecord{}, metadata, errors.New("assignment metadata does not match its identity")
 		}
 		revision = 2 * metadata.Revision
@@ -126,7 +105,7 @@ func (s *Service) assignmentRecord(ctx context.Context, project string, key assi
 	if err != nil {
 		return AssignmentRecord{}, metadata, err
 	}
-	view := AssignmentRecord{ID: key.id(), Project: project, Revision: revision, Data: AssignmentView{assignmentIdentity: key, PrincipalName: name, PrincipalActive: active, RoleName: role.Name, RoleDisabled: role.IsDisabled, Managed: managed}}
+	view := AssignmentRecord{ID: key.ID(), Project: project, Revision: revision, Data: AssignmentView{assignmentIdentity: key, PrincipalName: name, PrincipalActive: active, RoleName: role.Name, RoleDisabled: role.IsDisabled, Managed: managed}}
 	if managed {
 		view.Updated = &metadata.Updated
 	}
@@ -245,9 +224,9 @@ func (s *Service) applyAssignment(ctx context.Context, actor, project string, d 
 		}
 	}
 	if remove {
-		err = s.Auth.Engine.UnassignRole(ctx, key.principal(), key.RoleID, key.Bindings)
+		err = s.Auth.Engine.UnassignRole(ctx, key.Principal(), key.RoleID, key.Bindings)
 	} else {
-		err = s.Auth.Engine.AssignRole(ctx, key.principal(), key.RoleID, key.Bindings)
+		err = s.Auth.Engine.AssignRole(ctx, key.Principal(), key.RoleID, key.Bindings)
 	}
 	if err != nil {
 		return AssignmentRecord{}, err
@@ -261,7 +240,7 @@ func (s *Service) applyAssignment(ctx context.Context, actor, project string, d 
 			return AssignmentRecord{}, errors.New("the change would remove the last usable installation administrator")
 		}
 	}
-	c, err := storage.Put("access-assignments", key.id(), project, metadata.Revision, assignmentState{assignmentIdentity: key, Present: !remove})
+	c, err := storage.Put("access-assignments", key.ID(), project, metadata.Revision, assignmentState{AssignmentIdentity: key, Present: !remove})
 	if err != nil {
 		return AssignmentRecord{}, err
 	}
@@ -270,7 +249,7 @@ func (s *Service) applyAssignment(ctx context.Context, actor, project string, d 
 	if remove {
 		action, prior, after = "role.revoke", before.Data, nil
 	}
-	audit, err := domain.Audit(actor, project, action, key.id(), prior, map[string]any{"value": after, "reason": d.Reason})
+	audit, err := domain.Audit(actor, project, action, key.ID(), prior, map[string]any{"value": after, "reason": d.Reason})
 	if err != nil {
 		return AssignmentRecord{}, err
 	}

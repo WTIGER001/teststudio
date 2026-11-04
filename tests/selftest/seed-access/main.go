@@ -28,7 +28,7 @@ func main() {
 }
 
 func run() error {
-	if len(os.Args) != 2 || !domain.ValidID(os.Args[1]) {
+	if (len(os.Args) != 2 && len(os.Args) != 3) || !domain.ValidID(os.Args[1]) || len(os.Args) == 3 && os.Args[2] != "creator" {
 		return errors.New("one project identifier is required")
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
@@ -57,6 +57,9 @@ func run() error {
 	auth, err := authorization.New(ctx, permissionsqlite.New(db), directory)
 	if err != nil {
 		return err
+	}
+	if len(os.Args) == 3 {
+		return prepareCreator(ctx, db, auth)
 	}
 	user, err := directory.ResolveExternal(ctx, "https://identity.selftest.invalid", "project-manager", "Project manager", "manager@example.test", true, true)
 	if err != nil {

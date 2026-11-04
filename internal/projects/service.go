@@ -29,11 +29,10 @@ func (s *Service) SaveProject(ctx context.Context, user string, p Project, revis
 	if !domain.ValidID(p.ID) || strings.TrimSpace(p.Name) == "" {
 		return errors.New("valid project identifier and name are required")
 	}
-	permission, scope := "projects.manage", p.ID
 	if revision == 0 {
-		permission, scope = "projects.create", ""
+		return s.createProject(ctx, user, p)
 	}
-	if err := s.Auth.Check(ctx, user, scope, "", permission); err != nil {
+	if err := s.Auth.Check(ctx, user, p.ID, "", "projects.manage"); err != nil {
 		return err
 	}
 	if err := capture.Validate(capture.Resolve(p.Capture, nil), capture.ResolveLimits(p.CaptureLimits)); err != nil {

@@ -53,10 +53,10 @@ const server = createServer(async (request, response) => {
       } finally { restarting = false }
       return
     }
-    if (request.method === 'POST' && request.url === '/access/prepare') {
+    if (request.method === 'POST' && ['/access/prepare', '/access/creator'].includes(request.url)) {
       if (typeof body.project !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(body.project)) { response.writeHead(400).end(); return }
       const fixture = await new Promise((resolve, reject) => {
-        const helper = execFile('/app/access-fixture', [body.project], { env: { PATH: process.env.PATH, TMPDIR: '/tmp' }, timeout: 10000, maxBuffer: 4096 }, (error, stdout) => {
+        const helper = execFile('/app/access-fixture', request.url === '/access/creator' ? [body.project, 'creator'] : [body.project], { env: { PATH: process.env.PATH, TMPDIR: '/tmp' }, timeout: 10000, maxBuffer: 4096 }, (error, stdout) => {
           helpers.delete(helper)
           if (error) reject(new Error('Fixture preparation failed')); else resolve(stdout)
         })

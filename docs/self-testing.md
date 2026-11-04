@@ -241,3 +241,12 @@ STUDIO-APPS-001 covers the shared registration wizard and locked application ass
 STUDIO-HTTPS-001 covers advanced assertions and retained diagnostics.
 STUDIO-CATALOG-001 and STUDIO-SELECTIONS-001 cover reviewed normal runs and saved selection previews.
 Select only these workflows for wizard changes. Cloud verification remains separate.
+
+## Ordinary project creator workflow
+
+STUDIO-OWNER-001 starts from an isolated identity with only project creation authority.
+It completes project, application, target, and suite setup through the UI.
+It creates and publishes a native check, runs it locally, and adds an existing project reviewer.
+It verifies managed project assignments, limited project discovery, and the absence of installation authority.
+The fixture session is private to its disposable local TestStudio instance.
+Use the targeted selector after changing initial project access or its guided setup.

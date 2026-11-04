@@ -2,7 +2,7 @@
 
 The first delivery presents a usable local TestStudio application.
 The complete product plan and 57 acceptance items remain the later delivery scope.
-The current acceptance ledger has 26 verified items. It measures full product requirements rather than the size of this demonstration.
+The current acceptance ledger has 27 verified items. It measures full product requirements rather than the size of this demonstration.
 
 ## Existing application
 
@@ -59,8 +59,8 @@ This follow-up does not change the demonstration setup or add a demonstration ga
 ## Next usable workflow
 
 The completed demonstration checklist remains complete. It does not prove all ordinary-user or hosted workflows.
-The next delivery verifies project creator access, then environment-backed recorded website execution.
-Current project creation does not assign initial project access. The local installation administrator masks that gap.
+Project creator access now passes ordinary-user setup and scoped-boundary checks.
+The next delivery implements environment-backed recorded website execution.
 Current recording saves source but its website draft cannot execute through the isolated offline profile.
 Follow [the active delivery plan](plan.md#active-delivery-plan-after-the-tester-walkthrough) for bounded batches and required evidence.
 Keep the running demonstration available while these workflows are implemented.

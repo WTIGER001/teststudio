@@ -391,6 +391,41 @@ The built-service check verifies custom policies, inherited group assignment, ex
 It uses a new managed local user and random passwords held in memory.
 All owned verification controllers exit after the check.
 
+## Initial project creator access
+
+Creating a project requires installation-scoped projects.create permission.
+Ordinary creators receive four existing roles, bound only to the new project's identifier:
+
+- Project administrator manages the project's applications, targets, membership, and access.
+- Catalog editor creates and changes test definitions.
+- Publisher manages suites and sources and publishes releases.
+- Operator starts runs and manages schedules.
+
+The project and these managed assignments commit in one transaction with audit records.
+If a required role is disabled or an assignment fails, the project and partial access do not commit.
+The error identifies the unavailable role. An installation operator must repair that policy before another create attempt.
+Explicit denies remain effective. Initial assignments grant no installation privileges or protected-target execution permission.
+Assignment routes expose these records with their normal revisions, management timestamps, and revocation controls.
+Revoking a role remains effective after project edits. Updating a project never repeats its initial assignments.
+A duplicate project identifier returns a conflict without assigning access or changing its owner experience.
+
+An actor with every installation permission already has complete installation administration.
+Such actors keep their existing authority without automatic project self-assignment.
+They can assign explicit project roles before withdrawing installation administration when retained project access is required.
+Existing projects receive no automatic access changes during startup or upgrade.
+The Project administrator role itself still does not include editing, publishing, or running tests.
+Those capabilities come from the separate initial assignments and remain independently revocable.
+
+### Project creation API
+
+POST /api/v1/projects accepts id, name, description, archived, and the existing optional project policies.
+The request selects no role identifiers, principals, or assignment bindings.
+The response remains the normal project record. Creation returns HTTP 200.
+Current session, Origin, and request-forgery protection apply.
+Missing authority returns 403. Duplicate identity returns 409. Invalid or unavailable setup policy returns 422.
+Use the existing project read route to reconcile an interrupted successful response before retrying creation.
+Initial assignment inspection and removal use the ordinary project role-assignment routes.
+
 ## Predefined role assignments
 
 Create an assignment with `principalKind`, `principalId`, `roleId`, and a nonblank `reason`.

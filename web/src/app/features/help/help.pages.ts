@@ -318,7 +318,7 @@ export const helpPages: Record<string, HelpPage> = {
     concepts: [
       { title: 'Project', description: 'A project provides the shared home for a test catalog, configuration, and run history.' },
       { title: 'Permanent identifier', description: 'Identifiers stay stable when display names change. Use letters, numbers, periods, underscores, or hyphens.' },
-      { title: 'Permissions', description: 'The projects and controls you see depend on your access. Creating a project requires project creation permission.' }
+      { title: 'Permissions', description: 'The projects and controls you see depend on your access. Creating a project requires project creation permission. Ordinary creators receive project-scoped administration, editing, publication, and run roles together. Installation privileges do not change.' }
     ],
     tutorials: [
       { title: 'Create your first project', steps: ['Enter a project name. The permanent identifier is generated; change it under Advanced details when needed.', 'Select Continue. Name your first application and choose whether to create an empty Availability suite.', 'Select Continue. Optionally register a target URL, stage, and protection.', 'Review the selected resources, then select Create project. No tests run during setup.', 'If setup stops after creating resources, Retry remaining setup continues without creating those resources again.'] },

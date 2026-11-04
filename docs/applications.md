@@ -66,3 +66,14 @@ Each resource uses the existing API and current permissions.
 If setup stops, successful resources remain. Retry remaining setup skips confirmed successful steps.
 Entries lock after project creation. Open the created project provides access to existing resources.
 Reloading ends the in-page continuation. Users can manage retained resources from Applications or Project settings.
+
+## Project creator access
+
+Project creation now gives ordinary authorized creators project administration, test editing, publishing, and run roles for the new project.
+Creation saves the project and initial access together. It grants no installation administration.
+The project wizard explains this access on Review before creation.
+This lets a permitted creator complete the first application, target, and suite setup without an installation administrator session.
+If a required predefined role is disabled, creation fails without saving partial project access.
+Existing installation administrators use their existing authority without automatic project self-assignment.
+Project edits do not restore revoked roles. Existing projects receive no automatic access changes.
+See [Initial creator access](access.md#initial-project-creator-access) for API behavior, policy, and recovery.

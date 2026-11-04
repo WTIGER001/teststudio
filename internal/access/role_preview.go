@@ -68,7 +68,7 @@ func (s *Service) PreviewRolePolicy(ctx context.Context, actor string, input Rol
 		}
 		if !input.Policy.Disabled && !result.UserDisabled {
 			key := assignmentKey(result.Project, AssignmentDefinition{PrincipalKind: "user", PrincipalID: input.User, RoleID: input.Policy.ID})
-			if err := bound.Auth.Engine.AssignRole(ctx, key.principal(), key.RoleID, key.Bindings); err != nil {
+			if err := bound.Auth.Engine.AssignRole(ctx, key.Principal(), key.RoleID, key.Bindings); err != nil {
 				return err
 			}
 		}

@@ -15,9 +15,9 @@ The full product scope remains required. This direction supersedes the testing s
 ## Active delivery plan after the tester walkthrough
 
 This section is the current implementation order. Historical continuation commands below do not override it.
-The local demonstration is usable and verified. The complete product remains unfinished at 26 verified items out of 57.
-The next goal is a complete tester journey with ordinary project access and a real recorded website test.
-Do not add new dashboard pages or repeat completed demonstration setup before closing these workflow gaps.
+The local demonstration is usable and verified. The complete product remains unfinished at 27 verified items out of 57.
+Ordinary project creator access now passes targeted verification. Continue with a real recorded website test.
+Do not add new dashboard pages or repeat completed demonstration setup before closing the remaining workflow gaps.
 
 ### Current decisions
 
@@ -42,24 +42,24 @@ Complete one coherent batch before adding the next. Update its user help and rel
 
 | Priority | Batch | Completion evidence |
 | --- | --- | --- |
-| 1 | Project creator access | A permitted creator receives the intended project-scoped administrator access and can complete setup without installation administrator privileges. Creation and initial access are atomic and audited. |
+| Complete | Project creator access | Ordinary creator setup, managed scoped roles, publication, local execution, atomic rollback, and project boundaries pass on SQLite and local PostgreSQL. Acceptance 13 is verified. |
 | 2 | Recorded website execution locally | Record a new generic local website journey, review and save it, prepare and publish it, select its registered target, and run it successfully with retained evidence. |
 | 3 | Tester operation and failure recovery | A tester can find a failed step, logs, screenshot, timeout, and retry result. Permission loss and partial failures explain recovery without losing saved work. |
 | 4 | Remaining catalog and evidence gaps | Continue category navigation, remaining catalog actions, private trace viewing, evidence state and retention, and timing parity against the existing acceptance ledger. |
 | 5 | Hosted packaging and provider adapters | Implement and document independent provider configuration, worker dispatch, private artifacts, cancellation, deadlines, and recovery. Use local contract checks first. |
 | 6 | Deployment acceptance | Verify AWS, Kubernetes, and Azure in their separate deployment work. Then close the applicable remaining ledger items with profile-specific evidence. |
 
-The creator-access batch addresses an observed gap in internal/projects/service.go and the project creation handler.
-Current project creation saves a record and audit entry. It does not create an initial project assignment.
-The local installation administrator already has access, so that demonstration does not prove ordinary creator onboarding.
-Use the existing project administrator role for the initial owner experience unless a separate ownership requirement emerges.
-Initial access applies only to the new project. It grants no installation authority and cannot override explicit denies.
-Preserve domain permission checks, durable assignment records, atomic failure behavior, and audit history.
-Verify one authorized creator and one unauthorized actor with targeted local checks.
-Keep direct owner-managed membership and the existing local/OIDC identity model.
+The creator-access batch fixes the missing initial assignments in project creation.
+Ordinary creators receive the existing administrator, editor, publisher, and operator roles bound only to their new project.
+The project and initial assignments commit atomically with audit records and the directory revision.
+The administrator role itself retains its existing responsibilities. Full installation administrators keep existing authority without automatic project self-assignment.
+Disabled required roles prevent partial creation. Explicit denies remain effective. Project edits do not restore revoked roles.
+Existing projects receive no automatic access changes during upgrade.
+See [initial creator access](access.md#initial-project-creator-access) for current API behavior and role policy.
+SQLite, local PostgreSQL, and STUDIO-OWNER-001 evidence are recorded in the implementation ledger.
 
 This sequence changes implementation priority, not the scope or numbering of the 57 acceptance criteria.
-Relevant open access work remains under 12 and 13. Broad catalog, execution, and evidence requirements remain open.
+Acceptance 13 is complete. Remaining access checks stay under 12. Catalog, execution, and evidence requirements remain open.
 Do not treat these batches as additional acceptance items or claim the whole product complete after a demonstration.
 
 ### Recorded browser execution scope
@@ -194,12 +194,12 @@ Imports and retained releases stay under Advanced testing.
 Quick HTTPS probes now accept a complete URL directly, including addresses without an explicit port.
 The wizard reuses matching registered targets and preserves their protection.
 Review lists new target configuration and any new application before explicit saving.
-Follow the active delivery sequence above: project creator access, then environment-backed recorded browser execution.
+Follow the active delivery sequence above. Project creator access is complete; environment-backed recorded browser execution is next.
 The next implementation batches follow the full ledger without adding new gates to the usable demonstration.
 
 ## Current implementation checkpoint
 
-The acceptance ledger has **26 verified, 31 open, 57 total** items.
+The acceptance ledger has **27 verified, 30 open, 57 total** items.
 Bulk metadata edits now support reviewed category, tags, owner, title, description, safety, rationale, and condition changes.
 The API and UI preserve source-owned definitions and use atomic revision-controlled preview plans.
 Safety changes recheck current publishing permission. Stored previews recheck exact read and editing authority.

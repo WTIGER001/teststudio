@@ -98,7 +98,7 @@ func (s *Service) ApplyPendingAccess(ctx context.Context, proof authoidc.SignInI
 					}
 				}
 				now := time.Now().UTC()
-				value.State, value.ActivatedAt, value.ActivatedUser, value.AssignmentID = "activated", &now, user.ID, key.id()
+				value.State, value.ActivatedAt, value.ActivatedUser, value.AssignmentID = "activated", &now, user.ID, key.ID()
 				action = "project-access.activate"
 			}
 			change, err := storage.Put(pendingAccessBucket, value.ID, value.Project, row.Revision, value)
