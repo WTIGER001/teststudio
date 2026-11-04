@@ -223,10 +223,18 @@ A new prerequisite now supplies the worker-facing process: the standalone testst
 The existing API owns a second worker listener and retains private storage. The relay forwards only four bounded operations to one trusted HTTPS backend.
 The production command links only the standard library and small wire helpers. It has no storage, identity-service, secret, or cloud-SDK dependency.
 Seven new focused local race checks and two existing durable exchange checks pass. Local listener cleanup passes.
-A separate scratch-image Dockerfile is staged. Its reproducible builder and provider wiring remain unfinished; no image build runs.
+The standalone batch introduces a separate scratch-image Dockerfile. Its builder now passes local packaging checks below; provider wiring remains unfinished.
 See [standalone private worker relay](worker-relay.md). Acceptance 51 advances; the count remains 48 of 57.
 
-Next package the relay image without rebuilding UI assets, then inspect exchange service authority.
+Relay image packaging now compiles only the relay and health commands and reuses the pinned certificate source.
+The local-only builder supports explicit architecture and buildx, hashes source and binary inputs, and reuses an unchanged image.
+The AMD64 package passes seven focused container checks on the current ARM64 host.
+It starts non-root with read-only root, no capabilities, no network, and no writable mounts. Static binary and CA bundle checks pass.
+A warm invocation reuses both binaries, certificates, and the exact image. Owned extraction and verification containers are absent.
+No UI, runner, broader Go suite, registry push, or deployment runs.
+See [relay packaging](worker-relay.md#packaging-boundary). Acceptances 51 and supporting packaging under 57 advance; the count remains 48 of 57.
+
+Next inspect exchange service authority using the packaged relay.
 Inspect the separate exchange environment, service-side approval, isolated application inventory, and HTTPS hostname authority.
 Resolve effective VNet-wide private-zone visibility and attachment controls. Selected-zone inspection cannot rule out other shadowing zones.
 Keep that proof separate from configured record correctness and private endpoint ownership.

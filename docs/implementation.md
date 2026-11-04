@@ -122,7 +122,42 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: standalone private worker relay
+## Current delivery: minimal worker relay image packaging
+
+Acceptance **51** and supporting packaging under **57** advance. The verified count remains **48 of 57**, with **9 open**.
+The standalone relay batch commits as 763daf4.
+
+The new builder compiles only teststudio-exchange and teststudio-health for an explicit Linux architecture.
+It uses disabled CGO, readonly module inputs, trimmed paths, disabled VCS stamping, and recorded target settings.
+It reuses the existing immutable certificate source and copies only its public CA bundle.
+No UI assets, preparation executable, API executable, database directory, installation credential, or runner image enters the context.
+Local-only mode requires a local Docker socket and refuses to pull a missing certificate-source image.
+Image builds use no build network or implicit pull. No registry push occurs.
+
+Source and compiler fingerprints preserve unchanged binary reuse. File hashes verify those cached artifacts.
+Image identity binds actual binary and certificate bytes, architecture, Dockerfile, build tooling, and source policy.
+A warm invocation reuses both binaries, the certificate bundle, and the exact immutable image without rebuilding.
+Only Docker's fixed default PATH can appear in the image environment.
+Public CA permissions are corrected so the non-root process can read the bundle.
+
+The AMD64 relay package passes seven focused local checks on the ARM64 Docker host.
+It starts as user 65532 with read-only root, no capabilities, no network, and no writable mounts.
+In-image process health and liveness pass. Exported artifact digests and non-root file permissions match.
+Both ELF64 executables match AMD64 and require no dynamic interpreter.
+The exported filesystem contains only required artifacts and known Docker runtime files, including empty device placeholders.
+Graceful shutdown exits successfully. Exact extraction and verification container absence is confirmed.
+
+Initial checker assumptions reject Docker's default PATH and its empty console placeholder. Those expectations are corrected before final verification.
+The certificate readability issue is fixed in the prepared context and covered by the final package check.
+No unchanged relay Go check, broader Go suite, UI build, runner fixture, cloud credential, live cloud API, registry push, or deployment runs.
+Evidence is output/worker-relay-image/build.json, cache-reuse.json, and runtime/summary.json.
+
+This verifies the local AMD64 package. It does not prove backend TLS reachability or hosted service authority.
+Continue Azure exchange environment approval, isolated application inventory, immutable relay configuration, and certificate/hostname binding.
+Restricted backend placement, effective DNS visibility, trusted preparation networking, cross-job isolation, execution placement, and role bindings remain required.
+Azure coded execution stays disabled. See [worker relay packaging](worker-relay.md#packaging-boundary).
+
+## Previous delivery: standalone private worker relay
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 The preceding registry service batch commits as 71b7801.

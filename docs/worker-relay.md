@@ -113,15 +113,53 @@ Shutdown closes the owned listener and idle backend connections.
 
 ## Packaging boundary
 
-The staged deploy/worker-relay/Dockerfile uses scratch and user 65532:65532.
+The deploy/worker-relay/Dockerfile uses scratch and user 65532:65532.
 Its prepared context contains teststudio-exchange, teststudio-health, and a CA certificate bundle.
 It contains no UI, API executable, preparation executable, database directory, or credential configuration.
 Its health probe uses the existing health command on port 8043.
 
-This delivery does not build or publish that image.
-A reproducible image builder, immutable image approval, private registry access, provider service wiring, and deployed checks remain required.
-Use the approved certificate source and architecture rules from the existing service packaging workflow when completing that builder.
-Do not rebuild unrelated UI assets for the relay.
+The new builder compiles only the relay and health binaries. It does not invoke UI, trace-viewer, preparation, or runner image builds.
+It uses Linux, disabled CGO, readonly module inputs, trimmed paths, disabled VCS stamping, and explicit target architecture settings.
+Both amd64 and arm64 are supported. Cross-architecture image builds require buildx.
+The local verification in this delivery covers amd64 on the current ARM64 Docker host.
+
+```sh
+mkdir -p output/worker-relay-image
+node scripts/build-worker-relay-image.mjs --arch=amd64 --local-only > output/worker-relay-image/build.json
+python3 scripts/verify-worker-relay-image.py --build-result output/worker-relay-image/build.json --output output/worker-relay-image/runtime
+```
+
+If Docker cannot discover buildx, supply --buildx=/trusted/path/docker-buildx.
+Omitting --arch selects the Docker host architecture.
+The --local-only option requires a local Docker socket and forbids pulling a missing certificate-source image.
+Without that option, the builder can fetch only the configured immutable certificate-source image when needed.
+It never pushes the relay image.
+
+The certificate source is the existing pinned deploy/service/certificate-source.json resource.
+Only its public CA bundle enters the scratch image. No source-image executable or filesystem directory enters the package.
+The private cache protects its files. The prepared image context makes the public certificate bundle readable by the non-root runtime.
+The extraction container uses a unique owned name, never starts, and is removed with confirmed absence.
+Build contexts disappear in finally cleanup.
+
+The builder stores separate target caches under .data/worker-relay-build.
+Selected Go source files, module metadata, compiler version, build arguments, and target settings determine binary reuse.
+It verifies each cached binary's content hash before reuse.
+The image identity binds binary hashes, certificate source and content, Dockerfile, builder scripts, and build backend version.
+It verifies immutable image identity, architecture, source label, non-root user, entrypoint, environment, and absence of image-owned volumes.
+Only Docker's standard PATH value can appear in its environment.
+An unchanged invocation reuses both binaries, the certificate bundle, and the exact image.
+It does not recompile, extract certificates, or perform an image build.
+
+The local package check starts one owned container with no network, read-only root, no capabilities, and no writable mounts.
+It runs the image's health and liveness probes and verifies bounded process configuration.
+It inspects the exported filesystem without extracting application files.
+Required artifact digests and readable or executable permissions must match the builder output.
+Both executables must match the selected Linux architecture and require no dynamic interpreter.
+Only the three regular package artifacts and known Docker runtime files are permitted.
+The checker verifies graceful shutdown and confirms removal of its exact container.
+
+Local packaging does not prove backend TLS reachability or complete Azure service authority.
+Immutable registry publication, installed service image approval, private registry access, provider wiring, and separate deployment checks remain required.
 
 ## Targeted local verification
 
@@ -137,13 +175,17 @@ python3 scripts/verify-worker-relay-dependencies.py
 ```
 
 All owned local HTTP and TLS listeners close through test cleanup. The command shutdown check confirms its port rejects new connections.
-No cloud credential, live cloud API, deployment, registry push, UI build, browser, container, or image build runs.
-Evidence is output/worker-relay/summary.json and the targeted command results.
+The earlier relay workflow evidence is output/worker-relay/summary.json.
+The packaging delivery adds one focused seven-check container workflow and one warm-cache reuse check.
+Its evidence is output/worker-relay-image/build.json, cache-reuse.json, and runtime/summary.json.
+Package verification accounts for Docker's default PATH and empty runtime device placeholders without allowing application configuration or extra payload files.
+The certificate permission fix ensures that the non-root runtime can read its trusted public roots.
+No Go runner fixture, broader Go suite, UI build, browser, cloud credential, live cloud API, registry push, or deployment runs.
 Acceptance 51 advances. The count remains 48 verified items out of 57.
 
 ## Next implementation
 
-Complete reproducible relay image packaging without a UI dependency.
+Use the verified relay image package for the next private service configuration batch.
 Inspect Azure exchange environment approval, isolated application inventory, immutable relay image, argument configuration, and HTTPS certificate binding.
 Verify that its backend reaches only the trusted worker listener and carries no installation credentials.
 Complete effective DNS visibility, trusted preparation networking, cross-job isolation, execution placement, and role binding before native Azure enablement.
