@@ -173,3 +173,19 @@ func TestECSConcurrentControllersReserveOnlyOneRegistrationAndLaunch(t *testing.
 		t.Fatal("changed stop schedule was deleted as owned")
 	}
 }
+
+func TestECSImageAdmissionRequiresSupportedNonRootTaskVolumes(t *testing.T) {
+	p, f, job := lifecycle(t, "go", "", "")
+	image, err := p.InspectImage(t.Context(), job.Image)
+	if err != nil || image.ExecutionProfile == "" {
+		t.Fatal("supported task storage rejected", err)
+	}
+	f.storage = ""
+	if _, err := p.InspectImage(t.Context(), job.Image); !errors.Is(err, hostedexecution.ErrConfiguration) {
+		t.Fatal("legacy image admitted without task volume contract", err)
+	}
+	f.storage = "unexpected"
+	if _, err := p.InspectImage(t.Context(), job.Image); !errors.Is(err, hostedexecution.ErrConfiguration) {
+		t.Fatal("unsupported task storage admitted", err)
+	}
+}

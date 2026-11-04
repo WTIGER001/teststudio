@@ -11,6 +11,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/wtiger001/teststudio/internal/hostedexecution"
 )
 
 type registryFixture struct {
@@ -273,5 +275,46 @@ func TestRegistryBlobRedirectsRequireAnExplicitOriginAndStripCredentials(t *test
 	f.client.blobRedirectOrigins[f.server.URL] = true
 	if _, err := f.client.Inspect(t.Context(), f.reference); err != nil || contentRequests != 1 {
 		t.Fatal("approved checksummed blob redirect failed", err)
+	}
+}
+
+func TestRegistryValidatesOptionalTaskVolumeCapability(t *testing.T) {
+	for _, runner := range []string{"go", "playwright"} {
+		for _, mode := range []string{"valid", "missing-path", "extra-path", "null-volume", "unknown-capability", "legacy"} {
+			t.Run(runner+"-"+mode, func(t *testing.T) {
+				f := fresh(t, runner, false, func(c *configuration, _ *manifest) {
+					if mode == "legacy" {
+						return
+					}
+					c.Config.Labels["teststudio.task-storage"] = hostedexecution.NonRootTaskStorage
+					c.Config.Volumes = map[string]json.RawMessage{"/tmp": json.RawMessage(`{ }`), "/output": json.RawMessage(`{}`)}
+					switch mode {
+					case "missing-path":
+						delete(c.Config.Volumes, "/output")
+					case "extra-path":
+						c.Config.Volumes["/runner"] = json.RawMessage(`{}`)
+					case "null-volume":
+						c.Config.Volumes["/tmp"] = json.RawMessage(`null`)
+					case "unknown-capability":
+						c.Config.Labels["teststudio.task-storage"] = "unexpected"
+					}
+				})
+				metadata, err := f.client.Inspect(t.Context(), f.reference)
+				if mode == "valid" || mode == "legacy" {
+					if err != nil {
+						t.Fatal(err)
+					}
+					want := ""
+					if mode == "valid" {
+						want = hostedexecution.NonRootTaskStorage
+					}
+					if metadata.Image.TaskStorage != want {
+						t.Fatal("capability lost")
+					}
+				} else if !errors.Is(err, ErrInvalid) {
+					t.Fatal("unsupported task volume metadata admitted", err)
+				}
+			})
+		}
 	}
 }

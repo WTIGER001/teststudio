@@ -82,8 +82,18 @@ func TestFargatePlansKeepDiscoveryAndExecutionFixedAndCredentialsOutsideDefiniti
 				}
 				draft := p.Definition()
 				container := draft.ContainerDefinitions[0]
-				if len(draft.ContainerDefinitions) != 1 || aws.ToString(draft.TaskRoleArn) != "" || aws.ToString(draft.ExecutionRoleArn) != c.ExecutionRole || aws.ToString(draft.Cpu) != "2048" || aws.ToString(draft.Memory) != "4096" || len(draft.Volumes) != 0 || len(container.Environment) != 0 || len(container.Secrets) != 0 || container.LogConfiguration != nil || aws.ToString(container.User) != "1000:1000" || !aws.ToBool(container.ReadonlyRootFilesystem) || len(container.LinuxParameters.Tmpfs) != 2 {
+				if len(draft.ContainerDefinitions) != 1 || aws.ToString(draft.TaskRoleArn) != "" || aws.ToString(draft.ExecutionRoleArn) != c.ExecutionRole || aws.ToString(draft.Cpu) != "2048" || aws.ToString(draft.Memory) != "4096" || len(draft.Volumes) != 2 || len(container.Environment) != 0 || len(container.Secrets) != 0 || container.LogConfiguration != nil || aws.ToString(container.User) != "1000:1000" || !aws.ToBool(container.ReadonlyRootFilesystem) || len(container.LinuxParameters.Tmpfs) != 0 {
 					t.Fatal("worker definition changed its fixed isolation contract")
+				}
+				if draft.EphemeralStorage == nil || draft.EphemeralStorage.SizeInGiB != 21 || len(container.MountPoints) != 2 {
+					t.Fatal("task-local storage allocation changed")
+				}
+				for index, path := range []string{"/tmp", "/output"} {
+					mount := container.MountPoints[index]
+					volume := draft.Volumes[index]
+					if aws.ToString(mount.ContainerPath) != path || aws.ToString(mount.SourceVolume) != aws.ToString(volume.Name) || aws.ToBool(mount.ReadOnly) || volume.Host != nil || volume.DockerVolumeConfiguration != nil || volume.EfsVolumeConfiguration != nil || volume.FsxWindowsFileServerVolumeConfiguration != nil || aws.ToBool(volume.ConfiguredAtLaunch) {
+						t.Fatal("worker storage is no longer task-scoped")
+					}
 				}
 				launch, err := p.Launch(*actual.TaskDefinition.TaskDefinitionArn)
 				if err != nil || *launch.Count != 1 || launch.EnableExecuteCommand || launch.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp != ecstypes.AssignPublicIpDisabled || launch.Overrides.TaskRoleArn != nil || len(launch.Overrides.ContainerOverrides[0].Environment) != 2 {
@@ -133,6 +143,16 @@ func TestFargateDefinitionProofRejectsIdentityCommandsCredentialsAndResourceMuta
 		func(d *ecstypes.TaskDefinition) { d.ContainerDefinitions[0].RestartPolicy.Enabled = aws.Bool(true) },
 		func(d *ecstypes.TaskDefinition) { d.Memory = aws.String("8192") },
 		func(d *ecstypes.TaskDefinition) { d.Revision = 2 },
+		func(d *ecstypes.TaskDefinition) { d.EphemeralStorage.SizeInGiB = 200 },
+		func(d *ecstypes.TaskDefinition) {
+			d.Volumes[0].Host = &ecstypes.HostVolumeProperties{SourcePath: aws.String("/host")}
+		},
+		func(d *ecstypes.TaskDefinition) {
+			d.ContainerDefinitions[0].MountPoints[1].ContainerPath = aws.String("/runner")
+		},
+		func(d *ecstypes.TaskDefinition) {
+			d.ContainerDefinitions[0].LinuxParameters.Tmpfs = []ecstypes.Tmpfs{{ContainerPath: aws.String("/tmp"), Size: 1024}}
+		},
 		func(d *ecstypes.TaskDefinition) { d.PidMode = ecstypes.PidModeHost },
 	}
 	for index, mutate := range mutations {

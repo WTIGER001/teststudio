@@ -98,7 +98,7 @@ func (p *Provider) InspectImage(ctx context.Context, image string) (hostedexecut
 	if err != nil {
 		return result, hostedexecution.ErrUnavailable
 	}
-	if result.Reference != image || result.OS != "linux" || result.Architecture != p.config.Architecture {
+	if result.Reference != image || result.OS != "linux" || result.Architecture != p.config.Architecture || result.TaskStorage != hostedexecution.NonRootTaskStorage {
 		return result, hostedexecution.ErrConfiguration
 	}
 	result.ExecutionProfile, err = ExecutionProfile(p.config)

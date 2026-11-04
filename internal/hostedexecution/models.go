@@ -16,7 +16,10 @@ var ErrRejected = errors.New("hosted worker creation was rejected before dispatc
 var ErrOwnership = errors.New("hosted worker ownership or immutable execution settings do not match")
 var ErrConfiguration = errors.New("hosted execution requires an approved supervised image, private exchange, and durable lifecycle hooks")
 
+const NonRootTaskStorage = "task-volumes/v1"
+
 type Image struct {
+	TaskStorage      string
 	Discovery        string
 	Reference        string
 	Runner           string

@@ -86,5 +86,5 @@ func ExecutionProfile(c Config) (string, error) {
 	if err := Validate(c); err != nil {
 		return "", err
 	}
-	return "fargate-v1-" + fingerprint([]any{canonical(c), "cpu2048-memory4096-tmpfs1536"})[:20], nil
+	return "fargate-v2-" + fingerprint([]any{canonical(c), "cpu2048-memory4096-taskdisk21g-volumes-v1"})[:20], nil
 }

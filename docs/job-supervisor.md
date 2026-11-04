@@ -142,6 +142,10 @@ The final overlay build has no network-enabled build step and needs no package i
 It compiles only the supervisor and retains the cached Go toolchain or Playwright browser runtime.
 
 The overlay runs as 1000:1000 and installs /runner/teststudio-job as a root-owned executable.
+It declares teststudio.task-storage=task-volumes/v1 and image volumes at /tmp and /output.
+Both directories belong to 1000:1000. Their modes are 1777 and 0700.
+These declarations initialize non-root task-local storage under the [ECS worker contract](ecs-worker-contract.md).
+The remaining runtime and prepared suite stay on the read-only root filesystem.
 It retains the original runner entrypoint, runtime identity, API policy, and source-base labels.
 The provider explicitly selects the supervisor entrypoint when launching a hosted job.
 Ordinary local runner invocation remains available without changing existing demonstration images.
@@ -160,13 +164,15 @@ Checks cover passed and failed observations, missing reports, invalid passes, cr
 The CLI check rejects invalid or credential-bearing arguments without echoing private values.
 Focused existing report and output cases preserve the local container contract after parser extraction.
 
-The package check executes only the supervisor's configuration guard in each overlay:
+The package check executes the supervisor's configuration guard and a focused volume probe in each overlay:
 
 ```sh
 python3 scripts/verify-job-runtime.py --go-runtime output/job-supervisor/go-runtime.json --playwright-runtime output/job-supervisor/playwright-runtime.json --output output/job-supervisor/package
 ```
 
 It checks metadata, non-root image configuration, retained runner entrypoints, the installed binary, and owned container removal.
+The volume probe checks ownership and directory modes, writes only to /tmp and /output, and rejects writes to /runner and /suite.
+It uses actual write attempts. Permission-bit inspection alone does not prove a read-only filesystem.
 It uses no network, test suite, or browser.
 Evidence remains in output/job-supervisor with targeted Go logs and package cleanup records.
 No AWS, Kubernetes, or Azure functional check runs for this batch.

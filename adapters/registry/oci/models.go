@@ -2,6 +2,7 @@ package oci
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -89,11 +90,12 @@ type configuration struct {
 	Architecture string `json:"architecture"`
 	Variant      string `json:"variant,omitempty"`
 	Config       struct {
-		Labels     map[string]string `json:"Labels"`
-		User       string            `json:"User"`
-		WorkingDir string            `json:"WorkingDir"`
-		Entrypoint []string          `json:"Entrypoint"`
-		OnBuild    []string          `json:"OnBuild"`
+		Labels     map[string]string          `json:"Labels"`
+		Volumes    map[string]json.RawMessage `json:"Volumes"`
+		User       string                     `json:"User"`
+		WorkingDir string                     `json:"WorkingDir"`
+		Entrypoint []string                   `json:"Entrypoint"`
+		OnBuild    []string                   `json:"OnBuild"`
 	} `json:"config"`
 	RootFS struct {
 		Type    string   `json:"type"`

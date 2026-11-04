@@ -96,18 +96,16 @@ func (p *Plan) definition(tagged bool) *ecs.RegisterTaskDefinitionInput {
 		ExecutionRoleArn: aws.String(p.config.ExecutionRole), EnableFaultInjection: aws.Bool(false),
 		NetworkMode: types.NetworkModeAwsvpc, RequiresCompatibilities: []types.Compatibility{types.CompatibilityFargate},
 		RuntimePlatform:  &types.RuntimePlatform{CpuArchitecture: architecture, OperatingSystemFamily: types.OSFamilyLinux},
-		EphemeralStorage: &types.EphemeralStorage{SizeInGiB: 20},
+		EphemeralStorage: &types.EphemeralStorage{SizeInGiB: 21},
+		Volumes:          []types.Volume{{Name: aws.String("temporary")}, {Name: aws.String("output")}},
 		ContainerDefinitions: []types.ContainerDefinition{{
 			Name: aws.String("runner"), Image: aws.String(p.job.Image), Essential: aws.Bool(true), User: aws.String("1000:1000"),
 			EntryPoint: []string{"/runner/teststudio-job"}, Command: args, WorkingDirectory: aws.String("/suite"),
 			ReadonlyRootFilesystem: aws.Bool(true), Privileged: aws.Bool(false), Interactive: aws.Bool(false), PseudoTerminal: aws.Bool(false),
+			MountPoints: []types.MountPoint{{ContainerPath: aws.String("/tmp"), SourceVolume: aws.String("temporary"), ReadOnly: aws.Bool(false)}, {ContainerPath: aws.String("/output"), SourceVolume: aws.String("output"), ReadOnly: aws.Bool(false)}},
 			StopTimeout: aws.Int32(10), RestartPolicy: &types.ContainerRestartPolicy{Enabled: aws.Bool(false)},
 			LinuxParameters: &types.LinuxParameters{
 				InitProcessEnabled: aws.Bool(true), Capabilities: &types.KernelCapabilities{Drop: []string{"ALL"}},
-				Tmpfs: []types.Tmpfs{
-					{ContainerPath: aws.String("/tmp"), Size: 1024, MountOptions: []string{"rw", "nosuid", "nodev", "mode=1777", "uid=1000", "gid=1000"}},
-					{ContainerPath: aws.String("/output"), Size: 512, MountOptions: []string{"rw", "nosuid", "nodev", "noexec", "mode=0700", "uid=1000", "gid=1000"}},
-				},
 			},
 		}},
 	}

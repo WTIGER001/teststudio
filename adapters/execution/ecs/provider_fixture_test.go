@@ -25,6 +25,7 @@ type cloudFixture struct {
 	t                                                         *testing.T
 	plan                                                      *Plan
 	mode                                                      string
+	storage                                                   string
 	database                                                  string
 	definition                                                *ecs.DescribeTaskDefinitionOutput
 	task                                                      *ecstypes.Task
@@ -51,7 +52,7 @@ func lifecycle(t *testing.T, runner, operation, mode string) (*Provider, *cloudF
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { db.Close() })
-	f := &cloudFixture{t: t, plan: plan, mode: mode, now: time.Now().UTC(), database: database}
+	f := &cloudFixture{t: t, plan: plan, mode: mode, storage: hostedexecution.NonRootTaskStorage, now: time.Now().UTC(), database: database}
 	provider, err := New(Options{Config: config, Store: db, ECS: f, Scheduler: f, Inspector: f, Network: f, Now: func() time.Time { f.mu.Lock(); defer f.mu.Unlock(); return f.now }, DiscoveryCleanup: func(context.Context, execution.Reference) error {
 		f.mu.Lock()
 		defer f.mu.Unlock()
@@ -78,7 +79,7 @@ func lifecycle(t *testing.T, runner, operation, mode string) (*Provider, *cloudF
 }
 
 func (f *cloudFixture) InspectImage(_ context.Context, image string) (hostedexecution.Image, error) {
-	return hostedexecution.Image{Reference: image, OS: "linux", Architecture: f.plan.config.Architecture}, nil
+	return hostedexecution.Image{TaskStorage: f.storage, Reference: image, OS: "linux", Architecture: f.plan.config.Architecture}, nil
 }
 func (f *cloudFixture) Admit(context.Context, Config) error {
 	f.mu.Lock()

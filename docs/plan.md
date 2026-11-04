@@ -119,7 +119,8 @@ The ECS network admission checker now reads exact VPC, routing, group, endpoint,
 Its bounded settings loader binds network identity into timing and recovery ownership.
 Use a dedicated worker VPC; VPC-wide DNS restrictions must not affect trusted controller traffic.
 No Route 53 Profile overlay is permitted in that worker VPC. See [network admission](ecs-network-admission.md).
-Correct the earlier unsupported Fargate tmpfs mounts before enabling dispatch. Then add SDK construction, ECR authentication, and command wiring.
+The corrected Fargate contract uses task-local volumes, an explicit 21 GiB allocation, and inspected non-root storage capability.
+Both thin overlays and source metadata preservation pass focused local checks. Next add SDK construction, ECR authentication, and command wiring.
 Package the private worker network and HTTPS route afterward. Preserve the separate cloud verification phase.
 
 ### Current hosted packaging checkpoint
@@ -253,8 +254,8 @@ Local race, database-reopen, mutation, concurrency, missing-history, and targete
 See [Durable ECS lifecycle](ecs-worker-lifecycle.md) for exact evidence, ownership, cleanup, and uncertainty rules.
 This advances 51 and supporting replica recovery under 52. The total remains 48 verified and 9 open.
 
-Next implement the required production network-admission checker, scoped SDK factory, and bounded private ECS settings.
-Verify the actual task interface and exact private worker egress, including registry endpoint policies, before admission.
+The production network checker, bounded settings loader, and supported task storage now pass focused local checks.
+Next implement the scoped SDK factory and ECR credential callbacks. Keep actual task and pool network admission mandatory.
 Add server and preparation wiring plus the private HTTPS route and scoped roles before enabling AWS workers.
 Do not recreate uncertain tasks after the finite RunTask idempotency window. Missing live tasks remain unresolved without a saved terminal observation.
 Keep exact image approval, gated dispatch, provider ownership, cancellation, deadlines, and checkpointed cleanup.

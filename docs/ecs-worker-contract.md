@@ -40,14 +40,30 @@ The container runs as 1000:1000 with a read-only root filesystem, dropped capabi
 Privileged mode, interactive input, terminal allocation, and container restart are disabled.
 The container stop timeout is ten seconds.
 
-The definition supplies bounded tmpfs mounts at /tmp and /output, with user 1000 ownership.
-Temporary execution storage permits executable files for Go compilation. Output storage disables execution.
-Sizes are 1024 MiB and 512 MiB. These mounts consume task memory.
-The task declares the platform's 20 GiB ephemeral allocation but supplies no host, shared, or persistent data volumes.
+The definition mounts two task-scoped volumes at /tmp and /output. It specifies no host path or persistent storage.
+The explicit ephemeral allocation is 21 GiB, including image storage and both writable volumes.
+This is the smallest explicit allocation supported by the ECS API. It is not a per-volume quota.
+Fargate does not support tmpfs. The previous task contract incorrectly supplied tmpfs and an explicit 20 GiB allocation.
+The corrected contract retains the 2 vCPU and 4 GiB memory class and changes the execution-pool identity to fargate-v2.
+
+Supervised runtime overlays declare exactly /tmp and /output as image volumes, owned by 1000:1000.
+Their directory modes are 1777 and 0700. The image declares teststudio.task-storage=task-volumes/v1.
+Registry inspection checks that capability and both volume declarations. ECS rejects images without it before execution admission.
+Source assembly preserves the capability and volume declarations in the prepared image.
+Rebuild older supervised overlays and prepare their source again before selecting ECS.
+Existing Kubernetes images without this optional capability retain their prior admission behavior.
+
+The task has one container and shares no volume with another task or controller.
+Fargate removes temporary data when the task stops. Result and evidence upload still precede normal resource cleanup.
+These volumes do not provide the earlier proposed per-mount size or noexec controls.
+The finite task allocation, memory limit, artifact limits, immutable runtime, private networking, and independent deadline remain separate controls.
+Disk exhaustion can make an attempt incomplete. It cannot establish a passing test or complete evidence.
 
 Definitions carry no worker ticket, AWS task role, secrets, environment file, sidecar, log driver, or arbitrary command override.
 The platform execution role remains separate from container credentials.
-AWS documents Fargate task sizes and tmpfs support in [task parameters](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html).
+AWS documents unsupported parameters in [Fargate differences](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/fargate-tasks-services.html).
+[EphemeralStorage](https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_EphemeralStorage.html) defines the supported explicit size range.
+[Bind mounts](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/bind-mounts.html) describes task lifetime and image-derived directory ownership.
 
 Ownership tags bind the complete execution reference hash, installation, project, configuration scope, operation, deadline, and specification hash.
 Definition verification checks the exact family, account, region, ARN revision, active status, ownership tags, and immutable settings.
@@ -116,5 +132,9 @@ The API, preparation command, and supervisor retain successful compilation check
 
 The durable ECS state machine now reserves registration and launch, recovers lost acknowledgements, and retains terminal observations and cleanup state.
 The shared driver waits for explicit provider admission before opening the exchange gate.
-Next correct unsupported Fargate tmpfs storage, then add scoped SDK initialization, private HTTPS routing, controller roles, command wiring, and AWS service packaging.
+Supported task-local storage and non-root overlay volumes now pass focused local checks.
+Evidence is output/ecs-network-admission/task-storage-contract.log and output/ecs-task-storage.
+The package probe verifies both runner overlays with real local volume initialization, writable scratch paths, and rejected runtime writes.
+It starts no browser or source suite. All owned containers and anonymous volumes exit through removal.
+Next add scoped SDK initialization, private HTTPS routing, controller roles, command wiring, and AWS service packaging.
 Keep the AWS provider disabled until those lifecycle and routing contracts are complete.

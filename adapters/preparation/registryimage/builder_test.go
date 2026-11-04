@@ -85,7 +85,11 @@ func TestRegistryAssemblyRejectsRuntimeWithoutHostedDiscoveryBeforePublication(t
 func TestRegistryAssemblyPublishesBothRunnersWithFrozenRuntimeAndSource(t *testing.T) {
 	for _, runner := range []string{"go", "playwright"} {
 		t.Run(runner, func(t *testing.T) {
-			f := fixture(t, runner, nil)
+			f := fixture(t, runner, func(base map[string]any) {
+				config := base["config"].(map[string]any)
+				config["Labels"].(map[string]string)["teststudio.task-storage"] = "task-volumes/v1"
+				config["Volumes"] = map[string]any{"/tmp": map[string]any{}, "/output": map[string]any{}}
+			})
 			input := buildInput(t, runner)
 			builder := &Builder{Registry: f.client, RuntimeImage: f.base, Directory: filepath.Join(t.TempDir(), "private")}
 			result, err := builder.Build(t.Context(), input)
@@ -96,7 +100,7 @@ func TestRegistryAssemblyPublishesBothRunnersWithFrozenRuntimeAndSource(t *testi
 				t.Fatal(result)
 			}
 			metadata, err := f.client.Inspect(t.Context(), result.Image)
-			if err != nil || metadata.Project != "invoicing" || metadata.Installation != input.Reference.Installation || metadata.Preparation != input.Reference.ID || metadata.Source != input.Snapshot.Digest || metadata.Image.Runner != runner {
+			if err != nil || metadata.Project != "invoicing" || metadata.Installation != input.Reference.Installation || metadata.Preparation != input.Reference.ID || metadata.Source != input.Snapshot.Digest || metadata.Image.Runner != runner || metadata.Image.TaskStorage != "task-volumes/v1" {
 				t.Fatal(metadata, err)
 			}
 			f.mu.Lock()

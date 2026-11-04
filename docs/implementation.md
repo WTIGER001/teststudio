@@ -122,7 +122,33 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: ECS network admission and private settings
+## Current delivery: supported Fargate storage and non-root runtime volumes
+
+Acceptance **51** advances, with supporting resource-class timing identity under **41**. The total remains **48 verified of 57**, with **9 open**.
+Primary-source review finds two errors in the earlier draft: Fargate rejects tmpfs, and explicit ephemeral storage starts at 21 GiB.
+The task definition now supplies two task-scoped volumes and an explicit 21 GiB allocation without host or persistent storage.
+It retains non-root execution, a read-only root filesystem, fixed memory and CPU, private networking, and the independent deadline.
+The resource class uses a new timing-pool identity. Per-mount tmpfs sizes and noexec behavior are no longer claimed.
+
+The thin supervisor overlays now declare owned /tmp and /output image volumes and a task-volumes/v1 capability.
+OCI inspection checks the capability and exact volume declarations. Source assembly preserves both in the immutable prepared image.
+ECS image admission rejects absent or unsupported storage capability. Existing provider-independent legacy image inspection remains supported.
+Older overlays require rebuilding and source preparation before ECS selection. This provider is not enabled in any production profile yet.
+
+Targeted ECS and OCI race checks pass in output/ecs-network-admission/task-storage-contract.log.
+Cases reject persistent host paths, changed mount destinations, unsupported tmpfs, changed allocation, and invalid storage metadata.
+The two-runner source assembly check passes with the new capability in output/ecs-task-storage/source-compatibility.log.
+API, preparation, and supervisor commands compile in output/ecs-task-storage/compile.log.
+Both thin ARM64 overlays build from unchanged cached bases. Four focused local package checks pass in output/ecs-task-storage/package.
+The probe verifies actual non-root volume initialization, writable scratch paths, and rejected writes to runtime and suite directories.
+An initial probe incorrectly treats permission-bit access as proof of a writable filesystem. Actual write attempts correct that check.
+The failed and final probes remove their owned containers and anonymous volumes. No browser or uploaded source suite starts.
+No cloud operation, registry push, toolchain rebuild, service image rebuild, or UI build occurs. The demo remains available.
+
+Next add the scoped SDK factory, rotating ECR authentication, command wiring, and private worker infrastructure.
+Keep deployment, storage, timing, and hosted recovery acceptance open until profile-specific verification passes.
+
+## Previous delivery: ECS network admission and private settings
 
 Acceptance **51** advances, with supporting timing-pool identity under **41**. The total remains **48 verified of 57**, with **9 open**.
 The adapter now checks actual EC2, ELBv2, Route 53 Resolver, and Route 53 Profiles responses through typed SDK interfaces.
@@ -142,7 +168,7 @@ No browser, UI rebuild, service image, or trusted-runtime rebuild is needed for 
 See [ECS network admission](ecs-network-admission.md) for the exact contract, primary references, required read permissions, and remaining integration.
 
 The primary-source review also identifies unsupported tmpfs mounts in the earlier Fargate task definition.
-Correct those mounts before enabling dispatch. Then add SDK initialization, ECR authentication, native settings wiring, and private infrastructure.
+The next delivery above corrects those mounts. SDK initialization, ECR authentication, native settings wiring, and private infrastructure remain required.
 Local contracts do not close deployed execution, timing, storage, or recovery acceptance.
 
 ## Current delivery: durable ECS dispatch and checkpointed recovery

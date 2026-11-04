@@ -108,7 +108,8 @@ The UI, service images, trusted runtimes, and browser dependencies remain unchan
 ## Continue implementation
 
 Keep the implemented network checker mandatory. Its dedicated worker VPC and PrivateLink path separate worker egress from trusted controller access.
-Correct the earlier unsupported Fargate tmpfs mounts before enabling the provider. Use supported task-local storage and bind its resource class into timing identity.
+The corrected task contract uses supported task-local volumes, an explicit 21 GiB allocation, and a new timing-pool identity.
+Require the inspected non-root volume capability before execution admission.
 Add the scoped SDK factory and bounded private settings to the API and preparation commands.
 Preserve explicit account and region scope, disabled creation retries, current credentials, and private error handling.
 Then package private worker HTTPS routing, controller permissions, platform-only pull permissions, and the independent deadline role.

@@ -33,6 +33,8 @@ def main():
             assert labels['teststudio.job-supervisor'] == 'worker-exchange/v1'
             assert labels['teststudio.discovery-supervisor'] == 'worker-exchange/v1'
             assert labels['teststudio.job-runtime-base'] == base['Id']
+            assert labels['teststudio.task-storage'] == 'task-volumes/v1'
+            assert set(image['Config']['Volumes']) == {'/tmp', '/output'}
             assert labels['teststudio.job-source-key'] == build['sourceKey']
             for key in ['teststudio.runtime', 'teststudio.runtime-kind', 'teststudio.work-item-bytes', 'teststudio.api-policy']:
                 assert labels[key] == base['Config']['Labels'][key]
@@ -41,6 +43,12 @@ def main():
             result = docker('run', '--rm', '--name', name, '--platform=linux/' + build['architecture'], '--read-only', '--network=none', '--cap-drop=ALL', '--security-opt=no-new-privileges', '--entrypoint=/runner/teststudio-job', build['image'], '--runner=' + build['runner'], '--operation=discover', '--exchange-origin=https://jobs.example.test', check=False)
             assert result.returncode == 2 and 'job execution identity is missing or invalid' in result.stderr
             assert not result.stdout.strip()
+            name = 'teststudio-job-volumes-' + uuid.uuid4().hex[:12]
+            containers.append(name)
+            probe = 'test "$(id -u):$(id -g)" = 1000:1000 && test "$(stat -c %a /tmp)" = 1777 && test "$(stat -c %a /output)" = 700 && test "$(stat -c %u:%g /output)" = 1000:1000 && printf temporary > /tmp/probe && printf evidence > /output/probe && ! (printf blocked > /runner/volume-probe) 2>/dev/null && ! (printf blocked > /suite/volume-probe) 2>/dev/null'
+            result = docker('run', '--rm', '--name', name, '--platform=linux/' + build['architecture'], '--read-only', '--network=none', '--cap-drop=ALL', '--security-opt=no-new-privileges', '--entrypoint=/bin/sh', build['image'], '-c', probe)
+            assert result.returncode == 0 and not result.stdout.strip()
+            summary['checks'].append(build['runner'] + ': task volumes initialize non-root ownership, permit scratch writes, and retain a read-only runtime and suite')
             summary['checks'].append(build['runner'] + ': immutable base and runner contracts retained; non-root supervisor executes without ambient work or network')
             summary['images'].append(build)
         summary['passed'] = True

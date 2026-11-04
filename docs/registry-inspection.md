@@ -86,6 +86,11 @@ Configuration must preserve the prepared source runtime contract:
 - Valid project, installation, preparation, and source-digest labels.
 - A valid runtime identity, platform, root filesystem type, and layer digest list.
 
+An optional teststudio.task-storage=task-volumes/v1 capability requires exactly two empty volume declarations: /tmp and /output.
+Unknown storage capabilities, missing paths, extra paths, and invalid volume declarations fail inspection.
+The result carries this capability to providers. ECS requires it for non-root task-local storage.
+Legacy images without it retain existing provider-independent inspection behavior. See [ECS worker storage](ecs-worker-contract.md).
+
 The adapter checks bounded layer descriptors without fetching their content.
 Foreign layer URLs, unsupported layer types, invalid digests, and oversized layer declarations fail explicitly.
 Container runtimes remain responsible for layer download and content verification during the approved image pull.

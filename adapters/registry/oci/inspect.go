@@ -2,6 +2,7 @@ package oci
 
 import (
 	"context"
+	"encoding/json"
 	"slices"
 	"strings"
 	"time"
@@ -113,6 +114,19 @@ func (c *Client) inspect(ctx context.Context, reference string, requireOwnership
 		}
 	}
 	labels := config.Config.Labels
+	storage := labels["teststudio.task-storage"]
+	if storage != "" {
+		if storage != hostedexecution.NonRootTaskStorage || len(config.Config.Volumes) != 2 {
+			return Metadata{}, ErrInvalid
+		}
+		for _, path := range []string{"/tmp", "/output"} {
+			value, exists := config.Config.Volumes[path]
+			var attributes map[string]json.RawMessage
+			if !exists || json.Unmarshal(value, &attributes) != nil || attributes == nil || len(attributes) != 0 {
+				return Metadata{}, ErrInvalid
+			}
+		}
+	}
 	runner := ""
 	if strings.HasPrefix(labels["teststudio.runtime"], "go") {
 		runner = "go"
@@ -129,5 +143,5 @@ func (c *Client) inspect(ctx context.Context, reference string, requireOwnership
 	if requireOwnership && (!domain.ValidID(labels["teststudio.project"]) || !domain.ValidID(labels["teststudio.installation"]) || !domain.ValidID(labels["teststudio.preparation"]) || !digest.MatchString(labels["teststudio.source"])) {
 		return Metadata{}, ErrInvalid
 	}
-	return Metadata{template: &runtimeTemplate{client: c, repository: repo, manifest: value, configuration: data, labels: labels}, Image: hostedexecution.Image{Discovery: labels["teststudio.discovery-supervisor"], Reference: reference, Runner: runner, Runtime: labels["teststudio.runtime"], OS: config.OS, Architecture: config.Architecture, Supervisor: labels["teststudio.job-supervisor"], Project: labels["teststudio.project"], SourceDigest: labels["teststudio.source"]}, Manifest: strings.TrimPrefix(c.origin, "https://") + "/" + repo + "@" + hash, Configuration: value.Config.Digest, Project: labels["teststudio.project"], Installation: labels["teststudio.installation"], Preparation: labels["teststudio.preparation"], Source: labels["teststudio.source"]}, nil
+	return Metadata{template: &runtimeTemplate{client: c, repository: repo, manifest: value, configuration: data, labels: labels}, Image: hostedexecution.Image{TaskStorage: storage, Discovery: labels["teststudio.discovery-supervisor"], Reference: reference, Runner: runner, Runtime: labels["teststudio.runtime"], OS: config.OS, Architecture: config.Architecture, Supervisor: labels["teststudio.job-supervisor"], Project: labels["teststudio.project"], SourceDigest: labels["teststudio.source"]}, Manifest: strings.TrimPrefix(c.origin, "https://") + "/" + repo + "@" + hash, Configuration: value.Config.Digest, Project: labels["teststudio.project"], Installation: labels["teststudio.installation"], Preparation: labels["teststudio.preparation"], Source: labels["teststudio.source"]}, nil
 }
