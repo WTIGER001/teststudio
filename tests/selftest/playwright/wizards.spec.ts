@@ -35,6 +35,7 @@ test('Guided setup and HTTPS creation preserve entries and recover without dupli
   const probe = page.locator('ts-https-wizard')
   await probe.getByLabel('Title', { exact: true }).fill('Service health')
   await probe.getByRole('button', { name: 'Continue', exact: true }).click()
+  await probe.getByLabel('Use a registered environment', { exact: true }).check()
   await expect(probe.getByLabel('Target environment', { exact: true })).toHaveValue(`development-${suffix}`)
   await expect(probe.getByLabel('Expected response headers (JSON)', { exact: true })).not.toBeVisible()
   await probe.getByText('Advanced response assertions', { exact: true }).click()

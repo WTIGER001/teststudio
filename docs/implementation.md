@@ -74,6 +74,50 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Quick HTTPS probes from complete URLs
+
+The HTTPS Request step now accepts a complete website URL by default.
+HTTPS uses port 443 automatically. Users do not need to enter a port.
+The wizard derives the origin, relative path, and query without contacting the website.
+A valid URL entered as the title also fills the address field.
+Use a registered environment preserves the existing endpoint-alias workflow.
+Both modes share check parsing, assertions, timing, safety review, and catalog saving.
+
+One matching registered target reuses its original stage, protection, and endpoint settings.
+Several matches require an explicit choice. Disabled targets remain visible and cannot run.
+Linked suite applications constrain target matching.
+New addresses show target registration and any new application on Review before saving.
+The application belongs to the selected suite context or an explicit application choice.
+Advanced target options exposes stage and protection.
+New plain HTTP targets require an explicit Local stage choice.
+Existing management permissions govern new application and environment records.
+Save draft stores reviewed configuration and the test without contacting the website.
+Save and run uses the normal local run request after saving the reviewed records.
+The suite's active release remains unchanged.
+Successful record receipts stay available during in-page retries.
+Unknown create outcomes use the existing stable identifier and intended-data reconciliation.
+Target configuration locks during partial save recovery. Project changes do not redirect delayed writes to another project.
+
+The first URL check finds that validation can report an error before focus moves to the invalid field.
+Validation feedback now waits for rendered fields. The URL control also exposes its parsed validity.
+The corrected URL and shared wizard checks pass.
+Three focused utility checks pass for omitted ports, paths, queries, explicit ports, invalid URLs, protected targets, disabled targets, prefixes, and ambiguous matches.
+STUDIO-URL-001 passes in 3.664 seconds using only local fixtures.
+It verifies protected target reuse, draft-only saving, invalid-address focus, Back preservation, reviewed new application and target creation, a successful native run, and dark mobile layout.
+STUDIO-WIZARD-001 passes in 7.050 seconds after the shared focus change.
+STUDIO-HTTPS-001 passes in 2.972 seconds with the registered-environment choice and retained advanced assertions.
+Final URL and wizard evidence is output/selftest/20261104T001458.396810000-58e498dfae0bc7a51c0ecbb9/summary.json and cleanup.json.
+HTTP assertion evidence is output/selftest/20261104T001333.956188000-718375f9a5a5512ad70e2294/summary.json and cleanup.json.
+The production Angular build passes. Generic URL placeholders keep the independent product examples neutral.
+The local demo receives the updated private UI snapshot and retains its data and history.
+The user's open tab is not refreshed. No public website receives a verification request.
+All owned verification browsers, controllers, containers, and volumes stop after checks.
+No cloud verification or unrelated broad suite runs for this delivery.
+
+The ledger remains **26 verified, 31 open, 57 total**.
+This extends **05**, **33**, **49**, and **50**, and advances **21**, which remains open.
+Continuation: implement environment-backed execution for recorded browser journeys, then continue the complete acceptance ledger.
+
 ### Tester sidebar and guided automation
 
 The sidebar keeps Applications, Suites, Test catalog, Test runs, and Trends visible under Testing.

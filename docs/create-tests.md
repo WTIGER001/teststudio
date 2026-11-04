@@ -30,20 +30,34 @@ See browser-recording.md for local setup, privacy, recovery, and current executi
 
 Enter a title and choose a suite. Select Continue.
 The wizard generates a permanent identifier. Advanced details contains its editor and the category.
-Choose a registered target environment. The picker shows its stage and protection.
-Choose its endpoint alias, then enter the relative path and accepted status codes.
-The wizard previews the resolved address. Other runs can use the same alias in another environment.
+Paste the complete website URL and enter accepted status codes.
+HTTPS uses port 443 automatically. An explicit port is optional.
+The wizard derives the endpoint origin, path, and query from the address.
+A URL entered as the title also fills the address when it is valid.
+If one registered target matches, the wizard reuses its endpoint and existing protection.
+If several targets match, choose one explicitly. Disabled targets remain visible and cannot run.
+A new address lists its target configuration on Review before saving.
+The target belongs to the suite's linked application, or an application chosen under Advanced target options.
+If no applications are available, Review lists a new application named from the hostname.
+Saving new target configuration requires environment management permission.
+Saving a new application also requires project management permission.
+Advanced target options contains the application choice, stage, and protection.
+Choose Local explicitly for a new plain HTTP or private-network target.
+Save draft stores the reviewed configuration and test without contacting the website.
+Save and run also starts the selected check locally.
+Use a registered environment remains available for endpoint aliases and relative paths.
+Other runs can use the same alias in another environment.
 Open named Advanced sections for response assertions, method, TLS, timeout, or slowdown settings.
 Select Continue. Invalid options reopen their section and receive focus.
 Back and completed step buttons preserve entered values.
 Review the request, target, safety label, and rationale.
 GET and HEAD do not establish production safety. New probes require review by default.
 Select Save draft to add the definition and return to the catalog.
-Save and run requires publication and run permissions, plus a registered target.
+Save and run requires publication and run permissions. It saves any reviewed new target first.
 Protected targets also require safe definitions and protected execution permission.
 This action validates and publishes a suite snapshot without changing its active release.
 It starts only the selected test and its dependencies through the normal local run API.
-The action keeps successful save and publication receipts during a retry.
+The action keeps successful application, target, test, and publication receipts during a retry.
 Publication and run creation reuse stable idempotency keys.
 After a partial failure, entries stay locked. Retry run continues the action. Open saved draft returns to the catalog.
 Reloading ends this in-page continuation. Saved resources remain in the catalog and history.

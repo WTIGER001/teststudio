@@ -40,7 +40,9 @@ See applications.md and ui.md for details.
 
 Select Create test from the catalog. Choose Playwright browser test, HTTPS probe, or Go suite.
 The dedicated creation page shows only the selected type's workflow.
-HTTPS probes follow Name, Request, and Review. Named Advanced sections hold uncommon options.
+HTTPS probes follow Name, Request, and Review. Paste a complete URL on Request; HTTPS needs no explicit port.
+Review lists any new target or application before it is saved.
+Use a registered environment remains available. Named Advanced sections hold uncommon options.
 Save draft retains a definition. Save and run explicitly publishes a snapshot and starts the chosen local check.
 The suite's active release stays unchanged.
 Projects also provides a wizard for a first application, optional target, and empty suite.

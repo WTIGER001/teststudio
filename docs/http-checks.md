@@ -103,3 +103,15 @@ This workflow creates and publishes assertions through the UI, runs GET and HEAD
 Focused Go checks verify publication limits, HEAD behavior, response-time failures, certificate trust, and certificate lifetime thresholds.
 
 Redirect following, secret references, project trust-bundle configuration, response excerpts, schedules, and response-time history remain pending.
+
+## Quick URL entry
+
+Create test offers a full URL field for HTTPS probes.
+HTTPS uses port 443 when the address omits a port.
+The wizard stores the origin in a registered environment and keeps the path and query in the test check.
+Existing matching environments keep their protection, stage, and endpoint settings.
+Several matches require an explicit target choice. Disabled targets cannot run.
+New target configuration appears on Review before Save draft or Save and run.
+Creating new target configuration uses the existing application and environment API contracts and current permissions.
+No website request occurs during URL entry or Save draft.
+Save and run uses the normal local execution path and retains its release snapshot.

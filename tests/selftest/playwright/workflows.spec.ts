@@ -26,6 +26,7 @@ test('Publish a catalog and inspect an executed check', { tag: '@STUDIO-CATALOG-
     await page.getByLabel('Permanent identifier').fill('SELF-CHECK')
     await page.getByLabel('Title', { exact: true }).fill('TestStudio health')
     await page.getByRole('button', { name: 'Continue', exact: true }).click()
+    await page.getByLabel('Use a registered environment', { exact: true }).check()
     await page.getByRole('button', { name: 'Continue', exact: true }).click()
     await page.getByLabel('Production-safety label').selectOption('safe')
     await page.getByLabel('Safety rationale').fill('Reads this isolated TestStudio instance')

@@ -60,9 +60,10 @@ Run history, artifact downloads, retained releases, and schedule pins survive ar
 The tester sidebar now exposes Suites beside Applications, the catalog, runs, and trends.
 Schedules and Notifications use guided configuration under Automation.
 Imports and retained releases stay under Advanced testing.
-The next interface priority is direct URL entry for a quick HTTPS probe.
-The current probe wizard still requires a registered environment for Save and run.
-Keep this friction visible in the continuation plan. Follow it with environment-backed recorded browser execution.
+Quick HTTPS probes now accept a complete URL directly, including addresses without an explicit port.
+The wizard reuses matching registered targets and preserves their protection.
+Review lists new target configuration and any new application before explicit saving.
+The next priority is environment-backed recorded browser execution.
 The next implementation batches follow the full ledger without adding new gates to the usable demonstration.
 
 ## Current implementation checkpoint

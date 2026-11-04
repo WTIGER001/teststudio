@@ -32,6 +32,7 @@ test('Declarative HTTP assertions, HEAD edits, and retained diagnostics', { tag:
       await page.getByLabel('Permanent identifier', { exact: true }).fill('HTTP-ASSERT-1')
       await page.getByLabel('Title', { exact: true }).fill('Structured health')
       await page.getByRole('button', { name: 'Continue', exact: true }).click()
+      await page.getByLabel('Use a registered environment', { exact: true }).check()
       await page.getByLabel('Relative path', { exact: true }).fill('/health')
       await page.getByLabel('Accepted status codes', { exact: true }).fill('200.5')
       await page.getByRole('button', { name: 'Continue', exact: true }).click()

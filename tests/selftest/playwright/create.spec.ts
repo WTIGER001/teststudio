@@ -25,6 +25,7 @@ test('Create tests through dedicated typed routes and review recorded browser so
   await page.getByRole('link', { name: 'Back to catalog', exact: true }).click()
   await expect(page).toHaveURL(newTest+'/https')
   await page.getByRole('button', { name: 'Continue', exact: true }).click()
+  await page.getByLabel('Use a registered environment', { exact: true }).check()
   await page.getByRole('button', { name: 'Continue', exact: true }).click()
   await page.getByLabel('Safety rationale', { exact: true }).fill('Reads the isolated local health endpoint')
   await page.getByRole('button', { name: 'Save draft', exact: true }).click()
