@@ -187,8 +187,13 @@ Disable project schedules and stop new runs through the existing authorized cont
 Wait for active attempts, source claims, worker exchanges, and ECS dispatch cleanup to finish.
 Do not clear core worker references, change the worker network profile, reduce preparation to zero, or delete the stack before that checkpoint.
 Task-definition deletion can remain pending for an hour after termination. The saved result remains available during that delay.
-The initial admission guard requires all registered backend targets healthy. Drain active work before API rollouts.
-Continuous rolling admission remains implementation work under replica recovery.
+API backend rotation now permits known startup and draining transitions while at least one owned target stays healthy.
+The guard checks every existing target interface, including retiring interfaces. Only confirmed deregistration permits an absent interface.
+Cross-zone routing and health thresholds use the fixed [network admission contract](ecs-network-admission.md).
+Live rollout availability and replica recovery still require deployment verification.
+Before upgrading older worker stacks, drain active work and apply the updated target attributes and controller read policy.
+Then deploy a freshly built service image. Older cached service images do not include the new admission behavior.
+Future compatible API rotations can retain admission while their owned healthy backend remains available.
 After a complete drain, disable preparation and worker references before removing worker infrastructure.
 Retained storage needs its own reviewed disposal decision.
 
@@ -213,6 +218,17 @@ A real local volume permits non-root preparation to initialize a private child u
 The stopped SQLite copy uses immutable read mode. Its first probe used the wrong read mode for a copied WAL database; the checker corrects that artifact read.
 Owned probe containers and volumes are removed after both failed and successful checks.
 The UI, trace viewer, and trusted runtime bases are reused. The demonstration remains available.
+
+The updated worker template also passes local rollout-attribute and read-authority checks in output/ecs-rollout/package.
+Its generated settings and target attributes pass the production admission guard with simulated SDK responses.
+Use an absolute fixture path because Go executes each test from its package directory:
+
+```sh
+TESTSTUDIO_AWS_PACKAGE_FIXTURE="$PWD/output/ecs-rollout/package/admission-fixture.json" \
+go test -race ./adapters/execution/ecs -run '^TestPackagedECSNetworkMatchesAdmissionAfterDocumentedDNSSetup$' -count=1
+```
+The rollout batch changes no UI or source runtime. It requires no image rebuild for local contract verification.
+A package test first uses a relative fixture path from the wrong working directory. The corrected absolute path passes.
 
 Live IAM, PrivateLink, DNS ownership, EFS, registry publication, Fargate execution, cancellation, deadlines, replica recovery, and upgrades remain unverified.
 Perform those checks only in the separate authorized MMDev deployment session.

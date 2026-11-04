@@ -35,7 +35,8 @@ type packageProperties struct {
 		Action, BlockResponse, FirewallDomainListId, FirewallDomainRedirectionAction string
 		Priority                                                                     int32
 	}
-	MutationProtection string
+	TargetGroupAttributes []struct{ Key, Value string }
+	MutationProtection    string
 }
 
 type packagePermission struct {
@@ -191,6 +192,10 @@ func TestPackagedECSNetworkMatchesAdmissionAfterDocumentedDNSSetup(t *testing.T)
 	target.HealthCheckPort = aws.String(value.HealthCheckPort)
 	target.HealthCheckPath = aws.String(value.HealthCheckPath)
 	target.Matcher = &l.Matcher{HttpCode: aws.String(value.Matcher.HttpCode)}
+	f.DescribeTargetGroupAttributesValue.Attributes = nil
+	for _, attribute := range value.TargetGroupAttributes {
+		f.DescribeTargetGroupAttributesValue.Attributes = append(f.DescribeTargetGroupAttributesValue.Attributes, l.TargetGroupAttribute{Key: aws.String(attribute.Key), Value: aws.String(attribute.Value)})
+	}
 	f.allowDomains.Domains = p["AllowedDomains"].Domains
 	f.blockDomains.Domains = p["BlockedDomains"].Domains
 	f.allowList.FirewallDomainList.DomainCount = aws.Int32(int32(len(f.allowDomains.Domains)))

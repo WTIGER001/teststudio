@@ -356,6 +356,13 @@ Resources:
       TargetGroupAttributes:
         - {Key: deregistration_delay.timeout_seconds, Value: '30'}
         - {Key: preserve_client_ip.enabled, Value: 'false'}
+        - {Key: load_balancing.cross_zone.enabled, Value: 'true'}
+        - {Key: deregistration_delay.connection_termination.enabled, Value: 'true'}
+        - {Key: proxy_protocol_v2.enabled, Value: 'false'}
+        - {Key: target_group_health.dns_failover.minimum_healthy_targets.count, Value: '1'}
+        - {Key: target_group_health.dns_failover.minimum_healthy_targets.percentage, Value: 'off'}
+        - {Key: target_group_health.unhealthy_state_routing.minimum_healthy_targets.count, Value: '1'}
+        - {Key: target_group_health.unhealthy_state_routing.minimum_healthy_targets.percentage, Value: 'off'}
   ExchangeListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
@@ -497,7 +504,7 @@ Resources:
         Statement:
           - Sid: InspectWorkerNetwork
             Effect: Allow
-            Action: [ec2:DescribeVpcs, ec2:DescribeVpcAttribute, ec2:DescribeDhcpOptions, ec2:DescribeSubnets, ec2:DescribeSecurityGroups, ec2:DescribeRouteTables, ec2:DescribeVpcEndpoints, ec2:DescribePrefixLists, ec2:DescribeNetworkInterfaces, ec2:DescribeVpcEndpointServiceConfigurations, ec2:DescribeVpcEndpointServicePermissions, elasticloadbalancing:DescribeLoadBalancers, elasticloadbalancing:DescribeListeners, elasticloadbalancing:DescribeTargetGroups, elasticloadbalancing:DescribeTargetHealth, route53resolver:GetFirewallConfig, route53resolver:ListFirewallRuleGroupAssociations, route53resolver:GetFirewallRuleGroup, route53resolver:ListFirewallRules, route53resolver:GetFirewallDomainList, route53resolver:ListFirewallDomains, route53profiles:ListProfileAssociations]
+            Action: [ec2:DescribeVpcs, ec2:DescribeVpcAttribute, ec2:DescribeDhcpOptions, ec2:DescribeSubnets, ec2:DescribeSecurityGroups, ec2:DescribeRouteTables, ec2:DescribeVpcEndpoints, ec2:DescribePrefixLists, ec2:DescribeNetworkInterfaces, ec2:DescribeVpcEndpointServiceConfigurations, ec2:DescribeVpcEndpointServicePermissions, elasticloadbalancing:DescribeLoadBalancers, elasticloadbalancing:DescribeListeners, elasticloadbalancing:DescribeTargetGroups, elasticloadbalancing:DescribeTargetHealth, elasticloadbalancing:DescribeTargetGroupAttributes, route53resolver:GetFirewallConfig, route53resolver:ListFirewallRuleGroupAssociations, route53resolver:GetFirewallRuleGroup, route53resolver:ListFirewallRules, route53resolver:GetFirewallDomainList, route53resolver:ListFirewallDomains, route53profiles:ListProfileAssociations]
             Resource: '*'
             Condition:
               StringEquals: {aws:RequestedRegion: !Ref 'AWS::Region'}

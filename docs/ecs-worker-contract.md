@@ -139,5 +139,6 @@ The package probe verifies both runner overlays with real local volume initializ
 It starts no browser or source suite. All owned containers and anonymous volumes exit through removal.
 Scoped SDK initialization, ECR authentication, and command wiring now pass local checks.
 Private HTTPS routing infrastructure, controller roles, and separate preparation now have a locally checked CloudFormation package.
-Next verify rollout admission behavior locally, then complete target-profile verification in its separate authorized session.
+Local rollout admission now passes focused transition, ownership, restart, and package-alignment checks.
+Complete target-profile verification in its separate authorized session.
 Keep the AWS provider disabled until those lifecycle and routing contracts are complete.

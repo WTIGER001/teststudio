@@ -2,13 +2,9 @@ package ecsworker
 
 import (
 	"context"
-	"fmt"
-	"net/netip"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2/types"
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
@@ -49,35 +45,8 @@ func (g *NetworkGuard) checkExchange(ctx context.Context) error {
 	if aws.ToString(tg.TargetGroupArn) != s.TargetGroup || aws.ToString(tg.VpcId) != s.ControllerVPC || tg.Protocol != types.ProtocolEnumTcp || aws.ToInt32(tg.Port) != 8042 || tg.TargetType != types.TargetTypeEnumIp || tg.IpAddressType != types.TargetGroupIpAddressTypeEnumIpv4 || !equalSet(tg.LoadBalancerArns, []string{s.LoadBalancer}) || !aws.ToBool(tg.HealthCheckEnabled) || tg.HealthCheckProtocol != types.ProtocolEnumHttp || aws.ToString(tg.HealthCheckPort) != "traffic-port" || aws.ToString(tg.HealthCheckPath) != "/healthz" || tg.Matcher == nil || aws.ToString(tg.Matcher.HttpCode) != "404" {
 		return hostedexecution.ErrOwnership
 	}
-	health, err := g.elb.DescribeTargetHealth(ctx, &elasticloadbalancingv2.DescribeTargetHealthInput{TargetGroupArn: aws.String(s.TargetGroup)}, oneELB)
-	if err != nil || health == nil || len(health.TargetHealthDescriptions) == 0 || len(health.TargetHealthDescriptions) > 32 {
-		return hostedexecution.ErrUnavailable
+	if err := g.checkTargetAttributes(ctx); err != nil {
+		return err
 	}
-	seen := map[string]bool{}
-	for _, target := range health.TargetHealthDescriptions {
-		if target.Target == nil || target.TargetHealth == nil || target.TargetHealth.State != types.TargetHealthStateEnumHealthy {
-			return hostedexecution.ErrUnavailable
-		}
-		ip := aws.ToString(target.Target.Id)
-		key := fmt.Sprintf("%s:%d", ip, aws.ToInt32(target.Target.Port))
-		if seen[key] {
-			return hostedexecution.ErrOwnership
-		}
-		seen[key] = true
-		if address, err := netip.ParseAddr(ip); err != nil || !address.Is4() || aws.ToInt32(target.Target.Port) != 8042 {
-			return hostedexecution.ErrOwnership
-		}
-		interfaces, err := g.ec2.DescribeNetworkInterfaces(ctx, &ec2.DescribeNetworkInterfacesInput{Filters: []ec2types.Filter{{Name: aws.String("addresses.private-ip-address"), Values: []string{ip}}, {Name: aws.String("vpc-id"), Values: []string{s.ControllerVPC}}}}, oneEC2)
-		if err != nil || interfaces == nil {
-			return hostedexecution.ErrUnavailable
-		}
-		if interfaces.NextToken != nil || len(interfaces.NetworkInterfaces) != 1 {
-			return hostedexecution.ErrOwnership
-		}
-		eni := interfaces.NetworkInterfaces[0]
-		if aws.ToString(eni.OwnerId) != g.worker.Account || aws.ToString(eni.VpcId) != s.ControllerVPC || aws.ToString(eni.PrivateIpAddress) != ip || eni.Association != nil || len(eni.Groups) != 1 || aws.ToString(eni.Groups[0].GroupId) != s.ControllerGroup {
-			return hostedexecution.ErrOwnership
-		}
-	}
-	return nil
+	return g.checkTargets(ctx)
 }

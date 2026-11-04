@@ -57,8 +57,20 @@ The target group's HTTP health check uses its traffic port, /healthz, and status
 The private listener intentionally exposes no health route. A healthy 404 confirms that isolated listener accepts HTTP.
 This check does not replace controller database readiness or exchange authorization.
 
-Admission verifies one through 32 healthy backend targets and rejects duplicate targets.
-Each target must match a private interface in the configured controller VPC, owned by the configured account, with only the controller group.
+Admission verifies one through 32 registered backend targets and rejects duplicate addresses or unexpected ports.
+At least one target must be healthy. Known initial, unhealthy, and draining states can coexist with that healthy target.
+Unknown states, inconsistent reason codes, and unavailable health reads block admission.
+One EC2 request checks the complete backend set. It uses the configured controller VPC and the registered addresses as filters.
+Each returned primary address must belong to the configured account and controller VPC, with only the controller group and no public association.
+Extra, duplicate, paginated, and unexpected primary-address matches fail ownership checks.
+A missing interface fails admission unless its target reports draining with Target.DeregistrationInProgress.
+A retiring interface that still exists must pass every ownership check. Controller restart needs no earlier in-memory ownership receipt.
+The load balancer's exact controller-group egress remains mandatory, including during draining propagation.
+
+Target-group attributes fix cross-zone routing to true and both healthy-count thresholds to one. Percentage thresholds remain off.
+The deregistration delay is 30 seconds, with connection termination enabled. Client-IP preservation and proxy protocol remain disabled.
+Missing, duplicated, or changed required attributes fail admission.
+These settings permit a healthy replacement in either enabled zone without admitting unknown routes.
 Neither the public API listener nor the artifact listener becomes a worker endpoint.
 
 ## DNS policy
@@ -115,7 +127,7 @@ These permissions belong to trusted controllers, never to the test container.
 | Service | Actions |
 | --- | --- |
 | EC2 | DescribeVpcs, DescribeVpcAttribute, DescribeDhcpOptions, DescribeSubnets, DescribeSecurityGroups, DescribeRouteTables, DescribeVpcEndpoints, DescribePrefixLists, DescribeNetworkInterfaces, DescribeVpcEndpointServiceConfigurations, DescribeVpcEndpointServicePermissions. |
-| ELBv2 | DescribeLoadBalancers, DescribeListeners, DescribeTargetGroups, DescribeTargetHealth. |
+| ELBv2 | DescribeLoadBalancers, DescribeListeners, DescribeTargetGroups, DescribeTargetHealth, DescribeTargetGroupAttributes. |
 | Route 53 Resolver | GetFirewallConfig, ListFirewallRuleGroupAssociations, GetFirewallRuleGroup, ListFirewallRules, GetFirewallDomainList, ListFirewallDomains. |
 | Route 53 Profiles | ListProfileAssociations. |
 
@@ -126,12 +138,16 @@ Missing read authority blocks dispatch. Infrastructure packaging must retain the
 Run the focused package checks from the repository root:
 
 ```sh
-go test -race ./adapters/execution/ecs -count=1
+go test -race ./adapters/execution/ecs -run 'TestECSNetwork' -count=1
 ```
 
 Evidence is output/ecs-network-admission/final-contract.log.
 Checks cover valid pool and task admission, concurrent cache reuse, expired snapshots, task drift, private errors, and invalid settings.
 Mutation cases reject internet routes, wider egress, changed endpoint policies, public exchange paths, DNS overlays, and firewall fail-open state.
+Rollout checks cover registration, initial health checks, draining, interface removal, cold controller restart, and a 32-target batch.
+They reject changed interface ownership, missing active targets, unknown health reasons, lost healthy quorum, and changed routing attributes.
+The current package fixture is output/ecs-rollout/package/admission-fixture.json. Its production admission check passes with simulated provider responses.
+The shared admission wait and revocation checks still pass. Both native entrypoint packages compile with the expanded typed client contract.
 No AWS credentials, accounts, deployments, or live registry endpoints are used.
 The running demo, UI, and source runtimes remain unchanged.
 
@@ -143,3 +159,7 @@ The running demo, UI, and source runtimes remain unchanged.
 [CloudFormation security groups](https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-ec2-securitygroup.html) describes default outbound rules.
 [DNS firewall rules](https://docs.aws.amazon.com/Route53/latest/APIReference/API_route53resolver_FirewallRule.html) defines redirection behavior.
 [Route 53 Profiles](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/profiles.html) describes inherited VPC settings.
+
+[Target health](https://docs.aws.amazon.com/elasticloadbalancing/latest/APIReference/API_TargetHealth.html) defines the accepted state and reason pairs.
+[Target-group attributes](https://docs.aws.amazon.com/elasticloadbalancing/latest/APIReference/API_TargetGroupAttribute.html) defines cross-zone routing and health thresholds.
+[Deregistration behavior](https://docs.aws.amazon.com/elasticloadbalancing/latest/network/edit-target-group-attributes.html#deregistration-delay) describes existing connections and propagation delay.

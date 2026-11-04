@@ -30,6 +30,8 @@ type networkFixture struct {
 	DescribeLoadBalancersValue                    *elasticloadbalancingv2.DescribeLoadBalancersOutput
 	DescribeListenersValue                        *elasticloadbalancingv2.DescribeListenersOutput
 	DescribeTargetGroupsValue                     *elasticloadbalancingv2.DescribeTargetGroupsOutput
+	DescribeTargetGroupAttributesValue            *elasticloadbalancingv2.DescribeTargetGroupAttributesOutput
+	backendInput                                  *ec2.DescribeNetworkInterfacesInput
 	DescribeTargetHealthValue                     *elasticloadbalancingv2.DescribeTargetHealthOutput
 	ListFirewallRuleGroupAssociationsValue        *route53resolver.ListFirewallRuleGroupAssociationsOutput
 	GetFirewallRuleGroupValue                     *route53resolver.GetFirewallRuleGroupOutput
@@ -126,6 +128,7 @@ func (f *networkFixture) DescribeNetworkInterfaces(ctx context.Context, input *e
 	if len(input.NetworkInterfaceIds) > 0 {
 		return copyValue(f.workerENI), nil
 	}
+	f.backendInput = copyValue(input)
 	return copyValue(f.backendENI), nil
 }
 
@@ -234,4 +237,18 @@ func (f *networkFixture) ListProfileAssociations(ctx context.Context, input *rou
 		return &route53profiles.ListProfileAssociationsOutput{}, nil
 	}
 	return copyValue(f.profiles), nil
+}
+
+func (f *networkFixture) DescribeTargetGroupAttributes(ctx context.Context, input *elasticloadbalancingv2.DescribeTargetGroupAttributesInput, options ...func(*elasticloadbalancingv2.Options)) (*elasticloadbalancingv2.DescribeTargetGroupAttributesOutput, error) {
+	if err := f.before(ctx, "DescribeTargetGroupAttributes"); err != nil {
+		return nil, err
+	}
+	var config elasticloadbalancingv2.Options
+	for _, option := range options {
+		option(&config)
+	}
+	if aws.ToString(input.TargetGroupArn) != f.settings.TargetGroup || config.RetryMaxAttempts != 1 {
+		return nil, errors.New("unexpected attribute scope")
+	}
+	return copyValue(f.DescribeTargetGroupAttributesValue), nil
 }

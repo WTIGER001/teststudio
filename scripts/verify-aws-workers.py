@@ -81,6 +81,9 @@ def main():
     assert properties['ExchangeLoadBalancer']['Scheme'] == 'internal' and properties['ExchangeLoadBalancer']['EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic'] == 'off'
     assert properties['ExchangeListener']['Protocol'] == 'TLS' and properties['ExchangeListener']['Port'] == 443
     assert properties['ExchangeTarget']['Port'] == 8042 and properties['ExchangeTarget']['Matcher']['HttpCode'] == '404'
+    attributes = {value['Key']: value['Value'] for value in properties['ExchangeTarget']['TargetGroupAttributes']}
+    assert attributes == {'deregistration_delay.timeout_seconds': '30', 'preserve_client_ip.enabled': 'false', 'load_balancing.cross_zone.enabled': 'true', 'deregistration_delay.connection_termination.enabled': 'true', 'proxy_protocol_v2.enabled': 'false', 'target_group_health.dns_failover.minimum_healthy_targets.count': '1', 'target_group_health.dns_failover.minimum_healthy_targets.percentage': 'off', 'target_group_health.unhealthy_state_routing.minimum_healthy_targets.count': '1', 'target_group_health.unhealthy_state_routing.minimum_healthy_targets.percentage': 'off'}
+    checks.append('Exchange rollout fixes cross-zone routing, healthy quorum, private client addressing, and bounded connection draining')
     assert properties['ExchangePermissions']['AllowedPrincipals'] == ['arn:aws:iam::123456789012:root']
     assert properties['DnsAssociation']['MutationProtection'] == 'ENABLED' and properties['DnsAssociation']['VpcId'] == settings['network']['vpc']
     assert len(properties['AllowedDomains']['Domains']) == 5 and properties['BlockedDomains']['Domains'] == ['*']
@@ -106,6 +109,7 @@ def main():
     checks.append('Separate preparation identity, private persistent journals, one-runner selection, and cleanup-only mode remain distinct from untrusted tasks')
     policies = properties['ControllerPolicy']['PolicyDocument']['Statement']
     by_name = {value['Sid']: value for value in policies}
+    assert any('elasticloadbalancing:DescribeTargetGroupAttributes' in value.get('Action', []) for value in policies)
     assert by_name['LaunchOwnedTasks']['Condition']['ArnEquals']['ecs:cluster'] == settings['worker']['cluster']
     assert by_name['PassPlatformRole']['Resource'] == settings['worker']['executionRole']
     assert by_name['PassDeadlineRole']['Resource'] == settings['worker']['deadlineRole']

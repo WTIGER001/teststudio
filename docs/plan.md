@@ -137,10 +137,15 @@ An explicit endpoint-to-worker HTTPS rule suppresses CloudFormation default egre
 Nine local profile previews, eleven rejected configurations, production admission alignment, and three changed-image probes pass.
 The ARM64 service image rebuild reuses the UI and trace assets. Trusted source runtime bases stay unchanged.
 See [AWS worker packaging](aws-workers-package.md) for ordered prepare, connect, and ready stages, DNS operator steps, and evidence.
-Before continuous rolling deployment acceptance, revise target-health admission to tolerate authorized backend transitions while retaining ownership checks.
-The current guard requires all registered backends healthy. Drain active work before initial API rollouts.
-Then continue Azure worker and gateway implementation gaps. Keep live MMDev deployment verification separate.
-Keep MMDev deployment verification separate. Acceptances 41, 46, and 51–57 remain open.
+Local rollout admission now preserves known backend startup and draining transitions while requiring at least one owned healthy target.
+A single bounded EC2 request checks up to 32 backend interfaces. Existing retiring interfaces retain all ownership checks.
+Exact cross-zone, health-threshold, protocol, and connection-draining attributes match the staged template and controller read policy.
+Focused race checks, generated-package admission, shared admission-loss behavior, and native entrypoint compilation pass.
+One package invocation uses the wrong relative fixture path; its corrected absolute path passes.
+Older installations need a complete drain before applying the new attributes, read authority, and freshly built service image.
+This verifies local contracts, not live API availability or uninterrupted requests during rotation.
+Continue Azure worker and gateway implementation gaps next. Preserve the separate MMDev deployment verification phase.
+Acceptances 41, 46, and 51–57 remain open.
 
 ### Current hosted packaging checkpoint
 

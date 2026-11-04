@@ -122,7 +122,36 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: staged AWS worker infrastructure and separate preparation
+## Current delivery: ECS admission during API backend rotation
+
+Acceptances **51** and **57** advance. The count remains **48 verified of 57**, with **9 open**.
+The earlier navigation refresh is verified in the existing user tab. It requires no further implementation.
+
+Backend admission now requires at least one healthy target among one through 32 registered targets.
+Known registration, initial-health, unhealthy, and deregistration transitions preserve admission when healthy capacity remains.
+Every existing interface must retain the configured account, controller VPC, sole controller group, primary address, and private addressing.
+Only draining with Target.DeregistrationInProgress permits an absent interface. Existing retiring interfaces retain all checks.
+A cold controller can recover this state without an in-memory ownership history. Exact load-balancer egress remains mandatory.
+Unknown health states, invalid reason pairs, absent active targets, and lost healthy quorum still block admission.
+One EC2 request checks the complete backend set instead of one request per backend.
+The 32-target local fixture confirms one lookup. Actual worker-interface verification remains a separate exact lookup.
+
+The staged template now fixes target-level cross-zone routing, one-target health thresholds, disabled percentage thresholds, and 30-second connection termination.
+It also fixes disabled client-IP preservation and proxy protocol. Admission rejects missing, duplicate, or changed required attributes.
+The controller policy gains DescribeTargetGroupAttributes. User-code tasks receive no new authority.
+Older installations must drain before applying the new attributes, read policy, and freshly built service image.
+
+Targeted network race checks pass, including rollout, cold restart, ownership drift, lost healthy capacity, and maximum pool batching.
+Nine local package previews and eleven rejected inputs pass. The generated package passes production admission with simulated AWS responses.
+The existing provider admission and cleanup checks pass. Shared pending-admission and post-activation admission-loss checks pass.
+The package alignment command first fails because Go runs from its package directory. Its corrected absolute fixture path passes.
+Both native entrypoint packages compile. Their ECS-named test selection has no matching tests; it proves compilation only.
+Evidence is output/ecs-rollout/package/summary.json and the focused command results.
+No UI build, browser, image build, source-suite run, cloud operation, registry push, or deployment runs in this batch.
+The user demo stays available. Live rotation, provider recovery, and deployment parity remain unverified.
+Continue remaining Azure worker and gateway implementation next. Keep 41, 46, and 51–57 open.
+
+## Previous delivery: staged AWS worker infrastructure and separate preparation
 
 Acceptances **51** and **57** advance, with supporting private-journal recovery packaging under **52**.
 The total remains **48 verified of 57**, with **9 open**. Local packaging does not close deployed acceptance.
@@ -157,8 +186,8 @@ Evidence is image/summary.json and image/cleanup.json. Live EFS and IAM are not 
 The local demo remains healthy. No browser, source suite, cloud account operation, registry push, or deployment runs.
 
 Operator, worker, network, lifecycle, preparation, image, AWS, and plan guides match the staged package and current limits.
-Before continuous rollout acceptance, update admission for authorized target-health rotation; the current guard requires all registered targets healthy.
-Initial API rollouts must drain active work. Continue remaining Azure execution, gateway, recording, storage, and deployment verification work.
+The current rollout batch replaces the all-targets-healthy restriction with locally verified transition admission.
+Continue remaining Azure execution, gateway, recording, storage, and deployment verification work.
 
 ## Previous delivery: scoped ECS SDK setup, ECR authentication, and native wiring
 
