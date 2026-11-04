@@ -8,7 +8,8 @@ It then checks the firewall, its subnet, public IP association, firewall policy,
 A selected private address alone no longer substitutes for firewall resource ownership.
 
 This stage does not implement the execution Network interface or release worker input.
-DNS filtering, private endpoint ownership, isolated exchange service, workload inventory, cross-job isolation, and execution placement remain required.
+The [DNS stage](azure-worker-dns.md) now checks resolver policy, complete inventories, and actual VNet association.
+Private DNS records, private endpoint ownership, isolated exchange service, workload inventory, cross-job isolation, and execution placement remain required.
 Azure coded execution stays disabled in native commands and infrastructure packaging.
 Local SDK fixtures do not establish Azure platform compatibility, firewall delivery, effective packet isolation, or hosted deployment parity.
 
@@ -112,7 +113,8 @@ Close the reader to close idle transport connections.
 
 ## Remaining work
 
-Implement the actual Azure DNS resolver policy, VNet link, default block, approved domain lists, and private records.
+The DNS inspector now checks the actual policy, VNet association, exclusive link, default block, and approved domain lists.
+Implement authoritative private DNS zones, exact records, links, and endpoint bindings.
 Bind private registry and exchange endpoints to approved resources and exact addresses.
 Establish isolated exchange authority, unrelated workload inventory, cross-job isolation, and actual execution placement.
 Then compose complete Network admission, bind the full execution profile, and add native configuration and infrastructure packaging.

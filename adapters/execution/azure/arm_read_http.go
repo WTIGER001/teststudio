@@ -14,6 +14,7 @@ type armReadHTTP struct {
 	base      policy.Transporter
 	resources map[string]string
 	pages     map[string]bool
+	posts     map[string]bool
 }
 
 func newTopologyHTTP(c Config, s TopologySettings, base policy.Transporter) *armReadHTTP {
@@ -37,7 +38,14 @@ func (h *armReadHTTP) allows(id, version string) bool {
 
 func (h *armReadHTTP) Do(r *http.Request) (*http.Response, error) {
 	u := r.URL
-	if u == nil || u.Scheme != "https" || u.Host != "management.azure.com" || u.User != nil || u.Fragment != "" || u.Opaque != "" || r.Host != "" && r.Host != u.Host || r.Method != "GET" {
+	if u == nil || u.Scheme != "https" || u.Host != "management.azure.com" || u.User != nil || u.Fragment != "" || u.Opaque != "" || r.Host != "" && r.Host != u.Host {
+		return nil, hostedexecution.ErrOwnership
+	}
+	method := "GET"
+	if h.posts[u.Path] {
+		method = "POST"
+	}
+	if r.Method != method || method == "POST" && (r.ContentLength > 0 || r.Body != nil && r.Body != http.NoBody) {
 		return nil, hostedexecution.ErrOwnership
 	}
 	version, ok := h.resources[u.Path]

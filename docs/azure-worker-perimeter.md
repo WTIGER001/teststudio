@@ -9,7 +9,8 @@ The same settings can produce SDK definitions for later infrastructure packaging
 
 This stage does not implement the execution Network interface or release worker input.
 The [firewall stage](azure-worker-firewall.md) now verifies actual resource identity, attachment, policy, and complete group inventory.
-DNS filtering, private endpoint ownership, isolated exchange service, and cross-job isolation remain required.
+The [DNS stage](azure-worker-dns.md) now checks the actual resolver policy and VNet association.
+Private records, private endpoint ownership, isolated exchange service, and cross-job isolation remain required.
 Azure coded execution stays disabled in native commands and infrastructure packaging.
 Local fixtures do not establish live platform compatibility or effective packet isolation.
 
@@ -89,7 +90,8 @@ Service tags represent shared Azure service ranges. They do not provide the requ
 The firewall inspector now checks the fixed platform allowlist, final deny, complete group inventory, and absence of classic or inherited-policy bypasses.
 It does not establish live platform compatibility or effective packet isolation.
 Azure platform DNS requires its specific service tag for NSG overrides. A generic deny alone does not establish DNS filtering.
-The later resolver-policy inspector must verify the actual VNet link, enabled rule order, domain lists, and default block.
+The resolver-policy inspector now verifies the actual VNet association, exclusive link, enabled rule order, exact domain lists, and default block.
+Private DNS and endpoint verification remain separate required stages.
 
 The required within-subnet platform rules allow communication inside that subnet.
 They do not establish cross-job isolation. Workload inventory and execution isolation need separate proof before cross-project coded execution.

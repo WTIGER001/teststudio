@@ -122,7 +122,39 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: Azure firewall resource and effective policy inspection
+## Current delivery: Azure DNS resolver policy and actual VNet association
+
+Acceptance **51** advances. The verified total stays **48 of 57**, with **9 open**.
+The previous firewall batch commits as 7d212a8. This batch implements actual resolver-policy and VNet association inspection.
+
+DNSGuard refreshes all previous network stages before reading the selected policy, two domain lists, complete rules and links, and actual VNet association.
+Exactly one enabled approved-list allow and one enabled root-domain block are required, with fixed priority and list authority.
+The approved list binds platform names, exchange origin, registry login, explicit registry data region, and private-link names.
+An explicit data region supports a registry and worker in different Azure regions without inferring endpoint location.
+Extra domains, bulk references, disabled rules, changed actions, foreign lists, extra rules, and substituted resource identity reject inspection.
+The policy links only the worker VNet. The VNet's own association inventory must identify the same policy.
+Empty, missing, incomplete, or unfinished observations remain unavailable. Conflicting or foreign authority never establishes admission.
+
+The production client pins the stable DNS SDK and API and preserves explicit credential, origin, resource, version, body, context, and query bounds.
+Its one POST exception invokes the exact documented read-only worker VNet association action with no request body.
+Other readers keep their existing methods and resources. A shared bounded inventory helper now serves DNS and firewall paging.
+Fresh validated definitions support later packaging without making Azure writes.
+Native hierarchy remains explicit: approved parents can permit descendants. Private zones and exact endpoint records remain required.
+
+Seven new focused local race checks pass, including a nineteen-case declared DNS decision matrix.
+Three selected existing firewall, perimeter, and topology checks pass for shared transport and paging compatibility.
+Only the affected settings, registry-region declarations, association, and SDK checks repeat after making data region explicit.
+Evidence is output/azure-worker-dns/summary.json and the focused command results.
+No Azure credential, cloud API, DNS probe, packet probe, registry push, deployment, UI build, browser, container, or image build runs.
+
+This stage does not implement complete Network admission or release worker input.
+Private zone authority, private DNS records, endpoint ownership and region, isolated exchange, workload inventory, cross-job isolation, and execution placement remain required.
+Live recursive resolution, platform CNAME behavior, identity compatibility, effective isolation, and deployment parity still need separate verification.
+Azure coded execution stays disabled. No broad acceptance item closes from these local response and declaration fixtures.
+Continue private DNS and endpoint verification before composing full Network admission or enabling native coded jobs.
+See [Azure worker DNS policy inspection](azure-worker-dns.md).
+
+## Previous delivery: Azure firewall resource and effective policy inspection
 
 Acceptance **51** advances. The total remains **48 verified of 57**, with **9 open**.
 The previous perimeter batch commits as f9be761. This batch verifies the actual firewall behind the selected default route.

@@ -14,6 +14,7 @@ The [independent deadline adapter](azure-worker-deadlines.md) now supplies durab
 The [topology inspector](azure-worker-network.md) now verifies environment and subnet bindings through scoped reads.
 The [perimeter inspector](azure-worker-perimeter.md) now verifies the fixed NSG rules and default route.
 The [firewall inspector](azure-worker-firewall.md) now checks actual attachment, dedicated policy, and complete group inventory.
+The [DNS inspector](azure-worker-dns.md) now checks actual resolver policy, VNet association, complete rules, and default block.
 Complete network admission, identity role binding, and command wiring remain required before enabling coded jobs.
 Do not enable local Docker runner flags or mount a Docker socket inside these apps.
 Local packaging checks do not close Azure deployment acceptance.

@@ -194,8 +194,18 @@ Complete policy group references and bounded list inventory must agree. Safe sco
 Eight new focused race checks and two selected existing transport checks pass locally. Independent resource reads run concurrently after perimeter inspection.
 See [Azure worker firewall inspection](azure-worker-firewall.md). Acceptance 51 advances; the count remains 48 of 57.
 
-Next inspect DNS resolver policy, private endpoints, and the isolated exchange.
-Bind the actual DNS policy and VNet link. Threat-intelligence filtering or a DNS proxy alone cannot establish the required default block.
+The Azure DNS stage now verifies the actual VNet association, exclusive worker link, complete rule inventory, approved names, and root-domain block.
+It rejects unexpected rules, domain lists, actions, disabled blocks, bulk URLs, foreign associations, and incomplete policy state.
+Explicit registry data region avoids assuming that the registry and worker share a region.
+The SDK permits one exact read-only POST association action. Shared scoped paging preserves existing firewall and read-transport boundaries.
+Seven new focused race checks, a nineteen-case declaration matrix, and three selected existing checks pass locally.
+Native DNS hierarchy remains explicit. An approved parent can allow descendants; this is not an exact-host-only DNS guarantee.
+See [Azure worker DNS policy inspection](azure-worker-dns.md). Acceptance 51 advances; the count remains 48 of 57.
+
+Next verify authoritative private DNS zones, exact records and links, registry and exchange private endpoints, address ownership, and data region.
+Do not treat the configured public exchange hostname or allowed DNS descendants as a complete private boundary.
+Check live platform aliases and CNAME compatibility in the separate hosted phase. Preserve the root-domain block.
+Then verify the isolated exchange service before composing complete admission.
 Verify unrelated workload inventory, cross-job isolation, and actual execution placement before composing Network.
 Bind topology and all perimeter settings into networkProfile. Do not substitute a partial topology digest.
 Keep coded jobs disabled until those controls pass. Ordinary jobs must meet the execution isolation contract or use a suitable Azure backend.
