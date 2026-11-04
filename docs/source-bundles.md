@@ -188,3 +188,11 @@ Archive and builder package tests cover validation, fixed build instructions, bo
 The Go runner has a targeted offline vendor check for discovery and normal execution.
 A real local ZIP workflow verifies assembly, server inspection, reviewed publication, execution, and owned resource cleanup.
 Reuse the trusted runtime when repeating that workflow after a relevant behavior change.
+
+## Managed metadata during synchronization
+
+Prepared source updates preserve title, description, category, tags, owner, explicit lifecycle, safety, rationale, conditions, timeout, timing, and capture settings.
+Discovery updates executable source facts and selectors. Edit executable definitions in the registered source workflow.
+A catalog edit after preview makes the old source review conflict. Refresh its review before publication.
+Unchanged repository source can refresh its review without repeating assembly or discovery.
+Explicit declarative catalog import remains a reviewed metadata update operation.

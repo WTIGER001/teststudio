@@ -167,9 +167,31 @@ func (s *Server) catalogRoutes(m *http.ServeMux) {
 		}
 		JSON(w, 200, map[string]any{"issues": issues, "valid": len(issues) == 0})
 	}))
+	m.HandleFunc("POST "+base+"/catalog-drafts/{id}/publication-reviews", s.authorized(func(w http.ResponseWriter, r *http.Request) {
+		rev, err := revision(r)
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		value, err := s.Catalog.ReviewPublication(r.Context(), actor(r), r.PathValue("project"), r.PathValue("suite"), r.PathValue("id"), rev)
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		JSON(w, 200, value)
+	}))
+	m.HandleFunc("GET "+base+"/publication-reviews/{id}", s.authorized(func(w http.ResponseWriter, r *http.Request) {
+		value, err := s.Catalog.ReadPublicationReview(r.Context(), actor(r), r.PathValue("project"), r.PathValue("suite"), r.PathValue("id"))
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		JSON(w, 200, value)
+	}))
 	m.HandleFunc("POST "+base+"/catalog-drafts/{id}/publish", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		var input struct {
-			Activate bool `json:"activate"`
+			Activate bool   `json:"activate"`
+			Review   string `json:"reviewId"`
 		}
 		if err := body(r, &input); err != nil {
 			problem(w, err)
@@ -180,7 +202,12 @@ func (s *Server) catalogRoutes(m *http.ServeMux) {
 			problem(w, err)
 			return
 		}
-		v, err := s.Catalog.Publish(r.Context(), actor(r), r.PathValue("project"), r.PathValue("suite"), r.PathValue("id"), r.Header.Get("Idempotency-Key"), rev, input.Activate)
+		var v catalog.Release
+		if input.Review != "" {
+			v, err = s.Catalog.PublishReviewed(r.Context(), actor(r), r.PathValue("project"), r.PathValue("suite"), r.PathValue("id"), input.Review, r.Header.Get("Idempotency-Key"), rev, input.Activate)
+		} else {
+			v, err = s.Catalog.Publish(r.Context(), actor(r), r.PathValue("project"), r.PathValue("suite"), r.PathValue("id"), r.Header.Get("Idempotency-Key"), rev, input.Activate)
+		}
 		if err != nil {
 			problem(w, err)
 			return

@@ -99,6 +99,15 @@ Existing capability checks still control each protected link.
 On narrow screens, Navigation opens and closes the menu. Selecting a link closes it and returns space to the current page.
 Sidebar styles stay within focused components and use shared theme tokens.
 
+## Publication review
+
+Show changes from the active release before publication, including safety, source, timing, capture, and readable schedule effects.
+Use Publish release and Publish and activate as distinct actions. Describe their effects beside the controls.
+Validation does not indicate test execution or success. Working changes and expired reviews require a new review.
+An uncertain publication retains its request key and chosen effect. Provide same-action retry and explain the reload boundary.
+Hide rejected review data after access loss. Keep long release identifiers inside the available width.
+See [Publication review](publication-review.md).
+
 ## Run investigation
 
 Use Inspect test to move from a logical result to its attempts, logs, and artifacts.

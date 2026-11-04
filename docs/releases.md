@@ -57,3 +57,9 @@ It also verifies archived-suite release history, contextual help, keyboard dismi
 Focused Go checks cover retained ordering, revision conflicts, cross-project rejection, archived history, and exact publication denies.
 Pure comparison checks cover permanent identities, artifact changes, nested key ordering, and immutable commit links.
 The common implementation remains subject to the separate deployment-profile acceptance checks.
+
+## Review before publication
+
+The catalog now compares a new draft with its active release before publication.
+Publish release leaves activation unchanged. Publish and activate selects the new release for future unpinned runs.
+See [Publication review](publication-review.md) for validation, schedule effects, stale conflicts, and lost-response recovery.

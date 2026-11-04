@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -16,6 +17,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/sources"
 	"github.com/wtiger001/teststudio/internal/storage"
 	"github.com/wtiger001/teststudio/internal/suitespec"
+	"github.com/wtiger001/teststudio/internal/timing"
 )
 
 type inspector struct {
@@ -134,11 +136,30 @@ func TestPrebuiltPreparationPublicationPreservesMetadataAndHistory(t *testing.T)
 	test.Title = "Managed title"
 	test.Tags = []string{"managed"}
 	test.Owner = "QA"
+	test.Description = "Managed description"
+	test.Category = "Managed / Checks"
+	test.Safety = "unsafe"
+	test.Rationale = "Requires a disposable target"
+	test.Conditions = "Use a new test database"
+	test.TimeoutSeconds = 23
+	policy := timing.DefaultPolicy()
+	policy.Mode = "warn"
+	policy.SlowdownFactor = 2.5
+	test.Timing = &policy
+	capture := catalog.DefaultCapture()
+	capture.RetentionDays = 14
+	capture.Trace = "always"
+	test.Capture = &capture
 	if err := c.SaveTest(t.Context(), "admin", "alpha", "health", test, row.Revision); err != nil {
 		t.Fatal(err)
 	}
+	if err := c.ChangeState(t.Context(), "admin", "alpha", "health", test.ID, "disabled", row.Revision+1); err != nil {
+		t.Fatal(err)
+	}
+	test.State = "disabled"
+	expectedManaged := test
 	test.Selector = "./checks::TestReplaced"
-	if err := c.SaveTest(t.Context(), "admin", "alpha", "health", test, row.Revision+1); err == nil {
+	if err := c.SaveTest(t.Context(), "admin", "alpha", "health", test, row.Revision+2); err == nil {
 		t.Fatal("manual editor changed source-owned selector")
 	}
 	probe.count, probe.version = 39, 2
@@ -153,6 +174,10 @@ func TestPrebuiltPreparationPublicationPreservesMetadataAndHistory(t *testing.T)
 	}
 	if second.Draft.Tests[0].Title != "Managed title" || second.Draft.Tests[0].Tags[0] != "managed" || second.Draft.Tests[0].Owner != "QA" || !strings.Contains(second.Draft.Tests[0].Selector, "Version2") {
 		t.Fatal("source synchronization overwrote metadata or lost discovered facts")
+	}
+	actual := second.Draft.Tests[0]
+	if actual.Description != expectedManaged.Description || actual.Category != expectedManaged.Category || actual.State != expectedManaged.State || actual.Safety != expectedManaged.Safety || actual.Rationale != expectedManaged.Rationale || actual.Conditions != expectedManaged.Conditions || actual.TimeoutSeconds != expectedManaged.TimeoutSeconds || !reflect.DeepEqual(actual.Timing, expectedManaged.Timing) || !reflect.DeepEqual(actual.Capture, expectedManaged.Capture) {
+		t.Fatal("source synchronization replaced managed lifecycle, safety, timing, capture, or descriptive metadata", actual)
 	}
 	removed, err := s.Store.Get(t.Context(), catalog.Bucket("tests", "alpha", "health"), "CODE-039")
 	if err != nil {

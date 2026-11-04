@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 30 verified of 57.
+The acceptance count is 31 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -35,7 +35,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **22.** Declarative uploads, complete source bundles, and registered GitHub repositories can produce versioned releases through the UI.
 - [x] **23.** One repository can provide multiple suites, including suites beside existing application source.
 - [x] **24.** Test-only publication requires no API or UI deployment.
-- [ ] **25.** Concurrent catalog edits produce explicit conflicts. Source synchronization preserves service-managed metadata.
+- [x] **25.** Concurrent catalog edits produce explicit conflicts. Source synchronization preserves service-managed metadata.
 - [ ] **26.** Failed or duplicate preparation events preserve the active release and do not create unintended test runs.
 - [x] **27.** Runs retain their release across updates, activation changes, and rollbacks.
 - [ ] **28.** Catalog changes do not change existing run snapshots. Disabled tests and invalid dependencies block new dispatch explicitly.
@@ -73,6 +73,50 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
+
+### Reviewed publication and complete source metadata preservation
+
+Acceptance **25** is complete. Acceptance **21** advances and remains open.
+The current ledger has **31 verified, 26 open, 57 total** items.
+Validate and preview now stores an actor-owned review of one draft revision and its active release context.
+The review lists added, changed, removed, and unchanged definitions, explicit safety changes, source settings, timing, capture, and readable schedule effects.
+Publish release and Publish and activate remain distinct choices. Neither action starts a test run.
+Pinned schedules retain their release. Future unpinned execution follows activation. Hidden schedules remain hidden.
+The publication transaction checks current authority, project, suite, draft, working catalog, active release, and schedule configuration.
+Routine scheduler progress does not invalidate a review. Changed schedule configuration does.
+Record guards serialize the relevant publication context. Rejected work cannot partially publish or activate a release.
+Same-key committed retries return the original release. Concurrent same-key submissions retain one release.
+Uncertain responses preserve the in-page request key and selected effect. Replacement preview and the other effect stay disabled until resolution.
+Access rejection hides the review. A stale review requires fresh validation and review before another publication.
+Prepared-source publication retains its existing source review. Existing trusted clients retain their original publication request shape.
+OpenAPI 0.27, the generated client, page help, and user guides describe the new reviewed operations and compatibility behavior.
+
+Focused publication review domain and HTTP checks pass with the race detector on SQLite and local PostgreSQL.
+They cover differences, schedule privacy, exact test denials, foreign context, expiry, stale catalog, draft, project, active release, and schedule changes.
+Same-key sequential and concurrent recovery, changed-effect rejection, and unchanged activation after rejected work pass.
+Generated-client synchronization and the production Angular build pass.
+STUDIO-PUBLISH-001 passes through normal TestStudio execution in about 1.4 seconds.
+It reviews changes and schedule pins, rejects a concurrent catalog edit, and regenerates the review.
+It then simulates a lost response after commit and recovers the same publication without another release.
+The original run keeps its release and definitions. Publication without activation keeps the active selection. Mobile layout stays within the viewport.
+The first focused UI pass identifies a long pinned-release identifier overflow. Scoped wrapping corrects it.
+Evidence is output/selftest/20261104T024320.646208000-175a56010e1548a3268efb8a/summary.json and cleanup.json.
+The concise milestone record is output/publication-review/checkpoint.json.
+Both UI runs, their browser containers and output volumes, their controllers, and the owned local PostgreSQL fixture are stopped and verified.
+No cloud tests or broad suites run.
+
+The acceptance 25 audit combines current revision conflict checks with prepared-source and registered repository synchronization.
+The prepared-source check now covers every managed metadata group through a second discovered source version.
+Title, description, category, tags, owner, explicit lifecycle, safety, rationale, conditions, timeout, timing, and capture settings survive synchronization.
+Source-owned selectors update from discovery. Direct executable edits remain rejected.
+A ready repository review refreshes metadata without rebuilding the unchanged source. An obsolete review conflicts before application.
+Atomic bulk metadata conflicts preserve all unselected values and create no partial updates.
+The five selected catalog and source checks pass locally with the race detector. Existing UI bulk and source conflict evidence remains applicable.
+These checks use controlled source and discovery adapters. They do not claim live GitHub or hosted execution verification.
+Items **22** and **26** retain their separate broader source preparation scope.
+
+Continue catalog API list contracts and complete transfer workflow evidence under acceptance 21.
+Keep evidence recovery, retention adapters, timing parity, and deployment acceptance in the full remaining plan.
 
 ### Category browsing, metadata filters, and direct lifecycle actions
 

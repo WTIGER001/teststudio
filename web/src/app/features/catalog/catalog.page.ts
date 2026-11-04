@@ -5,6 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterLink } from '@angular/router'
 import { CatalogService } from './catalog.service'
 import { CatalogEntryService } from './catalog-entry.service'
+import { CatalogPublicationReviewComponent } from './catalog-publication-review.component'
 import { CatalogTableComponent } from './catalog-table.component'
 import { CatalogFiltersComponent } from './catalog-filters.component'
 import { CatalogCategoryNodesComponent } from './catalog-category-nodes.component'
@@ -23,7 +24,7 @@ import { CatalogTestFormComponent } from './catalog-test-form.component'
 
 @Component({
   standalone: true,
-  imports: [CatalogTableComponent, CatalogFiltersComponent, CatalogCategoryNodesComponent, FormsModule, ReactiveFormsModule, RouterLink, CatalogEntryComponent, CatalogPlanComponent, CatalogBulkComponent, CatalogTransferComponent, CatalogSavedSelectionsComponent, CatalogTestFormComponent],
+  imports: [CatalogPublicationReviewComponent, CatalogTableComponent, CatalogFiltersComponent, CatalogCategoryNodesComponent, FormsModule, ReactiveFormsModule, RouterLink, CatalogEntryComponent, CatalogPlanComponent, CatalogBulkComponent, CatalogTransferComponent, CatalogSavedSelectionsComponent, CatalogTestFormComponent],
   providers: [RecordCreationService, CatalogTestEditorService, HTTPCheckEditorService, TimingPolicyEditorService, CatalogService, CatalogEntryService, CatalogPlanService, CatalogSelectionService, CatalogBulkMetadataService, CatalogSavedSelectionsService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -70,15 +71,10 @@ import { CatalogTestFormComponent } from './catalog-test-form.component'
     @if (service.suites().length) { <ts-catalog-saved-selections /> }
     @if (service.suites().length && service.workspace.can('catalog.update')) {
     <section class="panel release-panel" aria-labelledby="release-title"><div><h2 id="release-title">Publish a release</h2><p class="small muted">Validate draft definitions and freeze an executable catalog.</p></div>
-        <div class="inline-form"><label class="sr-only" for="release-suite">Suite to publish</label><select id="release-suite" [ngModel]="service.releaseSuite()" (ngModelChange)="service.releaseSuite.set($event); service.draft.set(null)">@for (suite of service.suites(); track suite.id) { <option [value]="suite.id">{{ suite.data.name }}</option> }</select><button class="button secondary" type="button" (click)="service.prepareRelease()" [disabled]="service.saving()">Validate and preview</button></div>
+        <div class="inline-form"><label class="sr-only" for="release-suite">Suite to publish</label><select id="release-suite" [ngModel]="service.releaseSuite()" [disabled]="service.saving() || service.publicationUncertain()" (ngModelChange)="service.changeReleaseSuite($event)">@for (suite of service.suites(); track suite.id) { <option [value]="suite.id">{{ suite.data.name }}</option> }</select><button class="button secondary" type="button" (click)="service.prepareRelease()" [disabled]="service.saving() || service.publicationUncertain()">Validate and preview</button></div>
       </section>
     }
-    @if (service.draft(); as draft) {
-      <section class="panel" aria-labelledby="release-preview-title"><h2 id="release-preview-title">Release preview</h2><p>{{ draft.data.tests.length }} test definitions in this immutable snapshot.</p>
-        @for (issue of service.issues(); track $index) { <p class="notice warning">{{ issue.testId }} · {{ issue.field }}: {{ issue.message }}</p> }
-        @if (!service.issues().length) { <p class="notice success">Validation passed. This does not indicate that the tests have run or passed.</p>@if (service.workspace.can('catalog.publish')) { <button class="button primary" type="button" (click)="service.publish()" [disabled]="service.saving()">Publish and activate</button> } }
-      </section>
-    }
+    <ts-catalog-publication-review />
   `,
   styles: [`:host { display: block; } .catalog-layout { min-width: 0; } .with-categories { display: grid; grid-template-columns: minmax(180px, 240px) minmax(0, 1fr); gap: 20px; } .category-navigation { min-width: 0; border-right: 1px solid var(--border); padding-right: 12px; } .catalog-results { min-width: 0; } @media (max-width: 1000px) { .with-categories { grid-template-columns: minmax(0, 1fr); } .category-navigation { border-right: 0; border-bottom: 1px solid var(--border); padding: 0 0 16px; } }`]
 })

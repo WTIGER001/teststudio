@@ -38,6 +38,8 @@ Apply checks current permissions, suite revision, catalog revision, and each tes
 A changed catalog returns a conflict. Create a new preview before retrying.
 The transaction applies all changes or none. Repeating an applied plan does not add revisions.
 Publication remains a separate, explicit action.
+Validate and preview compares the draft with the active release before Publish release or Publish and activate.
+The review shows safety, policy, and readable schedule effects and rejects stale publication. See [Publication review](publication-review.md).
 
 ## Interface workflows
 

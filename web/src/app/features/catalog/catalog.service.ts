@@ -1,7 +1,9 @@
 import { computed, DestroyRef, effect, inject, Injectable, signal, untracked } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { ActivatedRoute } from '@angular/router'
-import { ApiService, type Page, type RecordValue } from '../../core/api.service'
+import { ApiError, ApiService, type Page, type RecordValue } from '../../core/api.service'
+import { AccessClientService } from '../../core/access-client.service'
+import type { PublicationReview } from '../../core/generated/access.types'
 import { WorkspaceService } from '../../core/workspace.service'
 import type { Application, Suite } from '../configuration/configuration.service'
 import type { CatalogItem, Draft, Issue } from './catalog.models'
@@ -12,6 +14,7 @@ import { CatalogTestEditorService } from './catalog-test-editor.service'
 @Injectable()
 export class CatalogService {
   private readonly api = inject(ApiService)
+  private readonly client = inject(AccessClientService)
   private readonly route = inject(ActivatedRoute)
   private readonly destroy = inject(DestroyRef)
   readonly workspace = inject(WorkspaceService)
@@ -45,15 +48,22 @@ export class CatalogService {
   readonly editingHTTP = this.testEditor.editingHTTP
   readonly releaseSuite = signal('')
   readonly draft = signal<RecordValue<Draft> | null>(null)
+  readonly review = signal<PublicationReview | null>(null)
+  readonly publicationConflict = signal(false)
+  readonly publicationUncertain = signal(false)
+  readonly publicationAttempt = signal<boolean | null>(null)
+  readonly publicationDenied = signal(false)
+  readonly reviewStale = computed(() => this.publicationConflict() || !!this.review() && !this.draft() && !this.publicationUncertain())
   readonly issues = signal<Issue[]>([])
   readonly form = this.testEditor.form
   private applicationGeneration = 0
   private generation = 0
+  private publicationGeneration = 0
   private publicationKey = ''
 
   constructor() {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => {
-      this.projectId.set(params.get('projectId') ?? ''); this.suiteFilter.set(this.route.snapshot.queryParamMap.get('suite') ?? ''); this.typeFilter.set(''); this.query.set(''); this.state.set('active'); this.filters.set({}); this.view.set('table'); this.releaseSuite.set(''); this.draft.set(null)
+      this.projectId.set(params.get('projectId') ?? ''); this.suiteFilter.set(this.route.snapshot.queryParamMap.get('suite') ?? ''); this.typeFilter.set(''); this.query.set(''); this.state.set('active'); this.filters.set({}); this.view.set('table'); this.review.set(null); this.publicationConflict.set(false); this.publicationUncertain.set(false); this.publicationAttempt.set(null); this.publicationDenied.set(false); this.publicationGeneration++; this.releaseSuite.set(''); this.draft.set(null)
       this.editorOpen.set(false); this.editing.set(null); this.items.set([]); this.suites.set([]); this.applications.set([]); this.success.set(this.route.snapshot.queryParamMap.has('created') ? 'Draft changes saved. Publish a release to use the updated definition.' : '')
       void this.load()
     })
@@ -64,7 +74,7 @@ export class CatalogService {
         if (allowed) void this.loadApplications(project)
       })
     })
-    this.destroy.onDestroy(() => { this.generation++; this.applicationGeneration++ })
+    this.destroy.onDestroy(() => { this.generation++; this.applicationGeneration++; this.publicationGeneration++ })
   }
 
   filter(field: keyof CatalogFilters, value: string | boolean): void { this.filters.update(filters => ({ ...filters, [field]: value })) }
@@ -116,27 +126,44 @@ export class CatalogService {
     finally { this.saving.set(false) }
   }
 
-  async prepareRelease(): Promise<void> {
-    if (!this.releaseSuite() || this.saving()) return
-    this.saving.set(true); this.error.set(''); this.success.set('')
-    try {
-      const base = `/api/v1/projects/${this.projectId()}/suites/${this.releaseSuite()}/catalog-drafts`
-      const draft = await this.api.request<RecordValue<Draft>>(base, 'POST', {})
-      const validation = await this.api.request<{ issues: Issue[] }>(`${base}/${draft.id}/validate`, 'POST', {})
-      this.draft.set(draft); this.issues.set(validation.issues); this.publicationKey = crypto.randomUUID()
-    } catch (error) { this.error.set(error instanceof Error ? error.message : 'The release preview could not be prepared.') }
-    finally { this.saving.set(false) }
+  changeReleaseSuite(suite: string): void {
+    if (this.publicationUncertain()) return
+    this.publicationGeneration++; this.releaseSuite.set(suite); this.draft.set(null); this.review.set(null); this.publicationConflict.set(false); this.publicationAttempt.set(null)
   }
 
-  async publish(): Promise<void> {
-    const draft = this.draft()
-    if (!draft || this.issues().length || this.saving()) return
-    this.saving.set(true); this.error.set(''); this.success.set('')
+  async prepareRelease(): Promise<void> {
+    if (!this.releaseSuite() || this.saving() || this.publicationUncertain()) return
+    const generation = ++this.publicationGeneration, project = this.projectId(), suite = this.releaseSuite()
+    this.saving.set(true); this.error.set(''); this.success.set(''); this.review.set(null); this.draft.set(null); this.publicationConflict.set(false); this.publicationDenied.set(false); this.publicationAttempt.set(null)
     try {
-      await this.api.request(`/api/v1/projects/${this.projectId()}/suites/${this.releaseSuite()}/catalog-drafts/${draft.id}/publish`, 'POST', { activate: true }, draft.revision, this.publicationKey)
-      this.draft.set(null); this.success.set('Release published and activated. Existing run snapshots retain their original definitions.')
+      const draft = await this.api.request<RecordValue<Draft>>(`/api/v1/projects/${project}/suites/${suite}/catalog-drafts`, 'POST', {})
+      const review = await this.client.call('reviewCatalogPublication', { project, suite, id: draft.id, revision: draft.revision })
+      if (generation !== this.publicationGeneration) return
+      this.draft.set(draft); this.review.set(review); this.issues.set(review.issues); this.publicationKey = crypto.randomUUID()
+    } catch (error) { if (generation === this.publicationGeneration) this.error.set(error instanceof Error ? error.message : 'The release preview could not be prepared.') }
+    finally { if (generation === this.publicationGeneration) this.saving.set(false) }
+  }
+
+  async publish(activate = true): Promise<void> {
+    const review = this.review(), generation = this.publicationGeneration
+    if (!review || review.issues.length || this.saving() || this.reviewStale() || this.publicationAttempt() !== null && this.publicationAttempt() !== activate) return
+    this.saving.set(true); this.error.set(''); this.success.set(''); this.publicationAttempt.set(activate)
+    try {
+      await this.client.call('publishReviewedCatalog', { project: review.projectId, suite: review.suiteId, id: review.draftId, revision: review.draftRevision, key: this.publicationKey, body: { activate, reviewId: review.id } })
+      if (generation !== this.publicationGeneration) return
+      this.draft.set(null); this.review.set(null); this.publicationUncertain.set(false); this.publicationAttempt.set(null)
+      this.success.set(activate ? 'Release published and activated. Existing run snapshots retain their original definitions.' : 'Release published. The active release stays unchanged. Open Suite releases to activate it later.')
       await this.load()
-    } catch (error) { this.error.set(error instanceof Error ? error.message : 'Publication failed.') }
-    finally { this.saving.set(false) }
+    } catch (error) {
+      if (generation !== this.publicationGeneration) return
+      if (error instanceof ApiError && error.status < 500) {
+        this.publicationUncertain.set(false); this.publicationConflict.set(true)
+        if (error.status === 403 || error.status === 401) { this.review.set(null); this.draft.set(null); this.publicationDenied.set(true); this.error.set('Publication access is unavailable. Refresh access and prepare a new review.') }
+        else this.error.set('The review is outdated or no longer executable. Validate and preview again before publishing.')
+      } else {
+        this.publicationUncertain.set(true)
+        this.error.set('The publication response is unavailable. Retry the same publication action below. This page retains its request key to recover an existing release. Reloading loses this continuation; inspect Suite releases before publishing again.')
+      }
+    } finally { if (generation === this.publicationGeneration) this.saving.set(false) }
   }
 }

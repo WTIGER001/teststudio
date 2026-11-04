@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.26.0"
+export const accessContractVersion = "0.27.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -78,8 +78,13 @@ export type ProviderMappings = { [key: string]: string }
 export type ProviderMutation = { "autoProvision": boolean; "clientId": string; "disabled": boolean; "groupClaim"?: string; "groupMappings": ProviderMappings; "id": string; "issuer": string; "logoutEndpoint"?: string; "membershipTtlSeconds": number; "name": string; "reason": string; "scopes": (string)[]; "secretRef"?: string }
 export type ProviderPage = { "canCreate": boolean; "credentialRefs": (string)[]; "cursor"?: string; "items": (ProviderRecord)[]; "partial": boolean }
 export type ProviderRecord = { "data": Provider; "id": string; "revision": number; "updatedAt": string }
+export type PublicationChange = { "action": "added" | "changed" | "removed"; "after"?: SourceCatalogTest; "before"?: SourceCatalogTest; "fields": (string)[]; "id": string; "safetyChanged": boolean; "title": string }
+export type PublicationReview = { "activeReleaseId"?: string; "afterSettings": PublicationSettings; "artifactChanged": boolean; "beforeSettings"?: PublicationSettings; "captureChanged": boolean; "changes": (PublicationChange)[]; "createdAt": string; "draftId": string; "draftRevision": number; "enabled": number; "expiresAt": string; "id": string; "issues": (SourceCatalogIssue)[]; "projectId": string; "schedules": (PublicationSchedule)[]; "suiteId": string; "timingChanged": boolean; "total": number; "unchanged": number }
+export type PublicationSchedule = { "enabled": boolean; "followsActive": boolean; "id": string; "name": string; "releaseId"?: string }
+export type PublicationSettings = { "artifact": SourceCatalogArtifact; "capture": SourceCapturePolicy; "timing": SourceTimingPolicy }
 export type Reason = { "reason": string }
 export type ReleaseRegistry = { "activeReleaseId"?: string; "archived": boolean; "canActivate": boolean; "items": (SourceCatalogRelease)[]; "suiteId": string; "suiteName": string; "suiteRevision": number }
+export type ReviewedPublicationInput = { "activate": boolean; "reviewId": string }
 export type Revoked = { "revoked": boolean }
 export type Role = { "builtIn": boolean; "delegatable": boolean; "disabled": boolean; "id": string; "name": string; "permissions": (string)[]; "scope": "project" | "installation" }
 export type RoleChoicePage = { "cursor"?: string; "items": (Role)[]; "partial": boolean }
@@ -212,6 +217,8 @@ export interface AccessRequests {
   readBrowserRecording: { "project": string; "suite": string; "id": string }
   changeBrowserRecordingState: { "project": string; "suite": string; "id": string; "action": string }
   readBrowserRecordingSource: { "project": string; "suite": string; "id": string }
+  reviewCatalogPublication: { "project": string; "suite": string; "id": string; revision: number }
+  publishReviewedCatalog: { "project": string; "suite": string; "id": string; revision: number; key: string; body: ReviewedPublicationInput }
   readCatalogPlan: { "project": string; "suite": string; "id": string }
   applyCatalogPlan: { "project": string; "suite": string; "id": string; revision: number }
   readSuiteLifecycle: { "project": string; "suite": string }
@@ -220,6 +227,7 @@ export interface AccessRequests {
   readPlaywrightDraft: { "project": string; "suite": string; "id": string }
   savePlaywrightDraft: { "project": string; "suite": string; "id": string; revision: number; body: PlaywrightDraft }
   preparePlaywrightDraft: { "project": string; "suite": string; "id": string; revision: number; key: string }
+  readCatalogPublicationReview: { "project": string; "suite": string; "id": string }
   readReleaseRegistry: { "project": string; "suite": string }
   activateRetainedRelease: { "project": string; "suite": string; "id": string; revision: number }
   listSavedSelections: { "project": string; "suite": string; query?: { "cursor"?: string; "limit"?: number; "archived"?: boolean } }
@@ -339,6 +347,8 @@ export interface AccessResponses {
   readBrowserRecording: BrowserRecordingRecord
   changeBrowserRecordingState: BrowserRecordingRecord
   readBrowserRecordingSource: PlaywrightDraft
+  reviewCatalogPublication: PublicationReview
+  publishReviewedCatalog: SourceCatalogRelease
   readCatalogPlan: CatalogPlanRecord
   applyCatalogPlan: CatalogPlanRecord
   readSuiteLifecycle: SuiteLifecycle
@@ -347,6 +357,7 @@ export interface AccessResponses {
   readPlaywrightDraft: PlaywrightDraftRecord
   savePlaywrightDraft: PlaywrightDraftRecord
   preparePlaywrightDraft: SourcePreparationRecord
+  readCatalogPublicationReview: PublicationReview
   readReleaseRegistry: ReleaseRegistry
   activateRetainedRelease: {  }
   listSavedSelections: SavedSelectionPage
@@ -466,6 +477,8 @@ export const accessOperations = {
   readBrowserRecording: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}" },
   changeBrowserRecordingState: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/actions/{action}" },
   readBrowserRecordingSource: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/source" },
+  reviewCatalogPublication: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/catalog-drafts/{id}/publication-reviews" },
+  publishReviewedCatalog: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/catalog-drafts/{id}/publish" },
   readCatalogPlan: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/catalog-imports/{id}" },
   applyCatalogPlan: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/catalog-imports/{id}/apply" },
   readSuiteLifecycle: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/lifecycle" },
@@ -474,6 +487,7 @@ export const accessOperations = {
   readPlaywrightDraft: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/playwright-drafts/{id}" },
   savePlaywrightDraft: { method: "PUT", path: "/api/v1/projects/{project}/suites/{suite}/playwright-drafts/{id}" },
   preparePlaywrightDraft: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/playwright-drafts/{id}/prepare" },
+  readCatalogPublicationReview: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/publication-reviews/{id}" },
   readReleaseRegistry: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/release-registry" },
   activateRetainedRelease: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/releases/{id}/activate" },
   listSavedSelections: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/saved-selections" },

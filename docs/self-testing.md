@@ -310,3 +310,12 @@ The workflow creates new HTTP definitions through normal APIs in its disposable 
 It covers nested and sibling categories, combined metadata filters, readable application names, sorting, and preserved hidden selections.
 It also covers duplicate, enable, disable, archive, restore, revision history, keyboard category disclosure, and mobile themes.
 This workflow does not execute the HTTP definitions. Execution and publication retain their existing focused workflows.
+
+## Reviewed publication workflow
+
+Run `bash scripts/test-self.sh --test=STUDIO-PUBLISH-001` after reviewed publication changes.
+The workflow publishes and executes a new local HTTP check before editing its working definition.
+It reviews changes and pinned or unpinned schedules, rejects a concurrent catalog edit, and creates a fresh review.
+It simulates a lost response after publication commits, then verifies same-key recovery without another release.
+It also checks the preserved earlier run, mobile layout, and publication without activation.
+Schedules remain disabled. No hosted services or cloud verification run.
