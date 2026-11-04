@@ -24,6 +24,11 @@ func (s *Service) Export(ctx context.Context, user, project, suite string) (Docu
 	now := time.Now().UTC()
 	d := Document{Schema: SchemaVersion, Project: project, Suite: suite, ExportedAt: &now, Tests: []Test{}}
 	for _, row := range rows {
+		for _, permission := range []string{"catalog.read", "catalog.export"} {
+			if err := s.Auth.Check(ctx, user, project, "test/"+suite+"/"+row.ID, permission); err != nil {
+				return Document{}, err
+			}
+		}
 		t, err := storage.Decode[Test](row)
 		if err != nil {
 			return d, err

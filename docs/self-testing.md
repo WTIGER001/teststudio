@@ -319,3 +319,13 @@ It reviews changes and pinned or unpinned schedules, rejects a concurrent catalo
 It simulates a lost response after publication commits, then verifies same-key recovery without another release.
 It also checks the preserved earlier run, mobile layout, and publication without activation.
 Schedules remain disabled. No hosted services or cloud verification run.
+
+## Paged catalog and transfer workflow
+
+Run `bash scripts/test-self.sh --test=STUDIO-TRANSFER-001` after catalog paging or transfer changes.
+The workflow creates 35 new native checks through normal APIs.
+It verifies paging, server search, preserved selection, stale cursor rejection, and explicit reload.
+Export must include unloaded records and produce a real JSON download.
+The browser loads a new file, rejects invalid assertions, handles a stale import atomically, reloads without losing the document, and reviews again.
+It then imports and publishes without activation. The existing run and active release remain unchanged.
+Use STUDIO-BROWSE-001 for category navigation, combined filters, lifecycle actions, keyboard behavior, and themes.

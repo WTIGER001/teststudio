@@ -23,6 +23,8 @@ export class CatalogPlanService {
   clear(): void { this.generation++; this.plan.set(null); this.error.set(''); this.saving.set(false) }
   show(plan: RecordValue<CatalogPlan>): void { this.clear(); this.plan.set(plan) }
 
+  async reload(): Promise<void> { this.clear(); await this.catalog.load() }
+
   async apply(): Promise<void> {
     const row = this.plan()
     if (!row || row.data.issues.length || this.saving()) return

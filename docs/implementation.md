@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 31 verified of 57.
+The acceptance count is 32 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -31,7 +31,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **18.** Unmapped, missing, incomplete, or outdated external groups do not silently preserve elevated project access.
 - [x] **19.** Browser sessions keep provider tokens server-side. Expiry, revocation, callback rejection, and request-forgery protection pass focused checks.
 - [ ] **20.** Provider credentials remain outside browser configuration and application logs.
-- [ ] **21.** Catalog creation, editing, validation, publication, import, export, bulk actions, archive, and restoration work through both API and UI.
+- [x] **21.** Catalog creation, editing, validation, publication, import, export, bulk actions, archive, and restoration work through both API and UI.
 - [ ] **22.** Declarative uploads, complete source bundles, and registered GitHub repositories can produce versioned releases through the UI.
 - [x] **23.** One repository can provide multiple suites, including suites beside existing application source.
 - [x] **24.** Test-only publication requires no API or UI deployment.
@@ -73,6 +73,53 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
+
+### Complete catalog workflows and shared paged API
+
+Acceptance **21** is complete. The ledger has **32 verified, 25 open, 57 total** items.
+Catalog creation, editing, validation, publication, import, export, bulk review, archive, restoration, duplication, and history have authorized API and UI paths.
+The UI now uses the server list contract for search, filters, stable sorting, category branches, counts, metadata options, and pagination.
+It loads 30 matches at a time. Load more tests appends another page. Facets and counts cover the complete authorized view.
+Selected identities survive filtering and page changes. Catalog or access changes invalidate an old cursor and require reload with fresh selection.
+Read errors display recovery controls instead of an empty registry claim.
+Project and suite lists omit exactly denied definitions before building rows, categories, options, or counts.
+Whole-suite export checks exact read and export authority for every included definition. It cannot bypass a list denial.
+Exports include unloaded pages. JSON file imports remain bounded, validated previews with explicit apply.
+Reload catalog clears a rejected plan and preserves the import document for another review.
+File reading disables transfer actions. Export access rejection clears the old document and download link.
+The generated-client boundary preserves null dependencies and bindings instead of rewriting source-owned facts during metadata edits.
+The backend provides the canonical filtering and category rules. Duplicate browser filter and sort implementations are removed.
+A shared authenticated cursor helper preserves existing access cursor keys and context while adding a separate catalog namespace.
+Cursors bind actor, project, route, query, page size, and authorized snapshot. They expire after 15 minutes.
+The self-test registrar follows all suite pages before updating definitions.
+OpenAPI 0.28 describes catalog lists, test writes and history, lifecycle actions, duplication, transfer, drafts, validation, and retained release reads.
+The generated client, current-page help, interface rules, catalog list guide, and transfer guides match the workflow.
+
+Focused catalog list and HTTP checks pass with the race detector on SQLite and local PostgreSQL.
+They cover combined filters, category boundaries and totals, stable duplicate identifiers across suites, pagination, validation, and exact read or export denials.
+Opaque cursor checks reject actor, route, project, filter, tampering, expiry, catalog edits, and permission changes.
+Existing direct-grant, access-page, and permission-source checks pass after shared cursor extraction.
+The targeted original transfer API check passes. It preserves immutable run snapshots through import and bulk archive.
+Typed query, nullable definition, and loaded identity merge checks pass. Generated-client synchronization and the production build pass.
+
+STUDIO-BROWSE-001 passes after server filtering replaces local filtering.
+It verifies category navigation, metadata filters, selection, sort, lifecycle, history, keyboard disclosure, and themes.
+STUDIO-TRANSFER-001 and STUDIO-CATALOG-001 pass through normal TestStudio execution with complete evidence.
+The transfer workflow creates 35 fresh checks, follows pages, preserves hidden selections, rejects a stale cursor, and explicitly reloads.
+It downloads a full JSON export, reads a new file, rejects invalid assertions, handles a concurrent import conflict without partial writes, and reviews again.
+It imports and publishes without activation. The original run and active release stay unchanged.
+The catalog workflow creates a native test through the wizard, validates and activates its release, runs it, and inspects retained results.
+Their actual browser work takes about 2.7 and 4.2 seconds. Unchanged server binaries and the trace viewer remain cached.
+The first transfer pass needs an export-completion wait in the test harness. File reading also receives explicit busy feedback.
+A type check requires the metadata display helper to accept retained null tags. The corrected build and workflows pass.
+Evidence is output/selftest/20261104T030946.163033000-c5a028b98583370072d766d6/summary.json and cleanup.json.
+The earlier browse pass is output/selftest/20261104T030440.276266000-19155287270245cf01475d91/summary.json.
+The concise milestone record is output/catalog-transfer/checkpoint.json.
+Both browser runs, their controllers, browser containers, output volumes, and the exact owned PostgreSQL fixture are stopped and verified.
+No broad suite or cloud verification runs.
+
+The list currently computes its complete authorized view before slicing a page. This milestone does not claim indexed catalog search.
+Source preparation completion, removed-test history, timing parity, evidence recovery, retention adapters, and hosted acceptance retain their separate scope.
 
 ### Reviewed publication and complete source metadata preservation
 

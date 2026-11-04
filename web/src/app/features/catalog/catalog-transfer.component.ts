@@ -7,6 +7,7 @@ import { CatalogTransferService } from './catalog-transfer.service'
   template: `
     <details class="panel catalog-transfer"><summary>Import and export catalog definitions</summary>
       <p class="small muted">Import native HTTP checks with a review before apply. Each request accepts up to 30 tests and 2 MiB of JSON. Omitted tests remain in the catalog.</p>
+      @if (service.loading()) { <p class="small muted" role="status">Preparing catalog transfer…</p> }
       @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }
       <form [formGroup]="service.form" (ngSubmit)="service.preview()">
         <div class="form-grid"><div class="field"><label for="transfer-suite">Destination suite</label><select id="transfer-suite" formControlName="suite" required><option value="">Choose a suite</option>@for (suite of service.catalog.suites(); track suite.id) { <option [value]="suite.id">{{ suite.data.name }}</option> }</select></div>

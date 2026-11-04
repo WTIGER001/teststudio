@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.27.0"
+export const accessContractVersion = "0.28.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -19,7 +19,23 @@ export type CLIView = { "clientName": string; "expiresAt": string; "id": string;
 export type CatalogBulkMetadata = { "category"?: string | null; "conditions"?: string | null; "description"?: string | null; "owner"?: string | null; "rationale"?: string | null; "safety"?: string | null; "tags"?: (string)[] | null; "title"?: string | null }
 export type CatalogBulkRequest = { "action": "metadata" | "disable" | "enable" | "archive" | "restore"; "metadata"?: CatalogBulkMetadata; "tests": (CatalogBulkTarget)[] }
 export type CatalogBulkTarget = { "id": string; "revision": number }
+export type CatalogCategoryNode = { "children": (CatalogCategoryNode)[]; "count": number; "label": string; "path": string }
+export type CatalogCounts = { "enabled": number; "safe": number; "suites": number; "total": number }
+export type CatalogDocument = { "exportedAt"?: string; "originProjectId"?: string; "originSuiteId"?: string; "schemaVersion": "teststudio.catalog/v1"; "tests": (SourceCatalogTest)[] }
+export type CatalogDraftPage = { "items": (CatalogDraftRecord)[] }
+export type CatalogDraftRecord = { "data": SourceCatalogDraft; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type CatalogDuplicateInput = { "id": string }
+export type CatalogListEntry = { "data": SourceCatalogTest; "id": string; "projectId": string; "revision": number; "suiteId": string; "suiteName": string; "updatedAt": string }
+export type CatalogListOptions = { "application": (string)[]; "owner": (string)[]; "runner": (string)[]; "safety": (string)[]; "source": (string)[]; "tag": (string)[]; "type": (string)[] }
+export type CatalogListPage = { "categories": (CatalogCategoryNode)[]; "counts": CatalogCounts; "cursor"?: string; "items": (CatalogListEntry)[]; "matched": number; "options": CatalogListOptions; "total": number }
 export type CatalogPlanRecord = { "data": SourceCatalogImportPlan; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type CatalogReleasePage = { "items": (CatalogReleaseRecord)[] }
+export type CatalogReleaseRecord = { "data": SourceCatalogRelease; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type CatalogRevisionPage = { "items": (CatalogRevisionRecord)[] }
+export type CatalogRevisionRecord = { "data": CatalogTestRevision; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type CatalogTestRecord = { "data": SourceCatalogTest; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type CatalogTestRevision = { "actor": string; "at": string; "test": SourceCatalogTest }
+export type CatalogValidation = { "issues": (SourceCatalogIssue)[]; "valid": boolean }
 export type EditorFile = { "content": string; "executable"?: boolean; "path": string }
 export type ExternalIdentity = { "issuer": string; "subject": string; "userId": string }
 export type ExternalIdentityPage = { "cursor"?: string; "items": (ExternalIdentityRecord)[]; "partial": boolean }
@@ -217,8 +233,15 @@ export interface AccessRequests {
   readBrowserRecording: { "project": string; "suite": string; "id": string }
   changeBrowserRecordingState: { "project": string; "suite": string; "id": string; "action": string }
   readBrowserRecordingSource: { "project": string; "suite": string; "id": string }
+  listCatalogDrafts: { "project": string; "suite": string }
+  createCatalogDraft: { "project": string; "suite": string; body: SourceCatalogArtifact }
+  readCatalogDraft: { "project": string; "suite": string; "id": string }
+  updateCatalogDraft: { "project": string; "suite": string; "id": string; revision: number; body: SourceCatalogDraft }
   reviewCatalogPublication: { "project": string; "suite": string; "id": string; revision: number }
   publishReviewedCatalog: { "project": string; "suite": string; "id": string; revision: number; key: string; body: ReviewedPublicationInput }
+  validateCatalogDraft: { "project": string; "suite": string; "id": string }
+  exportCatalogDocument: { "project": string; "suite": string }
+  previewCatalogImport: { "project": string; "suite": string; body: CatalogDocument }
   readCatalogPlan: { "project": string; "suite": string; "id": string }
   applyCatalogPlan: { "project": string; "suite": string; "id": string; revision: number }
   readSuiteLifecycle: { "project": string; "suite": string }
@@ -229,6 +252,8 @@ export interface AccessRequests {
   preparePlaywrightDraft: { "project": string; "suite": string; "id": string; revision: number; key: string }
   readCatalogPublicationReview: { "project": string; "suite": string; "id": string }
   readReleaseRegistry: { "project": string; "suite": string }
+  listCatalogReleaseRecords: { "project": string; "suite": string }
+  readCatalogReleaseRecord: { "project": string; "suite": string; "id": string }
   activateRetainedRelease: { "project": string; "suite": string; "id": string; revision: number }
   listSavedSelections: { "project": string; "suite": string; query?: { "cursor"?: string; "limit"?: number; "archived"?: boolean } }
   createSavedSelection: { "project": string; "suite": string; body: SavedSelection }
@@ -250,7 +275,15 @@ export interface AccessRequests {
   readSourceUpload: { "project": string; "suite": string; "id": string }
   readSourceContent: { "project": string; "suite": string; "id": string }
   publishSourceUpload: { "project": string; "suite": string; "id": string; revision: number; body: SourcePublishInput }
+  listSuiteCatalog: { "project": string; "suite": string; query?: { "query"?: string; "suite"?: string; "application"?: string; "category"?: string; "tag"?: string; "owner"?: string; "type"?: string; "runner"?: string; "state"?: string; "safety"?: string; "source"?: string; "sort"?: string; "cursor"?: string; "descendants"?: boolean; "uncategorized"?: boolean; "limit"?: number } }
+  createCatalogTest: { "project": string; "suite": string; body: SourceCatalogTest }
   previewCatalogBulk: { "project": string; "suite": string; body: CatalogBulkRequest }
+  readCatalogTest: { "project": string; "suite": string; "test": string }
+  updateCatalogTest: { "project": string; "suite": string; "test": string; revision: number; body: SourceCatalogTest }
+  duplicateCatalogTest: { "project": string; "suite": string; "test": string; revision: number; body: CatalogDuplicateInput }
+  changeCatalogTestState: { "project": string; "suite": string; "test": string; "action": "disable" | "enable" | "archive" | "restore"; revision: number }
+  listCatalogTestRevisions: { "project": string; "suite": string; "test": string }
+  listProjectCatalog: { "project": string; query?: { "query"?: string; "suite"?: string; "application"?: string; "category"?: string; "tag"?: string; "owner"?: string; "type"?: string; "runner"?: string; "state"?: string; "safety"?: string; "source"?: string; "sort"?: string; "cursor"?: string; "descendants"?: boolean; "uncategorized"?: boolean; "limit"?: number } }
   listInstallationAssignments: { query?: { "limit"?: number; "cursor"?: string } }
   createInstallationAssignment: { body: AssignmentDefinition }
   revokeInstallationAssignment: { "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
@@ -347,8 +380,15 @@ export interface AccessResponses {
   readBrowserRecording: BrowserRecordingRecord
   changeBrowserRecordingState: BrowserRecordingRecord
   readBrowserRecordingSource: PlaywrightDraft
+  listCatalogDrafts: CatalogDraftPage
+  createCatalogDraft: CatalogDraftRecord
+  readCatalogDraft: CatalogDraftRecord
+  updateCatalogDraft: CatalogDraftRecord
   reviewCatalogPublication: PublicationReview
   publishReviewedCatalog: SourceCatalogRelease
+  validateCatalogDraft: CatalogValidation
+  exportCatalogDocument: CatalogDocument
+  previewCatalogImport: CatalogPlanRecord
   readCatalogPlan: CatalogPlanRecord
   applyCatalogPlan: CatalogPlanRecord
   readSuiteLifecycle: SuiteLifecycle
@@ -359,6 +399,8 @@ export interface AccessResponses {
   preparePlaywrightDraft: SourcePreparationRecord
   readCatalogPublicationReview: PublicationReview
   readReleaseRegistry: ReleaseRegistry
+  listCatalogReleaseRecords: CatalogReleasePage
+  readCatalogReleaseRecord: CatalogReleaseRecord
   activateRetainedRelease: {  }
   listSavedSelections: SavedSelectionPage
   createSavedSelection: SavedSelectionRecord
@@ -380,7 +422,15 @@ export interface AccessResponses {
   readSourceUpload: SourceUploadPreview
   readSourceContent: SourceContent
   publishSourceUpload: SourceCatalogRelease
+  listSuiteCatalog: CatalogListPage
+  createCatalogTest: CatalogTestRecord
   previewCatalogBulk: CatalogPlanRecord
+  readCatalogTest: CatalogTestRecord
+  updateCatalogTest: CatalogTestRecord
+  duplicateCatalogTest: CatalogTestRecord
+  changeCatalogTestState: CatalogTestRecord
+  listCatalogTestRevisions: CatalogRevisionPage
+  listProjectCatalog: CatalogListPage
   listInstallationAssignments: AssignmentPage
   createInstallationAssignment: AssignmentRecord
   revokeInstallationAssignment: Revoked
@@ -477,8 +527,15 @@ export const accessOperations = {
   readBrowserRecording: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}" },
   changeBrowserRecordingState: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/actions/{action}" },
   readBrowserRecordingSource: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/source" },
+  listCatalogDrafts: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/catalog-drafts" },
+  createCatalogDraft: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/catalog-drafts" },
+  readCatalogDraft: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/catalog-drafts/{id}" },
+  updateCatalogDraft: { method: "PUT", path: "/api/v1/projects/{project}/suites/{suite}/catalog-drafts/{id}" },
   reviewCatalogPublication: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/catalog-drafts/{id}/publication-reviews" },
   publishReviewedCatalog: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/catalog-drafts/{id}/publish" },
+  validateCatalogDraft: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/catalog-drafts/{id}/validate" },
+  exportCatalogDocument: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/catalog-exports" },
+  previewCatalogImport: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/catalog-imports" },
   readCatalogPlan: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/catalog-imports/{id}" },
   applyCatalogPlan: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/catalog-imports/{id}/apply" },
   readSuiteLifecycle: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/lifecycle" },
@@ -489,6 +546,8 @@ export const accessOperations = {
   preparePlaywrightDraft: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/playwright-drafts/{id}/prepare" },
   readCatalogPublicationReview: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/publication-reviews/{id}" },
   readReleaseRegistry: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/release-registry" },
+  listCatalogReleaseRecords: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/releases" },
+  readCatalogReleaseRecord: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/releases/{id}" },
   activateRetainedRelease: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/releases/{id}/activate" },
   listSavedSelections: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/saved-selections" },
   createSavedSelection: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/saved-selections" },
@@ -510,7 +569,15 @@ export const accessOperations = {
   readSourceUpload: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads/{id}" },
   readSourceContent: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads/{id}/content" },
   publishSourceUpload: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/source-uploads/{id}/publish" },
+  listSuiteCatalog: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests" },
+  createCatalogTest: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/tests" },
   previewCatalogBulk: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/tests/bulk-preview" },
+  readCatalogTest: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}" },
+  updateCatalogTest: { method: "PUT", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}" },
+  duplicateCatalogTest: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/actions/duplicate" },
+  changeCatalogTestState: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/actions/{action}" },
+  listCatalogTestRevisions: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/revisions" },
+  listProjectCatalog: { method: "GET", path: "/api/v1/projects/{project}/tests" },
   listInstallationAssignments: { method: "GET", path: "/api/v1/role-assignments" },
   createInstallationAssignment: { method: "POST", path: "/api/v1/role-assignments" },
   revokeInstallationAssignment: { method: "DELETE", path: "/api/v1/role-assignments/{kind}/{principal}/{role}" },

@@ -1,4 +1,4 @@
-import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core'
+import { computed, DestroyRef, effect, inject, Injectable, signal, untracked } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { ActivatedRoute } from '@angular/router'
 import { ApiService, type RecordValue } from '../../core/api.service'
@@ -26,6 +26,7 @@ export class CatalogSelectionService {
   private generation = 0
 
   constructor() {
+    effect(() => { this.catalog.selectionEpoch(); untracked(() => this.clear()) })
     const destroy = inject(DestroyRef)
     inject(ActivatedRoute).paramMap.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.invalidate(); this.keys.set([]); this.action.set(''); this.metadata.reset() })
     destroy.onDestroy(() => { this.generation++ })

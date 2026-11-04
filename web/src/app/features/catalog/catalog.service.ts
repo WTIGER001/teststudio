@@ -3,12 +3,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { ActivatedRoute } from '@angular/router'
 import { ApiError, ApiService, type Page, type RecordValue } from '../../core/api.service'
 import { AccessClientService } from '../../core/access-client.service'
-import type { PublicationReview } from '../../core/generated/access.types'
+import type { CatalogListPage, PublicationReview } from '../../core/generated/access.types'
 import { WorkspaceService } from '../../core/workspace.service'
 import type { Application, Suite } from '../configuration/configuration.service'
 import type { CatalogItem, Draft, Issue } from './catalog.models'
-import { catalogCounts, catalogTypes, filterCatalog } from './catalog.utils'
-import { catalogCategories, catalogOptions, categoryLabel, categoryInputValue, type CatalogFilters } from './catalog-browse.utils'
+import { catalogFacetOptions, catalogTypeOptions, catalogListRequest, catalogListItem, mergeCatalogItems, emptyCatalogPage, categoryLabel, categoryInputValue, type CatalogFilters } from './catalog-browse.utils'
 import { CatalogTestEditorService } from './catalog-test-editor.service'
 
 @Injectable()
@@ -36,13 +35,16 @@ export class CatalogService {
   readonly typeFilter = signal('')
   readonly filters = signal<CatalogFilters>({})
   readonly view = signal<'table' | 'categories'>('table')
-  readonly categories = computed(() => catalogCategories(filterCatalog(this.items(), this.query(), this.state(), this.suiteFilter(), this.typeFilter(), { ...this.filters(), category: '' })))
+  readonly page = signal<CatalogListPage>(emptyCatalogPage())
+  readonly visible = signal<CatalogItem[]>([])
+  readonly loadingMore = signal(false)
+  readonly selectionEpoch = signal(0)
+  readonly categories = computed(() => this.page().categories)
   readonly categoryInput = computed(() => categoryInputValue(this.filters().category ?? ''))
   readonly categoryTitle = computed(() => categoryLabel(this.filters().category ?? ''))
-  readonly options = computed(() => ({ application: catalogOptions(this.items(), 'application', this.applications()), tag: catalogOptions(this.items(), 'tag'), owner: catalogOptions(this.items(), 'owner'), runner: catalogOptions(this.items(), 'runner'), safety: catalogOptions(this.items(), 'safety'), source: catalogOptions(this.items(), 'source') }))
-  readonly types = computed(() => catalogTypes(this.items()))
-  readonly visible = computed(() => filterCatalog(this.items(), this.query(), this.state(), this.suiteFilter(), this.typeFilter(), this.filters()))
-  readonly counts = computed(() => catalogCounts(this.items()))
+  readonly options = computed(() => catalogFacetOptions(this.page().options, this.applications()))
+  readonly types = computed(() => catalogTypeOptions(this.page().options.type))
+  readonly counts = computed(() => this.page().counts)
   readonly editorOpen = this.testEditor.editorOpen
   readonly editing = this.testEditor.editing
   readonly editingHTTP = this.testEditor.editingHTTP
@@ -56,6 +58,7 @@ export class CatalogService {
   readonly reviewStale = computed(() => this.publicationConflict() || !!this.review() && !this.draft() && !this.publicationUncertain())
   readonly issues = signal<Issue[]>([])
   readonly form = this.testEditor.form
+  private loadTimer: ReturnType<typeof setTimeout> | undefined
   private applicationGeneration = 0
   private generation = 0
   private publicationGeneration = 0
@@ -64,8 +67,15 @@ export class CatalogService {
   constructor() {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => {
       this.projectId.set(params.get('projectId') ?? ''); this.suiteFilter.set(this.route.snapshot.queryParamMap.get('suite') ?? ''); this.typeFilter.set(''); this.query.set(''); this.state.set('active'); this.filters.set({}); this.view.set('table'); this.review.set(null); this.publicationConflict.set(false); this.publicationUncertain.set(false); this.publicationAttempt.set(null); this.publicationDenied.set(false); this.publicationGeneration++; this.releaseSuite.set(''); this.draft.set(null)
-      this.editorOpen.set(false); this.editing.set(null); this.items.set([]); this.suites.set([]); this.applications.set([]); this.success.set(this.route.snapshot.queryParamMap.has('created') ? 'Draft changes saved. Publish a release to use the updated definition.' : '')
-      void this.load()
+      this.editorOpen.set(false); this.editing.set(null); this.items.set([]); this.visible.set([]); this.page.set(emptyCatalogPage()); this.suites.set([]); this.applications.set([]); this.success.set(this.route.snapshot.queryParamMap.has('created') ? 'Draft changes saved. Publish a release to use the updated definition.' : '')
+    })
+    effect(() => {
+      const project = this.projectId()
+      this.query(); this.state(); this.suiteFilter(); this.typeFilter(); this.filters()
+      untracked(() => {
+        clearTimeout(this.loadTimer); this.generation++; this.loading.set(true); this.loadingMore.set(false); this.visible.set([])
+        if (project) this.loadTimer = setTimeout(() => { void this.load() }, 120)
+      })
     })
     effect(() => {
       const project = this.projectId(), allowed = this.workspace.projectId() === project && this.workspace.can('projects.read')
@@ -74,26 +84,37 @@ export class CatalogService {
         if (allowed) void this.loadApplications(project)
       })
     })
-    this.destroy.onDestroy(() => { this.generation++; this.applicationGeneration++; this.publicationGeneration++ })
+    this.destroy.onDestroy(() => { this.generation++; this.applicationGeneration++; this.publicationGeneration++; clearTimeout(this.loadTimer) })
   }
 
   filter(field: keyof CatalogFilters, value: string | boolean): void { this.filters.update(filters => ({ ...filters, [field]: value })) }
   clearFilters(): void { this.query.set(''); this.state.set('active'); this.suiteFilter.set(''); this.typeFilter.set(''); this.filters.set({}) }
 
-  async load(): Promise<void> {
-    const generation = ++this.generation
-    this.loading.set(true); this.error.set('')
+  async load(more = false): Promise<void> {
+    if (more && (this.loading() || this.loadingMore() || !this.page().cursor)) return
+    clearTimeout(this.loadTimer)
+    const generation = ++this.generation, project = this.projectId()
+    const query = catalogListRequest(this.query(), this.state(), this.suiteFilter(), this.typeFilter(), this.filters(), more ? this.page().cursor : '')
+    this.loading.set(!more); this.loadingMore.set(more); this.error.set('')
     try {
-      const base = `/api/v1/projects/${this.projectId()}`
-      const [tests, suites] = await Promise.all([
-        this.api.request<Page<CatalogItem>>(`${base}/tests`),
-        this.api.request<Page<RecordValue<Suite>>>(`${base}/suites`)
+      const [page, suites] = await Promise.all([
+        this.client.call('listProjectCatalog', { project, query }),
+        more ? Promise.resolve({ items: this.suites() }) : this.api.request<Page<RecordValue<Suite>>>(`/api/v1/projects/${project}/suites`)
       ])
       if (generation !== this.generation) return
-      this.items.set(tests.items); this.suites.set(suites.items)
+      const incoming = page.items.map(catalogListItem)
+      this.visible.set(more ? mergeCatalogItems(this.visible(), incoming) : incoming)
+      this.items.set(mergeCatalogItems(this.items(), incoming)); this.page.set(page); this.suites.set(suites.items)
       if (!this.releaseSuite()) this.releaseSuite.set(suites.items[0]?.id ?? '')
-    } catch (error) { if (generation === this.generation) this.error.set(error instanceof Error ? error.message : 'The catalog could not be loaded.') }
-    finally { if (generation === this.generation) this.loading.set(false) }
+    } catch (error) {
+      if (generation !== this.generation) return
+      this.visible.set([])
+      if (error instanceof ApiError && [401, 403, 409].includes(error.status)) {
+        this.items.set([]); this.page.set(emptyCatalogPage()); this.selectionEpoch.update(value => value + 1)
+        if (error.status === 409) this.error.set('The catalog or your access changed between pages. Reload results and select tests again.')
+        else this.error.set('Catalog access is unavailable. Refresh access before reloading results.')
+      } else this.error.set(error instanceof Error ? error.message : 'The catalog could not be loaded.')
+    } finally { if (generation === this.generation) { this.loading.set(false); this.loadingMore.set(false) } }
   }
 
   private async loadApplications(project: string): Promise<void> {

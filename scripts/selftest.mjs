@@ -40,7 +40,12 @@ if (previousSuite && (previousSuite.data.archived || previousSuite.data.requires
 if (!previousSuite) await call('PUT', `${base}/suites/${suite}`, { id: suite, name: suite === 'browser-workflows' ? 'TestStudio browser workflows' : 'Runner diagnostics', description: suiteDescription, applications: [], requiresTarget: false }, 0)
 const selected = diagnostic ? catalog.diagnostics.filter(test => test.id === 'ADAPTER-FAIL') : timeoutProbe ? catalog.diagnostics.filter(test => test.id === 'ADAPTER-TIMEOUT') : catalog.tests.filter(test => !selectedIds.size || selectedIds.has(test.id))
 if (!selected.length || selectedIds.size && selected.length !== selectedIds.size) throw new Error('Unknown self-test identifier')
-const existing = (await call('GET', `${base}/suites/${suite}/tests`)).items
+const existing = []
+let catalogCursor = ''
+do {
+  const page = await call('GET', `${base}/suites/${suite}/tests?state=all&limit=100${catalogCursor ? '&cursor=' + encodeURIComponent(catalogCursor) : ''}`)
+  existing.push(...page.items); catalogCursor = page.cursor ?? ''
+} while (catalogCursor)
 const discovered = Object.fromEntries([...catalog.tests, ...catalog.diagnostics].map(test => [test.id, test.selector])), ids = []
 for (const definition of selected) {
   discovered[definition.id] = definition.selector

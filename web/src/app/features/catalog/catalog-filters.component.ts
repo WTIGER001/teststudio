@@ -17,7 +17,7 @@ import { CatalogService } from './catalog.service'
       <button class="button small subtle" type="button" (click)="service.clearFilters()">Clear filters</button>
     </div>
     @if (service.applicationNotice()) { <p class="small muted">{{ service.applicationNotice() }}</p> }
-    <p class="small muted" role="status">{{ service.visible().length }} matching tests</p>
+    <p class="small muted" role="status">Showing {{ service.visible().length }} of {{ service.page().matched }} matching tests</p>
     <details class="advanced-filters"><summary>Advanced filters</summary>
       <div class="form-grid">
         <div class="field"><label for="catalog-state">Lifecycle state</label><select id="catalog-state" [ngModel]="service.state()" (ngModelChange)="service.state.set($event)"><option value="active">Active catalog</option><option value="draft">Draft</option><option value="enabled">Enabled</option><option value="disabled">Disabled</option><option value="archived">Archived</option><option value="all">All states</option></select></div>

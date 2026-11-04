@@ -15,7 +15,7 @@ The full product scope remains required. This direction supersedes the testing s
 ## Active delivery plan after the tester walkthrough
 
 This section is the current implementation order. Historical continuation commands below do not override it.
-The local demonstration is usable and verified. The complete product remains unfinished at 31 verified items out of 57.
+The local demonstration is usable and verified. The complete product remains unfinished at 32 verified items out of 57.
 Ordinary project creator access and the first environment-backed local recorded website flow pass targeted verification.
 Tester investigation and failure recovery now pass targeted local verification. Continue with remaining catalog and evidence gaps.
 Do not add new dashboard pages or repeat completed demonstration setup before closing the remaining workflow gaps.
@@ -46,7 +46,7 @@ Complete one coherent batch before adding the next. Update its user help and rel
 | Complete | Project creator access | Ordinary creator setup, managed scoped roles, publication, local execution, atomic rollback, and project boundaries pass on SQLite and local PostgreSQL. Acceptance 13 is verified. |
 | Complete | Recorded website execution locally | New native recording, reviewed local website steps, saved preparation, publication, registered target execution, guarded direct request, and blocked off-site redirect pass with retained logs, screenshot, trace, and timing. |
 | Complete | Tester operation and failure recovery | Scoped attempts, logs, screenshots, timeout and retry inspection, permission-loss recovery, and retry after a lost rerun response without another child pass. Acceptance 44 is verified. |
-| 4 | Remaining catalog and evidence gaps | Private trace viewing and category browsing are implemented. Reviewed publication also passes local verification. Continue transfer workflows, API list contracts, evidence recovery and retention, and timing parity against the existing acceptance ledger. |
+| 4 | Remaining catalog and evidence gaps | Private trace viewing and category browsing are implemented. Reviewed publication also passes local verification. Catalog workflows and the shared paged API now pass verification. Continue source preparation completion, removed-test history, evidence recovery and retention, and timing parity against the existing acceptance ledger. |
 | 5 | Hosted packaging and provider adapters | Implement and document independent provider configuration, worker dispatch, private artifacts, cancellation, deadlines, and recovery. Use local contract checks first. |
 | 6 | Deployment acceptance | Verify AWS, Kubernetes, and Azure in their separate deployment work. Then close the applicable remaining ledger items with profile-specific evidence. |
 
@@ -60,7 +60,7 @@ See [initial creator access](access.md#initial-project-creator-access) for curre
 SQLite, local PostgreSQL, and STUDIO-OWNER-001 evidence are recorded in the implementation ledger.
 
 This sequence changes implementation priority, not the scope or numbering of the 57 acceptance criteria.
-Acceptances 13, 25, 42, 44, and 45 are complete. Remaining access checks stay under 12. Other catalog, execution, and evidence requirements remain open.
+Acceptances 13, 21, 25, 42, 44, and 45 are complete. Remaining access checks stay under 12. Other catalog, execution, and evidence requirements remain open.
 Do not treat these batches as additional acceptance items or claim the whole product complete after a demonstration.
 
 ### Recorded browser execution scope
@@ -205,7 +205,7 @@ The next implementation batches follow the full ledger without adding new gates 
 
 ## Current implementation checkpoint
 
-The acceptance ledger has **31 verified, 26 open, 57 total** items.
+The acceptance ledger has **32 verified, 25 open, 57 total** items.
 Private trace viewing now passes targeted local verification. Acceptances **42** and **45** are complete.
 Run details expose recorded attempts, steps, context, logs, screenshots, traces, and configured attachments without HTML reports.
 The pinned installation-hosted viewer uses the separate artifact origin and short-lived grants with current project authorization.
@@ -217,7 +217,10 @@ Reviewed publication now shows changes, safety, policies, and readable schedule 
 Stale reviews and current permission loss reject publication. Same-key retry recovers a committed release after response loss.
 Acceptance **25** is complete. Full source metadata preservation and revision conflicts pass focused local checks.
 See [Publication review](publication-review.md) for API, user choices, expiry, and recovery.
-Continue transfer workflows and API list contracts. Evidence recovery, adapter retention, and timing parity remain open.
+Acceptance **21** is complete. The UI and API share authorized catalog filtering, sorting, counts, category branches, and opaque paging.
+Complete JSON export, reviewed file import, conflict recovery, and normal creation, publication, and execution pass targeted local checks.
+See [Catalog lists](catalog-list.md) for API queries, pagination, exact permission checks, and limits.
+Continue source preparation completion and removed-test history. Evidence recovery, adapter retention, and timing parity remain open.
 
 Bulk metadata edits now support reviewed category, tags, owner, title, description, safety, rationale, and condition changes.
 The API and UI preserve source-owned definitions and use atomic revision-controlled preview plans.
@@ -230,8 +233,9 @@ Focused API checks and STUDIO-SELECTIONS-001 pass locally. The implementation le
 The catalog now provides category navigation, combined metadata filters, stable sorting, and preserved selections with hidden-selection counts.
 Common controls stay visible. Advanced filters and row More disclosures contain less frequent options.
 Enable, Disable, Archive, Restore, Duplicate, and History pass the targeted STUDIO-BROWSE-001 workflow.
-The browser filters its authorized working catalog. Server-side list filtering and cursor contracts remain pending.
-Item 21 stays open for complete transfer workflow evidence and remaining API list contracts.
+The UI now uses server-side filtering and snapshot-bound cursors. Exact test denies protect rows and every facet.
+Import, export, lifecycle, and publication workflows pass current local verification. Acceptance 21 is complete.
+OpenAPI 0.28 and the generated client describe the implemented catalog operations.
 Item **23** now passes a real local repository snapshot with two suites beside shared application source.
 Both suites build separate images, publish, and pass normal runs with one result and complete evidence.
 Item **24** previously passes two-image publication and execution without restarting the server.

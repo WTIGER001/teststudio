@@ -61,7 +61,9 @@ Include child categories is on by default. Turn it off to match only the exact c
 A source filter matches either the executable source or its registered definition source identifier.
 Filters combine. An empty result explains how to recover. Clear filters restores the active catalog across suites.
 Application options use readable registered names when the user can read application records.
-The browser filters the authorized working catalog. Published release selections remain separate.
+The UI uses the shared server list contract. Published release selections remain separate.
+Load more tests appends the next page. Counts and category branches cover every authorized match.
+See [Catalog lists](catalog-list.md) for query fields, cursor scope, permissions, and recovery.
 
 Selections survive filtering and view changes. The bulk bar shows how many selected tests are currently hidden.
 Select visible tests replaces the selection with the current filtered list. Clear selection removes every selected test.
@@ -70,8 +72,10 @@ Edit and applicable Enable, Disable, or Restore actions stay visible on each row
 More contains History, Duplicate, and Archive. Normal removal uses Archive and retains history.
 Changing lifecycle does not publish a release or rewrite an existing run.
 Bulk actions preview one suite at a time. Review the proposed states before applying changes.
-The import panel loads a JSON file or accepts pasted definitions.
-Export fills the document field and provides a local JSON download.
+The import panel loads a JSON file or accepts pasted definitions. File reading disables transfer actions until the selected content is ready.
+Export fills the document field and provides a local JSON download. It covers the complete suite, including unloaded list pages.
+Export requires current read and export permission for every included definition. A denied definition rejects the full export.
+An export access rejection clears the old download link and document. Transfer limits still apply when importing an exported document.
 Validation errors identify the test and field. Invalid plans cannot apply.
 History shows retained definitions, actor, timestamp, and revision number.
 Duplicate asks for a new permanent identifier and creates a draft entry.
@@ -116,7 +120,7 @@ Omitted or null metadata fields remain unchanged. Use an empty string or array f
 Metadata cannot include executable fields, selectors, source identities, dependencies, runner settings, or lifecycle state.
 Prepared source facts stay unchanged. Future source synchronization preserves the service-managed metadata.
 Metadata edits do not publish a release, start a run, or rewrite retained results.
-After a conflict, reload the catalog and create a new preview.
+After a conflict, select Reload catalog and create a new preview. Reload preserves the import document.
 The API request, plan read, and apply operations are recorded in OpenAPI and the generated TypeScript client.
 
 ## Native HTTP editor
@@ -158,3 +162,9 @@ See [Test timing](timing.md) for baseline scope, adaptive timeouts, estimates, a
 
 Use Import and sync tests to stage JSON or YAML files and publish their reviewed catalog changes atomically.
 The [source upload guide](sources.md) describes provenance, retention, permissions, and publication retries.
+
+## Catalog API coverage
+
+OpenAPI 0.28 and the generated client describe lists, test creation and updates, revision history, lifecycle actions, duplication, JSON transfer, drafts, validation, and retained release reads.
+Reviewed publication and activation retain their documented operations.
+Catalog changes still require current context-specific permissions, Origin, CSRF protection, and mutation revisions where applicable.

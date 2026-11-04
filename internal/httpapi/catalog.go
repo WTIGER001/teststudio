@@ -6,20 +6,12 @@ import (
 
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/projects"
-	"github.com/wtiger001/teststudio/internal/storage"
 )
 
 func (s *Server) catalogRoutes(m *http.ServeMux) {
 	base := "/api/v1/projects/{project}/suites/{suite}"
 	m.HandleFunc("GET /api/v1/projects/{project}/tests", s.authorized(s.projectTests))
-	m.HandleFunc("GET "+base+"/tests", s.authorized(func(w http.ResponseWriter, r *http.Request) {
-		rows, err := s.Catalog.Tests(r.Context(), actor(r), r.PathValue("project"), r.PathValue("suite"))
-		if err != nil {
-			problem(w, err)
-			return
-		}
-		JSON(w, 200, map[string]any{"items": rows})
-	}))
+	m.HandleFunc("GET "+base+"/tests", s.authorized(s.catalogList))
 	m.HandleFunc("POST "+base+"/tests", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		var v catalog.Test
 		if err := body(r, &v); err != nil {
@@ -229,35 +221,4 @@ func (s *Server) catalogRoutes(m *http.ServeMux) {
 	}))
 }
 
-func (s *Server) projectTests(w http.ResponseWriter, r *http.Request) {
-	p := r.PathValue("project")
-	if err := s.Auth.Check(r.Context(), actor(r), p, "", "catalog.read"); err != nil {
-		problem(w, err)
-		return
-	}
-	suites, err := s.Store.All(r.Context(), projects.Bucket("suites", p), p)
-	if err != nil {
-		problem(w, err)
-		return
-	}
-	items := []map[string]any{}
-	for _, row := range suites {
-		v, err := storage.Decode[projects.Suite](row)
-		if err != nil {
-			problem(w, err)
-			return
-		}
-		if v.Archived {
-			continue
-		}
-		rows, err := s.Catalog.Tests(r.Context(), actor(r), p, row.ID)
-		if err != nil {
-			problem(w, err)
-			return
-		}
-		for _, test := range rows {
-			items = append(items, map[string]any{"id": test.ID, "suiteId": row.ID, "suiteName": v.Name, "revision": test.Revision, "data": test.Data, "updatedAt": test.Updated})
-		}
-	}
-	JSON(w, 200, map[string]any{"items": items})
-}
+func (s *Server) projectTests(w http.ResponseWriter, r *http.Request) { s.catalogList(w, r) }

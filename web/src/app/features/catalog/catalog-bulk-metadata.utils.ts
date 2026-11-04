@@ -51,4 +51,4 @@ export function metadataChanges(before: TestDefinition | undefined, after: TestD
 }
 
 function metadataTags(value: string): string[] { return value.split(',').map(tag => tag.trim()).filter(Boolean) }
-function metadataValue(value: string | string[] | undefined): string { return (Array.isArray(value) ? value.join(', ') : value) || 'Empty' }
+function metadataValue(value: string | string[] | null | undefined): string { return (Array.isArray(value) ? value.join(', ') : value) || 'Empty' }

@@ -49,7 +49,7 @@ import { CatalogTestFormComponent } from './catalog-test-form.component'
       </section>
     }
     <section class="panel catalog-panel" aria-labelledby="catalog-title">
-      <div class="section-top"><h2 id="catalog-title">All tests <span class="count-label">{{ service.visible().length }}</span></h2><span class="small muted">Definitions and history use stable identifiers.</span></div>
+      <div class="section-top"><h2 id="catalog-title">All tests <span class="count-label">{{ service.page().matched }}</span></h2><span class="small muted">Definitions and history use stable identifiers.</span></div>
       <ts-catalog-filters />
       <ts-catalog-bulk />
       <div class="catalog-layout" [class.with-categories]="service.view() === 'categories'">
@@ -60,11 +60,12 @@ import { CatalogTestFormComponent } from './catalog-test-form.component'
       @if (service.loading()) { <p class="loading-state" role="status">Loading the catalog…</p> }
       @else if (service.visible().length) {
         <ts-catalog-table />
-      } @else {
-        <div class="empty-state"><span class="empty-icon" aria-hidden="true">✓</span><h3>{{ service.items().length ? 'No matching tests.' : 'Your next good answer starts here.' }}</h3><p>{{ service.items().length ? 'Try another category or clear filters to see all active tests.' : 'Create a suite, then add checks or publish a versioned test catalog.' }}</p>@if (!service.suites().length) { <a class="button secondary" [routerLink]="['/projects', service.projectId(), 'configuration']">Set up a suite</a> }</div>
+      } @else if (service.error()) { <p class="notice">Catalog results are unavailable. <button class="button small secondary" type="button" (click)="service.load()">Reload results</button><button class="button small subtle" type="button" (click)="service.workspace.refreshAccess()">Refresh access</button></p> } @else {
+        <div class="empty-state"><span class="empty-icon" aria-hidden="true">✓</span><h3>{{ service.page().total ? 'No matching tests.' : 'Your next good answer starts here.' }}</h3><p>{{ service.page().total ? 'Try another category or clear filters to see all active tests.' : 'Create a suite, then add checks or publish a versioned test catalog.' }}</p>@if (!service.suites().length) { <a class="button secondary" [routerLink]="['/projects', service.projectId(), 'configuration']">Set up a suite</a> }</div>
       }
         </div>
       </div>
+      @if (service.page().cursor && !service.error()) { <button class="button secondary more-button" type="button" [disabled]="service.loading() || service.loadingMore()" (click)="service.load(true)">{{ service.loadingMore() ? 'Loading more tests…' : 'Load more tests' }}</button> }
     </section>
     @if (service.suites().length && (service.workspace.can('catalog.import') || service.workspace.can('catalog.export'))) { <ts-catalog-transfer /> }
     @if (service.suites().length) { <p><a class="button secondary" [routerLink]="['/projects', service.projectId(), 'releases']">Browse retained releases</a></p> }

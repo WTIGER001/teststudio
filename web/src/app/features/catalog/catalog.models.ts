@@ -15,7 +15,7 @@ export interface TestDefinition {
   description: string
   applicationId?: string
   category: string
-  tags: string[]
+  tags: string[] | null
   owner?: string
   conditions?: string
   type: string
@@ -23,8 +23,8 @@ export interface TestDefinition {
   state: string
   safety: string
   rationale: string
-  dependencies: string[]
-  requiredBindings: string[]
+  dependencies: string[] | null
+  requiredBindings: string[] | null
   timing?: TimingPolicy
   timeoutSeconds: number
   source?: string

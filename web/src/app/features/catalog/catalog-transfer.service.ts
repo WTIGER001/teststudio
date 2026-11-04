@@ -2,7 +2,7 @@ import { DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
 import { ActivatedRoute } from '@angular/router'
-import { ApiService, type RecordValue } from '../../core/api.service'
+import { ApiError, ApiService, type RecordValue } from '../../core/api.service'
 import { CatalogService } from './catalog.service'
 import { CatalogPlanService } from './catalog-plan.service'
 import type { CatalogDocument, CatalogPlan } from './catalog-operations.models'
@@ -33,21 +33,23 @@ export class CatalogTransferService {
     this.error.set('')
     if (file.size > 2 << 20) { this.error.set('The catalog file exceeds the 2 MiB limit.'); return }
     const generation = ++this.generation
+    this.loading.set(true); this.plans.clear(); this.clearDownload()
     try { const text = await file.text(); if (generation === this.generation) this.form.controls.document.setValue(text) }
     catch { if (generation === this.generation) this.error.set('The catalog file could not be read.') }
+    finally { if (generation === this.generation) this.loading.set(false) }
   }
 
   async export(): Promise<void> {
     if (this.form.controls.suite.invalid || this.loading()) return
     const generation = ++this.generation
-    this.loading.set(true); this.error.set('')
+    this.loading.set(true); this.error.set(''); this.clearDownload()
     try {
       const document = await this.api.request<CatalogDocument>(`${this.base()}/catalog-exports`)
       if (generation !== this.generation) return
       const text = JSON.stringify(document, null, 2)
       this.form.controls.document.setValue(text, { emitEvent: false })
       this.clearDownload(); this.downloadURL.set(URL.createObjectURL(new Blob([text], { type: 'application/json' })))
-    } catch (error) { if (generation === this.generation) this.error.set(error instanceof Error ? error.message : 'Export failed.') }
+    } catch (error) { if (generation === this.generation) { this.error.set(error instanceof Error ? error.message : 'Export failed.'); if (error instanceof ApiError && [401, 403].includes(error.status)) { this.form.controls.document.setValue('', { emitEvent: false }); this.plans.clear() } } }
     finally { if (generation === this.generation) this.loading.set(false) }
   }
 

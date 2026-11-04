@@ -70,11 +70,14 @@ Keep cloud acceptance separate from local verification. Close every verification
 
 The Angular application uses standalone components, OnPush change detection, and signal-based services.
 Components delegate workflows to focused feature services.
-Pure utilities handle catalog filtering, stable sorting, category paths, category counts, and hidden selection counts.
+The server supplies catalog filtering, stable sorting, category counts, authorized metadata options, and paged results.
+Pure UI utilities build typed queries, preserve source definition values, merge loaded identities, and count hidden selections.
 The catalog uses shared rows for its table and category navigation views.
 Common search, suite, application, type, and sort controls stay visible. Metadata and lifecycle filters use Advanced filters.
 Row editing and applicable lifecycle actions stay visible. History, duplication, and archive use More.
-View and filter changes preserve selection. The bulk bar reports selected tests hidden by filters.
+View, filter, and page changes preserve selection. The bulk bar reports selected tests hidden from current results.
+An outdated catalog cursor hides stale results and requests a reload and fresh selection. Access errors do not appear as empty data.
+File reading disables transfer actions. Import conflicts provide Reload catalog and preserve the document for another review.
 Bulk metadata uses a focused editor, signal-based service, and pure field validation utilities.
 Review previews show compact before and after values beside optional complete definitions.
 The catalog manages reusable saved selections and versioned filters.
