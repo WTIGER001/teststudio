@@ -476,3 +476,20 @@ func TestPrepareRefreshesAuthorityAfterAConcurrentRecordUpdate(t *testing.T) {
 		t.Fatal("concurrent authority update stranded the prepared attempt", err)
 	}
 }
+
+func TestTimingFailureKeepsRequestedFailureOnlyEvidence(t *testing.T) {
+	f := fresh(t)
+	threshold := float64(1)
+	f.input.TimingMode = "fail"
+	f.input.SlowThresholdMs = &threshold
+	ticket := f.prepare(t)
+	if _, err := f.service.Input(t.Context(), ticket.Execution, ticket.Token, "worker"); err != nil {
+		t.Fatal(err)
+	}
+	report := submission(f, []byte("image bytes"))
+	report.Report.Attachments[0].Kind = "screenshot"
+	report.Report.Attachments[0].ContentType = "image/png"
+	if err := f.service.Submit(t.Context(), ticket.Execution, ticket.Token, "worker", report); err != nil {
+		t.Fatal("timing failure lost failure-only evidence", err)
+	}
+}

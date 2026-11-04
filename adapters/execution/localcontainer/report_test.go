@@ -151,7 +151,7 @@ func TestProgressLinesSurviveChunkingAndIgnoreOversizedLines(t *testing.T) {
 	_, _ = b.Write([]byte("ed\n"))
 	_, _ = b.Write(make([]byte, 70000))
 	_, _ = b.Write([]byte("\nfinished\n"))
-	if len(lines) != 2 || lines[0] != "started" || lines[1] != "finished" || len(b.line) > 65536 {
+	if len(lines) != 2 || lines[0] != "started" || lines[1] != "finished" || b.PendingLineBytes() > 65536 {
 		t.Fatalf("progress framing: %v", lines)
 	}
 }

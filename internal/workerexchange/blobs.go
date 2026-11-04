@@ -160,6 +160,9 @@ func (s *Service) Observation(ctx context.Context, ref execution.Reference, inpu
 	if json.Unmarshal(data, &report) != nil {
 		return report, record.StartedAt, false, ErrUnavailable
 	}
+	if exitError == nil && (record.Submission.ProcessExitCode != 0 || record.Submission.InfrastructureFailure != "") {
+		exitError = errors.New("recorded runner process failed")
+	}
 	if err := execution.ValidateCodedReport(input, report, exitError); err != nil {
 		return report, record.StartedAt, false, ErrInvalid
 	}

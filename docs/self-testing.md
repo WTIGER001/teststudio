@@ -616,3 +616,12 @@ A local TLS fixture exercises the real run authorization bridge, production hand
 The native listener check starts one fresh service and removes its owned process and data.
 Keep report codec checks focused on the extracted shared validator.
 No browser suite, source runtime image, provider deployment, or cloud account is needed for this batch.
+
+## Hosted supervisor and runtime overlays
+
+Use the [hosted supervisor checks](job-supervisor.md#local-verification) for changes to job process ownership, progress, report delivery, or evidence snapshots.
+The native checks use local TLS and owned child processes. They do not start a browser or provider job.
+The overlay producer reuses the existing immutable Go and Playwright source bases and compiles only the supervisor.
+Its package probe executes the configuration guard without network access or a test suite.
+Keep the original local runner images and current demonstration runtime cache unchanged.
+Build only changed native binaries and thin overlays. Reuse existing source-runner and UI evidence for unchanged behavior.

@@ -13,11 +13,15 @@ func ValidateCodedReport(input CodedInput, report CodedReport, exitError error) 
 	if input.Test.Runner == "go" {
 		runner = "go"
 	}
-	if report.Schema != "teststudio."+runner+"/v1" || report.TestID != input.Test.ID || report.Selector != input.Test.Selector || result.TestID != input.Test.ID {
+	workerProblem := report.Schema == "teststudio.worker/v1" && exitError != nil && result.DurationUnavailable && result.DurationMs == 0 && (result.State == "unknown" || result.State == "timed-out") && (result.FailureKind == "worker" || result.FailureKind == "configuration" || result.FailureKind == "cancelled" || result.FailureKind == "timeout")
+	if (!workerProblem && report.Schema != "teststudio."+runner+"/v1") || report.TestID != input.Test.ID || report.Selector != input.Test.Selector || result.TestID != input.Test.ID {
 		return errors.New("Coded worker result does not match the selected test")
 	}
+	if workerProblem && (result.WorkerDurationMs < 0 || result.WorkerDurationMs > 7200000 || math.IsNaN(result.WorkerDurationMs) || math.IsInf(result.WorkerDurationMs, 0)) {
+		return errors.New("Worker infrastructure timing is invalid")
+	}
 	goProblem := runner == "go" && result.State == "unknown" && result.FailureKind != "" && result.DurationUnavailable
-	if result.State != "passed" && result.State != "failed" && result.State != "timed-out" && result.State != "skipped" && !goProblem {
+	if result.State != "passed" && result.State != "failed" && result.State != "timed-out" && result.State != "skipped" && !goProblem && !workerProblem {
 		return errors.New("Coded worker result has no supported terminal state")
 	}
 	if result.State == "timed-out" && result.FailureKind != "timeout" {
@@ -26,7 +30,7 @@ func ValidateCodedReport(input CodedInput, report CodedReport, exitError error) 
 	if math.IsNaN(result.DurationMs) || math.IsInf(result.DurationMs, 0) || result.DurationMs < 0 || result.DurationMs > 3600000 || result.StartedAt.IsZero() || result.FinishedAt.Before(result.StartedAt) || result.FinishedAt.After(time.Now().Add(time.Minute)) {
 		return errors.New("Coded worker timing is invalid")
 	}
-	if runner == "go" {
+	if runner == "go" && !workerProblem {
 		selected, err := gosuite.Parse(input.Test.Selector)
 		if err != nil || (result.DurationUnavailable && result.DurationMs != 0) || math.IsNaN(result.WorkerDurationMs) || math.IsInf(result.WorkerDurationMs, 0) || result.WorkerDurationMs < 0 {
 			return errors.New("Go worker timing does not match a valid selection")
@@ -40,7 +44,7 @@ func ValidateCodedReport(input CodedInput, report CodedReport, exitError error) 
 			}
 		}
 	}
-	if exitError != nil && !goProblem && ((result.State != "failed" && result.State != "timed-out") || result.FailureKind == "") {
+	if exitError != nil && !goProblem && !workerProblem && ((result.State != "failed" && result.State != "timed-out") || result.FailureKind == "") {
 		return errors.New("Coded worker process failed without a matching failed result")
 	}
 	if len(result.Steps) > 500 || len(report.Attachments) > 32 || len(report.EvidenceErrors) > 20 || len(result.Error) > 16384 {

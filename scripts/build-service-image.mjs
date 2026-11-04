@@ -4,6 +4,7 @@ import os from 'node:os'
 import crypto from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
+import { dockerBuildBackend } from './lib/docker-build.mjs'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
 process.chdir(root)
@@ -14,18 +15,8 @@ const hostName = execFileSync('docker', ['info', '--format', '{{.Architecture}}'
 const host = ({ aarch64: 'arm64', arm64: 'arm64', x86_64: 'amd64', amd64: 'amd64' })[hostName]
 if (!host) throw new Error('Unsupported Docker host architecture')
 const architecture = arguments_.find(value => value.startsWith('--arch='))?.split('=')[1] ?? host
-let buildCommand = 'docker', buildPrefix = ['build'], buildBackend = 'docker-legacy'
-try {
-  const command = buildxPath ? path.resolve(buildxPath) : 'docker'
-  const prefix = buildxPath ? [] : ['buildx']
-  const version = execFileSync(command, [...prefix, 'version'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim()
-  const contextName = execFileSync('docker', ['context', 'show'], { encoding: 'utf8' }).trim()
-  buildCommand = command
-  buildPrefix = [...prefix, 'build', '--builder', contextName, '--load', '--provenance=false']
-  buildBackend = version
-} catch (error) {
-  if (buildxPath || architecture !== host) throw new Error('Cross-architecture service packaging requires Docker buildx. Install the plugin or select its trusted executable with --buildx=PATH.')
-}
+const backend = dockerBuildBackend({ buildxPath, architecture, host })
+const buildCommand = backend.command, buildPrefix = backend.prefix, buildBackend = backend.version
 const directory = path.join(root, '.data/service-build', architecture)
 fs.mkdirSync(directory, { recursive: true, mode: 0o700 })
 const cacheFile = path.join(directory, 'cache.json')
@@ -57,7 +48,7 @@ for (const name of ['teststudio', 'teststudio-health']) {
 const dockerfile = path.join(root, 'deploy/service/Dockerfile')
 const certificateSource = JSON.parse(fs.readFileSync('deploy/service/certificate-source.json', 'utf8'))
 if (!/^[^\s]+@sha256:[a-f0-9]{64}$/.test(certificateSource.image) || !/^linux\/(amd64|arm64)$/.test(certificateSource.platform) || certificateSource.path !== '/etc/ssl/certs/ca-certificates.crt') throw new Error('The service certificate source requires a fixed image digest, platform, and certificate path')
-const sourceKey = digest([architecture, buildBackend, certificateSource, hashFile(dockerfile), hashFile('scripts/build-service-image.mjs'), cache.binaries, assets.uiOutput, assets.traceOutput])
+const sourceKey = digest([architecture, buildBackend, certificateSource, hashFile(dockerfile), hashFile('scripts/build-service-image.mjs'), hashFile('scripts/lib/docker-build.mjs'), cache.binaries, assets.uiOutput, assets.traceOutput])
 if (cache.sourceKey === sourceKey && cache.image) {
   const previous = inspect(cache.image)
   if (previous?.Id === cache.image && previous.Architecture === architecture) { console.error('Reusing the unchanged service image.'); console.log(JSON.stringify({ image: cache.image, architecture, sourceKey })); process.exit(0) }

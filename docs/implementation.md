@@ -69,6 +69,79 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: hosted runner supervisor and thin runtime overlays
+
+Acceptance **51** advances. The ledger stays at **48 verified, 9 open, 57 total** items.
+The new teststudio-job command fetches one scoped work item and invokes the existing fixed Go or Playwright runner inside its worker image.
+It starts no uploaded code in the API and accepts no arbitrary command or ticket argument.
+The ticket, execution, and optional instance identity use protected environment values.
+The child gets a fixed toolchain environment without the job ticket, database settings, cloud credentials, identity headers, or personal proxy configuration.
+
+The supervisor uses bounded retries for input, progress, report, and attachment delivery.
+A single process retains its instance identifier. Exact retries preserve the start timestamp, report, manifest, and snapshotted bytes.
+A lost report acknowledgement cannot rerun the test.
+Start delivery occurs separately from stdout draining and is bounded to five seconds.
+The local and hosted adapters now share the existing bounded output parser, including its 2 MiB retention and bounded progress-line behavior.
+The existing local parser checks use its public pending-byte observation instead of private buffer access.
+
+The owned runner process group receives termination before a bounded forced stop.
+The supervisor waits for the runner, completes an active forced-stop callback, and stops remaining members of its group.
+The local cancellation fixture starts a descendant and confirms that both runner completion and descendant reaping occur.
+Provider PID namespace cleanup and sandbox controls remain separate requirements.
+
+The collector verifies regular files through the rooted output directory and creates private read-only snapshots before manifest submission.
+Escape links, duplicate paths, invalid metadata, capture-disabled files, oversized data, and output truncation stay explicit evidence gaps.
+It removes its owned snapshot directory on delivery or an error.
+Known job ticket values are removed from report metadata and captured process output.
+The selected source runtime still requires the trusted gateway socket for target-backed work. No gateway or isolation boundary is invented by the supervisor.
+
+The report envelope now retains the actual runner process exit status and an optional infrastructure failure discriminator.
+A valid failed assertion delivers successfully while retaining its failed test outcome and nonzero runner exit.
+Missing reports and invalid passing reports produce teststudio.worker/v1 observations with unavailable test duration and measured worker duration.
+A worker infrastructure observation cannot create a passing test result.
+Available process logs remain private evidence. Child stdout and stderr do not stream to provider console logs.
+The supervisor's exit status describes report delivery. Test outcome remains in the accepted report.
+
+Staging quota exhaustion before report acceptance permits an explicit attachment omission without changing the observed result.
+Upload failure after acceptance keeps the report and records incomplete evidence separately.
+The CLI's fixed delivery message uses that incomplete-evidence outcome even when no attachment remains pending.
+The shared capture helper also fixes failure-only captures for a passing observation that fails its timing threshold.
+The broker and supervisor use the same timing-aware capture decision.
+
+The new runtime producer layers only the compiled supervisor onto a selected immutable source runtime.
+It retains the original runner entrypoint, runtime labels, API policy, and source-base contract.
+The layer adds a root-owned executable and defaults to user 1000:1000.
+The current Go and Playwright overlays reuse the existing cached ARM64 bases. No Go toolchain, npm dependency, or browser runtime rebuild occurs.
+Buildx selection now uses a shared helper with the service image producer. Its source participates in both relevant cache keys.
+The producer loads images locally and performs no push or provider job creation. Its temporary build context is removed.
+Produced overlays and immutable base aliases remain as intended build cache.
+
+The Go overlay is sha256:2636d33fd2ac03dae1dbd5624ec3a339b14d705ae51d56efea637a45cb354f60.
+The Playwright overlay is sha256:89611e083f27f68e494f92eaa12380268db301134562dc4efc018f4bc3fa9f34.
+The final image identifiers and exact inputs are recorded in output/job-supervisor/go-runtime.json and playwright-runtime.json.
+They are local image identifiers, not registry distribution digests.
+
+Focused native supervisor checks use real child processes and local TLS with the production exchange handler and client.
+They cover both runner schemas, passed and failed observations, missing reports, invalid passes, credential exclusion, oversized output, unsafe links, lost acknowledgements, quota gaps, upload failure, stale output, and cancellation cleanup.
+The command configuration check verifies missing or invalid identity and credential-bearing flags without echoing values.
+Two focused exchange cases preserve process-failure consistency and timing-triggered capture.
+Five existing report and output checks preserve local behavior after the shared parser extraction.
+All targeted Go checks pass with race detection.
+Evidence is output/job-supervisor/supervisor.log, command.log, exchange.log, and compatibility.log.
+
+Narrow overlay probes execute the installed supervisor configuration guard with no network, no capabilities, and a read-only root filesystem.
+They confirm non-root image settings, unchanged source contracts and runner entrypoints, and missing-work rejection.
+Evidence is output/job-supervisor/package/summary.json and cleanup.json.
+All owned probe containers are removed. No test suite or browser starts during these probes.
+The native API and preparation worker build with reused UI and private viewer assets.
+The demonstration refresh preserves its database, evidence, and existing browser work.
+No AWS, Kubernetes, Azure, full browser suite, or source-runner matrix runs.
+
+Provider admission, private worker routing, exact image dispatch, trusted remote gateway delivery, authoritative status, cancellation, deadlines, discovery, and restart reconciliation remain required.
+Remote source preparation and immutable registry publication also remain required.
+The next batch connects the exchange and supervisor to the common provider lifecycle driver and provider adapters.
+See [Hosted runner supervisor](job-supervisor.md) for the operational contract and current limits.
+
 ## Current delivery: private hosted worker exchange
 
 Acceptance **51** advances. The ledger stays at **48 verified, 9 open, 57 total** items.

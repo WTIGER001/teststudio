@@ -3,6 +3,7 @@ package workerexchange
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"mime"
 	"path"
 	"regexp"
@@ -74,7 +75,20 @@ func validateSubmission(input execution.CodedInput, submission Submission) error
 	if err != nil || len(data) > 2<<20 || len(submission.Files) != len(submission.Report.Attachments) || len(submission.Files) > 32 {
 		return ErrInvalid
 	}
-	if err := execution.ValidateCodedReport(input, submission.Report, nil); err != nil {
+	if submission.ProcessExitCode < -1 || submission.ProcessExitCode > 255 {
+		return ErrInvalid
+	}
+	var processError error
+	if submission.ProcessExitCode != 0 {
+		processError = errors.New("runner process failed")
+	}
+	if submission.InfrastructureFailure != "" {
+		if submission.Report.Schema != "teststudio.worker/v1" || submission.InfrastructureFailure != submission.Report.Result.FailureKind {
+			return ErrInvalid
+		}
+		processError = errors.New("runner infrastructure failed")
+	}
+	if err := execution.ValidateCodedReport(input, submission.Report, processError); err != nil {
 		return ErrInvalid
 	}
 	files := map[string]File{}
@@ -105,21 +119,7 @@ func validateSubmission(input execution.CodedInput, submission Submission) error
 		default:
 			return ErrInvalid
 		}
-		failed := input.FailedBefore || submission.Report.Result.State == "failed" || submission.Report.Result.State == "timed-out" || submission.Report.Result.State == "unknown"
-		mode := "always"
-		switch attachment.Kind {
-		case "log":
-			if !input.Capture.Logs {
-				return ErrInvalid
-			}
-		case "screenshot":
-			mode = input.Capture.Screenshots
-		case "trace":
-			mode = input.Capture.Trace
-		case "video":
-			mode = input.Capture.Video
-		}
-		if mode == "off" || mode == "failure" && !failed {
+		if !execution.CaptureAttachment(input, submission.Report.Result, attachment) {
 			return ErrInvalid
 		}
 		seen[attachment.Path] = true

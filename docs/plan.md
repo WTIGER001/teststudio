@@ -143,12 +143,22 @@ An HTTPS client rejects redirects and excludes private diagnostics. The optional
 Focused service, live-run TLS, report compatibility, export barrier, and native listener checks pass locally.
 See [Private hosted worker exchange](worker-exchange.md) for exact limits and integration order.
 Acceptance **51** advances. The count stays **48 verified, 9 open**.
-This transport does not yet provide a runner supervisor or dispatch a hosted provider job.
+The transport and supervisor do not yet dispatch a hosted provider job.
 
-Next, implement the trusted hosted runner supervisor and isolated provider execution adapters.
+The trusted hosted runner supervisor now fetches frozen work and invokes the fixed Go or Playwright runner outside the API.
+It strips ambient credentials from the child environment, forwards bounded progress, and snapshots owned files for exact upload retries.
+Runner process exit, observed test outcome, provider delivery, and evidence completeness remain separate.
+Missing or invalid reports produce explicit unmeasured infrastructure observations with available private logs.
+A shared capture decision preserves failure-only evidence for timing-policy failures.
+Thin supervised source runtimes reuse the cached Go and Playwright bases without rebuilding toolchains or browser dependencies.
+Local TLS/process checks and narrow runtime package probes pass. Acceptance 51 advances; the count remains 48 verified and 9 open.
+See [Hosted runner supervisor](job-supervisor.md) for its job contract, packaging, and remaining provider controls.
+
+Next, implement the common provider lifecycle driver and isolated provider execution adapters.
 Use the frozen work packet as the runner's existing bounded stdin contract.
 Preserve immutable source approval, timing, result, capture-policy, and gateway contracts.
 Keep real target credentials in the trusted gateway. Untrusted workers receive neither application sessions nor provider SDK credentials.
+Keep resolved gateway secret versions available for restart redaction without sending their values to the test worker.
 Add private worker HTTPS routing to each provider profile before enabling hosted dispatch.
 Azure needs its own private service arrangement for the worker listener rather than an additional public TCP port.
 Then add provider dispatch, status, cancellation, deadline, and restart reconciliation against local protocol fixtures.

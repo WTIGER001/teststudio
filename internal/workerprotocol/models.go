@@ -22,8 +22,10 @@ type File struct {
 }
 
 type Submission struct {
-	Report execution.CodedReport `json:"report"`
-	Files  []File                `json:"files"`
+	ProcessExitCode       int                   `json:"processExitCode"`
+	InfrastructureFailure string                `json:"infrastructureFailure,omitempty"`
+	Report                execution.CodedReport `json:"report"`
+	Files                 []File                `json:"files"`
 }
 
 type Packet struct {

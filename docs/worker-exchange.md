@@ -4,8 +4,8 @@ The worker exchange transports one attempt's input, start observation, report, a
 It uses shared installation storage and the existing private artifact store.
 It runs no test code inside the API.
 
-The transport and HTTPS client are implemented and pass local checks.
-The hosted runner supervisor, provider dispatch, gateway delivery, and provider recovery adapters remain unfinished.
+The transport, HTTPS client, and [hosted runner supervisor](job-supervisor.md) are implemented and pass local checks.
+Provider dispatch, gateway delivery, and provider recovery adapters remain unfinished.
 No hosted Go or Playwright execution is enabled by this feature alone.
 Keep acceptance 51 and the related hosted acceptance items open.
 
@@ -87,7 +87,10 @@ The execution identifier selects an existing server-owned record. The caller can
 | PUT /report | Sends report and files. The first valid submission freezes both. An exact retry succeeds. A changed submission conflicts. |
 | PUT /attachments/FILE | Uploads one file declared in the frozen report manifest. The body must match its exact byte count and SHA-256 checksum. |
 
-The report keeps the existing teststudio.go/v1 or teststudio.playwright/v1 contract.
+Ordinary reports keep the teststudio.go/v1 or teststudio.playwright/v1 contract.
+The envelope also records processExitCode and an optional infrastructureFailure.
+The supervisor uses teststudio.worker/v1 only for an explicit unknown or timed-out infrastructure observation with unavailable test duration.
+That discriminator must match its failure kind. It cannot accompany a passing observation.
 Its test, selector, terminal state, timeout reason, timing, steps, and Go observation use the same validator as local container reports.
 The report body has a 2 MiB limit. Its transport envelope adds at most 64 KiB for file descriptors.
 Unknown JSON fields and trailing JSON are rejected.
@@ -102,8 +105,8 @@ Successful reads return 200. Successful writes return 204.
 Unavailable or invalid credentials return 404 without exposing record existence or owner details.
 Invalid messages return 400. Conflicting claims or immutable messages return 409.
 Exhausted staging capacity returns 507. Other storage failures return a fixed 503 outcome.
-A future supervisor must report an explicit evidence gap if staging capacity prevents an attachment upload.
-It must preserve the observed test result when permitted evidence is unavailable.
+The supervisor reports an explicit evidence gap if staging capacity prevents an attachment upload.
+It preserves the observed test result when permitted evidence is unavailable.
 
 ## Private evidence staging
 
@@ -132,7 +135,7 @@ The trusted collector supplies controller-held redaction values. Those values ne
 
 ## Completion and recovery integration
 
-The future managed executor must use this order:
+The provider managed executor must use this order:
 
 1. Register the normal execution reference and recheck dispatch authority.
 2. Prepare the bounded exchange and create one provider job through an idempotent provider operation.
