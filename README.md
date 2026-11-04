@@ -13,6 +13,7 @@ The [Azure worker admission guide](docs/azure-worker-network.md) links the netwo
 The [standalone worker relay](docs/worker-relay.md) supplies a bounded frontend without installation credentials and a UI-independent image builder. Provider service wiring remains unfinished.
 The [staged Azure worker backend](docs/azure-worker-backend.md) defines a dedicated private environment, worker-only app, and scoped installation identities. Admission and deployment remain separate.
 The [backend observation stage](docs/azure-worker-backend-admission.md) checks actual app configuration, reported placement, identities, and revisions through scoped reads. Complete admission remains unfinished.
+The [backend private endpoint observer](docs/azure-worker-backend-endpoint.md) binds service approval, NIC and address ownership, and the dedicated endpoint subnet policy. Effective routing and TLS remain unfinished.
 The [trusted worker backend role](docs/worker-backend.md) serves private transport without UI, sign-in, or background workers. It supports optional direct TLS; private routing, certificate trust, and provider wiring remain required.
 The [private worker exchange](docs/worker-exchange.md) and [hosted supervisor](docs/job-supervisor.md) supply scoped transport and runner supervision for the provider adapters under development.
 

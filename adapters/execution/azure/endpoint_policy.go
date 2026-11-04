@@ -37,32 +37,40 @@ func (s EndpointSettings) SubnetDefinition(c Config) (n.Subnet, error) {
 }
 
 func (g *EndpointGuard) verifySecurityGroup(actual n.SecurityGroup) error {
-	if !perimeterIdentity(value(actual.ID), value(actual.Name), value(actual.Type), g.settings.SecurityGroup, "Microsoft.Network/networkSecurityGroups", value(actual.Location), g.worker.Region) || actual.Properties == nil {
+	return verifyEndpointSecurityGroup(actual, g.settings.SecurityGroup, g.settings.Subnet, g.worker.Region, g.settings.rules())
+}
+
+func verifyEndpointSecurityGroup(actual n.SecurityGroup, id, subnet, location string, rules []*n.SecurityRule) error {
+	if !perimeterIdentity(value(actual.ID), value(actual.Name), value(actual.Type), id, "Microsoft.Network/networkSecurityGroups", value(actual.Location), location) || actual.Properties == nil {
 		return hostedexecution.ErrOwnership
 	}
 	p := actual.Properties
 	if value(p.ProvisioningState) != n.ProvisioningStateSucceeded {
 		return hostedexecution.ErrUnavailable
 	}
-	if !value(p.FlushConnection) || len(p.NetworkInterfaces) != 0 || !soleSubnet(p.Subnets, g.settings.Subnet) {
+	if !value(p.FlushConnection) || len(p.NetworkInterfaces) != 0 || !soleSubnet(p.Subnets, subnet) {
 		return hostedexecution.ErrOwnership
 	}
-	return verifySecurityRules(g.settings.SecurityGroup, p.SecurityRules, g.settings.rules())
+	return verifySecurityRules(id, p.SecurityRules, rules)
 }
 
 func (g *EndpointGuard) verifySubnet(actual n.Subnet, interfaces []n.Interface) error {
 	s := g.settings
-	if err := subnetMatches(actual, s.Subnet); err != nil {
+	return verifyEndpointSubnet(actual, interfaces, s.Subnet, s.SubnetPrefix, s.SecurityGroup, []string{s.RegistryEndpoint, s.ExchangeEndpoint})
+}
+
+func verifyEndpointSubnet(actual n.Subnet, interfaces []n.Interface, subnet, prefix, security string, endpointIDs []string) error {
+	if err := subnetMatches(actual, subnet); err != nil {
 		return err
 	}
 	p := actual.Properties
 	prefixes := subnetPrefixes(actual)
 	if len(prefixes) != 1 ||
-		prefixes[0] != s.SubnetPrefix ||
+		prefixes[0] != prefix ||
 		p.DefaultOutboundAccess == nil ||
 		value(p.DefaultOutboundAccess) ||
 		p.NetworkSecurityGroup == nil ||
-		!strings.EqualFold(value(p.NetworkSecurityGroup.ID), s.SecurityGroup) ||
+		!strings.EqualFold(value(p.NetworkSecurityGroup.ID), security) ||
 		value(p.PrivateEndpointNetworkPolicies) != n.VirtualNetworkPrivateEndpointNetworkPoliciesEnabled ||
 		value(p.PrivateLinkServiceNetworkPolicies) != n.VirtualNetworkPrivateLinkServiceNetworkPoliciesEnabled ||
 		p.NatGateway != nil ||
@@ -71,11 +79,14 @@ func (g *EndpointGuard) verifySubnet(actual n.Subnet, interfaces []n.Interface) 
 		len(p.ApplicationGatewayIPConfigurations)+len(p.Delegations)+len(p.IPAllocations)+len(p.IpamPoolPrefixAllocations)+len(p.ServiceEndpoints)+len(p.ServiceEndpointPolicies)+len(p.IPConfigurationProfiles)+len(p.ResourceNavigationLinks)+len(p.ServiceAssociationLinks) != 0 {
 		return hostedexecution.ErrOwnership
 	}
-	endpoints := map[string]bool{strings.ToLower(s.RegistryEndpoint): true, strings.ToLower(s.ExchangeEndpoint): true}
-	if len(p.PrivateEndpoints) < 2 {
+	endpoints := map[string]bool{}
+	for _, id := range endpointIDs {
+		endpoints[strings.ToLower(id)] = true
+	}
+	if len(p.PrivateEndpoints) < len(endpointIDs) {
 		return hostedexecution.ErrUnavailable
 	}
-	if len(p.PrivateEndpoints) != 2 {
+	if len(p.PrivateEndpoints) != len(endpointIDs) {
 		return hostedexecution.ErrOwnership
 	}
 	for _, endpoint := range p.PrivateEndpoints {

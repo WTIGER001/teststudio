@@ -15,7 +15,11 @@ func endpointChild(id, name, parent, collection string) bool {
 }
 
 func (g *EndpointGuard) verifyEndpoint(role endpointRole, actual n.PrivateEndpoint) error {
-	if !perimeterIdentity(value(actual.ID), value(actual.Name), value(actual.Type), role.endpoint, "Microsoft.Network/privateEndpoints", value(actual.Location), g.worker.Region) || actual.Properties == nil || actual.ExtendedLocation != nil {
+	return verifyPrivateEndpoint(role, actual, g.settings.Subnet, g.worker.Region)
+}
+
+func verifyPrivateEndpoint(role endpointRole, actual n.PrivateEndpoint, subnet, location string) error {
+	if !perimeterIdentity(value(actual.ID), value(actual.Name), value(actual.Type), role.endpoint, "Microsoft.Network/privateEndpoints", value(actual.Location), location) || actual.Properties == nil || actual.ExtendedLocation != nil {
 		return hostedexecution.ErrOwnership
 	}
 	p := actual.Properties
@@ -27,7 +31,7 @@ func (g *EndpointGuard) verifyEndpoint(role endpointRole, actual n.PrivateEndpoi
 	}
 	_, nicName := resourceParts(role.nic)
 	if p.Subnet == nil ||
-		!strings.EqualFold(value(p.Subnet.ID), g.settings.Subnet) ||
+		!strings.EqualFold(value(p.Subnet.ID), subnet) ||
 		len(p.NetworkInterfaces) != 1 ||
 		p.NetworkInterfaces[0] == nil ||
 		!strings.EqualFold(value(p.NetworkInterfaces[0].ID), role.nic) ||
@@ -94,7 +98,11 @@ func (r endpointRole) address(member, group string) (string, string) {
 }
 
 func (g *EndpointGuard) verifyInterface(role endpointRole, actual n.Interface) error {
-	if !perimeterIdentity(value(actual.ID), value(actual.Name), value(actual.Type), role.nic, "Microsoft.Network/networkInterfaces", value(actual.Location), g.worker.Region) || actual.Properties == nil || actual.ExtendedLocation != nil {
+	return verifyPrivateInterface(role, actual, g.settings.Subnet, g.worker.Region)
+}
+
+func verifyPrivateInterface(role endpointRole, actual n.Interface, subnet, location string) error {
+	if !perimeterIdentity(value(actual.ID), value(actual.Name), value(actual.Type), role.nic, "Microsoft.Network/networkInterfaces", value(actual.Location), location) || actual.Properties == nil || actual.ExtendedLocation != nil {
 		return hostedexecution.ErrOwnership
 	}
 	p := actual.Properties
@@ -149,7 +157,7 @@ func (g *EndpointGuard) verifyInterface(role endpointRole, actual n.Interface) e
 			value(cfg.PrivateIPAddressVersion) != n.IPVersionIPv4 ||
 			cfg.PrivateIPAddressPrefixLength != nil ||
 			cfg.Subnet == nil ||
-			!strings.EqualFold(value(cfg.Subnet.ID), g.settings.Subnet) ||
+			!strings.EqualFold(value(cfg.Subnet.ID), subnet) ||
 			cfg.PublicIPAddress != nil ||
 			cfg.GatewayLoadBalancer != nil ||
 			len(cfg.ApplicationGatewayBackendAddressPools)+len(cfg.ApplicationSecurityGroups)+len(cfg.LoadBalancerBackendAddressPools)+len(cfg.LoadBalancerInboundNatRules)+len(cfg.VirtualNetworkTaps) != 0 ||

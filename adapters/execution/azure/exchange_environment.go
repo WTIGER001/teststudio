@@ -51,6 +51,10 @@ func verifyPrivateServiceEnvironment(actual a.ManagedEnvironment, environment, s
 }
 
 func (g *ExchangeGuard) verifyExchangeConnections(connections []a.PrivateEndpointConnection) (string, error) {
+	return verifyEnvironmentEndpointConnections(connections, g.settings.environment(), g.settings.Registry.Endpoints.ExchangeEndpoint)
+}
+
+func verifyEnvironmentEndpointConnections(connections []a.PrivateEndpointConnection, environment, endpoint string) (string, error) {
 	if len(connections) == 0 {
 		return "", hostedexecution.ErrUnavailable
 	}
@@ -58,11 +62,11 @@ func (g *ExchangeGuard) verifyExchangeConnections(connections []a.PrivateEndpoin
 		return "", hostedexecution.ErrOwnership
 	}
 	connection := connections[0]
-	if !endpointChild(value(connection.ID), value(connection.Name), g.settings.environment(), "privateEndpointConnections") ||
+	if !endpointChild(value(connection.ID), value(connection.Name), environment, "privateEndpointConnections") ||
 		!strings.EqualFold(value(connection.Type), "Microsoft.App/managedEnvironments/privateEndpointConnections") ||
 		connection.Properties == nil ||
 		connection.Properties.PrivateEndpoint == nil ||
-		!strings.EqualFold(value(connection.Properties.PrivateEndpoint.ID), g.settings.Registry.Endpoints.ExchangeEndpoint) {
+		!strings.EqualFold(value(connection.Properties.PrivateEndpoint.ID), endpoint) {
 		return "", hostedexecution.ErrOwnership
 	}
 	p := connection.Properties

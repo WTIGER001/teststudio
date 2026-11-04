@@ -11,7 +11,8 @@ This is staged backend infrastructure. It is not wired into the native Azure exe
 It creates no test job, worker environment, standalone relay, private endpoint, DNS zone, firewall, or deadline workflow.
 Do not enable coded Azure jobs from this package alone.
 The [backend observation stage](azure-worker-backend-admission.md) now checks selected app and environment binding, reported placement, identity metadata, and active revisions.
-Effective read coverage, attachment authority, network admission, and separate deployment verification remain required.
+The [backend endpoint observer](azure-worker-backend-endpoint.md) now checks selected approval, NIC ownership, and dedicated endpoint subnet policy.
+Effective read coverage, attachment authority, complete network admission, and separate deployment verification remain required.
 Acceptance 51 advances. The verified total remains 48 of 57, with nine open.
 
 ## Private ingress and service identity
@@ -96,7 +97,8 @@ Verify exclusive backend occupancy and restrictions on creating or joining other
 The intended resource definition does not prove future attachment authority.
 
 Provide the relay network with a dedicated private backend path and correctly scoped DNS.
-Verify endpoint approval, interface ownership, selected destination, normally trusted TLS, and all effective ingress and egress restrictions.
+The endpoint observer now checks reported approval, interface ownership, destination IP, and the selected endpoint NSG.
+Verify normally trusted TLS and all effective relay ingress, egress, route, and DNS controls next.
 Do not expose the API, reports, database, or storage through that path.
 Keep worker, relay, backend, and preparation network relationships explicit. Do not introduce worker-to-controller peering.
 Provide backend access to PostgreSQL, private artifacts, image pull, and platform secret resolution through their approved trusted paths.

@@ -54,18 +54,22 @@ func (s EndpointSettings) canonical(c Config) (EndpointSettings, error) {
 		}
 	}
 	for _, raw := range []string{s.PrivateDNS.ExchangeIP, s.PrivateDNS.RegistryIP, s.PrivateDNS.DataIP} {
-		ip, _ := netip.ParseAddr(raw)
-		if !prefix.Contains(ip) || ip == lastIPv4(prefix) {
-			return s, hostedexecution.ErrConfiguration
-		}
-		offset := uint32(ip.As4()[0])<<24 | uint32(ip.As4()[1])<<16 | uint32(ip.As4()[2])<<8 | uint32(ip.As4()[3])
-		start := prefix.Addr().As4()
-		base := uint32(start[0])<<24 | uint32(start[1])<<16 | uint32(start[2])<<8 | uint32(start[3])
-		if offset-base < 4 {
+		if !usableEndpointAddress(prefix, raw) {
 			return s, hostedexecution.ErrConfiguration
 		}
 	}
 	return s, nil
+}
+
+func usableEndpointAddress(prefix netip.Prefix, raw string) bool {
+	ip, valid := privateHost(raw)
+	if !valid || !prefix.IsValid() || !prefix.Addr().Is4() || !prefix.Contains(ip) || ip == lastIPv4(prefix) {
+		return false
+	}
+	address, start := ip.As4(), prefix.Addr().As4()
+	offset := uint32(address[0])<<24 | uint32(address[1])<<16 | uint32(address[2])<<8 | uint32(address[3])
+	base := uint32(start[0])<<24 | uint32(start[1])<<16 | uint32(start[2])<<8 | uint32(start[3])
+	return offset-base >= 4
 }
 
 func lastIPv4(p netip.Prefix) netip.Addr {

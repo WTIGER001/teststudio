@@ -122,7 +122,39 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: selected Azure backend observation
+## Current delivery: Azure private backend endpoint observation
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+The backend service observation batch commits as 21c2372.
+
+BackendEndpointGuard now refreshes backend service observation and checks a selected private endpoint in the relay VNet.
+It binds consumer approval, complete reported service approval, NIC backlinks, exact private address, endpoint subnet membership, and selected security rules.
+The service collection and embedded environment connections must agree. The NIC member must match the service's reported required member.
+The endpoint subnet explicitly enables network policies, disables default outbound access, and permits no unrelated endpoint, allocation, route, or NAT attachment.
+Its dedicated NSG permits only relay-subnet TCP 443 to the selected backend address before terminal inbound and outbound denies.
+The relay subnet's actual prefix and Container Apps delegation must match the selected source scope.
+
+The stage reuses the preceding call's validated environment observation instead of issuing a second environment GET.
+Existing worker and new backend endpoint inspection now share scoped SDK access, endpoint, NIC, subnet, security, and reserved-address verification.
+The new reader permits only five selected network resources and two backend service collections. It exposes no write or secret operation.
+A normal composed check makes fifty-seven reads within a fifty-second context. Complete bounded paging permits at most 110 reads.
+
+Four new focused local race checks pass. Four selected existing endpoint and backend checks also pass after extraction.
+Checks cover fresh state, environment reuse, foreign services, member and address mismatch, policy bypass, pending approval, incomplete pages, immutable definitions, and read boundaries.
+Only the changed definition check repeats after review strengthens its exact destination assertion.
+Fixtures use explicit fake credentials and in-memory SDK transports. They open no network connection.
+Evidence is output/azure-worker-backend-endpoint/summary.json and targeted command results.
+No live cloud API, cloud credential, Azure CLI, UI build, image build, browser, container, service listener, registry push, or deployment runs.
+No unchanged broad suite or fixture build repeats.
+
+This is endpoint observation and intended policy. It proves neither actual packet flow nor complete relay networking.
+The stage implements no Network and enables no coded Azure execution.
+Effective read coverage, workload attachment authority, actual relay VNet and perimeter, private DNS, TLS trust, identity grants, backend infrastructure subnet policy, and execution isolation remain required.
+The operator guide records the endpoint boundary and the remaining routing and trust work.
+Continue effective relay routing, DNS and normal backend TLS verification before native service wiring.
+See [Azure private backend endpoint observation](azure-worker-backend-endpoint.md).
+
+## Previous delivery: selected Azure backend observation
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 The staged backend package batch commits as 7825be6.

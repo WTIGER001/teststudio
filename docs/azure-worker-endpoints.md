@@ -148,3 +148,11 @@ Then add complete profile binding, native role configuration, packaging, and sep
 [Container Apps private endpoints](https://learn.microsoft.com/en-us/azure/container-apps/private-endpoints-with-dns) documents the managedEnvironment group and custom-domain private addressing.
 [Private endpoint network policies](https://learn.microsoft.com/en-us/azure/private-link/disable-private-endpoint-network-policy) documents subnet policy requirements for NSG enforcement.
 The pinned network SDK defines the inspected resource and attachment fields.
+
+## Shared backend endpoint verification
+
+The [backend endpoint observer](azure-worker-backend-endpoint.md) reuses the selected endpoint, NIC, subnet, security rule, and reserved-address checks.
+The shared SDK reader still permits only each caller's exact resource identifiers and API versions.
+The backend variant adds its own selected service collections and relay source subnet. It cannot read the existing worker endpoints.
+Three selected existing endpoint ownership, policy, and read-scope checks pass after extraction.
+The worker endpoint contract remains unchanged.

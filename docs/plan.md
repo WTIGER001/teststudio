@@ -281,12 +281,21 @@ Only checks affected by snapshot reuse and stronger occupant coverage repeat. Th
 See [Azure trusted backend observation](azure-worker-backend-admission.md). Acceptance 51 advances; the count remains 48 of 57.
 No browser, UI build, image build, container, live service listener, cloud request, registry push, or deployment runs.
 
+The backend endpoint stage now observes consumer and service approval, NIC and address ownership, dedicated endpoint subnet policy, and the selected relay source prefix.
+It requires service-required-member consistency and a dedicated NSG allowing only relay HTTPS to the selected backend address.
+The stage reuses the preceding validated backend environment observation without another GET. Shared worker endpoint verification remains canonical.
+Four new focused race checks and four existing endpoint or backend regression checks pass locally.
+The composed observation still implements no Network and enables no coded job.
+See [private backend endpoint observation](azure-worker-backend-endpoint.md). Acceptance 51 advances; the count remains 48 of 57.
+No cloud request, browser, UI build, image build, container, live service listener, registry push, or deployment runs.
+
 Next verify effective read coverage, environment attachment authority, and actual exchange networking.
 A completed list response does not prove authorization coverage or prevent later attachments. Keep those native installation controls mandatory.
 Use the worker backend role to verify its restricted route, TLS authority, and placement before completing service admission.
 The staged Azure backend selects platform HTTPS termination. Other approved profiles can select direct TLS.
 Selected origin, app, environment, command, identity metadata, and revision observation now pass local fixtures.
-Bind the exact private destination and normally trusted chain next. Inspect effective identity grants and the actual backend subnet or endpoint.
+The selected backend endpoint, NIC, address, approval, source prefix, and endpoint subnet policy now pass local fixtures.
+Bind the actual relay VNet, effective routing and DNS, and normally trusted chain next. Inspect effective identity grants and backend infrastructure subnet controls.
 Keep the staged backend separate from core deployment and coded worker packaging until admission and private relay access are complete.
 Resolve effective VNet-wide private-zone visibility and attachment controls. Selected-zone inspection cannot rule out other shadowing zones.
 Keep that proof separate from configured record correctness and private endpoint ownership.

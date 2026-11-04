@@ -9,7 +9,8 @@ It reuses that call's transient placement snapshot to reject other reported back
 
 This stage observes configuration and reported placement. It does not implement Network or enable coded Azure execution.
 It does not establish effective read coverage, prevent later attachments, or prove complete network isolation.
-The private relay route, endpoint approval, effective DNS, actual TLS trust, identity grants, and backend storage paths remain unverified.
+The [endpoint stage](azure-worker-backend-endpoint.md) now checks private endpoint approval, NIC ownership, and dedicated subnet policy.
+The complete relay route, effective DNS, actual TLS trust, identity grants, and backend storage paths remain unverified.
 Keep acceptance 51 and all related hosted criteria open.
 
 ## Explicit configuration
@@ -112,3 +113,9 @@ go test -race ./adapters/execution/azure -run '^(TestAzureExchangeVerifiesFreshS
 
 Evidence is output/azure-worker-backend-admission/summary.json and the targeted command results.
 The verified count remains 48 of 57, with nine open. Continue private backend routing and the remaining native admission controls.
+
+## Environment observation reuse
+
+The endpoint stage reuses this call's validated environment observation for its embedded approval comparison.
+It performs no second environment GET and stores no observation between checks.
+The public backend service Check behavior remains unchanged. Existing focused backend evidence still passes after this internal reuse change.
