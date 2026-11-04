@@ -249,38 +249,7 @@ func TestWorkerBackendStartupPreservesSignInStateAndStopsItsListener(t *testing.
 	}
 	address := listener.Addr().String()
 	listener.Close()
-	executable, err := os.Executable()
-	if err != nil {
-		t.Fatal(err)
-	}
-	ctx, cancel := context.WithCancel(context.Background())
-	command := exec.CommandContext(ctx, executable, "-test.run=^TestWorkerBackendStartupPreservesSignInStateAndStopsItsListener$", "--", "--serve-role=worker", "--worker-addr="+address, "--execution-location=azure", "--database="+f.database, "--artifact-directory="+f.files)
-	command.Env = append(os.Environ(), "TESTSTUDIO_BACKEND_COMMAND_CHECK=1")
-	if err := command.Start(); err != nil {
-		cancel()
-		t.Fatal(err)
-	}
-	done := make(chan error, 1)
-	go func() { done <- command.Wait() }()
-	t.Cleanup(func() {
-		defer cancel()
-		command.Process.Signal(syscall.SIGTERM)
-		select {
-		case err := <-done:
-			if err != nil {
-				t.Error(err)
-			}
-		case <-time.After(2 * time.Second):
-			cancel()
-			<-done
-			t.Error("backend did not stop")
-		}
-		connection, err := net.DialTimeout("tcp", address, time.Second)
-		if err == nil {
-			connection.Close()
-			t.Error("backend listener remained open")
-		}
-	})
+	startWorkerBackendCommand(t, address, "--serve-role=worker", "--worker-addr="+address, "--execution-location=azure", "--database="+f.database, "--artifact-directory="+f.files)
 	client := &http.Client{Timeout: time.Second}
 	t.Cleanup(client.CloseIdleConnections)
 	ready := false
@@ -310,4 +279,41 @@ func TestWorkerBackendStartupPreservesSignInStateAndStopsItsListener(t *testing.
 			t.Fatal("worker startup bootstrapped application state", bucket, err)
 		}
 	}
+}
+
+func startWorkerBackendCommand(t *testing.T, address string, options ...string) {
+	t.Helper()
+	executable, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	arguments := append([]string{"-test.run=^TestWorkerBackendStartupPreservesSignInStateAndStopsItsListener$", "--"}, options...)
+	command := exec.CommandContext(ctx, executable, arguments...)
+	command.Env = append(os.Environ(), "TESTSTUDIO_BACKEND_COMMAND_CHECK=1")
+	if err := command.Start(); err != nil {
+		cancel()
+		t.Fatal(err)
+	}
+	done := make(chan error, 1)
+	go func() { done <- command.Wait() }()
+	t.Cleanup(func() {
+		defer cancel()
+		command.Process.Signal(syscall.SIGTERM)
+		select {
+		case err := <-done:
+			if err != nil {
+				t.Error(err)
+			}
+		case <-time.After(2 * time.Second):
+			cancel()
+			<-done
+			t.Error("backend did not stop")
+		}
+		connection, err := net.DialTimeout("tcp", address, time.Second)
+		if err == nil {
+			connection.Close()
+			t.Error("backend listener remained open")
+		}
+	})
 }

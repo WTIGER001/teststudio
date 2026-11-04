@@ -48,9 +48,12 @@ Invalid options produce fixed errors without their values.
 
 The HTTP listener requires trusted external HTTPS termination.
 The backend must be the dedicated worker listener behind trusted TLS termination, rather than the normal UI, report, or user API origin.
-The --worker-addr listener itself uses HTTP. Its private TLS termination and restricted backend route still need provider packaging.
+The --worker-addr listener uses HTTP behind private TLS termination, or optional direct TLS in the dedicated worker role.
+Both forms still need restricted backend routes and provider packaging.
 The worker backend role provides a separate process without UI, sign-in, or background workers.
 It holds installation storage access and stays on the trusted side of the relay boundary.
+Its direct TLS mode validates mounted leaf identity before storage startup and requires the configured SNI and HTTP Host.
+The relay continues normal chain verification. Native backend routing and installation admission remain separate work.
 Do not point this relay at the ordinary application port and assume that network isolation exists.
 
 Backend TLS uses normal certificate verification, a TLS 1.2 minimum, and the system trust store.

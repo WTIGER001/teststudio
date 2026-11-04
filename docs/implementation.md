@@ -122,7 +122,39 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: dedicated trusted worker backend
+## Current delivery: direct HTTPS worker backend
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+The dedicated backend role batch commits as 105acdf.
+
+The worker role now supports optional direct TLS with an exact HTTPS origin and mounted certificate chain and private key.
+The backend validates leaf hostname, lifetime, server usage, and key matching before opening storage.
+Incomplete or invalid material returns fixed errors without file names, private values, or certificate diagnostics.
+The HTTPS origin parser is the existing relay validator, now exported for reuse. Relay production dependencies do not change.
+
+The configured listener requires TLS 1.2 or later. Wrong SNI rejects the handshake, even when the certificate also covers that other name.
+Wrong HTTP Host rejects before probe or worker routing. Plain HTTP reaches no worker operation.
+The shared listener lifecycle supports already-configured TLS servers while preserving existing HTTP behavior and shutdown.
+API and artifact roles cannot configure nonempty direct worker TLS settings. The API's optional worker listener retains external termination.
+The relay still verifies issuer and chain trust normally. Leaf startup checks do not establish that external trust or network placement.
+
+Two new focused local race checks pass, with invalid-material table cases and a complete relay-to-backend command flow.
+The real command persists input claims, start observations, validated reports, and checked attachment uploads into the existing private stores.
+Live account disablement rejects the next write through the relay.
+Foreign Host, a foreign but certificate-covered SNI, untrusted roots, legacy TLS, and plaintext HTTP reject locally.
+Three existing command startup and listener lifecycle checks pass after the TLS lifecycle change.
+Only changed certificate and end-to-end checks repeat after review strengthens purpose, SNI, and plaintext coverage. No unchanged broad suite repeats.
+Owned subprocesses, HTTP/TLS listeners, and idle transports close. Port checks confirm backend shutdown.
+Evidence is output/worker-backend-tls/summary.json and targeted command results.
+No browser, UI build, image build, cloud request, cloud credential, registry push, or deployment runs.
+
+The operator guide documents read-only certificate mounts, normal relay trust, exact health authority, restart-based rotation, and image entrypoint overrides.
+The service and relay image caches predate these code changes. Rebuild them only in the next relevant packaging batch.
+Native read coverage, attachment authority, effective networking, private backend routing and placement, and full provider admission remain required.
+Direct TLS enables no Azure coded job and closes no broad hosted acceptance item.
+See [trusted backend direct TLS](worker-backend.md#direct-tls).
+
+## Previous delivery: dedicated trusted worker backend
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 The workload inventory batch commits as 903bf11.

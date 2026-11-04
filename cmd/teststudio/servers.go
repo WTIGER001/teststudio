@@ -34,7 +34,13 @@ func serveServers(ctx context.Context, servers []*http.Server, ready func() func
 	}
 	failed := make(chan error, len(servers))
 	for i, server := range servers {
-		go func(server *http.Server, listener net.Listener) { failed <- server.Serve(listener) }(server, listeners[i])
+		go func(server *http.Server, listener net.Listener) {
+			if server.TLSConfig != nil {
+				failed <- server.ServeTLS(listener, "", "")
+				return
+			}
+			failed <- server.Serve(listener)
+		}(server, listeners[i])
 	}
 	select {
 	case err := <-failed:

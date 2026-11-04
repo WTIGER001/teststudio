@@ -11,7 +11,7 @@ The [AWS core profile](docs/aws.md) documents ECS, separate CloudFront origins, 
 The [Azure core profile](docs/azure.md) documents separate Container Apps, managed identities, Key Vault references, and private Blob evidence.
 The [Azure worker admission guide](docs/azure-worker-network.md) links the network, endpoint, and registry service checks under development.
 The [standalone worker relay](docs/worker-relay.md) supplies a bounded frontend without installation credentials and a UI-independent image builder. Provider service wiring remains unfinished.
-The [trusted worker backend role](docs/worker-backend.md) serves private transport without UI, sign-in, or background workers. Private TLS and provider wiring remain required.
+The [trusted worker backend role](docs/worker-backend.md) serves private transport without UI, sign-in, or background workers. It supports optional direct TLS; private routing, certificate trust, and provider wiring remain required.
 The [private worker exchange](docs/worker-exchange.md) and [hosted supervisor](docs/job-supervisor.md) supply scoped transport and runner supervision for the provider adapters under development.
 
 ## Local demonstration

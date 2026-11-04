@@ -59,7 +59,10 @@ func main() {
 }
 
 func run() error {
-	workerAddr := flag.String("worker-addr", "", "Optional private job transport listen address; requires trusted ingress and remote TLS termination")
+	workerAddr := flag.String("worker-addr", "", "Private job transport listen address; requires private HTTPS ingress or direct TLS in the worker role")
+	workerOrigin := flag.String("worker-origin", "", "Exact HTTPS authority for direct TLS in the worker-only role")
+	workerCertificate := flag.String("worker-tls-certificate", "", "Mounted PEM certificate chain for direct worker backend TLS")
+	workerKey := flag.String("worker-tls-key", "", "Mounted PEM private key for direct worker backend TLS")
 	ecsConfiguration := flag.String("ecs-workers-config", "", "Private ECS worker and network JSON settings")
 	ecsEnvironment := flag.String("ecs-workers-env", "", "Environment variable containing private ECS worker settings")
 	kubernetesConfiguration := flag.String("kubernetes-workers-config", "", "Operator JSON settings for isolated Kubernetes workers")
@@ -105,6 +108,9 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	if !role.Worker && (*workerOrigin != "" || *workerCertificate != "" || *workerKey != "") {
+		return errors.New("direct worker TLS settings require the worker service role")
+	}
 	if !role.API && !role.Worker && (*workerAddr != "" || *local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *preparedSources || *sourceBundles || *githubSources || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
 		return errors.New("the artifact service role cannot configure identity bootstrap, sign-in, source preparation, recording, execution, or private worker transport")
 	}
@@ -132,7 +138,7 @@ func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if role.Worker {
-		return runWorkerBackend(ctx, *workerAddr, *location, connection, *databaseEnvironment, *artifactConfiguration, *artifactEnvironment, *artifactDirectory)
+		return runWorkerBackend(ctx, *workerAddr, *location, connection, *databaseEnvironment, *artifactConfiguration, *artifactEnvironment, *artifactDirectory, workerTLSOptions{Origin: *workerOrigin, Certificate: *workerCertificate, Key: *workerKey})
 	}
 	parsed, err := url.Parse(*public)
 	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Path != "" || parsed.RawQuery != "" || parsed.Fragment != "" || parsed.User != nil {

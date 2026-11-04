@@ -17,7 +17,7 @@ type operation struct {
 	input                            bool
 }
 
-func origin(raw string) (*url.URL, error) {
+func ParseHTTPSOrigin(raw string) (*url.URL, error) {
 	u, err := url.Parse(raw)
 	if err != nil || len(raw) > 2048 || u.Scheme != "https" || u.Hostname() == "" || u.User != nil || u.Path != "" || u.RawPath != "" || u.RawQuery != "" || u.ForceQuery || u.Fragment != "" || u.Opaque != "" || u.String() != raw {
 		return nil, errConfiguration
@@ -90,11 +90,11 @@ func authority(u *url.URL) string {
 }
 
 func parsedOrigins(publicOrigin, backendOrigin string) (*url.URL, *url.URL, error) {
-	public, err := origin(publicOrigin)
+	public, err := ParseHTTPSOrigin(publicOrigin)
 	if err != nil {
 		return nil, nil, err
 	}
-	backend, err := origin(backendOrigin)
+	backend, err := ParseHTTPSOrigin(backendOrigin)
 	if err != nil || authority(public) == authority(backend) {
 		return nil, nil, errConfiguration
 	}

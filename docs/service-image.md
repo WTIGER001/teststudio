@@ -151,9 +151,10 @@ Select the artifact port explicitly when configuring a health probe for an artif
 The packaged default Docker health command checks API port 8040. Provider probes must override that address for artifact-only instances.
 
 Use --serve-role=worker for the dedicated [trusted worker backend](worker-backend.md).
-This role exposes only private transport and probes. It accepts only worker address, location, database, and artifact storage settings.
+This role exposes only private transport and probes. It accepts worker address, location, database, artifact storage, and optional direct TLS settings.
 Override the image entrypoint with /app/teststudio and remove inherited UI and artifact listener flags.
-Select the worker port for health probes. Private TLS termination and provider routing remain required.
+Select the worker port for health probes. Direct TLS requires the selected HTTPS authority and normally trusted certificate chain.
+Without direct TLS, private external TLS termination remains required. Provider routing and placement remain separate admission requirements.
 A fresh service image build is required before deployment; this backend batch performs no image build.
 
 The [Azure core profile](azure.md) uses the API and artifact roles for separate HTTPS apps with shared PostgreSQL and Blob storage.

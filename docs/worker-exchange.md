@@ -72,6 +72,8 @@ The current provider core packages do not yet provision that route.
 The [standalone relay](worker-relay.md) now supplies a separate worker-facing process without installation credentials.
 The [trusted backend role](worker-backend.md) exposes private transport without the UI, sign-in, or background workers.
 It reuses the installation database, private artifact store, and existing execution and discovery authorization.
+The backend role also supports direct TLS with mounted certificate material and exact HTTPS authority.
+The existing API worker listener still requires external TLS termination.
 Azure still needs private HTTPS ingress, restricted backend termination, image packaging, and service admission for that arrangement.
 These settings belong to the provider adapter batch before any real hosted execution.
 

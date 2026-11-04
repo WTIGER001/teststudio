@@ -13,7 +13,7 @@ The backend checks the existing attempt ticket and current execution or discover
 Disabled users, cancellation, expired leases, changed ownership, and archived resources retain their existing rejection behavior.
 The preparation execution location selects the discovery lease registry.
 
-This role implements the backend process. It does not establish provider routing, TLS termination, placement, or installation authority.
+This role implements the backend process and optional direct TLS. It does not establish provider routing, placement, or installation authority.
 Azure coded execution remains disabled until complete admission and provider wiring pass.
 
 ## Startup
@@ -31,7 +31,8 @@ go run ./cmd/teststudio \
 
 Use the same installation database and artifact settings as the dispatching controller.
 Do not start an independent empty database and expect existing tickets to work.
-Hosted instances require PostgreSQL and the installation's shared private artifact adapter:
+Hosted instances require PostgreSQL and the installation's shared private artifact adapter.
+This example uses a separate private TLS ingress:
 
 ```sh
 /app/teststudio \
@@ -58,6 +59,9 @@ The role accepts only these explicit options:
 | require-postgres | Reject a SQLite fallback for hosted installations. |
 | artifact-directory | Private filesystem artifact root for local operation. |
 | artifact-store-config or artifact-store-env | Existing private artifact adapter settings. |
+| worker-origin | Exact HTTPS origin for optional direct TLS. |
+| worker-tls-certificate | Mounted PEM certificate chain for direct TLS. |
+| worker-tls-key | Mounted PEM private key for direct TLS. |
 
 Other explicit flags reject startup before storage opens. This includes scheduler=false and notification-worker=false.
 Those services never start in this role, so their flags are unnecessary.
@@ -71,7 +75,7 @@ Override the default image health probe to use the worker port.
 
 ## Private ingress and probes
 
-The process listener uses HTTP behind trusted private HTTPS termination.
+The process listener uses HTTP behind trusted private HTTPS termination unless direct TLS is configured.
 Permit only the standalone relay and approved installation probes to reach this listener.
 Do not expose it through the UI or artifact origin.
 The relay requires normal backend certificate verification and a fixed HTTPS backend origin.
@@ -88,6 +92,43 @@ SIGINT or SIGTERM closes the owned listener through the shared graceful shutdown
 It exposes no HTTP operation for preparing, activating, collecting, or revoking exchanges.
 Trusted controllers retain those operations.
 
+## Direct TLS
+
+The worker role can terminate HTTPS itself instead of using a separate TLS proxy.
+Set all three TLS options together:
+
+```sh
+/app/teststudio \
+  --serve-role=worker \
+  --worker-addr=0.0.0.0:8042 \
+  --worker-origin=https://controller-workers.internal.example.test:8042 \
+  --worker-tls-certificate=/private/tls/chain.pem \
+  --worker-tls-key=/private/tls/key.pem \
+  --execution-location=azure \
+  --database-env=TESTSTUDIO_DATABASE \
+  --require-postgres \
+  --artifact-store-env=TESTSTUDIO_ARTIFACTS
+```
+
+Mount the certificate chain and key read-only on the trusted backend. Keep the private key inaccessible to test workers and the relay.
+The relay backend-origin must equal the selected worker-origin.
+The certificate must cover that hostname, match the key, remain current, and permit server authentication.
+Validation runs before database or artifact initialization. Incomplete, malformed, mismatched, expired, and future-dated leaf material rejects startup with fixed errors.
+The backend loads its certificate once. Restart it to rotate the certificate before expiry.
+
+Direct TLS requires TLS 1.2 or later. Plain HTTP receives no worker operation.
+The TLS server name must match the configured hostname. A literal IP origin permits clients that omit SNI.
+Each HTTP request must retain the exact configured Host authority, including an explicit configured port.
+A different Host returns a fixed 404 before health or worker handling. A different SNI rejects the TLS handshake.
+Do not add a health probe that changes the Host or disables certificate verification.
+Use the selected HTTPS origin for teststudio-health, with working private DNS and normal certificate trust.
+
+The relay still verifies the normal certificate chain. Startup validation of the leaf does not prove the relay trusts its issuer or complete chain.
+Use an issuer trusted by the approved relay image. Locally injected test roots do not alter the production relay trust configuration.
+Direct TLS does not replace attempt tickets or network access restrictions.
+Provider admission must still bind the backend destination, private routing, certificate authority, and placement.
+These TLS options require the worker role. The existing API worker listener continues to use external TLS termination.
+
 ## Targeted local verification
 
 Six new focused race checks cover role selection, option rejection, live execution authority, discovery authority, health behavior, and actual command startup.
@@ -102,3 +143,18 @@ go test -race ./cmd/teststudio -run '^(TestArtifactRolePreservesPasswordModeAndR
 
 Evidence is output/worker-backend/summary.json and the targeted command results.
 Acceptance 51 advances. The count remains 48 verified of 57, with nine open.
+
+### Direct TLS delivery
+
+Two new focused local race checks cover certificate configuration and the real HTTPS backend command through the standalone relay.
+The end-to-end check carries input, start, report, and attachment operations into shared durable storage.
+It rejects a foreign Host, foreign SNI that the certificate also covers, untrusted roots, legacy TLS, plaintext HTTP, and revoked write authority.
+Three existing command and listener lifecycle checks also pass. Owned subprocesses and listeners exit through cleanup.
+Only changed certificate and end-to-end checks repeat after review strengthens purpose, SNI, and plaintext coverage.
+No UI, browser, image build, cloud request, registry push, or deployment runs.
+
+```sh
+go test -race ./cmd/teststudio -run '^(TestDirectWorkerTLS|TestWorkerBackendStartupPreservesSignInStateAndStopsItsListener|TestListenerFailureDoesNotStartWorkersAndReleasesEarlierPorts|TestServiceCancellationStopsItsOwnedListenersAndWorkers)' -count=1
+```
+
+Evidence is output/worker-backend-tls/summary.json. Acceptance 51 advances; the count remains 48 of 57.

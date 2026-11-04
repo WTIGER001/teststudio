@@ -257,9 +257,18 @@ The actual command preserves stored sign-in configuration and closes its owned p
 See [trusted worker backend](worker-backend.md). Acceptance 51 advances; the count remains 48 of 57.
 No browser, UI build, service image rebuild, registry push, deployment, or cloud request runs.
 
+The backend now supports optional direct TLS through mounted certificate and key material with one exact HTTPS origin.
+It validates current leaf identity before storage opens. TLS requires the selected SNI, and requests require its exact HTTP Host.
+The real command passes the existing relay's four operations through locally verified HTTPS and shared durable storage.
+Two new focused race checks and three existing command or listener checks pass. Only changed certificate and end-to-end cases repeat.
+Foreign authority, untrusted roots, legacy TLS, plaintext HTTP, and revoked writes reject locally.
+See [direct backend TLS](worker-backend.md#direct-tls). Acceptance 51 advances; the count remains 48 of 57.
+No UI, browser, image build, cloud request, registry push, or deployment runs.
+
 Next verify effective read coverage, environment attachment authority, and actual exchange networking.
 A completed list response does not prove authorization coverage or prevent later attachments. Keep those native installation controls mandatory.
 Use the worker backend role to verify its restricted route, TLS authority, and placement before completing service admission.
+Select direct backend TLS or private TLS ingress explicitly in provider packaging. Bind its exact destination and normally trusted chain.
 Resolve effective VNet-wide private-zone visibility and attachment controls. Selected-zone inspection cannot rule out other shadowing zones.
 Keep that proof separate from configured record correctness and private endpoint ownership.
 Provide trusted preparation with a separate private registry endpoint and DNS path. Do not add controller links to worker zones or peer worker and controller networks.
