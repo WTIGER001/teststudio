@@ -1,0 +1,10 @@
+TestStudio API and UI: {{ .Values.origins.ui }}
+Private evidence origin: {{ .Values.origins.artifacts }}
+Database Secret: {{ .Values.database.existingSecret }} / {{ .Values.database.key }}
+
+Configure the declared TLS Secrets, ingress controller, PostgreSQL connection, and OIDC callbacks before use.
+Filesystem artifact claims remain after release removal. Manage retention and backups explicitly.
+Hosted coded execution requires the separate provider worker adapters described in the product plan.
+{{ range .Values.oidc.providers }}
+OIDC callback for {{ .id }}: {{ $.Values.origins.ui }}/auth/callback/{{ .id }}
+{{ end }}

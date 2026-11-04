@@ -35,6 +35,7 @@ func main() {
 func run() error {
 	database := flag.String("database", ".data/teststudio.db", "SQLite path or PostgreSQL URL shared with the API")
 	databaseEnvironment := flag.String("database-env", "", "Environment variable containing the database connection")
+	requirePostgres := flag.Bool("require-postgres", false, "Require PostgreSQL for a hosted or multi-instance installation")
 	location := flag.String("execution-location", "local", "Preparation queue location")
 	browserRuntime := flag.String("playwright-runtime", "", "Trusted immutable local Playwright source runtime image ID")
 	runtime := flag.String("go-runtime", "", "Trusted immutable local Go source runtime image ID")
@@ -44,6 +45,9 @@ func run() error {
 	flag.Parse()
 	connection, err := runtimeconfig.DatabaseConnection(*database, *databaseEnvironment, runtimeconfig.ExplicitFlag(flag.CommandLine, "database"), os.LookupEnv)
 	if err != nil {
+		return err
+	}
+	if err := runtimeconfig.RequirePostgres(connection, *requirePostgres); err != nil {
 		return err
 	}
 	if !domain.ValidID(*location) {

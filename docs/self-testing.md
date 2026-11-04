@@ -4,6 +4,27 @@ TestStudio owns a new Playwright suite in `tests/selftest/playwright`.
 The suite runs through the normal catalog, publication, execution, timing, and evidence APIs.
 It copies no tests or configuration from another application.
 
+## Kubernetes packaging checks
+
+The Helm chart has strict installation values and local rendering checks in scripts/verify-kubernetes.py.
+It reads no kubeconfig and performs no cluster operation.
+Use Helm and kubeconform plus PyYAML from scripts/kubernetes-check-requirements.txt.
+The selected schema source and revision remain in deploy/kubernetes/schema-source.json.
+
+```sh
+.data/kubernetes-tools/venv/bin/python scripts/verify-kubernetes.py \
+  --helm helm --kubeconform kubeconform --output output/kubernetes-package/check
+```
+
+Four rendering profiles produce 31 valid resources. Nine invalid configurations fail.
+The check validates routing, selectors, Secret references, private storage, replica policy, configuration checksums, multiple providers, and probes.
+Schema validation reads public metadata into its local cache. No cloud credential or cluster API is needed.
+The new /livez and --require-postgres behavior passes targeted race-enabled checks.
+The updated service image passes ten local package checks and removes its owned containers and volume.
+Evidence is output/kubernetes-package/check and output/kubernetes-package/service-2fl_jh9n.
+Do not repeat completed browser or source-runtime suites for chart or operator prose changes.
+See [Kubernetes service profile](kubernetes.md) for actual deployment prerequisites and the separate hosted acceptance scope.
+
 ## Portable service package check
 
 Use scripts/build-service-image.mjs for the common service package and scripts/verify-service-image.py for its focused local verification.

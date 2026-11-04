@@ -1,0 +1,34 @@
+image:
+  repository: registry.example.test/teststudio/service
+  digest: sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  architecture: amd64
+origins:
+  ui: https://studio.example.test
+  artifacts: https://evidence.example.test
+database:
+  existingSecret: teststudio-database
+  key: database-url
+oidc:
+  providers:
+    - id: organization
+      name: Organization sign-in
+      issuer: https://identity.example.test
+      clientId: teststudio
+      secretRef: env:TESTSTUDIO_OIDC_ORGANIZATION
+      scopes: [profile, email]
+      autoProvision: false
+  credentials:
+    TESTSTUDIO_OIDC_ORGANIZATION:
+      existingSecret: teststudio-identity
+      key: client-secret
+bootstrap:
+  issuer: https://identity.example.test
+  subject: installation-owner-subject
+ingress:
+  className: installation-ingress
+  uiTLSSecret: teststudio-ui-tls
+  artifactTLSSecret: teststudio-evidence-tls
+networkPolicy:
+  ingressNamespace: installation-routing
+  ingressPodLabels:
+    app.kubernetes.io/name: installation-ingress

@@ -204,6 +204,7 @@ Explicit declarative catalog import remains a reviewed metadata update operation
 The separate preparation command accepts --database-env TESTSTUDIO_DATABASE instead of a connection value in --database.
 Supply the same installation database through the worker's protected environment.
 Missing variables and conflicting explicit database options fail before worker startup.
+Hosted preparation processes can add --require-postgres to reject accidental SQLite configuration.
 Initialization errors exclude private environment connection values.
 The [service image](service-image.md) packages the API and static assets. Local Docker preparation remains a separate trusted host process.
 Hosted preparation and execution adapters remain separate implementation work.

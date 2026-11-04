@@ -109,8 +109,13 @@ The producer reuses the canonical static assets and hashes compiler, binary, and
 The local arm64 package passes startup, health, storage persistence, origin separation, and database-canary checks.
 The implementation ledger records exact evidence and verified cleanup. The count remains **48 verified, 9 open**.
 
-Next, add independent Kubernetes service manifests and runtime configuration against this package.
-Then add AWS ECS with CloudFront and Azure Container Apps packaging, followed by their isolated execution adapters and preparation requirements.
+Kubernetes service packaging now includes a Helm chart with private references, separate origins, persistent artifacts, replica constraints, and lifecycle probes.
+Local lint, four strict-schema renderings, and nine rejected configurations pass without contacting a cluster.
+The image adds independent liveness and an explicit hosted PostgreSQL guard. The count remains 48 verified and 9 open.
+See [Kubernetes service profile](kubernetes.md) for operator settings and the verified local evidence.
+
+Next, add AWS ECS with CloudFront and Azure Container Apps packaging.
+Then implement their isolated execution adapters and preparation requirements, preserving the full deployment acceptance scope.
 Preserve separate API/UI and artifact origins. Require installation-specific PostgreSQL, identity, storage, and secret configuration.
 Keep untrusted test execution outside the API. Do not promise hosted coded execution before its network, artifact, deadline, and recovery contracts exist.
 Use local schema, protocol, and packaging checks. Cloud deployment verification remains separate work.

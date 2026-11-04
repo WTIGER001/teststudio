@@ -1,0 +1,41 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "teststudio.name" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "teststudio.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className | quote }}
+  tls:
+    - hosts: [{{ trimPrefix "https://" .Values.origins.ui | quote }}]
+      secretName: {{ .Values.ingress.uiTLSSecret | quote }}
+    - hosts: [{{ trimPrefix "https://" .Values.origins.artifacts | quote }}]
+      secretName: {{ .Values.ingress.artifactTLSSecret | quote }}
+  rules:
+    - host: {{ trimPrefix "https://" .Values.origins.ui | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "teststudio.name" . }}-api
+                port:
+                  name: api
+    - host: {{ trimPrefix "https://" .Values.origins.artifacts | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "teststudio.name" . }}-artifacts
+                port:
+                  name: artifacts
+{{- end }}

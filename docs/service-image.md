@@ -54,6 +54,7 @@ An explicitly supplied --database conflicts with --database-env. The ordinary lo
 A missing or blank selected variable fails before startup. Invalid environment names also fail explicitly.
 Database initialization errors from this environment path exclude private connection values and upstream diagnostics.
 The connection value never becomes a process argument.
+Hosted API and preparation processes can add --require-postgres to reject a local SQLite fallback before opening storage.
 
 The packaged entrypoint includes these settings:
 
@@ -93,6 +94,7 @@ Add the installation's identity and artifact settings before interactive use.
 Use --env-file with a private operator-owned file when supplying a local PostgreSQL connection.
 The image includes CA certificates and built-in timezone data for named schedule timezones.
 The health command checks the bounded TestStudio ready response with a two-second deadline and rejects redirects.
+/healthz checks database readiness. /livez checks process liveness independently of database availability.
 Override its --url or --timeout only when the installation changes the API listener.
 Provider orchestrators must configure their readiness and startup probes according to their own lifecycle contract.
 
@@ -115,3 +117,5 @@ The service supports native HTTP checks, scheduling, notifications, and the sele
 Browser and coded suites require their separate execution workers. Keep Docker access on dedicated local workers.
 Hosted dispatch, preparation, cancellation, deadlines, recovery, and provider-specific private access remain required work.
 The package verification does not complete AWS, Kubernetes, Azure, or cross-profile acceptance.
+
+The [Kubernetes service profile](kubernetes.md) supplies Helm configuration, private Secret references, separate origins, storage, and probes for this image.

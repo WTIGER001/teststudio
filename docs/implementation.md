@@ -69,6 +69,45 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: Kubernetes service packaging and lifecycle probes
+
+Acceptance **57** advances. The ledger stays at **48 verified, 9 open, 57 total** items.
+The new Helm chart packages the portable service for a dedicated Kubernetes namespace without inherited cluster, database, identity, or artifact settings.
+Its values schema requires an immutable registry image digest, matching architecture, explicit HTTPS origins, existing Secret references, and initial identity configuration.
+The API/UI and artifact hosts use separate Services and explicit TLS routes.
+The chart references PostgreSQL and OIDC Secrets without creating or embedding their values.
+It supports multiple initial providers and approves the explicitly mapped references for later UI provider management.
+Bootstrap issuer selection must match one configured provider and names one exact external subject.
+
+The pod runs non-root with a protected root filesystem, private data and temporary mounts, no capabilities, and no automatically mounted API token.
+The chart grants no Kubernetes RBAC. Selector labels and the configuration checksum cannot be replaced by custom pod metadata.
+Filesystem artifacts use retained private storage. Single-writer storage uses one replica and Recreate updates.
+Multiple filesystem replicas require declared ReadWriteMany storage. Shared or object-storage profiles use rolling updates and a disruption budget.
+Storage configuration changes replace the relevant JSON object without carrying filesystem-only defaults into Azure or S3 settings.
+Ingress policy permits traffic from explicit proxy namespace and pod selectors. Hosted coded worker isolation remains separate work.
+
+A new /livez route separates process liveness from /healthz database readiness.
+The focused API check closes storage, observes readiness failure, and confirms continued liveness.
+The API and preparation command add --require-postgres to reject a local database fallback before opening storage.
+The targeted guard and API checks pass with race detection. The preparation command compiles.
+
+Helm lint and local rendering pass. kubeconform validates 31 resources across four storage and replica renderings against pinned strict Kubernetes 1.37.0 schemas.
+Cross-resource checks cover routing, service selectors, secret references, protected pod settings, stateful mounts, probes, multiple providers, and configuration rollout checksums.
+Nine invalid configuration cases fail before deployment, including inline credentials, missing immutable digests, shared origins, unmapped references, foreign bootstrap issuers, and unsafe replicas.
+Evidence is output/kubernetes-package/check/summary.json and the rendered manifests and schema logs.
+Verified local tool versions and checksums are retained in .data/kubernetes-tools/downloads.json.
+The verifier uses no kubeconfig and performs no cluster operation. Public schema downloads are local validation inputs.
+An initial verifier-only Helm memory-driver setup error is corrected by clearing inherited driver overrides.
+No product or cluster operation is involved in that correction.
+
+Only the changed service binary and image build. UI assets, trace-viewer assets, health binary, and trusted test runtimes remain unchanged.
+The current service image passes ten focused local package checks, including process liveness and the hosted PostgreSQL guard.
+Evidence is output/kubernetes-package/service-2fl_jh9n/summary.json and cleanup.json.
+All owned package-check containers and volumes are removed. Rendered files and the intended service image remain available.
+No browser, source-runner matrix, Kubernetes cluster, AWS, or Azure test runs.
+The chart's namespace, ingress, storage driver, real identity, replica failover, and hosted execution behavior still require their own deployment verification.
+See [Kubernetes service profile](kubernetes.md) for operator inputs, commands, and remaining scope.
+
 ## Current delivery: portable service image and database environment
 
 Acceptance **57** advances. The ledger stays at **48 verified, 9 open, 57 total** items.

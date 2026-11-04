@@ -1,0 +1,143 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "teststudio.name" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "teststudio.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicas }}
+  revisionHistoryLimit: 3
+  progressDeadlineSeconds: 300
+  strategy:
+    {{- if and (eq .Values.artifactStore.driver "filesystem") (eq .Values.persistence.accessMode "ReadWriteOnce") }}
+    type: Recreate
+    {{- else }}
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+    {{- end }}
+  selector:
+    matchLabels:
+      {{- include "teststudio.selector" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "teststudio.selector" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum | quote }}
+    spec:
+      serviceAccountName: {{ include "teststudio.name" . }}
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 90
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: {{ .Values.image.architecture }}
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- range .Values.image.pullSecrets }}
+        - name: {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: api
+          image: {{ printf "%s@%s" .Values.image.repository .Values.image.digest | quote }}
+          imagePullPolicy: IfNotPresent
+          args:
+            - {{ printf "--public-url=%s" .Values.origins.ui | quote }}
+            - {{ printf "--artifact-origin=%s" .Values.origins.artifacts | quote }}
+            - --database-env=TESTSTUDIO_DATABASE
+            - --require-postgres=true
+            - --oidc-config=/etc/teststudio/providers.json
+            - {{ printf "--oidc-secret-refs=%s" (include "teststudio.oidcReferences" .) | quote }}
+            - {{ printf "--bootstrap-issuer=%s" .Values.bootstrap.issuer | quote }}
+            - {{ printf "--bootstrap-subject=%s" .Values.bootstrap.subject | quote }}
+            - {{ printf "--local-accounts=%t" .Values.localAccounts | quote }}
+            - --artifact-store-config=/etc/teststudio/artifact-store.json
+            - --execution-location=kubernetes
+          env:
+            - name: TESTSTUDIO_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.existingSecret | quote }}
+                  key: {{ .Values.database.key | quote }}
+            {{- range $name, $reference := .Values.oidc.credentials }}
+            - name: {{ $name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $reference.existingSecret | quote }}
+                  key: {{ $reference.key | quote }}
+            {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          ports:
+            - name: api
+              containerPort: 8040
+            - name: artifacts
+              containerPort: 8041
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: api
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 36
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: api
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: api
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/teststudio
+              readOnly: true
+            - name: data
+              mountPath: /data
+            - name: temporary
+              mountPath: /tmp
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "teststudio.name" . }}-config
+            defaultMode: 0444
+        - name: data
+          {{- if eq .Values.artifactStore.driver "filesystem" }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (printf "%s-artifacts" (include "teststudio.name" .)) | quote }}
+          {{- else }}
+          emptyDir:
+            sizeLimit: 256Mi
+          {{- end }}
+        - name: temporary
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi

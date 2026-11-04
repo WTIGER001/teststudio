@@ -42,3 +42,10 @@ func DatabaseError(err error, variable string) error {
 	}
 	return errors.New("database initialization failed; check the configured database connection and service access")
 }
+
+func RequirePostgres(connection string, required bool) error {
+	if required && !strings.HasPrefix(connection, "postgres://") && !strings.HasPrefix(connection, "postgresql://") {
+		return errors.New("this deployment requires a PostgreSQL database connection")
+	}
+	return nil
+}

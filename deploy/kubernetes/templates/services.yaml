@@ -1,0 +1,19 @@
+{{- range $name, $port := dict "api" 8040 "artifacts" 8041 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "teststudio.name" $ }}-{{ $name }}
+  namespace: {{ $.Release.Namespace | quote }}
+  labels:
+    {{- include "teststudio.labels" $ | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "teststudio.selector" $ | nindent 4 }}
+  ports:
+    - name: {{ $name }}
+      port: 80
+      targetPort: {{ $name }}
+      protocol: TCP
+{{- end }}

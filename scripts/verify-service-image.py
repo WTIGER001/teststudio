@@ -72,6 +72,8 @@ def main():
                 time.sleep(0.1)
             assert ready, 'The service package did not become ready'
             docker('exec', name, '/app/teststudio-health')
+            status, body = request(origin + '/livez')
+            assert status == 200 and json.loads(body) == {'status': 'up', 'service': 'teststudio'}
             status, html = request(origin + '/')
             assert status == 200 and b'<ts-root' in html
             status, body = request(artifact_origin + '/')
@@ -92,7 +94,7 @@ def main():
                 assert current == migrations, 'Container recreation replaced the persisted database'
             migrations = current
             docker('rm', name)
-        summary['checks'] += ['Non-root startup with a read-only root filesystem and no Linux capabilities', 'Writable private SQLite and artifact volume', 'Bounded in-image readiness probe', 'Built UI served on the API origin', 'Separate artifact origin serves no UI', 'Container recreation preserves the same SQLite migration state', 'Fresh package starts with empty project, run, and schedule registries']
+        summary['checks'] += ['Non-root startup with a read-only root filesystem and no Linux capabilities', 'Writable private SQLite and artifact volume', 'Bounded in-image readiness probe', 'Independent process liveness endpoint', 'Built UI served on the API origin', 'Separate artifact origin serves no UI', 'Container recreation preserves the same SQLite migration state', 'Fresh package starts with empty project, run, and schedule registries']
         invalid = 'teststudio-service-invalid-' + suffix
         containers.append(invalid)
         canary = 'private-service-database-canary-' + suffix
@@ -107,6 +109,11 @@ def main():
             configured = json.loads(docker('inspect', invalid).stdout)[0]
             assert canary not in json.dumps(configured['Args'])
         summary['checks'].append('Database environment values stay out of process arguments and startup errors')
+        guarded = 'teststudio-service-postgres-' + suffix
+        containers.append(guarded)
+        result = docker('run', '--name', guarded, '--network=none', '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges', arguments.image, '--require-postgres=true', check=False)
+        assert result.returncode != 0 and 'requires a PostgreSQL database connection' in result.stderr
+        summary['checks'].append('Hosted mode rejects the packaged SQLite fallback before opening storage')
         summary['passed'] = True
         print(json.dumps({'passed': True, 'checks': len(summary['checks']), 'output': str(root)}))
     finally:

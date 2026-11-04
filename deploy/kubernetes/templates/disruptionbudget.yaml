@@ -1,0 +1,14 @@
+{{- if gt (int .Values.replicas) 1 }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "teststudio.name" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "teststudio.labels" . | nindent 4 }}
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      {{- include "teststudio.selector" . | nindent 6 }}
+{{- end }}

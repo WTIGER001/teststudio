@@ -64,6 +64,7 @@ func run() error {
 	addr := flag.String("addr", "127.0.0.1:8040", "HTTP listen address")
 	dsn := flag.String("database", ".data/teststudio.db", "SQLite path or PostgreSQL connection URL")
 	databaseEnvironment := flag.String("database-env", "", "Environment variable containing the database connection")
+	requirePostgres := flag.Bool("require-postgres", false, "Require PostgreSQL for a hosted or multi-instance installation")
 	public := flag.String("public-url", "http://127.0.0.1:8040", "Public origin")
 	ui := flag.String("ui", "web/dist/web/browser", "Built Angular application directory")
 	artifactAddr := flag.String("artifact-addr", "127.0.0.1:8041", "Private artifact HTTP listen address")
@@ -95,6 +96,9 @@ func run() error {
 	flag.Parse()
 	connection, err := runtimeconfig.DatabaseConnection(*dsn, *databaseEnvironment, runtimeconfig.ExplicitFlag(flag.CommandLine, "database"), os.LookupEnv)
 	if err != nil {
+		return err
+	}
+	if err := runtimeconfig.RequirePostgres(connection, *requirePostgres); err != nil {
 		return err
 	}
 	if *recordingCLI != "" && !*local {

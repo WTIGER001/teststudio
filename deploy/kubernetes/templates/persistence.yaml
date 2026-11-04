@@ -1,0 +1,19 @@
+{{- if and (eq .Values.artifactStore.driver "filesystem") (not .Values.persistence.existingClaim) }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "teststudio.name" . }}-artifacts
+  namespace: {{ .Release.Namespace | quote }}
+  annotations:
+    helm.sh/resource-policy: keep
+  labels:
+    {{- include "teststudio.labels" . | nindent 4 }}
+spec:
+  accessModes: [{{ .Values.persistence.accessMode }}]
+  {{- if .Values.persistence.storageClass }}
+  storageClassName: {{ .Values.persistence.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size | quote }}
+{{- end }}

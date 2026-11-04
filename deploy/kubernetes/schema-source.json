@@ -1,0 +1,6 @@
+{
+  "kubernetesVersion": "1.37.0",
+  "repository": "https://github.com/yannh/kubernetes-json-schema",
+  "commit": "86d045595d3f93b703bbf439cf9eb4bd6830d58f",
+  "schemaLocation": "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/86d045595d3f93b703bbf439cf9eb4bd6830d58f/{{.NormalizedKubernetesVersion}}-standalone{{.StrictSuffix}}/{{.ResourceKind}}{{.KindSuffix}}.json"
+}

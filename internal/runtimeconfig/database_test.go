@@ -57,3 +57,20 @@ func TestDatabaseFlagConflictUsesExplicitArgumentsInsteadOfTheDefaultValue(t *te
 		}
 	}
 }
+
+func TestHostedDatabaseGuardPreventsAnAccidentalLocalDatabaseFallback(t *testing.T) {
+	for _, connection := range []string{"local.db", "/data/private-database-canary", ""} {
+		err := runtimeconfig.RequirePostgres(connection, true)
+		if err == nil || strings.Contains(err.Error(), connection) && connection != "" {
+			t.Fatal("hosted database guard accepted or disclosed a local fallback", err)
+		}
+		if runtimeconfig.RequirePostgres(connection, false) != nil {
+			t.Fatal("local database behavior changed")
+		}
+	}
+	for _, connection := range []string{"postgres://user@database/studio", "postgresql://user@database/studio"} {
+		if err := runtimeconfig.RequirePostgres(connection, true); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
