@@ -12,7 +12,9 @@ The portable service image now includes /app/teststudio-prepare for a separate p
 Native configuration, local TLS protocol checks, and package checks pass without registry or cluster access.
 The optional [Helm preparation package](kubernetes-preparation.md) now supplies a separate deployment, durable journal claim, and scoped writer references.
 Complete hosted source operation still requires deployment verification.
-Environment-backed browser and API profiles require remote gateway delivery. AWS and Azure worker implementations remain open.
+Environment-backed browser and API profiles require remote gateway delivery.
+AWS dispatch is implemented with separate deployment verification pending.
+Azure now has a [job request and recovery-proof contract](azure-worker-contract.md). Its durable provider and isolation checks remain open.
 
 ## Configure separate processes
 

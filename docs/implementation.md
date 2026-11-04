@@ -122,7 +122,44 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: ECS admission during API backend rotation
+## Current delivery: Azure job request and ownership contracts
+
+Acceptance **51** advances. The count remains **48 verified of 57**, with **9 open**.
+The previous goal batch commits ECS backend rotation support as 5afecb1. This batch continues the Azure adapter gap.
+
+The new Azure package uses armappcontainers/v4 4.0.0 and API 2025-07-01 to construct and verify manual jobs and execution overrides.
+Both Go and Playwright support normal execution and catalog discovery references.
+Definitions fix one replica, one completion, zero provider retries, two CPU cores, 4 GiB memory, and Consumption resources.
+They bind exact source digests, repository namespace, private exchange arguments, and the trusted supervisor command.
+The sole pull identity has lifecycle None. Definitions reject runtime identity access, secrets, credentials, sidecars, init containers, and shared mounts.
+Generated names fit the platform's shorter limit. Full ownership and specification hashes remain in tags.
+The timing-pool digest includes installation configuration and the intended network policy.
+
+Only a fresh, unexpired plan can emit ticket-bearing Start options. Definitions, recovery proofs, and plan diagnostics exclude usable tickets.
+Restored proofs verify existing execution templates and cannot generate another launch.
+Response checks retain legitimate provider metadata while rejecting writable drift and changed execution receipts.
+The documented execution list can omit resource identifier and type; verification still requires the saved child receipt and matching execution name.
+Provider completion and timestamps remain separate from runner outcomes, durations, and numeric process exit codes.
+The selected execution API has no numeric exit-code field. Later lifecycle integration must preserve that distinction.
+
+Six focused contract checks pass with race detection. The SDK wire check passes for both runners and both operations after one fixture correction.
+Its first token audience expectation differs from the official SDK's public-cloud audience. Source inspection corrects the fixture, and only that failing check repeats.
+The official SDK serializes exact create, start, and execution-stop requests into an in-memory transport. No Azure connection or credential discovery occurs.
+The earlier three initial contract checks also pass before the complete new package's race run.
+Final observation checks preserve missing optional provider timestamps, including stopped jobs that never start a replica.
+An outdated negative case initially rejects a missing start time. Correcting that fixture leaves the targeted observation checks passing.
+Evidence is output/azure-worker-contract/summary.json and the focused command results.
+No UI build, browser, container, image build, source-suite run, cloud operation, registry push, or deployment runs.
+The demonstration remains unchanged and available.
+
+The adapter does not yet implement the managed Provider interface and is not wired into native commands.
+Durable creation and Start reservations, lost-acknowledgment recovery, actual network admission, independent absolute deadlines, and registry authentication remain next.
+Replica timeout does not replace absolute stop enforcement. The API cannot enforce the ECS user, read-only-root, or capability fields.
+Keep strict supervised-image inspection and a separate Azure isolation design mandatory before enabling dispatch.
+Private exchange service packaging, preparation, remote gateways, recording, and deployment verification remain required.
+No acceptance item closes from request construction alone.
+
+## Previous delivery: ECS admission during API backend rotation
 
 Acceptances **51** and **57** advance. The count remains **48 verified of 57**, with **9 open**.
 The earlier navigation refresh is verified in the existing user tab. It requires no further implementation.

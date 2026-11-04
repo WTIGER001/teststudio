@@ -144,7 +144,22 @@ Focused race checks, generated-package admission, shared admission-loss behavior
 One package invocation uses the wrong relative fixture path; its corrected absolute path passes.
 Older installations need a complete drain before applying the new attributes, read authority, and freshly built service image.
 This verifies local contracts, not live API availability or uninterrupted requests during rotation.
-Continue Azure worker and gateway implementation gaps next. Preserve the separate MMDev deployment verification phase.
+Azure now has a pinned SDK job contract for Go and Playwright execution and discovery.
+It fixes manual single-replica execution, zero platform retries, private pull-only identity, exact source images, resources, and supervisor commands.
+The job definition and recovery proof contain no usable ticket. Restored proofs cannot start another execution.
+Local checks cover writable drift, execution receipts, optional list metadata, provider states, and scoped SDK create, start, and stop requests.
+Provider completion remains separate from numeric process exit codes, which the Azure execution model does not expose.
+See [Azure job contracts](azure-worker-contract.md). Acceptance 51 advances; the total remains 48 of 57.
+
+Next implement durable Azure creation and Start reservations, acknowledgment recovery, exact execution receipts, terminal history, and checkpointed cleanup.
+Never repeat an uncertain Start. The selected API supplies no caller-selected execution name or idempotency field.
+Integrate independent provider completion with the authenticated runner report without inventing process exit codes or test durations.
+Then add actual worker-environment network admission, an independent absolute stop deadline, and trusted registry authentication.
+Replica timeout alone does not cover queue delay or satisfy the absolute deadline contract.
+Keep inspected non-root images mandatory. Azure lacks the ECS root-filesystem and capability overrides; verify its own isolation arrangement.
+Add the separate private HTTPS exchange service and preparation wiring before enabling coded execution in the native commands or Bicep package.
+Preserve the later remote gateway and recording requirements. Keep application secrets in trusted gateways.
+Run only targeted local fixtures during these batches. Keep live MMDev and Azure deployment verification separate.
 Acceptances 41, 46, and 51–57 remain open.
 
 ### Current hosted packaging checkpoint
@@ -281,8 +296,8 @@ This advances 51 and supporting replica recovery under 52. The total remains 48 
 The production network checker, bounded settings loader, and supported task storage now pass focused local checks.
 The scoped SDK factory, ECR credential callback, and optional API and preparation flags now pass focused local checks.
 Keep actual task and pool network admission mandatory. Private worker infrastructure and independent controller permissions now have staged packaging.
-Next address rolling target-health admission and the remaining provider and gateway implementation gaps.
-Add server and preparation wiring plus the private HTTPS route and scoped roles before enabling AWS workers.
+Rolling target-health admission now passes local verification. ECS server wiring and private infrastructure are also implemented.
+Continue the Azure provider and remote gateway gaps. AWS deployment verification remains separate.
 Do not recreate uncertain tasks after the finite RunTask idempotency window. Missing live tasks remain unresolved without a saved terminal observation.
 Keep exact image approval, gated dispatch, provider ownership, cancellation, deadlines, and checkpointed cleanup.
 Use local protocol fixtures and package rendering. Do not run AWS, cluster, or Azure deployment checks in this session.

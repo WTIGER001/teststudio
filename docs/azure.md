@@ -7,7 +7,8 @@ The artifact app validates existing grants against current stored sessions, cred
 
 The current package supports the catalog, identity, native HTTP execution, schedules, and private evidence service.
 Hosted preparation, Go execution, Playwright execution, and recording remain unfinished.
-Container Apps Jobs execution adapters remain part of the plan.
+The [Azure job contract](azure-worker-contract.md) now builds and verifies SDK requests for execution and discovery.
+Durable dispatch, network admission, absolute deadlines, and command wiring remain required before enabling coded jobs.
 Do not enable local Docker runner flags or mount a Docker socket inside these apps.
 Local packaging checks do not close Azure deployment acceptance.
 

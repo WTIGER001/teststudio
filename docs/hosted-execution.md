@@ -2,6 +2,9 @@
 
 ## Current scope
 
+The [Azure job contract](azure-worker-contract.md) now provides SDK request construction, ownership checks, and ticket-free recovery proofs.
+It remains separate from an enabled provider. Durable dispatch, network admission, independent deadlines, and command wiring are unfinished.
+
 The shared hosted lifecycle driver is implemented in internal/hostedexecution.
 It implements the existing managed executor and timing-profile contracts.
 It connects a provider implementation to the private worker exchange and the durable execution ledger.
