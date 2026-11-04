@@ -7,8 +7,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/cloud"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
 )
@@ -29,13 +27,6 @@ func newDeadlineHTTP(c DeadlineConfig, base policy.Transporter) *deadlineHTTP {
 	prefix := worker.resourceID("Microsoft.Logic", "workflows", "")
 	escaped := strings.Replace(prefix, "/resourceGroups/"+c.ResourceGroup+"/", "/resourceGroups/"+url.PathEscape(c.ResourceGroup)+"/", 1)
 	return &deadlineHTTP{base: base, prefix: prefix, escapedPrefix: escaped, name: regexp.MustCompile("^" + regexp.QuoteMeta(c.Worker.NamePrefix) + "-stop-[a-f0-9]{24}$")}
-}
-
-func deadlineClientOptions(h *deadlineHTTP) *arm.ClientOptions {
-	return &arm.ClientOptions{DisableRPRegistration: true, ClientOptions: policy.ClientOptions{
-		Transport: h, Retry: policy.RetryOptions{MaxRetries: -1},
-		Cloud: cloud.Configuration{ActiveDirectoryAuthorityHost: "https://login.microsoftonline.com/", Services: map[cloud.ServiceName]cloud.ServiceConfiguration{cloud.ResourceManager: {Endpoint: "https://management.azure.com/", Audience: "https://management.core.windows.net/"}}},
-	}}
 }
 
 func (h *deadlineHTTP) Do(r *http.Request) (*http.Response, error) {

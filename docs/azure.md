@@ -11,7 +11,8 @@ The [Azure job contract](azure-worker-contract.md) now builds and verifies SDK r
 The [durable provider](azure-worker-lifecycle.md) now passes local dispatch, status, cancellation, and checkpointed recovery checks.
 The [trusted ACR adapter](azure-registry-authentication.md) now supports separate inspection and preparation credentials.
 The [independent deadline adapter](azure-worker-deadlines.md) now supplies durable timer resources.
-Concrete network admission, identity role binding, and command wiring remain required before enabling coded jobs.
+The [topology inspector](azure-worker-network.md) now verifies environment and subnet bindings through scoped reads.
+Complete network admission, identity role binding, and command wiring remain required before enabling coded jobs.
 Do not enable local Docker runner flags or mount a Docker socket inside these apps.
 Local packaging checks do not close Azure deployment acceptance.
 

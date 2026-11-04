@@ -174,7 +174,17 @@ Targeted local race checks cover both runners, discovery, concurrency, changed r
 Azure service scheduling and shutdown latency remain unverified. A scheduled stop request does not imply exact-second termination.
 See [independent Azure deadlines](azure-worker-deadlines.md). Acceptances 51 and 52 advance; the count remains 48 of 57.
 
-Next add actual worker-environment network admission.
+The Azure topology stage now inspects actual environments, VNets, and subnets through a scoped read-only SDK client.
+It rejects shared controller networking, public worker ingress, unsafe address spaces, unexpected delegation, NAT, peering, and attachment drift.
+Fresh bounded reads preserve provisioning and resource uncertainty. It does not implement complete Network admission or release worker input.
+Seven new focused race checks and two selected existing SDK checks pass without Azure connections.
+See [Azure worker network admission](azure-worker-network.md). Acceptance 51 advances; the count remains 48 of 57.
+
+Next inspect complete NSG rules, UDRs, DNS resolver policy, private endpoints, and the isolated exchange.
+Bind the actual DNS policy and VNet link. Threat-intelligence filtering or a DNS proxy alone cannot establish the required default block.
+Verify unrelated workload inventory, cross-job isolation, and actual execution placement before composing Network.
+Bind topology and all perimeter settings into networkProfile. Do not substitute a partial topology digest.
+Keep coded jobs disabled until those controls pass. Ordinary jobs must meet the execution isolation contract or use a suitable Azure backend.
 Bind the stop-only identity role, workflow management authority, capacity limits, and orphan monitoring during infrastructure packaging.
 Then bind actual managed identities and registry roles in native setup and infrastructure packaging. The authentication adapter alone enables no worker.
 Keep network and deadline hooks mandatory. A local fake does not establish a deployable Azure isolation boundary.

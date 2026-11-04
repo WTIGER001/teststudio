@@ -39,7 +39,7 @@ func NewSDKDeadlines(o DeadlineOptions) (*SDKDeadlines, error) {
 		now = time.Now
 	}
 	h := newDeadlineHTTP(o.Config, o.Transport)
-	client, err := l.NewWorkflowsClient(o.Config.Worker.Subscription, o.Credential, deadlineClientOptions(h))
+	client, err := l.NewWorkflowsClient(o.Config.Worker.Subscription, o.Credential, publicARMOptions(h))
 	if err != nil {
 		return nil, hostedexecution.ErrConfiguration
 	}

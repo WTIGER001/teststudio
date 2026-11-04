@@ -111,7 +111,7 @@ func TestAzureDeadlineStopActionMatchesContainerAppsSDKRequest(t *testing.T) {
 		}
 		return deadlineResponse(r, 200, map[string]any{"value": []any{}}), nil
 	})
-	options := deadlineClientOptions(newDeadlineHTTP(c, wire))
+	options := publicARMOptions(newDeadlineHTTP(c, wire))
 	options.Transport = wire
 	options.Retry = policy.RetryOptions{MaxRetries: -1}
 	client, err := a.NewJobsClient(worker.Subscription, fixtureCredential{}, options)

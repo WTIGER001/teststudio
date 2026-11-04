@@ -122,7 +122,36 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: independent Azure deadline resources
+## Current delivery: Azure environment and network topology inspection
+
+Acceptance **51** advances. The total remains **48 verified of 57**, with **9 open**.
+The previous independent deadline batch commits as c3dd6da. This batch implements the actual environment and subnet inspection stage.
+
+TopologyGuard checks the configured worker and controller environments, VNets, and infrastructure subnets through fresh SDK reads.
+It requires a private workload-profile worker environment with one Consumption profile and separate controller networking.
+It rejects shared infrastructure, overlapping or nonprivate prefixes, public ingress, extra profiles, telemetry credentials, and unexpected identity.
+The worker VNet rejects peering, NAT bypasses, custom DNS, BGP community settings, and external IP allocations.
+The worker subnet requires explicit private outbound configuration, exact NSG and route-table bindings, and the Container Apps delegation.
+Service endpoints, subnet sharing, foreign attachments, conflicting subnet observations, and other configured bypasses reject inspection.
+Missing addresses, unready provisioning, failed reads, and cancelled operations remain unavailable.
+
+The production reader permits only GET on the six selected resources through pinned official SDKs and management versions.
+It fixes endpoint, subscription, resource paths, and bounded contexts and response sizes.
+The ARM client options now share the existing no-retry and no-provider-registration configuration across job, timer, and topology clients.
+Seven new focused local race checks pass. Two selected existing SDK request checks pass.
+A new fixture initially uses the wrong reader type; its corrected targeted invocation passes.
+Only affected checks repeat after private-prefix and boundary updates.
+Evidence is output/azure-worker-topology/summary.json and the focused command results.
+No Azure credential, cloud operation, registry push, deployment, UI build, browser, container, or image build runs.
+
+This is a required inspection stage. It does not implement Network or authorize execution by itself.
+Full NSG rules, routing, DNS policy, private endpoints, exchange isolation, unrelated workload inventory, and cross-job isolation remain required.
+The complete adapter must bind all policy settings into networkProfile. A topology-only digest cannot establish the final execution identity.
+Azure coded execution stays disabled. No broad acceptance item closes from this local stage.
+Continue the perimeter checks before native enablement, infrastructure packaging, or separate deployment verification.
+See [Azure worker network admission](azure-worker-network.md).
+
+## Previous delivery: independent Azure deadline resources
 
 Acceptance **51** and supporting recovery under **52** advance. The total stays **48 verified of 57**, with **9 open**.
 The previous ACR authentication batch commits as 6e943de. This batch implements the concrete deadline hook.

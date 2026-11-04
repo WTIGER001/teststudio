@@ -8,8 +8,6 @@ import (
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/cloud"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	a "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appcontainers/armappcontainers/v4"
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
@@ -27,10 +25,7 @@ func NewSDKClient(c Config, credential azcore.TokenCredential, transport policy.
 		return nil, hostedexecution.ErrConfiguration
 	}
 	httpClient := newSDKHTTP(c, transport)
-	options := &arm.ClientOptions{DisableRPRegistration: true, ClientOptions: policy.ClientOptions{
-		Transport: httpClient, Retry: policy.RetryOptions{MaxRetries: -1},
-		Cloud: cloud.Configuration{ActiveDirectoryAuthorityHost: "https://login.microsoftonline.com/", Services: map[cloud.ServiceName]cloud.ServiceConfiguration{cloud.ResourceManager: {Endpoint: "https://management.azure.com/", Audience: "https://management.core.windows.net/"}}},
-	}}
+	options := publicARMOptions(httpClient)
 	jobs, err := a.NewJobsClient(c.Subscription, credential, options)
 	if err != nil {
 		return nil, hostedexecution.ErrConfiguration
