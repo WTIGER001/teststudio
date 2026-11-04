@@ -10,6 +10,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/wtiger001/teststudio/internal/browserpolicy"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/gosuite"
@@ -24,6 +25,12 @@ func RelativePath(value string, root bool) bool {
 }
 
 func Validate(manifest Manifest) error {
+	if err := browserpolicy.Validate(manifest.Browser); err != nil {
+		return err
+	}
+	if (manifest.Browser != nil) != (manifest.BuildProfile == "playwright-environment") || manifest.Browser != nil && (manifest.Runner != "playwright" || manifest.RequestPolicy != "" || len(manifest.RequiredBindings) > 0) {
+		return errors.New("environment browser suites require the playwright-environment profile, one endpoint, and no credential or custom request-policy bindings")
+	}
 	if manifest.Schema != SchemaVersion {
 		return errors.New("unsupported suite manifest schema")
 	}

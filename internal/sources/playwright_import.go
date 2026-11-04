@@ -21,8 +21,8 @@ func (s *Service) EditorSource(ctx context.Context, user, project, suite, id str
 	if err != nil {
 		return PlaywrightDraft{}, err
 	}
-	if snapshot.Manifest.Runner != "playwright" || snapshot.Manifest.BuildProfile != "playwright-node" {
-		return PlaywrightDraft{}, errors.New("only offline Playwright bundles can open in the browser editor")
+	if snapshot.Manifest.Runner != "playwright" || (snapshot.Manifest.BuildProfile != "playwright-node" && snapshot.Manifest.BuildProfile != "playwright-environment") {
+		return PlaywrightDraft{}, errors.New("only supported local Playwright bundles can open in the browser editor")
 	}
 	value := PlaywrightDraft{ID: domain.NewID(), Name: "Imported browser source", ManifestPath: bundle.Manifest, Files: []EditorFile{}}
 	size := 0

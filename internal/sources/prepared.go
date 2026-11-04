@@ -44,7 +44,7 @@ func (s *Service) stagePrepared(ctx context.Context, job Job, result preparation
 	if err != nil {
 		return upload, err
 	}
-	if suite.RequiresTarget {
+	if suite.RequiresTarget && result.Discovery.Manifest.Browser == nil {
 		return upload, errors.New("the local coded profiles require a suite without a target environment")
 	}
 	if suite.Archived {
@@ -65,7 +65,7 @@ func (s *Service) stagePrepared(ctx context.Context, job Job, result preparation
 	for _, test := range result.Discovery.Tests {
 		selectors[test.ID] = test.Selector
 	}
-	artifact := catalog.Artifact{SourceSnapshot: id, SourceProject: job.Project, SourceRevision: digest(string(content)), Image: job.Image, Discovered: selectors, Provenance: &result.Discovery.Origin}
+	artifact := catalog.Artifact{Browser: result.Discovery.Manifest.Browser, SourceSnapshot: id, SourceProject: job.Project, SourceRevision: digest(string(content)), Image: job.Image, Discovered: selectors, Provenance: &result.Discovery.Origin}
 	channel := digest(job.Project + "/" + job.Suite + "/prebuilt")[7:]
 	if job.RepositorySource != "" {
 		channel = digest(job.Project + "/" + job.Suite + "/repository/" + job.RepositorySource)[7:]

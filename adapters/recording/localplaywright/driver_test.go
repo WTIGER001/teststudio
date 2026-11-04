@@ -2,6 +2,7 @@ package localplaywright
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -117,6 +118,12 @@ func TestRecordingLocalPlaywrightWritesSourceAndClosesOwnedBrowsers(t *testing.T
 			draft, err := sources.RecordedDraft(recording.Session{Input: recording.Input{TestID: "NATIVE-RECORD-001", Title: "Native recorded navigation", URL: server.URL}, State: "ready", Code: stopped.Code})
 			if err != nil || !strings.Contains(draft.Files[0].Content, "@NATIVE-RECORD-001") {
 				t.Fatal("real generated source did not become a tagged catalog draft", err)
+			}
+			if output := os.Getenv("TESTSTUDIO_NATIVE_RECORDING_OUTPUT"); output != "" {
+				data, _ := json.Marshal(recording.Session{Input: recording.Input{TestID: "NATIVE-RECORD-001", Title: "Native recorded navigation", URL: server.URL}, State: "ready", Code: stopped.Code})
+				if err := os.WriteFile(output, data, 0600); err != nil {
+					t.Fatal(err)
+				}
 			}
 			t.Logf("real recorded navigation converted to tagged source; %d owned processes exited", len(known))
 			return

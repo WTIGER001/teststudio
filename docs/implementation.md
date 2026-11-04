@@ -74,6 +74,34 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Environment-backed recorded website execution locally
+
+The first single-origin local website flow is complete. The full ledger remains **27 verified, 30 open, 57 total**.
+This work advances **22, 34, 35, 36, 38, 41, 42, and 44** without closing their broader pending scope.
+Recorded source now prepares through playwright-environment and retains its endpoint policy in the verified immutable artifact.
+The review source visibly replaces supported start-origin navigation with TESTSTUDIO_BASE_URL. Private history retains the raw recording.
+Offline browser suites keep their separate targetless profile. Preparation still installs no additional source dependencies or scripts.
+Browser execution stays unprivileged with network=none. A trusted Unix-socket gateway restricts upstream connections to one registered origin and port.
+The profile supports browser traffic and Playwright request fixtures, including HTTP CONNECT clients. Off-site redirects are blocked.
+It permits all methods to that endpoint. Additional origins, custom request policies, credential-binding injection, and hosted execution remain open.
+Gateway health is checked before dispatch. Normal owned-resource cleanup and recovery include the gateway container.
+Admission rejects incompatible localhost targets. Dispatch rechecks permissions, safety, current environment policy, and worker ownership.
+The UI enables recorded draft preparation, shows target endpoints on run review, and explains source binding and local addressing.
+Page help, user guides, operator setup, suite JSON Schema, OpenAPI 0.26, and generated client types describe the profile.
+
+Targeted race checks pass for source conversion, gateway HTTP and TLS behavior, target admission, changed policies, revoked execution, and protected safety.
+A new real native recording closes all 19 owned processes before execution verification.
+The first local integration run catches socket-volume ownership. A readiness check and corrected ownership fix that setup error.
+The next pass catches Playwright's CONNECT transport for HTTP API requests. Exact-destination HTTP tunneling fixes that compatibility gap.
+The final recorded flow passes normal preparation, publication, and execution with one logical result and complete evidence.
+It retains 23 steps, a 157 ms test duration, logs, one screenshot, and one trace.
+Evidence is output/recorded-website/checkpoint.json, original-recording.json, run.json, and the retained artifact files.
+STUDIO-CREATE-001 and STUDIO-WIZARD-001 pass together through TestStudio's normal self-test execution.
+Their evidence is output/selftest/20261104T005645.164758000-7c3098f80687727af244e78a/summary.json and cleanup.json.
+The production Angular build and generated API contract check pass.
+Owned verification browsers, controllers, worker containers, gateway containers, and output volumes stop after checks.
+No AWS, Kubernetes, Azure, or public website verification runs.
+
 ### Project creator access and project administration boundaries
 
 Acceptance **13** is complete. The current ledger has **27 verified, 30 open, 57 total** items.

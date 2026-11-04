@@ -66,6 +66,7 @@ func run() error {
 	artifactDirectory := flag.String("artifact-directory", ".data/artifacts", "Private local artifact directory")
 	location := flag.String("execution-location", "local", "Execution location identifier")
 	playwrightImages := flag.String("playwright-images", "", "Comma-separated immutable local Playwright image references; enables the isolated local worker")
+	browserGateway := flag.String("browser-gateway-image", "", "Immutable trusted browser gateway image; enables single-origin environment-backed local Playwright execution")
 	goImages := flag.String("go-images", "", "Comma-separated immutable local Go suite image references; enables the isolated local Go worker")
 	preparedSources := flag.Bool("prepared-sources", false, "Enable local prebuilt preparation and project-labelled immutable suite images")
 	sourceBundles := flag.Bool("source-bundles", false, "Enable Go ZIP staging for the separate teststudio-prepare worker")
@@ -227,13 +228,18 @@ func run() error {
 		}
 	}
 	runService.RecoveryDriver = &localplaywright.Executor{}
-	runService.RecoveryDrivers = []execution.ManagedExecutor{&localcontainer.Executor{Runner: "go"}}
+	runService.RecoveryDrivers = []execution.ManagedExecutor{&localcontainer.Executor{Runner: "go"}, &localcontainer.Executor{Runner: "playwright", Environment: true}}
 	if strings.TrimSpace(*playwrightImages) != "" || *preparedSources || *sourceBundles || *githubSources {
 		driver := &localplaywright.Executor{Images: strings.Split(*playwrightImages, ",")}
 		if *preparedSources || *sourceBundles || *githubSources {
 			driver.ApproveArtifact = sourceService.ApproveArtifact
 		}
 		runService.Playwright = driver
+		if *browserGateway != "" {
+			browser := *driver
+			browser.Environment, browser.GatewayImage = true, *browserGateway
+			runService.Browser = &browser
+		}
 	}
 	if strings.TrimSpace(*goImages) != "" || *preparedSources || *sourceBundles || *githubSources {
 		driver := &localcontainer.Executor{Runner: "go", Images: strings.Split(*goImages, ",")}

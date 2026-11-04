@@ -34,6 +34,7 @@ type Service struct {
 	Auth              *authorization.Service
 	Catalog           *catalog.Service
 	Evidence          *evidence.Service
+	Browser           execution.CodedExecutor
 	Playwright        execution.CodedExecutor
 	Go                execution.CodedExecutor
 	RecoveryDriver    execution.ManagedExecutor
@@ -303,11 +304,18 @@ func (s *Service) prepare(ctx context.Context, user, project string, req Request
 		testPolicies[test.ID] = effective
 	}
 	for _, test := range tests {
-		if driver := s.codedDriver(test.Runner); driver != nil {
+		if test.Runner == "playwright" && release.Draft.Artifact.Browser != nil && s.Browser == nil {
+			return Run{}, nil, errors.New("environment-backed browser execution is disabled; the installation needs its trusted browser gateway profile")
+		}
+		if driver := s.codedDriver(test.Runner, release.Draft.Artifact); driver != nil {
 			if req.Location != "local" {
 				return Run{}, nil, errors.New("the configured coded profile runs only at the local execution location")
 			}
-			if environment != nil || len(test.RequiredBindings) > 0 {
+			if release.Draft.Artifact.Browser != nil {
+				if _, err := browserTarget(environment, release.Draft.Artifact, test); err != nil {
+					return Run{}, nil, err
+				}
+			} else if environment != nil || len(test.RequiredBindings) > 0 {
 				return Run{}, nil, errors.New("the isolated local coded profile requires a targetless suite without external bindings")
 			}
 			if err := driver.Admit(ctx, test, release.Draft.Artifact); err != nil {

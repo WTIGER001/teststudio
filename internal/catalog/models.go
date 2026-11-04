@@ -1,6 +1,7 @@
 package catalog
 
 import (
+	"github.com/wtiger001/teststudio/internal/browserpolicy"
 	"github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/timing"
 	"time"
@@ -58,12 +59,13 @@ type Provenance struct {
 }
 
 type Artifact struct {
-	SourceProject  string            `json:"sourceProjectId,omitempty"`
-	Provenance     *Provenance       `json:"provenance,omitempty"`
-	SourceSnapshot string            `json:"sourceSnapshotId,omitempty"`
-	Image          string            `json:"image,omitempty"`
-	SourceRevision string            `json:"sourceRevision,omitempty"`
-	Discovered     map[string]string `json:"discoveredSelectors,omitempty"`
+	Browser        *browserpolicy.Spec `json:"browser,omitempty"`
+	SourceProject  string              `json:"sourceProjectId,omitempty"`
+	Provenance     *Provenance         `json:"provenance,omitempty"`
+	SourceSnapshot string              `json:"sourceSnapshotId,omitempty"`
+	Image          string              `json:"image,omitempty"`
+	SourceRevision string              `json:"sourceRevision,omitempty"`
+	Discovered     map[string]string   `json:"discoveredSelectors,omitempty"`
 }
 
 type Draft struct {

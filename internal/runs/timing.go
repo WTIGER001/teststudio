@@ -27,7 +27,11 @@ func timingContext(run Run, test catalog.Test) timing.Context {
 		target.Endpoints = run.Environment.Endpoints
 		target.Credentials = run.Environment.Credentials
 	}
-	return timing.Context{Project: run.Project, Suite: run.Request.Suite, Test: test.ID, Environment: run.Request.Environment, Location: run.Request.Location, Runner: test.Runner, Profile: "native-http-v1", Definition: fingerprint(definition), Target: fingerprint(target)}
+	definitionKey := fingerprint(definition)
+	if run.Release.Draft.Artifact.Browser != nil {
+		definitionKey = fingerprint([]any{definition, run.Release.Draft.Artifact.Browser})
+	}
+	return timing.Context{Project: run.Project, Suite: run.Request.Suite, Test: test.ID, Environment: run.Request.Environment, Location: run.Request.Location, Runner: test.Runner, Profile: "native-http-v1", Definition: definitionKey, Target: fingerprint(target)}
 }
 
 func (s *Service) predictTiming(ctx context.Context, run *Run) error {
@@ -39,7 +43,7 @@ func (s *Service) predictTiming(ctx context.Context, run *Run) error {
 			policy = timing.Normalize(*test.Timing)
 		}
 		scope := timingContext(*run, test)
-		if driver := s.codedDriver(test.Runner); driver != nil {
+		if driver := s.codedDriver(test.Runner, run.Release.Draft.Artifact); driver != nil {
 			scope.Profile = driver.Profile()
 			if profiler, ok := driver.(execution.RuntimeProfiler); ok {
 				profile, err := profiler.TimingProfile(ctx, run.Release.Draft.Artifact)

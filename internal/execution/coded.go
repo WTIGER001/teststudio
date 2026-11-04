@@ -2,6 +2,7 @@ package execution
 
 import (
 	"context"
+	"github.com/wtiger001/teststudio/internal/browserpolicy"
 	"github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"time"
@@ -24,6 +25,7 @@ type Attachment struct {
 }
 
 type CodedInput struct {
+	Browser         *browserpolicy.Target   `json:"browser,omitempty"`
 	Reference       *Reference              `json:"-"`
 	BeforeDispatch  func() error            `json:"-"`
 	BeforeCleanup   func(CodedReport) error `json:"-"`

@@ -35,6 +35,7 @@ Select Suites for test groups, their scoped catalog links, and the shared New su
 Automation contains Schedules and Notifications. Both provide guided setup with a final review.
 Advanced testing contains Import and sync tests and Suite releases.
 See applications.md and ui.md for details.
+For recorded website runs, follow [Website execution](browser-execution.md). The demo enables its trusted single-origin gateway.
 
 ## Create a test
 

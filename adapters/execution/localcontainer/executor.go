@@ -20,6 +20,8 @@ var digest = regexp.MustCompile(`^(sha256:[a-f0-9]{64}|[A-Za-z0-9][A-Za-z0-9._:/
 var selector = regexp.MustCompile(`^@[A-Za-z0-9][A-Za-z0-9._-]{0,127}$`)
 
 type Executor struct {
+	Environment        bool
+	GatewayImage       string
 	AllowProjectImages bool
 	RequireProject     bool
 	ApproveArtifact    func(context.Context, catalog.Artifact) error
@@ -34,7 +36,12 @@ func (e *Executor) runner() string {
 	}
 	return e.Runner
 }
-func (e *Executor) Profile() string { return e.runner() + "-local-isolated-v1" }
+func (e *Executor) Profile() string {
+	if e.Environment {
+		return "playwright-local-environment-v1"
+	}
+	return e.runner() + "-local-isolated-v1"
+}
 func (e *Executor) binary() string {
 	if e.Docker != "" {
 		return e.Docker
@@ -42,6 +49,17 @@ func (e *Executor) binary() string {
 	return "docker"
 }
 func (e *Executor) Admit(ctx context.Context, test catalog.Test, artifact catalog.Artifact) error {
+	if (artifact.Browser != nil) != e.Environment || e.Environment && (e.runner() != "playwright" || len(test.RequiredBindings) > 0) {
+		return errors.New("browser target policy does not match the enabled execution profile")
+	}
+	if e.Environment {
+		if !digest.MatchString(e.GatewayImage) {
+			return errors.New("environment browser execution requires an immutable trusted gateway image")
+		}
+		if _, err := e.output(ctx, "image", "inspect", e.GatewayImage, "--format", "{{.Id}}"); err != nil {
+			return errors.New("the trusted browser gateway image is unavailable locally")
+		}
+	}
 	if (e.runner() != "playwright" && e.runner() != "go") || (test.Runner != "" && test.Runner != e.runner()) {
 		return errors.New("coded runner does not match the enabled execution profile")
 	}
@@ -165,6 +183,18 @@ func (e *Executor) Execute(ctx context.Context, input execution.CodedInput) (rep
 		if err := input.BeforeDispatch(); err != nil {
 			return fail("worker-lease", err)
 		}
+	}
+	if e.Environment {
+		if err := e.startGateway(ctx, *ref, input.Browser); err != nil {
+			return fail("configuration", err)
+		}
+		if input.BeforeDispatch != nil {
+			if err := input.BeforeDispatch(); err != nil {
+				return fail("worker-lease", err)
+			}
+		}
+	} else if input.Browser != nil {
+		return fail("configuration", errors.New("offline browser workers cannot receive a target"))
 	}
 	wire := input
 	wire.Artifact.Discovered = map[string]string{input.Test.ID: input.Test.Selector}

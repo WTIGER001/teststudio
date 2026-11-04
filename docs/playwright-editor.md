@@ -1,7 +1,7 @@
 # Playwright editor
 
 Open Import and sync tests and choose a destination suite. Select New Playwright draft.
-Drafts require an active suite. The current isolated preparation profile also requires a suite without a target environment.
+Drafts require an active suite. The offline starter requires a targetless suite. Recorded website drafts support suites with registered targets.
 Each draft contains the complete source workspace for one suite.
 
 ## Open retained source
@@ -55,11 +55,11 @@ Start execution separately from Test runs.
 
 ## Current limits
 
-The editor uses the existing offline, isolated browser profile.
-It has no network access to external websites or configured application environments.
+The starter uses the existing offline, isolated browser profile. It has no external network access.
 The starter renders a local HTML fixture inside Chromium and attaches a screenshot.
 [Browser recording](browser-recording.md) captures website actions and creates reviewed source drafts.
-Environment-backed website execution remains pending. Recorded website drafts cannot use the isolated preparation profile.
+Recorded drafts use the separate [environment-backed local profile](browser-execution.md).
+That profile binds reviewed navigation to one registered endpoint and keeps direct network access disabled.
 The editor supports 50 text files, 256 KiB per file, and 1 MiB of source text per draft.
 Paths must remain relative and unique. New starter drafts keep generated package and manifest paths reserved.
 ZIP uploads and GitHub sources remain available for larger source contexts and normal repository development.

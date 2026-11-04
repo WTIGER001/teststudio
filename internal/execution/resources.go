@@ -12,6 +12,7 @@ type Reference struct {
 	Worker       string `json:"workerId"`
 	Profile      string `json:"profile"`
 	Container    string `json:"container"`
+	Gateway      string `json:"gateway,omitempty"`
 	Volume       string `json:"volume"`
 }
 

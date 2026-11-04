@@ -21,3 +21,5 @@ export function previewKind(contentType: string): 'text' | 'image' | 'video' | '
   if (['video/mp4', 'video/webm'].includes(kind)) return 'video'
   return 'download'
 }
+
+export function registeredEndpoints(endpoints?: Record<string, string>): { name: string; address: string }[] { return Object.entries(endpoints ?? {}).map(([name, address]) => ({ name, address })) }

@@ -121,6 +121,19 @@
     "buildProfile": {
       "type": "string",
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "browser": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "endpoint": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        }
+      },
+      "required": [
+        "endpoint"
+      ]
     }
   },
   "required": [
@@ -189,6 +202,40 @@
               }
             }
           }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "buildProfile": {
+            "const": "playwright-environment"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "browser"
+        ],
+        "properties": {
+          "runner": {
+            "const": "playwright"
+          },
+          "requiredBindings": {
+            "maxItems": 0
+          }
+        },
+        "not": {
+          "required": [
+            "requestPolicy"
+          ]
+        }
+      },
+      "else": {
+        "not": {
+          "required": [
+            "browser"
+          ]
         }
       }
     }

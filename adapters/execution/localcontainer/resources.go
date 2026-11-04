@@ -23,6 +23,9 @@ type containerInfo struct {
 	State struct {
 		Running  bool `json:"Running"`
 		ExitCode int  `json:"ExitCode"`
+		Health   struct {
+			Status string `json:"Status"`
+		} `json:"Health"`
 	} `json:"State"`
 	Mounts []struct{ Type, Name string } `json:"Mounts"`
 }
@@ -35,6 +38,10 @@ func (e *Executor) Reference(ref execution.Reference) execution.Reference {
 	prefix := "pw"
 	if e.runner() == "go" {
 		prefix = "go"
+	}
+	if e.Environment {
+		prefix = "pw-env"
+		ref.Gateway = "teststudio-pw-gateway-" + ref.ID
 	}
 	ref.Container = "teststudio-" + prefix + "-" + ref.ID
 	ref.Volume = "teststudio-" + prefix + "-output-" + ref.ID
@@ -118,6 +125,19 @@ func (e *Executor) Cleanup(ctx context.Context, ref execution.Reference) error {
 	if exists {
 		if _, err := e.output(ctx, "rm", "--force", "--volumes", container.ID); err != nil && !absent(err, "container") {
 			return err
+		}
+	}
+	if ref.Gateway != "" {
+		gatewayRef := ref
+		gatewayRef.Container = ref.Gateway
+		gateway, exists, err := e.container(ctx, gatewayRef)
+		if err != nil {
+			return err
+		}
+		if exists {
+			if _, err := e.output(ctx, "rm", "--force", "--volumes", gateway.ID); err != nil && !absent(err, "container") {
+				return err
+			}
 		}
 	}
 	if volume {
@@ -221,7 +241,7 @@ func (e *Executor) Inventory(ctx context.Context, installation string) ([]execut
 			if kind == "volume" {
 				name = item.Name
 			}
-			if name != ref.Container && name != ref.Volume {
+			if name != ref.Container && name != ref.Volume && name != ref.Gateway {
 				return nil, errors.New("managed worker resource name does not match its identity")
 			}
 			found[ref.ID] = ref

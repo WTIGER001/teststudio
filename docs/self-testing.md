@@ -175,7 +175,8 @@ The container has a read-only image, an unprivileged user, resource limits, and 
 Completion, failure, timeout, and cancellation remove the owned container and its installation-scoped output volume.
 A worker-side deadline also bounds execution after a controller disconnect.
 
-External target networking, cloud Playwright execution, source preparation screens, and private trace viewing remain pending.
+The separate [website profile](browser-execution.md) supports one registered local target with guarded browser and request fixtures.
+Cloud Playwright execution and private trace viewing remain pending.
 
 ## Restart and cleanup recovery
 
@@ -250,3 +251,22 @@ It creates and publishes a native check, runs it locally, and adds an existing p
 It verifies managed project assignments, limited project discovery, and the absence of installation authority.
 The fixture session is private to its disposable local TestStudio instance.
 Use the targeted selector after changing initial project access or its guided setup.
+
+## Recorded website execution checkpoint
+
+A fresh native Playwright recording supplies the start navigation for the local website workflow.
+The native recorder check verifies that all 19 owned processes stop. It preserves the generated source as private verification evidence.
+The reviewed draft adds independent assertions, a local button interaction, a direct API request, and an off-site redirect check.
+A separate preparation worker assembles and discovers the saved source. Normal publication produces the immutable browser artifact.
+The normal run service selects its registered environment and executes one logical test through the Unix-socket gateway.
+The successful result contains 23 steps, a 157 ms test duration, complete logs, one screenshot, and one trace.
+
+The check names are TestRecordingLocalPlaywrightWritesSourceAndClosesOwnedBrowsers and TestRecordedWebsiteBuildsPublishesAndRunsThroughGuardedGateway.
+The second check accepts TESTSTUDIO_NATIVE_RECORDING_SOURCE, TESTSTUDIO_BROWSER_GATEWAY_IMAGE, TESTSTUDIO_BROWSER_RUNTIME_IMAGE, and an optional TESTSTUDIO_BROWSER_OUTPUT directory.
+Use the newly retained recording JSON as the source. Keep runtime and gateway references immutable.
+Unit checks cover HTTP forwarding, HTTPS tunneling, Playwright HTTP tunneling, denied origins, redirects, target admission, and changed policy between attempts.
+STUDIO-CREATE-001 covers the reviewed target expression and preparation action in the application.
+STUDIO-WIZARD-001 covers run review with the registered endpoint list.
+Evidence is output/recorded-website/checkpoint.json and output/selftest/20261104T005645.164758000-7c3098f80687727af244e78a/summary.json.
+The corresponding cleanup records verify that owned controllers, containers, and volumes stop.
+These checks use local fixtures. They make no public website or cloud verification request.

@@ -7,7 +7,7 @@ teststudio_browser_arch=$(docker image inspect "$teststudio_browser_base" --form
 teststudio_browser_context=$(mktemp -d "${TMPDIR:-/tmp}/teststudio-browser-runtime.XXXXXX")
 trap 'rm -rf "$teststudio_browser_context"' EXIT
 mkdir -p "$teststudio_browser_context/runners/playwright"
-for teststudio_browser_file in package.json package-lock.json run.mjs reporter.cjs suite-context.mjs discovery-reporter.cjs; do
+for teststudio_browser_file in package.json package-lock.json run.mjs reporter.cjs suite-context.mjs discovery-reporter.cjs egress.mjs; do
   cp "runners/playwright/$teststudio_browser_file" "$teststudio_browser_context/runners/playwright/$teststudio_browser_file"
 done
 docker build --pull=false --build-arg "TARGETARCH=$teststudio_browser_arch" -f "$teststudio_root/runners/playwright/Dockerfile" -t teststudio/playwright-source-runtime:local "$teststudio_browser_context"

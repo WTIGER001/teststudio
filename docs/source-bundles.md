@@ -79,7 +79,8 @@ bin/teststudio-prepare --database .data/teststudio.db \
 Configure each runtime needed at the location. Workers leave jobs for other runtimes queued.
 They scan subsequent queue pages to avoid starving an available runner behind pending work for another runtime.
 Recovery keeps both ownership profiles available when new builds are disabled.
-Current local coded preparation requires a suite without a target environment.
+Offline Go and browser profiles require a suite without a target environment.
+The [environment-backed browser profile](browser-execution.md) supports registered targets with the same offline dependency preparation.
 Tests can start isolated application fixtures or render source directly in their own worker.
 
 ## Server worker and interface

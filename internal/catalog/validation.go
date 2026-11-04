@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/wtiger001/teststudio/internal/browserpolicy"
 	"github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/gosuite"
@@ -54,6 +55,9 @@ func Validate(d Draft) []Issue {
 	add := func(id, field, message string) {
 		issues = append(issues, Issue{TestID: id, Field: field, Message: message})
 	}
+	if err := browserpolicy.Validate(d.Artifact.Browser); err != nil {
+		add("", "artifact.browser", err.Error())
+	}
 	if len(d.Tests) == 0 {
 		add("", "tests", "catalog contains no tests")
 	}
@@ -69,6 +73,9 @@ func Validate(d Draft) []Issue {
 	tests := map[string]Test{}
 	goEntries := []gosuite.Entry{}
 	for _, t := range d.Tests {
+		if d.Artifact.Browser != nil && (t.Runner != "playwright" || len(t.RequiredBindings) > 0) {
+			add(t.ID, "artifact.browser", "the environment browser profile requires Playwright tests without injected credential bindings")
+		}
 		if err := ValidateTest(t); err != nil {
 			add(t.ID, "definition", err.Error())
 		}

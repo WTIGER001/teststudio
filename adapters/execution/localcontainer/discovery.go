@@ -105,14 +105,10 @@ func (e *Executor) Inspect(ctx context.Context, input preparation.InspectionRequ
 	if discovery.Manifest.Runner != e.runner() || discovery.Manifest.Suite != input.Suite {
 		return inspection, errors.New("discovered suite or runner differs from its registration destination")
 	}
-	profile := "go-module"
-	if e.runner() == "playwright" {
-		profile = "playwright-node"
-	}
 	if discovery.Manifest.RequestPolicy != "" || len(discovery.Manifest.RequiredBindings) != 0 {
 		return inspection, errors.New("this local inspection profile does not support request policies or execution bindings")
 	}
-	if discovery.Manifest.BuildProfile != profile {
+	if !preparation.LocalSourceProfile(e.runner(), discovery.Manifest.BuildProfile) {
 		return inspection, errors.New("manifest build profile is unsupported by this local inspector")
 	}
 	if err := suitespec.ValidateDiscovery(discovery, input.Image); err != nil {

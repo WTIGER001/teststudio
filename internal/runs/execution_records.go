@@ -9,9 +9,12 @@ import (
 	"github.com/wtiger001/teststudio/internal/workerstate"
 )
 
-func (s *Service) codedDriver(runner string) execution.CodedExecutor {
+func (s *Service) codedDriver(runner string, artifact catalog.Artifact) execution.CodedExecutor {
 	switch runner {
 	case "playwright":
+		if artifact.Browser != nil {
+			return s.Browser
+		}
 		return s.Playwright
 	case "go":
 		return s.Go
@@ -22,7 +25,7 @@ func (s *Service) managedDrivers() []execution.ManagedExecutor {
 	drivers := []execution.ManagedExecutor{}
 	seen := map[string]bool{}
 	candidates := append([]execution.ManagedExecutor{s.RecoveryDriver}, s.RecoveryDrivers...)
-	for _, coded := range []execution.CodedExecutor{s.Playwright, s.Go} {
+	for _, coded := range []execution.CodedExecutor{s.Playwright, s.Browser, s.Go} {
 		if driver, ok := coded.(execution.ManagedExecutor); ok {
 			candidates = append(candidates, driver)
 		}

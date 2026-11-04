@@ -9,7 +9,7 @@ import type { SavedSelectionPreview, SavedSelectionRecord } from '../../core/gen
 import { WorkspaceService } from '../../core/workspace.service'
 import { RunLookupsService } from './run-lookups.service'
 import type { Run } from './run.models'
-import { errorMessage, requestFromForm } from './run.utils'
+import { errorMessage, requestFromForm, registeredEndpoints } from './run.utils'
 import { WizardController } from '../../shared/wizard/wizard-controller'
 
 @Injectable()
@@ -89,6 +89,7 @@ export class NewRunService {
 
   suiteName(): string { const id = this.form.controls.suite.value; return this.lookups.suites().find(row => row.id === id)?.data.name || id }
   environmentName(): string { const id = this.form.controls.environment.value; const target = this.lookups.environments().find(row => row.id === id); return target ? `${target.data.name} · ${target.data.stage}${target.data.protected ? ' · Protected' : ''}` : id || 'No target' }
+  endpointReview() { const id = this.form.controls.environment.value; return registeredEndpoints(this.lookups.environments().find(row => row.id === id)?.data.endpoints) }
   targetWarning(): string { const target = this.lookups.environments().find(row => row.id === this.form.controls.environment.value); return target?.data.protected ? 'Protected target: only safe tests can run, with protected execution permission.' : target?.data.stage === 'production' ? 'Production target: this environment is not protected. Review the selected tests before starting.' : 'Starting creates a run from the published release. Review the target and selected tests before continuing.' }
 
   async create(): Promise<void> {

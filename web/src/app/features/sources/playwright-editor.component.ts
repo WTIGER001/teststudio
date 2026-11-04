@@ -12,13 +12,13 @@ import { protectedEditorFile } from './playwright-editor.utils'
         @if (service.sources.workspace.can('sources.manage')) { <button type="button" class="button primary" [disabled]="service.busy() || service.sources.draftDirty()" (click)="service.create()">New Playwright draft</button> }
       </div>
       <ol class="editor-steps"><li>Write and save</li><li>Validate and prepare</li><li>Review and publish</li><li>Start a test run</li></ol>
-      <p class="notice">This browser profile runs isolated local fixtures. It has no network access to a website or configured environment. The starter renders HTML inside the browser.</p>
+      <p class="notice">The starter runs an offline HTML fixture. Recorded website drafts use the selected environment’s api endpoint. They can reach only that origin. Review steps and safety labels before publishing.</p>
       @if (!service.preparation.bundleRunners().includes('playwright')) { <p class="notice">Browser source preparation is unavailable on this installation. You can still save and edit drafts.</p> }
       @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }
       @if (service.message()) { <p class="notice success" role="status">{{ service.message() }}</p> }
       @if (service.document(); as document) {
-        @if (document.targetUrl) { <p class="notice warning">Recorded start address: {{ document.targetUrl }}. Review and save these steps. Running recorded website tests requires environment-backed browser execution, which is not available yet.</p> }
-        @if (document.manifestPath) { <p class="notice">This imported workspace retains its source paths and package declarations. Its manifest is {{ document.manifestPath }}. The offline worker uses only the trusted runtime dependencies.</p> }
+        @if (document.targetUrl) { <p class="notice warning">Recorded start address: {{ document.targetUrl }}. The review source binds recorded start-origin navigation to TESTSTUDIO_BASE_URL. Execution uses the selected registered environment, not your personal recording session. Register a worker-reachable api endpoint; container localhost cannot reach your desktop server.</p> }
+        @if (document.manifestPath) { <p class="notice">This imported workspace retains its source paths and package declarations. Its manifest is {{ document.manifestPath }}. Preparation uses only the trusted runtime dependencies.</p> }
         <fieldset [disabled]="service.busy() || !service.sources.workspace.can('sources.manage')">
           <div class="section-top"><div class="field draft-name"><label for="playwright-draft-name">Draft name</label><input id="playwright-draft-name" maxlength="120" [ngModel]="document.name" (ngModelChange)="service.editName($event)"></div><span class="small muted" role="status">{{ service.sources.draftDirty() ? 'Unsaved changes' : 'Saved revision ' + service.saved()?.revision }}</span></div>
           <div class="file-actions"><label for="playwright-editor-file">File</label><select id="playwright-editor-file" [ngModel]="service.selectedPath()" (ngModelChange)="service.selectedPath.set($event)">@for (file of document.files; track file.path) { <option [value]="file.path">{{ file.path }}</option> }</select>
@@ -31,7 +31,7 @@ import { protectedEditorFile } from './playwright-editor.utils'
           <details class="add-file"><summary>Add a source or helper file</summary><div class="file-actions"><label for="playwright-new-file">New file path</label><input id="playwright-new-file" placeholder="checks/another.spec.ts" [ngModel]="newPath()" (ngModelChange)="newPath.set($event)"><button type="button" class="button secondary" (click)="addFile()">Add file</button></div><p class="small muted">Up to 50 files and 1 MiB of text. New starter drafts use generated package files. Imported workspaces retain their own declarations.</p></details>
           <div class="row-actions wrap-actions">
             <button type="button" class="button primary" [disabled]="!service.sources.draftDirty() || !document.name.trim()" (click)="service.save()">Save Playwright draft</button>
-            <button type="button" class="button secondary" [disabled]="!!document.targetUrl || !service.saved() || service.sources.draftDirty() || service.preparation.busy() || !service.preparation.bundleRunners().includes('playwright') || !service.sources.workspace.can('catalog.import')" (click)="service.prepare()">Validate and prepare draft</button>
+            <button type="button" class="button secondary" [disabled]="!service.saved() || service.sources.draftDirty() || service.preparation.busy() || !service.preparation.bundleRunners().includes('playwright') || !service.sources.workspace.can('catalog.import')" (click)="service.prepare()">Validate and prepare draft</button>
             @if (service.sources.draftDirty()) { <button type="button" class="button secondary" (click)="service.discard()">Discard local changes</button> }
           </div>
         </fieldset>

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"slices"
 
+	"github.com/wtiger001/teststudio/internal/browserpolicy"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/sourcebundle"
 	"github.com/wtiger001/teststudio/internal/suitespec"
@@ -30,7 +31,15 @@ func assembleDraft(suite string, value PlaywrightDraft) ([]byte, error) {
 	}
 	files := slices.Clone(value.Files)
 	if value.ManifestPath == "" {
-		files = append(files, generatedEditorFiles(suite)...)
+		generated := generatedEditorFiles(suite)
+		if value.TargetURL != "" {
+			var manifest suitespec.Manifest
+			_ = json.Unmarshal([]byte(generated[0].Content), &manifest)
+			manifest.BuildProfile, manifest.Browser = "playwright-environment", &browserpolicy.Spec{Endpoint: "api"}
+			content, _ := json.Marshal(manifest)
+			generated[0].Content = string(content)
+		}
+		files = append(files, generated...)
 	}
 	slices.SortFunc(files, func(a, b EditorFile) int {
 		if a.Path < b.Path {
@@ -64,8 +73,8 @@ func assembleDraft(suite string, value PlaywrightDraft) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if snapshot.Manifest.Runner != "playwright" || snapshot.Manifest.BuildProfile != "playwright-node" {
-		return nil, errors.New("the editor prepares only Playwright source with the offline playwright-node profile")
+	if snapshot.Manifest.Runner != "playwright" || (snapshot.Manifest.BuildProfile != "playwright-node" && snapshot.Manifest.BuildProfile != "playwright-environment") {
+		return nil, errors.New("the editor prepares only supported local Playwright profiles")
 	}
 	return buffer.Bytes(), nil
 }

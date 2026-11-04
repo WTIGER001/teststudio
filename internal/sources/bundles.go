@@ -72,7 +72,7 @@ func (s *Service) enqueueBundle(ctx context.Context, user, project, suite, key, 
 	for _, runner := range s.BundleRunners {
 		enabled = enabled || runner == snapshot.Manifest.Runner
 	}
-	if !enabled || !preparation.OfflineSourceProfile(snapshot.Manifest.Runner, snapshot.Manifest.BuildProfile) {
+	if !enabled || !preparation.LocalSourceProfile(snapshot.Manifest.Runner, snapshot.Manifest.BuildProfile) {
 		return result, errors.New("bundle preparation is not enabled for this runner")
 	}
 	id := bundleJobID(user, project, suite, key)
@@ -98,7 +98,7 @@ func (s *Service) enqueueBundle(ctx context.Context, user, project, suite, key, 
 			if current.Revision != draft.Revision {
 				return storage.ErrConflict
 			}
-			if err := bound.draftSuite(ctx, project, suite, true); err != nil {
+			if err := bound.draftSuite(ctx, project, suite, snapshot.Manifest.Browser == nil); err != nil {
 				return err
 			}
 		}

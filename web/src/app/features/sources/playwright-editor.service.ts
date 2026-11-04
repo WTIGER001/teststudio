@@ -89,7 +89,7 @@ export class PlaywrightEditorService {
       const document = await this.client.call('readBrowserRecordingSource', { ...this.scope(), id })
       if (generation !== this.generation) return
       this.saved.set(null); this.document.set(document); this.selectedPath.set(document.files[0]?.path ?? ''); this.sources.draftDirty.set(true)
-      this.message.set('Recording opened for review. Save the draft to keep this version. Its catalog starts with a needs-review safety label.')
+      this.message.set('Recording opened for review. Save the draft to keep this version. Start-origin navigation is bound to the selected environment in the visible source. The original recording stays in your history. Its catalog starts with a needs-review safety label.')
     } catch (error) { if (generation === this.generation) this.fail(error) }
     finally { if (generation === this.generation) this.busy.set(false) }
   }

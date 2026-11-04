@@ -292,7 +292,7 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 				now := time.Now().UTC()
 				v.CurrentTestStartedAt = &now
 				v.Phase = "execution"
-				if s.codedDriver(test.Runner) != nil {
+				if s.codedDriver(test.Runner, run.Release.Draft.Artifact) != nil {
 					v.CurrentTestStartedAt = nil
 					v.Phase = "preparation"
 				}
@@ -304,7 +304,7 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 				break
 			}
 			eventKind, eventMessage := "test.started", fmt.Sprintf("Starting %s, attempt %d.", test.ID, attempt)
-			if s.codedDriver(test.Runner) != nil {
+			if s.codedDriver(test.Runner, run.Release.Draft.Artifact) != nil {
 				eventKind = "test.preparing"
 				eventMessage = fmt.Sprintf("Preparing %s, attempt %d.", test.ID, attempt)
 			}
@@ -313,9 +313,16 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 			var report execution.CodedReport
 			recorded := false
 			executionID := ""
-			if coded := s.codedDriver(test.Runner); coded != nil {
+			if coded := s.codedDriver(test.Runner, run.Release.Draft.Artifact); coded != nil {
 				policy := run.TestCapture[test.ID]
 				input := execution.CodedInput{RunID: run.ID, Test: test, Artifact: run.Release.Draft.Artifact, Capture: policy, TimeoutMs: test.TimeoutSeconds * 1000, FailedBefore: failedBefore}
+				if run.Release.Draft.Artifact.Browser != nil {
+					input.Browser, err = browserTarget(run.Environment, run.Release.Draft.Artifact, test)
+					if err != nil {
+						executionError = err.Error()
+						break
+					}
+				}
 				input.OnStart = func(at time.Time) error {
 					progressCtx, cancelProgress := context.WithTimeout(context.WithoutCancel(parent), 5*time.Second)
 					defer cancelProgress()
@@ -350,7 +357,10 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 						if err != nil {
 							return err
 						}
-						return owned(&current, worker)
+						if err := owned(&current, worker); err != nil {
+							return err
+						}
+						return s.admitAttempt(ctx, run)
 					}
 					input.BeforeCleanup = func(observation execution.CodedReport) error {
 						if observation.RecoveryError != nil {
@@ -591,6 +601,9 @@ func (s *Service) admitAttempt(ctx context.Context, run Run) error {
 		}
 		if environment.Disabled {
 			return errors.New("environment is disabled")
+		}
+		if err := currentBrowserEnvironment(run, environment, suite); err != nil {
+			return err
 		}
 		protected = protected || environment.Protected
 	}

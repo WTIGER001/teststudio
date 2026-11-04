@@ -16,7 +16,8 @@ The full product scope remains required. This direction supersedes the testing s
 
 This section is the current implementation order. Historical continuation commands below do not override it.
 The local demonstration is usable and verified. The complete product remains unfinished at 27 verified items out of 57.
-Ordinary project creator access now passes targeted verification. Continue with a real recorded website test.
+Ordinary project creator access and the first environment-backed local recorded website flow pass targeted verification.
+Continue with tester operation and failure recovery.
 Do not add new dashboard pages or repeat completed demonstration setup before closing the remaining workflow gaps.
 
 ### Current decisions
@@ -43,7 +44,7 @@ Complete one coherent batch before adding the next. Update its user help and rel
 | Priority | Batch | Completion evidence |
 | --- | --- | --- |
 | Complete | Project creator access | Ordinary creator setup, managed scoped roles, publication, local execution, atomic rollback, and project boundaries pass on SQLite and local PostgreSQL. Acceptance 13 is verified. |
-| 2 | Recorded website execution locally | Record a new generic local website journey, review and save it, prepare and publish it, select its registered target, and run it successfully with retained evidence. |
+| Complete | Recorded website execution locally | New native recording, reviewed local website steps, saved preparation, publication, registered target execution, guarded direct request, and blocked off-site redirect pass with retained logs, screenshot, trace, and timing. |
 | 3 | Tester operation and failure recovery | A tester can find a failed step, logs, screenshot, timeout, and retry result. Permission loss and partial failures explain recovery without losing saved work. |
 | 4 | Remaining catalog and evidence gaps | Continue category navigation, remaining catalog actions, private trace viewing, evidence state and retention, and timing parity against the existing acceptance ledger. |
 | 5 | Hosted packaging and provider adapters | Implement and document independent provider configuration, worker dispatch, private artifacts, cancellation, deadlines, and recovery. Use local contract checks first. |
@@ -64,10 +65,13 @@ Do not treat these batches as additional acceptance items or claim the whole pro
 
 ### Recorded browser execution scope
 
-The native local recorder and saved source editor exist. Recording a website does not yet make its draft executable.
-The current offline Playwright profile rejects recorded website drafts during preparation.
-Implement a distinct environment-backed browser execution profile. Preserve the existing isolated profile for offline suites.
-Bind reviewed navigation to registered environment endpoints through an explicit runtime configuration.
+The native recorder, saved source editor, and first environment-backed local browser profile now work together.
+The offline profile stays separate. Recorded drafts prepare through the single-origin playwright-environment profile.
+See [Website execution](browser-execution.md) for its reviewed source binding, request policy, limits, and operator setup.
+The implemented runtime binds reviewed navigation to one registered endpoint. The default endpoint identifier is api.
+It retains network=none on browser workers and uses an owned Unix-socket gateway.
+The profile permits all methods to that endpoint. It does not claim read-only behavior or encrypted payload inspection.
+Additional origins, injected credential bindings, custom request policies, and hosted browser execution remain later profile work.
 Preserve the original recording and source provenance. Do not silently rewrite arbitrary code or remove its target restriction.
 Keep dependencies inside trusted preparation workers. Add bounded dependency preparation only when the selected profile needs it.
 
@@ -177,7 +181,7 @@ Resource registration uses Name, Options, and Review. HTTPS creation uses Name, 
 Run creation uses Selection and Review. Named Advanced sections hold uncommon controls.
 HTTPS Save and run explicitly publishes a snapshot without replacing the active release and starts a local run.
 Continue through the active delivery sequence after this interface delivery.
-The current isolated profile deliberately blocks recorded website drafts. That execution work remains open.
+The offline profile stays targetless. The separate single-origin browser profile now executes reviewed recorded drafts against registered environments.
 
 Item **01** now passes a build from an isolated copy of the current source tree.
 Go uses no workspace or local module replacements. A clean offline npm installation and Angular build also pass.
@@ -194,7 +198,8 @@ Imports and retained releases stay under Advanced testing.
 Quick HTTPS probes now accept a complete URL directly, including addresses without an explicit port.
 The wizard reuses matching registered targets and preserves their protection.
 Review lists new target configuration and any new application before explicit saving.
-Follow the active delivery sequence above. Project creator access is complete; environment-backed recorded browser execution is next.
+Follow the active delivery sequence above. Creator access and the first local recorded execution flow are complete.
+Next, verify the tester path from a failed step through logs, screenshot, timeout, and rerun recovery.
 The next implementation batches follow the full ledger without adding new gates to the usable demonstration.
 
 ## Current implementation checkpoint

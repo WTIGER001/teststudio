@@ -150,7 +150,7 @@ func (s *Service) SaveRepository(ctx context.Context, user, project, id string, 
 func (s *Service) validateRepositoryBindings(ctx context.Context, user, project string, input RepositoryConfig) error {
 	seen := map[string]bool{}
 	for _, binding := range input.Bindings {
-		if !domain.ValidID(binding.Suite) || !sourcebundle.SafePath(binding.Manifest) || seen[binding.Suite] || !slices.Contains(s.BundleRunners, binding.Runner) || !preparation.OfflineSourceProfile(binding.Runner, binding.Profile) {
+		if !domain.ValidID(binding.Suite) || !sourcebundle.SafePath(binding.Manifest) || seen[binding.Suite] || !slices.Contains(s.BundleRunners, binding.Runner) || !preparation.LocalSourceProfile(binding.Runner, binding.Profile) {
 			return errors.New("each source binding requires a distinct suite, manifest path, and enabled build profile")
 		}
 		seen[binding.Suite] = true

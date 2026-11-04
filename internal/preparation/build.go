@@ -29,6 +29,6 @@ type ArtifactBuilder interface {
 	CleanupBuild(context.Context, execution.Reference) error
 }
 
-func OfflineSourceProfile(runner, profile string) bool {
-	return runner == "go" && profile == "go-module" || runner == "playwright" && profile == "playwright-node"
+func LocalSourceProfile(runner, profile string) bool {
+	return runner == "go" && profile == "go-module" || runner == "playwright" && (profile == "playwright-node" || profile == "playwright-environment")
 }

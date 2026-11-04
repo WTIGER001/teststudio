@@ -8,7 +8,8 @@ The same page prepares locally available immutable Go and Playwright images when
 See [prepared suites](prepared-suites.md) for image labels, durable jobs, cancellation, recovery, and CLI publication.
 The same page uploads [Go ZIP bundles](source-bundles.md) for a separate preparation worker.
 The CLI can also assemble bundles before server inspection.
-GitHub repository preparation and Playwright bundle assembly remain pending.
+GitHub repository registration and offline Go and Playwright bundle assembly use the same reviewed publication flow.
+[Recorded website execution](browser-execution.md) uses a separate environment-backed profile.
 
 ## Review and publication
 

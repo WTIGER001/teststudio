@@ -15,15 +15,15 @@ Saving that workspace creates a durable source draft.
 ## Review and execution
 
 The source converter adds the permanent test tag and matching catalog selector.
-It retains generated browser steps and uses the needs-review safety label.
+It retains actions and assertions and uses the needs-review safety label.
+Supported start-origin navigation receives a visible runtime target expression. The original code stays in private recording history.
 Review code, assertions, timeouts, capture settings, and safety metadata before publication.
 Raw generated code remains readable when conversion cannot identify one standard recorded test.
 
 Recording, draft saving, publication, and execution remain separate operations.
-The current isolated browser execution profile cannot reach the recorded website.
-Recorded drafts retain their start address and block preparation through that profile.
-Environment-backed browser execution remains required work.
-Follow [the active delivery plan](plan.md#recorded-browser-execution-scope) for target binding, isolation, evidence, and local verification requirements.
+Recorded drafts use the separate [local website execution profile](browser-execution.md).
+Review and save the source, prepare it, publish a release, then select a registered environment for execution.
+The offline starter retains its existing isolated profile. It cannot reach a website.
 The current native recorder requires a local desktop.
 Hosted recording requires a local companion or streamed browser, which remains pending.
 

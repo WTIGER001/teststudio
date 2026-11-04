@@ -45,8 +45,8 @@ func (b *Builder) Build(ctx context.Context, input preparation.BuildRequest) (re
 	if !immutable.MatchString(b.RuntimeImage) || !validReference(input.Reference) {
 		return result, errors.New("local source assembly requires an immutable runtime image and preparation ownership")
 	}
-	if !preparation.OfflineSourceProfile(input.Snapshot.Manifest.Runner, input.Snapshot.Manifest.BuildProfile) {
-		return result, errors.New("the local source assembler requires a supported offline Go or Playwright profile")
+	if !preparation.LocalSourceProfile(input.Snapshot.Manifest.Runner, input.Snapshot.Manifest.BuildProfile) {
+		return result, errors.New("the local source assembler requires a supported local Go or Playwright preparation profile")
 	}
 	if input.Origin.SnapshotDigest != input.Snapshot.Digest || suitespec.ValidateOrigin(input.Origin) != nil {
 		return result, errors.New("build provenance must identify the stored source digest")

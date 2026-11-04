@@ -116,7 +116,8 @@ Current source and catalog permissions are checked before dispatch and during pr
 Enable local preparation with the server flag `--prepared-sources`.
 Docker must contain each immutable image before preparation starts.
 Each image needs the expected runtime label and its destination `teststudio.project` label.
-The current local profiles require a suite without a target environment.
+Offline profiles require a suite without a target environment.
+The [website execution profile](browser-execution.md) supports registered targets with a declared browser endpoint.
 The worker does not pull images or install source dependencies.
 
 Open Import and sync tests, select the destination suite, and enter the image digest and runner.

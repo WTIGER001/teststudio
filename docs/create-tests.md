@@ -24,7 +24,9 @@ Record actions and assertions. Return to TestStudio and select Stop and keep rec
 Select Review recorded test. Review the generated code and catalog metadata, then save the draft.
 Recorded tests start with the needs-review safety label.
 Recording does not publish or execute a test.
-See browser-recording.md for local setup, privacy, recovery, and current execution limits.
+Prepare the saved draft, review its catalog, and publish an active release.
+Use Test runs to select a registered environment and review its endpoint before execution.
+See [Browser recording](browser-recording.md) and [Website execution](browser-execution.md) for setup, privacy, recovery, and limits.
 
 ## HTTPS probes
 

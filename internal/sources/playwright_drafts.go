@@ -148,7 +148,7 @@ func (s *Service) draftSuite(ctx context.Context, project, suite string, prepari
 		return errors.New("restore the suite before editing browser source")
 	}
 	if preparing && value.RequiresTarget {
-		return errors.New("browser preparation currently requires a suite without a target environment")
+		return errors.New("the offline browser profile requires a targetless suite")
 	}
 	return nil
 }
@@ -164,9 +164,6 @@ func (s *Service) PrepareDraft(ctx context.Context, user, project, suite, id, ke
 	value, err := storage.Decode[PlaywrightDraft](row)
 	if err != nil {
 		return storage.Record{}, err
-	}
-	if value.TargetURL != "" {
-		return storage.Record{}, errors.New("recorded website execution requires an environment-backed browser profile; review and save the draft while that profile remains unavailable")
 	}
 	data, err := assembleDraft(suite, value)
 	if err != nil {

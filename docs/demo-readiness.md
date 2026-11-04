@@ -60,7 +60,8 @@ This follow-up does not change the demonstration setup or add a demonstration ga
 
 The completed demonstration checklist remains complete. It does not prove all ordinary-user or hosted workflows.
 Project creator access now passes ordinary-user setup and scoped-boundary checks.
-The next delivery implements environment-backed recorded website execution.
-Current recording saves source but its website draft cannot execute through the isolated offline profile.
+The first environment-backed local recorded website flow now passes preparation, publication, execution, and private evidence collection.
+The demo enables the trusted single-origin gateway. The offline starter keeps its separate isolated profile.
+Next, improve tester operation and recovery through the existing result and evidence pages.
 Follow [the active delivery plan](plan.md#active-delivery-plan-after-the-tester-walkthrough) for bounded batches and required evidence.
 Keep the running demonstration available while these workflows are implemented.

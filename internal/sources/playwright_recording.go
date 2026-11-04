@@ -25,6 +25,10 @@ func RecordedDraft(value recording.Session) (PlaywrightDraft, error) {
 	tag, _ := json.Marshal("@" + value.TestID)
 	declaration := "test(" + string(title) + ", { tag: " + string(tag) + " }, async ({ page }) => {"
 	code := value.Code[:matches[0][0]] + declaration + value.Code[matches[0][1]:]
+	code, err := bindRecordedNavigation(code, value.URL)
+	if err != nil {
+		return PlaywrightDraft{}, err
+	}
 	draft := StarterDraft()
 	draft.ID, draft.Name, draft.TargetURL = domain.NewID(), value.Title, value.URL
 	draft.Files[0] = EditorFile{Path: "checks/recording.spec.ts", Content: code}
