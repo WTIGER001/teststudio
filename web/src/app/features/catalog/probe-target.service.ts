@@ -1,3 +1,4 @@
+import { randomId } from '../../core/random-id'
 import { computed, DestroyRef, effect, inject, Injectable, signal, untracked } from '@angular/core'
 import { toSignal } from '@angular/core/rxjs-interop'
 import { FormControl } from '@angular/forms'
@@ -52,7 +53,7 @@ export class ProbeTargetService {
   readonly applicationId = computed(() => this.applications().length === 1 ? this.applications()[0].id : this.selectedApplication())
   readonly needsTarget = computed(() => this.direct() && !!this.parsed() && !this.matches().length)
   readonly needsApplication = computed(() => this.needsTarget() && this.loaded() && !this.applications().length)
-  private readonly suffix = crypto.randomUUID().slice(0, 8)
+  private readonly suffix = randomId().slice(0, 8)
   private disposed = false
   private generation = 0
 

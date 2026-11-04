@@ -4,6 +4,31 @@ TestStudio owns a new Playwright suite in `tests/selftest/playwright`.
 The suite runs through the normal catalog, publication, execution, timing, and evidence APIs.
 It copies no tests or configuration from another application.
 
+## Complete repository publication UI journey
+
+TestRegisteredGitHubSourceCompletesUIReviewPublicationAndExecution closes acceptance 22 with one local integration.
+It uses the production GitHub adapter against a new TLS fixture, real preparation workers, and cached trusted Go and Playwright images.
+The authoring browser runs through normal TestStudio publication and guarded environment execution against the local API and built UI.
+It registers a source, starts synchronization, observes preparation, reviews changes, publishes with activation, reads retained source, and explicitly runs the immutable release.
+Exactly one archive downloads. Publication creates no unintended runs.
+The harness uses two execution slots so the authoring browser can await its separate Go run.
+Its short action deadlines expose missing controls before the overall preparation deadline.
+
+Set TESTSTUDIO_BROWSER_RUNTIME_IMAGE, TESTSTUDIO_SOURCE_RUNTIME_IMAGE, TESTSTUDIO_BROWSER_GATEWAY_IMAGE, and TESTSTUDIO_UI_DIRECTORY to current cached inputs.
+TESTSTUDIO_REPOSITORY_UI_OUTPUT selects a retained local evidence directory.
+
+```sh
+go test ./internal/sources \
+  -run '^TestRegisteredGitHubSourceCompletesUIReviewPublicationAndExecution$' -count=1 -timeout=240s -v
+```
+
+The final check takes 30.794 seconds. Evidence is output/playwright/repository-ui-zzqhf0me.
+The initial failed run identifies an unavailable crypto.randomUUID method on the ordinary HTTP fixture hostname.
+The shared secure-random fallback fixes that real browser failure. Focused identifier checks also cover native generation and missing secure randomness.
+Resources record their exact owned identifiers. Cleanup verifies containers, volumes, prepared images, and private contexts are absent.
+The verification closes listeners, stops workers, and revokes its newly created session. It preserves the running user demo.
+Reuse existing native-upload, ZIP, and source-runner evidence for unchanged behavior. No broad self-test matrix or cloud verification is needed.
+
 ## Manual and scheduled parity
 
 Acceptance 37 reuses the passing native HTTP, HTTPS, and guarded API workflow evidence.

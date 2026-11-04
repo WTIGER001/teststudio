@@ -1,3 +1,4 @@
+import { randomId } from '../../core/random-id'
 import { DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { AccessClientService } from '../../core/access-client.service'
@@ -21,7 +22,7 @@ export class PlaywrightEditorService {
   readonly error = signal('')
   readonly message = signal('')
   private generation = 0
-  private key = crypto.randomUUID()
+  private key = randomId()
 
   constructor() {
     const destroy = inject(DestroyRef)
@@ -54,7 +55,7 @@ export class PlaywrightEditorService {
       const starter = await this.client.call('readPlaywrightStarter', { ...this.scope(), query: { type } })
       if (generation !== this.generation) return false
       const document = type === 'api' && options ? configureAPIStarter(starter, options) : starter
-      this.saved.set(null); this.document.set({ ...document, id: crypto.randomUUID() }); this.selectedPath.set(document.files[0]?.path ?? ''); this.sources.draftDirty.set(true)
+      this.saved.set(null); this.document.set({ ...document, id: randomId() }); this.selectedPath.set(document.files[0]?.path ?? ''); this.sources.draftDirty.set(true)
       return true
     } catch (error) { if (generation === this.generation) this.fail(error); return false }
     finally { if (generation === this.generation) this.busy.set(false) }
@@ -98,7 +99,7 @@ export class PlaywrightEditorService {
   }
 
   private accept(row: PlaywrightDraftRecord): void {
-    this.saved.set(row); this.document.set(row.data); this.selectedPath.set(row.data.files[0]?.path ?? ''); this.sources.draftDirty.set(false); this.key = crypto.randomUUID()
+    this.saved.set(row); this.document.set(row.data); this.selectedPath.set(row.data.files[0]?.path ?? ''); this.sources.draftDirty.set(false); this.key = randomId()
     this.drafts.update(items => [row, ...items.filter(item => item.id !== row.id)])
   }
 

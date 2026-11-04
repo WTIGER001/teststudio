@@ -1,3 +1,4 @@
+import { randomId } from '../../core/random-id'
 import { DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { WizardController } from '../../shared/wizard/wizard-controller'
@@ -10,7 +11,7 @@ export class RegistrationWizardService {
   readonly registration = inject(ConfigurationService)
   readonly error = signal('')
   readonly flow = new WizardController(3, step => this.validate(step))
-  private readonly suffix = crypto.randomUUID().slice(0, 8)
+  private readonly suffix = randomId().slice(0, 8)
 
   constructor() {
     const destroy = inject(DestroyRef), form = this.registration.form

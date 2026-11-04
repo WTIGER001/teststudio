@@ -1,0 +1,70 @@
+import { test, expect } from '@playwright/test'
+
+test.use({ actionTimeout: 10000, navigationTimeout: 15000 })
+
+test('Register a repository, review its prepared catalog, publish, and execute the immutable release', { tag: '@STUDIO-REPOSITORY-RELEASE-001' }, async ({ page }, testInfo) => {
+  const errors: string[] = []
+  page.on('pageerror', error => errors.push(error.message))
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()) })
+  await page.context().addCookies([FIXTURE_SESSION_COOKIE])
+  await page.goto('/projects/beta/sources')
+  await expect(page.getByRole('heading', { name: 'Import and sync tests', exact: true })).toBeVisible()
+  expect(errors).toEqual([])
+  await page.getByRole('button', { name: 'Register repository', exact: true }).click()
+  await page.getByLabel('Source name', { exact: true }).fill('Local GitHub release')
+  await page.getByLabel('GitHub repository', { exact: true }).fill('owner/suite')
+  await page.getByText('Advanced repository options', { exact: true }).click()
+  await page.getByLabel('Source identifier', { exact: true }).fill('reviewed-repository')
+  await page.getByRole('button', { name: 'Continue', exact: true }).click()
+  await page.getByLabel('Suite 1', { exact: true }).selectOption('health')
+  await page.getByLabel('Manifest path 1', { exact: true }).fill('suites/health.json')
+  await page.getByRole('button', { name: 'Continue', exact: true }).click()
+  await expect(page.getByLabel('Publish and activate successful preparations automatically')).not.toBeChecked()
+  await page.getByRole('button', { name: 'Save repository source', exact: true }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Repository source saved.' })).toBeVisible()
+
+  const session = await (await page.request.get('/auth/session')).json()
+  const headers = { 'X-CSRF-Token': session.session.csrfToken, Origin: new URL(page.url()).origin }
+  const base = '/api/v1/projects/beta'
+  const runs = async () => (await (await page.request.get(base + '/runs')).json()).items
+  expect(await runs()).toEqual([])
+  const suite = async () => (await (await page.request.get(base + '/suites')).json()).items.find((row: any) => row.id === 'health')
+  await page.getByRole('button', { name: 'Sync now', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Inspect suite preparation', exact: true })).toBeVisible({ timeout: 15000 })
+  await page.getByRole('button', { name: 'Inspect suite preparation', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'Refresh repository preparation', exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Review repository preparation', exact: true })).toBeVisible({ timeout: 45000 })
+  expect((await suite()).data.activeReleaseId).toBeUndefined()
+  expect(await runs()).toEqual([])
+  await page.getByRole('button', { name: 'Review repository preparation', exact: true }).click()
+  const review = page.getByRole('region', { name: 'Source review', exact: true })
+  await expect(review.getByRole('cell', { name: 'CODE-000', exact: false })).toBeVisible()
+  await expect(review.getByRole('checkbox', { name: 'Activate this release for future runs' })).not.toBeChecked()
+  await testInfo.attach('repository-prepared-review', { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' })
+  await review.getByRole('checkbox', { name: 'Activate this release for future runs' }).check()
+  await review.getByRole('button', { name: 'Publish source release', exact: true }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Source release published.' })).toBeVisible()
+  const releaseId = (await suite()).data.activeReleaseId
+  expect(releaseId).toBeTruthy()
+  expect(await runs()).toEqual([])
+  const release = (await (await page.request.get(base + '/suites/health/releases/' + releaseId)).json()).data
+  expect(release.catalog.artifact.provenance.commit).toBe('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+  expect(release.catalog.artifact.sourceSnapshotId).toBeTruthy()
+  expect(release.catalog.tests).toHaveLength(1)
+  expect(release.catalog.tests[0].id).toBe('CODE-000')
+  await review.getByRole('button', { name: 'View retained source', exact: true }).click()
+  await expect(page.getByLabel('Retained source document', { exact: true })).toHaveValue(/CODE-000/)
+
+  const created = await page.request.post(base + '/runs', { data: { suiteId: 'health', releaseId, executionLocation: 'local', timeoutSeconds: 60 }, headers: { ...headers, 'Idempotency-Key': 'repository-ui-run' } })
+  expect(created.ok(), await created.text()).toBeTruthy()
+  const run = await created.json()
+  let finished: any
+  await expect.poll(async () => { finished = (await (await page.request.get(base + '/runs/' + run.id)).json()).data; return finished.state }, { timeout: 30000 }).toBe('completed')
+  expect(finished.outcome).toBe('passed')
+  expect(finished.release.id).toBe(releaseId)
+  expect(finished.counts.total).toBe(1)
+  expect(finished.counts.passed).toBe(1)
+  expect(finished.evidenceState).toBe('complete')
+  await testInfo.attach('repository-release-and-run', { body: Buffer.from(JSON.stringify({ release, run: finished })), contentType: 'application/json' })
+  expect(errors).toEqual([])
+})

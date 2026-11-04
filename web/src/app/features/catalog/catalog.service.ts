@@ -1,3 +1,4 @@
+import { randomId } from '../../core/random-id'
 import { computed, DestroyRef, effect, inject, Injectable, signal, untracked } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { ActivatedRoute } from '@angular/router'
@@ -160,7 +161,7 @@ export class CatalogService {
       const draft = await this.api.request<RecordValue<Draft>>(`/api/v1/projects/${project}/suites/${suite}/catalog-drafts`, 'POST', {})
       const review = await this.client.call('reviewCatalogPublication', { project, suite, id: draft.id, revision: draft.revision })
       if (generation !== this.publicationGeneration) return
-      this.draft.set(draft); this.review.set(review); this.issues.set(review.issues); this.publicationKey = crypto.randomUUID()
+      this.draft.set(draft); this.review.set(review); this.issues.set(review.issues); this.publicationKey = randomId()
     } catch (error) { if (generation === this.publicationGeneration) this.error.set(error instanceof Error ? error.message : 'The release preview could not be prepared.') }
     finally { if (generation === this.publicationGeneration) this.saving.set(false) }
   }

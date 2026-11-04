@@ -1,3 +1,4 @@
+import { randomId } from '../../core/random-id'
 import { DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
@@ -17,7 +18,7 @@ export class ProjectsService {
   readonly error = signal('')
   readonly completed = signal<string[]>([])
   readonly flow = new WizardController(4, step => this.validate(step))
-  private readonly suffix = crypto.randomUUID().slice(0, 8)
+  private readonly suffix = randomId().slice(0, 8)
   readonly form = new FormGroup({
     id: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/)] }),
     name: new FormControl('', { nonNullable: true, validators: Validators.required }),

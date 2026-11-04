@@ -1,3 +1,4 @@
+import { randomId } from '../../core/random-id'
 import { DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { FormControl, FormGroup } from '@angular/forms'
@@ -18,7 +19,7 @@ export class NotificationEditorService {
   readonly list = inject(NotificationChannelsService)
   readonly opened = signal(false)
   readonly flow = new WizardController(3, step => { this.form.markAllAsTouched(); const issue = (step === 0 ? notificationIdentityValidation : notificationValidation)(this.form.getRawValue(), this.references()); this.error.set(issue); return !issue && this.referencesReady() })
-  private suffix = crypto.randomUUID().slice(0, 8)
+  private suffix = randomId().slice(0, 8)
   readonly editing = signal<RecordValue<Channel> | null>(null)
   readonly references = signal<SecretReference[]>([])
   readonly referencesReady = signal(false)
@@ -46,7 +47,7 @@ export class NotificationEditorService {
   }
   async open(item?: RecordValue<Channel>): Promise<void> {
     const generation = ++this.generation
-    this.suffix = crypto.randomUUID().slice(0, 8); this.flow.reset()
+    this.suffix = randomId().slice(0, 8); this.flow.reset()
     this.editing.set(item ?? null); this.form.reset(notificationForm(item?.data)); this.opened.set(true); this.error.set(''); this.conflict.set(false)
     this.references.set([]); this.referencesReady.set(false); this.unavailableReference.set(item?.data.secretReference ?? ''); this.list.message.set(''); this.busy.set(true)
     this.list.focus('notification-editor-heading')

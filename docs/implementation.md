@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 44 verified of 57.
+The acceptance count is 45 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -32,7 +32,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **19.** Browser sessions keep provider tokens server-side. Expiry, revocation, callback rejection, and request-forgery protection pass focused checks.
 - [x] **20.** Provider credentials remain outside browser configuration and application logs.
 - [x] **21.** Catalog creation, editing, validation, publication, import, export, bulk actions, archive, and restoration work through both API and UI.
-- [ ] **22.** Declarative uploads, complete source bundles, and registered GitHub repositories can produce versioned releases through the UI.
+- [x] **22.** Declarative uploads, complete source bundles, and registered GitHub repositories can produce versioned releases through the UI.
 - [x] **23.** One repository can provide multiple suites, including suites beside existing application source.
 - [x] **24.** Test-only publication requires no API or UI deployment.
 - [x] **25.** Concurrent catalog edits produce explicit conflicts. Source synchronization preserves service-managed metadata.
@@ -68,6 +68,48 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **55.** Hosted identity and private report access work through installation-specific configuration.
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
+
+## Current delivery: complete repository publication through the UI
+
+Acceptance **22** is complete. The ledger has **45 verified, 12 open, 57 total** items.
+Declarative JSON and YAML uploads, complete Go and Playwright ZIPs, and registered GitHub sources produce immutable releases through the UI.
+The existing source, native-upload, ZIP, isolated assembly, publication, and execution evidence remains valid.
+The final gap closes with one actual local GitHub-to-release browser journey.
+
+The browser registers a repository through Repository, Suites, and Review.
+The production GitHub adapter resolves a fixed commit from a new local TLS provider fixture and downloads its archive once.
+A separate real preparation worker assembles and discovers the Go suite from that exact snapshot.
+The inspected preparation now updates automatically while work remains active. An explicit Refresh repository preparation action remains available.
+Current project, detail, and job checks discard stale responses. Access loss uses the existing private-state clearing path.
+The browser reviews source provenance and catalog changes, publishes with explicit activation, and reads the retained source.
+Registration, synchronization, preparation, and publication create no test run.
+One later explicit run executes that immutable Go release and retains one passed logical result with complete evidence.
+The authoring journey itself runs through TestStudio's normal catalog, prepared Playwright source, environment gateway, timing, results, and evidence contracts.
+The browser and Go executions share two local execution slots to avoid waiting on their own worker slot.
+
+The initial execution finds a blank source page on an ordinary HTTP hostname.
+The browser omits crypto.randomUUID outside a secure context. Existing generated identifiers and request keys previously call it directly.
+A shared randomId helper now uses native randomUUID when available and secure getRandomValues otherwise.
+The fallback preserves UUID version and variant bits. It never uses weak random values.
+All existing UI UUID call sites use the helper. Native generation, the secure-byte fallback, and explicit missing-randomness failure pass focused checks.
+The actual HTTP browser journey verifies the fallback under the original failing origin.
+
+The Angular production build passes. The final integrated check passes in 30.794 seconds.
+The UI observation takes 15909 milliseconds. Its separate Go result retains a valid zero-millisecond measured duration.
+Evidence is output/playwright/repository-ui-zzqhf0me/summary.json, resources.json, and cleanup.json.
+Review and retained-source screenshots receive visual inspection. Logs and traces remain private local evidence.
+Owned browser and Go containers, gateways, volumes, both prepared source images, and private contexts are verified absent.
+The verification process closes its API and TLS listeners, stops source and run workers, and revokes its newly created test-only session.
+The initial failed execution also completes owned-resource cleanup.
+
+Previously retained native upload evidence is output/selftest/20261103T112052.874370000-12768173eed23e629c9e7309/summary.json.
+Previously retained Go and browser ZIP evidence is output/selftest/20261103T164151.211223000-fbde814a60efc9df0c742ab8/summary.json.
+Both records remain completed, passed, and evidence-complete. They do not repeat.
+The actual Go ZIP UI journey is retained under .data/bundle-ui-verification.Eh6NWc.
+Its recorded browser, controller, worker, image, and context cleanup remains valid.
+Supported dependency and execution profiles remain explicit. Arbitrary uploaded installers do not execute in the API.
+No live GitHub or cloud requests run. Cached trusted Go, Playwright, and gateway images remain unchanged.
+Only the changed UI and small prepared verification source images build.
 
 ## Current delivery: guided repository configuration
 

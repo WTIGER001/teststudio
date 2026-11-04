@@ -15,7 +15,7 @@ The full product scope remains required. This direction supersedes the testing s
 ## Active delivery plan after the tester walkthrough
 
 This section is the current implementation order. Historical continuation commands below do not override it.
-The local demonstration is usable and verified. The complete product remains unfinished at 44 verified items out of 57.
+The local demonstration is usable and verified. The complete product remains unfinished at 45 verified items out of 57.
 Ordinary project creator access and the first environment-backed local recorded website flow pass targeted verification.
 Tester investigation, failure recovery, and local manual/scheduled runner parity pass targeted verification.
 Continue source-workflow, access, storage, and hosted packaging gaps. Reuse passing runner evidence.
@@ -64,24 +64,27 @@ This sequence changes implementation priority, not the scope or numbering of the
 Acceptances 03, 08, 13, 20, 21, 25, 26, 28, 29, 34, 36, 38, 42, 43, 44, and 45 are complete. Remaining access checks stay under 12. Other catalog, execution, and evidence requirements remain open.
 Do not treat these batches as additional acceptance items or claim the whole product complete after a demonstration.
 
-### Current continuation: source workflow usability
+### Current continuation: access, storage, and provider work
 
-The repository editor now uses Repository, Suites, and Review through the canonical wizard components.
-Identifiers generate from the name. Reference type and identifier editing stay under Advanced repository options.
-Push and periodic settings stay under Advanced synchronization options.
+Acceptances **22** and **37** are complete. The count is **45 verified, 12 open**.
+The repository editor uses Repository, Suites, and Review through the canonical wizard components.
+Identifiers generate from the name. Uncommon reference and synchronization settings stay under named Advanced sections.
 Review keeps enabled state, automatic publication, future activation, and test-execution consequences visible.
-Back preserves entries. Duplicate suite bindings and invalid hidden settings receive explicit correction and focus.
+Inspected repository preparation updates automatically and provides an explicit refresh action.
 
-The Angular production build and targeted STUDIO-GIT-001 pass locally.
-The final browser workflow takes 2.448 seconds and retains light desktop and dark mobile screenshots.
-The initial focus failure is corrected in the repository editor. Other wizard behavior and runners do not change.
-Help and repository-sources.md describe the current steps.
-Acceptance **22** advances and remains open. The count stays **44 verified, 13 open**.
+The complete local GitHub-to-release UI journey passes against a local TLS provider fixture.
+The production adapter fetches one pinned archive. Real Go preparation, browser review, publication, retained source, and explicit release execution pass.
+Its authoring browser runs through normal TestStudio publication and guarded environment execution.
+The check finds and fixes direct crypto.randomUUID calls on ordinary HTTP origins.
+The shared randomId helper preserves secure UUID generation with a secure-random-byte fallback.
+The Angular build and targeted identifier checks pass. Existing native-upload and ZIP UI evidence remains valid without repetition.
+See the implementation ledger for exact runs and verified cleanup.
 
-Next, complete the registered GitHub sync, preparation review, and publication journey through the UI against a local provider fixture.
-Reuse passing source preparation and runtime evidence. Build only changed self-test or implementation inputs.
-Do not repeat the completed native, guarded API, recorded website, or targetless parity checks.
-Then continue access and storage gaps, provider packaging, and the remaining ledger scope.
+Next, audit remaining user, group, role, object, and project grant coverage under **12**.
+Implement any missing access behavior, then run only its focused local checks.
+Continue storage parity under **06**, provenance under **02**, provider packaging, and remaining ledger scope.
+Keep deployment-wide timing **41**, storage-provider retention **46**, and hosted criteria **51–57** open until their required verification passes.
+Do not repeat completed source, native, API, browser, or scheduled-runner fixtures without a concrete contract change or unresolved failure.
 Cloud execution and storage-provider verification remain separate work.
 
 ### Recorded browser execution scope
@@ -340,7 +343,7 @@ Browser-confirmed publisher login now supports local and OIDC accounts through t
 It issues one independent, proof-bound managed CLI session and retains current authorization and expiry bounds.
 The actual CLI binary passes STUDIO-CLI-001 with local and local-fixture OIDC accounts, denial, help, and mobile checks.
 See cli-sign-in.md and the implementation ledger for exact evidence and continuation details.
-Continue complete GitHub-to-UI publication evidence for item 22 and dependency preparation profiles.
+Acceptance 22 now passes complete GitHub-to-UI publication against a local TLS provider fixture. Continue explicit dependency profiles only when required by a supported execution profile.
 The cached browser runtime is teststudio/playwright-source-runtime:local. The cached Go runtime is teststudio/go-source-runtime:local.
 Do not repeat the passing real Go or Playwright image integrations without a builder or execution contract change.
 Use the targeted source checks or affected self-test selector after implementation changes.

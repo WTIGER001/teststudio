@@ -1,3 +1,4 @@
+import { randomId } from '../../core/random-id'
 import { DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
@@ -20,7 +21,7 @@ export class ScheduleEditorService {
   readonly lookups = inject(RunLookupsService)
   readonly opened = signal(false)
   readonly flow = new WizardController(3, step => { this.form.markAllAsTouched(); const issue = scheduleWizardIssue(step, this.form.getRawValue()); this.error.set(issue); return !issue })
-  private suffix = crypto.randomUUID().slice(0, 8)
+  private suffix = randomId().slice(0, 8)
   readonly editing = signal<RecordValue<Schedule> | null>(null)
   readonly busy = signal(false)
   readonly error = signal('')
@@ -46,7 +47,7 @@ export class ScheduleEditorService {
     this.destroy.onDestroy(() => { this.generation++ })
   }
   async open(item?: RecordValue<Schedule>): Promise<void> {
-    this.suffix = crypto.randomUUID().slice(0, 8); this.flow.reset()
+    this.suffix = randomId().slice(0, 8); this.flow.reset()
     this.editing.set(item ?? null); this.form.reset(scheduleForm(item?.data)); this.opened.set(true); this.error.set(''); this.conflict.set(false); this.preview.set(null)
     const generation = ++this.generation
     this.list.message.set('')

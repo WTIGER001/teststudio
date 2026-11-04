@@ -1,3 +1,4 @@
+import { randomId } from '../../core/random-id'
 import { DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
@@ -10,13 +11,13 @@ export class BundleUploadService {
   readonly file = signal<File | null>(null)
   readonly error = signal('')
   readonly form = new FormGroup({ manifest: new FormControl('teststudio-suite.json', { nonNullable: true, validators: [Validators.required, Validators.maxLength(512)] }) })
-  private key = crypto.randomUUID()
+  private key = randomId()
 
   constructor() {
-    this.form.valueChanges.pipe(takeUntilDestroyed(inject(DestroyRef))).subscribe(() => { this.key = crypto.randomUUID() })
+    this.form.valueChanges.pipe(takeUntilDestroyed(inject(DestroyRef))).subscribe(() => { this.key = randomId() })
   }
 
-  select(file: File | null): void { this.file.set(file); this.error.set(bundleFileError(file)); this.key = crypto.randomUUID() }
+  select(file: File | null): void { this.file.set(file); this.error.set(bundleFileError(file)); this.key = randomId() }
 
   async upload(): Promise<void> {
     const file = this.file(), error = bundleFileError(file)

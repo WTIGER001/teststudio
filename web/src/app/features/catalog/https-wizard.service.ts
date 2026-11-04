@@ -1,3 +1,4 @@
+import { randomId } from '../../core/random-id'
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { Router } from '@angular/router'
@@ -32,11 +33,11 @@ export class HTTPSWizardService {
   readonly error = signal('')
   readonly progress = signal('')
   readonly canRun = computed(() => this.workspace.can('catalog.publish') && this.workspace.can('runs.create'))
-  private readonly suffix = crypto.randomUUID().slice(0, 8)
+  private readonly suffix = randomId().slice(0, 8)
   private draft: RecordValue<Draft> | undefined
   private release = ''
-  private readonly publishKey = crypto.randomUUID()
-  private readonly runKey = crypto.randomUUID()
+  private readonly publishKey = randomId()
+  private readonly runKey = randomId()
   private disposed = false
 
   constructor() {

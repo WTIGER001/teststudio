@@ -1,3 +1,4 @@
+import { randomId } from '../../core/random-id'
 import { DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
@@ -19,17 +20,17 @@ export class BrowserRecorderService {
   readonly cursor = signal('')
   readonly form = new FormGroup({
     url: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(2048), Validators.pattern(/^https?:\/\//)] }),
-    testId: new FormControl(`REC-${crypto.randomUUID().slice(0, 8)}`, { nonNullable: true, validators: [Validators.required, Validators.pattern(/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/)] }),
+    testId: new FormControl(`REC-${randomId().slice(0, 8)}`, { nonNullable: true, validators: [Validators.required, Validators.pattern(/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/)] }),
     title: new FormControl('Recorded browser flow', { nonNullable: true, validators: [Validators.required, Validators.maxLength(120)] })
   })
   private generation = 0
-  private requestId = crypto.randomUUID()
+  private requestId = randomId()
   private reading = false
 
   constructor() {
     const destroy = inject(DestroyRef)
     this.sources.form.controls.suite.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.selected.set(null); this.reading = false; void this.load() })
-    this.form.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.requestId = crypto.randomUUID() })
+    this.form.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.requestId = randomId() })
     const timer = setInterval(() => { const row = this.selected(); if (row && (row.data.state === 'recording' || row.data.state === 'starting') && !this.busy() && !this.reading) void this.read(row.id) }, 1500)
     destroy.onDestroy(() => { this.generation++; clearInterval(timer) })
     void this.load()
@@ -81,7 +82,7 @@ export class BrowserRecorderService {
     this.reading = false; this.busy.set(true); this.error.set('')
     try {
       const result = await this.client.call('changeBrowserRecordingState', { ...this.scope(), id: row.id, action: cancel ? 'cancel' : 'stop' })
-      if (generation === this.generation) { this.accept(result); this.requestId = crypto.randomUUID() }
+      if (generation === this.generation) { this.accept(result); this.requestId = randomId() }
     } catch (error) { if (generation === this.generation) this.fail(error) }
     finally { if (generation === this.generation) this.busy.set(false) }
   }

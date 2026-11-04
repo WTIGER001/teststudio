@@ -1,3 +1,4 @@
+import { randomId } from '../../core/random-id'
 import { liveTiming } from '../timing/timing.utils'
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
@@ -36,13 +37,13 @@ export class RunDetailService {
   private historyScopeApplied = false
   private generation = 0
   private timer: ReturnType<typeof setTimeout> | undefined
-  private rerunKey = crypto.randomUUID()
+  private rerunKey = randomId()
 
   constructor() {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => {
       this.generation++; clearTimeout(this.timer)
       this.projectId.set(params.get('projectId') ?? ''); this.runId.set(params.get('runId') ?? ''); this.historyScopeApplied = false
-      this.run.set(null); this.error.set(''); this.actionError.set(''); this.rerunKey = crypto.randomUUID()
+      this.run.set(null); this.error.set(''); this.actionError.set(''); this.rerunKey = randomId()
       this.evidence.reset(this.projectId(), this.runId())
       void this.load()
     })

@@ -34,6 +34,11 @@ Generate its permanent identifier from the source name. Keep identifier and refe
 Keep push and periodic settings under Advanced synchronization options.
 Review shows every suite binding, enabled state, automatic publication, and effects on future releases and test execution.
 
+Use the shared core randomId helper for generated UUIDs and idempotency keys.
+It uses native UUID generation when available and secure random bytes otherwise.
+Do not call crypto.randomUUID directly from feature code. Ordinary HTTP origins can omit that method.
+Missing secure randomness produces an explicit error. Never substitute weak random values.
+
 ### Preserve work and explain recovery
 
 Back and completed step navigation preserve values. Lookup refreshes and help must not reset edits.

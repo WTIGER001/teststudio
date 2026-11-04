@@ -30,5 +30,6 @@ export function repositoryPreparations(values: Record<string, string>): { suite:
   return Object.entries(values).map(([suite, id]) => ({ suite, id })).sort((a, b) => a.suite.localeCompare(b.suite))
 }
 export function repositorySyncActive(state: string | undefined): boolean { return state === 'received' || state === 'fetching' }
+export function repositoryPreparationActive(state: string | undefined, cleanupPending = false): boolean { return cleanupPending || state === 'received' || state === 'preparing' || state === 'discovering' }
 
 export function repositoryWebhookAddress(origin: string, project: string, source: string): string { return `${origin}/api/v1/projects/${encodeURIComponent(project)}/repository-sources/${encodeURIComponent(source)}/webhooks/github` }

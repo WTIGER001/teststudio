@@ -94,6 +94,13 @@ Automatic publication changes the active release for future runs. It remains off
 Saving does not start a manual sync, build, or test. Enabled automatic policies can queue future preparations.
 Inspect the saved source and select Sync now. Synchronization never starts tests.
 
+Select Inspect suite preparation after synchronization creates its jobs.
+The selected preparation updates automatically while it remains active or awaits cleanup.
+Refresh repository preparation requests its current status immediately.
+When the preparation becomes ready, select Review repository preparation.
+Review the pinned source, discovered catalog, and optional activation before publishing.
+Publication creates an immutable release. Start its tests through a separate run action.
+
 The worker pins the repository identity and resolved commit before fetching source.
 A renamed or replaced repository cannot silently change the pinned identity.
 Each downloaded GitHub wrapper directory is removed from logical paths after archive validation.

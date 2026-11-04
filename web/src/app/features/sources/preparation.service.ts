@@ -1,3 +1,4 @@
+import { randomId } from '../../core/random-id'
 import { DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
@@ -22,12 +23,12 @@ export class PreparationService {
   private generation = 0
   private reading = false
   private detailGeneration = 0
-  private key = crypto.randomUUID()
+  private key = randomId()
 
   constructor() {
     const destroy = inject(DestroyRef)
-    this.sources.form.controls.suite.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.key = crypto.randomUUID(); void this.load() })
-    this.form.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.key = crypto.randomUUID() })
+    this.sources.form.controls.suite.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.key = randomId(); void this.load() })
+    this.form.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.key = randomId() })
     const timer = setInterval(() => { const job = this.selected(); if (job && (job.data.state === 'received' || job.data.state === 'preparing' || job.data.state === 'discovering' || job.data.cleanupPending) && !this.busy() && !this.reading) void this.inspect(job.id) }, 5000)
     destroy.onDestroy(() => { this.generation++; clearInterval(timer); this.clearDownload() })
     void this.load()
@@ -48,7 +49,7 @@ export class PreparationService {
     } catch (error) { if (generation === this.generation) this.fail(error) }
   }
 
-  newRequest(): void { this.detailGeneration++; this.reading = false; this.key = crypto.randomUUID(); this.selected.set(null); this.error.set(''); this.clearDownload() }
+  newRequest(): void { this.detailGeneration++; this.reading = false; this.key = randomId(); this.selected.set(null); this.error.set(''); this.clearDownload() }
 
   async prepare(): Promise<void> {
     if (this.form.invalid || this.busy()) return

@@ -1,3 +1,4 @@
+import { randomId } from '../../core/random-id'
 import { DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { FormControl, FormGroup } from '@angular/forms'
@@ -24,7 +25,7 @@ export class APIDraftWizardService {
   })
 
   constructor() {
-    const destroy = inject(DestroyRef), suffix = crypto.randomUUID().slice(0, 8), controls = this.form.controls
+    const destroy = inject(DestroyRef), suffix = randomId().slice(0, 8), controls = this.form.controls
     controls.id.setValue('API-' + suggestedIdentifier('api-test', suffix), { emitEvent: false })
     controls.title.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(title => { if (controls.id.pristine) controls.id.setValue('API-' + suggestedIdentifier(title, suffix)) })
     controls.path.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(value => { if (controls.prefix.pristine) controls.prefix.setValue(apiPathPrefix(value)) })

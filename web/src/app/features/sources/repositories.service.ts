@@ -1,3 +1,4 @@
+import { randomId } from '../../core/random-id'
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms'
@@ -8,7 +9,7 @@ import type { SourcePreparationRecord, SourceRepositoryOptions, SourceRepository
 import { SourcesService } from './sources.service'
 import { WizardController } from '../../shared/wizard/wizard-controller'
 import { suggestedIdentifier } from '../../shared/wizard/creation.utils'
-import { repositoryConfig, repositoryPreparations, repositoryReference, repositorySyncActive, repositoryWebhookAddress, repositoryWizardProblem } from './repository.utils'
+import { repositoryConfig, repositoryPreparations, repositoryPreparationActive, repositoryReference, repositorySyncActive, repositoryWebhookAddress, repositoryWizardProblem } from './repository.utils'
 
 @Injectable()
 export class RepositoriesService {
@@ -28,6 +29,7 @@ export class RepositoriesService {
   readonly busy = signal(false)
   readonly loading = signal(false)
   readonly historyLoading = signal(false)
+  readonly preparationLoading = signal(false)
   readonly error = signal('')
   readonly message = signal('')
   readonly flow = new WizardController(3, step => this.validate(step))
@@ -51,19 +53,23 @@ export class RepositoriesService {
   private historyGeneration = 0
   private detailGeneration = 0
   private polling = false
-  private syncKey = crypto.randomUUID()
-  private identifierSuffix = crypto.randomUUID().slice(0, 8)
+  private syncKey = randomId()
+  private identifierSuffix = randomId().slice(0, 8)
 
   constructor() {
     const destroy = inject(DestroyRef)
     this.form.controls.name.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(name => {
       if (!this.selected() && this.form.controls.id.pristine) this.form.controls.id.setValue(suggestedIdentifier(name, this.identifierSuffix))
     })
-    this.force.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.syncKey = crypto.randomUUID() })
+    this.force.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.syncKey = randomId() })
     inject(ActivatedRoute).paramMap.pipe(takeUntilDestroyed(destroy)).subscribe(() => {
       this.generation++; this.detailGeneration++; this.rows.set([]); this.selected.set(null); this.history.set([]); this.sync.set(null); this.prepared.set(null); this.editor.set(false); this.cursor.set(''); this.syncCursor.set(''); this.options.set({ providers: [], credentials: [], webhookCredentials: [] }); this.busy.set(false); void this.load()
     })
-    const timer = setInterval(() => { if (repositorySyncActive(this.sync()?.data.state) && !this.busy() && !this.polling) void this.refreshSync() }, 5000)
+    const timer = setInterval(() => {
+      if (!this.busy() && !this.polling && repositorySyncActive(this.sync()?.data.state)) void this.refreshSync()
+      const job = this.prepared()
+      if (!this.busy() && !this.preparationLoading() && repositoryPreparationActive(job?.data.state, job?.data.cleanupPending)) void this.refreshPreparation()
+    }, 5000)
     destroy.onDestroy(() => { this.generation++; this.detailGeneration++; clearInterval(timer) })
   }
 
@@ -88,7 +94,7 @@ export class RepositoriesService {
   removeBinding(index: number): void { if (this.form.controls.bindings.length > 1) this.form.controls.bindings.removeAt(index) }
 
   edit(row?: SourceRepositoryRecord): void {
-    this.flow.reset(); this.identifierSuffix = crypto.randomUUID().slice(0, 8)
+    this.flow.reset(); this.identifierSuffix = randomId().slice(0, 8)
     this.detailGeneration++; this.sync.set(null); this.prepared.set(null); this.history.set([]); this.force.setValue(false)
     this.selected.set(row ?? null); this.editor.set(true); this.error.set(''); this.message.set('')
     const config = row?.data.configuration, reference = repositoryReference(config?.reference ?? 'heads/main')
@@ -132,7 +138,7 @@ export class RepositoriesService {
 
   async inspect(row: SourceRepositoryRecord): Promise<void> {
     const generation = this.generation, detail = ++this.detailGeneration
-    this.busy.set(true); this.error.set(''); this.sync.set(null); this.prepared.set(null); this.history.set([]); this.syncCursor.set(''); this.editor.set(false); this.syncKey = crypto.randomUUID(); this.force.setValue(false)
+    this.busy.set(true); this.error.set(''); this.sync.set(null); this.prepared.set(null); this.history.set([]); this.syncCursor.set(''); this.editor.set(false); this.syncKey = randomId(); this.force.setValue(false)
     try {
       const current = await this.client.call('readRepositorySource', { ...this.scope(), source: row.id })
       if (generation !== this.generation || detail !== this.detailGeneration) return
@@ -160,7 +166,7 @@ export class RepositoriesService {
     try {
       const sync = await this.client.call('enqueueRepositorySync', { ...this.scope(), source: row.id, key: this.syncKey, body: { force: this.force.value } })
       if (generation !== this.generation || detail !== this.detailGeneration) return
-      this.sync.set(sync); this.history.update(items => [sync, ...items.filter(item => item.id !== sync.id)]); this.syncKey = crypto.randomUUID()
+      this.sync.set(sync); this.history.update(items => [sync, ...items.filter(item => item.id !== sync.id)]); this.syncKey = randomId()
       this.message.set('Repository sync queued. Tests do not run during synchronization.')
     } catch (error) { if (generation === this.generation) this.fail(error) }
     finally { if (generation === this.generation && detail === this.detailGeneration) this.busy.set(false) }
@@ -190,6 +196,17 @@ export class RepositoriesService {
   }
 
   async reviewPreparation(): Promise<void> { const job = this.prepared(); if (job?.data.uploadId) { this.sources.form.controls.suite.setValue(job.data.suiteId); await this.sources.openReview(job.data.uploadId, job.data.suiteId) } }
+
+  async refreshPreparation(): Promise<void> {
+    const job = this.prepared(), generation = this.generation, detail = this.detailGeneration
+    if (!job || this.preparationLoading()) return
+    this.preparationLoading.set(true)
+    try {
+      const current = await this.client.call('readSourcePreparation', { ...this.scope(), suite: job.data.suiteId, id: job.id })
+      if (generation === this.generation && detail === this.detailGeneration && this.prepared()?.id === job.id) this.prepared.set(current)
+    } catch (error) { if (generation === this.generation && detail === this.detailGeneration) this.fail(error) }
+    finally { this.preparationLoading.set(false) }
+  }
 
   private fail(error: unknown): void {
     this.error.set(error instanceof ApiError && error.status === 409 ? 'The source changed. Refresh its details before saving or syncing again.' : error instanceof Error ? error.message : 'Repository source request failed.')

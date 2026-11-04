@@ -1,3 +1,4 @@
+import { randomId } from '../../core/random-id'
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop'
 import type { TimingEstimate } from '../timing/timing.models'
@@ -42,7 +43,7 @@ export class NewRunService {
   readonly needsSelectionPreview = computed(() => !!this.selectionId() && !this.selectionPreview())
   private selectionGeneration = 0
   private selectionLoadGeneration = 0
-  private key = crypto.randomUUID()
+  private key = randomId()
   private fingerprint = ''
 
   constructor() {
@@ -98,7 +99,7 @@ export class NewRunService {
     try {
       const input = requestFromForm(this.form.getRawValue(), this.selectionPreview()?.id)
       const fingerprint = JSON.stringify(input)
-      if (fingerprint !== this.fingerprint) { this.key = crypto.randomUUID(); this.fingerprint = fingerprint }
+      if (fingerprint !== this.fingerprint) { this.key = randomId(); this.fingerprint = fingerprint }
       const run = await this.api.request<RecordValue<Run>>(`/api/v1/projects/${encodeURIComponent(this.workspace.projectId())}/runs`, 'POST', input, undefined, this.key)
       await this.router.navigate(['/projects', this.workspace.projectId(), 'runs', run.id])
     } catch (error) { if (this.selectionPreview() && error instanceof ApiError && error.status === 409) { this.selectionPreview.set(null); this.error.set('The saved selection changed. Preview the saved selection again before starting the run.') } else this.error.set(errorMessage(error, 'The run could not be started.')) }
