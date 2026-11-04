@@ -187,9 +187,14 @@ Eight new focused race checks, a 24-case declared traffic matrix, and two select
 This stage does not implement complete Network admission. Platform compatibility, service-tag membership, and effective packet isolation remain unverified.
 See [Azure worker perimeter](azure-worker-perimeter.md). Acceptance 51 advances; the count remains 48 of 57.
 
-Next inspect actual firewall identity, IP configuration, effective policy, and rule groups.
-Reject inherited-policy, application-rule, network-rule, and NAT bypasses. Do not treat shared platform service tags as exclusive destinations.
-Then inspect DNS resolver policy, private endpoints, and the isolated exchange.
+The Azure firewall stage now binds the routed private IP to the selected firewall, subnet, public IP, and dedicated policy.
+It rejects classic and inherited rules, populated default groups, NAT, proxies, changed application controls, and substituted resource ownership.
+A fixed platform HTTPS allowlist precedes an explicit application deny that overrides the built-in infrastructure fallback.
+Complete policy group references and bounded list inventory must agree. Safe scoped paging preserves hidden-resource and incomplete-inventory uncertainty.
+Eight new focused race checks and two selected existing transport checks pass locally. Independent resource reads run concurrently after perimeter inspection.
+See [Azure worker firewall inspection](azure-worker-firewall.md). Acceptance 51 advances; the count remains 48 of 57.
+
+Next inspect DNS resolver policy, private endpoints, and the isolated exchange.
 Bind the actual DNS policy and VNet link. Threat-intelligence filtering or a DNS proxy alone cannot establish the required default block.
 Verify unrelated workload inventory, cross-job isolation, and actual execution placement before composing Network.
 Bind topology and all perimeter settings into networkProfile. Do not substitute a partial topology digest.

@@ -7,6 +7,7 @@ The [ACR authentication adapter](azure-registry-authentication.md) now supports 
 The [independent deadline adapter](azure-worker-deadlines.md) now provides durable timer resources.
 The [topology inspector](azure-worker-network.md) verifies selected environment and subnet bindings.
 The [perimeter inspector](azure-worker-perimeter.md) now verifies the fixed NSG rules and default route.
+The [firewall inspector](azure-worker-firewall.md) now checks actual attachment, dedicated policy, and complete group inventory.
 Complete network admission, identity role binding, and command wiring remain unfinished. Azure coded execution stays disabled.
 
 The shared hosted lifecycle driver is implemented in internal/hostedexecution.

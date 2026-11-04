@@ -122,7 +122,40 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: Azure worker NSG and routing inspection
+## Current delivery: Azure firewall resource and effective policy inspection
+
+Acceptance **51** advances. The total remains **48 verified of 57**, with **9 open**.
+The previous perimeter batch commits as f9be761. This batch verifies the actual firewall behind the selected default route.
+
+FirewallGuard refreshes topology and perimeter before checking the firewall, subnet, public IP association, policy, and complete group inventory.
+It binds the reported routed private IP to one Standard VNet firewall configuration and the selected subnet, public IP, and policy.
+Classic rule collections, management configurations, hubs, substituted resources, unsafe subnet bindings, and alternate public-IP arrangements reject inspection.
+The dedicated policy rejects inherited or child policy, shared firewall attachment, proxies, custom DNS, and unrelated capabilities.
+
+One owned group contains a fixed worker HTTPS platform allowlist followed by an explicit application deny.
+That final deny overrides Azure Firewall's built-in infrastructure fallback for this profile's application protocols.
+Only empty documented default groups are permitted. Changed actions, rules, groups, destinations, sources, protocols, URLs, tags, and NAT reject inspection.
+Fresh validated SDK definitions support later packaging without issuing Azure writes.
+
+The production reader permits only the exact firewall resources and selected policy's bounded group listing.
+The shared transport permits opaque pagination only on that collection. Other readers retain their existing resource and query boundaries.
+Complete policy references and listed group inventory must agree. Missing groups and unfinished paging retain uncertainty.
+Contexts, body reads, four-group inventory, four-page bounds, and token-cycle checks remain enforced.
+Four independent attachment reads run concurrently after perimeter inspection. The normal full check makes thirteen bounded reads with no successful-admission cache.
+
+Eight new focused local race checks pass. Two selected existing transport boundary checks pass.
+Only the affected uncertainty check repeats after adding hidden-group, missing-group, and endless-paging handling.
+Evidence is output/azure-worker-firewall/summary.json and the focused command results.
+No Azure credential, cloud API, packet probe, registry push, deployment, UI build, browser, container, or image build runs.
+
+This stage does not implement complete Network admission or enable coded execution.
+Actual DNS filtering and private records, endpoint ownership, exchange isolation, workload inventory, cross-job isolation, and execution placement remain required.
+Azure startup compatibility, identity behavior, effective packet isolation, and deployment parity still need separate hosted verification.
+No broad acceptance item closes from these local SDK and declaration fixtures.
+Continue DNS policy and endpoint inspection before native enablement or infrastructure packaging.
+See [Azure worker firewall inspection](azure-worker-firewall.md).
+
+## Previous delivery: Azure worker NSG and routing inspection
 
 Acceptance **51** advances. The total stays **48 verified of 57**, with **9 open**.
 The previous topology batch commits as f3f7634. This batch adds the actual security-rule and routing inspection stage.

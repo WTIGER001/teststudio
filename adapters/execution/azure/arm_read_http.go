@@ -13,6 +13,7 @@ import (
 type armReadHTTP struct {
 	base      policy.Transporter
 	resources map[string]string
+	pages     map[string]bool
 }
 
 func newTopologyHTTP(c Config, s TopologySettings, base policy.Transporter) *armReadHTTP {
@@ -40,7 +41,7 @@ func (h *armReadHTTP) Do(r *http.Request) (*http.Response, error) {
 		return nil, hostedexecution.ErrOwnership
 	}
 	version, ok := h.resources[u.Path]
-	if !ok || u.RawQuery != "api-version="+version {
+	if !ok || !h.queryAllowed(u, version) {
 		return nil, hostedexecution.ErrOwnership
 	}
 	group, _ := resourceParts(u.Path)
@@ -67,4 +68,27 @@ func (h *armReadHTTP) CloseIdleConnections() {
 	if closer, ok := h.base.(interface{ CloseIdleConnections() }); ok {
 		closer.CloseIdleConnections()
 	}
+}
+
+func (h *armReadHTTP) queryAllowed(u *url.URL, version string) bool {
+	if u.RawQuery == "api-version="+version {
+		return true
+	}
+	if !h.pages[u.Path] || len(u.RawQuery) > 4096 {
+		return false
+	}
+	query, err := url.ParseQuery(u.RawQuery)
+	if err != nil || len(query) != 2 || len(query["api-version"]) != 1 || query.Get("api-version") != version || len(query["$skipToken"]) != 1 {
+		return false
+	}
+	token := query.Get("$skipToken")
+	if len(token) == 0 || len(token) > 2048 {
+		return false
+	}
+	for _, r := range token {
+		if r < 32 || r == 127 {
+			return false
+		}
+	}
+	return true
 }

@@ -12,6 +12,7 @@ The [ACR authentication adapter](azure-registry-authentication.md) now supports 
 The [independent deadline adapter](azure-worker-deadlines.md) now implements timer creation, verification, and checkpointed removal.
 The [topology inspector](azure-worker-network.md) now verifies environment and subnet bindings through scoped reads.
 The [perimeter inspector](azure-worker-perimeter.md) now verifies the fixed NSG rules and default route.
+The [firewall inspector](azure-worker-firewall.md) now checks actual attachment, dedicated policy, and complete group inventory.
 Complete network admission, identity role binding, and private exchange service packaging remain required.
 Network, deadline, image inspection, and fresh dispatch authorization are mandatory constructor dependencies.
 No default permissive implementation supplies these dependencies.

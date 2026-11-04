@@ -8,7 +8,8 @@ It checks complete custom rule content and routing against the fixed worker poli
 The same settings can produce SDK definitions for later infrastructure packaging.
 
 This stage does not implement the execution Network interface or release worker input.
-Firewall resource identity, effective firewall rules, DNS filtering, private endpoint ownership, isolated exchange service, and cross-job isolation remain required.
+The [firewall stage](azure-worker-firewall.md) now verifies actual resource identity, attachment, policy, and complete group inventory.
+DNS filtering, private endpoint ownership, isolated exchange service, and cross-job isolation remain required.
 Azure coded execution stays disabled in native commands and infrastructure packaging.
 Local fixtures do not establish live platform compatibility or effective packet isolation.
 
@@ -85,7 +86,8 @@ In particular, verify the interaction between the metadata deny rule and platfor
 Do not remove a boundary silently to make platform startup pass. Resolve the isolation arrangement explicitly.
 
 Service tags represent shared Azure service ranges. They do not provide the required application-level destination or request restriction by themselves.
-The later firewall inspector must check the exact permitted platform destinations and reject broad network, application, NAT, and inherited-policy bypasses.
+The firewall inspector now checks the fixed platform allowlist, final deny, complete group inventory, and absence of classic or inherited-policy bypasses.
+It does not establish live platform compatibility or effective packet isolation.
 Azure platform DNS requires its specific service tag for NSG overrides. A generic deny alone does not establish DNS filtering.
 The later resolver-policy inspector must verify the actual VNet link, enabled rule order, domain lists, and default block.
 
