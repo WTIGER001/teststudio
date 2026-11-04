@@ -69,6 +69,72 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: private hosted worker exchange
+
+Acceptance **51** advances. The ledger stays at **48 verified, 9 open, 57 total** items.
+The new worker exchange binds a frozen work item, start event, report, and declared attachment bytes to one normal execution reference.
+The service checks current controller ownership, attempt, test, lease, run deadline, project state, and the existing execution admission rules.
+The normal ledger reference must remain prepared and uncheckpointed.
+Ownership and project records guard relevant metadata writes.
+The optional --worker-addr listener is separate from the UI and artifact listeners and stays disabled by default.
+An artifact-only process rejects it. The listener starts no test process.
+
+An installation-private signing key and exchange nonce derive a stable HMAC-SHA256 ticket.
+Concurrent controllers reconstruct one ticket. The first worker instance claims the exchange; another instance cannot execute it again.
+Later preparation cannot replace the input or extend the frozen deadline.
+Preparation refreshes authority guards after a concurrent metadata update rather than retrying a stale revision.
+Tickets are absent from packet bodies, formatting, JSON serialization, URLs, session cookies, and application identity records.
+The selected work item excludes credential references, redaction values, unrelated selectors, native HTTP headers, source provenance, and controller callbacks.
+It retains the existing 4 MiB bound, immutable artifact identity, selected test, target policy, capture settings, and timing values.
+
+The HTTPS client rejects redirects, insecure origins, oversized responses, and invalid packet identity or expiry.
+Its default transport uses ordinary TLS verification without environment proxy settings.
+Request failures use fixed errors without upstream headers, bodies, URLs, or network diagnostics.
+The handler rejects cookies, browser Origin headers, and query strings. Worker authorization remains separate from application sessions.
+
+Start events and report submissions support exact retries after a lost acknowledgement.
+Changed start events, reports, manifests, and instance claims conflict.
+The report validator moves from the local container adapter into the shared execution package.
+Both paths preserve selector, schema, test ownership, terminal state, timeout normalization, timing, Go observation, step, and process outcome checks.
+A passing report cannot hide an incompatible failed process outcome.
+
+Attachment manifests declare at most 32 files with exact sizes and SHA-256 checksums.
+Capture mode, failure-only settings, filenames, media types, byte limits, and total attempt bounds validate before storage.
+Project and run staging reservations bound simultaneous attempts. Exact report retries reserve no additional space.
+The project staging limit follows current project settings. The run staging limit follows its frozen capture policy.
+Staging is a separate bounded capacity from retained evidence. Normal evidence import still enforces its own quotas, retention, pins, and redaction.
+
+Four uploads can stage concurrently per service process.
+A bounded per-file lease protects backend writes. Revocation does not discard the metadata needed to track a write already in progress.
+Collection verifies stored content again and can recover bytes written before a metadata acknowledgement failure.
+Missing bytes remain an evidence gap and can be collected later without another execution.
+Cleanup waits for live uploads and requires a saved result with complete or explicitly abandoned evidence.
+Object deletion precedes atomic reservation release and exchange removal. A lost cleanup acknowledgement remains retryable.
+Installation export now refuses unfinished exchanges even if another recovery index is missing.
+The signing key remains protected installation authentication state in a completed backup archive.
+
+Eight exchange tests and three live-run or HTTP tests pass with race detection.
+They cover controller concurrency, one worker instance, restart reconstruction, private input, immutable messages, checksums, expiry, capture bounds, shared quotas, cleanup races, and exact cleanup retry.
+A real TLS fixture uses the production run authorization callback, handler, and client.
+It covers start progress, a deliberately lost report acknowledgement, attachment names with spaces, duplicate uploads, cancellation, stale ownership, expired leases, archived projects, and redirect rejection.
+Three existing focused report cases preserve invalid-pass rejection, Go preparation failures, and legacy timeout interpretation after extraction.
+The targeted export barrier covers normal execution work and unfinished exchange records without publishing a partial archive.
+Its fixture now uses a fresh database instead of seeding and executing an unrelated installation.
+Evidence is output/worker-exchange/service.log, run-http.log, report-compatibility.log, and transfer-barrier.log.
+The quota fixture initially regenerates report timestamps during an exact-replay assertion. Keeping the same frozen report corrects the fixture.
+
+The native listener check starts one fresh isolated process, checks private routing, and confirms that startup creates no ticket or signing key without trusted dispatch.
+Evidence is output/worker-exchange/listener/summary.json and cleanup.json.
+Its owned process stops and temporary database and storage are removed.
+No browser, Docker test runtime, source-runner matrix, AWS, Kubernetes, or Azure test runs.
+The native build reuses UI and private viewer assets. Existing trusted runner images remain unchanged.
+
+Hosted runner supervision, provider job creation, gateway delivery, private provider ingress, authoritative status, cancellation, deadline enforcement, and restart discovery remain required.
+Provider preparation must still publish and inspect immutable runnable artifacts outside the API.
+The current transport library and listener do not enable hosted Go or Playwright runs alone.
+The next batch adds the trusted supervisor and provider lifecycle integration against local protocol fixtures.
+See [Private hosted worker exchange](worker-exchange.md) for the HTTP contract, quotas, and required integration order.
+
 ## Current delivery: Azure core packaging and separate service roles
 
 Acceptance **57** advances. The ledger stays at **48 verified, 9 open, 57 total** items.

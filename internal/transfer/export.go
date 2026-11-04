@@ -20,7 +20,7 @@ func Export(ctx context.Context, source *storage.Store, output io.Writer) (Stats
 	stats := Stats{Permissions: map[string]int64{}}
 	err := source.ReadTransaction(ctx, func(db *storage.Store, tx *sql.Tx) error {
 		var busy bool
-		if err := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM records WHERE bucket IN ('run-leases','execution-work') OR bucket LIKE 'preparation-leases/%')`).Scan(&busy); err != nil {
+		if err := tx.QueryRowContext(ctx, `SELECT EXISTS(SELECT 1 FROM records WHERE bucket IN ('run-leases','execution-work','worker-exchanges') OR bucket LIKE 'preparation-leases/%')`).Scan(&busy); err != nil {
 			return err
 		}
 		if busy {

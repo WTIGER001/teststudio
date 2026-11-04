@@ -150,3 +150,12 @@ The packaged default Docker health command checks API port 8040. Provider probes
 
 The [Azure core profile](azure.md) uses these roles for separate HTTPS apps with shared PostgreSQL and Blob storage.
 The focused local role checker is scripts/verify-service-roles.py. It uses sequential single-process SQLite startup without a browser or cloud target.
+
+## Optional worker listener
+
+The API can add --worker-addr for the private hosted worker exchange.
+The listener is disabled by default. It exposes no UI or session-based application API.
+Hosted use requires a separate private route with trusted TLS termination.
+The artifact-only role rejects this setting.
+See [Private hosted worker exchange](worker-exchange.md) for ticket scope, limits, staging quotas, and integration order.
+Current provider packages still require their worker routing and isolated execution adapters before this listener supports hosted test execution.

@@ -27,7 +27,7 @@ Unsupported versions fail before installation data commits.
 4. Keep the destination service stopped. Prepare an empty destination database.
 5. Export metadata and copy its corresponding retained storage while the source remains stopped.
 
-Export refuses active run leases, execution recovery work, preparation leases, and open browser recordings.
+Export refuses active run leases, execution recovery work, unfinished worker exchanges, preparation leases, and open browser recordings.
 The tool cannot stop other service instances. The operator keeps both installations offline during cutover.
 After import, start only the destination as the authoritative installation.
 Keep the source available for rollback without serving requests from both copies.
@@ -46,7 +46,7 @@ The output publishes only after the complete archive is written and synced.
 An existing archive is never overwritten. A failed export removes its owned temporary file.
 The summary prints counts rather than record contents or credentials.
 
-Archives contain private installation metadata, password hashes, sessions, and server-side authentication state.
+Archives contain private installation metadata, password hashes, sessions, server-side authentication state, and the private worker ticket signing key.
 Export creates the archive with permissions 0600. Import requires a private regular file.
 Store it with access restricted to the installation's backup operators.
 

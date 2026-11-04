@@ -441,23 +441,31 @@ func TestCorruptOrTruncatedInstallationArchiveRollsBackDestination(t *testing.T)
 }
 
 func TestInstallationExportWaitsForActiveWorkAndPublishesNoPartialArchive(t *testing.T) {
-	source := seedInstallation(t)
-	row, err := storage.Put("execution-work", "pending", "project", 0, map[string]string{"runId": source.run.ID, "executionId": "pending"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := source.db.Commit(t.Context(), row); err != nil {
-		t.Fatal(err)
-	}
-	output := filepath.Join(t.TempDir(), "busy.ndjson")
-	if _, err := transfer.ExportFile(t.Context(), source.db, output); !errors.Is(err, transfer.ErrBusy) {
-		t.Fatal("active worker state entered a cutover archive", err)
-	}
-	if _, err := os.Stat(output); !os.IsNotExist(err) {
-		t.Fatal("failed export published an archive")
-	}
-	files, err := os.ReadDir(filepath.Dir(output))
-	if err != nil || len(files) != 0 {
-		t.Fatal("failed export left an owned temporary file", err)
+	for _, bucket := range []string{"execution-work", "worker-exchanges"} {
+		t.Run(bucket, func(t *testing.T) {
+			source, err := testkit.Open(t, filepath.Join(t.TempDir(), "busy.db"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Cleanup(func() { source.Close() })
+			row, err := storage.Put(bucket, "pending", "project", 0, map[string]string{"runId": "pending-run", "executionId": "pending"})
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := source.Commit(t.Context(), row); err != nil {
+				t.Fatal(err)
+			}
+			output := filepath.Join(t.TempDir(), "busy.ndjson")
+			if _, err := transfer.ExportFile(t.Context(), source, output); !errors.Is(err, transfer.ErrBusy) {
+				t.Fatal("active worker state entered a cutover archive", err)
+			}
+			if _, err := os.Stat(output); !os.IsNotExist(err) {
+				t.Fatal("failed export published an archive")
+			}
+			files, err := os.ReadDir(filepath.Dir(output))
+			if err != nil || len(files) != 0 {
+				t.Fatal("failed export left an owned temporary file", err)
+			}
+		})
 	}
 }

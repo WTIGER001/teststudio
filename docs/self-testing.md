@@ -607,3 +607,12 @@ It runs one fresh local installation sequentially and removes all owned containe
 Use the service image check's --configuration-only option for changed configuration or directory ownership.
 These checks require no browser suite, source-runtime rebuild, cloud deployment, or provider account.
 Reuse existing complete package and product evidence for unchanged contracts.
+
+## Private worker transport
+
+Use the focused checks described in [Private hosted worker exchange](worker-exchange.md#targeted-local-verification).
+Exchange tests cover scoped credentials, durable messages, staging limits, and cleanup without executing uploaded code.
+A local TLS fixture exercises the real run authorization bridge, production handler, and production client.
+The native listener check starts one fresh service and removes its owned process and data.
+Keep report codec checks focused on the extracted shared validator.
+No browser suite, source runtime image, provider deployment, or cloud account is needed for this batch.

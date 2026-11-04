@@ -92,7 +92,7 @@ Acceptance 02 now passes the distribution provenance audit against nine availabl
 Repository origin, authored fixtures, independent example configuration, and retained isolated-build and empty-start evidence support the comparison.
 The audit tool records its exact scope and limits. It imports no reference material.
 
-Next, implement hosted packaging and execution adapters for AWS, Kubernetes, and Azure through independent provider configuration.
+Core provider packaging is implemented locally. Continue hosted execution adapters for AWS, Kubernetes, and Azure through independent provider configuration.
 Keep artifact storage, secrets, worker dispatch, status, cancellation, deadlines, and recovery within common product contracts.
 Use local provider protocol fixtures and packaging checks only. Do not run cloud deployments in this work session.
 Reuse completed local product evidence and build only changed inputs.
@@ -135,10 +135,22 @@ The cross-architecture producer fixes the legacy builder failure and verifies ce
 See [Azure core service profile](azure.md) for operator inputs, platform limits, and exact local evidence.
 The count remains **48 verified, 9 open**. Core packaging does not establish complete hosted execution or deployment parity.
 
-Next, implement isolated execution adapters and preparation requirements, preserving the full deployment acceptance scope.
-First add common attempt-scoped work-packet and result transport for hosted jobs.
-Preserve the existing bounded input, immutable source, timing, result, capture-policy, and gateway contracts.
+The common private worker exchange now transports frozen work, start observations, immutable reports, and checksummed attachments.
+It binds one active controller-owned attempt to one worker instance and reconstructs its ticket after controller restart.
+Current run authority, leases, cancellation, project state, and deadlines control worker access.
+Private staging uses project and run reservations, per-file upload leases, and checkpoint-gated cleanup.
+An HTTPS client rejects redirects and excludes private diagnostics. The optional private listener is disabled by default.
+Focused service, live-run TLS, report compatibility, export barrier, and native listener checks pass locally.
+See [Private hosted worker exchange](worker-exchange.md) for exact limits and integration order.
+Acceptance **51** advances. The count stays **48 verified, 9 open**.
+This transport does not yet provide a runner supervisor or dispatch a hosted provider job.
+
+Next, implement the trusted hosted runner supervisor and isolated provider execution adapters.
+Use the frozen work packet as the runner's existing bounded stdin contract.
+Preserve immutable source approval, timing, result, capture-policy, and gateway contracts.
 Keep real target credentials in the trusted gateway. Untrusted workers receive neither application sessions nor provider SDK credentials.
+Add private worker HTTPS routing to each provider profile before enabling hosted dispatch.
+Azure needs its own private service arrangement for the worker listener rather than an additional public TCP port.
 Then add provider dispatch, status, cancellation, deadline, and restart reconciliation against local protocol fixtures.
 Preparation must publish and inspect immutable artifacts outside the API before hosted code can execute.
 Do not substitute fire-and-forget job creation for these lifecycle and recovery requirements.

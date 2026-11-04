@@ -31,6 +31,7 @@ import (
 	recordinglocal "github.com/wtiger001/teststudio/adapters/recording/localplaywright"
 	localsecrets "github.com/wtiger001/teststudio/adapters/secrets/local"
 	githubsource "github.com/wtiger001/teststudio/adapters/sources/github"
+	workerhttp "github.com/wtiger001/teststudio/adapters/workerexchange/http"
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/cliauth"
@@ -51,6 +52,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/sources"
 	"github.com/wtiger001/teststudio/internal/storage"
 	"github.com/wtiger001/teststudio/internal/traceviewer"
+	"github.com/wtiger001/teststudio/internal/workerexchange"
 )
 
 func main() {
@@ -60,6 +62,7 @@ func main() {
 }
 
 func run() error {
+	workerAddr := flag.String("worker-addr", "", "Optional private job transport listen address; requires trusted ingress and remote TLS termination")
 	serviceRole := flag.String("serve-role", "all", "Service listeners: all, api, or artifacts; artifact role starts no background workers or identity bootstrap")
 	addr := flag.String("addr", "127.0.0.1:8040", "HTTP listen address")
 	dsn := flag.String("database", ".data/teststudio.db", "SQLite path or PostgreSQL connection URL")
@@ -100,8 +103,8 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	if !role.API && (*local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *preparedSources || *sourceBundles || *githubSources || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
-		return errors.New("the artifact service role cannot configure identity bootstrap, sign-in, source preparation, recording, or execution")
+	if !role.API && (*workerAddr != "" || *local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *preparedSources || *sourceBundles || *githubSources || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
+		return errors.New("the artifact service role cannot configure identity bootstrap, sign-in, source preparation, recording, execution, or private worker transport")
 	}
 	connection, err := runtimeconfig.DatabaseConnection(*dsn, *databaseEnvironment, runtimeconfig.ExplicitFlag(flag.CommandLine, "database"), os.LookupEnv)
 	if err != nil {
@@ -318,6 +321,10 @@ func run() error {
 	servers := []*http.Server{server}
 	if role.Artifacts {
 		servers = append(servers, artifactServer)
+	}
+	if *workerAddr != "" {
+		exchange := &workerexchange.Service{Store: db, Blobs: blobs, Authorize: runService.AuthorizeWorkerAttempt}
+		servers = append(servers, &http.Server{Addr: *workerAddr, Handler: workerhttp.Handler(exchange), ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 45 * time.Second, WriteTimeout: 60 * time.Second, IdleTimeout: 90 * time.Second, MaxHeaderBytes: 16 << 10})
 	}
 	background := backgroundServices{Runs: runService, Recordings: recordingService, CLI: &cliauth.Service{Sessions: sessionService}, Evidence: evidenceService, Sources: sourceService}
 	if *scheduler {

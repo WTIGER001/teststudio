@@ -9,6 +9,7 @@ Use the [workflow completion checklist](docs/plan.md#workflow-completion-checkli
 
 The [AWS core profile](docs/aws.md) documents ECS, separate CloudFront origins, private storage, and local packaging checks.
 The [Azure core profile](docs/azure.md) documents separate Container Apps, managed identities, Key Vault references, and private Blob evidence.
+The [private worker exchange](docs/worker-exchange.md) supplies bounded attempt transport for the hosted execution adapters under development.
 
 ## Local demonstration
 
