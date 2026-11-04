@@ -122,7 +122,38 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: direct HTTPS worker backend
+## Current delivery: staged Azure trusted backend package
+
+Acceptance **51** and supporting packaging under **57** advance. The verified total remains **48 of 57**, with **9 open**.
+The direct TLS backend batch commits as 38a5d7a.
+
+The new deploy/azure/worker-backend.bicep package defines a dedicated internal Container Apps environment with public network access disabled.
+Its only app overrides the service image entrypoint and runs the exact worker-only command on private port 8042.
+The app uses platform HTTPS termination with the environment default domain. Platform user authentication is explicitly disabled.
+It starts no UI, sign-in, source preparation, scheduler, notification worker, test executor, or coded job.
+The existing core deployment remains unchanged and does not invoke this separate package.
+
+Separate pull, startup, and runtime identities reuse the existing registry, secret, and Blob grant modules.
+Pull and startup identities have lifecycle None. The main container selects the exact artifact runtime client identifier.
+The startup grant reaches only the named database secret. The artifact grant reaches only the selected existing container.
+Only a database secret reference and Azure artifact configuration enter the container. No target, OIDC, registry-write, or AWS credential is added.
+Outputs bind intended backend origin, application identifier, and environment identifier. They contain no secret values.
+
+A local Bicep 0.48.1 compilation passes schema validation without warnings or registry restoration.
+Six focused package checks pass for private environment intent, HTTPS listener, exact command, identity separation, grant scopes, and probes or outputs.
+A checker review strengthens the dependency assertions. It reuses the compiled template rather than recompiling or repeating Go fixtures.
+Evidence is output/azure-worker-backend/backend.json, compile.log, and summary.json.
+No live Azure API, account, cloud credential, Azure CLI, image build, UI build, browser, registry push, or deployment runs.
+No owned browser, container, service process, or live test listener starts in this batch.
+
+This is staged backend infrastructure, not native admission or coded worker enablement.
+Actual private relay routing, endpoint approval, DNS, certificate trust, resource observation, exclusive occupancy, attachment authority, effective identities, and trusted storage paths remain required.
+The intended package does not establish deployed isolation or authorize an untrusted test job.
+The operator guide records those boundaries and leaves all nine broad acceptance items open.
+Continue resource binding and private relay-to-backend admission, effective read coverage, environment attachment authority, and exchange networking.
+See [staged Azure trusted backend](azure-worker-backend.md).
+
+## Previous delivery: direct HTTPS worker backend
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 The dedicated backend role batch commits as 105acdf.

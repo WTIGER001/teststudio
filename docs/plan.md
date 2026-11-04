@@ -265,10 +265,20 @@ Foreign authority, untrusted roots, legacy TLS, plaintext HTTP, and revoked writ
 See [direct backend TLS](worker-backend.md#direct-tls). Acceptance 51 advances; the count remains 48 of 57.
 No UI, browser, image build, cloud request, registry push, or deployment runs.
 
+A separate staged Azure backend package now defines a dedicated internal environment with public network access disabled.
+Its only app uses the exact worker role command, platform HTTPS termination, and the selected private worker port.
+Separate identities supply image pull, one database secret, and the shared artifact container. Existing scoped grant modules remain canonical.
+Resource-bound outputs identify the backend origin, app, and environment without secret values.
+Local schema compilation and six packaging checks pass. The checker inspects no live Azure state.
+The core package remains unchanged. No image, UI, browser, Go fixture, registry push, deployment, or cloud request runs.
+See [staged Azure trusted backend](azure-worker-backend.md). Acceptance 51 and supporting packaging under 57 advance; the count remains 48 of 57.
+
 Next verify effective read coverage, environment attachment authority, and actual exchange networking.
 A completed list response does not prove authorization coverage or prevent later attachments. Keep those native installation controls mandatory.
 Use the worker backend role to verify its restricted route, TLS authority, and placement before completing service admission.
-Select direct backend TLS or private TLS ingress explicitly in provider packaging. Bind its exact destination and normally trusted chain.
+The staged Azure backend selects platform HTTPS termination. Other approved profiles can select direct TLS.
+Bind its actual origin, app, environment, exact private destination, and normally trusted chain.
+Keep the staged backend separate from core deployment and coded worker packaging until admission and private relay access are complete.
 Resolve effective VNet-wide private-zone visibility and attachment controls. Selected-zone inspection cannot rule out other shadowing zones.
 Keep that proof separate from configured record correctness and private endpoint ownership.
 Provide trusted preparation with a separate private registry endpoint and DNS path. Do not add controller links to worker zones or peer worker and controller networks.
@@ -283,7 +293,7 @@ Then bind actual managed identities and registry roles in native setup and infra
 Keep network and deadline hooks mandatory. A local fake does not establish a deployable Azure isolation boundary.
 Replica timeout alone does not cover queue delay or satisfy the absolute deadline contract.
 Keep inspected non-root images mandatory. Azure lacks the ECS root-filesystem and capability overrides; verify its own isolation arrangement.
-Complete private HTTPS relay ingress, the restricted trusted worker backend, and preparation wiring before enabling native coded execution or Bicep packaging.
+Complete private HTTPS relay ingress, the restricted trusted worker backend, and preparation wiring before enabling native coded execution or adding coded-worker Bicep resources.
 Preserve the later remote gateway and recording requirements. Keep application secrets in trusted gateways.
 Run only targeted local fixtures during these batches. Keep live MMDev and Azure deployment verification separate.
 Acceptances 41, 46, and 51–57 remain open.

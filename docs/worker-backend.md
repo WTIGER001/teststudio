@@ -14,6 +14,8 @@ Disabled users, cancellation, expired leases, changed ownership, and archived re
 The preparation execution location selects the discovery lease registry.
 
 This role implements the backend process and optional direct TLS. It does not establish provider routing, placement, or installation authority.
+The [staged Azure backend package](azure-worker-backend.md) supplies a private environment, worker-only app, and scoped identities.
+It uses platform HTTPS termination rather than direct TLS. Provider admission and deployed routing remain unfinished.
 Azure coded execution remains disabled until complete admission and provider wiring pass.
 
 ## Startup

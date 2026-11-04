@@ -203,3 +203,15 @@ Complete the isolated preparation and execution adapters before claiming hosted 
 [Managed identities](https://learn.microsoft.com/en-us/azure/container-apps/managed-identity) describes runtime identity lifecycle controls.
 [Key Vault references](https://learn.microsoft.com/en-us/azure/container-apps/manage-secrets) describes protected secret resolution and refresh.
 [Storage behavior](https://learn.microsoft.com/en-us/azure/container-apps/storage-mounts) describes temporary storage and Blob mount limitations.
+
+## Staged private worker backend
+
+The separate [worker backend package](azure-worker-backend.md) defines a dedicated internal environment and the worker-only service role.
+It reuses existing PostgreSQL, artifact storage, vault, and registry references through three separate managed identities.
+It overrides the service image entrypoint and adds only database and artifact configuration.
+It exposes no UI, sign-in, source preparation, scheduler, notification worker, or test executor.
+The core deployment does not include or invoke this package.
+
+Local compilation and six packaging checks pass without Azure account access or deployment.
+Private relay access, effective identity authority, DNS, routing, complete admission, and separate hosted verification remain unfinished.
+Keep coded Azure execution disabled. Backend infrastructure intent does not complete acceptance 51 or 57.

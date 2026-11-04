@@ -16,6 +16,8 @@ The [endpoint stage](azure-worker-endpoints.md) now checks consumer-side approva
 The [registry service stage](azure-worker-registry.md) now checks private configuration, regional data members, and service-side approval.
 The [selected exchange stage](azure-worker-exchange.md) now checks app specification, service approval, routes, revisions, and HTTPS metadata.
 The [workload inventory stage](azure-worker-workloads.md) now checks reported application and job occupancy across the configured subscription.
+The [staged backend package](azure-worker-backend.md) now defines the separate internal backend environment, worker-only app, and scoped installation identities.
+It creates no worker job or relay path and proves no deployed isolation.
 The complete adapter must also prove read coverage, attachment authority, effective zone visibility, backend authority, exchange networking, and execution placement.
 Azure coded execution remains disabled in native commands and infrastructure packaging.
 See [durable Azure execution](azure-worker-lifecycle.md), [job contracts](azure-worker-contract.md), and [independent deadlines](azure-worker-deadlines.md).
