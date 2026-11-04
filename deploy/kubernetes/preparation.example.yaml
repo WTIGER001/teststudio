@@ -1,0 +1,14 @@
+preparation:
+  enabled: true
+  goRuntime: registry.example.test/teststudio/source@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+  playwrightRuntime: registry.example.test/teststudio/browser@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+  registry:
+    usernameEnvironment: TESTSTUDIO_REGISTRY_WRITER_USERNAME
+    passwordEnvironment: TESTSTUDIO_REGISTRY_WRITER_PASSWORD
+    credentials:
+      TESTSTUDIO_REGISTRY_WRITER_USERNAME:
+        existingSecret: teststudio-registry-writer
+        key: username
+      TESTSTUDIO_REGISTRY_WRITER_PASSWORD:
+        existingSecret: teststudio-registry-writer
+        key: password

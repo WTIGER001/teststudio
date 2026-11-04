@@ -4,7 +4,7 @@ The Helm chart in deploy/kubernetes packages the TestStudio service, identity se
 It uses the portable service image and installation-specific PostgreSQL and OIDC settings.
 The current chart runs the API, UI, schedules, notifications, and native HTTP checks.
 Optional offline coded execution uses the [Kubernetes worker profile](kubernetes-workers.md).
-Native remote preparation is implemented. Its Helm deployment and Kubernetes acceptance remain open.
+Native remote preparation and its optional Helm package are implemented. Kubernetes deployment acceptance remains open.
 
 ## Installation inputs
 
@@ -72,7 +72,7 @@ No claim is made about hosted failover or provider lifecycle until the correspon
 ## Process and network configuration
 
 The pod uses user and group 65532, a read-only root filesystem, no added capabilities, and private writable mounts.
-The ServiceAccount has no automatic API token or chart-created RBAC grants.
+The ServiceAccount has no automatic API token. The optional worker profile adds explicit bounded worker-control grants and a projected token.
 Configuration changes update a pod-template checksum and trigger rollout.
 Environment Secret rotations require a controlled pod restart after the new Secret value is available.
 
@@ -134,5 +134,6 @@ Keep the full acceptance scope in [Implementation verification](implementation.m
 ## Isolated execution workers
 
 The optional [worker profile](kubernetes-workers.md) now supplies Pod dispatch, a private exchange route, controller permissions, and a dedicated restricted namespace.
-It is disabled by default. The separate preparation-worker deployment and complete hosted verification remain required.
+It is disabled by default. The optional [preparation package](kubernetes-preparation.md) adds source assembly, durable journals, and separate writer credentials.
+Complete hosted verification remains required.
 Use the new worker guide for configuration, local evidence, and remaining scope.

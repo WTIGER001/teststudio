@@ -5,6 +5,13 @@ Database Secret: {{ .Values.database.existingSecret }} / {{ .Values.database.key
 Configure the declared TLS Secrets, ingress controller, PostgreSQL connection, and OIDC callbacks before use.
 Filesystem artifact claims remain after release removal. Manage retention and backups explicitly.
 Hosted coded execution requires the separate provider worker adapters described in the product plan.
+{{ if .Values.preparation.enabled }}
+Preparation worker: {{ include "teststudio.preparationName" . }}
+New source staging and builds: {{ .Values.preparation.acceptNewWork }}
+Private journal claim: {{ .Values.preparation.persistence.existingClaim | default (printf "%s-journals" (include "teststudio.preparationName" .)) }}
+Keep journal storage and registry writer credentials available until pending preparation cleanup finishes.
+Use preparation.acceptNewWork=false to drain without enabling new source staging or builds.
+{{ end }}
 {{ range .Values.oidc.providers }}
 OIDC callback for {{ .id }}: {{ $.Values.origins.ui }}/auth/callback/{{ .id }}
 {{ end }}

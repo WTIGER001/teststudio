@@ -44,6 +44,11 @@ subjects:
   - kind: ServiceAccount
     name: {{ include "teststudio.name" . }}
     namespace: {{ .Release.Namespace | quote }}
+  {{- if .Values.preparation.enabled }}
+  - kind: ServiceAccount
+    name: {{ include "teststudio.preparationName" . }}
+    namespace: {{ .Release.Namespace | quote }}
+  {{- end }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -71,6 +76,11 @@ subjects:
   - kind: ServiceAccount
     name: {{ include "teststudio.name" . }}
     namespace: {{ .Release.Namespace | quote }}
+  {{- if .Values.preparation.enabled }}
+  - kind: ServiceAccount
+    name: {{ include "teststudio.preparationName" . }}
+    namespace: {{ .Release.Namespace | quote }}
+  {{- end }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole

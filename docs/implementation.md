@@ -111,7 +111,40 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: hosted discovery and preparation queue integration
+## Current delivery: Helm source preparation and private journals
+
+Acceptances **51** and **57** advance with supporting preparation failover packaging under **52**.
+The total remains **48 verified of 57**, with **9 open** items. Local package checks do not close hosted acceptance.
+
+The optional preparation workload uses the immutable service image and a separate command, service account, projected token, and registry writer environment.
+The API retains its registry reader. The chart rejects shared reader/writer Secret objects and embeds no credential values.
+The preparation ConfigMap contains only worker and registry reference settings. It mounts no artifact claim or OIDC settings.
+No Service, Ingress, or container port exposes the preparation process. Its ingress policy denies incoming traffic.
+Existing bounded worker-control RBAC now binds both trusted controller accounts. Untrusted worker permissions remain unchanged.
+
+A separate durable claim retains private registry upload journals. A mode-0700 child protects journal contents beneath the writable mount.
+ReadWriteOnce journals use a single-replica Recreate rollout. Multiple replicas require shared ReadWriteMany storage and receive a disruption budget.
+Cleanup-only mode keeps the process, provider authority, writer credentials, and journals while disabling new API staging and builder flags.
+Source review, explicit publication, and approved execution retain their existing behavior.
+
+The API adds --source-bundle-runners to advertise only supported source builders. Its default remains go,playwright.
+The chart derives that list from selected immutable runtime references. The preparation command also derives synchronization profiles from enabled builders.
+Targeted parser checks pass. Go-only chart settings emit only the Go upload profile.
+
+Helm lint and six strict-schema profiles pass locally, including disabled preparation, both builders, Go-only staging, cleanup-only operation, shared journals, private CA, and Bearer credentials.
+Twelve rejected configurations cover missing worker isolation, missing or mutable runtimes, foreign registry references, claim collisions, replica/storage mismatch, and credential errors.
+Both rendered process settings load through the production Go parser and match the provider's exact protected network policy.
+Nine native and packaged startup guards pass before database initialization or provider contact.
+The service image reuses the UI, private trace viewer, and health binary. No source-runtime or browser dependency rebuild occurs.
+Owned startup probe containers are removed and their absence is verified. The local demonstration remains healthy.
+
+Evidence is output/kubernetes-preparation: package/summary.json, api-settings.log, preparation-settings.log, startup/summary.json, and startup/cleanup.json.
+See [Kubernetes source preparation](kubernetes-preparation.md) for operator setup, storage privacy, drain behavior, and limits.
+There is no registry push, browser run, cluster, AWS, or Azure operation.
+Next implement AWS worker dispatch and private exchange packaging through local protocol fixtures.
+Remote gateway profiles, Azure workers, and hosted deployment verification remain open.
+
+## Previous delivery: hosted discovery and preparation queue integration
 
 Acceptance **51** advances with supporting preparation failover work under **52**.
 The total remains **48 verified of 57**, with **9 open** items. No hosted acceptance closes from local fixtures.
@@ -143,7 +176,7 @@ No browser, external registry, cluster, AWS, or Azure verification runs. The exi
 
 Evidence is output/hosted-discovery: contract.log, provider-outcome.log, deferred-recovery.log, exchange-compatibility.log, startup, and runtime-package.
 See [Hosted preparation](hosted-discovery.md) for exact native configuration, package command overrides, and recovery requirements.
-Next implement the Helm preparation deployment, durable private journal volume, and separate registry writer credential references.
+The delivery above implements the Helm preparation deployment, durable private journal volume, and separate registry writer credential references.
 Remote gateway delivery, other provider adapters, and deployment acceptance remain open.
 
 ## Previous delivery: registry source assembly and immutable publication

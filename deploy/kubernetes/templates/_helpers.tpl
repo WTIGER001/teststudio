@@ -35,10 +35,31 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- if or (eq .Values.workers.origin .Values.origins.ui) (eq .Values.workers.origin .Values.origins.artifacts) -}}{{ fail "Workers require a separate private HTTPS origin" }}{{- end -}}
 {{- if eq .Values.workers.privateIngress.className .Values.ingress.className -}}{{ fail "Worker ingress must use a separate private ingress class" }}{{- end -}}
 {{- if not .Values.networkPolicy.enabled -}}{{ fail "Workers require ingress network policy" }}{{- end -}}
-{{- $registry := .Values.workers.registry -}}
-{{- if or (and $registry.bearerEnvironment (or $registry.usernameEnvironment $registry.passwordEnvironment)) (and $registry.usernameEnvironment (not $registry.passwordEnvironment)) (and $registry.passwordEnvironment (not $registry.usernameEnvironment)) -}}{{ fail "Registry authentication requires a Basic pair or one Bearer reference" }}{{- end -}}
+{{- include "teststudio.registryAuthentication" .Values.workers.registry -}}
+{{- end -}}
+{{- if .Values.preparation.enabled -}}
+{{- if not .Values.workers.enabled -}}{{ fail "Preparation requires the protected Kubernetes worker profile" }}{{- end -}}
+{{- if and (gt (int .Values.preparation.replicas) 1) (ne .Values.preparation.persistence.accessMode "ReadWriteMany") -}}{{ fail "Multiple preparation replicas require shared ReadWriteMany journals" }}{{- end -}}
+{{- $journals := .Values.preparation.persistence.existingClaim | default (printf "%s-journals" (include "teststudio.preparationName" .)) -}}
+{{- $artifacts := .Values.persistence.existingClaim | default (printf "%s-artifacts" (include "teststudio.name" .)) -}}
+{{- if and (eq .Values.artifactStore.driver "filesystem") (eq $journals $artifacts) -}}{{ fail "Preparation journals require a separate private claim" }}{{- end -}}
+{{- if and .Values.preparation.acceptNewWork (not (or .Values.preparation.goRuntime .Values.preparation.playwrightRuntime)) -}}{{ fail "New preparation requires at least one immutable registry runtime" }}{{- end -}}
+{{- $prefix := printf "%s/%s" (trimPrefix "https://" .Values.workers.registry.origin) .Values.workers.registry.repositoryPrefix -}}
+{{- range $image := list .Values.preparation.goRuntime .Values.preparation.playwrightRuntime -}}
+{{- if and $image (not (or (hasPrefix (printf "%s/" $prefix) $image) (hasPrefix (printf "%s@" $prefix) $image))) -}}{{ fail "Preparation runtimes must use the configured registry namespace" }}{{- end -}}
+{{- end -}}
+{{- $registry := .Values.preparation.registry -}}
+{{- if not (or $registry.usernameEnvironment $registry.bearerEnvironment) -}}{{ fail "Preparation requires separate registry writer credential references" }}{{- end -}}
+{{- include "teststudio.registryAuthentication" $registry -}}
+{{- $selected := dict -}}
 {{- range $name := list $registry.usernameEnvironment $registry.passwordEnvironment $registry.bearerEnvironment -}}
-{{- if and $name (not (hasKey $registry.credentials $name)) -}}{{ fail "Registry credential references require an existing Secret mapping" }}{{- end -}}
+{{- if $name -}}{{- $_ := set $selected $name true -}}{{- end -}}
+{{- end -}}
+{{- range $name, $reference := $registry.credentials -}}
+{{- if not (hasKey $selected $name) -}}{{ fail "Preparation cannot inject unused registry credentials" }}{{- end -}}
+{{- range $_, $reader := $.Values.workers.registry.credentials -}}
+{{- if eq $reference.existingSecret $reader.existingSecret -}}{{ fail "Preparation writer and API reader must use separate Secrets" }}{{- end -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
@@ -51,10 +72,35 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end -}}
 
 {{- define "teststudio.workerConfiguration" -}}
-{{- $w := .Values.workers -}}
-{{- $worker := dict "apiOrigin" $w.apiOrigin "namespace" $w.namespace "serviceAccount" $w.serviceAccount "tokenFile" "/var/run/teststudio-controller/token" "caFile" "/var/run/teststudio-controller/ca.crt" "architecture" .Values.image.architecture "runtimeClass" $w.runtimeClass "policyName" $w.policyName "exchangeOrigin" $w.origin "exchangePeer" (dict "namespace" $w.privateIngress.namespace "labels" $w.privateIngress.podLabels) "exchangePort" $w.privateIngress.port "dnsPeer" (dict "namespace" $w.dns.namespace "labels" $w.dns.podLabels) "imagePullSecrets" $w.imagePullSecrets "nodeSelector" $w.nodeSelector -}}
-{{- $r := $w.registry -}}
+{{- include "teststudio.workerSettings" (dict "root" . "registry" .Values.workers.registry) -}}
+{{- end -}}
+{{- define "teststudio.preparationConfiguration" -}}
+{{- $registry := mergeOverwrite (deepCopy .Values.workers.registry) .Values.preparation.registry -}}
+{{- include "teststudio.workerSettings" (dict "root" . "registry" $registry) -}}
+{{- end -}}
+{{- define "teststudio.workerSettings" -}}
+{{- $w := .root.Values.workers -}}
+{{- $worker := dict "apiOrigin" $w.apiOrigin "namespace" $w.namespace "serviceAccount" $w.serviceAccount "tokenFile" "/var/run/teststudio-controller/token" "caFile" "/var/run/teststudio-controller/ca.crt" "architecture" .root.Values.image.architecture "runtimeClass" $w.runtimeClass "policyName" $w.policyName "exchangeOrigin" $w.origin "exchangePeer" (dict "namespace" $w.privateIngress.namespace "labels" $w.privateIngress.podLabels) "exchangePort" $w.privateIngress.port "dnsPeer" (dict "namespace" $w.dns.namespace "labels" $w.dns.podLabels) "imagePullSecrets" $w.imagePullSecrets "nodeSelector" $w.nodeSelector -}}
+{{- $r := .registry -}}
 {{- $registry := dict "origin" $r.origin "repositoryPrefix" $r.repositoryPrefix "tokenURL" $r.tokenURL "tokenService" $r.tokenService "blobRedirectOrigins" $r.blobRedirectOrigins "usernameEnvironment" $r.usernameEnvironment "passwordEnvironment" $r.passwordEnvironment "bearerEnvironment" $r.bearerEnvironment -}}
 {{- if $r.caSecret -}}{{- $_ := set $registry "caFile" "/etc/teststudio-registry/ca.crt" -}}{{- end -}}
 {{- dict "worker" $worker "registry" $registry | toPrettyJson -}}
+{{- end -}}
+{{- define "teststudio.registryAuthentication" -}}
+{{- if or (and .bearerEnvironment (or .usernameEnvironment .passwordEnvironment)) (and .usernameEnvironment (not .passwordEnvironment)) (and .passwordEnvironment (not .usernameEnvironment)) -}}{{ fail "Registry authentication requires a Basic pair or one Bearer reference" }}{{- end -}}
+{{- range $name := list .usernameEnvironment .passwordEnvironment .bearerEnvironment -}}
+{{- if and $name (not (hasKey $.credentials $name)) -}}{{ fail "Registry credential references require an existing Secret mapping" }}{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- define "teststudio.preparationSelector" -}}
+app.kubernetes.io/name: teststudio
+app.kubernetes.io/instance: {{ .Release.Name | quote }}
+app.kubernetes.io/component: preparation
+{{- end -}}
+{{- define "teststudio.preparationName" -}}
+{{- if gt (len .Release.Name) 44 -}}
+{{- printf "%s-%s-prepare" (.Release.Name | trunc 35 | trimSuffix "-") (.Release.Name | sha256sum | trunc 8) -}}
+{{- else -}}
+{{- printf "%s-prepare" .Release.Name -}}
+{{- end -}}
 {{- end -}}

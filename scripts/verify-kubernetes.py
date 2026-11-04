@@ -7,6 +7,7 @@ import subprocess
 import tempfile
 
 import yaml
+from lib.kubernetes_preparation import check_preparation
 
 
 def main():
@@ -14,7 +15,9 @@ def main():
     parser.add_argument('--helm', default='helm')
     parser.add_argument('--kubeconform', default='kubeconform')
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--workers-only', action='store_true')
+    selection = parser.add_mutually_exclusive_group()
+    selection.add_argument('--workers-only', action='store_true')
+    selection.add_argument('--preparation-only', action='store_true')
     parser.add_argument('--pod', type=Path)
     arguments = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
@@ -88,12 +91,12 @@ def main():
                 assert store == {'driver': 'filesystem', 'directory': '/data/artifacts'}
                 claim = next(item for item in pod['volumes'] if item['name'] == 'data')['persistentVolumeClaim']['claimName']
                 if values.get('persistence', {}).get('existingClaim'):
-                    assert claim == values['persistence']['existingClaim'] and 'PersistentVolumeClaim' not in by_kind
+                    assert claim == values['persistence']['existingClaim'] and not any(item['metadata']['name'] == claim for item in by_kind.get('PersistentVolumeClaim', []))
                 else:
                     assert by_kind['PersistentVolumeClaim'][0]['metadata']['name'] == claim
                     assert by_kind['PersistentVolumeClaim'][0]['metadata']['annotations']['helm.sh/resource-policy'] == 'keep'
             else:
-                assert store == values['artifactStore'] and 'PersistentVolumeClaim' not in by_kind
+                assert store == values['artifactStore'] and not any(item['metadata']['name'] == 'fixture-artifacts' for item in by_kind.get('PersistentVolumeClaim', []))
                 assert 'emptyDir' in next(item for item in pod['volumes'] if item['name'] == 'data')
             services = {item['metadata']['name']: item for item in by_kind['Service']}
             ingress = next(item for item in by_kind['Ingress'] if item['metadata']['name'] == 'fixture')
@@ -111,7 +114,7 @@ def main():
             assert peer['podSelector']['matchLabels'] == values['networkPolicy']['ingressPodLabels']
             replicas = values.get('replicas', 1)
             assert deployment['spec']['replicas'] == replicas
-            assert ('PodDisruptionBudget' in by_kind) == (replicas > 1)
+            assert any(item['metadata']['name'] == 'fixture' for item in by_kind.get('PodDisruptionBudget', [])) == (replicas > 1)
             if driver == 'filesystem' and values.get('persistence', {}).get('accessMode', 'ReadWriteOnce') == 'ReadWriteOnce':
                 assert deployment['spec']['strategy']['type'] == 'Recreate'
             else:
@@ -136,7 +139,10 @@ def main():
                 account = next(item for item in by_kind['ServiceAccount'] if item['metadata']['namespace'] == worker['namespace'])
                 assert account['automountServiceAccountToken'] is False and not account['metadata'].get('annotations', {})
                 bindings = by_kind['RoleBinding'] + by_kind['ClusterRoleBinding']
-                assert all(item['subjects'] == [{'kind': 'ServiceAccount', 'name': 'fixture', 'namespace': 'teststudio-fixture'}] for item in bindings)
+                subjects = [{'kind': 'ServiceAccount', 'name': 'fixture', 'namespace': 'teststudio-fixture'}]
+                if values.get('preparation', {}).get('enabled'):
+                    subjects.append({'kind': 'ServiceAccount', 'name': 'fixture-prepare', 'namespace': 'teststudio-fixture'})
+                assert all(item['subjects'] == subjects for item in bindings)
                 role = by_kind['Role'][0]
                 assert role['metadata']['namespace'] == worker['namespace']
                 assert {resource for rule in role['rules'] for resource in rule['resources']} == {'pods', 'serviceaccounts', 'networkpolicies'}
@@ -160,6 +166,9 @@ def main():
                 assert 'kubernetes-workers.json' not in config
                 assert not any(item['name'] == 'controller-identity' for item in pod['volumes'])
                 assert not any(item.startswith('--kubernetes-workers') for item in container['args'])
+            preparation_settings = check_preparation(objects, values)
+            if preparation_settings is not None:
+                (output / (name + '-preparation-settings.json')).write_text(json.dumps(preparation_settings, indent=2) + '\n')
             checked = execute([arguments.kubeconform, '-strict', '-summary', '-exit-on-error', '-kubernetes-version', source['kubernetesVersion'], '-schema-location', source['schemaLocation'], '-cache', str(cache), str(manifest)])
             (output / (name + '-schema.log')).write_text(checked.stdout)
             report['validProfiles'].append({'name': name, 'resources': len(objects), 'schemaValidated': True})
@@ -170,7 +179,46 @@ def main():
         lint = execute([arguments.helm, 'lint', str(chart), '--strict', '--values', str(values_file)])
         (output / 'lint.log').write_text(lint.stdout)
         original_checksum = render('filesystem-single', base)
-        if arguments.workers_only:
+        if arguments.preparation_only:
+            enabled = copy.deepcopy(base)
+            enabled.update(yaml.safe_load((chart / 'workers.example.yaml').read_text()))
+            render('workers-without-preparation', enabled)
+            defaults = yaml.safe_load((chart / 'values.yaml').read_text())['preparation']
+            selected = yaml.safe_load((chart / 'preparation.example.yaml').read_text())['preparation']
+            defaults.update({key: value for key, value in selected.items() if key != 'registry'})
+            defaults['registry'].update(selected['registry'])
+            enabled['preparation'] = defaults
+            render('preparation-single', enabled)
+            go_only = copy.deepcopy(enabled)
+            go_only['preparation']['playwrightRuntime'] = ''
+            render('preparation-go-only', go_only)
+            drain = copy.deepcopy(enabled)
+            drain['preparation'].update(acceptNewWork=False, goRuntime='', playwrightRuntime='')
+            drain['preparation']['persistence']['existingClaim'] = 'existing-private-journals'
+            render('preparation-cleanup-only', drain)
+            shared = copy.deepcopy(enabled)
+            shared['image']['architecture'] = 'arm64'
+            shared['workers']['registry']['caSecret'] = 'registry-trust'
+            shared['preparation']['replicas'] = 2
+            shared['preparation']['persistence']['accessMode'] = 'ReadWriteMany'
+            shared['preparation']['registry'] = {'usernameEnvironment': '', 'passwordEnvironment': '', 'bearerEnvironment': 'TESTSTUDIO_REGISTRY_WRITER_BEARER', 'credentials': {'TESTSTUDIO_REGISTRY_WRITER_BEARER': {'existingSecret': 'writer-bearer', 'key': 'token'}}}
+            render('preparation-shared-bearer', shared)
+            invalid = {}
+            value = copy.deepcopy(enabled); value['workers']['enabled'] = False; invalid['preparation-without-workers'] = value
+            value = copy.deepcopy(enabled); value['preparation'].update(goRuntime='', playwrightRuntime=''); invalid['preparation-without-runtime'] = value
+            value = copy.deepcopy(enabled); value['preparation']['goRuntime'] = 'registry.example.test/teststudio/source:latest'; invalid['preparation-mutable-runtime'] = value
+            value = copy.deepcopy(enabled); value['preparation']['goRuntime'] = 'foreign.example.test/teststudio/source@sha256:' + 'a' * 64; invalid['preparation-foreign-runtime'] = value
+            value = copy.deepcopy(enabled); value['preparation']['replicas'] = 2; invalid['preparation-shared-rwo'] = value
+            value = copy.deepcopy(enabled); value['preparation']['persistence']['existingClaim'] = 'fixture-artifacts'; invalid['preparation-shared-artifact-claim'] = value
+            value = copy.deepcopy(enabled); value['persistence'] = {'existingClaim': 'fixture-prepare-journals'}; invalid['preparation-default-journal-collision'] = value
+            value = copy.deepcopy(enabled); value['preparation']['registry']['credentials']['TESTSTUDIO_REGISTRY_WRITER_PASSWORD']['existingSecret'] = 'teststudio-registry-reader'; invalid['preparation-reader-writer-secret'] = value
+            value = copy.deepcopy(enabled); value['preparation']['registry']['credentials'] = {}; invalid['preparation-unmapped-writer'] = value
+            value = copy.deepcopy(enabled); value['preparation']['registry']['bearerEnvironment'] = 'TESTSTUDIO_REGISTRY_WRITER_BEARER'; invalid['preparation-mixed-auth'] = value
+            value = copy.deepcopy(enabled); value['preparation']['registry']['password'] = 'inline-private-canary'; invalid['preparation-inline-password'] = value
+            value = copy.deepcopy(enabled); value['preparation']['registry']['credentials']['TESTSTUDIO_REGISTRY_UNUSED'] = {'existingSecret': 'unused-secret', 'key': 'password'}; invalid['preparation-unused-secret'] = value
+            for name, values in invalid.items():
+                render(name, values, expected=False)
+        elif arguments.workers_only:
             worker_values = yaml.safe_load((chart / 'workers.example.yaml').read_text())
             enabled = copy.deepcopy(base)
             enabled.update(worker_values)

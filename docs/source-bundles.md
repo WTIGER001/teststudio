@@ -216,4 +216,7 @@ The [registry source builder](registry-preparation.md) assembles offline snapsho
 It retains source ownership and publishes immutable distribution digests through a trusted preparation process.
 The preparation worker enables it through explicit provider settings and immutable registry runtime flags.
 Hosted discovery feeds the existing source review, exact artifact approval, publication, and optional activation workflow.
-Its Helm preparation deployment and complete provider verification remain open. Existing local bundle workflows retain their current behavior.
+The optional [Kubernetes preparation package](kubernetes-preparation.md) deploys its separate process, credentials, and durable journals.
+The API accepts --source-bundle-runners=go, playwright, or go,playwright. Align this list with the location's configured builders.
+The preparation command derives repository synchronization profiles from its enabled builders.
+Complete provider verification remains open. Existing local bundle workflows retain their current behavior by default.

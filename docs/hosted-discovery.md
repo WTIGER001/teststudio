@@ -8,8 +8,8 @@ The API accepts source uploads and presents the normal source review. It does no
 The portable service image now includes /app/teststudio-prepare for a separate preparation process.
 
 Native configuration, local TLS protocol checks, and package checks pass without registry or cluster access.
-The Helm preparation deployment, durable journal volume, and preparation-specific credential references remain to implement.
-Do not treat the existing chart as a complete hosted source installation.
+The optional [Helm preparation package](kubernetes-preparation.md) now supplies a separate deployment, durable journal claim, and scoped writer references.
+Complete hosted source operation still requires deployment verification.
 Environment-backed browser and API profiles require remote gateway delivery. AWS and Azure worker implementations remain open.
 
 ## Configure separate processes
@@ -65,6 +65,7 @@ It holds private registry upload journals, including scoped upload addresses. It
 Use [registry recovery](registry-preparation.md#ownership-and-recovery) for interrupted or uncertain uploads.
 
 Omit a runner's registry runtime flag to disable new builds for that runner while retaining its cleanup driver.
+Set the API's --source-bundle-runners list to match the available builders. Its default is go,playwright.
 Keep the worker running with the same database, provider settings, credentials, and journal directory until pending cleanup finishes.
 The API retains discovery recovery even when new prebuilt discovery is disabled.
 For repository synchronization, use the existing [repository settings](repository-sources.md) and enable the corresponding provider on the preparation process.

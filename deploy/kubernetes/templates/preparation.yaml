@@ -1,0 +1,199 @@
+{{- if .Values.preparation.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "teststudio.preparationName" . }}
+  namespace: {{ .Release.Namespace | quote }}
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "teststudio.preparationName" . }}-config
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  kubernetes-workers.json: |-
+    {{- include "teststudio.preparationConfiguration" . | nindent 4 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "teststudio.preparationName" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  labels:
+    {{- include "teststudio.preparationSelector" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.preparation.replicas }}
+  revisionHistoryLimit: 3
+  progressDeadlineSeconds: 300
+  strategy:
+    {{- if eq .Values.preparation.persistence.accessMode "ReadWriteOnce" }}
+    type: Recreate
+    {{- else }}
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+    {{- end }}
+  selector:
+    matchLabels:
+      {{- include "teststudio.preparationSelector" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "teststudio.preparationSelector" . | nindent 8 }}
+      annotations:
+        checksum/config: {{ include "teststudio.preparationConfiguration" . | sha256sum | quote }}
+    spec:
+      serviceAccountName: {{ include "teststudio.preparationName" . }}
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 90
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: {{ .Values.image.architecture }}
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- range .Values.image.pullSecrets }}
+        - name: {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: preparation
+          image: {{ printf "%s@%s" .Values.image.repository .Values.image.digest | quote }}
+          imagePullPolicy: IfNotPresent
+          command: [/app/teststudio-prepare]
+          args:
+            - --database-env=TESTSTUDIO_DATABASE
+            - --require-postgres=true
+            - --execution-location=kubernetes
+            - --kubernetes-workers-config=/etc/teststudio/kubernetes-workers.json
+            - --build-directory=/journals/private
+            {{- if .Values.preparation.acceptNewWork }}
+            {{- if .Values.preparation.goRuntime }}
+            - {{ printf "--registry-go-runtime=%s" .Values.preparation.goRuntime | quote }}
+            {{- end }}
+            {{- if .Values.preparation.playwrightRuntime }}
+            - {{ printf "--registry-playwright-runtime=%s" .Values.preparation.playwrightRuntime | quote }}
+            {{- end }}
+            {{- end }}
+          env:
+            - name: TESTSTUDIO_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.existingSecret | quote }}
+                  key: {{ .Values.database.key | quote }}
+            {{- range $name, $reference := .Values.preparation.registry.credentials }}
+            - name: {{ $name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $reference.existingSecret | quote }}
+                  key: {{ $reference.key | quote }}
+            {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          resources:
+            {{- toYaml .Values.preparation.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/teststudio
+              readOnly: true
+            - name: journals
+              mountPath: /journals
+            - name: temporary
+              mountPath: /tmp
+            - name: controller-identity
+              mountPath: /var/run/teststudio-controller
+              readOnly: true
+            {{- if .Values.workers.registry.caSecret }}
+            - name: registry-ca
+              mountPath: /etc/teststudio-registry
+              readOnly: true
+            {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "teststudio.preparationName" . }}-config
+            defaultMode: 0444
+        - name: journals
+          persistentVolumeClaim:
+            claimName: {{ .Values.preparation.persistence.existingClaim | default (printf "%s-journals" (include "teststudio.preparationName" .)) | quote }}
+        - name: temporary
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
+        - name: controller-identity
+          projected:
+            defaultMode: 0440
+            sources:
+              - serviceAccountToken:
+                  path: token
+                  expirationSeconds: 3600
+              - configMap:
+                  name: kube-root-ca.crt
+                  items:
+                    - key: ca.crt
+                      path: ca.crt
+        {{- if .Values.workers.registry.caSecret }}
+        - name: registry-ca
+          secret:
+            secretName: {{ .Values.workers.registry.caSecret | quote }}
+            defaultMode: 0440
+            items:
+              - key: ca.crt
+                path: ca.crt
+        {{- end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "teststudio.preparationName" . }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "teststudio.preparationSelector" . | nindent 6 }}
+  policyTypes: [Ingress]
+  ingress: []
+{{- if not .Values.preparation.persistence.existingClaim }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "teststudio.preparationName" . }}-journals
+  namespace: {{ .Release.Namespace | quote }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes: [{{ .Values.preparation.persistence.accessMode }}]
+  {{- if .Values.preparation.persistence.storageClass }}
+  storageClassName: {{ .Values.preparation.persistence.storageClass | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.preparation.persistence.size | quote }}
+{{- end }}
+{{- if gt (int .Values.preparation.replicas) 1 }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "teststudio.preparationName" . }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      {{- include "teststudio.preparationSelector" . | nindent 6 }}
+{{- end }}
+{{- end }}

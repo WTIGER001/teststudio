@@ -7,7 +7,7 @@ It runs inside the worker image. It never executes uploaded test code inside the
 The supervisor, runtime overlay producer, and targeted local verification are implemented.
 The optional [Kubernetes worker profile](kubernetes-workers.md) now supplies dispatch, private ingress configuration, and provider recovery.
 Native remote preparation and discovery now connect to the existing source queue and approval workflow.
-Its Helm deployment, trusted remote gateway delivery, other providers, and hosted acceptance remain unfinished.
+The optional Helm preparation package is implemented. Trusted remote gateway delivery, other providers, and hosted acceptance remain unfinished.
 Keep acceptance 51 and the related hosted acceptance items open.
 
 ## Job contract
@@ -193,7 +193,7 @@ They must distinguish provider status, runner status, test outcome, and evidence
 They must reconcile cancellation, hard deadlines, orphaned jobs, and persisted reports after controller restart.
 Revoke worker tickets before publishing collected results or evidence.
 Keep staging cleanup and provider cleanup ahead of the final worker ledger completion.
-The Helm preparation deployment, remote gateway profiles, remaining providers, and hosted verification remain required work.
+Remote gateway profiles, remaining providers, and hosted verification remain required work.
 
 A managed worker can receive a retryable input response while provider verification remains pending.
 The existing bounded input retry policy handles that activation gate without invoking uploaded code early.

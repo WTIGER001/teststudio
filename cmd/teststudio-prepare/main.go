@@ -118,8 +118,10 @@ func run() error {
 			}
 		}
 	}
-	if len(service.Builders) > 0 {
-		service.BundleRunners = []string{"go", "playwright"}
+	for _, runner := range []string{"go", "playwright"} {
+		if service.Builders[runner] != nil {
+			service.BundleRunners = append(service.BundleRunners, runner)
+		}
 	}
 	var syncDone <-chan struct{}
 	if *githubSources && len(service.Builders) > 0 {

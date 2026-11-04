@@ -38,16 +38,18 @@ def main():
         verify([native['preparation'], *common, '--kubernetes-workers-config=' + str(config)], 'requires Kubernetes settings', 'native-location-required')
         verify([native['preparation'], *common, *worker, '--go-runtime=sha256:' + 'a' * 64], 'without local source runtime flags', 'native-local-runtime-rejected')
         verify([native['preparation'], *common, '--registry-go-runtime=registry.example.test/teststudio/source@sha256:' + 'a' * 64], 'requires Kubernetes settings', 'native-registry-settings-required')
-        verify([native['server'], *common, *worker, '--prepared-sources', '--source-bundles', '--worker-addr=127.0.0.1:8042', '--public-url=https://studio.example.test', '--artifact-origin=https://evidence.example.test'], 'requires a PostgreSQL', 'native-api-discovery-profile')
+        verify([native['server'], *common, *worker, '--prepared-sources', '--source-bundles', '--source-bundle-runners=go', '--worker-addr=127.0.0.1:8042', '--public-url=https://studio.example.test', '--artifact-origin=https://evidence.example.test'], 'requires a PostgreSQL', 'native-api-discovery-profile')
+        verify([native['server'], *common, '--source-bundles', '--source-bundle-runners=go,node'], 'source bundle runners must select', 'native-invalid-source-runners')
         assert not database.exists(), 'rejected startup initialized a database'
 
-    for label, extra, expected in [
-        ('image-postgres-required', ['--execution-location=kubernetes'], 'requires a PostgreSQL'),
-        ('image-local-runtime-rejected', ['--execution-location=kubernetes', '--playwright-runtime=sha256:' + 'a' * 64], 'without local source runtime flags'),
+    for label, entrypoint, extra, expected in [
+        ('image-postgres-required', '/app/teststudio-prepare', ['--execution-location=kubernetes'], 'requires a PostgreSQL'),
+        ('image-local-runtime-rejected', '/app/teststudio-prepare', ['--execution-location=kubernetes', '--playwright-runtime=sha256:' + 'a' * 64], 'without local source runtime flags'),
+        ('image-single-source-runner', '/app/teststudio', ['--execution-location=kubernetes', '--prepared-sources', '--source-bundles', '--source-bundle-runners=go', '--worker-addr=0.0.0.0:8042', '--public-url=https://studio.example.test', '--artifact-origin=https://evidence.example.test'], 'requires a PostgreSQL'),
     ]:
         name = 'teststudio-preparation-guard-' + uuid.uuid4().hex[:12]
         try:
-            verify(['docker', 'run', '--rm', '--name', name, '--network=none', '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges', '--health-cmd=none', '--env', 'TESTSTUDIO_WORKER_CONFIGURATION=' + json.dumps(settings), '--entrypoint=/app/teststudio-prepare', image, '--database=/tmp/unopened.db', '--kubernetes-workers-env=TESTSTUDIO_WORKER_CONFIGURATION', *extra], expected, label)
+            verify(['docker', 'run', '--rm', '--name', name, '--network=none', '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges', '--no-healthcheck', '--env', 'TESTSTUDIO_WORKER_CONFIGURATION=' + json.dumps(settings), '--entrypoint=' + entrypoint, image, '--database=/tmp/unopened.db', '--kubernetes-workers-env=TESTSTUDIO_WORKER_CONFIGURATION', *extra], expected, label)
         finally:
             subprocess.run(['docker', 'rm', '-fv', name], capture_output=True, text=True, timeout=10)
             state = subprocess.run(['docker', 'container', 'inspect', name], capture_output=True, text=True, timeout=10)

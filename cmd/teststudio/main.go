@@ -84,7 +84,8 @@ func run() error {
 	browserGateway := flag.String("browser-gateway-image", "", "Immutable trusted gateway image; enables single-origin environment-backed local Playwright and Go API execution")
 	goImages := flag.String("go-images", "", "Comma-separated immutable local Go suite image references; enables the isolated local Go worker")
 	preparedSources := flag.Bool("prepared-sources", false, "Enable source discovery and project-owned immutable suite images for the configured execution provider")
-	sourceBundles := flag.Bool("source-bundles", false, "Enable Go ZIP staging for the separate teststudio-prepare worker")
+	sourceBundles := flag.Bool("source-bundles", false, "Enable offline ZIP staging for the separate teststudio-prepare worker")
+	sourceBundleRunners := flag.String("source-bundle-runners", "go,playwright", "Available source builders: go, playwright, or both separated by a comma")
 	githubSources := flag.Bool("github-sources", false, "Enable GitHub repository registration and durable sync queues")
 	scheduler := flag.Bool("scheduler", true, "Process durable project schedules on this instance")
 	notificationWorker := flag.Bool("notification-worker", true, "Process durable notification deliveries on this instance")
@@ -173,6 +174,10 @@ func run() error {
 		}
 	}
 	initialProviders, err := authoidc.InitialProviders(*providers, *providersEnvironment, os.LookupEnv)
+	if err != nil {
+		return err
+	}
+	bundleRunners, err := runtimeconfig.SourceRunners(*sourceBundleRunners)
 	if err != nil {
 		return err
 	}
@@ -267,7 +272,7 @@ func run() error {
 		"go": &localcontainer.Executor{Runner: "go"}, "playwright": &localcontainer.Executor{Runner: "playwright"},
 	}}
 	if *sourceBundles || *githubSources {
-		sourceService.BundleRunners = []string{"go", "playwright"}
+		sourceService.BundleRunners = bundleRunners
 	}
 	if *githubSources {
 		sourceService.Secrets = secretProvider

@@ -9,7 +9,8 @@ Local protocol and packaging checks pass. No cluster deployment is verified in t
 Acceptance 51 remains open across providers. The total stays 48 verified items out of 57.
 
 The separate preparation command now connects registry assembly, immutable publication, and hosted discovery to the existing source queue.
-Native setup is documented in [Hosted preparation](hosted-discovery.md). The Helm preparation deployment and durable journal mounts remain to implement.
+Native setup is documented in [Hosted preparation](hosted-discovery.md).
+The optional [preparation package](kubernetes-preparation.md) adds its Helm deployment, private durable journals, separate service account, and registry writer references.
 The catalog still requires a prepared and approved immutable artifact.
 Source import does not automatically approve a new registry image.
 Environment-backed browser and API artifacts remain blocked until trusted remote gateway delivery exists.
@@ -168,8 +169,7 @@ The service image rebuild reuses the UI, private viewer, and unchanged health bi
 No source runner image rebuild, browser suite, registry push, cloud operation, or cluster test occurs.
 The local demonstration retains its database and evidence.
 
-Next package the separate preparation worker, durable private journal storage, and scoped registry writer settings in Helm.
-Preserve the admission gate and durable cleanup ordering in that deployment.
+The separate preparation package now preserves the admission gate and durable cleanup ordering through explicit Helm settings.
 Then continue AWS and Azure adapters through the same lifecycle contract.
 Actual deployment, CNI isolation, RuntimeClass behavior, OIDC, and multi-replica acceptance remain separate verification work.
 

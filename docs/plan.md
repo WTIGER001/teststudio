@@ -219,15 +219,23 @@ The source help reflects the configured execution location, and the Angular prod
 See [Hosted preparation](hosted-discovery.md) for exact native setup and retained evidence.
 Acceptances 51 and supporting preparation isolation in 52 advance. The count remains 48 verified and 9 open.
 
-Next add the separate preparation deployment to Helm with its durable private journal volume and scoped registry writer credential references.
-Keep API registry access read-only and give the preparation process its own provider identity and bounded resource profile.
-Do not enable source staging in the chart without the preparation process and its recovery storage.
-Retain private upload journals on durable preparation storage and preserve cleanup-only recovery when new builds are disabled.
-The first Kubernetes source workflow must become usable before repeating generic execution implementation for other providers.
+The optional Helm preparation package now includes a separate workload, projected provider identity, bounded resources, and private durable journal claim.
+API registry reads and preparation registry writes use separate Secret references and process environments.
+The API advertises only configured source builders. A Go-only preparation worker no longer advertises Playwright ZIP staging.
+Cleanup-only mode disables new staging and build flags while retaining provider settings, registry credentials, and durable journals.
+Single-writer claims use Recreate. Multiple preparation replicas require shared ReadWriteMany journals.
+Six local schema profiles, twelve rejected settings, both rendered provider configurations, and nine native or packaged startup guards pass.
+The source-profile parser passes targeted checks. UI assets, the trace viewer, and trusted source runtimes are reused.
+See [Kubernetes source preparation](kubernetes-preparation.md) for installation, drain, recovery, limits, and exact local evidence.
+This advances 51, supporting failover work in 52, and deployment packaging in 57. The total remains 48 verified and 9 open.
+
+Next implement AWS execution workers and their private HTTPS exchange route through the common managed lifecycle.
+Keep exact image approval, gated dispatch, provider ownership, cancellation, deadlines, and checkpointed cleanup.
+Use local protocol fixtures and package rendering. Do not run AWS, cluster, or Azure deployment checks in this session.
 Keep uploaded source outside the API and retain exact source approval, project ownership, catalog review, and publication boundaries.
 Reuse trusted supervised runtimes. Do not execute uploaded Dockerfiles or add privileged building inside the API.
 Preserve the activation gate, cancellation, deadline, evidence, and cleanup contracts for preparation work.
-Then continue AWS and Azure provider adapters and their private routes through the same managed lifecycle.
+Then continue Azure workers and remote gateway delivery through the same managed lifecycle.
 Use the frozen work packet as the runner's existing bounded stdin contract.
 Preserve immutable source approval, timing, result, capture-policy, and gateway contracts.
 Keep real target credentials in the trusted gateway. Untrusted workers receive neither application sessions nor provider SDK credentials.

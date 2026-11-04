@@ -47,6 +47,31 @@ serviceAccount:
   annotations: {}
 podAnnotations: {}
 podLabels: {}
+preparation:
+  enabled: false
+  acceptNewWork: true
+  replicas: 1
+  goRuntime: ""
+  playwrightRuntime: ""
+  persistence:
+    existingClaim: ""
+    storageClass: ""
+    size: 5Gi
+    accessMode: ReadWriteOnce
+  registry:
+    usernameEnvironment: ""
+    passwordEnvironment: ""
+    bearerEnvironment: ""
+    credentials: {}
+  resources:
+    requests:
+      cpu: 500m
+      memory: 512Mi
+      ephemeral-storage: 64Mi
+    limits:
+      cpu: "2"
+      memory: 2Gi
+      ephemeral-storage: 256Mi
 workers:
   enabled: false
   namespace: ""

@@ -74,6 +74,14 @@ spec:
             - --worker-addr=0.0.0.0:8042
             - --kubernetes-workers-config=/etc/teststudio/kubernetes-workers.json
             {{- end }}
+            {{- if and .Values.preparation.enabled .Values.preparation.acceptNewWork }}
+            - --source-bundles=true
+            - --prepared-sources=true
+            {{- $runners := list }}
+            {{- if .Values.preparation.goRuntime }}{{- $runners = append $runners "go" }}{{- end }}
+            {{- if .Values.preparation.playwrightRuntime }}{{- $runners = append $runners "playwright" }}{{- end }}
+            - {{ printf "--source-bundle-runners=%s" (join "," $runners) | quote }}
+            {{- end }}
           env:
             - name: TESTSTUDIO_DATABASE
               valueFrom:

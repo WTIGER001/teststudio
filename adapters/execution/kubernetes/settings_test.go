@@ -70,7 +70,11 @@ func TestRenderedWorkerSettingsMatchTheProtectedPolicy(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := os.ReadFile(filepath.Join(filepath.Dir(file), "private-workers-policy.json"))
+	policy := os.Getenv("TESTSTUDIO_KUBERNETES_POLICY")
+	if policy == "" {
+		policy = filepath.Join(filepath.Dir(file), "private-workers-policy.json")
+	}
+	data, err := os.ReadFile(policy)
 	if err != nil {
 		t.Fatal(err)
 	}

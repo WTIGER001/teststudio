@@ -736,6 +736,226 @@
         "privateIngress",
         "dns"
       ]
+    },
+    "preparation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "acceptNewWork": {
+          "type": "boolean"
+        },
+        "replicas": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 32
+        },
+        "goRuntime": {
+          "type": "string",
+          "pattern": "^$|^[A-Za-z0-9][A-Za-z0-9._:/-]*@sha256:[a-f0-9]{64}$",
+          "maxLength": 1024
+        },
+        "playwrightRuntime": {
+          "type": "string",
+          "pattern": "^$|^[A-Za-z0-9][A-Za-z0-9._:/-]*@sha256:[a-f0-9]{64}$",
+          "maxLength": 1024
+        },
+        "persistence": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "existingClaim": {
+              "type": "string",
+              "pattern": "^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+              "maxLength": 63
+            },
+            "storageClass": {
+              "type": "string"
+            },
+            "size": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]*(Mi|Gi|Ti)$"
+            },
+            "accessMode": {
+              "enum": [
+                "ReadWriteOnce",
+                "ReadWriteMany"
+              ]
+            }
+          },
+          "required": [
+            "existingClaim",
+            "storageClass",
+            "size",
+            "accessMode"
+          ]
+        },
+        "registry": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "usernameEnvironment": {
+              "type": "string",
+              "pattern": "^$|^TESTSTUDIO_REGISTRY_[A-Z0-9_]{1,96}$"
+            },
+            "passwordEnvironment": {
+              "type": "string",
+              "pattern": "^$|^TESTSTUDIO_REGISTRY_[A-Z0-9_]{1,96}$"
+            },
+            "bearerEnvironment": {
+              "type": "string",
+              "pattern": "^$|^TESTSTUDIO_REGISTRY_[A-Z0-9_]{1,96}$"
+            },
+            "credentials": {
+              "type": "object",
+              "patternProperties": {
+                "^TESTSTUDIO_REGISTRY_[A-Z0-9_]{1,96}$": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "existingSecret": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+                      "maxLength": 63
+                    },
+                    "key": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9._-]+$",
+                      "maxLength": 253
+                    }
+                  },
+                  "required": [
+                    "existingSecret",
+                    "key"
+                  ]
+                }
+              },
+              "additionalProperties": false,
+              "maxProperties": 8
+            }
+          },
+          "required": [
+            "usernameEnvironment",
+            "passwordEnvironment",
+            "bearerEnvironment",
+            "credentials"
+          ]
+        },
+        "resources": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "requests": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cpu": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  ]
+                },
+                "memory": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  ]
+                },
+                "ephemeral-storage": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ]
+            },
+            "limits": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cpu": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  ]
+                },
+                "memory": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  ]
+                },
+                "ephemeral-storage": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ]
+            }
+          },
+          "required": [
+            "requests",
+            "limits"
+          ]
+        }
+      },
+      "required": [
+        "enabled",
+        "acceptNewWork",
+        "replicas",
+        "goRuntime",
+        "playwrightRuntime",
+        "persistence",
+        "registry",
+        "resources"
+      ]
     }
   },
   "required": [
@@ -754,7 +974,8 @@
     "serviceAccount",
     "podAnnotations",
     "podLabels",
-    "workers"
+    "workers",
+    "preparation"
   ],
   "$schema": "http://json-schema.org/draft-07/schema#",
   "allOf": [
@@ -895,6 +1116,30 @@
             }
           },
           "networkPolicy": {
+            "properties": {
+              "enabled": {
+                "const": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "preparation": {
+            "properties": {
+              "enabled": {
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "workers": {
             "properties": {
               "enabled": {
                 "const": true
