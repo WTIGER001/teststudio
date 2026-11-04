@@ -69,6 +69,40 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: provider artifact storage selection
+
+Acceptance **46** advances and remains open. The ledger stays at **35 verified, 22 open, 57 total** items.
+
+Added filesystem, S3, and Azure Blob selection through the operator's --artifact-store-config JSON file.
+The default filesystem startup remains independent of cloud credentials. Selected profiles reject mixed settings and credential-bearing fields.
+Relative local directories resolve beside their configuration file. Local evidence remains outside the public UI directory.
+AWS credentials use the configured SDK chain. Azure uses its default credential chain or an explicit managed identity client identifier.
+Provider resources and credentials stay outside catalog, run, and UI contracts.
+
+Both object adapters use the existing evidence service for permissions, quotas, manifests, pins, retention, and upload recovery.
+Cloud uploads stage bounded input in private temporary files, calculate SHA-256, and remove the owned files after each call.
+S3 supplies a transfer checksum, optional expected owner, and optional KMS key. Azure uses block blobs and transfer validation.
+Keys preserve project and run identity beneath a configured installation prefix. Unsafe and oversized keys fail before a provider request.
+Missing objects use the shared missing-content error. Missing buckets and containers remain configuration errors.
+The server continues private artifact delivery through its existing isolated origin and authorization grants.
+
+Focused race checks pass against in-process HTTPS protocol fixtures with real SDK clients and test-only identities.
+They verify signing or bearer authentication, content and checksum preservation, prefixes, bounded writes, escaped names, and idempotent deletion.
+Common evidence checks pass for duplicate admission, quotas, pins, expiry, and durable manifests on SQLite and local PostgreSQL.
+Settings and staging checks pass for invalid profiles, credential rejection, relative paths, cancellation, private permissions, and owned-file cleanup.
+Password compatibility checks pass after required SDK dependency updates.
+Native server compilation and a Linux ARM64 build pass. UI and trace assets remain cached. No browser fixture image rebuilds.
+An actual local startup verifies the configuration flag, selected directory, ignored default directory, and rejection of public storage paths.
+Its owned server stops. The exact PostgreSQL fixture is removed. No verification browser starts.
+
+The concise milestone record is output/artifact-storage/checkpoint.json. Startup evidence is output/artifact-storage/startup.json.
+Operator setup, identity requirements, migration, provider lifecycle limits, and verification status appear in artifact-storage.md.
+The README, evidence guide, and self-testing guide link the supported profiles.
+
+Protocol fixtures do not prove provider IAM, managed identity, KMS, storage lifecycle rules, or deployed retention behavior.
+No cloud resources or deployments are tested. Acceptance **46** stays open for that required verification.
+Continue timing parity and provider execution packaging while keeping hosted acceptance separate.
+
 ## Current delivery: durable evidence upload recovery
 
 Acceptance **43** is complete. The current ledger has **35 verified, 22 open, 57 total** items.

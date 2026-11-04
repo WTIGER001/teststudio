@@ -351,3 +351,17 @@ They close and reopen database and artifact handles, then recover without upload
 Additional cases cover missing content, corrupt bytes, transient reads, active leases, bounded pages, and older pending manifests.
 Execution checks hold a duplicate upload open. Its checkpoint remains until the attachment becomes available.
 These checks require no browser build or cloud account.
+
+## Artifact storage contracts
+
+Run the affected local contracts with this command:
+
+```sh
+go test -race ./adapters/artifacts/... ./internal/artifacts -count=1
+```
+
+S3 and Azure cases use SDK clients against in-process HTTPS fixtures with test-only identities.
+The fixture owns no cloud resource and uses no configured account credentials.
+It closes its HTTP servers when the check finishes. No browser starts.
+The common lifecycle check can use the local PostgreSQL helper through the existing test database setting.
+See [Artifact storage](artifact-storage.md#verification-status) for verified behavior and provider acceptance limits.

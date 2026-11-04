@@ -20,7 +20,7 @@ import (
 	"time"
 
 	permissions "github.com/wtiger001/go-permissions"
-	"github.com/wtiger001/teststudio/adapters/artifacts/filesystem"
+	artifactconfig "github.com/wtiger001/teststudio/adapters/artifacts/config"
 	authoidc "github.com/wtiger001/teststudio/adapters/auth/oidc"
 	"github.com/wtiger001/teststudio/adapters/execution/localcontainer"
 	"github.com/wtiger001/teststudio/adapters/execution/localplaywright"
@@ -66,6 +66,7 @@ func run() error {
 	artifactOrigin := flag.String("artifact-origin", "http://127.0.0.1:8041", "Separate public artifact origin")
 	traceDirectory := flag.String("trace-viewer-directory", "", "Trusted pinned trace viewer bundle, served only on the separate artifact origin")
 	artifactDirectory := flag.String("artifact-directory", ".data/artifacts", "Private local artifact directory")
+	artifactConfiguration := flag.String("artifact-store-config", "", "Operator JSON settings for filesystem, S3, or Azure Blob artifacts")
 	location := flag.String("execution-location", "local", "Execution location identifier")
 	playwrightImages := flag.String("playwright-images", "", "Comma-separated immutable local Playwright image references; enables the isolated local worker")
 	browserGateway := flag.String("browser-gateway-image", "", "Immutable trusted browser gateway image; enables single-origin environment-backed local Playwright execution")
@@ -119,13 +120,15 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	artifactPath, err := filepath.Abs(*artifactDirectory)
+	artifactSettings, err := artifactconfig.Load(*artifactConfiguration, *artifactDirectory)
 	if err != nil {
 		return err
 	}
-	relative, err := filepath.Rel(uiPath, artifactPath)
-	if err != nil || (relative != ".." && !strings.HasPrefix(relative, ".."+string(filepath.Separator))) {
-		return errors.New("artifact-directory must be outside the public UI directory")
+	if artifactSettings.Driver == "filesystem" {
+		relative, err := filepath.Rel(uiPath, artifactSettings.Directory)
+		if err != nil || (relative != ".." && !strings.HasPrefix(relative, ".."+string(filepath.Separator))) {
+			return errors.New("artifact-directory must be outside the public UI directory")
+		}
 	}
 	if *local || (*localAccounts && parsed.Scheme == "http") {
 		host, _, err := net.SplitHostPort(*addr)
@@ -205,13 +208,13 @@ func run() error {
 	}
 	sessionService := &sessions.Service{LocalAccounts: *localAccounts, Store: db, Directory: directory, Origin: *public, Secure: parsed.Scheme == "https"}
 	oidc := &authoidc.Service{Store: db, Directory: directory, Sessions: sessionService, Origin: *public, SecretRefs: approvedOIDCSecrets}
-	files, err := filesystem.New(*artifactDirectory)
+	blobs, closeArtifacts, err := artifactconfig.Open(ctx, artifactSettings)
 	if err != nil {
 		return err
 	}
-	defer files.Close()
+	defer closeArtifacts()
 	catalogService := &catalog.Service{Store: db, Auth: auth}
-	evidenceService := &evidence.Service{Store: db, Blobs: files}
+	evidenceService := &evidence.Service{Store: db, Blobs: blobs}
 	runService := &runs.Service{Store: db, Auth: auth, Catalog: catalogService, Evidence: evidenceService, HTTP: &execution.HTTP{}, Location: *location}
 	sourceService := &sources.Service{Store: db, Auth: auth, Location: *location, RecoveryInspectors: map[string]preparation.ArtifactInspector{
 		"go": &localcontainer.Executor{Runner: "go"}, "playwright": &localcontainer.Executor{Runner: "playwright"},

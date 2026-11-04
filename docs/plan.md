@@ -46,7 +46,7 @@ Complete one coherent batch before adding the next. Update its user help and rel
 | Complete | Project creator access | Ordinary creator setup, managed scoped roles, publication, local execution, atomic rollback, and project boundaries pass on SQLite and local PostgreSQL. Acceptance 13 is verified. |
 | Complete | Recorded website execution locally | New native recording, reviewed local website steps, saved preparation, publication, registered target execution, guarded direct request, and blocked off-site redirect pass with retained logs, screenshot, trace, and timing. |
 | Complete | Tester operation and failure recovery | Scoped attempts, logs, screenshots, timeout and retry inspection, permission-loss recovery, and retry after a lost rerun response without another child pass. Acceptance 44 is verified. |
-| 4 | Remaining catalog and evidence gaps | Private trace viewing and category browsing are implemented. Reviewed publication also passes local verification. Catalog workflows and the shared paged API now pass verification. Preparation safety and retained history now close 26 and 29. Evidence restart recovery closes 43. Continue retention adapters and timing parity against the existing acceptance ledger. |
+| 4 | Remaining catalog and evidence gaps | Private trace viewing and category browsing are implemented. Reviewed publication also passes local verification. Catalog workflows and the shared paged API now pass verification. Preparation safety and retained history now close 26 and 29. Evidence restart recovery closes 43. S3 and Azure Blob adapters now have operator selection and local protocol checks. Keep 46 open for provider verification. Continue timing parity and provider packaging against the existing ledger. |
 | 5 | Hosted packaging and provider adapters | Implement and document independent provider configuration, worker dispatch, private artifacts, cancellation, deadlines, and recovery. Use local contract checks first. |
 | 6 | Deployment acceptance | Verify AWS, Kubernetes, and Azure in their separate deployment work. Then close the applicable remaining ledger items with profile-specific evidence. |
 
@@ -224,7 +224,10 @@ Acceptance **26** is complete. Bounded preparation recovery and terminal replay 
 Acceptance **29** is complete. Retained history and private evidence remain available through archive and working-definition removal.
 See [Retained test history](test-history.md) for tester steps, API permissions, paging, and retention limits.
 Acceptance **43** is complete. Durable upload recovery preserves identities, reservations, and original run outcomes.
-SQLite, local PostgreSQL, and the owned controller restart scenario pass. See [Evidence recovery](evidence.md#interrupted-upload-recovery). Acceptance **43** is complete. Durable upload recovery and repeated private evidence reads pass after local controller restart.
+SQLite, local PostgreSQL, and the owned controller restart scenario pass. See [Evidence recovery](evidence.md#interrupted-upload-recovery).
+Acceptance **46** advances. Filesystem, S3, and Azure Blob adapters now share the evidence service through operator-selected storage.
+SDK protocol fixtures and common lifecycle checks pass locally. Hosted storage identities and lifecycle behavior remain unverified.
+See [Artifact storage](artifact-storage.md) for configuration, migration, and remaining acceptance scope. Acceptance **43** is complete. Durable upload recovery and repeated private evidence reads pass after local controller restart.
 Continue adapter retention and timing parity.
 
 Bulk metadata edits now support reviewed category, tags, owner, title, description, safety, rationale, and condition changes.

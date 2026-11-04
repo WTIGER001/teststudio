@@ -35,7 +35,7 @@ Normal local development still starts with an empty project registry.
 | Inspect runs | [Results](docs/results.md), [Test history](docs/test-history.md), [Evidence](docs/evidence.md), [Timing](docs/timing.md), [Trends](docs/trends.md). |
 | Automate testing | [Schedules](docs/schedules.md), [Notifications](docs/notifications.md). |
 | Import and synchronize | [Native uploads](docs/sources.md), [Source bundles](docs/source-bundles.md), [Prepared suites](docs/prepared-suites.md), [Repositories](docs/repository-sources.md), [CLI sign-in](docs/cli-sign-in.md). |
-| Administer and operate | [Access](docs/access.md), [Provider profiles](docs/providers.md), [Notification transports](docs/notification-transports.md). Current installation commands appear below. |
+| Administer and operate | [Access](docs/access.md), [Artifact storage](docs/artifact-storage.md), [Provider profiles](docs/providers.md), [Notification transports](docs/notification-transports.md). Current installation commands appear below. |
 | Use the API | [OpenAPI contract](contracts/openapi.yaml), [Source webhook contract](contracts/source-webhooks.openapi.yaml), and the affected feature guide. |
 | Contribute | [Plan](docs/plan.md), [Acceptance ledger](docs/implementation.md), [UI contract](docs/ui.md), [Help maintenance](docs/help.md), [Self-testing](docs/self-testing.md). |
 
@@ -79,6 +79,7 @@ The API provides run creation, progress, cancellation, failure reruns, logs, and
 The artifact listener uses `http://127.0.0.1:8041` by default.
 Keep the artifact directory outside the public UI directory.
 Use `--artifact-origin`, `--artifact-addr`, and `--artifact-directory` to change these settings.
+Use `--artifact-store-config` for operator-selected S3 or Azure Blob storage. See [Artifact storage](docs/artifact-storage.md).
 Select Test runs to start a run, inspect progress, cancel execution, or rerun failed tests.
 The detail page shows attempts, filtered logs, events, and private artifact previews or downloads.
 The [private trace guide](docs/trace-viewer.md) describes installation-hosted action and snapshot inspection, expiry, and local download fallback.

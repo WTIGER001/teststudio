@@ -8,7 +8,6 @@ import (
 	"io"
 	"os"
 	"path"
-	"strings"
 
 	"github.com/wtiger001/teststudio/internal/artifacts"
 	"github.com/wtiger001/teststudio/internal/domain"
@@ -31,12 +30,8 @@ func New(directory string) (*Store, error) {
 
 func (s *Store) Close() error { return s.root.Close() }
 
-func validKey(key string) bool {
-	return key != "" && !strings.HasPrefix(key, "/") && !strings.Contains(key, "\\") && path.Clean(key) == key && key != ".." && !strings.HasPrefix(key, "../")
-}
-
 func (s *Store) Put(ctx context.Context, key string, source io.Reader, limit int64) (Object, error) {
-	if !validKey(key) || limit < 1 || limit > 1<<30 {
+	if !artifacts.ValidKey(key) || limit < 1 || limit > 1<<30 {
 		return Object{}, errors.New("invalid artifact key or size limit")
 	}
 	if err := ctx.Err(); err != nil {
@@ -76,7 +71,7 @@ func (s *Store) Put(ctx context.Context, key string, source io.Reader, limit int
 }
 
 func (s *Store) Open(ctx context.Context, key string) (io.ReadCloser, error) {
-	if !validKey(key) {
+	if !artifacts.ValidKey(key) {
 		return nil, errors.New("invalid artifact key")
 	}
 	if err := ctx.Err(); err != nil {
@@ -90,7 +85,7 @@ func (s *Store) Open(ctx context.Context, key string) (io.ReadCloser, error) {
 }
 
 func (s *Store) Delete(ctx context.Context, key string) error {
-	if !validKey(key) {
+	if !artifacts.ValidKey(key) {
 		return errors.New("invalid artifact key")
 	}
 	if err := ctx.Err(); err != nil {

@@ -87,7 +87,8 @@ View actions and page snapshots without publishing evidence. Refresh expired acc
 See [Private trace viewing](trace-viewer.md) for limits, permissions, and installation configuration.
 The Capture summary records collection completeness. File retention remains separate.
 The artifact heading receives keyboard focus after a deletion request.
-Capture configuration screens and cloud artifact adapters remain pending.
+Full capture configuration screens and cloud artifact deployment verification remain pending.
+Operator-selected S3 and Azure Blob adapters now share this evidence service. See [Artifact storage](artifact-storage.md).
 
 ## Local Playwright evidence
 
@@ -144,3 +145,10 @@ Focused SQLite and local PostgreSQL checks cover interrupted finalization, datab
 The local controller restart check verifies private evidence bytes and stable run, attempt, and attachment identities after another restart.
 See [Self-testing](self-testing.md#restart-and-cleanup-recovery) for the restart command and owned-resource cleanup.
 Cloud artifact adapter and deployment verification remain separate acceptance work.
+
+## Storage selection
+
+The default filesystem profile requires no cloud service.
+S3 and Azure Blob profiles use the same private grants, manifests, quotas, pin checks, and retention worker.
+Provider configuration stays outside the test catalog and run request.
+See [Artifact storage](artifact-storage.md) for credential sources, installation prefixes, storage migration, and current verification limits.
