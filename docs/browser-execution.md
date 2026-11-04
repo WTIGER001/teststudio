@@ -41,6 +41,8 @@ DNS resolution checks every returned address before connection. Metadata and lin
 Private addresses require the Local stage or the environment's explicit private-network setting.
 
 This profile permits all request methods to that endpoint. It does not promise read-only requests or inspect encrypted request contents.
+API-typed suites can instead declare a [request-restricted API policy](api-testing.md). Its gateway validates methods, paths, and payload limits before transmission.
+Protected API execution requires that reviewed read-only policy as well as safe test labels and protected-execution authority.
 CONNECT tunnels serve browser HTTPS and Playwright's HTTP and HTTPS request clients.
 Third-party assets, off-site redirects, and separate login origins fail unless they remain within the selected endpoint.
 The profile has no additional-origin list, custom request policy, or credential-binding injection.

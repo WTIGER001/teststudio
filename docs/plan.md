@@ -252,6 +252,12 @@ Project and exact-origin private CA bundles preserve certificate validation and 
 New local TLS fixtures pass on SQLite and PostgreSQL. The production UI and native server build pass without a browser or runner-image rebuild.
 See [Private HTTPS trust](http-checks.md#private-certificate-authorities) for operator configuration and retained diagnostics.
 Required native HTTP follow-ups remain authentication secret bindings, bounded permitted redirects, and bounded redacted response excerpts.
+Acceptance **35** advances with method, path, payload, redirect, and request-budget enforcement in the existing trusted gateway.
+The API starter endpoint and exact-revision preparation pass focused local checks. Protected API targets require reviewed read-only rules.
+Older runner and gateway images fail capability checks. Source and runtime policy snapshots must match.
+The API creation choice, canonical editor wiring, and one targeted full API worker flow are next.
+Automatic diagnostic redaction, credential bindings, environment-backed Go clients, and remaining scheduled parity remain required.
+See [Coded API request policies](api-testing.md) for the implemented foundation and current limits.
 Continue remaining storage parity, source, HTTP follow-ups, API and scheduled runner parity, adapter retention, timing, and provider packaging work.
 
 Bulk metadata edits now support reviewed category, tags, owner, title, description, safety, rationale, and condition changes.

@@ -63,6 +63,11 @@ func (e *Executor) Admit(ctx context.Context, test catalog.Test, artifact catalo
 	if (e.runner() != "playwright" && e.runner() != "go") || (test.Runner != "" && test.Runner != e.runner()) {
 		return errors.New("coded runner does not match the enabled execution profile")
 	}
+	if artifact.Browser != nil && artifact.Browser.Requests != nil {
+		if err := e.admitAPIPolicy(ctx, artifact); err != nil {
+			return err
+		}
+	}
 	if !digest.MatchString(artifact.Image) {
 		return errors.New("coded runner image requires an immutable digest")
 	}

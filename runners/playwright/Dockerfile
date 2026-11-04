@@ -6,6 +6,7 @@ ARG TARGETARCH
 LABEL teststudio.runtime="playwright1.64.1-noble-linux-${TARGETARCH}-source-v1"
 LABEL teststudio.runtime-kind="source-base/v1"
 LABEL teststudio.playwright-version="1.64.1"
+LABEL teststudio.api-policy="request-policy/v1"
 COPY runners/playwright/run.mjs runners/playwright/reporter.cjs runners/playwright/suite-context.mjs runners/playwright/discovery-reporter.cjs runners/playwright/egress.mjs ./
 RUN mkdir -p /suite /output && ln -s /runner/node_modules /suite/node_modules && chmod 1777 /output
 ENV HOME=/tmp

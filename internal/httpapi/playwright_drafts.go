@@ -22,6 +22,20 @@ func (s *Server) playwrightDraftRoutes(m *http.ServeMux, service *sources.Servic
 			problem(w, err)
 			return
 		}
+		kind := r.URL.Query()["type"]
+		if len(kind) > 1 || len(kind) == 1 && kind[0] != "browser" && kind[0] != "api" {
+			problem(w, errors.New("starter type must select browser or api"))
+			return
+		}
+		if len(kind) == 1 && kind[0] == "api" {
+			value, err := sources.APIStarterDraft(r.PathValue("suite"))
+			if err != nil {
+				problem(w, err)
+				return
+			}
+			JSON(w, 200, value)
+			return
+		}
 		JSON(w, 200, sources.StarterDraft())
 	}))
 	m.HandleFunc("GET "+base, s.authorized(func(w http.ResponseWriter, r *http.Request) {

@@ -6,6 +6,18 @@ It copies no tests or configuration from another application.
 
 ## Run locally
 
+For the new coded API request-policy foundation, use focused local checks:
+
+```sh
+go test -race ./internal/apipolicy ./internal/browsergateway ./adapters/execution/localcontainer \
+  -run '^(TestAPIRequestRules|TestAPIGatewayChecks|TestAPIPolicyRequires)' -count=1
+go test -race ./internal/sources ./internal/httpapi ./internal/runs \
+  -run '^(TestAPIStarter|TestProtectedAPITarget)' -count=1
+```
+
+These checks exercise real local HTTP and TLS gateway traffic, payload admission, redirects, request budgets, and starter source snapshots.
+They do not prove the complete API worker or authoring workflow. That targeted integration remains the next delivery step.
+
 For native private HTTPS trust and scheduled timing history, run:
 
 ```sh

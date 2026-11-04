@@ -73,6 +73,9 @@ func Validate(d Draft) []Issue {
 	tests := map[string]Test{}
 	goEntries := []gosuite.Entry{}
 	for _, t := range d.Tests {
+		if d.Artifact.Browser != nil && d.Artifact.Browser.Requests != nil && t.Type != "api" {
+			add(t.ID, "artifact.browser.requests", "request-restricted execution requires API test types")
+		}
 		if d.Artifact.Browser != nil && (t.Runner != "playwright" || len(t.RequiredBindings) > 0) {
 			add(t.ID, "artifact.browser", "the environment browser profile requires Playwright tests without injected credential bindings")
 		}

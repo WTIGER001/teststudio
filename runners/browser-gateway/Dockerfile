@@ -1,4 +1,7 @@
+FROM golang:1.26.8-alpine3.23@sha256:33ce311e5eecedee48ec1b84419c1306e9fbd71009f0d5c3f2a6904b579c1ecc AS certificates
 FROM scratch
+COPY --from=certificates /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+LABEL teststudio.api-policy="request-policy/v1"
 COPY teststudio-browser-gateway /gateway
 COPY --chown=1000:1000 output /output
 USER 1000:1000

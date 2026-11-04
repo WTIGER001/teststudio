@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/wtiger001/teststudio/internal/apipolicy"
 	capturepolicy "github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/evidence"
@@ -618,6 +619,11 @@ func (s *Service) admitAttempt(ctx context.Context, run Run) error {
 		protected = protected || environment.Protected
 	}
 	if protected {
+		for _, test := range run.Tests {
+			if test.Type == "api" && test.Runner != "http" && (run.Release.Draft.Artifact.Browser == nil || !apipolicy.ReadOnly(run.Release.Draft.Artifact.Browser.Requests)) {
+				return errors.New("protected API execution requires a reviewed read-only request policy")
+			}
+		}
 		if err := s.Auth.Check(ctx, run.Actor, run.Project, "environment/"+run.Request.Environment, "runs.execute-protected"); err != nil {
 			return errors.New("protected execution permission was revoked")
 		}

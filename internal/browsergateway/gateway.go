@@ -8,8 +8,10 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync/atomic"
 	"time"
 
+	"github.com/wtiger001/teststudio/internal/apipolicy"
 	"github.com/wtiger001/teststudio/internal/browserpolicy"
 	"github.com/wtiger001/teststudio/internal/networkguard"
 )
@@ -21,6 +23,8 @@ type Gateway struct {
 	dial      func(context.Context, string, string) (net.Conn, error)
 	transport *http.Transport
 	slots     chan struct{}
+	requests  *apipolicy.Spec
+	count     atomic.Int32
 }
 
 func New(target browserpolicy.Target) (*Gateway, error) {
@@ -40,7 +44,12 @@ func New(target browserpolicy.Target) (*Gateway, error) {
 	if target.AllowPrivate {
 		scope = networkguard.Private
 	}
-	g := &Gateway{origin: target.Origin, authority: net.JoinHostPort(u.Hostname(), port), scheme: u.Scheme, dial: networkguard.Dial(scope), slots: make(chan struct{}, 64)}
+	g := &Gateway{origin: target.Origin, authority: net.JoinHostPort(u.Hostname(), port), scheme: u.Scheme, dial: networkguard.Dial(scope), slots: make(chan struct{}, 64), requests: target.Requests}
+	if target.Requests != nil {
+		copy := *target.Requests
+		copy.Rules = append([]apipolicy.Rule(nil), target.Requests.Rules...)
+		g.requests, g.slots = &copy, make(chan struct{}, 4)
+	}
 	g.transport = &http.Transport{Proxy: nil, DialContext: g.dial, DisableKeepAlives: true, ResponseHeaderTimeout: 20 * time.Second, MaxResponseHeaderBytes: 64 << 10}
 	return g, nil
 }
@@ -53,6 +62,10 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		defer func() { <-g.slots }()
 	default:
 		http.Error(w, "Browser gateway connection limit", http.StatusServiceUnavailable)
+		return
+	}
+	if g.requests != nil {
+		g.api(w, r)
 		return
 	}
 	if r.Method == http.MethodConnect {
@@ -145,6 +158,9 @@ func Serve(ctx context.Context, listener net.Listener, target browserpolicy.Targ
 	}
 	defer g.Close()
 	server := &http.Server{Handler: g, ReadHeaderTimeout: 5 * time.Second, IdleTimeout: 30 * time.Second, MaxHeaderBytes: 64 << 10}
+	if target.Requests != nil {
+		server.ReadTimeout, server.WriteTimeout = 30*time.Second, 30*time.Second
+	}
 	finished := make(chan struct{})
 	defer close(finished)
 	go func() {

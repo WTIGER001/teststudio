@@ -28,6 +28,9 @@ func Validate(manifest Manifest) error {
 	if err := browserpolicy.Validate(manifest.Browser); err != nil {
 		return err
 	}
+	if manifest.Browser != nil && manifest.Browser.Requests != nil && manifest.Type != "api" {
+		return errors.New("request-restricted suites require API type")
+	}
 	if (manifest.Browser != nil) != (manifest.BuildProfile == "playwright-environment") || manifest.Browser != nil && (manifest.Runner != "playwright" || manifest.RequestPolicy != "" || len(manifest.RequiredBindings) > 0) {
 		return errors.New("environment browser suites require the playwright-environment profile, one endpoint, and no credential or custom request-policy bindings")
 	}

@@ -7,21 +7,27 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/wtiger001/teststudio/internal/apipolicy"
 	"github.com/wtiger001/teststudio/internal/domain"
 )
 
 type Spec struct {
-	Endpoint string `json:"endpoint"`
+	Endpoint string          `json:"endpoint"`
+	Requests *apipolicy.Spec `json:"requests,omitempty"`
 }
 
 type Target struct {
-	Origin       string `json:"origin"`
-	AllowPrivate bool   `json:"allowPrivateNetwork,omitempty"`
+	Origin       string          `json:"origin"`
+	AllowPrivate bool            `json:"allowPrivateNetwork,omitempty"`
+	Requests     *apipolicy.Spec `json:"requests,omitempty"`
 }
 
 func Validate(spec *Spec) error {
 	if spec != nil && !domain.ValidID(spec.Endpoint) {
 		return errors.New("browser execution requires one registered endpoint identifier")
+	}
+	if spec != nil {
+		return apipolicy.Validate(spec.Requests)
 	}
 	return nil
 }
@@ -56,6 +62,9 @@ func Origin(address string) (string, error) {
 }
 
 func ValidateTarget(target Target) error {
+	if err := apipolicy.Validate(target.Requests); err != nil {
+		return err
+	}
 	origin, err := Origin(target.Origin)
 	if err != nil || origin != target.Origin {
 		return errors.New("browser target requires a canonical origin")

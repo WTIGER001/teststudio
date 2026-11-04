@@ -4,10 +4,36 @@ import (
 	"maps"
 	"testing"
 
+	"github.com/wtiger001/teststudio/internal/apipolicy"
 	"github.com/wtiger001/teststudio/internal/browserpolicy"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/projects"
 )
+
+func TestProtectedAPITargetRequiresAnExplicitReadOnlyRequestPolicy(t *testing.T) {
+	environment := projects.Environment{Application: "app", Stage: "local", Protected: true, Endpoints: map[string]string{"api": "http://host.docker.internal:3000"}}
+	artifact := catalog.Artifact{Browser: &browserpolicy.Spec{Endpoint: "api"}}
+	test := catalog.Test{Runner: "playwright", Type: "api"}
+	if _, err := browserTarget(&environment, artifact, test); err == nil {
+		t.Fatal("origin-only proxy claims protected API request enforcement")
+	}
+	artifact.Browser.Requests = &apipolicy.Spec{Rules: []apipolicy.Rule{{Method: "GET", PathPrefix: "/", ReadOnly: true}}, MaxRequests: 10, MaxResponseBytes: 1024}
+	if target, err := browserTarget(&environment, artifact, test); err != nil || target.Requests == nil {
+		t.Fatal("protected read-only API policy is rejected", err)
+	}
+	artifact.Browser.Requests.Rules[0] = apipolicy.Rule{Method: "DELETE", PathPrefix: "/items"}
+	if _, err := browserTarget(&environment, artifact, test); err == nil {
+		t.Fatal("mutating API policy enters a protected target")
+	}
+	environment.Protected = false
+	if _, err := browserTarget(&environment, artifact, test); err != nil {
+		t.Fatal("explicit unprotected API mutation policy is rejected", err)
+	}
+	test.Type = "browser"
+	if _, err := browserTarget(&environment, artifact, test); err == nil {
+		t.Fatal("browser type can silently select request-restricted execution")
+	}
+}
 
 func TestBrowserAdmissionRequiresReviewedReachableTargetAndNoBindings(t *testing.T) {
 	artifact := catalog.Artifact{Browser: &browserpolicy.Spec{Endpoint: "api"}}

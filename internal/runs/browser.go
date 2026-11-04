@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/url"
 
+	"github.com/wtiger001/teststudio/internal/apipolicy"
 	"github.com/wtiger001/teststudio/internal/browserpolicy"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/projects"
@@ -16,6 +17,12 @@ func browserTarget(environment *projects.Environment, artifact catalog.Artifact,
 	if err := browserpolicy.Validate(artifact.Browser); err != nil {
 		return nil, err
 	}
+	if artifact.Browser.Requests != nil && test.Type != "api" {
+		return nil, errors.New("a request-restricted profile requires API tests")
+	}
+	if test.Type == "api" && environment.Protected && !apipolicy.ReadOnly(artifact.Browser.Requests) {
+		return nil, errors.New("protected API execution requires a reviewed read-only request policy")
+	}
 	if len(test.RequiredBindings) > 0 {
 		return nil, errors.New("the single-origin browser profile does not inject credential bindings")
 	}
@@ -27,6 +34,6 @@ func browserTarget(environment *projects.Environment, artifact catalog.Artifact,
 	if u.Scheme == "http" && !environment.AllowHTTP && environment.Stage != "local" {
 		return nil, errors.New("the selected browser environment does not permit HTTP")
 	}
-	target := &browserpolicy.Target{Origin: origin, AllowPrivate: environment.AllowPrivate || environment.Stage == "local"}
+	target := &browserpolicy.Target{Origin: origin, AllowPrivate: environment.AllowPrivate || environment.Stage == "local", Requests: artifact.Browser.Requests}
 	return target, browserpolicy.ValidateTarget(*target)
 }

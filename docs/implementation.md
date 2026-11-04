@@ -69,6 +69,43 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: coded API request-policy foundation
+
+Acceptance **35** advances and remains open. The ledger stays at **42 verified, 15 open, 57 total** items.
+
+API-typed Playwright suites can declare a bounded request policy inside the existing environment execution artifact.
+The trusted gateway enforces canonical paths, methods, complete request-body limits, response limits, request counts, and four-request concurrency.
+API mode rejects CONNECT tunnels, protocol upgrades, compressed payloads, request trailers, and common method overrides under read-only rules.
+It establishes upstream HTTP or verified TLS itself. The network-isolated worker uses a local relay and cannot obtain an unrestricted tunnel.
+Redirect statuses remain visible. The gateway withholds Location and replaces redirect bodies with a fixed policy message.
+The first redirect fixture exposes a destination URL in the original HTML body; the replacement fixes that disclosure.
+HEAD retains its upstream content length. Nonredirect responses retain bounded assertion data.
+
+Protected API execution requires a valid reviewed read-only policy in addition to safe test and dependency labels and current permission.
+Later protection changes recheck that requirement at attempt admission.
+Request restrictions participate in the immutable prepared artifact and timing definition.
+Both runner and gateway require the explicit request-policy/v1 image capability. Admission and timing reject incompatible older images.
+The worker compares its prepared manifest policy with the frozen request input, including defaults for optional rule fields.
+
+The new starter endpoint accepts type=api and returns a complete workspace with a direct request fixture, reviewed rules, and needs-review safety.
+It saves and queues preparation through the existing exact-revision source contracts without starting runs.
+OpenAPI 0.30, the suite JSON Schema, and the generated client describe the policy and starter selector.
+Default browser starter behavior stays available.
+
+Targeted race checks pass for actual local gateway HTTP and TLS traffic, policy validation, compatibility, protected admission, starter API, and source snapshots.
+The existing origin-only browser gateway regression passes in the initial focused batch.
+The generated client check passes. Node worker syntax and the production UI build pass.
+The changed source runtime and gateway images build once. Both actual image capability labels are verified.
+The gateway image includes its pinned standard CA file. The local demo restarts with retained data.
+These checks do not prove complete API worker execution or the dedicated authoring UI.
+No browser suite or cloud verification runs in this batch.
+Evidence is output/api-policy/checkpoint.json.
+See [Coded API request policies](api-testing.md) for current behavior, operator setup, and limits.
+
+Continue with the API choice and canonical editor starter wiring, then one targeted real API worker flow with the new images.
+Complete automatic diagnostic redaction, credential bindings, environment-backed Go request clients, and remaining scheduled parity afterward.
+Keep acceptance **35** open until its complete guarded execution and normal history and trends scope passes.
+
 ## Current delivery: private HTTPS trust and scheduled response history
 
 Acceptance **34** is complete. The ledger has **42 verified, 15 open, 57 total** items.

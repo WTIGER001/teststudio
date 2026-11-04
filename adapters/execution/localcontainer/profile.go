@@ -14,6 +14,11 @@ import (
 var runtimeLabel = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._+-]{0,127}$`)
 
 func (e *Executor) TimingProfile(ctx context.Context, artifact catalog.Artifact) (string, error) {
+	if artifact.Browser != nil && artifact.Browser.Requests != nil {
+		if err := e.admitAPIPolicy(ctx, artifact); err != nil {
+			return "", err
+		}
+	}
 	if !digest.MatchString(artifact.Image) {
 		return "", errors.New("timing requires an immutable coded runner image")
 	}
