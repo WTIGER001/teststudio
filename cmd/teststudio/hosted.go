@@ -1,16 +1,12 @@
 package main
 
 import (
-	"context"
-	"strings"
-
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
 	"github.com/wtiger001/teststudio/internal/preparation"
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/sources"
 	"github.com/wtiger001/teststudio/internal/workerexchange"
-	"github.com/wtiger001/teststudio/internal/workerstate"
 )
 
 func configureHostedWorkers(run *runs.Service, source *sources.Service, exchange *workerexchange.Service, provider hostedexecution.Provider, name, origin string, preparationEnabled bool) {
@@ -31,11 +27,5 @@ func configureHostedWorkers(run *runs.Service, source *sources.Service, exchange
 			source.Inspectors[runner] = inspector
 		}
 	}
-	exchange.Authorize = func(ctx context.Context, ref execution.Reference) (workerstate.Access, error) {
-		if strings.HasSuffix(ref.Profile, "-discovery-v1") {
-			return source.AuthorizeDiscovery(ctx, ref)
-		}
-		return run.AuthorizeWorkerAttempt(ctx, ref)
-	}
-	exchange.AuthorizeDiscoveryCleanup = source.AuthorizeDiscoveryCleanup
+	configureWorkerAuthorization(run, source, exchange)
 }

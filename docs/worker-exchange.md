@@ -70,6 +70,8 @@ bin/teststudio --worker-addr 127.0.0.1:8042
 Hosted profiles need a private worker route with trusted TLS termination and explicit network reachability.
 The current provider core packages do not yet provision that route.
 The [standalone relay](worker-relay.md) now supplies a separate worker-facing process without installation credentials.
+The [trusted backend role](worker-backend.md) exposes private transport without the UI, sign-in, or background workers.
+It reuses the installation database, private artifact store, and existing execution and discovery authorization.
 Azure still needs private HTTPS ingress, restricted backend termination, image packaging, and service admission for that arrangement.
 These settings belong to the provider adapter batch before any real hosted execution.
 

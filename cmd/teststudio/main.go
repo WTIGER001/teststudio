@@ -19,7 +19,6 @@ import (
 	"time"
 	_ "time/tzdata"
 
-	permissions "github.com/wtiger001/go-permissions"
 	artifactconfig "github.com/wtiger001/teststudio/adapters/artifacts/config"
 	authoidc "github.com/wtiger001/teststudio/adapters/auth/oidc"
 	ecsworker "github.com/wtiger001/teststudio/adapters/execution/ecs"
@@ -28,19 +27,15 @@ import (
 	"github.com/wtiger001/teststudio/adapters/execution/localplaywright"
 	httptrust "github.com/wtiger001/teststudio/adapters/httptrust/filesystem"
 	"github.com/wtiger001/teststudio/adapters/notifications/webhook"
-	permissionpg "github.com/wtiger001/teststudio/adapters/permissions/postgres"
-	permissionsqlite "github.com/wtiger001/teststudio/adapters/permissions/sqlite"
 	recordinglocal "github.com/wtiger001/teststudio/adapters/recording/localplaywright"
 	localsecrets "github.com/wtiger001/teststudio/adapters/secrets/local"
 	githubsource "github.com/wtiger001/teststudio/adapters/sources/github"
 	workerhttp "github.com/wtiger001/teststudio/adapters/workerexchange/http"
-	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/cliauth"
 	"github.com/wtiger001/teststudio/internal/evidence"
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/httpapi"
-	"github.com/wtiger001/teststudio/internal/identity"
 	"github.com/wtiger001/teststudio/internal/localauth"
 	"github.com/wtiger001/teststudio/internal/notifications"
 	"github.com/wtiger001/teststudio/internal/preparation"
@@ -69,7 +64,7 @@ func run() error {
 	ecsEnvironment := flag.String("ecs-workers-env", "", "Environment variable containing private ECS worker settings")
 	kubernetesConfiguration := flag.String("kubernetes-workers-config", "", "Operator JSON settings for isolated Kubernetes workers")
 	kubernetesEnvironment := flag.String("kubernetes-workers-env", "", "Environment variable containing isolated Kubernetes worker settings")
-	serviceRole := flag.String("serve-role", "all", "Service listeners: all, api, or artifacts; artifact role starts no background workers or identity bootstrap")
+	serviceRole := flag.String("serve-role", "all", "Service listeners: all, api, artifacts, or worker; isolated roles start no background workers or identity bootstrap")
 	addr := flag.String("addr", "127.0.0.1:8040", "HTTP listen address")
 	dsn := flag.String("database", ".data/teststudio.db", "SQLite path or PostgreSQL connection URL")
 	databaseEnvironment := flag.String("database-env", "", "Environment variable containing the database connection")
@@ -110,11 +105,16 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	if !role.API && (*workerAddr != "" || *local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *preparedSources || *sourceBundles || *githubSources || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
+	if !role.API && !role.Worker && (*workerAddr != "" || *local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *preparedSources || *sourceBundles || *githubSources || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
 		return errors.New("the artifact service role cannot configure identity bootstrap, sign-in, source preparation, recording, execution, or private worker transport")
 	}
-	if !role.API && (*kubernetesConfiguration != "" || *kubernetesEnvironment != "" || *ecsConfiguration != "" || *ecsEnvironment != "") {
+	if !role.API && !role.Worker && (*kubernetesConfiguration != "" || *kubernetesEnvironment != "" || *ecsConfiguration != "" || *ecsEnvironment != "") {
 		return errors.New("the artifact service role cannot configure hosted execution")
+	}
+	if role.Worker {
+		if err := validateWorkerBackendFlags(flag.CommandLine, *workerAddr, *location); err != nil {
+			return err
+		}
 	}
 	connection, err := runtimeconfig.DatabaseConnection(*dsn, *databaseEnvironment, runtimeconfig.ExplicitFlag(flag.CommandLine, "database"), os.LookupEnv)
 	if err != nil {
@@ -131,6 +131,9 @@ func run() error {
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	if role.Worker {
+		return runWorkerBackend(ctx, *workerAddr, *location, connection, *databaseEnvironment, *artifactConfiguration, *artifactEnvironment, *artifactDirectory)
+	}
 	parsed, err := url.Parse(*public)
 	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Path != "" || parsed.RawQuery != "" || parsed.Fragment != "" || parsed.User != nil {
 		return errors.New("public-url must be an HTTP or HTTPS origin")
@@ -220,25 +223,12 @@ func run() error {
 			return err
 		}
 	}
-	db, err := storage.Open(ctx, connection)
-	if err != nil {
-		return runtimeconfig.DatabaseError(err, *databaseEnvironment)
-	}
-	defer db.Close()
-	var permissionStore permissions.PermissionStore = permissionsqlite.New(db)
-	if db.Dialect == "postgres" {
-		pg, err := permissionpg.Open(ctx, connection)
-		if err != nil {
-			return runtimeconfig.DatabaseError(err, *databaseEnvironment)
-		}
-		defer pg.Close()
-		permissionStore = pg
-	}
-	directory := &identity.Directory{Store: db}
-	auth, err := authorization.New(ctx, permissionStore, directory)
+	db, auth, closeStorage, err := openServiceStorage(ctx, connection, *databaseEnvironment)
 	if err != nil {
 		return err
 	}
+	defer closeStorage()
+	directory := auth.Directory
 	blobs, closeArtifacts, err := artifactconfig.Open(ctx, artifactSettings)
 	if err != nil {
 		return err

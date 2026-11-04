@@ -249,9 +249,17 @@ The shared read transport now accepts registered subscription paths without assu
 Six new focused race checks and two selected existing transport checks pass locally.
 See [Azure exchange workload inventory](azure-worker-workloads.md). Acceptance 51 advances; the count remains 48 of 57.
 
+The trusted backend prerequisite now supplies --serve-role=worker with one private transport listener and local health probes.
+It shares storage and canonical execution and discovery authorization without UI, sign-in, dispatch, or background worker startup.
+Role options reject unrelated service settings before opening storage. The existing API worker listener remains available.
+Six new focused race checks and three existing artifact or listener lifecycle checks pass locally.
+The actual command preserves stored sign-in configuration and closes its owned process and port.
+See [trusted worker backend](worker-backend.md). Acceptance 51 advances; the count remains 48 of 57.
+No browser, UI build, service image rebuild, registry push, deployment, or cloud request runs.
+
 Next verify effective read coverage, environment attachment authority, and actual exchange networking.
 A completed list response does not prove authorization coverage or prevent later attachments. Keep those native installation controls mandatory.
-Verify the trusted worker backend's restricted route, TLS authority, and placement before completing service admission.
+Use the worker backend role to verify its restricted route, TLS authority, and placement before completing service admission.
 Resolve effective VNet-wide private-zone visibility and attachment controls. Selected-zone inspection cannot rule out other shadowing zones.
 Keep that proof separate from configured record correctness and private endpoint ownership.
 Provide trusted preparation with a separate private registry endpoint and DNS path. Do not add controller links to worker zones or peer worker and controller networks.

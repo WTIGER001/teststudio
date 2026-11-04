@@ -150,7 +150,13 @@ Both listeners expose /healthz readiness and /livez liveness. Artifact routes re
 Select the artifact port explicitly when configuring a health probe for an artifact-only process.
 The packaged default Docker health command checks API port 8040. Provider probes must override that address for artifact-only instances.
 
-The [Azure core profile](azure.md) uses these roles for separate HTTPS apps with shared PostgreSQL and Blob storage.
+Use --serve-role=worker for the dedicated [trusted worker backend](worker-backend.md).
+This role exposes only private transport and probes. It accepts only worker address, location, database, and artifact storage settings.
+Override the image entrypoint with /app/teststudio and remove inherited UI and artifact listener flags.
+Select the worker port for health probes. Private TLS termination and provider routing remain required.
+A fresh service image build is required before deployment; this backend batch performs no image build.
+
+The [Azure core profile](azure.md) uses the API and artifact roles for separate HTTPS apps with shared PostgreSQL and Blob storage.
 The focused local role checker is scripts/verify-service-roles.py. It uses sequential single-process SQLite startup without a browser or cloud target.
 
 ## Optional worker listener

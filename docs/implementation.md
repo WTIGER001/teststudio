@@ -122,7 +122,40 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: bounded Azure exchange workload inventory
+## Current delivery: dedicated trusted worker backend
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+The workload inventory batch commits as 903bf11.
+
+The new --serve-role=worker starts one private worker listener with readiness and liveness probes.
+It exposes no UI, sign-in, user API, artifact viewer, source preparation, schedule, notification, or execution worker.
+An explicit option allowlist rejects unrelated configuration before storage opens. The listener address is required.
+The role reuses the installation database, private artifact adapter, and normal permission service.
+It loads no target bindings, HTTP trust bindings, OIDC providers, hosted dispatch settings, or local executors.
+
+Execution requests retain fresh run, lease, current attempt, permission, project, suite, capture, environment, and catalog checks.
+Discovery requests retain the location-specific lease registry, exact reference, permission, cancellation, and project checks.
+Hosted dispatch and the new backend share the same authorization wiring. Source cleanup authority remains controller-side.
+Shared storage initialization preserves existing PostgreSQL and SQLite adapter selection and database error redaction.
+No user bootstrap or password-mode update runs in this role.
+
+Six new focused local race checks pass. They cover role selection, explicit option rejection, execution permission loss, discovery activation and location, readiness, and command startup.
+Three existing artifact-role and listener lifecycle checks also pass after shared storage extraction.
+The startup check executes the real command branch in an owned subprocess and confirms standard health responses and stored sign-in preservation.
+Its initial subprocess cleanup harness inherited the test context and killed the child before graceful cleanup.
+The corrected harness owns a separate bounded lifecycle. Only the changed startup check repeats and passes.
+Owned HTTP listeners and the subprocess stop. The final port check rejects new connections.
+Evidence is output/worker-backend/summary.json and targeted command results.
+No browser, UI build, image build, cloud credential, cloud request, registry push, or deployment runs.
+
+Operator guidance covers exact role flags, shared storage, health overrides, and the required image entrypoint override.
+The current service image cache predates this change. Rebuild it in the next relevant packaging batch rather than claiming it already contains the role.
+Private HTTPS termination, restricted relay-to-backend routes, backend placement, effective network controls, and native authority remain required.
+This role does not implement Azure Network or enable coded jobs.
+Continue native coverage and attachment authority, effective networking, and trusted backend admission before provider wiring.
+See [trusted worker backend](worker-backend.md).
+
+## Previous delivery: bounded Azure exchange workload inventory
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 The selected exchange binding batch commits as 716d412.

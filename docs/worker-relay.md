@@ -8,7 +8,8 @@ It opens no database, artifact store, registry client, identity directory, or cl
 It does not execute uploaded tests.
 
 This process supports the separate worker-facing service needed by Azure Container Apps.
-The existing API worker listener still owns authentication, authorization, staging, durable state, and report validation.
+The trusted worker listener owns authentication, authorization, staging, durable state, and report validation.
+It can run in the API process or through the dedicated [worker backend role](worker-backend.md).
 The relay validates request scope and forwards the bounded worker credential. It does not authenticate that credential itself.
 
 The [selected Azure exchange inspector](azure-worker-exchange.md) now checks configured relay specification, approval, revisions, and HTTPS metadata.
@@ -47,7 +48,9 @@ Invalid options produce fixed errors without their values.
 
 The HTTP listener requires trusted external HTTPS termination.
 The backend must be the dedicated worker listener behind trusted TLS termination, rather than the normal UI, report, or user API origin.
-The current --worker-addr listener itself uses HTTP. Its private TLS termination and restricted backend route still need provider packaging.
+The --worker-addr listener itself uses HTTP. Its private TLS termination and restricted backend route still need provider packaging.
+The worker backend role provides a separate process without UI, sign-in, or background workers.
+It holds installation storage access and stays on the trusted side of the relay boundary.
 Do not point this relay at the ordinary application port and assume that network isolation exists.
 
 Backend TLS uses normal certificate verification, a TLS 1.2 minimum, and the system trust store.
@@ -186,7 +189,7 @@ Acceptance 51 advances. The count remains 48 verified items out of 57.
 
 ## Next implementation
 
-Use the verified relay image package for the next private service configuration batch.
+Use the verified relay image package and the dedicated worker backend role for the next private service configuration batch.
 Compose the selected Azure exchange checks. Establish complete workload occupancy, effective networking, and trusted backend authority.
 Verify that its backend reaches only the trusted worker listener and carries no installation credentials.
 Complete effective DNS visibility, trusted preparation networking, cross-job isolation, execution placement, and role binding before native Azure enablement.
