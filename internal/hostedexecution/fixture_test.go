@@ -125,7 +125,7 @@ func fresh(t *testing.T, runner string) *fixture {
 
 func (p *provider) InspectImage(_ context.Context, image string) (hostedexecution.Image, error) {
 	p.inspectCount++
-	return hostedexecution.Image{Reference: image, Runner: p.f.driver.Runner, Runtime: p.f.driver.Runner + "-fixture-v1", OS: "linux", Architecture: "arm64", Supervisor: "worker-exchange/v1"}, nil
+	return hostedexecution.Image{Reference: image, Runner: p.f.driver.Runner, Runtime: p.f.driver.Runner + "-fixture-v1", OS: "linux", Architecture: "arm64", Supervisor: "worker-exchange/v1", Project: "project"}, nil
 }
 
 func (p *provider) Ensure(ctx context.Context, job hostedexecution.Job) error {

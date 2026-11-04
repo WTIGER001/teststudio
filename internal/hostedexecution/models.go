@@ -23,6 +23,8 @@ type Image struct {
 	OS           string
 	Architecture string
 	Supervisor   string
+	Project      string
+	SourceDigest string
 }
 
 type Job struct {

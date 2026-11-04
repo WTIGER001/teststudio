@@ -69,6 +69,34 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: immutable registry inspection for hosted workers
+
+Acceptance **51** advances. The verified count stays **48 of 57**, with **9 open** items.
+The new OCI registry adapter supplies the image inspection method for real provider adapters.
+It admits only an explicit HTTPS registry, repository namespace, and sha256 distribution reference.
+It verifies raw manifest and configuration digests, descriptor sizes, platform selection, source ownership, and the supervised runtime contract.
+The shared lifecycle also compares inspected project ownership and retained source provenance before dispatch.
+Both Go and Playwright metadata use the same path. An index must select exactly one supported configured platform.
+
+Private Basic and Bearer credentials use a fresh callback for each inspection.
+Bearer challenges must match the configured endpoint, service, and exact repository pull scope.
+One scoped token serves that inspection. Another inspection can use rotated credentials.
+Manifest and token redirects fail. Explicit configuration-blob redirect origins receive no registry Authorization header.
+All returned bytes retain digest verification. Private values, response bodies, and signed query values stay outside errors.
+Metadata, token responses, request counts, layer declarations, and elapsed time have bounds.
+The adapter fetches no filesystem layers and starts no test code.
+
+The targeted local TLS fixture and affected shared lifecycle checks pass with race detection.
+They reject a mismatched project or retained source digest before dispatch.
+The TLS fixture covers both runners, direct manifests, indexes, scoped authentication, credential rotation, exact metadata request counts, approved blob redirects, digest mismatch, unsafe references, unsupported runtimes, oversize responses, ambiguous platforms, and descriptor size mismatch.
+Evidence is output/registry-inspection/contract.log.
+No native service, UI, browser, runner image, or provider deployment rebuild is needed because this adapter is not wired into the API yet.
+No cloud account or cluster is contacted.
+
+Next connect this inspector to concrete isolated provider dispatch.
+Private worker routing, provider lifecycle operations, remote source preparation, and immutable publication remain required.
+See [Hosted registry inspection](registry-inspection.md) for the operator contract and exact current scope.
+
 ## Current delivery: shared hosted lifecycle and evidence recovery
 
 Acceptance **51** advances. Timing identity **41** and replica recovery **52** gain implementation support.

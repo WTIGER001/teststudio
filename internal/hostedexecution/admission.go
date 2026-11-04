@@ -42,6 +42,9 @@ func (e *Executor) image(ctx context.Context, artifact catalog.Artifact) (Image,
 	if image.Reference != artifact.Image || image.Runner != e.Runner || !runtime.MatchString(image.Runtime) || image.OS != "linux" || (image.Architecture != "amd64" && image.Architecture != "arm64") || image.Supervisor != "worker-exchange/v1" {
 		return Image{}, ErrConfiguration
 	}
+	if artifact.SourceProject != "" && image.Project != artifact.SourceProject || artifact.Provenance != nil && artifact.Provenance.SnapshotDigest != "" && image.SourceDigest != artifact.Provenance.SnapshotDigest {
+		return Image{}, ErrConfiguration
+	}
 	return image, nil
 }
 

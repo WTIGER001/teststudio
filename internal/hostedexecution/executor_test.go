@@ -229,6 +229,10 @@ func TestHostedAdmissionAndTimingRequireAReviewedImmutableSupervisedRuntime(t *t
 	mutations := []func(*fixture){
 		func(f *fixture) { f.input.Artifact.Image = "sha256:" + strings.Repeat("a", 64) },
 		func(f *fixture) { f.input.Test.RequiredBindings = []string{"credential"} },
+		func(f *fixture) { f.input.Artifact.SourceProject = "another-project" },
+		func(f *fixture) {
+			f.input.Artifact.Provenance = &catalog.Provenance{SnapshotDigest: "sha256:" + strings.Repeat("b", 64)}
+		},
 		func(f *fixture) { f.driver.ExchangeOrigin = "https://jobs.example.test/" },
 		func(f *fixture) {
 			f.driver.ApproveArtifact = func(context.Context, catalog.Artifact) error { return errors.New("private review detail") }

@@ -631,3 +631,7 @@ Run its targeted race checks for dispatch, cancellation, deadline, or recovery c
 Run the two focused recovery-input and pending-evidence checks when those run contracts change.
 Reuse existing supervisor, runtime package, UI, and browser evidence when their behavior is unchanged.
 See [Hosted execution lifecycle](hosted-execution.md) for the fixture boundary and remaining provider requirements.
+
+The OCI registry inspector uses a focused local TLS fixture with race detection.
+Its metadata-only checks need no Docker image, browser, provider account, or unchanged service build.
+See [Hosted registry inspection](registry-inspection.md) for its exact coverage.

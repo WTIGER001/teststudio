@@ -21,6 +21,7 @@ See [Private worker exchange](worker-exchange.md) for frozen work, tickets, repo
 The installation supplies one provider, runner, profile name, private HTTPS origin, and artifact approval callback.
 The origin contains no path, query, fragment, or user information.
 The provider inspects the selected registry distribution digest.
+The [OCI registry adapter](registry-inspection.md) supplies bounded metadata, platform, and supervised-runtime verification.
 Local image identifiers and mutable tags cannot launch hosted work.
 
 The driver requires the selected test in the artifact's discovered catalog.
@@ -28,6 +29,8 @@ Go uses the existing package and test selector parser.
 Playwright uses its permanent discovered test tag.
 The registry response must match the exact image reference, runner, Linux platform, runtime label, and worker-exchange/v1 supervisor contract.
 An artifact with another project's explicit ownership cannot dispatch.
+Inspected project ownership must match the approved artifact.
+A retained provenance digest must match the inspected source digest.
 
 Timing profiles include the provider profile, runtime identity, operating system, and architecture.
 Observed test duration comes from the validated report.

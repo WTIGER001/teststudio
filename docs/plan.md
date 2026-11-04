@@ -162,6 +162,13 @@ Focused local fixture and race checks pass. The driver is not enabled with any p
 Acceptance 51 advances; the count remains 48 verified and 9 open.
 See [Hosted execution lifecycle](hosted-execution.md) for the provider contract and current limits.
 
+The OCI registry inspector now verifies approved distribution metadata for Go and Playwright without a Docker daemon or cloud SDK.
+It binds one explicit registry namespace, selects the configured platform, and checks digest, size, runtime, supervisor, and source ownership metadata.
+Scoped registry authentication supports credential rotation. Approved configuration-blob redirects strip registry credentials.
+Focused local TLS race checks pass. No provider adapter is enabled yet.
+See [Hosted registry inspection](registry-inspection.md) for the contract and bounds.
+Acceptance 51 advances; the count remains 48 verified and 9 open.
+
 Next, implement isolated provider adapters and connect each installation profile to this common lifecycle driver.
 Use the frozen work packet as the runner's existing bounded stdin contract.
 Preserve immutable source approval, timing, result, capture-policy, and gateway contracts.
