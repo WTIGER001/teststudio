@@ -28,4 +28,13 @@ func TestAPIPolicyRequiresCapableGatewayAndRunnerImages(t *testing.T) {
 			t.Fatal("unsupported image capability is admitted", labels, err)
 		}
 	}
+	for _, labels := range []string{`{}`, `{"teststudio.api-credentials":"gateway-injection/v1"}`} {
+		if err := os.WriteFile(metadata, []byte(labels), 0600); err != nil {
+			t.Fatal(err)
+		}
+		err := driver.admitAPICredentials(t.Context())
+		if (err == nil) != strings.Contains(labels, "gateway-injection/v1") {
+			t.Fatal("credential-less gateway image can claim secret injection")
+		}
+	}
 }

@@ -11,12 +11,14 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/wtiger001/teststudio/internal/browserpolicy"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/networkguard"
 	"github.com/wtiger001/teststudio/internal/secrets"
 )
 
 type Binding struct {
+	Origins     []string           `json:"allowedOrigins,omitempty"`
 	ID          string             `json:"id"`
 	Name        string             `json:"name"`
 	Project     string             `json:"projectId"`
@@ -43,6 +45,21 @@ func New(bindings []Binding) (*Provider, error) {
 		}
 		if b.Name == "" {
 			b.Name = b.ID
+		}
+		if b.Purpose == secrets.APICredential {
+			if len(b.Origins) < 1 || len(b.Origins) > 16 || b.Network == networkguard.Loopback {
+				return nil, errors.New("API credentials require 1 through 16 exact origins and a public or private network scope")
+			}
+			seen := map[string]bool{}
+			for _, origin := range b.Origins {
+				canonical, err := browserpolicy.Origin(origin)
+				if err != nil || canonical != origin || seen[origin] || strings.Contains(origin, "*") {
+					return nil, errors.New("API credential origins must be unique and canonical")
+				}
+				seen[origin] = true
+			}
+		} else if len(b.Origins) > 0 {
+			return nil, errors.New("origin restrictions apply only to API credentials")
 		}
 		if !domain.ValidID(b.Project) || !domain.ValidID(b.ID) || len(b.Name) > 256 || !domain.ValidID(b.Purpose) || (b.Environment == "") == (b.File == "") || (b.Environment != "" && !variable.MatchString(b.Environment)) || (b.File != "" && (!filepath.IsAbs(b.File) || len(b.File) > 4096)) || (b.Network != networkguard.Public && b.Network != networkguard.Private && b.Network != networkguard.Loopback) {
 			return nil, errors.New("secret binding requires valid scope, purpose, source, and network settings")
@@ -87,7 +104,7 @@ func (p *Provider) References(ctx context.Context, project, purpose string) ([]s
 	refs := []secrets.Reference{}
 	for _, b := range p.bindings {
 		if b.Project == project && b.Purpose == purpose {
-			refs = append(refs, secrets.Reference{ID: b.ID, Name: b.Name})
+			refs = append(refs, secrets.Reference{ID: b.ID, Name: b.Name, Origins: slices.Clone(b.Origins)})
 		}
 	}
 	slices.SortFunc(refs, func(a, b secrets.Reference) int { return strings.Compare(a.ID, b.ID) })
@@ -126,5 +143,5 @@ func (p *Provider) Resolve(ctx context.Context, project, id, purpose string) (se
 	if len(data) == 0 || len(data) > 65536 {
 		return secrets.Value{}, secrets.ErrUnavailable
 	}
-	return secrets.Value{Bytes: data, Network: b.Network}, nil
+	return secrets.Value{Bytes: data, Network: b.Network, Origins: slices.Clone(b.Origins)}, nil
 }

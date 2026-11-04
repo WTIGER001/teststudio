@@ -5,10 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/wtiger001/teststudio/internal/apicredential"
+	"github.com/wtiger001/teststudio/internal/apipolicy"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/gosuite"
+	"github.com/wtiger001/teststudio/internal/secrets"
 	"os/exec"
 	"regexp"
 	"slices"
@@ -20,6 +23,7 @@ var digest = regexp.MustCompile(`^(sha256:[a-f0-9]{64}|[A-Za-z0-9][A-Za-z0-9._:/
 var selector = regexp.MustCompile(`^@[A-Za-z0-9][A-Za-z0-9._-]{0,127}$`)
 
 type Executor struct {
+	Secrets            secrets.Provider
 	Environment        bool
 	GatewayImage       string
 	AllowProjectImages bool
@@ -49,8 +53,19 @@ func (e *Executor) binary() string {
 	return "docker"
 }
 func (e *Executor) Admit(ctx context.Context, test catalog.Test, artifact catalog.Artifact) error {
-	if (artifact.Browser != nil) != e.Environment || e.Environment && (e.runner() != "playwright" || len(test.RequiredBindings) > 0) {
+	if (artifact.Browser != nil) != e.Environment || e.Environment && e.runner() != "playwright" {
 		return errors.New("browser target policy does not match the enabled execution profile")
+	}
+	if len(test.RequiredBindings) > 0 {
+		if artifact.Browser == nil || e.Secrets == nil {
+			return errors.New("the selected execution profile requires an API credential provider")
+		}
+		if err := apipolicy.ValidateBindings(artifact.Browser.Requests, test.RequiredBindings); err != nil {
+			return err
+		}
+		if err := e.admitAPICredentials(ctx); err != nil {
+			return err
+		}
 	}
 	if e.Environment {
 		if !digest.MatchString(e.GatewayImage) {
@@ -191,7 +206,16 @@ func (e *Executor) Execute(ctx context.Context, input execution.CodedInput) (rep
 		}
 	}
 	if e.Environment {
-		if err := e.startGateway(ctx, *ref, input.Browser); err != nil {
+		var credential *apicredential.Value
+		if input.Browser != nil && input.Browser.Authenticated {
+			var err error
+			credential, err = apicredential.Resolve(ctx, e.Secrets, ref.Project, input.CredentialReference, *input.Browser)
+			if err != nil {
+				return fail("configuration", err)
+			}
+			input.RedactionValues = credential.PrivateValues()
+		}
+		if err := e.startGateway(ctx, *ref, input.Browser, credential); err != nil {
 			return fail("configuration", err)
 		}
 		if input.BeforeDispatch != nil {

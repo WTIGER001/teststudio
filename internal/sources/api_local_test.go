@@ -19,14 +19,17 @@ import (
 	"github.com/wtiger001/teststudio/adapters/artifacts/filesystem"
 	"github.com/wtiger001/teststudio/adapters/execution/localcontainer"
 	"github.com/wtiger001/teststudio/adapters/preparation/localimage"
+	localsecrets "github.com/wtiger001/teststudio/adapters/secrets/local"
 	"github.com/wtiger001/teststudio/internal/apipolicy"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/diagnostics"
 	"github.com/wtiger001/teststudio/internal/evidence"
+	"github.com/wtiger001/teststudio/internal/networkguard"
 	"github.com/wtiger001/teststudio/internal/preparation"
 	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/schedules"
+	"github.com/wtiger001/teststudio/internal/secrets"
 	"github.com/wtiger001/teststudio/internal/sources"
 	"github.com/wtiger001/teststudio/internal/storage"
 	"github.com/wtiger001/teststudio/internal/suitespec"
@@ -50,22 +53,37 @@ func TestGuardedAPIWorkspaceBuildsPublishesAndRunsManuallyAndOnSchedule(t *testi
 	}
 	fixture := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		hits.Add(1)
+		if r.Header.Get("Authorization") != "Bearer api-bound-canary" {
+			w.WriteHeader(401)
+			return
+		}
 		if r.URL.Path == "/redirect" {
 			http.Redirect(w, r, "http://unapproved.invalid/private-route", 302)
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"status":"up","token":"response-canary","privateContact":"contact-canary"}`))
+		_, _ = w.Write([]byte(`{"status":"up","token":"response-canary","privateContact":"contact-canary","echo":"api-bound-canary"}`))
 	}))
 	fixture.Listener.Close()
 	fixture.Listener = listener
 	fixture.Start()
 	t.Cleanup(fixture.Close)
 	projectService := &projects.Service{Store: s.Store, Auth: s.Auth}
+	credentialFile := filepath.Join(root, "credential")
+	if err := os.WriteFile(credentialFile, []byte("api-bound-canary"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = os.Remove(credentialFile) })
+	origin := fmt.Sprintf("http://host.docker.internal:%d", listener.Addr().(*net.TCPAddr).Port)
+	provider, err := localsecrets.New([]localsecrets.Binding{{ID: "api-reader", Project: "alpha", Purpose: secrets.APICredential, File: credentialFile, Origins: []string{origin}, Network: networkguard.Private}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	projectService.Secrets = provider
 	if err := projectService.SaveApplication(t.Context(), "admin", "alpha", projects.Application{ID: "requests", Name: "Owned request fixture"}, 0); err != nil {
 		t.Fatal(err)
 	}
-	if err := projectService.SaveEnvironment(t.Context(), "admin", "alpha", projects.Environment{ID: "requests", Name: "Guarded local API", Application: "requests", Stage: "local", Protected: true, Endpoints: map[string]string{"api": fmt.Sprintf("http://host.docker.internal:%d", listener.Addr().(*net.TCPAddr).Port)}}, 0); err != nil {
+	if err := projectService.SaveEnvironment(t.Context(), "admin", "alpha", projects.Environment{ID: "requests", Name: "Guarded local API", Application: "requests", Stage: "local", Protected: true, Endpoints: map[string]string{"api": origin}, Credentials: map[string]string{"api-login": "api-reader"}}, 0); err != nil {
 		t.Fatal(err)
 	}
 	row, _ := s.Store.Get(t.Context(), projects.Bucket("suites", "alpha"), "health")
@@ -91,12 +109,15 @@ func TestGuardedAPIWorkspaceBuildsPublishesAndRunsManuallyAndOnSchedule(t *testi
 			_ = json.Unmarshal([]byte(file.Content), &manifest)
 			manifest.Browser.Requests = &apipolicy.Spec{Rules: []apipolicy.Rule{{Method: "GET", PathPrefix: "/health", ReadOnly: true}, {Method: "GET", PathPrefix: "/redirect", ReadOnly: true}, {Method: "POST", PathPrefix: "/search", ReadOnly: true, MaxBodyBytes: 8}}, MaxRequests: 3, MaxResponseBytes: 65536}
 			manifest.Browser.Requests.RedactFields = []string{"privateContact"}
+			manifest.Browser.Requests.Authentication = &apipolicy.Authentication{Binding: "api-login", Scheme: "bearer"}
+			manifest.RequiredBindings = []string{"api-login"}
 			data, _ := json.Marshal(manifest)
 			draft.Files[index].Content = string(data)
 		case "catalog.json":
 			var document catalog.Document
 			_ = json.Unmarshal([]byte(file.Content), &document)
 			document.Tests[0].Safety, document.Tests[0].Rationale = "safe", "Reads newly created local fixture state and checks denied requests without application mutations"
+			document.Tests[0].RequiredBindings = []string{"api-login"}
 			data, _ := json.Marshal(document)
 			draft.Files[index].Content = string(data)
 		case "checks/api.spec.ts":
@@ -107,6 +128,9 @@ test('Guard API requests', { tag: '@API-001' }, async ({ request }, testInfo) =>
     const response = await request.get('/health/')
     expect(response.status()).toBe(200)
     expect(await response.json()).toHaveProperty('status', 'up')
+    expect(await response.text()).not.toContain('api-bound-canary')
+    expect(process.env.TESTSTUDIO_WORK_ITEM).not.toContain('api-bound-canary')
+    expect(process.env.TESTSTUDIO_WORK_ITEM).not.toContain('api-reader')
     await testInfo.attach('response', { body: await response.body(), contentType: 'application/json' })
     process.stdout.write('Authorization: Bearer split-')
     process.stdout.write('canary\n')
@@ -219,7 +243,7 @@ test('Guard API requests', { tag: '@API-001' }, async ({ request }, testInfo) =>
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { files.Close() })
-	driver := &localcontainer.Executor{Runner: "playwright", Environment: true, GatewayImage: gateway, ApproveArtifact: s.ApproveArtifact}
+	driver := &localcontainer.Executor{Runner: "playwright", Environment: true, GatewayImage: gateway, ApproveArtifact: s.ApproveArtifact, Secrets: provider}
 	runner := &runs.Service{Store: s.Store, Auth: s.Auth, Catalog: catalogService, Evidence: &evidence.Service{Store: s.Store, Blobs: files}, Browser: driver, Location: "local", Concurrency: 1, PollInterval: 10 * time.Millisecond}
 	ctx, cancel := context.WithCancel(t.Context())
 	done := runner.Start(ctx)

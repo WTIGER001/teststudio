@@ -7,15 +7,19 @@ import (
 	"strings"
 
 	"github.com/wtiger001/teststudio/internal/authorization"
+	"github.com/wtiger001/teststudio/internal/browserpolicy"
 	"github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/domain"
+	"github.com/wtiger001/teststudio/internal/secrets"
 	"github.com/wtiger001/teststudio/internal/storage"
 	"github.com/wtiger001/teststudio/internal/timing"
+	"slices"
 )
 
 type Service struct {
-	Store *storage.Store
-	Auth  *authorization.Service
+	Secrets secrets.Provider
+	Store   *storage.Store
+	Auth    *authorization.Service
 }
 
 func Bucket(kind, project string) string {
@@ -73,6 +77,32 @@ func (s *Service) SaveEnvironment(ctx context.Context, user, project string, e E
 			return errors.New("endpoints require named HTTP or HTTPS URLs without embedded credentials")
 		}
 	}
+	if len(e.Credentials) > 16 {
+		return errors.New("an environment supports at most 16 API credential bindings")
+	}
+	if len(e.Credentials) > 0 {
+		refs, err := s.CredentialReferences(ctx, user, project)
+		if err != nil {
+			return err
+		}
+		for binding, id := range e.Credentials {
+			if !domain.ValidID(binding) || !domain.ValidID(id) || !slices.ContainsFunc(refs, func(ref secrets.Reference) bool { return ref.ID == id }) {
+				return errors.New("credential bindings require valid names and registered project API credential references")
+			}
+			ref := refs[slices.IndexFunc(refs, func(ref secrets.Reference) bool { return ref.ID == id })]
+			approved := false
+			for _, address := range e.Endpoints {
+				endpoint, _ := url.Parse(address)
+				origin, err := browserpolicy.Origin(endpoint.Scheme + "://" + endpoint.Host)
+				if err == nil && slices.Contains(ref.Origins, origin) {
+					approved = true
+				}
+			}
+			if !approved {
+				return errors.New("the API credential reference is not approved for an environment endpoint origin")
+			}
+		}
+	}
 	if revision > 0 {
 		r, err := s.Store.Get(ctx, Bucket("environments", project), e.ID)
 		if err != nil {
@@ -87,6 +117,20 @@ func (s *Service) SaveEnvironment(ctx context.Context, user, project string, e E
 		}
 	}
 	return s.save(ctx, user, Bucket("environments", project), e.ID, project, revision, e)
+}
+
+func (s *Service) CredentialReferences(ctx context.Context, user, project string) ([]secrets.Reference, error) {
+	if err := s.Auth.Check(ctx, user, project, "", "environments.manage"); err != nil {
+		return nil, err
+	}
+	if s.Secrets == nil {
+		return []secrets.Reference{}, nil
+	}
+	refs, err := s.Secrets.References(ctx, project, secrets.APICredential)
+	if err != nil {
+		return nil, errors.New("API credential references are unavailable")
+	}
+	return refs, nil
 }
 
 func (s *Service) SaveSuite(ctx context.Context, user, project string, value Suite, revision int64) error {

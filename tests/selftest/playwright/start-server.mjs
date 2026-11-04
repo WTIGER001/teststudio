@@ -5,6 +5,7 @@ import { writeFile, unlink } from 'node:fs/promises'
 import { createOIDCFixture } from './oidc-fixture.mjs'
 
 const historyWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-HISTORY-001'
+const apiAuthoringWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-API-AUTHOR-001'
 const privateTraceWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-TRACE-001'
 const diagnosticsWorkflow = ['@STUDIO-DIAGNOSTICS-001', '@STUDIO-TRACE-001'].includes(JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector)
 const recordingWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-CREATE-001'
@@ -116,6 +117,8 @@ process.on('SIGINT', () => { void stop(0) })
 try {
   await new Promise((resolve, reject) => { server.once('error', reject); server.listen(8050, '127.0.0.1', resolve) })
   if (localWorkflow) await writeFile(providerPath, JSON.stringify([{ id: 'selftest-oidc', name: 'Self-test identity', issuer: 'https://identity.selftest.invalid', clientId: 'teststudio-selftest', scopes: ['openid'], autoProvision: false }]), { mode: 0o600 })
-  await writeFile(bindingsPath, JSON.stringify(kinds.map(kind => ({ id: `${kind}-receiver`, name: `${kind} receiver`, projectId: 'notification-selftests', purpose: 'notification-webhook', environmentVariable: `TESTSTUDIO_SELFTEST_${kind.toUpperCase()}`, network: 'loopback' }))), { mode: 0o600 })
+  const bindings = kinds.map(kind => ({ id: `${kind}-receiver`, name: `${kind} receiver`, projectId: 'notification-selftests', purpose: 'notification-webhook', environmentVariable: `TESTSTUDIO_SELFTEST_${kind.toUpperCase()}`, network: 'loopback' }))
+  if (apiAuthoringWorkflow) bindings.push({ id: 'local-api-reader', name: 'Local API reader', projectId: 'api-auth-authoring', purpose: 'api-credential', environmentVariable: 'UNRESOLVED_API_AUTHOR_VALUE', network: 'private', allowedOrigins: ['http://127.0.0.1:8040'] })
+  await writeFile(bindingsPath, JSON.stringify(bindings), { mode: 0o600 })
   startChild()
 } catch { await stop(1) }

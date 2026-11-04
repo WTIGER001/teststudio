@@ -14,6 +14,7 @@ export class APIDraftWizardService {
   readonly bodyMethod = apiBodyMethod
   readonly readOnlyMethod = apiReadOnlyMethod
   readonly form = new FormGroup({
+	 authScheme: new FormControl('none', { nonNullable: true }), credentialBinding: new FormControl('api-login', { nonNullable: true }), credentialHeader: new FormControl('X-API-Key', { nonNullable: true }),
     title: new FormControl('', { nonNullable: true }), id: new FormControl('', { nonNullable: true }),
     method: new FormControl('GET', { nonNullable: true }), path: new FormControl('/health', { nonNullable: true }),
     endpoint: new FormControl('api', { nonNullable: true }), prefix: new FormControl('/health', { nonNullable: true }),

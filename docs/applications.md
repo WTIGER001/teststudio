@@ -33,6 +33,10 @@ Delayed creation responses do not navigate an unrelated project or application.
 
 ## Access
 
+Environment registration provides Advanced credentials for optional API authentication.
+Map a binding name to a current project's approved reference. Review the mapping and target before creating the environment.
+The operator controls secret values and permitted origins. See [API credentials](api-credentials.md).
+
 Application lists require project read permission. Application creation requires project management permission.
 Environment and suite read permissions control the related lists independently.
 Missing read permission displays an explanation instead of an empty resource claim.

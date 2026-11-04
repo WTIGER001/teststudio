@@ -1,22 +1,28 @@
 package localcontainer
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os/exec"
 	"strings"
 	"time"
 
+	"github.com/wtiger001/teststudio/internal/apicredential"
 	"github.com/wtiger001/teststudio/internal/browserpolicy"
 	"github.com/wtiger001/teststudio/internal/execution"
 )
 
-func (e *Executor) startGateway(ctx context.Context, ref execution.Reference, target *browserpolicy.Target) error {
+func (e *Executor) startGateway(ctx context.Context, ref execution.Reference, target *browserpolicy.Target, credential *apicredential.Value) error {
 	if target == nil {
 		return errors.New("environment browser execution requires its reviewed target")
 	}
 	if err := browserpolicy.ValidateTarget(*target); err != nil {
+		return err
+	}
+	if err := apicredential.Validate(*target, credential); err != nil {
 		return err
 	}
 	if ref.Gateway != e.Reference(ref).Gateway {
@@ -27,6 +33,9 @@ func (e *Executor) startGateway(ctx context.Context, ref execution.Reference, ta
 		return err
 	}
 	args := []string{"run", "--detach", "--pull=never", "--name", ref.Gateway, "--network=bridge", "--read-only", "--cap-drop=ALL", "--security-opt=no-new-privileges", "--pids-limit=64", "--memory=128m", "--cpus=1", "--user", "1000:1000", "--env", "TESTSTUDIO_BROWSER_TARGET=" + string(policy), "--mount", "type=volume,src=" + ref.Volume + ",dst=/output"}
+	if credential != nil {
+		args = append(args, "--tmpfs", "/run/teststudio:rw,nosuid,noexec,size=1048576,uid=1000,gid=1000,mode=0700")
+	}
 	for key, value := range labels(ref) {
 		args = append(args, "--label", key+"="+value)
 	}
@@ -36,6 +45,17 @@ func (e *Executor) startGateway(ctx context.Context, ref execution.Reference, ta
 	_, err = e.output(wall, args...)
 	if err != nil {
 		return err
+	}
+	if credential != nil {
+		data, err := json.Marshal(credential)
+		if err != nil {
+			return errors.New("API credential initialization is unavailable")
+		}
+		command := exec.CommandContext(wall, e.binary(), "exec", "--interactive", ref.Gateway, "/gateway", "--configure")
+		command.Stdin = bytes.NewReader(data)
+		if command.Run() != nil {
+			return errors.New("API credential initialization is unavailable")
+		}
 	}
 	gatewayRef := ref
 	gatewayRef.Container = ref.Gateway

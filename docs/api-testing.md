@@ -9,7 +9,8 @@ The browser recording profile remains separate. It does not inspect encrypted re
 Create test includes an API test choice with Name, Request, and Review steps, followed by the shared source editor.
 Manual and scheduled request suites execute through the trusted gateway and retain normal results, timing, history, and trends.
 API diagnostics now redact sensitive text and JSON before retention, including during worker recovery.
-Credential injection and environment-backed Go clients remain pending.
+Environment-backed credential injection now supports Bearer, Basic, and approved API-key headers through the trusted local gateway.
+Environment-backed Go clients remain pending.
 Acceptance 35 stays open.
 
 ## Create an API draft
@@ -31,6 +32,8 @@ The review creates no server record until Save API draft. Saving, preparing, and
 The source catalog retains needs-review until a reviewer changes and publishes its safety label.
 A read-only request policy does not automatically label the test safe.
 The initial request asserts its expected status. Add further steps and assertions in the code editor.
+Choose Authentication when the API needs a credential. Enter its environment binding name and review it before creating source.
+Configure references under Advanced credentials when registering an environment. See [API credentials](api-credentials.md).
 Request JSON is serialized literally with application/json content type. The wizard evaluates no scripts or expressions.
 
 Code authors can upload complete source bundles or registered repository manifests through Import and sync tests.
@@ -118,7 +121,9 @@ Redaction changes no test state, failure kind, duration, retry eligibility, hist
 Default sensitive fields include authorization, proxy authorization, cookies, passwords, secrets, tokens, API keys, credentials, and sessions.
 Matching ignores case and field-name separators. URL user information and sensitive query values are also removed.
 The collector replaces detected values in the other text from the same observation, including reflected assertion values.
-Known secret values also support literal, JSON-escaped, and URL-encoded replacement. Credential injection remains separate unfinished work.
+Known secret values also support literal, JSON-escaped, and URL-encoded replacement.
+The gateway injects selected credentials and removes common reflections before responses reach the worker.
+See [API credentials](api-credentials.md#runtime-and-recovery) for the private channel and recovery boundary.
 
 Add up to 32 field names with requests.redactFields in the source manifest.
 Each name starts with a letter and contains at most 64 letters, digits, periods, underscores, or hyphens.

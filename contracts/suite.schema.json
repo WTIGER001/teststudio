@@ -382,12 +382,67 @@
             "type": "string",
             "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"
           }
+        },
+        "authentication": {
+          "$ref": "#/$defs/APIAuthentication"
         }
       },
       "required": [
         "rules",
         "maxRequests",
         "maxResponseBytes"
+      ]
+    },
+    "APIAuthentication": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "binding": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        },
+        "scheme": {
+          "type": "string",
+          "enum": [
+            "bearer",
+            "basic",
+            "header"
+          ]
+        },
+        "header": {
+          "type": "string",
+          "pattern": "^[Xx]-[A-Za-z0-9][A-Za-z0-9-]{0,61}$|^[Aa][Pp][Ii]-[Kk][Ee][Yy]$"
+        }
+      },
+      "required": [
+        "binding",
+        "scheme"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "scheme": {
+                "const": "header"
+              }
+            },
+            "required": [
+              "scheme"
+            ]
+          },
+          "then": {
+            "required": [
+              "header"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "header"
+              ]
+            }
+          }
+        }
       ]
     }
   }

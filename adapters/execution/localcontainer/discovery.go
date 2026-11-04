@@ -105,7 +105,7 @@ func (e *Executor) Inspect(ctx context.Context, input preparation.InspectionRequ
 	if discovery.Manifest.Runner != e.runner() || discovery.Manifest.Suite != input.Suite {
 		return inspection, errors.New("discovered suite or runner differs from its registration destination")
 	}
-	if discovery.Manifest.RequestPolicy != "" || len(discovery.Manifest.RequiredBindings) != 0 {
+	if discovery.Manifest.RequestPolicy != "" || len(discovery.Manifest.RequiredBindings) != 0 && (discovery.Manifest.Browser == nil || discovery.Manifest.Browser.Requests == nil || discovery.Manifest.Browser.Requests.Authentication == nil) {
 		return inspection, errors.New("this local inspection profile does not support request policies or execution bindings")
 	}
 	if !preparation.LocalSourceProfile(e.runner(), discovery.Manifest.BuildProfile) {

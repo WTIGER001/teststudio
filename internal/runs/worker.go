@@ -327,6 +327,9 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 						executionError = err.Error()
 						break
 					}
+					if input.Browser.Authenticated {
+						input.CredentialReference = run.Environment.Credentials[input.Browser.Requests.Authentication.Binding]
+					}
 				}
 				input.OnStart = func(at time.Time) error {
 					progressCtx, cancelProgress := context.WithTimeout(context.WithoutCancel(parent), 5*time.Second)

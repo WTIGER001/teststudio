@@ -17,9 +17,11 @@ type Spec struct {
 }
 
 type Target struct {
-	Origin       string          `json:"origin"`
-	AllowPrivate bool            `json:"allowPrivateNetwork,omitempty"`
-	Requests     *apipolicy.Spec `json:"requests,omitempty"`
+	Authenticated       bool            `json:"authenticated,omitempty"`
+	AllowCredentialHTTP bool            `json:"allowCredentialHttp,omitempty"`
+	Origin              string          `json:"origin"`
+	AllowPrivate        bool            `json:"allowPrivateNetwork,omitempty"`
+	Requests            *apipolicy.Spec `json:"requests,omitempty"`
 }
 
 func Validate(spec *Spec) error {
@@ -64,6 +66,9 @@ func Origin(address string) (string, error) {
 func ValidateTarget(target Target) error {
 	if err := apipolicy.Validate(target.Requests); err != nil {
 		return err
+	}
+	if target.Authenticated && (target.Requests == nil || target.Requests.Authentication == nil) || target.AllowCredentialHTTP && !target.Authenticated {
+		return errors.New("API credential target requires its reviewed authentication policy")
 	}
 	origin, err := Origin(target.Origin)
 	if err != nil || origin != target.Origin {

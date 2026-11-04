@@ -5,9 +5,10 @@ import { RegistrationWizardService } from './registration-wizard.service'
 import { WizardStepperComponent } from '../../shared/wizard/wizard-stepper.component'
 import { WizardHeadingComponent } from '../../shared/wizard/wizard-heading.component'
 import { WizardFormDirective } from '../../shared/wizard/wizard-form.directive'
+import { CredentialBindingsComponent } from './credential-bindings.component'
 
 @Component({
-  selector: 'ts-resource-registration-form', standalone: true, imports: [ReactiveFormsModule, WizardStepperComponent, WizardHeadingComponent, WizardFormDirective], providers: [RegistrationWizardService], changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'ts-resource-registration-form', standalone: true, imports: [ReactiveFormsModule, WizardStepperComponent, WizardHeadingComponent, WizardFormDirective, CredentialBindingsComponent], providers: [RegistrationWizardService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
           <ts-wizard-stepper [steps]="['Name', 'Options', 'Review']" [current]="wizard.flow.step()" [reached]="wizard.flow.reached()" [disabled]="service.saving()" (selected)="wizard.flow.go($event); feedback.reveal()" />
           <form [formGroup]="service.form" tsWizardForm #feedback="tsWizardForm" (ngSubmit)="advance(); feedback.reveal()">
@@ -30,6 +31,7 @@ import { WizardFormDirective } from '../../shared/wizard/wizard-form.directive'
               <details><summary>Advanced endpoint options</summary><div class="field"><label for="endpoint-name">Endpoint name</label><input id="endpoint-name" formControlName="endpoint" required></div></details>
               <div class="field"><label for="endpoint-url">Endpoint URL</label><input id="endpoint-url" type="url" formControlName="url" required placeholder="https://example.com"></div>
               <label class="checkbox-field"><input type="checkbox" formControlName="protected">Require production-safe tests</label><p class="small muted">Protection is separate from the named stage.</p>
+              <ts-credential-bindings />
             }
             @if (service.kind() === 'applications') { <p>Applications group their target environments and related suites. You can add those after creating this application.</p> }
           }
@@ -39,6 +41,7 @@ import { WizardFormDirective } from '../../shared/wizard/wizard-form.directive'
             @if (service.kind() === 'suites') { <dt>Requires target</dt><dd>{{ service.form.controls.requiresTarget.value ? 'Yes' : 'No' }}</dd> }
             @if (service.kind() === 'environments') { <dt>Target</dt><dd class="wrap-anywhere">{{ service.form.controls.endpoint.value }} → {{ service.form.controls.url.value }}</dd><dt>Stage</dt><dd>{{ service.form.controls.stage.value }}</dd><dt>Protection</dt><dd>{{ service.form.controls.protected.value ? 'Only production-safe tests, with protected execution permission' : 'Not protected' }}</dd> }
             </dl>
+            @if (service.kind() === 'environments' && service.form.controls.credentials.length) { <h3>Credential bindings</h3><ul>@for (row of service.form.controls.credentials.controls; track row) { <li class="wrap-anywhere">{{ row.controls.binding.value }} → {{ row.controls.reference.value }}. The secret stays outside test code.</li> }</ul> }
           }
           </fieldset>
           <div class="row-actions">@if (wizard.flow.step() > 0) { <button type="button" class="button secondary" [disabled]="service.saving()" (click)="wizard.flow.back()">Back</button> }<button class="button primary" type="submit" [disabled]="service.saving()">{{ service.saving() ? 'Creating…' : wizard.flow.step() === 2 ? 'Create' : 'Continue' }}</button></div>

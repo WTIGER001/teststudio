@@ -262,7 +262,11 @@ The API worker harness double-deletion is corrected; exact resource absence is v
 Acceptances **35** and **37** remain open for their remaining required scope.
 API diagnostic redaction now protects retained assertion text, steps, logs, and bounded JSON during normal execution and recovery.
 API media and opaque files produce explicit omissions. Browser media remains available under its capture rules.
-Credential bindings, environment-backed Go clients, and remaining scheduled parity remain required.
+Environment credential bindings now support Bearer, Basic, and API-key headers through the trusted gateway.
+Operator-approved project references require exact origins and intersect the selected network policy.
+The environment and API creation wizards expose references and binding names without secret values.
+Authenticated manual and scheduled runs retain normal results and redacted evidence.
+Environment-backed Go clients and remaining scheduled parity remain required.
 See [Coded API request policies](api-testing.md) for the implemented foundation and current limits.
 Continue remaining storage parity, source, HTTP follow-ups, API and scheduled runner parity, adapter retention, timing, and provider packaging work.
 

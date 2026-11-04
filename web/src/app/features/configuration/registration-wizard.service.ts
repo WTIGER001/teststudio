@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { WizardController } from '../../shared/wizard/wizard-controller'
 import { suggestedIdentifier, validWebAddress } from '../../shared/wizard/creation.utils'
 import { ConfigurationService } from './configuration.service'
+import { credentialBindingProblem } from './configuration.utils'
 
 @Injectable()
 export class RegistrationWizardService {
@@ -20,6 +21,11 @@ export class RegistrationWizardService {
   validate(step: number): boolean {
     const form = this.registration.form, kind = this.registration.kind()
     this.error.set('')
+    if (step === 1 && kind === 'environments') {
+      for (const row of form.controls.credentials.controls) for (const control of Object.values(row.controls)) control.updateValueAndValidity({ emitEvent: false })
+      const problem = credentialBindingProblem(form.controls.credentials.getRawValue(), this.registration.credentialReferences(), form.controls.url.value)
+      if (problem) { const control = form.controls.credentials.at(problem.index).controls[problem.field]; control.markAsTouched(); control.setErrors({ credentialBinding: true }); this.error.set(problem.message); return false }
+    }
     const fields = step === 0 ? [form.controls.name, form.controls.id] : kind === 'environments' ? [form.controls.application, form.controls.url, form.controls.endpoint, form.controls.stage] : []
     for (const field of fields) field.markAsTouched()
     const valid = fields.every(field => field.disabled || field.valid) && (step !== 0 || !!form.controls.name.value.trim()) && (step !== 1 || kind !== 'environments' || !!form.controls.application.value && validWebAddress(form.controls.url.value))

@@ -51,6 +51,14 @@ func TestBindingsResolveOnlyTheirProjectAndPurposeWithoutExposingSecretValues(t 
 		}
 	}
 }
+
+func TestAPICredentialBindingsRequireExactOperatorApprovedOrigins(t *testing.T) {
+	for _, origins := range [][]string{nil, {"https://approved.test/"}, {"https://user:password@approved.test"}, {"https://approved.test", "https://approved.test"}, {"https://*.test"}} {
+		if _, err := New([]Binding{{ID: "reader", Project: "alpha", Purpose: secrets.APICredential, Environment: "API_VALUE", Origins: origins}}); err == nil {
+			t.Fatal("invalid credential origins accepted", origins)
+		}
+	}
+}
 func TestBindingsRejectAmbiguousSourcesAndBoundSecretReads(t *testing.T) {
 	for _, binding := range []Binding{
 		{ID: "alerts", Project: "one", Purpose: secrets.NotificationWebhook},

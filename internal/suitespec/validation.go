@@ -10,6 +10,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/wtiger001/teststudio/internal/apipolicy"
 	"github.com/wtiger001/teststudio/internal/browserpolicy"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/domain"
@@ -31,8 +32,16 @@ func Validate(manifest Manifest) error {
 	if manifest.Browser != nil && manifest.Browser.Requests != nil && manifest.Type != "api" {
 		return errors.New("request-restricted suites require API type")
 	}
-	if (manifest.Browser != nil) != (manifest.BuildProfile == "playwright-environment") || manifest.Browser != nil && (manifest.Runner != "playwright" || manifest.RequestPolicy != "" || len(manifest.RequiredBindings) > 0) {
-		return errors.New("environment browser suites require the playwright-environment profile, one endpoint, and no credential or custom request-policy bindings")
+	if (manifest.Browser != nil) != (manifest.BuildProfile == "playwright-environment") || manifest.Browser != nil && (manifest.Runner != "playwright" || manifest.RequestPolicy != "") {
+		return errors.New("environment browser suites require the playwright-environment profile, one endpoint, and reviewed request policies")
+	}
+	if manifest.Browser != nil {
+		if err := apipolicy.ValidateBindings(manifest.Browser.Requests, manifest.RequiredBindings); err != nil {
+			return err
+		}
+		if manifest.Browser.Requests != nil && manifest.Browser.Requests.Authentication != nil && len(manifest.RequiredBindings) != 1 {
+			return errors.New("API authentication must declare its manifest credential binding")
+		}
 	}
 	if manifest.Schema != SchemaVersion {
 		return errors.New("unsupported suite manifest schema")

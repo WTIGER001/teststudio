@@ -7,6 +7,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/wtiger001/teststudio/internal/apipolicy"
 	"github.com/wtiger001/teststudio/internal/browserpolicy"
 	"github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/domain"
@@ -76,8 +77,13 @@ func Validate(d Draft) []Issue {
 		if d.Artifact.Browser != nil && d.Artifact.Browser.Requests != nil && t.Type != "api" {
 			add(t.ID, "artifact.browser.requests", "request-restricted execution requires API test types")
 		}
-		if d.Artifact.Browser != nil && (t.Runner != "playwright" || len(t.RequiredBindings) > 0) {
-			add(t.ID, "artifact.browser", "the environment browser profile requires Playwright tests without injected credential bindings")
+		if d.Artifact.Browser != nil {
+			if t.Runner != "playwright" {
+				add(t.ID, "artifact.browser", "the environment profile requires Playwright tests")
+			}
+			if err := apipolicy.ValidateBindings(d.Artifact.Browser.Requests, t.RequiredBindings); err != nil {
+				add(t.ID, "requiredBindings", err.Error())
+			}
 		}
 		if err := ValidateTest(t); err != nil {
 			add(t.ID, "definition", err.Error())

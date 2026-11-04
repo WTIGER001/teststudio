@@ -69,6 +69,52 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: project API credentials through the trusted gateway
+
+Acceptance **35** advances and remains open. The ledger stays at **42 verified, 15 open, 57 total** items.
+
+Operators can register project-scoped api-credential references with exact approved origins and public or private network scope.
+Environment registration maps up to 16 unique binding names to current project references under Advanced credentials.
+The API validates project, purpose, identifiers, and permitted endpoint origin before saving mappings.
+The new reference endpoint requires environments.manage and returns no secret value or source location.
+The API authoring wizard supports Bearer, Basic, and reviewed API-key headers. Review retains binding names without credential values.
+Manifest and catalog declarations must match. Missing-credential tests can explicitly omit their test-level binding.
+Browser session credentials, native HTTP-check authentication, and environment-backed Go clients remain separate requirements.
+
+The execution host resolves a selected reference before each attempt. Provider errors exclude private diagnostics.
+Only the trusted gateway receives the resolved header through Docker exec stdin and a one-use private tmpfs socket.
+The socket stays outside the worker volume and is removed after initialization.
+Work-item JSON excludes resolved values and the selected secret reference. Stored runs retain only their environment reference mapping.
+HTTPS is mandatory outside explicitly local environments. Network permission is the intersection of environment and credential scope.
+The gateway injects only after method, path, payload, and origin admission. Redirects remain disabled.
+Literal and common encoded credential reflections are removed before the worker sees upstream response headers or bodies.
+The collector also removes known values. Recovery therefore needs no persisted earlier secret or current-secret resolution.
+Authenticated admission requires the gateway-injection/v1 image capability.
+
+Focused race checks pass for reference scope, private errors, HTTP rejection, operator origin validation, permissions, binding declarations, and configuration socket cleanup.
+Gateway checks pass for Bearer, Basic, and API-key injection, spoofed-header replacement, off-origin rejection, reflection scrubbing, and missing authentication.
+A public-only credential cannot inherit private network access from its environment.
+Three pure UI checks pass for reference origin selection, unique bindings, request validation, and generated source declarations.
+OpenAPI 0.32, the source schema, and generated client stay aligned.
+
+The first real worker check finds a remaining legacy inspection rejection of all bindings.
+Source inspection now accepts only validated API authentication bindings. Targetless and unsupported bindings remain rejected.
+The focused worker check then passes in 24.404 seconds using one changed gateway image and the unchanged source runtime.
+Manual and scheduled executions each retain one passed API result, normal history and trends, and redacted private evidence.
+Evidence is output/playwright/api-credentials-re8kk9jt/summary.json and cleanup.json.
+All owned preparation resources, source images, workers, gateways, and volumes are verified absent.
+
+STUDIO-API-AUTHOR-001 passes in 2315 milliseconds through TestStudio's normal self-test path.
+It creates an environment with an approved reference, rejects a different origin with Advanced focus, preserves review values, and saves an authenticated API draft.
+The first UI check completes environment registration, then uses an unsupported single-environment read in its assertion.
+The corrected assertion uses the existing environment list. Only this focused workflow repeats.
+The narrow dark editor screenshot is inspected. Its worker, browser processes, volumes, and controller are verified absent.
+Evidence is output/selftest/20261104T065542.477028000-af6b4329874072ad68068ed0/summary.json and cleanup.json.
+No broad suite or cloud profile runs. See [API credentials](api-credentials.md) for setup, recovery, and limits.
+
+Next implement environment-backed Go direct clients through the same reviewed request transport.
+Then verify the remaining manual and scheduled runner parity before closing **35** or **37**.
+
 ## Current delivery: retained API diagnostic redaction
 
 Acceptance **35** advances and remains open. The ledger stays at **42 verified, 15 open, 57 total** items.

@@ -249,6 +249,7 @@ func run() error {
 		if *browserGateway != "" {
 			browser := *driver
 			browser.Environment, browser.GatewayImage = true, *browserGateway
+			browser.Secrets = secretProvider
 			runService.Browser = &browser
 		}
 	}
@@ -282,7 +283,7 @@ func run() error {
 			return err
 		}
 	}
-	api := &httpapi.Server{TraceViewer: traceBundle, Recordings: recordingService, Sources: sourceService, Store: db, Auth: auth, Projects: &projects.Service{Store: db, Auth: auth}, Catalog: catalogService, Runs: runService, Schedules: scheduleService, Notifications: notificationService, Evidence: evidenceService, ArtifactOrigin: *artifactOrigin, Sessions: sessionService, OIDC: oidc, LocalUser: localUser, UI: *ui}
+	api := &httpapi.Server{TraceViewer: traceBundle, Recordings: recordingService, Sources: sourceService, Store: db, Auth: auth, Projects: &projects.Service{Store: db, Auth: auth, Secrets: secretProvider}, Catalog: catalogService, Runs: runService, Schedules: scheduleService, Notifications: notificationService, Evidence: evidenceService, ArtifactOrigin: *artifactOrigin, Sessions: sessionService, OIDC: oidc, LocalUser: localUser, UI: *ui}
 	if *localAccounts {
 		api.LocalAccounts, err = localauth.New(ctx, sessionService)
 		if err != nil {

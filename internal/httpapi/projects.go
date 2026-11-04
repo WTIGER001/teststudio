@@ -11,6 +11,14 @@ import (
 
 func (s *Server) projectRoutes(m *http.ServeMux) {
 	s.suiteLifecycleRoutes(m)
+	m.HandleFunc("GET /api/v1/projects/{project}/api-credential-references", s.authorized(func(w http.ResponseWriter, r *http.Request) {
+		refs, err := s.Projects.CredentialReferences(r.Context(), actor(r), r.PathValue("project"))
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		JSON(w, 200, map[string]any{"items": refs})
+	}))
 	m.HandleFunc("GET /api/v1/projects", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		rows, err := s.Store.All(r.Context(), "projects", "")
 		if err != nil {

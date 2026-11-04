@@ -7,14 +7,17 @@ import (
 )
 
 const NotificationWebhook = "notification-webhook"
+const APICredential = "api-credential"
 
 var ErrUnavailable = errors.New("secret reference is unavailable")
 
 type Reference struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	Origins []string `json:"allowedOrigins,omitempty"`
+	ID      string   `json:"id"`
+	Name    string   `json:"name"`
 }
 type Value struct {
+	Origins []string           `json:"-"`
 	Bytes   []byte             `json:"-"`
 	Network networkguard.Scope `json:"-"`
 }

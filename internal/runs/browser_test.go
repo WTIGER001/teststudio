@@ -93,3 +93,30 @@ func TestBrowserAttemptsRejectChangedTargetPolicy(t *testing.T) {
 		t.Fatal("current suite application boundary was ignored")
 	}
 }
+
+func TestAPICredentialTargetsRequireDeclaredBindingsAndSecureTransport(t *testing.T) {
+	spec := &apipolicy.Spec{Authentication: &apipolicy.Authentication{Binding: "api-login", Scheme: "bearer"}, Rules: []apipolicy.Rule{{Method: "GET", PathPrefix: "/", ReadOnly: true}}, MaxRequests: 3, MaxResponseBytes: 1024}
+	artifact := catalog.Artifact{Browser: &browserpolicy.Spec{Endpoint: "api", Requests: spec}}
+	test := catalog.Test{Type: "api", Runner: "playwright", RequiredBindings: []string{"api-login"}}
+	environment := projects.Environment{Stage: "local", Endpoints: map[string]string{"api": "http://host.docker.internal:3000"}}
+	if _, err := browserTarget(&environment, artifact, test); err == nil {
+		t.Fatal("missing environment credential admitted")
+	}
+	environment.Credentials = map[string]string{"api-login": "approved-reader"}
+	target, err := browserTarget(&environment, artifact, test)
+	if err != nil || !target.Authenticated || !target.AllowCredentialHTTP {
+		t.Fatal("explicit local credential target rejected", err)
+	}
+	environment.Stage, environment.AllowHTTP = "development", true
+	if _, err := browserTarget(&environment, artifact, test); err == nil {
+		t.Fatal("remote HTTP credential target admitted")
+	}
+	environment.Endpoints["api"] = "https://approved.test"
+	if target, err := browserTarget(&environment, artifact, test); err != nil || !target.Authenticated || target.AllowCredentialHTTP {
+		t.Fatal("HTTPS credential target rejected", err)
+	}
+	test.RequiredBindings = nil
+	if target, err := browserTarget(&environment, artifact, test); err != nil || target.Authenticated {
+		t.Fatal("no-credential test acquires authentication", err)
+	}
+}

@@ -1,6 +1,7 @@
-export const accessContractVersion = "0.31.0"
+export const accessContractVersion = "0.32.0"
 
-export type APIRequestPolicy = { "maxRequests": number; "maxResponseBytes": number; "redactFields"?: (string)[]; "rules": (APIRequestRule)[] }
+export type APIAuthentication = { "binding": string; "header"?: string; "scheme": "bearer" | "basic" | "header" }
+export type APIRequestPolicy = { "authentication"?: APIAuthentication; "maxRequests": number; "maxResponseBytes": number; "redactFields"?: (string)[]; "rules": (APIRequestRule)[] }
 export type APIRequestRule = { "maxBodyBytes"?: number; "method": "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | "DELETE"; "pathPrefix": string; "readOnly"?: boolean }
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -210,6 +211,7 @@ export interface AccessRequests {
   listPredefinedRoles: {  }
   readPredefinedRole: { "role": string }
   setPredefinedRoleState: { "role": string; revision: number; body: PredefinedRoleUpdate }
+  listAPICredentialReferences: { "project": string }
   listPendingAccess: { "project": string; query?: { "limit"?: number; "cursor"?: string } }
   createPendingAccess: { "project": string; body: PendingAccessInput }
   pendingAccessProviders: { "project": string }
@@ -359,6 +361,7 @@ export interface AccessResponses {
   listPredefinedRoles: PredefinedRolePage
   readPredefinedRole: PredefinedRoleRecord
   setPredefinedRoleState: PredefinedRoleRecord
+  listAPICredentialReferences: { "items": ({ "allowedOrigins"?: (string)[]; "id": string; "name": string })[] }
   listPendingAccess: PendingAccessPage
   createPendingAccess: PendingAccessRecord
   pendingAccessProviders: PendingProviderChoices
@@ -508,6 +511,7 @@ export const accessOperations = {
   listPredefinedRoles: { method: "GET", path: "/api/v1/predefined-roles" },
   readPredefinedRole: { method: "GET", path: "/api/v1/predefined-roles/{role}" },
   setPredefinedRoleState: { method: "PUT", path: "/api/v1/predefined-roles/{role}" },
+  listAPICredentialReferences: { method: "GET", path: "/api/v1/projects/{project}/api-credential-references" },
   listPendingAccess: { method: "GET", path: "/api/v1/projects/{project}/pending-access" },
   createPendingAccess: { method: "POST", path: "/api/v1/projects/{project}/pending-access" },
   pendingAccessProviders: { method: "GET", path: "/api/v1/projects/{project}/pending-access/providers" },

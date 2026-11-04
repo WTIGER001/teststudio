@@ -25,21 +25,22 @@ type Attachment struct {
 }
 
 type CodedInput struct {
-	RedactionValues []string                `json:"-"`
-	Browser         *browserpolicy.Target   `json:"browser,omitempty"`
-	Reference       *Reference              `json:"-"`
-	BeforeDispatch  func() error            `json:"-"`
-	BeforeCleanup   func(CodedReport) error `json:"-"`
-	AfterCleanup    func(error) error       `json:"-"`
-	OnStart         func(time.Time) error   `json:"-"`
-	RunID           string                  `json:"runId"`
-	Test            catalog.Test            `json:"test"`
-	Artifact        catalog.Artifact        `json:"artifact"`
-	Capture         capture.Policy          `json:"capture"`
-	TimeoutMs       int                     `json:"timeoutMs"`
-	FailedBefore    bool                    `json:"failedBefore"`
-	SlowThresholdMs *float64                `json:"slowThresholdMs,omitempty"`
-	TimingMode      string                  `json:"timingMode"`
+	CredentialReference string                  `json:"-"`
+	RedactionValues     []string                `json:"-"`
+	Browser             *browserpolicy.Target   `json:"browser,omitempty"`
+	Reference           *Reference              `json:"-"`
+	BeforeDispatch      func() error            `json:"-"`
+	BeforeCleanup       func(CodedReport) error `json:"-"`
+	AfterCleanup        func(error) error       `json:"-"`
+	OnStart             func(time.Time) error   `json:"-"`
+	RunID               string                  `json:"runId"`
+	Test                catalog.Test            `json:"test"`
+	Artifact            catalog.Artifact        `json:"artifact"`
+	Capture             capture.Policy          `json:"capture"`
+	TimeoutMs           int                     `json:"timeoutMs"`
+	FailedBefore        bool                    `json:"failedBefore"`
+	SlowThresholdMs     *float64                `json:"slowThresholdMs,omitempty"`
+	TimingMode          string                  `json:"timingMode"`
 }
 
 type CodedReport struct {

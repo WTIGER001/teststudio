@@ -68,6 +68,9 @@ func (g *Gateway) api(w http.ResponseWriter, r *http.Request) {
 	request.Header.Del("Content-Length")
 	request.Header.Set("Accept-Encoding", "identity")
 	stripHopHeaders(request.Header)
+	if g.credential != nil {
+		request.Header.Set(g.credential.Header, g.credential.Value)
+	}
 	response, err := g.transport.RoundTrip(request)
 	if err != nil {
 		http.Error(w, "Selected API target is unreachable or fails TLS validation", http.StatusBadGateway)
@@ -90,8 +93,21 @@ func (g *Gateway) api(w http.ResponseWriter, r *http.Request) {
 		data = []byte("Automatic API redirects are disabled by the reviewed request policy.\n")
 	}
 	response.Header.Del("Content-Length")
+	if g.private != nil {
+		data = []byte(g.private.Replace(string(data)))
+		if len(data) > g.requests.MaxResponseBytes {
+			http.Error(w, "Redacted API response exceeds its reviewed limit", http.StatusBadGateway)
+			return
+		}
+	}
 	for key, values := range response.Header {
+		if g.private != nil && g.private.Replace(key) != key {
+			continue
+		}
 		for _, value := range values {
+			if g.private != nil {
+				value = g.private.Replace(value)
+			}
 			w.Header().Add(key, value)
 		}
 	}

@@ -32,6 +32,18 @@ It builds one newly authored API suite and runs protected manual and scheduled r
 It opens retained worker evidence and checks redaction markers, private canary absence, and explicit binary omission warnings.
 Owned source images, worker containers, gateways, and output volumes are removed after verification.
 
+For API credential changes, use focused local checks:
+
+```sh
+go test -race ./internal/apicredential ./internal/browsergateway ./cmd/teststudio-browser-gateway ./internal/httpapi ./adapters/secrets/local ./internal/runs \
+  -run 'Test(API(Credential|Credentials|GatewayInjects)|ProtectedAPITarget|BrowserAdmission)' -count=1
+```
+
+These checks cover scoped references, exact origins, private configuration, header injection, response reflections, and forbidden credential transport.
+The gateway check proves that environment private access cannot widen a public-only credential scope.
+The existing real API worker check now uses an operator-approved local credential for manual and scheduled requests.
+The source runtime is reused. Build the gateway only when its implementation changes.
+
 For the API authoring wizard, use this single TestStudio UI workflow:
 
 ```sh

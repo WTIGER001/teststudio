@@ -17,10 +17,11 @@ type Rule struct {
 }
 
 type Spec struct {
-	RedactFields     []string `json:"redactFields,omitempty"`
-	Rules            []Rule   `json:"rules"`
-	MaxRequests      int      `json:"maxRequests"`
-	MaxResponseBytes int      `json:"maxResponseBytes"`
+	Authentication   *Authentication `json:"authentication,omitempty"`
+	RedactFields     []string        `json:"redactFields,omitempty"`
+	Rules            []Rule          `json:"rules"`
+	MaxRequests      int             `json:"maxRequests"`
+	MaxResponseBytes int             `json:"maxResponseBytes"`
 }
 
 var fieldName = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_.-]{0,63}$`)
@@ -32,6 +33,9 @@ func canonicalPath(value string) bool {
 func Validate(spec *Spec) error {
 	if spec == nil {
 		return nil
+	}
+	if err := ValidateAuthentication(spec.Authentication); err != nil {
+		return err
 	}
 	if len(spec.RedactFields) > 32 {
 		return errors.New("API diagnostics support at most 32 additional sensitive field names")

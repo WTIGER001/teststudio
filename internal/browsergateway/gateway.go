@@ -11,24 +11,35 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/wtiger001/teststudio/internal/apicredential"
 	"github.com/wtiger001/teststudio/internal/apipolicy"
 	"github.com/wtiger001/teststudio/internal/browserpolicy"
+	"github.com/wtiger001/teststudio/internal/diagnostics"
 	"github.com/wtiger001/teststudio/internal/networkguard"
 )
 
 type Gateway struct {
-	origin    string
-	authority string
-	scheme    string
-	dial      func(context.Context, string, string) (net.Conn, error)
-	transport *http.Transport
-	slots     chan struct{}
-	requests  *apipolicy.Spec
-	count     atomic.Int32
+	credential *apicredential.Value
+	private    *strings.Replacer
+	origin     string
+	authority  string
+	scheme     string
+	dial       func(context.Context, string, string) (net.Conn, error)
+	transport  *http.Transport
+	slots      chan struct{}
+	requests   *apipolicy.Spec
+	count      atomic.Int32
 }
 
 func New(target browserpolicy.Target) (*Gateway, error) {
+	return NewAuthenticated(target, nil)
+}
+
+func NewAuthenticated(target browserpolicy.Target, credential *apicredential.Value) (*Gateway, error) {
 	if err := browserpolicy.ValidateTarget(target); err != nil {
+		return nil, err
+	}
+	if err := apicredential.Validate(target, credential); err != nil {
 		return nil, err
 	}
 	u, _ := url.Parse(target.Origin)
@@ -44,7 +55,15 @@ func New(target browserpolicy.Target) (*Gateway, error) {
 	if target.AllowPrivate {
 		scope = networkguard.Private
 	}
+	if credential != nil && credential.Network == networkguard.Public {
+		scope = networkguard.Public
+	}
 	g := &Gateway{origin: target.Origin, authority: net.JoinHostPort(u.Hostname(), port), scheme: u.Scheme, dial: networkguard.Dial(scope), slots: make(chan struct{}, 64), requests: target.Requests}
+	if credential != nil {
+		copy := *credential
+		g.credential = &copy
+		g.private = diagnostics.LiteralReplacer(credential.PrivateValues())
+	}
 	if target.Requests != nil {
 		copy := *target.Requests
 		copy.Rules = append([]apipolicy.Rule(nil), target.Requests.Rules...)
@@ -152,7 +171,11 @@ func (g *Gateway) tunnel(w http.ResponseWriter, r *http.Request) {
 }
 
 func Serve(ctx context.Context, listener net.Listener, target browserpolicy.Target) error {
-	g, err := New(target)
+	return ServeAuthenticated(ctx, listener, target, nil)
+}
+
+func ServeAuthenticated(ctx context.Context, listener net.Listener, target browserpolicy.Target, credential *apicredential.Value) error {
+	g, err := NewAuthenticated(target, credential)
 	if err != nil {
 		return err
 	}

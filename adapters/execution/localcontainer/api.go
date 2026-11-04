@@ -24,3 +24,14 @@ func (e *Executor) admitAPIPolicy(ctx context.Context, artifact catalog.Artifact
 	}
 	return nil
 }
+
+func (e *Executor) admitAPICredentials(ctx context.Context) error {
+	bounded, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	data, err := e.output(bounded, "image", "inspect", e.GatewayImage, "--format", "{{json .Config.Labels}}")
+	var labels map[string]string
+	if err != nil || json.Unmarshal(data, &labels) != nil || labels["teststudio.api-credentials"] != "gateway-injection/v1" {
+		return errors.New("API credentials require a gateway-injection/v1 trusted gateway image")
+	}
+	return nil
+}

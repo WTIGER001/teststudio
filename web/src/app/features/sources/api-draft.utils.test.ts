@@ -12,6 +12,7 @@ test('API wizard validates request policy and identifies invalid Advanced fields
   assert.equal(apiStarterProblem({ ...options(), prefix: '/private' })?.field, 'prefix')
   assert.notEqual(apiStarterIssue({ ...options(), method: 'GET' }), '')
   assert.equal(apiStarterIssue({ ...options(), method: 'GET', path: '/v1/search/', body: '' }), '')
+  assert.equal(apiStarterProblem({ ...options(), authScheme: 'header', credentialBinding: 'api-login', credentialHeader: 'X-HTTP-Method-Override' })?.field, 'credentialHeader')
 })
 
 test('API source generation preserves literal data and keeps safety separate from policy', () => {
@@ -20,7 +21,7 @@ test('API source generation preserves literal data and keeps safety separate fro
     { path: 'catalog.json', content: JSON.stringify({ tests: [{ id: 'API-001', title: 'Default', type: 'api', safety: 'needs-review' }] }) },
     { path: 'teststudio-suite.json', content: JSON.stringify({ type: 'api', browser: { endpoint: 'api' } }) }
   ] }
-  const value = { ...options(), title: `Search ' "; throw new Error('untrusted'); //`, body: '{"query":"\\\"`literal`"}' }
+  const value = { ...options(), authScheme: 'bearer', credentialBinding: 'api-login', title: `Search ' "; throw new Error('untrusted'); //`, body: '{"query":"\\\"`literal`"}' }
   const result = configureAPIStarter(starter, value)
   const code = result.files[0].content
   assert.doesNotThrow(() => new Function(code.replace(/^import[^\n]*\n/, '')))
@@ -30,5 +31,8 @@ test('API source generation preserves literal data and keeps safety separate fro
   assert.equal(catalog.tests[0].safety, 'needs-review')
   assert.equal(manifest.browser.requests.rules[0].readOnly, true)
   assert.equal(manifest.browser.requests.rules[0].maxBodyBytes, 1024)
+  assert.deepEqual(manifest.requiredBindings, ['api-login'])
+  assert.deepEqual(catalog.tests[0].requiredBindings, ['api-login'])
+  assert.deepEqual(manifest.browser.requests.authentication, { binding: 'api-login', scheme: 'bearer' })
   assert.equal(JSON.parse(starter.files[1].content).tests[0].id, 'API-001')
 })

@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/wtiger001/teststudio/internal/apipolicy"
+	"github.com/wtiger001/teststudio/internal/browserpolicy"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/definitions"
 	"github.com/wtiger001/teststudio/internal/suitespec"
@@ -14,6 +16,26 @@ import (
 
 func manifest() suitespec.Manifest {
 	return suitespec.Manifest{Schema: 1, Suite: "unit", Type: "unit", Runner: "go", ModuleRoot: "service", Catalog: "testing/catalog.json", Tests: suitespec.Tests{Packages: []string{"./unit"}}, BuildProfile: "go-module"}
+}
+
+func TestAPIAuthenticationManifestAndCatalogShareTheDeclaredBinding(t *testing.T) {
+	m := suitespec.Manifest{Schema: 1, Suite: "requests", Type: "api", Runner: "playwright", ModuleRoot: ".", Catalog: "catalog.json", Tests: suitespec.Tests{Config: "playwright.config.ts"}, BuildProfile: "playwright-environment", Browser: &browserpolicy.Spec{Endpoint: "api", Requests: &apipolicy.Spec{Authentication: &apipolicy.Authentication{Binding: "login", Scheme: "bearer"}, Rules: []apipolicy.Rule{{Method: "GET", PathPrefix: "/", ReadOnly: true}}, MaxRequests: 2, MaxResponseBytes: 1024}}}
+	if suitespec.Validate(m) == nil {
+		t.Fatal("authentication without manifest binding accepted")
+	}
+	m.RequiredBindings = []string{"login"}
+	d := catalog.Document{Schema: catalog.SchemaVersion, Tests: []catalog.Test{{ID: "API-1", Runner: "playwright", Type: "api", Source: "checks/api.spec.ts", Selector: "@API-1", RequiredBindings: []string{"login"}}}}
+	if err := suitespec.ValidateCatalog(m, d); err != nil {
+		t.Fatal("declared API credential rejected", err)
+	}
+	d.Tests[0].RequiredBindings = []string{"foreign"}
+	if suitespec.ValidateCatalog(m, d) == nil {
+		t.Fatal("unreviewed test binding accepted")
+	}
+	d.Tests[0].RequiredBindings = nil
+	if err := suitespec.ValidateCatalog(m, d); err != nil {
+		t.Fatal("missing-credential scenario rejected", err)
+	}
 }
 func descriptor() suitespec.Discovery {
 	spec := manifest()
