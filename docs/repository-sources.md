@@ -78,11 +78,21 @@ See the [GitHub App token documentation](https://docs.github.com/en/rest/apps/ap
 ## Register and synchronize
 
 Open Import and sync tests and select Register repository.
-Enter a permanent source identifier, display name, and owner/repository.
-Choose a branch, tag, or exact commit. The API represents named references as heads/name or tags/name.
-Select public access or an approved private credential reference.
-Add each suite and manifest path relative to the repository root.
-Save the source, inspect it, and select Sync now.
+The wizard uses Repository, Suites, and Review steps.
+In Repository, enter a display name and owner/repository. Select public access or an approved private credential reference.
+The source identifier generates from the name. Advanced repository options contains this identifier and the reference type.
+The default reference is the main branch. Choose a branch, tag, or exact commit.
+The API represents named references as heads/name or tags/name. A saved identifier stays permanent.
+
+Continue to Suites. Choose each destination suite once, its manifest path, and the Go or Playwright runtime.
+Paths refer to the repository root. Back and completed steps preserve current entries.
+Continue to Review. Inspect the repository, reference, access reference, and all suite bindings.
+Advanced synchronization options contains periodic sync and signed push settings.
+Invalid hidden settings open automatically and receive keyboard focus.
+Review the enabled state and automatic publication before saving.
+Automatic publication changes the active release for future runs. It remains off by default.
+Saving does not start a manual sync, build, or test. Enabled automatic policies can queue future preparations.
+Inspect the saved source and select Sync now. Synchronization never starts tests.
 
 The worker pins the repository identity and resolved commit before fetching source.
 A renamed or replaced repository cannot silently change the pinned identity.

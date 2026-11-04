@@ -6,7 +6,9 @@ import { AccessClientService } from '../../core/access-client.service'
 import { ApiError } from '../../core/api.service'
 import type { SourcePreparationRecord, SourceRepositoryOptions, SourceRepositoryRecord, SourceRepositorySyncRecord } from '../../core/generated/access.types'
 import { SourcesService } from './sources.service'
-import { repositoryConfig, repositoryPreparations, repositoryReference, repositorySyncActive, repositoryWebhookAddress } from './repository.utils'
+import { WizardController } from '../../shared/wizard/wizard-controller'
+import { suggestedIdentifier } from '../../shared/wizard/creation.utils'
+import { repositoryConfig, repositoryPreparations, repositoryReference, repositorySyncActive, repositoryWebhookAddress, repositoryWizardProblem } from './repository.utils'
 
 @Injectable()
 export class RepositoriesService {
@@ -28,11 +30,12 @@ export class RepositoriesService {
   readonly historyLoading = signal(false)
   readonly error = signal('')
   readonly message = signal('')
+  readonly flow = new WizardController(3, step => this.validate(step))
   readonly force = new FormControl(false, { nonNullable: true })
   readonly form = new FormGroup({
     id: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern('^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$')] }),
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(200)] }),
-    repository: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(140)] }),
+    repository: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(140), Validators.pattern('^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$')] }),
     referenceKind: new FormControl('branch', { nonNullable: true }),
     reference: new FormControl('main', { nonNullable: true, validators: [Validators.required, Validators.maxLength(256)] }),
     credential: new FormControl('', { nonNullable: true }),
@@ -49,9 +52,13 @@ export class RepositoriesService {
   private detailGeneration = 0
   private polling = false
   private syncKey = crypto.randomUUID()
+  private identifierSuffix = crypto.randomUUID().slice(0, 8)
 
   constructor() {
     const destroy = inject(DestroyRef)
+    this.form.controls.name.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(name => {
+      if (!this.selected() && this.form.controls.id.pristine) this.form.controls.id.setValue(suggestedIdentifier(name, this.identifierSuffix))
+    })
     this.force.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.syncKey = crypto.randomUUID() })
     inject(ActivatedRoute).paramMap.pipe(takeUntilDestroyed(destroy)).subscribe(() => {
       this.generation++; this.detailGeneration++; this.rows.set([]); this.selected.set(null); this.history.set([]); this.sync.set(null); this.prepared.set(null); this.editor.set(false); this.cursor.set(''); this.syncCursor.set(''); this.options.set({ providers: [], credentials: [], webhookCredentials: [] }); this.busy.set(false); void this.load()
@@ -81,6 +88,7 @@ export class RepositoriesService {
   removeBinding(index: number): void { if (this.form.controls.bindings.length > 1) this.form.controls.bindings.removeAt(index) }
 
   edit(row?: SourceRepositoryRecord): void {
+    this.flow.reset(); this.identifierSuffix = crypto.randomUUID().slice(0, 8)
     this.detailGeneration++; this.sync.set(null); this.prepared.set(null); this.history.set([]); this.force.setValue(false)
     this.selected.set(row ?? null); this.editor.set(true); this.error.set(''); this.message.set('')
     const config = row?.data.configuration, reference = repositoryReference(config?.reference ?? 'heads/main')
@@ -93,6 +101,7 @@ export class RepositoriesService {
   }
 
   async save(): Promise<void> {
+    if (!this.flow.ready() || !this.validate(2)) return
     if (this.form.invalid || this.form.controls.bindings.length === 0 || this.busy()) return
     const generation = this.generation, value = this.form.getRawValue()
     this.busy.set(true); this.error.set(''); this.message.set('')
@@ -102,6 +111,23 @@ export class RepositoriesService {
       this.selected.set(row); this.editor.set(false); this.message.set('Repository source saved. No remote sync, build, or test was started.'); await this.load()
     } catch (error) { if (generation === this.generation) this.fail(error) }
     finally { if (generation === this.generation) this.busy.set(false) }
+  }
+
+  advance(): void { if (this.flow.step() < 2) this.flow.next(); else void this.save() }
+
+  private validate(step: number): boolean {
+    this.error.set('')
+    const controls = this.form.controls
+    if (step === 1) for (const binding of controls.bindings.controls) for (const field of Object.values(binding.controls)) field.updateValueAndValidity({ emitEvent: false })
+    const fields = step === 0 ? [controls.id, controls.name, controls.repository, controls.reference, controls.credential] : step === 1 ? [controls.bindings] : [controls.intervalSeconds, controls.webhookCredential]
+    for (const field of fields) { field.updateValueAndValidity(); field.markAllAsTouched() }
+    if (fields.some(field => field.invalid)) { this.error.set('Complete the highlighted fields before continuing.'); return false }
+    const problem = repositoryWizardProblem(this.form.getRawValue(), step)
+    if (problem) {
+      const field = problem.field === 'suite' ? controls.bindings.at(problem.binding!).controls.suite : controls[problem.field]
+      field.setErrors({ configuration: true }); this.error.set(problem.message); return false
+    }
+    return true
   }
 
   async inspect(row: SourceRepositoryRecord): Promise<void> {

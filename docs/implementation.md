@@ -69,6 +69,33 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: guided repository configuration
+
+Acceptance **22** advances and remains open. The ledger stays at **44 verified, 13 open, 57 total** items.
+The repository editor now uses the shared Repository, Suites, and Review stepper pattern.
+Source identifiers generate from the name. Permanent identifier and reference-type controls move under Advanced repository options.
+Periodic and signed push settings move under Advanced synchronization options.
+Review shows repository identity, reference, access reference, all suite bindings, and automatic sync settings.
+Enable state and automatic publication remain visible with future activation and execution consequences.
+Automatic publication remains off by default. Synchronization never starts tests.
+
+Back and completed step navigation preserve entries. Each suite can appear once.
+Invalid hidden settings open and receive keyboard focus. Opening the editor focuses its first step heading.
+The configuration uses feature-service state and pure validation utilities. No API or runner contract changes.
+The page help and repository guide describe the same steps.
+
+The Angular production build passes. STUDIO-GIT-001 passes in 2448 milliseconds through TestStudio's normal runner.
+It covers generated identifiers, duplicate correction, review, hidden periodic validation, Back preservation, editing, durable sync queueing, Help, and mobile dark layout.
+The first focused run detects missing initial focus. The editor corrects it without changing shared route focus behavior.
+The failed and successful runs both complete owned execution cleanup.
+Evidence is output/selftest/20261104T075856.861520000-f6ff1ec18e3235ac266f3a31/summary.json and cleanup.json.
+Light desktop and dark mobile screenshots receive visual inspection.
+Owned browser containers, volumes, and verification controllers are absent after completion.
+Only the changed UI and self-test image build. Existing service binaries, runtime dependencies, and the private trace viewer are reused.
+
+The remaining acceptance 22 step is the complete registered repository sync, preparation review, and UI publication journey against a local provider fixture.
+Existing native-upload, ZIP, source-worker, and publication evidence remain valid. Do not repeat unchanged runner fixture builds.
+
 ## Current delivery: manual and scheduled runner parity
 
 Acceptance **37** is complete. The ledger has **44 verified, 13 open, 57 total** items.

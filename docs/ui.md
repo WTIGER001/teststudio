@@ -29,6 +29,11 @@ Show the final resources and effects before saving related configuration or star
 Keep Save draft, publish, activate, run, and enable actions distinct. Label combined actions explicitly.
 Do not add a confirmation to every ordinary action. Use review where it resolves a meaningful decision or consequence.
 
+Repository configuration uses Repository, Suites, and Review steps through the shared wizard components.
+Generate its permanent identifier from the source name. Keep identifier and reference-type settings under Advanced repository options.
+Keep push and periodic settings under Advanced synchronization options.
+Review shows every suite binding, enabled state, automatic publication, and effects on future releases and test execution.
+
 ### Preserve work and explain recovery
 
 Back and completed step navigation preserve values. Lookup refreshes and help must not reset edits.

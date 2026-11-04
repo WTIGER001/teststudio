@@ -4,6 +4,19 @@ export interface RepositoryFormValue {
   id: string; name: string; repository: string; referenceKind: string; reference: string; credential: string; enabled: boolean; autoActivate: boolean; push: boolean; webhookCredential: string; intervalSeconds: number
   bindings: { suite: string; manifest: string; runner: string }[]
 }
+export function repositoryWizardProblem(value: RepositoryFormValue, step: number): { field: 'suite' | 'intervalSeconds' | 'webhookCredential'; binding?: number; message: string } | null {
+  if (step === 1) {
+    const suites = new Set<string>()
+    for (let index = 0; index < value.bindings.length; index++) {
+      const suite = value.bindings[index].suite
+      if (suites.has(suite)) return { field: 'suite', binding: index, message: 'Choose each suite only once.' }
+      suites.add(suite)
+    }
+  }
+  if (step === 2 && (!Number.isInteger(value.intervalSeconds) || value.intervalSeconds !== 0 && value.intervalSeconds < 60)) return { field: 'intervalSeconds', message: 'Use 0 to disable periodic sync, or a whole number from 60 through 86400 seconds.' }
+  if (step === 2 && value.push && !value.webhookCredential) return { field: 'webhookCredential', message: 'Choose an approved webhook secret for signed push synchronization.' }
+  return null
+}
 export function repositoryConfig(value: RepositoryFormValue): SourceRepositoryConfig {
   const reference = value.referenceKind === 'commit' ? value.reference : `${value.referenceKind === 'tag' ? 'tags' : 'heads'}/${value.reference}`
   return { pushEnabled: value.push, webhookCredentialReference: value.webhookCredential || undefined, syncIntervalSeconds: value.intervalSeconds || undefined, name: value.name, provider: 'github', repository: value.repository, reference, credentialReference: value.credential || undefined, enabled: value.enabled, autoActivate: value.autoActivate, bindings: value.bindings.map(item => ({ suiteId: item.suite, manifestPath: item.manifest, runner: item.runner, buildProfile: item.runner === 'playwright' ? 'playwright-node' : 'go-module' })) }

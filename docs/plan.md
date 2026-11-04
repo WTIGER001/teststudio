@@ -64,6 +64,26 @@ This sequence changes implementation priority, not the scope or numbering of the
 Acceptances 03, 08, 13, 20, 21, 25, 26, 28, 29, 34, 36, 38, 42, 43, 44, and 45 are complete. Remaining access checks stay under 12. Other catalog, execution, and evidence requirements remain open.
 Do not treat these batches as additional acceptance items or claim the whole product complete after a demonstration.
 
+### Current continuation: source workflow usability
+
+The repository editor now uses Repository, Suites, and Review through the canonical wizard components.
+Identifiers generate from the name. Reference type and identifier editing stay under Advanced repository options.
+Push and periodic settings stay under Advanced synchronization options.
+Review keeps enabled state, automatic publication, future activation, and test-execution consequences visible.
+Back preserves entries. Duplicate suite bindings and invalid hidden settings receive explicit correction and focus.
+
+The Angular production build and targeted STUDIO-GIT-001 pass locally.
+The final browser workflow takes 2.448 seconds and retains light desktop and dark mobile screenshots.
+The initial focus failure is corrected in the repository editor. Other wizard behavior and runners do not change.
+Help and repository-sources.md describe the current steps.
+Acceptance **22** advances and remains open. The count stays **44 verified, 13 open**.
+
+Next, complete the registered GitHub sync, preparation review, and publication journey through the UI against a local provider fixture.
+Reuse passing source preparation and runtime evidence. Build only changed self-test or implementation inputs.
+Do not repeat the completed native, guarded API, recorded website, or targetless parity checks.
+Then continue access and storage gaps, provider packaging, and the remaining ledger scope.
+Cloud execution and storage-provider verification remain separate work.
+
 ### Recorded browser execution scope
 
 The native recorder, saved source editor, and first environment-backed local browser profile now work together.
@@ -247,7 +267,7 @@ See [Provider credentials](providers.md#server-credentials) for the boundary and
 Acceptances **28** and **38** are complete. Atomic admission guards the reviewed suite, release, environment, and selected working tests.
 Current lifecycle, network policy, permissions, protection, and dependency safety block queued dispatch and retries without rewriting snapshots.
 Focused local SQLite and PostgreSQL checks preserve actual manual and scheduled HTTP runs, earlier attempt evidence, and large guarded selections.
-Acceptance **37** advances; remaining runner parity stays open. See [Dispatch safety](results.md#dispatch-safety-and-frozen-runs).
+Acceptance **37** is complete across implemented local runners. See [Dispatch safety](results.md#dispatch-safety-and-frozen-runs).
 Acceptance **34** is complete. Manual and scheduled native HTTPS checks share normal result, evidence, assertion, TLS, and response-time history contracts.
 Project and exact-origin private CA bundles preserve certificate validation and network policy. Trust rotation blocks queued work and separates timing history.
 New local TLS fixtures pass on SQLite and PostgreSQL. The production UI and native server build pass without a browser or runner-image rebuild.
@@ -260,7 +280,7 @@ The API creation choice and Name, Request, Review wizard now use the canonical s
 One newly authored API suite passes actual protected manual and scheduled execution with normal history and trend counts.
 The targeted authoring UI workflow passes focus, preservation, Help, discard protection, persistence, and narrow dark layout.
 The API worker harness double-deletion is corrected; exact resource absence is verified without repeating successful execution.
-Acceptance **35** is complete. Acceptance **37** remains open for its remaining runner parity scope.
+Acceptances **35** and **37** are complete for their implemented local scope.
 API diagnostic redaction now protects retained assertion text, steps, logs, and bounded JSON during normal execution and recovery.
 API media and opaque files produce explicit omissions. Browser media remains available under its capture rules.
 Environment credential bindings now support Bearer, Basic, and API-key headers through the trusted gateway.
@@ -269,9 +289,9 @@ The environment and API creation wizards expose references and binding names wit
 Authenticated manual and scheduled runs retain normal results and redacted evidence.
 Environment-backed Go API clients now share the registered gateway and normal result, evidence, timing, history, and trend contracts.
 Focused authenticated manual and scheduled Go runs pass, including a large reviewed policy and direct-network denial.
-Continue the remaining scheduled runner parity under **37**.
+The recorded website and targetless contract checks complete local scheduled runner parity under **37**.
 See [Coded API request policies](api-testing.md) for the implemented foundation and current limits.
-Continue remaining storage parity, source, HTTP follow-ups, API and scheduled runner parity, adapter retention, timing, and provider packaging work.
+Continue remaining storage parity, source workflows, HTTP follow-ups, adapter retention, timing, and provider packaging work.
 
 Bulk metadata edits now support reviewed category, tags, owner, title, description, safety, rationale, and condition changes.
 The API and UI preserve source-owned definitions and use atomic revision-controlled preview plans.
