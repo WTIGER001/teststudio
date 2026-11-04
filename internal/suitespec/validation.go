@@ -32,8 +32,9 @@ func Validate(manifest Manifest) error {
 	if manifest.Browser != nil && manifest.Browser.Requests != nil && manifest.Type != "api" {
 		return errors.New("request-restricted suites require API type")
 	}
-	if (manifest.Browser != nil) != (manifest.BuildProfile == "playwright-environment") || manifest.Browser != nil && (manifest.Runner != "playwright" || manifest.RequestPolicy != "") {
-		return errors.New("environment browser suites require the playwright-environment profile, one endpoint, and reviewed request policies")
+	environmentProfile := manifest.BuildProfile == "playwright-environment" || manifest.BuildProfile == "go-environment"
+	if (manifest.Browser != nil) != environmentProfile || manifest.Browser != nil && (manifest.RequestPolicy != "" || manifest.Runner == "playwright" && manifest.BuildProfile != "playwright-environment" || manifest.Runner == "go" && (manifest.BuildProfile != "go-environment" || manifest.Type != "api" || manifest.Browser.Requests == nil) || manifest.Runner != "playwright" && manifest.Runner != "go") {
+		return errors.New("environment suites require their runner's environment profile, a registered endpoint, and reviewed request rules for Go API clients")
 	}
 	if manifest.Browser != nil {
 		if err := apipolicy.ValidateBindings(manifest.Browser.Requests, manifest.RequiredBindings); err != nil {

@@ -37,6 +37,7 @@ type Service struct {
 	Browser           execution.CodedExecutor
 	Playwright        execution.CodedExecutor
 	Go                execution.CodedExecutor
+	GoAPI             execution.CodedExecutor
 	RecoveryDriver    execution.ManagedExecutor
 	RecoveryDrivers   []execution.ManagedExecutor
 	RecoveryInterval  time.Duration
@@ -298,6 +299,9 @@ func (s *Service) prepare(ctx context.Context, user, project string, req Request
 	}
 	testPolicies := map[string]capture.Policy{}
 	for _, test := range tests {
+		if test.Runner == "go" && release.Draft.Artifact.Browser != nil && s.GoAPI == nil {
+			return Run{}, nil, errors.New("environment-backed Go API execution is disabled; enable the trusted gateway profile")
+		}
 		effective := capture.Normalize(policy)
 		if test.Capture != nil && req.Capture == nil {
 			effective = capture.Normalize(*test.Capture)

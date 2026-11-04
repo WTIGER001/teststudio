@@ -54,6 +54,18 @@ The workflow verifies typed creation, Advanced validation focus, preserved entri
 Neither wizard setup nor saving a draft starts an API test run.
 
 
+For the Go API profile, use focused relay, policy, and event checks:
+
+```sh
+go test -race ./internal/workerrelay ./runners/go/runner ./internal/diagnostics \
+  -run 'Test(GoRequestRelay|GoAPIInput|GoJSONEvents)' -count=1
+```
+
+The real Go API worker check is TestGuardedGoAPIWorkspaceBuildsPublishesAndRunsManuallyAndOnSchedule.
+Set TESTSTUDIO_GO_RUNTIME_IMAGE and TESTSTUDIO_BROWSER_GATEWAY_IMAGE to updated immutable local images.
+It checks protected authenticated manual and scheduled runs, all 64 policy rules, redaction, denied bypasses, history, trends, and owned cleanup.
+Use [Go API execution](go-testing.md#guarded-go-api-execution) for the exact invocation. Do not repeat unchanged Playwright authoring checks.
+
 For native private HTTPS trust and scheduled timing history, run:
 
 ```sh

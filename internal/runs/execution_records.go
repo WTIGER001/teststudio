@@ -17,6 +17,9 @@ func (s *Service) codedDriver(runner string, artifact catalog.Artifact) executio
 		}
 		return s.Playwright
 	case "go":
+		if artifact.Browser != nil {
+			return s.GoAPI
+		}
 		return s.Go
 	}
 	return nil
@@ -25,7 +28,7 @@ func (s *Service) managedDrivers() []execution.ManagedExecutor {
 	drivers := []execution.ManagedExecutor{}
 	seen := map[string]bool{}
 	candidates := append([]execution.ManagedExecutor{s.RecoveryDriver}, s.RecoveryDrivers...)
-	for _, coded := range []execution.CodedExecutor{s.Playwright, s.Browser, s.Go} {
+	for _, coded := range []execution.CodedExecutor{s.Playwright, s.Browser, s.Go, s.GoAPI} {
 		if driver, ok := coded.(execution.ManagedExecutor); ok {
 			candidates = append(candidates, driver)
 		}

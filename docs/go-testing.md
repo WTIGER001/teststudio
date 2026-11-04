@@ -6,11 +6,14 @@ The local Go worker compiles source tests inside an immutable container image.
 Unit suites need no target, browser, network access, or application credentials.
 The installation administrator enables exact images through `--go-images`.
 Publication and execution use the normal catalog, release, run, timing, and evidence APIs.
-External targets, dependency bindings, hosted Go workers, and source preparation screens remain pending.
+Registered HTTP API targets and credential bindings use the separate go-environment profile described below.
+Hosted Go execution and non-HTTP integration bindings remain pending.
 Prepared manifests can now declare a module root and catalog for isolated discovery and normal execution.
 See [Prepared suite inspection](prepared-suites.md) for that contract and its local CLI.
 
 ## Catalog and selectors
+
+For environment-backed API checks, use [Guarded Go API execution](#guarded-go-api-execution).
 
 Put suite source and module metadata under `/suite` in the image.
 Preload dependencies in the image module cache and set `GOMODCACHE` to its path.
@@ -121,3 +124,65 @@ The service blocks dispatch if that profile changes before an attempt. Start a n
 Framework measurements stay separate from compilation and worker coordination.
 Measured zero durations can train history. Missing measurements remain censored.
 See [Test timing](timing.md#runtime-compatibility-and-zero-measurements) for the shared rule.
+
+## Guarded Go API execution
+
+Use runner go, type api, and buildProfile go-environment for registered HTTP API targets.
+The complete new example lives in examples/go-api. It uses only the Go standard library.
+Copy it to a new suite workspace, set the manifest suiteId to the destination suite, and review its catalog and policy.
+Upload that complete ZIP through Create test → Go suite or Import and sync tests.
+Prepare, review, publish, and run through the normal source workflow. The example initially retains needs-review safety.
+Unit suites keep go-module and require no target or artificial API endpoint.
+
+The manifest's browser object is the existing shared endpoint-policy field. Its name remains compatible with published Playwright source contracts.
+For Go API suites, browser.requests is mandatory. Declare the registered endpoint, allowed methods and path prefixes, and request and response limits.
+The server validates the source manifest, discovered catalog, and selected environment before dispatch.
+The worker compares the frozen policy and authentication with the prepared source again before compiling or running a selected test.
+Policy changes require a new prepared release. They cannot alter an already queued run.
+
+Standard net/http clients use the local relay address supplied in TESTSTUDIO_API_BASE_URL or TESTSTUDIO_BASE_URL:
+
+```go
+client := &http.Client{Timeout: 5 * time.Second}
+response, err := client.Get(os.Getenv("TESTSTUDIO_API_BASE_URL") + "/health")
+```
+
+Close response bodies and idle client connections. Use relative paths appended to the supplied relay address.
+The selected test process receives the address after compilation. Proxy environment variables are cleared for that process.
+The relay forwards to the owned Unix gateway. The worker keeps network=none, its read-only image, and existing resource limits.
+It cannot reach a registered target directly. CONNECT, off-origin requests, unsafe methods, oversized bodies, and excess requests remain blocked.
+Redirect statuses remain visible, but the gateway withholds Location and the original redirect body.
+General Go source remains trusted published code. The network boundary enforces access; a library wrapper is not its sandbox.
+
+For authenticated tests, declare the matching API binding in the manifest and catalog.
+The gateway resolves the environment reference and injects the reviewed header. Go source and process input receive no resolved secret.
+Protected environments still require safe selections, safe dependencies, protected execution authority, and reviewed read-only rules.
+See [API credentials](api-credentials.md) and [Request policies](api-testing.md).
+
+The profile retains ordinary Go build diagnostics, exact selectors, uncached execution, root and child steps, and framework measurements.
+Build and coordination durations remain separate from measured test duration. Child events never add logical test counts.
+Manual and scheduled execution produce the same result, evidence, timing, history, and trend contracts.
+Go event logs use application/x-ndjson. The collector decodes event output before redacting sensitive fields and reflected values.
+Invalid or truncated event streams produce an explicit evidence gap. Test outcomes and durations remain unchanged.
+
+Build the updated Go source runtime once with scripts/build-go-runtime.sh.
+Configure teststudio-prepare with --go-runtime and its immutable image identifier.
+Enable source bundles or approved prepared Go images on the API, and configure its --browser-gateway-image.
+The gateway flag names the shared environment transport for both Go and Playwright.
+Environment Go execution uses go-local-environment-v1. Offline Go retains go-local-isolated-v1.
+The updated API runtime advertises teststudio.api-policy=request-policy/v1 and teststudio.work-item-bytes=4194304.
+The gateway advertises teststudio.gateway-config=private-config/v1. Older images fail admission with an explicit upgrade requirement.
+
+For the demo, pass --go-runtime with the already built immutable image to node scripts/demo.mjs start.
+The launcher retains that choice for later starts and reuses the image. It does not rebuild it or reseed existing data.
+
+Run only the focused real worker check after changing this profile:
+
+```sh
+TESTSTUDIO_GO_RUNTIME_IMAGE="$teststudio_go_image" \
+TESTSTUDIO_BROWSER_GATEWAY_IMAGE="$teststudio_gateway_image" \
+go test ./internal/sources -run '^TestGuardedGoAPIWorkspaceBuildsPublishesAndRunsManuallyAndOnSchedule$' -count=1
+```
+
+Set both variables to immutable images already available locally. No cloud account or public target is needed.
+The fixture checks authenticated manual and scheduled runs, large reviewed policies, denied bypasses, private evidence, history, trends, and owned-resource cleanup.

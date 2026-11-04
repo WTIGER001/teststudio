@@ -46,10 +46,10 @@ func main() {
 		}
 		return
 	}
-	data, err := io.ReadAll(io.LimitReader(os.Stdin, 65537))
+	data, err := io.ReadAll(io.LimitReader(os.Stdin, (4<<20)+1))
 	var input runner.Input
-	if err != nil || len(data) > 65536 || json.Unmarshal(data, &input) != nil {
-		fmt.Fprintln(os.Stderr, "Go worker input is invalid or exceeds 64 KiB")
+	if err != nil || len(data) > 4<<20 || json.Unmarshal(data, &input) != nil {
+		fmt.Fprintln(os.Stderr, "Go worker input is invalid or exceeds 4 MiB")
 		os.Exit(2)
 	}
 	report := runner.Execute(ctx, input, "/suite", "/output")

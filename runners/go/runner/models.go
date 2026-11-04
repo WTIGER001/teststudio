@@ -1,12 +1,18 @@
 package runner
 
-import "time"
+import (
+	"github.com/wtiger001/teststudio/internal/browserpolicy"
+	"time"
+)
 
 type Input struct {
-	RunID string `json:"runId"`
-	Test  struct {
-		ID       string `json:"id"`
-		Selector string `json:"selector"`
+	Browser *browserpolicy.Target `json:"browser,omitempty"`
+	RunID   string                `json:"runId"`
+	Test    struct {
+		ID               string   `json:"id"`
+		Selector         string   `json:"selector"`
+		Type             string   `json:"type"`
+		RequiredBindings []string `json:"requiredBindings"`
 	} `json:"test"`
 	Capture struct {
 		Logs bool `json:"logs"`

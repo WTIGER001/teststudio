@@ -10,13 +10,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/wtiger001/teststudio/internal/apicredential"
+	"github.com/wtiger001/teststudio/internal/browsergateway"
 )
 
 const credentialSocket = "/run/teststudio/credentials.sock"
-const maxCredentialBytes = 16384
+const maxCredentialBytes = 4 << 20
 
-func receiveCredential(ctx context.Context, path string) (*apicredential.Value, error) {
+func receiveCredential(ctx context.Context, path string) (*browsergateway.Configuration, error) {
 	listener, err := net.Listen("unix", path)
 	if err != nil {
 		return nil, errors.New("API credential initialization is unavailable")
@@ -40,7 +40,7 @@ func receiveCredential(ctx context.Context, path string) (*apicredential.Value, 
 	}
 	decoder := json.NewDecoder(strings.NewReader(string(data)))
 	decoder.DisallowUnknownFields()
-	var value apicredential.Value
+	var value browsergateway.Configuration
 	if decoder.Decode(&value) != nil {
 		return nil, errors.New("API credential initialization is invalid")
 	}

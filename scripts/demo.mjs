@@ -13,7 +13,8 @@ const root = fileURLToPath(new URL('..', import.meta.url))
 process.chdir(root)
 const args = process.argv.slice(2), command = args.shift() ?? 'start'
 let directory = path.join(root, '.data/demo')
-while (args.length) { const argument = args.shift(); if (argument === '--data' && args.length) directory = path.resolve(args.shift()); else throw new Error('Use node scripts/demo.mjs start|stop|status [--data DIRECTORY]') }
+let goRuntimeImage = ''
+while (args.length) { const argument = args.shift(); if (argument === '--data' && args.length) directory = path.resolve(args.shift()); else if (argument === '--go-runtime' && args.length) goRuntimeImage = args.shift(); else throw new Error('Use node scripts/demo.mjs start|stop|status [--data DIRECTORY] [--go-runtime IMAGE]') }
 if (!['start', 'stop', 'status'].includes(command)) throw new Error('Use node scripts/demo.mjs start|stop|status [--data DIRECTORY]')
 const marker = path.join(directory, 'demo.json'), stateFile = path.join(directory, 'launcher.json'), lockFile = path.join(directory, 'launcher.lock')
 function read(filename) { try { return JSON.parse(fs.readFileSync(filename, 'utf8')) } catch (error) { if (error.code === 'ENOENT') return null; throw error } }
@@ -87,6 +88,12 @@ function runtimeImage() {
 
 async function serve() {
   const owner = ensureDirectory()
+  goRuntimeImage ||= owner.goRuntimeImage || ''
+  if (goRuntimeImage) {
+    if (!/^sha256:[a-f0-9]{64}$/.test(goRuntimeImage)) throw new Error('The demo Go runtime requires an immutable local image')
+    execFileSync('docker', ['image', 'inspect', goRuntimeImage], { stdio: 'ignore' })
+    owner.goRuntimeImage = goRuntimeImage; save(marker, owner)
+  }
   const previous = read(stateFile)
   try { const status = await control(previous, 'status'); if (status) { console.log(status.ready ? 'The demo is already running.' : 'The demo is starting.'); print(status); return } } catch (error) { if (error.message.includes('ownership token')) throw error }
   if (fs.existsSync(lockFile)) {
@@ -166,7 +173,7 @@ async function serve() {
     let available = false
     for (let attempt = 0; attempt < 100 && !stopping; attempt++) { if (server.listening) { try { available = (await fetch(origin + '/healthz', { signal: AbortSignal.timeout(1000) })).ok } catch {} } if (available) break; await new Promise(resolve => setTimeout(resolve, 100)) }
     if (!available || stopping) throw new Error('The local demo API did not start; inspect its process log')
-    start('Source preparation worker', build.preparation, ['--database', database, '--playwright-runtime', image, '--execution-location', 'local', '--build-directory', path.join(directory, 'source-builds')])
+    start('Source preparation worker', build.preparation, ['--database', database, '--playwright-runtime', image, ...(goRuntimeImage ? ['--go-runtime', goRuntimeImage] : []), '--execution-location', 'local', '--build-directory', path.join(directory, 'source-builds')])
     await seedDemo({ root, origin, target: target.origin, owner, save: value => save(marker, value), progress })
     if (!stopping) { status.ready = true; status.browserRun = owner.browserRun; status.runs = owner.runs; progress('Demo ready. Open TestStudio and select Open local workspace.'); print(status); console.log('Press Ctrl+C to stop. The demo data and evidence stay available for the next start.') }
     await done

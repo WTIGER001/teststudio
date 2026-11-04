@@ -31,7 +31,7 @@ Normal local development still starts with an empty project registry.
 | --- | --- |
 | Start and organize testing | [Demo](docs/demo.md), [Applications](docs/applications.md), [Suites](docs/suites.md). |
 | Create tests | [Create test](docs/create-tests.md), [HTTPS checks](docs/http-checks.md), [Browser recording](docs/browser-recording.md), [Website execution](docs/browser-execution.md), [Playwright editor](docs/playwright-editor.md), [Go testing](docs/go-testing.md). |
-| Author request-based suites | [Coded API policies](docs/api-testing.md). The API wizard, shared source editor, and guarded local worker support request suites. API diagnostics redact sensitive text and JSON. [Environment credentials](docs/api-credentials.md) support Bearer, Basic, and API-key headers. Go client parity remains open. |
+| Author request-based suites | [Coded API policies](docs/api-testing.md). The API wizard, shared source editor, and guarded local worker support request suites. API diagnostics redact sensitive text and JSON. [Environment credentials](docs/api-credentials.md) support Bearer, Basic, and API-key headers. [Go API suites](docs/go-testing.md#guarded-go-api-execution) use the same guarded transport and result contracts. |
 | Manage test definitions | [Catalog](docs/catalog.md), [Saved selections](docs/saved-selections.md), [Releases](docs/releases.md). |
 | Inspect runs | [Results](docs/results.md), [Test history](docs/test-history.md), [Evidence](docs/evidence.md), [Timing](docs/timing.md), [Trends](docs/trends.md). |
 | Automate testing | [Schedules](docs/schedules.md), [Notifications](docs/notifications.md). |

@@ -70,7 +70,7 @@ func run() error {
 	artifactConfiguration := flag.String("artifact-store-config", "", "Operator JSON settings for filesystem, S3, or Azure Blob artifacts")
 	location := flag.String("execution-location", "local", "Execution location identifier")
 	playwrightImages := flag.String("playwright-images", "", "Comma-separated immutable local Playwright image references; enables the isolated local worker")
-	browserGateway := flag.String("browser-gateway-image", "", "Immutable trusted browser gateway image; enables single-origin environment-backed local Playwright execution")
+	browserGateway := flag.String("browser-gateway-image", "", "Immutable trusted gateway image; enables single-origin environment-backed local Playwright and Go API execution")
 	goImages := flag.String("go-images", "", "Comma-separated immutable local Go suite image references; enables the isolated local Go worker")
 	preparedSources := flag.Bool("prepared-sources", false, "Enable local prebuilt preparation and project-labelled immutable suite images")
 	sourceBundles := flag.Bool("source-bundles", false, "Enable Go ZIP staging for the separate teststudio-prepare worker")
@@ -239,7 +239,7 @@ func run() error {
 		}
 	}
 	runService.RecoveryDriver = &localplaywright.Executor{}
-	runService.RecoveryDrivers = []execution.ManagedExecutor{&localcontainer.Executor{Runner: "go"}, &localcontainer.Executor{Runner: "playwright", Environment: true}}
+	runService.RecoveryDrivers = []execution.ManagedExecutor{&localcontainer.Executor{Runner: "go"}, &localcontainer.Executor{Runner: "playwright", Environment: true}, &localcontainer.Executor{Runner: "go", Environment: true}}
 	if strings.TrimSpace(*playwrightImages) != "" || *preparedSources || *sourceBundles || *githubSources {
 		driver := &localplaywright.Executor{Images: strings.Split(*playwrightImages, ",")}
 		if *preparedSources || *sourceBundles || *githubSources {
@@ -259,6 +259,11 @@ func run() error {
 			driver.ApproveArtifact = sourceService.ApproveArtifact
 		}
 		runService.Go = driver
+		if *browserGateway != "" {
+			apiDriver := *driver
+			apiDriver.Environment, apiDriver.GatewayImage, apiDriver.Secrets = true, *browserGateway, secretProvider
+			runService.GoAPI = &apiDriver
+		}
 	}
 	scheduleService := &schedules.Service{Store: db, Auth: auth, Runs: runService, RepositorySources: sourceService}
 	notificationService := &notifications.Service{Store: db, Auth: auth, Secrets: secretProvider, Sender: &webhook.Sender{}, Origin: *public}

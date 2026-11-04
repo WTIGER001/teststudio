@@ -78,8 +78,8 @@ func Validate(d Draft) []Issue {
 			add(t.ID, "artifact.browser.requests", "request-restricted execution requires API test types")
 		}
 		if d.Artifact.Browser != nil {
-			if t.Runner != "playwright" {
-				add(t.ID, "artifact.browser", "the environment profile requires Playwright tests")
+			if t.Runner != "playwright" && (t.Runner != "go" || t.Type != "api" || d.Artifact.Browser.Requests == nil) {
+				add(t.ID, "artifact.browser", "the environment profile requires Playwright tests or request-restricted Go API tests")
 			}
 			if err := apipolicy.ValidateBindings(d.Artifact.Browser.Requests, t.RequiredBindings); err != nil {
 				add(t.ID, "requiredBindings", err.Error())

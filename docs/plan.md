@@ -15,7 +15,7 @@ The full product scope remains required. This direction supersedes the testing s
 ## Active delivery plan after the tester walkthrough
 
 This section is the current implementation order. Historical continuation commands below do not override it.
-The local demonstration is usable and verified. The complete product remains unfinished at 42 verified items out of 57.
+The local demonstration is usable and verified. The complete product remains unfinished at 43 verified items out of 57.
 Ordinary project creator access and the first environment-backed local recorded website flow pass targeted verification.
 Tester investigation and failure recovery now pass targeted local verification. Continue with remaining catalog and evidence gaps.
 Do not add new dashboard pages or repeat completed demonstration setup before closing the remaining workflow gaps.
@@ -205,7 +205,7 @@ The next implementation batches follow the full ledger without adding new gates 
 
 ## Current implementation checkpoint
 
-The acceptance ledger has **42 verified, 15 open, 57 total** items.
+The acceptance ledger has **43 verified, 14 open, 57 total** items.
 Private trace viewing now passes targeted local verification. Acceptances **42** and **45** are complete.
 Run details expose recorded attempts, steps, context, logs, screenshots, traces, and configured attachments without HTML reports.
 The pinned installation-hosted viewer uses the separate artifact origin and short-lived grants with current project authorization.
@@ -259,14 +259,16 @@ The API creation choice and Name, Request, Review wizard now use the canonical s
 One newly authored API suite passes actual protected manual and scheduled execution with normal history and trend counts.
 The targeted authoring UI workflow passes focus, preservation, Help, discard protection, persistence, and narrow dark layout.
 The API worker harness double-deletion is corrected; exact resource absence is verified without repeating successful execution.
-Acceptances **35** and **37** remain open for their remaining required scope.
+Acceptance **35** is complete. Acceptance **37** remains open for its remaining runner parity scope.
 API diagnostic redaction now protects retained assertion text, steps, logs, and bounded JSON during normal execution and recovery.
 API media and opaque files produce explicit omissions. Browser media remains available under its capture rules.
 Environment credential bindings now support Bearer, Basic, and API-key headers through the trusted gateway.
 Operator-approved project references require exact origins and intersect the selected network policy.
 The environment and API creation wizards expose references and binding names without secret values.
 Authenticated manual and scheduled runs retain normal results and redacted evidence.
-Environment-backed Go clients and remaining scheduled parity remain required.
+Environment-backed Go API clients now share the registered gateway and normal result, evidence, timing, history, and trend contracts.
+Focused authenticated manual and scheduled Go runs pass, including a large reviewed policy and direct-network denial.
+Continue the remaining scheduled runner parity under **37**.
 See [Coded API request policies](api-testing.md) for the implemented foundation and current limits.
 Continue remaining storage parity, source, HTTP follow-ups, API and scheduled runner parity, adapter retention, timing, and provider packaging work.
 

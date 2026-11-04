@@ -94,7 +94,7 @@ The source runtime retains request-policy/v1. Rebuild the gateway and restart th
 
 The execution host resolves the reference immediately before gateway startup.
 Provider failures return fixed errors that exclude private upstream diagnostics.
-The gateway receives its header through a one-use private socket initialized through Docker exec stdin.
+The gateway receives its target policy and optional header through a one-use private socket initialized through Docker exec stdin.
 The socket lives in private tmpfs outside the worker output volume. Initialization removes its path.
 Secrets enter no process arguments, Docker environment, source image, work-item JSON, or stored run snapshot.
 Run snapshots retain binding names and environment reference IDs.
@@ -111,6 +111,6 @@ See [Diagnostic redaction](api-testing.md#diagnostic-redaction) for evidence for
 
 ## Current scope
 
-This profile supports request-restricted Playwright API tests through the local gateway.
-Environment-backed Go clients, browser session credentials, native HTTP-check authentication, and hosted verification remain separate work.
+This profile supports request-restricted Playwright and Go API tests through the local gateway.
+Browser session credentials, native HTTP-check authentication, and hosted verification remain separate work.
 Personal recording cookies and local browser sessions do not become execution credentials automatically.

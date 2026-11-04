@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"net"
 	"os"
@@ -10,7 +9,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/wtiger001/teststudio/internal/apicredential"
 	"github.com/wtiger001/teststudio/internal/browsergateway"
 	"github.com/wtiger001/teststudio/internal/browserpolicy"
 )
@@ -37,22 +35,15 @@ func run() error {
 		}
 		return connection.Close()
 	}
-	var target browserpolicy.Target
-	if err := json.Unmarshal([]byte(os.Getenv("TESTSTUDIO_BROWSER_TARGET")), &target); err != nil {
-		return fmt.Errorf("invalid browser gateway policy")
-	}
-	if err := browserpolicy.ValidateTarget(target); err != nil {
+	deadline, cancel := context.WithTimeout(ctx, 10*time.Second)
+	configuration, err := receiveCredential(deadline, credentialSocket)
+	cancel()
+	if err != nil {
 		return err
 	}
-	var credential *apicredential.Value
-	if target.Authenticated {
-		deadline, cancel := context.WithTimeout(ctx, 10*time.Second)
-		value, err := receiveCredential(deadline, credentialSocket)
-		cancel()
-		if err != nil {
-			return err
-		}
-		credential = value
+	target, credential := configuration.Target, configuration.Credential
+	if err := browserpolicy.ValidateTarget(target); err != nil {
+		return err
 	}
 	g, err := browsergateway.NewAuthenticated(target, credential)
 	if err != nil {

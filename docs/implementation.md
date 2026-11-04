@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 42 verified of 57.
+The acceptance count is 43 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -45,7 +45,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **32.** Go suites preserve test identities, disable cached execution, and distinguish build failures from test assertion failures.
 - [x] **33.** Adding an HTTPS check requires no browser or service deployment.
 - [x] **34.** HTTPS checks run manually and on schedules, with configurable assertions, TLS checks, response-time history, and normal result records.
-- [ ] **35.** API suites run through guarded direct clients and produce the same history and trends as browser tests.
+- [x] **35.** API suites run through guarded direct clients and produce the same history and trends as browser tests.
 - [x] **36.** Package events, subtest aggregates, retries, and API steps do not inflate test counts.
 - [ ] **37.** Local and scheduled executions produce the same logical run and result records.
 - [x] **38.** Protected environments reject unsafe selections and unsafe dependencies.
@@ -68,6 +68,49 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **55.** Hosted identity and private report access work through installation-specific configuration.
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
+
+## Current delivery: guarded Go API execution and acceptance 35
+
+Acceptance **35** is complete. The ledger has **43 verified, 14 open, 57 total** items.
+Acceptance **37** remains open for the remaining local and scheduled runner parity scope.
+
+Go API suites now use go-environment, the registered endpoint policy, and the same trusted gateway as Playwright API suites.
+Standard net/http clients use the loopback relay supplied to the selected test process after compilation.
+The worker retains network=none, read-only source, bounded resources, and isolated dependency resolution.
+The Go worker checks its prepared request rules, selected test, and authentication against frozen input before execution.
+Go unit suites keep their targetless go-module profile and go-local-isolated-v1 identity.
+Environment Go execution uses go-local-environment-v1 and joins the existing recovery and owned-resource ledger.
+
+A complete new stdlib-only workspace is available in examples/go-api.
+It prepares from a ZIP or repository manifest and uses normal publication, registered selection, results, history, and stacked-area trends.
+Source and catalog validation accept Go environment profiles only with API type and explicit request rules.
+The source JSON Schema now matches those profiles and no longer rejects valid API authentication bindings.
+Draft 2020 checks validate normal and authenticated Go profiles and reject mismatched runner, profile, and missing-policy cases.
+
+Go event evidence uses bounded JSON lines. The collector decodes event output before sensitive-field and reflected-value redaction.
+Malformed or truncated event streams produce explicit capture gaps while leaving the observed state and measurements unchanged.
+The existing private viewer treats these logs as text. Focused pure UI checks preserve other artifact previews and timeout reruns.
+The common gateway initialization packet now carries the target policy and optional credential through private stdin and tmpfs.
+No target policy or credential needs a process argument or Docker environment variable.
+The packet and runtime work item each have a 4 MiB limit. Updated images declare private-config/v1 and the 4194304-byte runtime contract.
+Legacy images fail API admission with an explicit upgrade requirement.
+
+Targeted relay, frozen-input, redaction, credential-channel, image-capability, and artifact-preview checks pass locally.
+The first real Go API run passes in 35.122 seconds. Its functional checks need no further repetition.
+The final contract audit identifies the older 64 KiB input limit and operating-system argument limits for large reviewed policies.
+The updated bounded channel and runtimes pass a second focused run in 35.701 seconds.
+This final fixture uses all 64 request rules, long prefixes, and an encoded work item larger than 1 MiB.
+It verifies authenticated manual and scheduled execution, policy denials, body limits, request budgets, disabled redirects, and direct-network and CONNECT denial.
+The verification credential is generated outside the source image. Reflected values are removed before the test receives its response.
+Retained logs contain no private canaries or credential values. Each run retains one passed logical result and its Go child steps.
+History and trends contain exactly two passed tests. Only six permitted requests reach the newly created local fixture.
+Evidence is output/playwright/go-api-large-policy-ozilpklo/summary.json and cleanup.json.
+All owned source images, preparation resources, worker containers, gateways, volumes, listeners, and verification credential files are verified removed.
+
+Only changed runtime and gateway images build. The passing authoring UI suite and unrelated functional suites do not repeat.
+The demo accepts an immutable --go-runtime image, retains that choice, and enables Go preparation without reseeding existing data.
+No cloud profile runs. See [Go API execution](go-testing.md#guarded-go-api-execution) for setup and current boundaries.
+Continue the remaining scheduling parity, storage parity, access matrix, source workflow, artifact adapter, timing, and hosted deployment items.
 
 ## Current delivery: project API credentials through the trusted gateway
 

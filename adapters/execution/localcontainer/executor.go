@@ -42,7 +42,7 @@ func (e *Executor) runner() string {
 }
 func (e *Executor) Profile() string {
 	if e.Environment {
-		return "playwright-local-environment-v1"
+		return e.runner() + "-local-environment-v1"
 	}
 	return e.runner() + "-local-isolated-v1"
 }
@@ -53,7 +53,7 @@ func (e *Executor) binary() string {
 	return "docker"
 }
 func (e *Executor) Admit(ctx context.Context, test catalog.Test, artifact catalog.Artifact) error {
-	if (artifact.Browser != nil) != e.Environment || e.Environment && e.runner() != "playwright" {
+	if (artifact.Browser != nil) != e.Environment || e.Environment && e.runner() != "playwright" && (e.runner() != "go" || test.Type != "api" || artifact.Browser == nil || artifact.Browser.Requests == nil) {
 		return errors.New("browser target policy does not match the enabled execution profile")
 	}
 	if len(test.RequiredBindings) > 0 {
@@ -73,6 +73,9 @@ func (e *Executor) Admit(ctx context.Context, test catalog.Test, artifact catalo
 		}
 		if _, err := e.output(ctx, "image", "inspect", e.GatewayImage, "--format", "{{.Id}}"); err != nil {
 			return errors.New("the trusted browser gateway image is unavailable locally")
+		}
+		if err := e.admitGatewayConfiguration(ctx); err != nil {
+			return err
 		}
 	}
 	if (e.runner() != "playwright" && e.runner() != "go") || (test.Runner != "" && test.Runner != e.runner()) {

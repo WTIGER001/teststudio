@@ -23,6 +23,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/apipolicy"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/diagnostics"
+	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/evidence"
 	"github.com/wtiger001/teststudio/internal/networkguard"
 	"github.com/wtiger001/teststudio/internal/preparation"
@@ -37,7 +38,14 @@ import (
 )
 
 func TestGuardedAPIWorkspaceBuildsPublishesAndRunsManuallyAndOnSchedule(t *testing.T) {
+	testGuardedAPIWorkspace(t, "playwright")
+}
+
+func testGuardedAPIWorkspace(t *testing.T, kind string) {
 	runtime, gateway := os.Getenv("TESTSTUDIO_BROWSER_RUNTIME_IMAGE"), os.Getenv("TESTSTUDIO_BROWSER_GATEWAY_IMAGE")
+	if kind == "go" {
+		runtime = os.Getenv("TESTSTUDIO_GO_RUNTIME_IMAGE")
+	}
 	if runtime == "" || gateway == "" {
 		t.Skip("supply cached request-policy/v1 runtime and gateway images for the local API workflow")
 	}
@@ -46,6 +54,7 @@ func TestGuardedAPIWorkspaceBuildsPublishesAndRunsManuallyAndOnSchedule(t *testi
 	if root == "" {
 		root = t.TempDir()
 	}
+	boundSecret := "credential-value-" + domain.NewID()
 	var hits atomic.Int32
 	listener, err := net.Listen("tcp", "0.0.0.0:0")
 	if err != nil {
@@ -53,7 +62,7 @@ func TestGuardedAPIWorkspaceBuildsPublishesAndRunsManuallyAndOnSchedule(t *testi
 	}
 	fixture := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		hits.Add(1)
-		if r.Header.Get("Authorization") != "Bearer api-bound-canary" {
+		if r.Header.Get("Authorization") != "Bearer "+boundSecret {
 			w.WriteHeader(401)
 			return
 		}
@@ -62,7 +71,7 @@ func TestGuardedAPIWorkspaceBuildsPublishesAndRunsManuallyAndOnSchedule(t *testi
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"status":"up","token":"response-canary","privateContact":"contact-canary","echo":"api-bound-canary"}`))
+		_ = json.NewEncoder(w).Encode(map[string]string{"status": "up", "token": "response-canary", "privateContact": "contact-canary", "echo": boundSecret})
 	}))
 	fixture.Listener.Close()
 	fixture.Listener = listener
@@ -70,7 +79,7 @@ func TestGuardedAPIWorkspaceBuildsPublishesAndRunsManuallyAndOnSchedule(t *testi
 	t.Cleanup(fixture.Close)
 	projectService := &projects.Service{Store: s.Store, Auth: s.Auth}
 	credentialFile := filepath.Join(root, "credential")
-	if err := os.WriteFile(credentialFile, []byte("api-bound-canary"), 0600); err != nil {
+	if err := os.WriteFile(credentialFile, []byte(boundSecret), 0600); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = os.Remove(credentialFile) })
@@ -93,10 +102,10 @@ func TestGuardedAPIWorkspaceBuildsPublishesAndRunsManuallyAndOnSchedule(t *testi
 		t.Fatal(err)
 	}
 	builder := &localimage.Builder{RuntimeImage: runtime, TempDirectory: filepath.Join(root, "contexts")}
-	inspector := &localcontainer.Executor{Runner: "playwright", AllowProjectImages: true, RequireProject: true}
-	s.BundleRunners = []string{"playwright"}
-	s.Builders, s.RecoveryBuilders = map[string]preparation.ArtifactBuilder{"playwright": builder}, map[string]preparation.ArtifactBuilder{"playwright": builder}
-	s.Inspectors, s.RecoveryInspectors = map[string]preparation.ArtifactInspector{"playwright": inspector}, map[string]preparation.ArtifactInspector{"playwright": inspector}
+	inspector := &localcontainer.Executor{Runner: kind, AllowProjectImages: true, RequireProject: true}
+	s.BundleRunners = []string{kind}
+	s.Builders, s.RecoveryBuilders = map[string]preparation.ArtifactBuilder{kind: builder}, map[string]preparation.ArtifactBuilder{kind: builder}
+	s.Inspectors, s.RecoveryInspectors = map[string]preparation.ArtifactInspector{kind: inspector}, map[string]preparation.ArtifactInspector{kind: inspector}
 	draft, err := sources.APIStarterDraft("health")
 	if err != nil {
 		t.Fatal(err)
@@ -111,6 +120,14 @@ func TestGuardedAPIWorkspaceBuildsPublishesAndRunsManuallyAndOnSchedule(t *testi
 			manifest.Browser.Requests.RedactFields = []string{"privateContact"}
 			manifest.Browser.Requests.Authentication = &apipolicy.Authentication{Binding: "api-login", Scheme: "bearer"}
 			manifest.RequiredBindings = []string{"api-login"}
+			if kind == "go" {
+				manifest.Runner = "go"
+				manifest.BuildProfile = "go-environment"
+				manifest.Tests = suitespec.Tests{Packages: []string{"./checks"}}
+				for index := 0; index < 61; index++ {
+					manifest.Browser.Requests.Rules = append(manifest.Browser.Requests.Rules, apipolicy.Rule{Method: "GET", PathPrefix: fmt.Sprintf("/reserved/%02d/", index) + strings.Repeat("<", 1900), ReadOnly: true})
+				}
+			}
 			data, _ := json.Marshal(manifest)
 			draft.Files[index].Content = string(data)
 		case "catalog.json":
@@ -118,6 +135,11 @@ func TestGuardedAPIWorkspaceBuildsPublishesAndRunsManuallyAndOnSchedule(t *testi
 			_ = json.Unmarshal([]byte(file.Content), &document)
 			document.Tests[0].Safety, document.Tests[0].Rationale = "safe", "Reads newly created local fixture state and checks denied requests without application mutations"
 			document.Tests[0].RequiredBindings = []string{"api-login"}
+			if kind == "go" {
+				document.Tests[0].Runner = "go"
+				document.Tests[0].Source = "checks/api_test.go"
+				document.Tests[0].Selector = "./checks::TestGuardedAPIRequests"
+			}
 			data, _ := json.Marshal(document)
 			draft.Files[index].Content = string(data)
 		case "checks/api.spec.ts":
@@ -128,8 +150,8 @@ test('Guard API requests', { tag: '@API-001' }, async ({ request }, testInfo) =>
     const response = await request.get('/health/')
     expect(response.status()).toBe(200)
     expect(await response.json()).toHaveProperty('status', 'up')
-    expect(await response.text()).not.toContain('api-bound-canary')
-    expect(process.env.TESTSTUDIO_WORK_ITEM).not.toContain('api-bound-canary')
+    expect(await response.json()).toHaveProperty('echo', '[REDACTED]')
+    expect(process.env.TESTSTUDIO_WORK_ITEM).not.toContain('credential-value-')
     expect(process.env.TESTSTUDIO_WORK_ITEM).not.toContain('api-reader')
     await testInfo.attach('response', { body: await response.body(), contentType: 'application/json' })
     process.stdout.write('Authorization: Bearer split-')
@@ -166,11 +188,16 @@ test('Guard API requests', { tag: '@API-001' }, async ({ request }, testInfo) =>
 `
 		}
 	}
-	saved, err := s.SaveDraft(t.Context(), "admin", "alpha", "health", draft, 0)
-	if err != nil {
-		t.Fatal(err)
+	var queued storage.Record
+	if kind == "go" {
+		queued, err = s.EnqueueBundle(t.Context(), "admin", "alpha", "health", "guarded-go-api", "go-api.zip", draft.ManifestPath, guardedGoZIP(t, draft, origin))
+	} else {
+		saved, saveErr := s.SaveDraft(t.Context(), "admin", "alpha", "health", draft, 0)
+		if saveErr != nil {
+			t.Fatal(saveErr)
+		}
+		queued, err = s.PrepareDraft(t.Context(), "admin", "alpha", "health", draft.ID, "guarded-api-source", saved.Revision)
 	}
-	queued, err := s.PrepareDraft(t.Context(), "admin", "alpha", "health", draft.ID, "guarded-api-source", saved.Revision)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -243,8 +270,12 @@ test('Guard API requests', { tag: '@API-001' }, async ({ request }, testInfo) =>
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { files.Close() })
-	driver := &localcontainer.Executor{Runner: "playwright", Environment: true, GatewayImage: gateway, ApproveArtifact: s.ApproveArtifact, Secrets: provider}
+	driver := &localcontainer.Executor{Runner: kind, Environment: true, GatewayImage: gateway, ApproveArtifact: s.ApproveArtifact, Secrets: provider}
 	runner := &runs.Service{Store: s.Store, Auth: s.Auth, Catalog: catalogService, Evidence: &evidence.Service{Store: s.Store, Blobs: files}, Browser: driver, Location: "local", Concurrency: 1, PollInterval: 10 * time.Millisecond}
+	if kind == "go" {
+		runner.Browser = nil
+		runner.GoAPI = driver
+	}
 	ctx, cancel := context.WithCancel(t.Context())
 	done := runner.Start(ctx)
 	t.Cleanup(func() {
@@ -256,6 +287,9 @@ test('Guard API requests', { tag: '@API-001' }, async ({ request }, testInfo) =>
 		}
 	})
 	request := runs.Request{Suite: "health", Environment: "requests", TimeoutSeconds: 60}
+	if kind == "go" {
+		request.TimeoutSeconds = 180
+	}
 	manual, err := runner.Create(t.Context(), "admin", "alpha", request, "api-manual", "manual")
 	if err != nil {
 		t.Fatal(err)
@@ -278,6 +312,9 @@ test('Guard API requests', { tag: '@API-001' }, async ({ request }, testInfo) =>
 	completed := []runs.Run{}
 	for _, id := range ids[1:] {
 		deadline := time.Now().Add(65 * time.Second)
+		if kind == "go" {
+			deadline = time.Now().Add(150 * time.Second)
+		}
 		var current runs.Run
 		for time.Now().Before(deadline) {
 			current, _, err = runner.Get(t.Context(), "alpha", id)
@@ -289,13 +326,13 @@ test('Guard API requests', { tag: '@API-001' }, async ({ request }, testInfo) =>
 			}
 			time.Sleep(25 * time.Millisecond)
 		}
-		if current.State != "completed" || current.Outcome != "passed" || current.Counts.Total != 1 || current.Counts.Passed != 1 || current.EvidenceState != "incomplete" {
+		if current.State != "completed" || current.Outcome != "passed" || current.Counts.Total != 1 || current.Counts.Passed != 1 || current.EvidenceState != expectedAPIEvidence(kind) {
 			t.Fatalf("API run differs: state=%s outcome=%s results=%+v error=%s gaps=%v", current.State, current.Outcome, current.Results, current.Error, current.EvidenceErrors)
 		}
 		if len(current.Results) != 1 || len(current.Results[0].Steps) < 5 || current.Tests[0].Type != "api" {
 			t.Fatal("API steps inflate or lose logical test identity")
 		}
-		if current.Results[0].DiagnosticsPolicy != diagnostics.Version || len(current.EvidenceErrors) == 0 {
+		if current.Results[0].DiagnosticsPolicy != diagnostics.Version || (kind == "playwright" && len(current.EvidenceErrors) == 0) {
 			t.Fatal("diagnostic policy and omission are missing")
 		}
 		page, err := s.Store.List(t.Context(), evidence.Bucket(id), "alpha", "", 100)
@@ -311,7 +348,7 @@ test('Guard API requests', { tag: '@API-001' }, async ({ request }, testInfo) =>
 			if artifact.Test != "API-001" {
 				continue
 			}
-			coded := strings.HasPrefix(artifact.Stream, "playwright.") || artifact.Kind == "attachment"
+			coded := strings.HasPrefix(artifact.Stream, kind+".") || artifact.Kind == "attachment"
 			if coded && artifact.RedactionPolicy != diagnostics.Version {
 				t.Fatal("retained artifact lacks redaction policy")
 			}
@@ -321,7 +358,7 @@ test('Guard API requests', { tag: '@API-001' }, async ({ request }, testInfo) =>
 			}
 			data, err := io.ReadAll(reader)
 			_ = reader.Close()
-			if err != nil || strings.Contains(string(data), "canary") {
+			if err != nil || strings.Contains(string(data), "canary") || strings.Contains(string(data), boundSecret) {
 				t.Fatal("API private diagnostic value reached evidence", artifact.Kind, err)
 			}
 			if coded {
@@ -349,4 +386,11 @@ test('Guard API requests', { tag: '@API-001' }, async ({ request }, testInfo) =>
 	if err := os.WriteFile(filepath.Join(root, "summary.json"), data, 0600); err != nil {
 		t.Fatal(err)
 	}
+}
+
+func expectedAPIEvidence(kind string) string {
+	if kind == "go" {
+		return "complete"
+	}
+	return "incomplete"
 }

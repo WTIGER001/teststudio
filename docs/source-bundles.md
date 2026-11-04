@@ -26,6 +26,8 @@ Go contexts require go.mod under moduleRoot and each declared test source file.
 Include vendor dependencies with vendor/modules.txt when external modules are needed.
 Alternatively, include complete local replacement modules in the archive.
 Discovery and execution disable module downloads and toolchain downloads.
+Go API bundles can use go-environment with a registered endpoint and explicit request rules.
+See [Guarded Go API execution](go-testing.md#guarded-go-api-execution) and the complete new examples/go-api workspace.
 Assembly does not install dependencies or execute uploaded build scripts.
 
 ## Trusted Go runtime

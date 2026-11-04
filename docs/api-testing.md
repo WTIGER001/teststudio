@@ -1,6 +1,6 @@
 # Coded API request policies
 
-Use test type api with the Playwright runner for request-based TypeScript tests.
+Use test type api with Playwright for request-based TypeScript tests or Go for standard net/http tests.
 The new request policy extends the existing single-origin environment execution profile.
 The browser recording profile remains separate. It does not inspect encrypted request methods or paths.
 
@@ -10,8 +10,9 @@ Create test includes an API test choice with Name, Request, and Review steps, fo
 Manual and scheduled request suites execute through the trusted gateway and retain normal results, timing, history, and trends.
 API diagnostics now redact sensitive text and JSON before retention, including during worker recovery.
 Environment-backed credential injection now supports Bearer, Basic, and approved API-key headers through the trusted local gateway.
-Environment-backed Go clients remain pending.
-Acceptance 35 stays open.
+Environment-backed Go clients use the same guarded gateway through the go-environment profile.
+Acceptance 35 is verified for the implemented local profiles. Hosted verification remains separate.
+See [Go API execution](go-testing.md#guarded-go-api-execution) for source bundles and operator setup.
 
 ## Create an API draft
 
@@ -131,6 +132,8 @@ These names identify object properties, not JSON paths. Nested objects and array
 The prepared release freezes this policy. Prepare and publish a new release to change it.
 
 Only bounded UTF-8 text/plain, application/json, and application/*+json attachments enter API evidence.
+Go JSON event logs also accept application/x-ndjson. Their decoded output passes through the same redaction rules.
+The event stream supports up to 4096 complete JSON records. Invalid or truncated streams produce an explicit evidence gap.
 Each diagnostic file has a 2 MiB input limit and the configured capture limits still apply.
 JSON must parse completely and remain within 64 nesting levels. Numbers retain their JSON precision.
 Diagnostic scanning permits 2048 field assignments and 512 learned values within a 1 MiB private-value budget.
@@ -150,6 +153,10 @@ This policy filters conventional structured diagnostics. It does not sandbox pub
 ## Runtime and recovery
 
 Both the source runtime and gateway image must declare teststudio.api-policy=request-policy/v1.
+API runtimes also declare teststudio.work-item-bytes=4194304. Frozen work items have a 4 MiB input limit.
+Gateway configuration uses the same bounded private initialization channel as credentials, rather than process arguments or environment variables.
+This preserves documented policy limits without operating-system argument-size restrictions.
+The gateway declares teststudio.gateway-config=private-config/v1.
 Admission and timing checks reject older images rather than silently ignoring request rules.
 Build the updated trusted images, then restart the configured API and source preparation worker with their immutable identifiers.
 Reprepare API suites that use an older runtime.

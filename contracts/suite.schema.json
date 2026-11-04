@@ -212,20 +212,23 @@
       "if": {
         "properties": {
           "buildProfile": {
-            "const": "playwright-environment"
+            "enum": [
+              "playwright-environment",
+              "go-environment"
+            ]
           }
-        }
+        },
+        "required": [
+          "buildProfile"
+        ]
       },
       "then": {
         "required": [
           "browser"
         ],
         "properties": {
-          "runner": {
-            "const": "playwright"
-          },
           "requiredBindings": {
-            "maxItems": 0
+            "maxItems": 1
           }
         },
         "not": {
@@ -259,6 +262,98 @@
         "properties": {
           "type": {
             "const": "api"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "buildProfile": {
+            "const": "playwright-environment"
+          }
+        },
+        "required": [
+          "buildProfile"
+        ]
+      },
+      "then": {
+        "properties": {
+          "runner": {
+            "const": "playwright"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "buildProfile": {
+            "const": "go-environment"
+          }
+        },
+        "required": [
+          "buildProfile"
+        ]
+      },
+      "then": {
+        "properties": {
+          "runner": {
+            "const": "go"
+          },
+          "type": {
+            "const": "api"
+          },
+          "browser": {
+            "required": [
+              "requests"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "browser": {
+            "properties": {
+              "requests": {
+                "required": [
+                  "authentication"
+                ]
+              }
+            },
+            "required": [
+              "requests"
+            ]
+          }
+        },
+        "required": [
+          "browser"
+        ]
+      },
+      "then": {
+        "required": [
+          "requiredBindings"
+        ],
+        "properties": {
+          "requiredBindings": {
+            "minItems": 1,
+            "maxItems": 1
+          }
+        }
+      },
+      "else": {
+        "if": {
+          "required": [
+            "browser"
+          ]
+        },
+        "then": {
+          "properties": {
+            "requiredBindings": {
+              "maxItems": 0
+            }
           }
         }
       }

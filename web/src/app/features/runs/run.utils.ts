@@ -16,7 +16,7 @@ export function queryString(values: Record<string, string>): string {
 export function errorMessage(error: unknown, fallback: string): string { return error instanceof Error ? error.message : fallback }
 export function previewKind(contentType: string): 'text' | 'image' | 'video' | 'download' {
   const kind = contentType.split(';')[0].trim().toLowerCase()
-  if (['text/plain', 'application/json'].includes(kind)) return 'text'
+  if (['text/plain', 'application/json', 'application/x-ndjson'].includes(kind)) return 'text'
   if (['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(kind)) return 'image'
   if (['video/mp4', 'video/webm'].includes(kind)) return 'video'
   return 'download'

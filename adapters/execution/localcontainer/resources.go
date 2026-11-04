@@ -40,8 +40,8 @@ func (e *Executor) Reference(ref execution.Reference) execution.Reference {
 		prefix = "go"
 	}
 	if e.Environment {
-		prefix = "pw-env"
-		ref.Gateway = "teststudio-pw-gateway-" + ref.ID
+		prefix += "-env"
+		ref.Gateway = "teststudio-" + strings.TrimSuffix(prefix, "-env") + "-gateway-" + ref.ID
 	}
 	ref.Container = "teststudio-" + prefix + "-" + ref.ID
 	ref.Volume = "teststudio-" + prefix + "-output-" + ref.ID

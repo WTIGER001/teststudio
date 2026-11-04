@@ -15,7 +15,7 @@ func APIDiagnostics(input CodedInput) bool { return input.Test.Type == "api" }
 
 func APITextAttachment(file Attachment) bool {
 	typeName, _, err := mime.ParseMediaType(file.ContentType)
-	return err == nil && (file.Kind == "log" || file.Kind == "attachment") && (typeName == "text/plain" || typeName == "application/json" || strings.HasPrefix(typeName, "application/") && strings.HasSuffix(typeName, "+json"))
+	return err == nil && (file.Kind == "log" || file.Kind == "attachment") && (typeName == "text/plain" || typeName == "application/json" || typeName == "application/x-ndjson" || strings.HasPrefix(typeName, "application/") && strings.HasSuffix(typeName, "+json"))
 }
 
 func RedactAPIReport(input CodedInput, report CodedReport) CodedReport {
@@ -39,7 +39,13 @@ func RedactAPIReport(input CodedInput, report CodedReport) CodedReport {
 		typeName, _, _ := mime.ParseMediaType(file.ContentType)
 		isJSON := typeName == "application/json" || strings.HasSuffix(typeName, "+json")
 		if APITextAttachment(file) && utf8.Valid(file.Data) && len(file.Data) <= diagnostics.MaxBytes && (!isJSON || json.Valid(file.Data)) {
-			r.Learn(string(file.Data))
+			if typeName == "application/x-ndjson" {
+				_, _ = r.JSONLines(file.Data)
+			} else if isJSON {
+				_ = r.LearnJSON(file.Data)
+			} else {
+				r.Learn(string(file.Data))
+			}
 		}
 	}
 	report.Result.DiagnosticsPolicy = diagnostics.Version
@@ -64,8 +70,14 @@ func RedactAPIReport(input CodedInput, report CodedReport) CodedReport {
 			continue
 		}
 		typeName, _, _ := mime.ParseMediaType(file.ContentType)
-		if typeName == "application/json" || strings.HasSuffix(typeName, "+json") {
-			body, err := r.JSON(file.Data)
+		if typeName == "application/json" || typeName == "application/x-ndjson" || strings.HasSuffix(typeName, "+json") {
+			var body []byte
+			var err error
+			if typeName == "application/x-ndjson" {
+				body, err = r.JSONLines(file.Data)
+			} else {
+				body, err = r.JSON(file.Data)
+			}
 			if err != nil {
 				problems = append(problems, err.Error())
 				continue
@@ -81,6 +93,9 @@ func RedactAPIReport(input CodedInput, report CodedReport) CodedReport {
 		file.Filename = "api-diagnostic-" + strconv.Itoa(index) + ".txt"
 		if typeName != "text/plain" {
 			file.Filename = "api-diagnostic-" + strconv.Itoa(index) + ".json"
+		}
+		if typeName == "application/x-ndjson" {
+			file.Filename = "api-diagnostic-" + strconv.Itoa(index) + ".jsonl"
 		}
 		file.Stream = r.Text(file.Stream, 128)
 		files = append(files, file)

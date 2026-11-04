@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "teststudio.catalog/v1",
+  "tests": [{
+    "id": "GO-API-001",
+    "title": "Read service health through the API gateway",
+    "description": "A newly written Go request check for a registered environment",
+    "category": "API",
+    "tags": ["example"],
+    "type": "api",
+    "runner": "go",
+    "state": "enabled",
+    "safety": "needs-review",
+    "rationale": "Review the endpoint and request policy before labeling this test safe",
+    "dependencies": [],
+    "requiredBindings": [],
+    "timeoutSeconds": 10,
+    "source": "checks/api_test.go",
+    "selector": "./checks::TestServiceHealth",
+    "capture": { "logs": true, "screenshots": "off", "trace": "off", "video": "off", "retentionDays": 7 }
+  }]
+}

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/gosuite"
+	"github.com/wtiger001/teststudio/internal/workerrelay"
 )
 
 func Execute(ctx context.Context, input Input, suite, outputDirectory string) Report {
@@ -28,6 +29,7 @@ func Execute(ctx context.Context, input Input, suite, outputDirectory string) Re
 	if input.TimeoutMs < 1 || input.TimeoutMs > 3600000 {
 		return fail("configuration", errors.New("Go timeout must be between 1 and 3600000 milliseconds"))
 	}
+	root := suite
 	suite, manifest, err := loadCatalog(suite)
 	if err != nil {
 		return fail("configuration", err)
@@ -41,6 +43,9 @@ func Execute(ctx context.Context, input Input, suite, outputDirectory string) Re
 	}
 	if selected == nil {
 		return fail("configuration", errors.New("Go selection does not match an immutable registered catalog entry"))
+	}
+	if err := validateEnvironment(root, input); err != nil {
+		return fail("configuration", err)
 	}
 	report.Result.Go.Package, report.Result.Go.Test = selected.Package, selected.Test
 	temp, err := os.MkdirTemp("", "teststudio-go-")
@@ -87,6 +92,15 @@ func Execute(ctx context.Context, input Input, suite, outputDirectory string) Re
 	if _, err := os.Stat(filepath.Join(temp, "selected.test")); err != nil {
 		return fail("build", errors.New("Go package produced no executable test binary"))
 	}
+	processEnvironment := environment
+	if input.Browser != nil {
+		relay, err := workerrelay.Open(ctx, "/output/.browser-egress.sock")
+		if err != nil {
+			return fail("configuration", err)
+		}
+		defer relay.Close()
+		processEnvironment = requestEnvironment(environment, relay.URL())
+	}
 	events := NewEvents(*selected, func(at time.Time) {
 		message, _ := json.Marshal(map[string]any{"event": "test.started", "testId": input.Test.ID, "selector": input.Test.Selector, "at": at})
 		fmt.Println("TESTSTUDIO_EVENT " + string(message))
@@ -96,7 +110,7 @@ func Execute(ctx context.Context, input Input, suite, outputDirectory string) Re
 	executionCtx, cancelExecution := context.WithTimeout(ctx, time.Duration(input.TimeoutMs)*time.Millisecond+5*time.Second)
 	process := command(executionCtx, "tool", "test2json", "-t", "-p", selected.Package, filepath.Join(temp, "selected.test"), "-test.v=test2json", "-test.count=1", "-test.run="+gosuite.Pattern(selected.Test), "-test.timeout="+(time.Duration(input.TimeoutMs)*time.Millisecond).String())
 	process.Dir = filepath.Join(suite, selected.Package)
-	process.Env = environment
+	process.Env = processEnvironment
 	process.Stdout = &stdout
 	process.Stderr = &stderr
 	exit := process.Run()
@@ -141,5 +155,9 @@ func appendLog(report *Report, input Input, directory, name, stream string, sour
 		report.EvidenceErrors = append(report.EvidenceErrors, "Go output could not be retained: "+err.Error())
 		return
 	}
-	report.Attachments = append(report.Attachments, Attachment{Path: name, Filename: name, Kind: "log", Stream: stream, ContentType: "text/plain; charset=utf-8"})
+	contentType := "text/plain; charset=utf-8"
+	if input.Test.Type == "api" && stream == "go.events" {
+		contentType = "application/x-ndjson"
+	}
+	report.Attachments = append(report.Attachments, Attachment{Path: name, Filename: name, Kind: "log", Stream: stream, ContentType: contentType})
 }

@@ -302,6 +302,7 @@ func (r *Redactor) JSON(data []byte) ([]byte, error) {
 		return nil, errors.New("API JSON diagnostic has trailing data")
 	}
 	r.Learn(string(data))
+	r.learnValue(value, 0)
 	if r.overflow {
 		return nil, errors.New("API JSON diagnostic exceeds its redaction limit")
 	}

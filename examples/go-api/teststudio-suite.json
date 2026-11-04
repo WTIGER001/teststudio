@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "suiteId": "go-api",
+  "type": "api",
+  "runner": "go",
+  "applications": [],
+  "moduleRoot": ".",
+  "tests": { "packages": ["./checks"] },
+  "catalog": "catalog.json",
+  "buildProfile": "go-environment",
+  "browser": {
+    "endpoint": "api",
+    "requests": {
+      "rules": [{ "method": "GET", "pathPrefix": "/health", "readOnly": true, "maxBodyBytes": 0 }],
+      "maxRequests": 5,
+      "maxResponseBytes": 65536
+    }
+  }
+}
