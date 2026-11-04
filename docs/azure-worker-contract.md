@@ -16,7 +16,8 @@ The [selected private-zone inspector](azure-worker-private-dns.md) now verifies 
 The [endpoint inspector](azure-worker-endpoints.md) now binds consumer-side approval, NIC ownership, subnet policy, and exact regional role addresses.
 The [registry service inspector](azure-worker-registry.md) now verifies private configuration, regional authority, and service-side registry approval.
 The [selected exchange inspector](azure-worker-exchange.md) now checks relay configuration, service approval, revision state, and HTTPS binding metadata.
-Complete network admission, exclusive occupancy, backend authority, identity role binding, and native command wiring remain unfinished.
+The [workload inventory observer](azure-worker-workloads.md) now checks reported app and job placement across the configured subscription.
+Complete network admission, effective read coverage, attachment authority, backend authority, identity role binding, and native wiring remain unfinished.
 Azure coded execution remains disabled. The core deployment still supports native HTTP checks.
 
 See [Azure core service](azure.md), [hosted lifecycle](hosted-execution.md), and [hosted preparation](hosted-discovery.md).

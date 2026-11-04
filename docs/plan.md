@@ -241,7 +241,16 @@ Six new focused local race checks and one existing relay configuration check pas
 The reader accesses only eight selected resources and collections. It does not claim complete workload occupancy from an application lookup.
 See [selected Azure exchange binding](azure-worker-exchange.md). Acceptance 51 advances; the count remains 48 of 57.
 
-Next establish complete application and job occupancy, attachment authority, and actual exchange networking.
+The workload inventory stage now reads the configured subscription's complete reported app and job collections within explicit bounds.
+It finds the selected relay and rejects other observed exchange occupants across resource groups, duplicate identities, and conflicting placement.
+Each SDK page reduces immediately to resource and environment identifiers. Unrelated configuration does not leave the reader.
+Missing arrays, unknown placement, failed reads, exceeded item limits, and unfinished paging cannot establish absence.
+The shared read transport now accepts registered subscription paths without assuming a resource-group segment.
+Six new focused race checks and two selected existing transport checks pass locally.
+See [Azure exchange workload inventory](azure-worker-workloads.md). Acceptance 51 advances; the count remains 48 of 57.
+
+Next verify effective read coverage, environment attachment authority, and actual exchange networking.
+A completed list response does not prove authorization coverage or prevent later attachments. Keep those native installation controls mandatory.
 Verify the trusted worker backend's restricted route, TLS authority, and placement before completing service admission.
 Resolve effective VNet-wide private-zone visibility and attachment controls. Selected-zone inspection cannot rule out other shadowing zones.
 Keep that proof separate from configured record correctness and private endpoint ownership.

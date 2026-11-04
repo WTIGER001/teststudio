@@ -8,6 +8,7 @@ The [standalone relay](worker-relay.md) supplies the bounded worker-facing proce
 
 This stage does not implement Network, authorize dispatch, or release worker input.
 A selected application lookup does not prove exclusive environment occupancy.
+The [workload inventory stage](azure-worker-workloads.md) now checks reported app and job placement across the configured subscription.
 Complete application and job inventories, attachment authority, effective network state, backend placement, and actual TLS verification remain required.
 Azure coded execution stays disabled in native commands and infrastructure packaging.
 
@@ -161,7 +162,7 @@ Acceptance 51 advances. The total remains 48 verified items out of 57.
 
 ## Next implementation
 
-Establish complete application and job occupancy, exclusive attachment authority, and actual exchange network configuration.
+Compose workload inventory observation. Verify effective read coverage, exclusive attachment authority, and actual exchange network configuration.
 Verify that the selected backend reaches only the trusted worker listener with the intended TLS authority.
 Complete effective VNet-wide DNS visibility, trusted preparation networking, cross-job isolation, execution placement, managed identity roles, and full profile binding.
 Then add native configuration and infrastructure service wiring before separate deployment acceptance.

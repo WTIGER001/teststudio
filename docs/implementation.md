@@ -122,7 +122,39 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: selected Azure exchange and HTTPS binding
+## Current delivery: bounded Azure exchange workload inventory
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+The selected exchange binding batch commits as 716d412.
+
+WorkloadInventoryGuard now refreshes the selected exchange stage before concurrent application and job subscription inventories.
+The selected relay must appear in its expected environment. Any other observed app or job in that environment rejects inspection.
+The check includes resources in other groups and stopped applications. It does not limit discovery to the relay's resource group.
+Duplicate identities, conflicting environment fields, wrong kinds, foreign-subscription records, and contradictory placement reject observation.
+Missing properties, absent placement, unknown references, missing selected relay, and uncertain list data remain unavailable.
+
+The SDK permits only two configured subscription collection GET paths through the existing bounded ARM transport.
+It reduces each page to resource and environment identifiers without retaining unrelated application or job configuration.
+Each collection allows 512 items and sixteen pages. Missing or null value arrays, nil records, excess items, and unfinished paging cannot establish absence.
+Foreign pages, other collections, token cycles, altered queries, secret actions, and mutations cannot widen read authority.
+A failed subscription read triggers no smaller-scope fallback.
+
+The shared HTTP guard now handles registered subscription paths without assuming a resource-group identifier exists.
+Existing escaped-group and DNS association behavior remains verified through two selected checks.
+Six new focused local race checks pass, including exact item bounds, cross-group occupants, legacy connected references, Unicode groups, and metadata reduction.
+A review fix aligns duplicate keys with Unicode identity comparison. Only the two affected checks repeat.
+Evidence is output/azure-worker-workloads/summary.json and the targeted command results.
+No cloud credential, live cloud API, DNS probe, packet probe, TLS probe, deployment, registry push, UI build, browser, container, or image build runs.
+No unchanged broad suite or runner fixture repeats.
+
+This is reported inventory observation. A 200 response does not prove effective read coverage or prevent later workload attachments.
+Native setup must still verify subscription read coverage, relevant access restrictions, and trusted environment join and write authority.
+The guard does not implement Network or enable coded execution.
+Actual exchange networking, restricted backend authority, effective DNS visibility, trusted preparation access, cross-job isolation, execution placement, and role binding remain required.
+Continue native authority and effective network controls before complete admission and service wiring.
+See [Azure exchange workload inventory](azure-worker-workloads.md).
+
+## Previous delivery: selected Azure exchange and HTTPS binding
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 The relay packaging batch commits as 707f54f.

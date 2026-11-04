@@ -52,8 +52,12 @@ func (h *armReadHTTP) Do(r *http.Request) (*http.Response, error) {
 	if !ok || !h.queryAllowed(u, version) {
 		return nil, hostedexecution.ErrOwnership
 	}
-	group, _ := resourceParts(u.Path)
-	escaped := strings.Replace(u.Path, "/resourceGroups/"+group+"/", "/resourceGroups/"+url.PathEscape(group)+"/", 1)
+	escaped := u.Path
+	parts := strings.Split(u.Path, "/")
+	if len(parts) > 4 && parts[3] == "resourceGroups" {
+		group := parts[4]
+		escaped = strings.Replace(u.Path, "/resourceGroups/"+group+"/", "/resourceGroups/"+url.PathEscape(group)+"/", 1)
+	}
 	if u.RawPath != "" && u.EscapedPath() != escaped {
 		return nil, hostedexecution.ErrOwnership
 	}
