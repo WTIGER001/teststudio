@@ -8,7 +8,8 @@ Pinned dependencies are ECS v1.103.1 and Scheduler v1.26.1. They retain the exis
 
 This delivery does not enable ECS workers in the API or preparation command.
 The [durable provider lifecycle](ecs-worker-lifecycle.md) now implements dispatch, observations, and checkpointed cleanup with required network-admission hooks.
-Production network checks, configuration, private exchange routing, and AWS packaging remain required.
+The [network checker and bounded settings parsing](ecs-network-admission.md) are implemented.
+SDK initialization, command wiring, private exchange routing, and AWS packaging remain required.
 The existing AWS service profile continues to support native HTTP execution only.
 No cloud account, registry, or deployment is contacted by these contract checks.
 
@@ -115,5 +116,5 @@ The API, preparation command, and supervisor retain successful compilation check
 
 The durable ECS state machine now reserves registration and launch, recovers lost acknowledgements, and retains terminal observations and cleanup state.
 The shared driver waits for explicit provider admission before opening the exchange gate.
-Next implement production network checks, scoped SDK initialization, private HTTPS routing, controller roles, optional settings, and AWS service packaging.
+Next correct unsupported Fargate tmpfs storage, then add scoped SDK initialization, private HTTPS routing, controller roles, command wiring, and AWS service packaging.
 Keep the AWS provider disabled until those lifecycle and routing contracts are complete.

@@ -42,8 +42,12 @@ github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.8.8 h1:PWv+vG8aCLS8qd+HPdY
 github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.8.8/go.mod h1:xxPZEpflYHJA12366ZGyq66z9dHPCoeCIu99Jck+MPw=
 github.com/aws/aws-sdk-go-v2/internal/v4a v1.5.8 h1:WOp5De9iWdEHDPh2Kb0tBP3vGBm/dVAuRGh4a4tqduo=
 github.com/aws/aws-sdk-go-v2/internal/v4a v1.5.8/go.mod h1:z8W8YgfhbWl62XqcTtK+CxPrE+iHGRVUOtrrbIOp7ZY=
+github.com/aws/aws-sdk-go-v2/service/ec2 v1.343.0 h1:pOxNUJbUOy779gx205gEpySpT5fu3B0ifPD8jBxujZI=
+github.com/aws/aws-sdk-go-v2/service/ec2 v1.343.0/go.mod h1:khWfxrzSgMjGMAZIaYAHu3IobEo7KRRNwPYaHb1zpng=
 github.com/aws/aws-sdk-go-v2/service/ecs v1.103.1 h1:DRTV+EGfif88RSqkyHvuyrHGHT9pCdT6yL0ivfALa4U=
 github.com/aws/aws-sdk-go-v2/service/ecs v1.103.1/go.mod h1:jjuJTYCyu/HPuJ0/SccHi+0I4VJFWxTPVxU7HpuZdPw=
+github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.63.6 h1:JK+gp4ooU4swwYw5lX1+GwBVw9Sdb5PsC9HboSN8V24=
+github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2 v1.63.6/go.mod h1:VEvYPB46bfTmZBhuZSx2I/QTFjdILAdnthRSNeGDm3E=
 github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.23 h1:MCIR6iZaCKO4UE0hUvoWWLI6JVjppopV64JfAJaMjng=
 github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.23/go.mod h1:pphWFS+z0MmIPivj8c/6bATd1Z+Av7Ust75DPdEFsPA=
 github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.11.9 h1:GACgECI422Xt5n4Pojr3O0aocPv8lfH4PJe2Aon5Wv8=
@@ -52,6 +56,10 @@ github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.14.8 h1:+PMpWlJYO
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.14.8/go.mod h1:cnG3xZLGQL4c/bt8pjdzlFtZsW7epBBuNS04a5xMjdo=
 github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.20.8 h1:RS1Wt+K0r4X0ci9Vf4JYTUfHzsQihYA2LgGJeEneKpk=
 github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.20.8/go.mod h1:adMnTy5kyoUW86jhXnGSVc/mvMQI4GZd1qYWMeaS8M8=
+github.com/aws/aws-sdk-go-v2/service/route53profiles v1.18.1 h1:rma6qZeqUJz6R3FLPUig0gyRCmUresPGLlXTKCrw3PQ=
+github.com/aws/aws-sdk-go-v2/service/route53profiles v1.18.1/go.mod h1:773L1nbFHdVqii7gSDk3hlvkoDX5lARfPXs/vuPK+Bk=
+github.com/aws/aws-sdk-go-v2/service/route53resolver v1.54.8 h1:y4x3zxiqeZwZ8J1RaK4B2cl8qh36WMsYCN81MkP7oY4=
+github.com/aws/aws-sdk-go-v2/service/route53resolver v1.54.8/go.mod h1:qE18NJBnhYpbXFlkgLUENHwfFiwD70yC52J3PkFDZ3k=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.114.6 h1:to7+Vr3rLkpYRwVKJ5QRriI0eE306vrVN/6TnVHgxvY=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.114.6/go.mod h1:Jc89ASa2k7HMAskj3bSnt8bf+k+p2IApzkoXnEjkgUw=
 github.com/aws/aws-sdk-go-v2/service/scheduler v1.26.1 h1:CZSLp1uHGlw42tV+hRlqlO/AAiUbNcX3kPqqTdk9NRs=

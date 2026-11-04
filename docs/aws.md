@@ -176,3 +176,11 @@ All owned verification containers and volumes are removed. Existing demonstratio
 [CloudFront error caching](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/custom-error-pages-expiration.html) describes the separate error response cache controls.
 
 [S3 GetObject permissions](https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html) describes the listing permission needed to distinguish missing objects.
+
+## Worker network admission
+
+The optional ECS adapter now has [SDK-backed network admission](ecs-network-admission.md) and bounded private settings parsing.
+Workers require a dedicated VPC with exact registry endpoints, DNS filtering, and a PrivateLink exchange path to the controller VPC.
+The core service template does not provision or enable these worker resources yet.
+SDK initialization, command wiring, private routing infrastructure, and supported task-local worker storage remain required.
+Local protocol checks do not establish deployed network isolation or hosted execution acceptance.

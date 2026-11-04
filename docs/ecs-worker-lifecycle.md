@@ -8,7 +8,8 @@ The existing immutable [task and deadline contracts](ecs-worker-contract.md) rem
 
 The provider is not enabled by server or preparation flags yet.
 Its constructor requires an image inspector and both installation and task network-admission checks. No default network bypass exists.
-The production EC2 network checks, scoped client factory, bounded settings loader, private exchange route, and deployment package remain to implement.
+The [production network checker and bounded settings loader](ecs-network-admission.md) are implemented with local protocol verification.
+The scoped client factory, command wiring, private exchange route, and deployment package remain to implement.
 The current AWS service profile continues to support native HTTP checks only.
 Keep all hosted acceptance items open until their complete scope is verified.
 
@@ -106,8 +107,8 @@ The UI, service images, trusted runtimes, and browser dependencies remain unchan
 
 ## Continue implementation
 
-Implement the required production network checker with exact VPC, subnet, security-group, private exchange, and registry endpoint policy checks.
-Verify the actual task interface before admission. Keep isolated worker egress separate from trusted controller access.
+Keep the implemented network checker mandatory. Its dedicated worker VPC and PrivateLink path separate worker egress from trusted controller access.
+Correct the earlier unsupported Fargate tmpfs mounts before enabling the provider. Use supported task-local storage and bind its resource class into timing identity.
 Add the scoped SDK factory and bounded private settings to the API and preparation commands.
 Preserve explicit account and region scope, disabled creation retries, current credentials, and private error handling.
 Then package private worker HTTPS routing, controller permissions, platform-only pull permissions, and the independent deadline role.

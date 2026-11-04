@@ -122,6 +122,29 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: ECS network admission and private settings
+
+Acceptance **51** advances, with supporting timing-pool identity under **41**. The total remains **48 verified of 57**, with **9 open**.
+The adapter now checks actual EC2, ELBv2, Route 53 Resolver, and Route 53 Profiles responses through typed SDK interfaces.
+A dedicated worker VPC keeps its strict DNS policy separate from trusted controller identity, notification, and target access.
+Worker routing permits only local routes and the restricted S3 gateway. Exact groups permit only required HTTPS paths.
+Private ECR policies bind platform pull authority and the repository prefix. The S3 policy permits only AWS-owned image-layer reads.
+The PrivateLink service, internal TLS load balancer, private controller targets, exact DNS lists, and fail-closed firewall must match.
+Profile overlays, public task interfaces, changed groups, inconsistent attachments, and unrecognized private diagnostics block admission.
+Pool refreshes serialize and have bounded caching. Full task checks and refreshes have bounded contexts and single-attempt SDK calls.
+The settings loader accepts one bounded file or environment reference and binds isolation settings into worker ownership and timing identity.
+
+All 19 ECS package checks pass with race detection, including the existing lifecycle contracts and six new network/settings checks.
+The final check includes 22 rejected pool mutations, six task-interface mutations, settings scope, cache expiry, and concurrent readers.
+Evidence is output/ecs-network-admission/final-contract.log. No credentials are discovered and no live provider is contacted.
+The four added SDK modules retain the existing AWS core SDK version. The demo remains healthy without another restart.
+No browser, UI rebuild, service image, or trusted-runtime rebuild is needed for this batch.
+See [ECS network admission](ecs-network-admission.md) for the exact contract, primary references, required read permissions, and remaining integration.
+
+The primary-source review also identifies unsupported tmpfs mounts in the earlier Fargate task definition.
+Correct those mounts before enabling dispatch. Then add SDK initialization, ECR authentication, native settings wiring, and private infrastructure.
+Local contracts do not close deployed execution, timing, storage, or recovery acceptance.
+
 ## Current delivery: durable ECS dispatch and checkpointed recovery
 
 Acceptance **51** advances with supporting replica recovery under **52**.

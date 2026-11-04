@@ -115,6 +115,13 @@ Keep deployment-wide timing **41**, storage-provider retention **46**, and hoste
 Do not repeat completed source, native, API, browser, or scheduled-runner fixtures without a concrete contract change or unresolved failure.
 Cloud execution and storage-provider verification remain separate work.
 
+The ECS network admission checker now reads exact VPC, routing, group, endpoint, PrivateLink, DNS, and task-interface state.
+Its bounded settings loader binds network identity into timing and recovery ownership.
+Use a dedicated worker VPC; VPC-wide DNS restrictions must not affect trusted controller traffic.
+No Route 53 Profile overlay is permitted in that worker VPC. See [network admission](ecs-network-admission.md).
+Correct the earlier unsupported Fargate tmpfs mounts before enabling dispatch. Then add SDK construction, ECR authentication, and command wiring.
+Package the private worker network and HTTPS route afterward. Preserve the separate cloud verification phase.
+
 ### Current hosted packaging checkpoint
 
 The portable service image now packages the API, UI, private trace viewer, and bounded health command.

@@ -13,6 +13,7 @@ import (
 )
 
 type Config struct {
+	NetworkProfile string   `json:"networkProfile,omitempty"`
 	Region         string   `json:"region"`
 	Account        string   `json:"account"`
 	Cluster        string   `json:"cluster"`
@@ -55,6 +56,9 @@ func (c Config) validRole(value string) bool {
 }
 
 func Validate(c Config) error {
+	if c.NetworkProfile != "" && !checksum.MatchString(c.NetworkProfile) {
+		return hostedexecution.ErrConfiguration
+	}
 	u, err := url.Parse(c.ExchangeOrigin)
 	if err != nil || u.Scheme != "https" || u.Hostname() == "" || u.User != nil || u.Path != "" || u.RawQuery != "" || u.ForceQuery || u.Fragment != "" || u.Opaque != "" || !region.MatchString(c.Region) || !account.MatchString(c.Account) || !strings.HasPrefix(c.Cluster, c.ecsPrefix()+"cluster/") || !resourceName.MatchString(c.clusterName()) || !c.validRole(c.ExecutionRole) || !c.validRole(c.DeadlineRole) || c.ExecutionRole == c.DeadlineRole || !scheduleGroup.MatchString(c.ScheduleGroup) || !prefix.MatchString(c.FamilyPrefix) || c.Architecture != "arm64" && c.Architecture != "amd64" || c.Platform != "1.4.0" || len(c.Subnets) < 1 || len(c.Subnets) > 16 || len(c.SecurityGroups) != 1 {
 		return hostedexecution.ErrConfiguration
