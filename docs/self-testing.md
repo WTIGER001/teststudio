@@ -588,3 +588,12 @@ The fixture creates a new project, access policy, local credential, session, com
 It verifies raw metadata, effective access, preserved native grant identifiers, sequence continuity, and retained bytes.
 The reverse transfer also preserves metadata and access. A damaged archive leaves the destination empty.
 No browser or cloud account is required. See [Database transfer](data-transfer.md) for operator cutover steps.
+
+## AWS packaging without deployment
+
+Use the pinned local checker described in [AWS core service profile](aws.md#local-packaging-checks).
+It validates CloudFormation schemas and package relationships without account credentials or AWS operations.
+Evaluate UI-only route rewriting locally with Node. Use the existing service-image check for changed runtime behavior.
+The service verifier accepts --configuration-only to check environment-backed JSON and temporary-volume startup after configuration-only changes.
+Retain earlier passing package evidence when the remaining package contracts do not change.
+No browser or test-source image rebuild is needed for this infrastructure batch.

@@ -72,3 +72,23 @@ func TestArtifactConfigurationRejectsAmbiguousOrCredentialBearingDocuments(t *te
 		}
 	}
 }
+
+func TestEnvironmentArtifactConfigurationPreservesProviderIsolation(t *testing.T) {
+	for _, fixture := range []struct {
+		document, driver string
+		valid            bool
+	}{
+		{`{"driver":"s3","s3":{"region":"us-east-1","bucket":"independent-evidence"}}`, "s3", true},
+		{`{"driver":"filesystem","directory":"/private/artifacts"}`, "filesystem", true},
+		{`{"driver":"filesystem","directory":"relative"}`, "", false},
+		{`{"driver":"azure","azure":{"serviceUrl":"https://example.com","container":"evidence","secret":"must-not-echo"}}`, "", false},
+	} {
+		settings, err := config.LoadEnvironment("", "ARTIFACT_SETTINGS", "unused", func(string) (string, bool) { return fixture.document, true })
+		if (err == nil) != fixture.valid || (fixture.valid && settings.Driver != fixture.driver) || (err != nil && strings.Contains(err.Error(), "must-not-echo")) {
+			t.Fatal("incorrect artifact environment outcome", err)
+		}
+		if fixture.driver == "s3" && settings.Directory != "" {
+			t.Fatal("filesystem settings leaked into S3")
+		}
+	}
+}

@@ -1,10 +1,7 @@
 package config
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
-	"io"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -12,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/wtiger001/teststudio/internal/artifacts"
+	"github.com/wtiger001/teststudio/internal/runtimeconfig"
 )
 
 type Settings struct {
@@ -41,27 +39,23 @@ var containerName = regexp.MustCompile(`^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$`)
 var ownerID = regexp.MustCompile(`^[0-9]{12}$`)
 
 func Load(filename, directory string) (Settings, error) {
-	settings := Settings{Driver: "filesystem", Directory: directory}
-	if filename != "" {
-		file, err := os.Open(filename)
-		if err != nil {
-			return Settings{}, errors.New("artifact store configuration cannot be read")
+	return LoadEnvironment(filename, "", directory, os.LookupEnv)
+}
+
+func LoadEnvironment(filename, variable, directory string, lookup func(string) (string, bool)) (Settings, error) {
+	settings := Settings{}
+	configured, err := runtimeconfig.LoadJSON(filename, variable, "artifact store", lookup, &settings)
+	if err != nil {
+		return Settings{}, err
+	}
+	if !configured {
+		settings = Settings{Driver: "filesystem", Directory: directory}
+	}
+	if settings.Driver == "filesystem" && settings.Directory != "" && !filepath.IsAbs(settings.Directory) {
+		if variable != "" {
+			return Settings{}, errors.New("environment artifact configuration requires an absolute filesystem directory")
 		}
-		defer file.Close()
-		data, err := io.ReadAll(io.LimitReader(file, (64<<10)+1))
-		if err != nil || len(data) > 64<<10 {
-			return Settings{}, errors.New("artifact store configuration exceeds its read limit")
-		}
-		settings = Settings{}
-		decoder := json.NewDecoder(bytes.NewReader(data))
-		decoder.DisallowUnknownFields()
-		if err := decoder.Decode(&settings); err != nil {
-			return Settings{}, errors.New("artifact store configuration must be valid JSON with supported fields")
-		}
-		if err := decoder.Decode(new(any)); err != io.EOF {
-			return Settings{}, errors.New("artifact store configuration must contain one JSON object")
-		}
-		if settings.Driver == "filesystem" && settings.Directory != "" && !filepath.IsAbs(settings.Directory) {
+		if filename != "" {
 			settings.Directory = filepath.Join(filepath.Dir(filename), settings.Directory)
 		}
 	}

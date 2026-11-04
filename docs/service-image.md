@@ -39,6 +39,10 @@ An unchanged image build reuses existing assets, binaries, and the verified imag
 
 The image runs as user and group 65532. It supports a read-only root filesystem.
 Mount writable storage at /data for local SQLite and filesystem artifacts. Mount private temporary storage at /tmp.
+The image declares /tmp as a volume and owns it as 65532:65532.
+This supports ECS bind-volume ownership without a shell or root initialization container.
+Docker creates an anonymous temporary volume when no explicit mount replaces this declaration.
+Use --rm or remove the owned anonymous volume when removing its container.
 The default database environment variable is TESTSTUDIO_DATABASE. Its default value is /data/teststudio.db.
 Hosted or multi-instance operation requires the installation's PostgreSQL URL in that variable.
 Supply secret values through the deployment's protected environment or secret integration.
@@ -69,6 +73,9 @@ The packaged entrypoint includes these settings:
 | Health command | /app/teststudio-health |
 
 Additional command arguments use the normal service flags.
+Use --oidc-config-env and --artifact-store-env for bounded JSON environment configuration without mounted configuration files.
+These options name variables. Their values do not become command arguments.
+The [AWS profile](aws.md) packages these references through ECS secrets and explicit environment settings.
 Set --public-url and --artifact-origin to the installation's actual origins.
 Use separate API/UI and artifact origins. Configure ingress TLS for hosted sessions.
 Configure OIDC providers, approved secret references, and the exact initial administrator through the existing identity setup.

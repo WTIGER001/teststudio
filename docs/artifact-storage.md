@@ -19,6 +19,16 @@ bin/teststudio --artifact-store-config /etc/teststudio/artifact-store.json
 ```
 
 The file contains one JSON object and accepts up to 64 KiB.
+Container operators can supply the same JSON through an environment reference:
+
+```sh
+bin/teststudio --artifact-store-env TESTSTUDIO_ARTIFACT_CONFIGURATION
+```
+
+The environment option conflicts with --artifact-store-config. Missing, blank, malformed, and oversized selected values fail before storage opens.
+Both forms reject unknown fields and trailing JSON. Errors exclude configuration values.
+Filesystem directories in environment configuration must be absolute.
+Storage JSON contains provider settings and references. AWS credentials and Azure account keys remain outside this document.
 Unknown fields, mixed profiles, embedded credentials, and noncanonical object prefixes fail validation.
 The service does not create buckets, storage accounts, containers, roles, or provider lifecycle rules.
 Provision those resources separately before enabling their profile.
@@ -33,7 +43,7 @@ A filesystem configuration can select a private persistent directory:
 ```
 
 Relative directories in a configuration file resolve beside that file.
-The existing --artifact-directory value applies only when no configuration file is supplied.
+The existing --artifact-directory value applies only when neither configuration source is supplied.
 Mount durable storage when using a container. Multiple instances require shared object storage or a suitable shared filesystem.
 
 ## S3

@@ -14,6 +14,7 @@ COPY ui /app/ui
 COPY trace-viewer /app/trace-viewer
 ENV HOME=/tmp TESTSTUDIO_DATABASE=/data/teststudio.db
 USER 65532:65532
+VOLUME ["/tmp"]
 WORKDIR /app
 EXPOSE 8040 8041
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 CMD ["/app/teststudio-health"]

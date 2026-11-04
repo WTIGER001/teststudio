@@ -114,7 +114,18 @@ Local lint, four strict-schema renderings, and nine rejected configurations pass
 The image adds independent liveness and an explicit hosted PostgreSQL guard. The count remains 48 verified and 9 open.
 See [Kubernetes service profile](kubernetes.md) for operator settings and the verified local evidence.
 
-Next, add AWS ECS with CloudFront and Azure Container Apps packaging.
+AWS ECS with CloudFront core packaging now defines 31 resources and passes local schema and cross-resource checks.
+Its independent stack references PostgreSQL and initial OIDC settings through Secrets Manager.
+Separate UI and artifact distributions preserve identity forwarding, private evidence authorization, and zero-duration error caching without HTML error substitution.
+Private Fargate tasks use the immutable service image, startup-only secret access, scoped evidence permissions, process liveness, and database readiness.
+The image adds a non-root temporary volume declaration. Strict bounded environment JSON supports hosted configuration without a shell or writable configuration files.
+Initial provider lists validate completely before database initialization. Existing file configuration remains available.
+The current image passes targeted configuration and volume startup. Earlier checks from the same batch cover the complete 12-check local package contract.
+No AWS operation, browser run, source-runtime rebuild, or unchanged UI build occurs.
+See [AWS core service profile](aws.md) and the implementation ledger for exact evidence and remaining scope.
+The count remains **48 verified, 9 open**. No hosted acceptance item closes from local packaging checks.
+
+Next, add Azure Container Apps core packaging.
 Then implement their isolated execution adapters and preparation requirements, preserving the full deployment acceptance scope.
 Preserve separate API/UI and artifact origins. Require installation-specific PostgreSQL, identity, storage, and secret configuration.
 Keep untrusted test execution outside the API. Do not promise hosted coded execution before its network, artifact, deadline, and recovery contracts exist.

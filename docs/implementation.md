@@ -69,6 +69,61 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: ECS and CloudFront core packaging
+
+Acceptance **57** advances. The ledger stays at **48 verified, 9 open, 57 total** items.
+The new deploy/aws/service.yaml defines an independent 31-resource CloudFormation core profile.
+Explicit inputs cover VPC and subnets, DNS, certificates, immutable ECR digest and architecture, PostgreSQL, identity settings, and the initial administrator.
+The stack creates private retained UI and evidence buckets, two CloudFront distributions, a TLS load balancer, private Fargate tasks, and dedicated roles.
+It creates no upstream application resources and inherits no MarketMaker identifiers or credentials.
+
+The private UI bucket uses distribution-scoped Origin Access Control.
+UI-only route rewriting preserves assets and query strings. API, authentication, readiness, and liveness routes bypass that function.
+Private responses disable caching. Separate zero-duration error-cache settings retain upstream status codes and bodies.
+Cookies, query strings, and viewer headers except Host reach the API and artifact service.
+The artifact distribution cannot read the evidence bucket directly. Existing application grant authorization remains required.
+UI content policy permits the separate artifact host without replacing artifact or trace policies.
+
+The load balancer accepts CloudFront HTTPS sources and requires a generated origin credential on both listener routes.
+Its default response denies access. Private tasks receive no public addresses or Docker socket.
+The non-root service retains a protected root filesystem, no capabilities, a task-scoped temporary mount, separate liveness and readiness, and deployment rollback settings.
+The image now declares /tmp as a volume with non-root ownership for ECS mount initialization.
+The task execution role reads only selected startup secrets and the selected image repository.
+The runtime role accesses evidence objects only within the new bucket's teststudio prefix.
+Listing permission applies only to that dedicated bucket so missing-object errors remain distinguishable from denied access.
+The operator supplies database reachability, certificates, DNS ownership, outbound routing, and appropriate secret key permissions.
+
+The API adds --oidc-config-env and --artifact-store-env.
+Both select bounded 64 KiB JSON through environment names and conflict with their file alternatives.
+Missing, blank, malformed, oversized, unknown-field, and trailing-value configurations fail without echoing values.
+Filesystem environment settings require an absolute directory. Provider settings accept references, not inline client secrets.
+The complete initial provider list validates before database initialization. Invalid or repeated providers cannot leave partial initial identity records.
+Existing providers remain unchanged on restart. The initial external administrator's existing one-time bootstrap behavior remains unchanged.
+
+Focused runtime and artifact configuration checks pass with race detection, together with existing API-command checks.
+The added provider configuration check covers two providers, distinct references, invalid later entries, duplicate identifiers, empty lists, and credential-bearing documents.
+It passes with race detection. The final API command compiles, and the native API and preparation binaries build.
+UI, trace viewer, health binary, execution runtimes, and gateway artifacts are reused.
+
+Local cfn-lint 1.46.0 validates the template against two regional provider schema sets.
+Seven packaging checks cover cross-resource routing, cache and error behavior, private storage, references, roles, mounts, process health, and the local UI function.
+Evidence is output/aws-package/check/summary.json with schema.log and ui-routing.log.
+The checker removes AWS environment settings and performs no account or AWS service operation.
+
+The first updated service image passes all 12 focused local package checks.
+Evidence is output/aws-package/service/summary.json and cleanup.json.
+After complete initial-provider validation moves before database initialization, the final image repeats only the two changed configuration and volume checks.
+Evidence is output/aws-package/final-configuration/summary.json and cleanup.json.
+The final local arm64 image is sha256:4ab98ab5196c6afbc7112305d58b7dbd2d7622fca7b4e1e3768cb24e08a9b21b.
+This is a local image identifier, not a pushed registry digest.
+All owned check containers and named or anonymous temporary volumes are removed.
+The demonstration refresh preserves its database, evidence, and existing browser work.
+No browser suite, source-runner matrix, live AWS, Kubernetes, or Azure verification runs.
+
+Hosted execution and preparation, infrastructure reachability, real identity, private report access, provider retention, replica failover, and deployment parity remain open.
+The next package is Azure Container Apps. Isolated provider adapters follow the core packages.
+See [AWS core service profile](aws.md) for operator setup, deployment limits, and later verification instructions.
+
 ## Current delivery: Kubernetes service packaging and lifecycle probes
 
 Acceptance **57** advances. The ledger stays at **48 verified, 9 open, 57 total** items.

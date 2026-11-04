@@ -27,6 +27,7 @@ def main():
     parser = argparse.ArgumentParser(description='Verify one built service image locally without a browser or cloud target.')
     parser.add_argument('--image', required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--configuration-only', action='store_true', help='Check only changed JSON configuration and temporary volume startup.')
     arguments = parser.parse_args()
     if not arguments.image.startswith('sha256:') or len(arguments.image) != 71:
         raise ValueError('Supply the immutable built service image ID')
@@ -51,74 +52,113 @@ def main():
     origin = 'http://127.0.0.1:' + str(api_port)
     artifact_origin = 'http://127.0.0.1:' + str(artifact_port)
     try:
-        docker('volume', 'create', '--label', 'teststudio.verification=service-package', volume)
-        migrations = None
-        for iteration in range(2):
-            name = 'teststudio-service-check-' + suffix + '-' + str(iteration)
-            containers.append(name)
-            docker('run', '--detach', '--name', name, '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges', '--tmpfs', '/tmp:rw,nosuid,nodev,size=67108864,uid=65532,gid=65532,mode=1777', '--mount', 'type=volume,source=' + volume + ',target=/data', '--env', 'TESTSTUDIO_DATABASE=/data/service.db', '--publish', '127.0.0.1:' + str(api_port) + ':8040', '--publish', '127.0.0.1:' + str(artifact_port) + ':8041', arguments.image, '--public-url=' + origin, '--artifact-origin=' + artifact_origin)
+        if not arguments.configuration_only:
+            docker('volume', 'create', '--label', 'teststudio.verification=service-package', volume)
+            migrations = None
+            for iteration in range(2):
+                name = 'teststudio-service-check-' + suffix + '-' + str(iteration)
+                containers.append(name)
+                docker('run', '--detach', '--name', name, '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges', '--tmpfs', '/tmp:rw,nosuid,nodev,size=67108864,uid=65532,gid=65532,mode=1777', '--mount', 'type=volume,source=' + volume + ',target=/data', '--env', 'TESTSTUDIO_DATABASE=/data/service.db', '--publish', '127.0.0.1:' + str(api_port) + ':8040', '--publish', '127.0.0.1:' + str(artifact_port) + ':8041', arguments.image, '--public-url=' + origin, '--artifact-origin=' + artifact_origin)
+                ready = False
+                for _ in range(100):
+                    try:
+                        status, body = request(origin + '/healthz')
+                        ready = status == 200 and json.loads(body) == {'status': 'up', 'service': 'teststudio'}
+                    except (OSError, ValueError):
+                        pass
+                    if ready:
+                        break
+                    state = json.loads(docker('inspect', name).stdout)[0]['State']
+                    if not state['Running']:
+                        raise RuntimeError('The owned service container stopped before readiness')
+                    time.sleep(0.1)
+                assert ready, 'The service package did not become ready'
+                docker('exec', name, '/app/teststudio-health')
+                status, body = request(origin + '/livez')
+                assert status == 200 and json.loads(body) == {'status': 'up', 'service': 'teststudio'}
+                status, html = request(origin + '/')
+                assert status == 200 and b'<ts-root' in html
+                status, body = request(artifact_origin + '/')
+                assert status == 404 and b'<ts-root' not in body
+                container = json.loads(docker('inspect', name).stdout)[0]
+                assert container['HostConfig']['ReadonlyRootfs']
+                assert container['Config']['User'] == '65532:65532'
+                assert container['HostConfig']['CapDrop'] == ['ALL']
+                docker('stop', '--time=10', name)
+                database = root / ('service-' + str(iteration) + '.db')
+                docker('cp', name + ':/data/service.db', str(database))
+                connection = sqlite3.connect('file:' + str(database) + '?mode=ro&immutable=1', uri=True)
+                current = connection.execute('SELECT version, applied_at FROM schema_migrations ORDER BY version').fetchall()
+                assert current
+                assert connection.execute("SELECT count(*) FROM records WHERE bucket IN ('projects','runs','schedules')").fetchone()[0] == 0
+                connection.close()
+                if migrations is not None:
+                    assert current == migrations, 'Container recreation replaced the persisted database'
+                migrations = current
+                docker('rm', name)
+            summary['checks'] += ['Non-root startup with a read-only root filesystem and no Linux capabilities', 'Writable private SQLite and artifact volume', 'Bounded in-image readiness probe', 'Independent process liveness endpoint', 'Built UI served on the API origin', 'Separate artifact origin serves no UI', 'Container recreation preserves the same SQLite migration state', 'Fresh package starts with empty project, run, and schedule registries']
+            invalid = 'teststudio-service-invalid-' + suffix
+            containers.append(invalid)
+            canary = 'private-service-database-canary-' + suffix
+            with tempfile.TemporaryDirectory(prefix='teststudio-service-secret-') as directory:
+                environment = Path(directory) / 'database.env'
+                environment.write_text('TESTSTUDIO_DATABASE=postgres://fixture:' + canary + '@127.0.0.1:invalid/studio\n')
+                environment.chmod(0o600)
+                result = docker('run', '--name', invalid, '--network=none', '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges', '--env-file', str(environment), arguments.image, check=False)
+                assert result.returncode != 0
+                assert canary not in result.stdout + result.stderr
+                assert 'database initialization failed' in result.stderr
+                configured = json.loads(docker('inspect', invalid).stdout)[0]
+                assert canary not in json.dumps(configured['Args'])
+            summary['checks'].append('Database environment values stay out of process arguments and startup errors')
+            guarded = 'teststudio-service-postgres-' + suffix
+            containers.append(guarded)
+            result = docker('run', '--name', guarded, '--network=none', '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges', arguments.image, '--require-postgres=true', check=False)
+            assert result.returncode != 0 and 'requires a PostgreSQL database connection' in result.stderr
+            summary['checks'].append('Hosted mode rejects the packaged SQLite fallback before opening storage')
+        referenced = 'teststudio-service-settings-' + suffix
+        containers.append(referenced)
+        private_volume = 'teststudio-service-temporary-' + suffix
+        docker('volume', 'create', '--label', 'teststudio.verification=service-package', private_volume)
+        try:
+            settings = json.dumps({'driver': 'filesystem', 'directory': '/tmp/evidence'})
+            providers = json.dumps([{'id': 'isolated', 'name': 'Isolated provider', 'issuer': 'https://identity.example.test', 'clientId': 'teststudio', 'secretRef': 'env:TESTSTUDIO_OIDC_CLIENT_ONE'}])
+            docker('run', '--detach', '--name', referenced, '--network=none', '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges', '--mount', 'type=volume,source=' + private_volume + ',target=/tmp', '--env', 'TESTSTUDIO_DATABASE=/tmp/service.db', '--env', 'TESTSTUDIO_ARTIFACT_CONFIGURATION=' + settings, '--env', 'TESTSTUDIO_OIDC_CONFIGURATION=' + providers, arguments.image, '--artifact-store-env=TESTSTUDIO_ARTIFACT_CONFIGURATION', '--oidc-config-env=TESTSTUDIO_OIDC_CONFIGURATION')
             ready = False
             for _ in range(100):
-                try:
-                    status, body = request(origin + '/healthz')
-                    ready = status == 200 and json.loads(body) == {'status': 'up', 'service': 'teststudio'}
-                except (OSError, ValueError):
-                    pass
-                if ready:
+                if docker('exec', referenced, '/app/teststudio-health', check=False).returncode == 0:
+                    ready = True
                     break
-                state = json.loads(docker('inspect', name).stdout)[0]['State']
-                if not state['Running']:
-                    raise RuntimeError('The owned service container stopped before readiness')
                 time.sleep(0.1)
-            assert ready, 'The service package did not become ready'
-            docker('exec', name, '/app/teststudio-health')
-            status, body = request(origin + '/livez')
-            assert status == 200 and json.loads(body) == {'status': 'up', 'service': 'teststudio'}
-            status, html = request(origin + '/')
-            assert status == 200 and b'<ts-root' in html
-            status, body = request(artifact_origin + '/')
-            assert status == 404 and b'<ts-root' not in body
-            container = json.loads(docker('inspect', name).stdout)[0]
-            assert container['HostConfig']['ReadonlyRootfs']
-            assert container['Config']['User'] == '65532:65532'
-            assert container['HostConfig']['CapDrop'] == ['ALL']
-            docker('stop', '--time=10', name)
-            database = root / ('service-' + str(iteration) + '.db')
-            docker('cp', name + ':/data/service.db', str(database))
+            assert ready, 'Environment-backed configuration or image-owned temporary volume failed'
+            docker('stop', '--time=10', referenced)
+            database = root / 'settings.db'
+            docker('cp', referenced + ':/tmp/service.db', str(database))
             connection = sqlite3.connect('file:' + str(database) + '?mode=ro&immutable=1', uri=True)
-            current = connection.execute('SELECT version, applied_at FROM schema_migrations ORDER BY version').fetchall()
-            assert current
-            assert connection.execute("SELECT count(*) FROM records WHERE bucket IN ('projects','runs','schedules')").fetchone()[0] == 0
+            saved = json.loads(connection.execute("SELECT payload FROM records WHERE bucket='providers' AND id='isolated'").fetchone()[0])
             connection.close()
-            if migrations is not None:
-                assert current == migrations, 'Container recreation replaced the persisted database'
-            migrations = current
-            docker('rm', name)
-        summary['checks'] += ['Non-root startup with a read-only root filesystem and no Linux capabilities', 'Writable private SQLite and artifact volume', 'Bounded in-image readiness probe', 'Independent process liveness endpoint', 'Built UI served on the API origin', 'Separate artifact origin serves no UI', 'Container recreation preserves the same SQLite migration state', 'Fresh package starts with empty project, run, and schedule registries']
-        invalid = 'teststudio-service-invalid-' + suffix
-        containers.append(invalid)
-        canary = 'private-service-database-canary-' + suffix
-        with tempfile.TemporaryDirectory(prefix='teststudio-service-secret-') as directory:
-            environment = Path(directory) / 'database.env'
-            environment.write_text('TESTSTUDIO_DATABASE=postgres://fixture:' + canary + '@127.0.0.1:invalid/studio\n')
-            environment.chmod(0o600)
-            result = docker('run', '--name', invalid, '--network=none', '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges', '--env-file', str(environment), arguments.image, check=False)
-            assert result.returncode != 0
-            assert canary not in result.stdout + result.stderr
-            assert 'database initialization failed' in result.stderr
-            configured = json.loads(docker('inspect', invalid).stdout)[0]
-            assert canary not in json.dumps(configured['Args'])
-        summary['checks'].append('Database environment values stay out of process arguments and startup errors')
-        guarded = 'teststudio-service-postgres-' + suffix
-        containers.append(guarded)
-        result = docker('run', '--name', guarded, '--network=none', '--read-only', '--cap-drop=ALL', '--security-opt=no-new-privileges', arguments.image, '--require-postgres=true', check=False)
-        assert result.returncode != 0 and 'requires a PostgreSQL database connection' in result.stderr
-        summary['checks'].append('Hosted mode rejects the packaged SQLite fallback before opening storage')
+            assert saved['secretRef'] == 'env:TESTSTUDIO_OIDC_CLIENT_ONE'
+            configured = json.loads(docker('inspect', referenced).stdout)[0]
+            assert settings not in json.dumps(configured['Args']) and providers not in json.dumps(configured['Args'])
+            summary['checks'].append('Strict environment-backed OIDC and artifact configuration starts without shell or configuration files')
+            summary['checks'].append('Image-owned temporary volume permits non-root database and artifact writes with a protected root filesystem')
+        finally:
+            docker('rm', '--force', '--volumes', referenced, check=False)
+            docker('volume', 'rm', private_volume, check=False)
+            absent = docker('volume', 'inspect', private_volume, check=False)
+            cleanup[private_volume] = absent.returncode != 0 and 'no such volume' in absent.stderr.lower()
         summary['passed'] = True
         print(json.dumps({'passed': True, 'checks': len(summary['checks']), 'output': str(root)}))
     finally:
         for name in containers:
-            docker('rm', '--force', name, check=False)
+            before = docker('inspect', name, check=False)
+            temporary_volumes = []
+            if before.returncode == 0:
+                temporary_volumes = [mount['Name'] for mount in json.loads(before.stdout)[0].get('Mounts', []) if mount['Type'] == 'volume' and mount['Name'] != volume]
+            docker('rm', '--force', '--volumes', name, check=False)
+            for temporary_volume in temporary_volumes:
+                absent_volume = docker('volume', 'inspect', temporary_volume, check=False)
+                cleanup[temporary_volume] = absent_volume.returncode != 0 and 'no such volume' in absent_volume.stderr.lower()
             absent = docker('inspect', name, check=False)
             cleanup[name] = absent.returncode != 0 and 'no such' in absent.stderr.lower()
         docker('volume', 'rm', volume, check=False)

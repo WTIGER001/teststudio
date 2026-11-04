@@ -7,6 +7,8 @@ The [UI contract](docs/ui.md) defines tester workflows, shared interaction patte
 The [help guide](docs/help.md) explains contextual guide maintenance.
 Use the [workflow completion checklist](docs/plan.md#workflow-completion-checklist) for each behavior change.
 
+The [AWS core profile](docs/aws.md) documents ECS, separate CloudFront origins, private storage, and local packaging checks.
+
 ## Local demonstration
 
 Start a separate demonstration with new generic examples:

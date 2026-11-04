@@ -138,3 +138,19 @@ bash scripts/test-access.sh
 The browser workflow uses two new local issuers and a disposable TestStudio instance.
 It requires no cloud account or remote identity provider.
 Provider logout, explicit account linking, and cross-profile provider acceptance remain separate pending work.
+
+## Initial operator configuration
+
+The API accepts an initial JSON provider array through --oidc-config FILE or --oidc-config-env VARIABLE.
+Choose one source. The environment form supports secret-integrated container installations without a configuration file or shell.
+Each source has a 64 KiB limit. Selected environment variables must exist and contain nonblank JSON.
+The complete list must contain one to 100 valid providers with unique identifiers.
+Unknown fields, inline client secret fields, malformed JSON, and trailing JSON fail before database initialization.
+Configuration read errors exclude values and parser diagnostics.
+
+Each provider uses the same fields and validation as provider administration.
+Use env:VARIABLE references for confidential clients. Supply resolved values through the protected runtime environment.
+Initial configuration approves its declared credential references. --oidc-secret-refs can approve additional mappings for later provider administration.
+Initial provider records are inserted only when absent. Restarting does not replace managed configuration or restore disabled providers.
+Keep each configured client callback aligned with the installation's public origin.
+See the [AWS core profile](aws.md) for ECS secret mappings and current deployment limits.

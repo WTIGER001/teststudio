@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -72,6 +71,7 @@ func run() error {
 	traceDirectory := flag.String("trace-viewer-directory", "", "Trusted pinned trace viewer bundle, served only on the separate artifact origin")
 	artifactDirectory := flag.String("artifact-directory", ".data/artifacts", "Private local artifact directory")
 	artifactConfiguration := flag.String("artifact-store-config", "", "Operator JSON settings for filesystem, S3, or Azure Blob artifacts")
+	artifactEnvironment := flag.String("artifact-store-env", "", "Environment variable containing operator artifact JSON settings")
 	location := flag.String("execution-location", "local", "Execution location identifier")
 	playwrightImages := flag.String("playwright-images", "", "Comma-separated immutable local Playwright image references; enables the isolated local worker")
 	browserGateway := flag.String("browser-gateway-image", "", "Immutable trusted gateway image; enables single-origin environment-backed local Playwright and Go API execution")
@@ -87,6 +87,7 @@ func run() error {
 	local := flag.Bool("local", false, "Enable explicit loopback-only local administrator sign-in")
 	recoverLocal := flag.Bool("recover-local-admin", false, "Reenable the loopback local administrator and invalidate its earlier sessions; requires --local")
 	providers := flag.String("oidc-config", "", "Initial JSON provider configuration file")
+	providersEnvironment := flag.String("oidc-config-env", "", "Environment variable containing initial OIDC provider JSON settings")
 	oidcSecretRefs := flag.String("oidc-secret-refs", "", "Comma-separated server credential references approved for OIDC provider configuration")
 	bootstrapIssuer := flag.String("bootstrap-issuer", "", "OIDC issuer for the initial installation administrator")
 	bootstrapSubject := flag.String("bootstrap-subject", "", "Exact OIDC subject for the initial installation administrator")
@@ -137,7 +138,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	artifactSettings, err := artifactconfig.Load(*artifactConfiguration, *artifactDirectory)
+	artifactSettings, err := artifactconfig.LoadEnvironment(*artifactConfiguration, *artifactEnvironment, *artifactDirectory, os.LookupEnv)
 	if err != nil {
 		return err
 	}
@@ -153,6 +154,10 @@ func run() error {
 		if err != nil || (host != "localhost" && (ip == nil || !ip.IsLoopback())) {
 			return errors.New("local authentication requires a loopback listen address")
 		}
+	}
+	initialProviders, err := authoidc.InitialProviders(*providers, *providersEnvironment, os.LookupEnv)
+	if err != nil {
+		return err
 	}
 	db, err := storage.Open(ctx, connection)
 	if err != nil {
@@ -198,19 +203,8 @@ func run() error {
 			approvedOIDCSecrets = append(approvedOIDCSecrets, value)
 		}
 	}
-	if *providers != "" {
-		data, err := os.ReadFile(*providers)
-		if err != nil {
-			return err
-		}
-		var list []authoidc.Provider
-		if err := json.Unmarshal(data, &list); err != nil {
-			return err
-		}
-		for _, p := range list {
-			if err := authoidc.ValidateProvider(p); err != nil {
-				return err
-			}
+	if len(initialProviders) > 0 {
+		for _, p := range initialProviders {
 			if p.SecretRef != "" && !slices.Contains(approvedOIDCSecrets, p.SecretRef) {
 				approvedOIDCSecrets = append(approvedOIDCSecrets, p.SecretRef)
 			}
