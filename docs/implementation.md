@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 47 verified of 57.
+The acceptance count is 48 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -12,7 +12,7 @@ These stable numbers match the priority list supplied to the user.
 Report progress against these numbers. Keep broad criteria unchecked until their full scope is verified.
 
 - [x] **01.** The Go service and UI build from this repository without MarketMaker imports, packages, shared resources, or sibling checkouts.
-- [ ] **02.** No existing tests, fixtures, catalog records, configuration, credentials, reports, or history are copied into the product.
+- [x] **02.** No existing tests, fixtures, catalog records, configuration, credentials, reports, or history are copied into the product.
 - [x] **03.** Installation starts with empty registries and can load only explicitly selected new examples.
 - [x] **04.** Local durable operation works without a cloud account.
 - [x] **05.** A new project, application, environment, and suite can be registered without editing Go or TypeScript source.
@@ -68,6 +68,33 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **55.** Hosted identity and private report access work through installation-specific configuration.
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
+
+## Current delivery: independent product material and provenance audit
+
+Acceptance **02** is complete. The ledger has **48 verified, 9 open, 57 total** items.
+The audit combines repository history, fixture and example review, known legacy source comparison, and existing empty-start and independent-build evidence.
+The single initial root, beb1c7b, adds five planning and module files. It contains no imported tests, application records, credentials, configuration bundle, or history.
+New product tests and fixtures enter through their own feature commits. The first self-test suite enters at 554739d.
+The checked-in ZIP fixtures enter at 3b90043 and 8a18764. All ten members contain new generic source, catalogs, manifests, and runtime declarations.
+The identity and HTTPS trust examples use sample endpoints, TestStudio references, and operator-selected values.
+No tracked credential file, database, report bundle, imported run history, or existing application deployment configuration is distributed.
+
+The read-only audit compares the complete tracked product inventory and ZIP members against nine known legacy checkouts.
+References include their current HEAD, a HEAD ancestor before product creation, and 16942 current tracked working files.
+No exact or whitespace-normalized matches appear.
+The comparison records product content digests, checked source revisions, and explicit exclusions for missing, large, or symbolic-link working files.
+A new temporary reference confirms that deliberate exact and whitespace-only overlap fails the audit. Its temporary files are removed.
+Evidence is output/provenance/content-comparison.json and review.json.
+
+The automated comparison is supporting evidence. It does not establish authorship or exclude arbitrary rewritten derivations by itself.
+Repository origin, newly authored fixture contents, independent configuration, and the passing empty-installation contract provide complementary evidence.
+The isolated build evidence remains .data/independent-build._o3cvq4v/result.json. It passes Go and UI builds with no external source directory or local package link.
+The normal-start evidence remains output/empty-installation/local-qoUlbQ/summary.json. It reports passed checks and complete process cleanup.
+Both existing records are inspected without repeating their builds or tests.
+Generated local demo data and later user-selected uploads remain outside the initial repository-distribution audit.
+See [Independent product material](product-provenance.md) for repeatable commands, scope, and limitations.
+No application suite, browser, runner-image build, cloud request, or deployment runs for this milestone.
+The demo remains running. Hosted execution, timing, storage lifecycle, identity, and deployment acceptance remain open under their stable numbers.
 
 ## Current delivery: shared SQLite and PostgreSQL storage behavior
 

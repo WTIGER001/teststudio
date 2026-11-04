@@ -15,7 +15,7 @@ The full product scope remains required. This direction supersedes the testing s
 ## Active delivery plan after the tester walkthrough
 
 This section is the current implementation order. Historical continuation commands below do not override it.
-The local demonstration is usable and verified. The complete product remains unfinished at 47 verified items out of 57.
+The local demonstration is usable and verified. The complete product remains unfinished at 48 verified items out of 57.
 Ordinary project creator access and the first environment-backed local recorded website flow pass targeted verification.
 Tester investigation, failure recovery, and local manual/scheduled runner parity pass targeted verification.
 Continue source-workflow, access, storage, and hosted packaging gaps. Reuse passing runner evidence.
@@ -66,7 +66,7 @@ Do not treat these batches as additional acceptance items or claim the whole pro
 
 ### Current continuation: access, storage, and provider work
 
-Acceptances **06**, **12**, **22**, and **37** are complete. The count is **47 verified, 10 open**.
+Acceptances **02**, **06**, **12**, **22**, and **37** are complete. The count is **48 verified, 9 open**.
 The repository editor uses Repository, Suites, and Review through the canonical wizard components.
 Identifiers generate from the name. Uncommon reference and synchronization settings stay under named Advanced sections.
 Review keeps enabled state, automatic publication, future activation, and test-execution consequences visible.
@@ -88,8 +88,14 @@ Acceptance 06 now passes the same eleven focused storage, ledger, and scheduler 
 Atomic writes, revision conflicts, cursor reopen, concurrent identity, worker checkpoints, and claim recovery share verified behavior.
 The owned local database container is removed. No UI rebuild, browser run, or runner-image build is needed.
 
-Next, audit product provenance under **02**, then provider packaging and remaining ledger scope.
-Implement any missing behavior first. Reuse completed service evidence and run only targeted local checks.
+Acceptance 02 now passes the distribution provenance audit against nine available legacy checkouts and the checked-in ZIP members.
+Repository origin, authored fixtures, independent example configuration, and retained isolated-build and empty-start evidence support the comparison.
+The audit tool records its exact scope and limits. It imports no reference material.
+
+Next, implement hosted packaging and execution adapters for AWS, Kubernetes, and Azure through independent provider configuration.
+Keep artifact storage, secrets, worker dispatch, status, cancellation, deadlines, and recovery within common product contracts.
+Use local provider protocol fixtures and packaging checks only. Do not run cloud deployments in this work session.
+Reuse completed local product evidence and build only changed inputs.
 Keep deployment-wide timing **41**, storage-provider retention **46**, and hosted criteria **51–57** open until their required verification passes.
 Do not repeat completed source, native, API, browser, or scheduled-runner fixtures without a concrete contract change or unresolved failure.
 Cloud execution and storage-provider verification remain separate work.
@@ -471,6 +477,7 @@ Do not depend on MarketMaker modules, shared libraries, authentication, notifica
 Do not inherit application identifiers, permission groups, account identifiers, AWS profiles, hostnames, or sibling checkout paths.
 Do not add legacy record adapters, catalog aliases, redirects, compatibility wrappers, or a MarketMaker cutover workflow.
 The existing MarketMaker deployment remains a separate system outside this plan.
+The distribution provenance audit under acceptance 02 is complete. See [Independent product material](product-provenance.md) for evidence and audit limits.
 
 Applications, suites, endpoints, stages, credentials, permissions, and notification policies are configuration.
 Use provider-neutral domain models and service contracts.
