@@ -69,6 +69,43 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: retained API diagnostic redaction
+
+Acceptance **35** advances and remains open. The ledger stays at **42 verified, 15 open, 57 total** items.
+
+API-typed coded tests now apply api-diagnostics/v1 at the trusted execution collector.
+The collector sanitizes assertion messages, steps, status text, logs, evidence warnings, and supported attachments before checkpoint and upload.
+Worker recovery uses the frozen test type and source policy through the same collector.
+Default sensitive fields, authorization headers, cookies, URL user information, and sensitive query values are removed.
+Detected values are also removed from reflected diagnostic text. Exact known-value replacement supports later credential resolution.
+The manifest accepts up to 32 additional sensitive field names. The schema, OpenAPI 0.31, and generated client share this field.
+
+Only bounded UTF-8 text and complete JSON enter API attachments. Invalid JSON and opaque files produce explicit evidence gaps.
+The request runtime disables automatic media. The reporter rejects API media before copying it; the collector independently rejects it before transfer.
+Browser media capture remains available. Each API diagnostic input stays within 2 MiB and the configured capture budget.
+JSON preserves large numeric values and enforces a 64-level nesting limit.
+The result records diagnosticsPolicy. Retained worker evidence records immutable redactionPolicy metadata.
+Previously stored files remain unchanged and receive no retroactive guarantee.
+The policy does not detect deliberately encoded or unlabeled private data in trusted published code.
+
+Targeted race checks cover structured and escaped fields, headers, queries, reflected values, known values, bounded diagnostics, and unchanged timeout measurements.
+The recovery collector check verifies sanitized logs and JSON without copying a declared private trace.
+Reporter checks verify pre-copy omissions. A focused evidence check rejects policy relabeling during upload replay.
+One changed runtime and gateway build supports the real local API check. No UI browser suite or cloud profile runs.
+The first harness assertion incorrectly requires the worker policy marker on trusted scheduler event logs.
+Its corrected assertion scopes the marker to worker diagnostics while checking every retained test artifact for private values.
+The focused workflow repeats using the already built runtime and gateway.
+
+The production UI and local server builds pass. No browser UI suite repeats for documentation changes.
+The real worker check passes in 12.745 seconds. Manual and scheduled runs retain one passed API result each.
+Retained logs and JSON contain none of the new private canaries. Unsupported binary evidence produces explicit incomplete-capture warnings.
+Normal history and trends retain exactly two passed tests. Six permitted requests reach the new local fixture.
+Evidence is output/playwright/api-diagnostics-q4u01s53/summary.json and cleanup.json.
+Cleanup verifies all owned worker containers, gateways, volumes, and prepared source images are absent.
+See [API diagnostic redaction](api-testing.md#diagnostic-redaction) and [API evidence](evidence.md#api-diagnostic-evidence).
+
+Continue credential bindings, environment-backed Go clients, and remaining cross-runner scheduling parity before closing **35** or **37**.
+
 ## Current delivery: API authoring wizard and real local request runs
 
 Acceptances **35** and **37** advance and remain open. The ledger stays at **42 verified, 15 open, 57 total** items.

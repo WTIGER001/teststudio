@@ -16,9 +16,20 @@ go test -race ./internal/sources ./internal/httpapi ./internal/runs \
 ```
 
 These checks exercise real local HTTP and TLS gateway traffic, payload admission, redirects, request budgets, and starter source snapshots.
+For changed API diagnostics, use these targeted checks:
+
+```sh
+go test -race ./internal/diagnostics ./internal/execution ./adapters/execution/localcontainer ./internal/evidence \
+  -run 'Test(Redaction|JSONRedaction|DiagnosticLimits|APIReport|BrowserMedia|APIDiagnosticRecovery|DiagnosticPolicy)' -count=1
+node --test runners/playwright/reporter.test.mjs
+```
+
+New private canaries exercise headers, query strings, nested fields, reflected values, chunked output, invalid JSON, opaque attachments, and recovery.
+The checks preserve timeout state and measured duration. Artifact upload retries cannot relabel the retained policy.
 The full local API worker check now uses cached capable images with TestGuardedAPIWorkspaceBuildsPublishesAndRunsManuallyAndOnSchedule.
 Set TESTSTUDIO_BROWSER_RUNTIME_IMAGE and TESTSTUDIO_BROWSER_GATEWAY_IMAGE to their immutable local identifiers before selecting that check.
 It builds one newly authored API suite and runs protected manual and scheduled requests through normal execution, history, and trends.
+It opens retained worker evidence and checks redaction markers, private canary absence, and explicit binary omission warnings.
 Owned source images, worker containers, gateways, and output volumes are removed after verification.
 
 For the API authoring wizard, use this single TestStudio UI workflow:

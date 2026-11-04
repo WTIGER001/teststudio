@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -20,6 +21,7 @@ import (
 	"github.com/wtiger001/teststudio/adapters/preparation/localimage"
 	"github.com/wtiger001/teststudio/internal/apipolicy"
 	"github.com/wtiger001/teststudio/internal/catalog"
+	"github.com/wtiger001/teststudio/internal/diagnostics"
 	"github.com/wtiger001/teststudio/internal/evidence"
 	"github.com/wtiger001/teststudio/internal/preparation"
 	"github.com/wtiger001/teststudio/internal/projects"
@@ -53,7 +55,7 @@ func TestGuardedAPIWorkspaceBuildsPublishesAndRunsManuallyAndOnSchedule(t *testi
 			return
 		}
 		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"status":"up"}`))
+		_, _ = w.Write([]byte(`{"status":"up","token":"response-canary","privateContact":"contact-canary"}`))
 	}))
 	fixture.Listener.Close()
 	fixture.Listener = listener
@@ -88,6 +90,7 @@ func TestGuardedAPIWorkspaceBuildsPublishesAndRunsManuallyAndOnSchedule(t *testi
 			var manifest suitespec.Manifest
 			_ = json.Unmarshal([]byte(file.Content), &manifest)
 			manifest.Browser.Requests = &apipolicy.Spec{Rules: []apipolicy.Rule{{Method: "GET", PathPrefix: "/health", ReadOnly: true}, {Method: "GET", PathPrefix: "/redirect", ReadOnly: true}, {Method: "POST", PathPrefix: "/search", ReadOnly: true, MaxBodyBytes: 8}}, MaxRequests: 3, MaxResponseBytes: 65536}
+			manifest.Browser.Requests.RedactFields = []string{"privateContact"}
 			data, _ := json.Marshal(manifest)
 			draft.Files[index].Content = string(data)
 		case "catalog.json":
@@ -99,11 +102,16 @@ func TestGuardedAPIWorkspaceBuildsPublishesAndRunsManuallyAndOnSchedule(t *testi
 		case "checks/api.spec.ts":
 			draft.Files[index].Content = `import { test, expect } from '@playwright/test'
 import http from 'node:http'
-test('Guard API requests', { tag: '@API-001' }, async ({ request }) => {
+test('Guard API requests', { tag: '@API-001' }, async ({ request }, testInfo) => {
   await test.step('Read the permitted endpoint', async () => {
     const response = await request.get('/health/')
     expect(response.status()).toBe(200)
     expect(await response.json()).toHaveProperty('status', 'up')
+    await testInfo.attach('response', { body: await response.body(), contentType: 'application/json' })
+    process.stdout.write('Authorization: Bearer split-')
+    process.stdout.write('canary\n')
+    console.log('actual response-canary contact-canary split-canary')
+    await testInfo.attach('opaque response', { body: Buffer.from('binary-canary'), contentType: 'application/octet-stream' })
   })
   await test.step('Reject unreviewed methods, paths, overrides and oversized payloads', async () => {
     expect((await request.delete('/health')).status()).toBe(403)
@@ -127,7 +135,7 @@ test('Guard API requests', { tag: '@API-001' }, async ({ request }) => {
     })
     expect(status).toBe(403)
   })
-  await test.step('Stop before another upstream request exceeds the attempt budget', async () => {
+  await test.step('Stop another request https://example.test/?token=query-canary', async () => {
     expect((await request.get('/health')).status()).toBe(429)
   })
 })
@@ -257,11 +265,48 @@ test('Guard API requests', { tag: '@API-001' }, async ({ request }) => {
 			}
 			time.Sleep(25 * time.Millisecond)
 		}
-		if current.State != "completed" || current.Outcome != "passed" || current.Counts.Total != 1 || current.Counts.Passed != 1 || current.EvidenceState != "complete" {
+		if current.State != "completed" || current.Outcome != "passed" || current.Counts.Total != 1 || current.Counts.Passed != 1 || current.EvidenceState != "incomplete" {
 			t.Fatalf("API run differs: state=%s outcome=%s results=%+v error=%s gaps=%v", current.State, current.Outcome, current.Results, current.Error, current.EvidenceErrors)
 		}
 		if len(current.Results) != 1 || len(current.Results[0].Steps) < 5 || current.Tests[0].Type != "api" {
 			t.Fatal("API steps inflate or lose logical test identity")
+		}
+		if current.Results[0].DiagnosticsPolicy != diagnostics.Version || len(current.EvidenceErrors) == 0 {
+			t.Fatal("diagnostic policy and omission are missing")
+		}
+		page, err := s.Store.List(t.Context(), evidence.Bucket(id), "alpha", "", 100)
+		if err != nil {
+			t.Fatal(err)
+		}
+		inspected := 0
+		for _, row := range page.Items {
+			artifact, err := storage.Decode[evidence.Artifact](row)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if artifact.Test != "API-001" {
+				continue
+			}
+			coded := strings.HasPrefix(artifact.Stream, "playwright.") || artifact.Kind == "attachment"
+			if coded && artifact.RedactionPolicy != diagnostics.Version {
+				t.Fatal("retained artifact lacks redaction policy")
+			}
+			_, reader, err := runner.Evidence.Open(t.Context(), "alpha", id, artifact.ID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			data, err := io.ReadAll(reader)
+			_ = reader.Close()
+			if err != nil || strings.Contains(string(data), "canary") {
+				t.Fatal("API private diagnostic value reached evidence", artifact.Kind, err)
+			}
+			if coded {
+				inspected++
+			}
+		}
+		encoded, _ := json.Marshal(current.Results)
+		if inspected < 2 || strings.Contains(string(encoded), "canary") {
+			t.Fatal("API diagnostics or redaction were lost")
 		}
 		completed = append(completed, current)
 	}

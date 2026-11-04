@@ -27,6 +27,7 @@ type GoObservation struct {
 }
 
 type Result struct {
+	DiagnosticsPolicy   string             `json:"diagnosticsPolicy,omitempty"`
 	DurationUnavailable bool               `json:"durationUnavailable,omitempty"`
 	WorkerDurationMs    float64            `json:"workerDurationMs,omitempty"`
 	ExecutionID         string             `json:"executionId,omitempty"`

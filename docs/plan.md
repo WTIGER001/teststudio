@@ -260,7 +260,9 @@ One newly authored API suite passes actual protected manual and scheduled execut
 The targeted authoring UI workflow passes focus, preservation, Help, discard protection, persistence, and narrow dark layout.
 The API worker harness double-deletion is corrected; exact resource absence is verified without repeating successful execution.
 Acceptances **35** and **37** remain open for their remaining required scope.
-Automatic diagnostic redaction, credential bindings, environment-backed Go clients, and remaining scheduled parity remain required.
+API diagnostic redaction now protects retained assertion text, steps, logs, and bounded JSON during normal execution and recovery.
+API media and opaque files produce explicit omissions. Browser media remains available under its capture rules.
+Credential bindings, environment-backed Go clients, and remaining scheduled parity remain required.
 See [Coded API request policies](api-testing.md) for the implemented foundation and current limits.
 Continue remaining storage parity, source, HTTP follow-ups, API and scheduled runner parity, adapter retention, timing, and provider packaging work.
 

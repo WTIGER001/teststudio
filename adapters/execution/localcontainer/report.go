@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/wtiger001/teststudio/internal/diagnostics"
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/gosuite"
 	"io"
@@ -98,11 +99,18 @@ func readReport(directory string, input execution.CodedInput, exitError error) (
 	var bytes int64
 	accepted := []execution.Attachment{}
 	for _, file := range report.Attachments {
+		if execution.APIDiagnostics(input) && !execution.APITextAttachment(file) {
+			report.EvidenceErrors = append(report.EvidenceErrors, "API attachment omitted: only bounded UTF-8 text and JSON support diagnostic redaction.")
+			continue
+		}
 		if file.Kind != "screenshot" && file.Kind != "trace" && file.Kind != "video" && file.Kind != "attachment" && file.Kind != "log" {
 			report.EvidenceErrors = append(report.EvidenceErrors, "Unsupported coded worker attachment kind.")
 			continue
 		}
 		limit := min(input.Capture.MaxFileBytes, input.Capture.MaxBytes-bytes, 64<<20)
+		if execution.APIDiagnostics(input) {
+			limit = min(limit, diagnostics.MaxBytes)
+		}
 		body, err := regularFile(root, file.Path, limit)
 		if err != nil {
 			report.EvidenceErrors = append(report.EvidenceErrors, file.Filename+": "+err.Error())

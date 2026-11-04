@@ -31,7 +31,7 @@ Normal local development still starts with an empty project registry.
 | --- | --- |
 | Start and organize testing | [Demo](docs/demo.md), [Applications](docs/applications.md), [Suites](docs/suites.md). |
 | Create tests | [Create test](docs/create-tests.md), [HTTPS checks](docs/http-checks.md), [Browser recording](docs/browser-recording.md), [Website execution](docs/browser-execution.md), [Playwright editor](docs/playwright-editor.md), [Go testing](docs/go-testing.md). |
-| Author request-based suites | [Coded API policies](docs/api-testing.md). The API wizard, shared source editor, and guarded local worker support request suites. Credential injection, redaction, and Go client parity remain open. |
+| Author request-based suites | [Coded API policies](docs/api-testing.md). The API wizard, shared source editor, and guarded local worker support request suites. API diagnostics redact sensitive text and JSON. Credential injection and Go client parity remain open. |
 | Manage test definitions | [Catalog](docs/catalog.md), [Saved selections](docs/saved-selections.md), [Releases](docs/releases.md). |
 | Inspect runs | [Results](docs/results.md), [Test history](docs/test-history.md), [Evidence](docs/evidence.md), [Timing](docs/timing.md), [Trends](docs/trends.md). |
 | Automate testing | [Schedules](docs/schedules.md), [Notifications](docs/notifications.md). |

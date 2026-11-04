@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/wtiger001/teststudio/internal/diagnostics"
 	"github.com/wtiger001/teststudio/internal/execution"
 	"io"
 	"os"
@@ -77,7 +78,13 @@ func (e *Executor) collect(ctx context.Context, container, directory string, inp
 	var bytes int64
 	problems := []string{}
 	for _, file := range report.Attachments {
+		if execution.APIDiagnostics(input) && !execution.APITextAttachment(file) {
+			continue
+		}
 		limit := min(input.Capture.MaxFileBytes, input.Capture.MaxBytes-bytes, 64<<20)
+		if execution.APIDiagnostics(input) {
+			limit = min(limit, diagnostics.MaxBytes)
+		}
 		if err := e.copyFile(ctx, container, file.Path, directory, limit); err != nil {
 			problems = append(problems, fmt.Sprintf("%s: %v", file.Filename, err))
 			continue

@@ -16,6 +16,7 @@ export interface GoObservation {
   buildDurationMs: number; buildExitCode?: number; exitCode?: number; outputTruncated?: boolean
 }
 export interface Attempt {
+  diagnosticsPolicy?: string
   executionId?: string; recovered?: boolean; durationUnavailable?: boolean; workerDurationMs?: number; steps?: TestStep[]; runnerStatus?: string; expectedStatus?: string
   testId: string; attempt: number; state: string; failureKind?: string; error?: string; startedAt: string; finishedAt: string; durationMs: number
   observedState?: string; totalDurationMs?: number; timingRegressions?: number; timing?: TimingAssessment
@@ -32,6 +33,7 @@ export interface Run {
   cancelRequested: boolean; error?: string; evidenceState: string; evidenceErrors: string[]
 }
 export interface Artifact {
+  redactionPolicy?: string
   id: string; projectId: string; runId: string; testId?: string; attempt?: number; workerId?: string; sequence?: number; stream?: string
   kind: string; filename: string; contentType: string; size: number; checksum: string; state: string; error?: string; createdAt: string; expiresAt: string
 }

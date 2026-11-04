@@ -155,6 +155,7 @@ func (e *Executor) Execute(ctx context.Context, input execution.CodedInput) (rep
 	}
 	input.Reference = ref
 	defer func() {
+		report = execution.RedactAPIReport(input, report)
 		if input.BeforeCleanup != nil {
 			if err := input.BeforeCleanup(report); err != nil {
 				report.EvidenceErrors = append(report.EvidenceErrors, "Result checkpoint failed; resources remain for recovery: "+err.Error())

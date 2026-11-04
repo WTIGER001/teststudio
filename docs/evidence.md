@@ -106,6 +106,17 @@ A failed upload keeps its upload-failed metadata. Missing content keeps a missin
 A passing test with incomplete capture does not become eligible for Rerun failures. Correct the capture setup before starting another run.
 See [Self-testing](self-testing.md) for the local workflow and verified failure probes.
 
+## API diagnostic evidence
+
+API-typed coded tests apply api-diagnostics/v1 before their result checkpoint and evidence upload.
+The same policy protects recovered worker observations.
+Sensitive headers, query values, and configured JSON fields become [REDACTED] in retained text.
+Text and JSON attachments have a 2 MiB input limit. Invalid JSON and unsupported binary evidence produce explicit capture gaps.
+API screenshots, traces, and video are omitted. Browser tests keep their configured media capture.
+Results retain diagnosticsPolicy. Worker artifact metadata retains redactionPolicy, which cannot change on a repeated upload.
+Earlier evidence without this marker has no automatic redaction guarantee.
+See [API diagnostic redaction](api-testing.md#diagnostic-redaction) for field configuration, limits, and supported formats.
+
 ## Recovery checkpoints
 
 Managed worker attempts save their observations and available evidence before resource removal.

@@ -42,6 +42,20 @@ func TestConcurrentDuplicatesReserveStorageOnlyOnce(t *testing.T) {
 	}
 }
 
+func TestDiagnosticPolicyCannotRelabelRetainedArtifact(t *testing.T) {
+	s, _ := fixture(t)
+	a := evidence.Artifact{ID: "diagnostic", Project: "project", Run: "run", Test: "API-1", Worker: "worker", Attempt: 1, Kind: "attachment", Filename: "response.json", ContentType: "application/json", RedactionPolicy: "api-diagnostics/v1"}
+	data := []byte(`{"status":"up"}`)
+	saved, err := s.SaveBytes(t.Context(), a, data, 1024)
+	if err != nil || saved.RedactionPolicy != a.RedactionPolicy {
+		t.Fatal("diagnostic policy was not retained", err)
+	}
+	a.RedactionPolicy = "another-policy"
+	if _, err := s.SaveBytes(t.Context(), a, data, 1024); !errors.Is(err, storage.ErrConflict) {
+		t.Fatal("retained diagnostic policy can be relabeled", err)
+	}
+}
+
 func TestMissingContentHasAnExplicitMetadataState(t *testing.T) {
 	s, files := fixture(t)
 	a, err := s.Log(t.Context(), "project", "run", "worker", "stdout", "TEST-1", 1, 1, "log\n", 100)

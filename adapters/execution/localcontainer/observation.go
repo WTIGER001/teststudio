@@ -40,9 +40,14 @@ func appendLogs(report *execution.CodedReport, input execution.CodedInput, stdou
 		report.Attachments = append(report.Attachments, execution.Attachment{Kind: "log", Stream: runner + "." + stream.name, Filename: runner + "-" + stream.name + ".log", ContentType: "text/plain; charset=utf-8", Data: body})
 	}
 }
-func (e *Executor) collectReport(ctx context.Context, container string, input execution.CodedInput, exitErr error, logs bool) execution.CodedReport {
+func (e *Executor) collectReport(ctx context.Context, container string, input execution.CodedInput, exitErr error, logs bool) (report execution.CodedReport) {
+	defer func() {
+		if logs {
+			report = execution.RedactAPIReport(input, report)
+		}
+	}()
 	now := time.Now().UTC()
-	report := execution.CodedReport{Result: execution.Result{TestID: input.Test.ID, DurationUnavailable: true, State: "unknown", FailureKind: "worker-report", StartedAt: now, FinishedAt: now}}
+	report = execution.CodedReport{Result: execution.Result{TestID: input.Test.ID, DurationUnavailable: true, State: "unknown", FailureKind: "worker-report", StartedAt: now, FinishedAt: now}}
 	directory, err := os.MkdirTemp("", "teststudio-worker-")
 	if err == nil {
 		defer os.RemoveAll(directory)

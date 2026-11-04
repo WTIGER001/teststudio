@@ -41,6 +41,7 @@ class TestStudioReporter {
     for (const attachment of attachments) {
       if (files.length >= 30) { evidenceErrors.push('Attachment count exceeds 30'); break }
       const kind = attachment.name === 'trace' ? 'trace' : attachment.contentType?.startsWith('image/') ? 'screenshot' : attachment.contentType?.startsWith('video/') ? 'video' : 'attachment'
+      if (this.input.test.type === 'api' && (kind !== 'attachment' || !/^(?:text\/plain|application\/(?:json|[A-Za-z0-9.+-]+\+json))(?:;|$)/i.test(attachment.contentType || ''))) { evidenceErrors.push('API attachment omitted: only bounded UTF-8 text and JSON support diagnostic redaction.'); continue }
       const mode = kind === 'attachment' ? 'always' : this.input.capture[kind === 'screenshot' ? 'screenshots' : kind]
       if (mode === 'off' || (mode === 'failure' && !failed)) continue
       try {

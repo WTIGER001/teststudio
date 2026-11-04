@@ -25,6 +25,7 @@ type Attachment struct {
 }
 
 type CodedInput struct {
+	RedactionValues []string                `json:"-"`
 	Browser         *browserpolicy.Target   `json:"browser,omitempty"`
 	Reference       *Reference              `json:"-"`
 	BeforeDispatch  func() error            `json:"-"`

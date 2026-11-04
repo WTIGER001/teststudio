@@ -8,7 +8,8 @@ The browser recording profile remains separate. It does not inspect encrypted re
 
 Create test includes an API test choice with Name, Request, and Review steps, followed by the shared source editor.
 Manual and scheduled request suites execute through the trusted gateway and retain normal results, timing, history, and trends.
-Automatic diagnostic redaction, credential injection, and environment-backed Go clients remain pending.
+API diagnostics now redact sensitive text and JSON before retention, including during worker recovery.
+Credential injection and environment-backed Go clients remain pending.
 Acceptance 35 stays open.
 
 ## Create an API draft
@@ -67,7 +68,8 @@ Its browser field identifies the registered endpoint and its request restriction
       {"method": "POST", "pathPrefix": "/v1/search", "readOnly": true, "maxBodyBytes": 4096}
     ],
     "maxRequests": 20,
-    "maxResponseBytes": 65536
+    "maxResponseBytes": 65536,
+    "redactFields": ["privateContact"]
   }
 }
 ```
@@ -106,6 +108,40 @@ A later protection change rechecks that policy before dispatch and each attempt.
 Origin-only API profiles cannot claim protected request enforcement.
 Mutating request policies remain available only for permitted unprotected targets.
 
+## Diagnostic redaction
+
+The execution collector applies api-diagnostics/v1 before the result checkpoint, evidence upload, or worker cleanup.
+Recovery uses the frozen test and release policy. It applies the same redaction before restoring an observation.
+Assertion messages, step titles, step errors, framework status text, stdout, stderr, and evidence warnings pass through this boundary.
+Redaction changes no test state, failure kind, duration, retry eligibility, history count, or trend count.
+
+Default sensitive fields include authorization, proxy authorization, cookies, passwords, secrets, tokens, API keys, credentials, and sessions.
+Matching ignores case and field-name separators. URL user information and sensitive query values are also removed.
+The collector replaces detected values in the other text from the same observation, including reflected assertion values.
+Known secret values also support literal, JSON-escaped, and URL-encoded replacement. Credential injection remains separate unfinished work.
+
+Add up to 32 field names with requests.redactFields in the source manifest.
+Each name starts with a letter and contains at most 64 letters, digits, periods, underscores, or hyphens.
+These names identify object properties, not JSON paths. Nested objects and arrays retain the same protection.
+The prepared release freezes this policy. Prepare and publish a new release to change it.
+
+Only bounded UTF-8 text/plain, application/json, and application/*+json attachments enter API evidence.
+Each diagnostic file has a 2 MiB input limit and the configured capture limits still apply.
+JSON must parse completely and remain within 64 nesting levels. Numbers retain their JSON precision.
+Diagnostic scanning permits 2048 field assignments and 512 learned values within a 1 MiB private-value budget.
+Malformed structured sensitive values and exceeded redaction limits omit the affected diagnostic content.
+Invalid, opaque, oversized, or unsupported files produce an explicit evidence gap without changing the observed test result.
+Request-restricted API workers disable automatic screenshots, video, and traces. The reporter rejects media and binary attachments before copying them.
+The collector independently rejects unsupported files before transfer. Text redaction does not sanitize browser images or trace archives.
+Browser-typed tests retain their existing media capture behavior.
+
+Results expose diagnosticsPolicy. Retained worker artifacts expose redactionPolicy. Both record api-diagnostics/v1.
+Artifact retries cannot replace that policy marker. Generated diagnostic filenames avoid retaining source attachment names.
+Existing stored evidence remains unchanged. Its absent marker does not claim redaction.
+
+Use dedicated test data and scoped credentials. Keep sensitive application fields in the reviewed redaction list.
+This policy filters conventional structured diagnostics. It does not sandbox published code or detect deliberately encoded or unlabeled private data.
+
 ## Runtime and recovery
 
 Both the source runtime and gateway image must declare teststudio.api-policy=request-policy/v1.
@@ -122,5 +158,5 @@ Hosted deployment verification remains separate work.
 
 Policy, gateway, compatibility, starter, and source-contract checks use local fixtures only.
 Run the targeted commands in [Self-testing](self-testing.md).
-The local worker verification checks actual protected manual and scheduled request runs, rejected requests, normal history, and trend counts.
+The local worker verification checks protected manual and scheduled runs, rejected requests, retained redaction, history, and trend counts.
 The targeted STUDIO-API-AUTHOR-001 workflow checks the creation wizard, source persistence, help, focus, unsaved navigation, and narrow layout.

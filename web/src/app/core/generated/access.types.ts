@@ -1,6 +1,6 @@
-export const accessContractVersion = "0.30.0"
+export const accessContractVersion = "0.31.0"
 
-export type APIRequestPolicy = { "maxRequests": number; "maxResponseBytes": number; "rules": (APIRequestRule)[] }
+export type APIRequestPolicy = { "maxRequests": number; "maxResponseBytes": number; "redactFields"?: (string)[]; "rules": (APIRequestRule)[] }
 export type APIRequestRule = { "maxBodyBytes"?: number; "method": "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | "DELETE"; "pathPrefix": string; "readOnly"?: boolean }
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }

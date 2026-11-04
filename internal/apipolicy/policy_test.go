@@ -37,6 +37,8 @@ func TestAPIRequestRulesRequireCanonicalPathsAndExplicitReadOnlyReview(t *testin
 	for _, mutate := range []func(*Spec){
 		func(v *Spec) { v.Rules = nil }, func(v *Spec) { v.MaxRequests = 0 },
 		func(v *Spec) { v.MaxResponseBytes = 4<<20 + 1 },
+		func(v *Spec) { v.RedactFields = []string{"password", "PASSWORD"} },
+		func(v *Spec) { v.RedactFields = []string{"bad field"} },
 		func(v *Spec) { v.Rules[0].Method = "CONNECT" },
 		func(v *Spec) { v.Rules[0].Method = "DELETE" },
 		func(v *Spec) { v.Rules[0].PathPrefix = "/v1/../admin" },

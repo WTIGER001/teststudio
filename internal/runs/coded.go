@@ -61,7 +61,7 @@ func (s *Service) captureCodedReport(parent context.Context, run Run, worker str
 			slot = fmt.Sprint(index)
 		}
 		artifactID := "execution-artifact-" + fingerprint([]any{run.ID, worker, result.TestID, result.Attempt, result.ExecutionID, slot, file.Kind, file.Path, file.Filename, file.Stream, hex.EncodeToString(hash[:])})
-		artifact := evidence.Artifact{ID: artifactID, Project: run.Project, Run: run.ID, Test: result.TestID, Attempt: result.Attempt, Worker: worker, Kind: file.Kind, Filename: file.Filename, ContentType: file.ContentType, Policy: &policy}
+		artifact := evidence.Artifact{ID: artifactID, Project: run.Project, Run: run.ID, Test: result.TestID, Attempt: result.Attempt, Worker: worker, Kind: file.Kind, Filename: file.Filename, ContentType: file.ContentType, Policy: &policy, RedactionPolicy: result.DiagnosticsPolicy}
 		if file.Kind == "log" {
 			artifact.Stream = file.Stream
 			if artifact.Stream == "" {

@@ -139,7 +139,7 @@ func (s *Service) admit(ctx context.Context, a Artifact, budget Budget) (storage
 			if err != nil {
 				return row, a, err
 			}
-			if old.Project != a.Project || old.Run != a.Run || old.Checksum != a.Checksum || old.Size != a.Size || old.Kind != a.Kind || old.Test != a.Test || old.Attempt != a.Attempt || old.Worker != a.Worker || old.Sequence != a.Sequence || old.Stream != a.Stream || old.Filename != a.Filename || old.ContentType != a.ContentType || old.Step != a.Step || !reflect.DeepEqual(old.Policy, a.Policy) {
+			if old.Project != a.Project || old.Run != a.Run || old.Checksum != a.Checksum || old.Size != a.Size || old.Kind != a.Kind || old.Test != a.Test || old.Attempt != a.Attempt || old.Worker != a.Worker || old.Sequence != a.Sequence || old.Stream != a.Stream || old.Filename != a.Filename || old.ContentType != a.ContentType || old.Step != a.Step || old.RedactionPolicy != a.RedactionPolicy || !reflect.DeepEqual(old.Policy, a.Policy) {
 				return row, a, storage.ErrConflict
 			}
 			if old.State == "expired" || old.State == "deleted" || old.State == "deleting" || old.State == "delete-pending" || old.State == "cleanup-failed" {

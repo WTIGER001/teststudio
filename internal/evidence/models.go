@@ -6,29 +6,30 @@ import (
 )
 
 type Artifact struct {
-	ID           string          `json:"id"`
-	Project      string          `json:"projectId"`
-	Run          string          `json:"runId"`
-	Test         string          `json:"testId,omitempty"`
-	Attempt      int             `json:"attempt,omitempty"`
-	Worker       string          `json:"workerId,omitempty"`
-	Sequence     int64           `json:"sequence,omitempty"`
-	Stream       string          `json:"stream,omitempty"`
-	Kind         string          `json:"kind"`
-	Filename     string          `json:"filename"`
-	ContentType  string          `json:"contentType"`
-	Size         int64           `json:"size"`
-	Checksum     string          `json:"checksum"`
-	State        string          `json:"state"`
-	Error        string          `json:"error,omitempty"`
-	CreatedAt    time.Time       `json:"createdAt"`
-	ExpiresAt    time.Time       `json:"expiresAt"`
-	Step         string          `json:"stepId,omitempty"`
-	Policy       *capture.Policy `json:"capturePolicy,omitempty"`
-	QuotaVersion int             `json:"quotaVersion,omitempty"`
-	UploadToken  string          `json:"uploadToken,omitempty"`
-	UploadUntil  *time.Time      `json:"uploadUntil,omitempty"`
-	DeletedAt    *time.Time      `json:"deletedAt,omitempty"`
+	RedactionPolicy string          `json:"redactionPolicy,omitempty"`
+	ID              string          `json:"id"`
+	Project         string          `json:"projectId"`
+	Run             string          `json:"runId"`
+	Test            string          `json:"testId,omitempty"`
+	Attempt         int             `json:"attempt,omitempty"`
+	Worker          string          `json:"workerId,omitempty"`
+	Sequence        int64           `json:"sequence,omitempty"`
+	Stream          string          `json:"stream,omitempty"`
+	Kind            string          `json:"kind"`
+	Filename        string          `json:"filename"`
+	ContentType     string          `json:"contentType"`
+	Size            int64           `json:"size"`
+	Checksum        string          `json:"checksum"`
+	State           string          `json:"state"`
+	Error           string          `json:"error,omitempty"`
+	CreatedAt       time.Time       `json:"createdAt"`
+	ExpiresAt       time.Time       `json:"expiresAt"`
+	Step            string          `json:"stepId,omitempty"`
+	Policy          *capture.Policy `json:"capturePolicy,omitempty"`
+	QuotaVersion    int             `json:"quotaVersion,omitempty"`
+	UploadToken     string          `json:"uploadToken,omitempty"`
+	UploadUntil     *time.Time      `json:"uploadUntil,omitempty"`
+	DeletedAt       *time.Time      `json:"deletedAt,omitempty"`
 }
 
 type Event struct {
