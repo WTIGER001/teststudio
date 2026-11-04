@@ -4,9 +4,10 @@ import crypto from 'node:crypto'
 const expectedFailures = new WeakMap<Page, { url: string; status: number; consoleSeen: boolean; responseSeen: boolean; allowRepeated?: boolean }[]>()
 
 export async function navigationLink(page: Page, name: string): Promise<Locator> {
+  if (name === 'Your account') return page.getByRole('banner').getByRole('link', { name, exact: true })
   const navigation = page.getByRole('navigation', { name: 'Main navigation', includeHidden: true })
   await navigation.waitFor({ state: 'attached' })
-  if (!await navigation.isVisible()) await page.getByRole('button', { name: 'Navigation', exact: true }).click()
+  if (!await page.locator('#sidebar-navigation').isVisible()) await page.getByRole('button', { name: 'Navigation', exact: true }).click()
   const link = navigation.getByRole('link', { name, exact: true, includeHidden: true })
   await link.waitFor({ state: 'attached' })
   const disclosure = link.locator('xpath=ancestor::details[1]')

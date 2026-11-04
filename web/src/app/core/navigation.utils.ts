@@ -11,7 +11,6 @@ export function navigationSections(project: string, capabilities: Capabilities, 
   const add = (id: string, title: string, collapsible: boolean, links: NavigationLink[]) => {
     if (links.length) sections.push({ id, title, collapsible, links, active: links.some(item => item.active) })
   }
-  add('workspace', 'Workspace', false, [link(project ? 'Manage projects' : 'Projects', '/projects', '▦', true), link('Your account', '/account', '♙', true)])
   if (project) {
     const base = `/projects/${project}`
     const application = applicationFromURL(url)
@@ -51,4 +50,8 @@ export function navigationSections(project: string, capabilities: Capabilities, 
     link('Explain installation access', '/account/access', '♧')
   ])
   return sections
+}
+
+export function projectNavigation(url: string): NavigationLink[] {
+  return [{ label: 'Projects', path: '/projects', icon: '▦', exact: true, active: url.split(/[?#]/)[0] === '/projects' }]
 }

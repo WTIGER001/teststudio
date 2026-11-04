@@ -27,7 +27,7 @@ import { HelpComponent } from './features/help/help.component'
         </select>
         <ts-help />
         @if (app.session.user(); as user) {
-          @if (app.session.ready()) { <a class="user-name" routerLink="/account" aria-label="Your account">{{ user.name }}</a> } @else { <span class="user-name">{{ user.name }}</span> }
+          @if (app.session.ready()) { <a class="user-name" routerLink="/account" aria-label="Your account"><span class="account-name">{{ user.name }}</span><span class="account-label">Your account</span></a> } @else { <span class="user-name">{{ user.name }}</span> }
           <button type="button" class="button subtle" [disabled]="app.session.authenticating()" (click)="app.signOut()">Sign out</button>
         }
       </div>

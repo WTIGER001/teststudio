@@ -32,6 +32,22 @@ Page help, application, catalog, result, retained-history, trend, UI, and plan d
 This improves verified items 05, 21, 27, 29, 30, 47, 49, and 50. The count remains 48 verified, 9 open.
 No cloud verification runs. Continue the remaining hosted adapter work after this usability correction.
 
+## Global account and project navigation correction — 2026-11-04
+
+Projects now appears before the project and application selectors.
+The sidebar no longer uses Workspace as an ownership heading or places Your account beneath it.
+The global header provides account access on desktop and narrow screens.
+The account page and help explain that accounts apply across TestStudio. Project access is assigned separately.
+Application scoping and project or installation administration keep their existing behavior.
+
+Five focused navigation utility checks and the Angular production build pass.
+STUDIO-NAV-001 passes with project-link ordering, no Workspace heading, no sidebar account link, and mobile global account navigation.
+Run: 20261104T143706.209433000-1adab9175059225f76a47692. Evidence is complete and the execution ledger is cleaned.
+Light and dark narrow-layout checks pass. The owned test container and browser processes are removed.
+The existing local demo serves the updated UI at http://127.0.0.1:8040 without a backend restart.
+Help, application guidance, UI rules, and the plan match the navigation correction.
+This refines verified items 49 and 50. The count remains 48 verified, 9 open. No cloud verification runs.
+
 ## Acceptance criteria
 
 These stable numbers match the priority list supplied to the user.

@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { navigationSections } from './navigation.utils.ts'
+import { navigationSections, projectNavigation } from './navigation.utils.ts'
 
 test('navigation separates daily testing from administration and opens the current scope', () => {
   const permissions = Object.fromEntries(['projects.read', 'catalog.read', 'sources.read', 'schedules.read', 'suites.read', 'notifications.read', 'members.read', 'permissions.read', 'groups.read', 'roles.read', 'users.read', 'providers.read'].map(permission => [`teststudio.${permission}`, true]))
   const catalog = navigationSections('demo', permissions, permissions, '/projects/demo/catalog')
-  assert.deepEqual(catalog.map(section => section.title), ['Workspace', 'All application testing', 'Project overviews', 'Automation', 'Advanced testing', 'Project administration', 'Installation administration'])
+  assert.deepEqual(catalog.map(section => section.title), ['All application testing', 'Project overviews', 'Automation', 'Advanced testing', 'Project administration', 'Installation administration'])
   assert.deepEqual(catalog.filter(section => section.collapsible).map(section => section.active), [false, false, false, false])
   assert.deepEqual(catalog.find(section => section.id === 'testing')?.links.map(link => link.label), ['Suites', 'Test catalog', 'Test runs', 'Trends'])
   assert.deepEqual(catalog.find(section => section.id === 'automation')?.links.map(link => link.label), ['Schedules', 'Notifications'])
@@ -28,7 +28,8 @@ test('navigation retains capability gates and exact account route matching', () 
   assert(paths.includes('/projects/demo/releases'))
   for (const path of ['/settings/users', '/settings/access', '/settings/roles', '/projects/demo/groups', '/projects/demo/notifications', '/projects/demo/sources']) assert(!paths.includes(path))
   assert(!navigationSections('demo', {}, {}, '/projects/demo/applications').flatMap(section => section.links).some(link => link.label === 'All applications'))
-  assert.equal(viewer.find(section => section.id === 'workspace')?.active, false)
+  assert(!viewer.some(section => section.id === 'workspace'))
+  assert(!paths.includes('/account'))
   assert.equal(viewer.find(section => section.id === 'installation')?.active, true)
 })
 
@@ -54,4 +55,14 @@ test('application navigation stays inside its scope and separates project overvi
   const probes = navigationSections('demo', {}, {}, '/projects/demo/probes')
   assert.equal(probes.find(section => section.id === 'overviews')?.active, true)
   assert.equal(probes.find(section => section.id === 'testing')?.active, false)
+})
+
+
+test('project management stands above scope and account access stays in the global header', () => {
+  assert.equal(projectNavigation('/projects')[0].active, true)
+  assert.equal(projectNavigation('/projects/demo/catalog')[0].active, false)
+  assert.deepEqual(projectNavigation('/account').map(link => link.path), ['/projects'])
+  const sections = navigationSections('demo', {}, {}, '/projects/demo/catalog')
+  assert(!sections.some(section => section.title === 'Workspace'))
+  assert(!sections.flatMap(section => section.links).some(link => link.path === '/account'))
 })

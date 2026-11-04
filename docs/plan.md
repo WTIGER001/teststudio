@@ -42,6 +42,7 @@ Do not add new dashboard pages or repeat completed demonstration setup before cl
 
 Prioritize the tester's reported scope confusion before further hosted adapter work.
 Use one project selector, one application selector, and a persistent project and application context band.
+Place Projects before those selectors. Keep account access in the global header and omit the ambiguous Workspace section.
 Application testing contains Overview, Suites, Test catalog, Test runs, and Trends with matching data filters.
 Project overviews provides All applications and HTTPS probes. Keep project administration visibly separate.
 Use explicit application routes. Preserve context in creation and investigation links, reload, and browser history.

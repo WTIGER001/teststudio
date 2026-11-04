@@ -2,7 +2,9 @@
 .sidebar { height: 100%; background: var(--surface); border-right: 1px solid var(--border); padding: 24px 14px 20px; display: flex; flex-direction: column; gap: 22px; }
 .workspace-picker { padding: 0 6px; display: grid; gap: 9px; }
 .workspace-picker select { width: 100%; font-size: 12px; background: var(--background); }
-nav { display: grid; gap: 18px; }
+.sidebar-navigation { display: grid; gap: 18px; }
+.section-navigation { display: grid; gap: 18px; }
+.project-navigation { border-bottom: 1px solid var(--border); padding-bottom: 12px; }
 .nav-section { min-width: 0; }
 .nav-section h2 { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin: 0 10px 7px; }
 details.nav-section { border-top: 1px solid var(--border); padding-top: 10px; }
@@ -21,7 +23,9 @@ details[open] > ts-sidebar-links { margin-top: 5px; }
   .sidebar-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 12px; }
   .workspace-picker { padding: 0; gap: 5px; }
   .navigation-toggle { display: inline-flex; }
-  nav { display: none; padding-top: 18px; }
-  nav.mobile-open { display: grid; gap: 14px; }
+  .sidebar-navigation { gap: 12px; }
+  .project-navigation { padding-bottom: 8px; }
+  .section-navigation { display: none; padding-top: 6px; }
+  .section-navigation.mobile-open { display: grid; gap: 14px; }
   .sidebar-footer { display: none; }
 }

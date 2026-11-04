@@ -4,7 +4,9 @@ Choose a project, then select All applications under Project overviews.
 The page lists the applications registered in that project.
 Each card shows readable environment and linked suite counts.
 Select Open application to make it the active application.
-Use the sidebar Application selector to switch quickly.
+The sidebar starts with Projects, followed by the Project and Application selectors.
+Use the Application selector to switch quickly.
+Your account stays in the global header. It applies across TestStudio, with project access assigned separately.
 The context above the page shows the project and active application.
 Suites, Test catalog, Test runs, and Trends follow this selection.
 Choose All applications for project-wide work. HTTPS probes provides a separate project overview.

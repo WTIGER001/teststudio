@@ -99,7 +99,11 @@ Revision conflicts require a reload before another mutation. See [Suite settings
 
 ## Sidebar navigation
 
-Project selection lives in one sidebar selector. The Projects landing page uses project cards instead of a second selector.
+The sidebar starts with Projects, followed by the Project and Application selectors.
+Do not add a Workspace heading. Workspace does not represent a separate ownership level.
+Account access lives in the global header and remains visible on narrow screens.
+An account belongs to the TestStudio installation. Project access is assigned separately.
+The Projects landing page uses project cards instead of a second project selector.
 Opening a project shows All applications. Opening an application makes it the active testing context.
 The Application selector switches applications without returning to the application list.
 The context band shows the project and active application above every project page.
@@ -124,7 +128,7 @@ Catalog titles, retained release definitions, and saved result titles link to th
 Keep common run inspection visible. Put definition JSON, revision details, and identifiers under named disclosures.
 Native disclosure controls support keyboard operation. Active links expose the current page.
 Existing capability checks still control each protected link.
-On narrow screens, Navigation opens and closes the menu. Selecting a link closes it and returns space to the current page.
+On narrow screens, Projects and scope selectors stay visible. Navigation opens and closes the remaining sidebar sections. Selecting a link closes it and returns space to the current page.
 Sidebar styles stay within focused components and use shared theme tokens.
 
 ## Publication review
