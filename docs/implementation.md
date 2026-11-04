@@ -111,6 +111,35 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: registry source assembly and immutable publication
+
+Acceptance **51** advances. The total remains **48 verified of 57**, with **9 open** items.
+This delivery provides the builder adapter. Hosted discovery and preparation-worker wiring remain required.
+No provider or complete source workflow acceptance closes from the local fixture.
+
+The registry builder implements ArtifactBuilder for validated offline Go and Playwright snapshots.
+It verifies a supervised registry runtime and appends a deterministic source layer without Docker, shell execution, or uploaded build commands.
+Controlled manifests, retained provenance, private file ownership, opaque source-directory replacement, and bounded paths preserve source confinement.
+The configuration retains the runtime environment, entrypoint, platform, supervisor, and original layers.
+Artifact identity binds project ownership, preparation reference, source digest, filesystem digest, and the retained configuration.
+
+Registry uploads use exact repository pull,push authentication, content-addressed deduplication, and fixed-origin upload locations.
+Lost blob or manifest acknowledgements resolve through exact digest checks. Known sessions close before their journal clears.
+Private durable journals precede creation and source transfer. Cancellation and restarted cleanup use only recorded owned sessions.
+Unknown creation remains cleanup-incomplete and cannot automatically repeat. No private upload URL appears in public diagnostics.
+Cleanup preserves published artifacts and shared base layers. Registry garbage collection remains an operator responsibility.
+
+Targeted race-enabled checks pass for both runners, source confinement, deterministic images, controlled metadata, runtime preservation, dependency restrictions, scoped token challenges, deduplication, lost acknowledgements, cancellation, rotated credentials, interrupted checkpoints, and uncertain creation.
+The existing OCI inspection and affected local assembly checks also pass. Evidence is output/registry-preparation/contract.log. Final scope and durability checks pass in final-contract.log and durable-journal.log.
+The API, preparation-worker, and publisher packages pass compilation.
+No external registry push, cloud account, cluster, browser, UI build, or runtime image rebuild occurs.
+The local demonstration stays running with its existing data and evidence.
+
+Next connect hosted discovery and the existing preparation queue to this builder.
+Current build checkpoints still accept local image identifiers only. Extend those contracts with explicit profile validation before enabling remote assembly.
+Preserve source review, approval, catalog publication, activation, cancellation, and cleanup-only recovery.
+See [Registry source assembly](registry-preparation.md) for the operator contract and exact remaining scope.
+
 ## Current delivery: Kubernetes Pod execution, private routing, and activation gate
 
 Acceptance **51** advances. Timing **41** and replica recovery **52** gain implementation support.

@@ -201,7 +201,17 @@ No cluster, cloud account, registry push, source-runtime rebuild, browser suite,
 See [Kubernetes execution workers](kubernetes-workers.md) and the implementation ledger for exact local evidence.
 Acceptance 51 advances. Acceptance 41 gains execution-pool identity support. The count remains 48 verified and 9 open.
 
-Next implement remote source assembly, immutable registry publication, and hosted discovery through the existing preparation queue.
+Registry source assembly and immutable OCI publication now have a separate builder adapter.
+It appends a deterministic bounded source layer to an inspected supervised runtime without a Docker daemon or uploaded build commands.
+Private upload journals retain exact ownership, cancellation, lost acknowledgements, and interrupted session checkpoints.
+Local TLS and race checks cover Go and Playwright. Registry inspection and local assembly retain their existing behavior.
+The API, preparation-worker, and publisher packages compile. No live registry, image rebuild, UI build, or cloud operation occurs.
+See [Registry source assembly](registry-preparation.md) for its exact scope and recovery limits.
+This adapter is not enabled in the preparation worker yet. The count remains 48 verified and 9 open.
+
+Next implement hosted discovery and wire registry assembly into the existing preparation queue.
+Add immutable registry references to the build checkpoint, discovery result, approval, and publication contracts without weakening local validation.
+Retain private upload journals on durable preparation storage and preserve cleanup-only recovery when new builds are disabled.
 The first Kubernetes source workflow must become usable before repeating generic execution implementation for other providers.
 Keep uploaded source outside the API and retain exact source approval, project ownership, catalog review, and publication boundaries.
 Reuse trusted supervised runtimes. Do not execute uploaded Dockerfiles or add privileged building inside the API.

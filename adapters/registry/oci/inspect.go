@@ -35,6 +35,10 @@ func (c *Client) InspectImage(ctx context.Context, reference string) (hostedexec
 }
 
 func (c *Client) Inspect(ctx context.Context, reference string) (Metadata, error) {
+	return c.inspect(ctx, reference, true)
+}
+
+func (c *Client) inspect(ctx context.Context, reference string, requireOwnership bool) (Metadata, error) {
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 	repo, hash, err := c.selected(reference)
@@ -119,8 +123,11 @@ func (c *Client) Inspect(ctx context.Context, reference string) (Metadata, error
 	if runner == "playwright" {
 		entry = []string{"node", "/runner/run.mjs"}
 	}
-	if runner == "" || !runtimeLabel.MatchString(labels["teststudio.runtime"]) || !slices.Equal(config.Config.Entrypoint, entry) || labels["teststudio.job-supervisor"] != "worker-exchange/v1" || labels["teststudio.runtime-kind"] != "source-base/v1" || labels["teststudio.work-item-bytes"] != "4194304" || !digest.MatchString(labels["teststudio.job-runtime-base"]) || !domain.ValidID(labels["teststudio.project"]) || !domain.ValidID(labels["teststudio.installation"]) || !domain.ValidID(labels["teststudio.preparation"]) || !digest.MatchString(labels["teststudio.source"]) {
+	if runner == "" || !runtimeLabel.MatchString(labels["teststudio.runtime"]) || !slices.Equal(config.Config.Entrypoint, entry) || labels["teststudio.job-supervisor"] != "worker-exchange/v1" || labels["teststudio.runtime-kind"] != "source-base/v1" || labels["teststudio.work-item-bytes"] != "4194304" || !digest.MatchString(labels["teststudio.job-runtime-base"]) {
 		return Metadata{}, ErrInvalid
 	}
-	return Metadata{Image: hostedexecution.Image{Reference: reference, Runner: runner, Runtime: labels["teststudio.runtime"], OS: config.OS, Architecture: config.Architecture, Supervisor: labels["teststudio.job-supervisor"], Project: labels["teststudio.project"], SourceDigest: labels["teststudio.source"]}, Manifest: strings.TrimPrefix(c.origin, "https://") + "/" + repo + "@" + hash, Configuration: value.Config.Digest, Project: labels["teststudio.project"], Installation: labels["teststudio.installation"], Preparation: labels["teststudio.preparation"], Source: labels["teststudio.source"]}, nil
+	if requireOwnership && (!domain.ValidID(labels["teststudio.project"]) || !domain.ValidID(labels["teststudio.installation"]) || !domain.ValidID(labels["teststudio.preparation"]) || !digest.MatchString(labels["teststudio.source"])) {
+		return Metadata{}, ErrInvalid
+	}
+	return Metadata{template: &runtimeTemplate{client: c, repository: repo, manifest: value, configuration: data, labels: labels}, Image: hostedexecution.Image{Reference: reference, Runner: runner, Runtime: labels["teststudio.runtime"], OS: config.OS, Architecture: config.Architecture, Supervisor: labels["teststudio.job-supervisor"], Project: labels["teststudio.project"], SourceDigest: labels["teststudio.source"]}, Manifest: strings.TrimPrefix(c.origin, "https://") + "/" + repo + "@" + hash, Configuration: value.Config.Digest, Project: labels["teststudio.project"], Installation: labels["teststudio.installation"], Preparation: labels["teststudio.preparation"], Source: labels["teststudio.source"]}, nil
 }

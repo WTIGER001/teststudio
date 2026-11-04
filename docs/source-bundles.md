@@ -208,3 +208,10 @@ Hosted preparation processes can add --require-postgres to reject accidental SQL
 Initialization errors exclude private environment connection values.
 The [service image](service-image.md) packages the API and static assets. Local Docker preparation remains a separate trusted host process.
 Hosted preparation and execution adapters remain separate implementation work.
+
+## Hosted registry assembly foundation
+
+The [registry source builder](registry-preparation.md) assembles offline snapshots without a Docker daemon.
+It retains source ownership and publishes immutable distribution digests through a trusted preparation process.
+It is not enabled in the preparation worker yet. Existing local bundle workflows retain their current behavior.
+Hosted discovery and queue integration must complete before a registry bundle becomes a reviewed hosted source workflow.

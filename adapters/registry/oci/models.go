@@ -31,6 +31,7 @@ type Options struct {
 }
 
 type Metadata struct {
+	template      *runtimeTemplate
 	Image         hostedexecution.Image
 	Manifest      string
 	Configuration string
