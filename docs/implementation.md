@@ -122,7 +122,40 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: durable Azure dispatch, recovery, and native completion
+## Current delivery: trusted ACR authentication and scoped source publication
+
+Acceptance **51** advances. The count remains **48 verified of 57**, with **9 open**.
+The previous durable Azure lifecycle batch commits as 10cd5f9. This batch implements its trusted registry authentication gap.
+
+The new ACR client exchanges an explicit Azure credential through the registry-specific Entra scope and selected tenant.
+It obtains registry refresh and exact repository tokens through bounded form POST requests to the configured registry.
+No registry administrator password, ARM token fallback, or implicit credential discovery is used.
+The existing OCI challenge parser checks exact realm, service, repository, and actions before invoking the optional token callback.
+Basic and Bearer credential callbacks retain their existing behavior. Token callbacks cannot combine with the Credentials option.
+
+Inspection permits pull only and rejects write requests. Separate preparation clients can request pull,push and publish through the normal OCI source flow.
+The transport permits immutable digest operations and bounded upload-session actions within the configured namespace.
+Registry redirects do not forward credentials. Approved Azure configuration-blob origins receive fresh credential-free GET requests.
+The existing size, digest, non-root, runtime, ownership, source, approval, and upload-journal checks remain in place.
+
+Caches remain in memory and are bounded by source identity, source expiry, registry token expiry, a 30-second margin, five-minute age, and 32 entries.
+Concurrent inspections reuse grants. A changed or failed Azure credential clears older tokens instead of falling back.
+Malformed, duplicate-key, expired, not-yet-valid, oversized, and foreign authentication responses fail with bounded private diagnostics.
+Close seals new requests, clears tokens, and closes idle connections.
+
+Five new focused race checks pass with in-memory OAuth and OCI responses for both Go and Playwright.
+They verify inspection, source publication, exact scopes, completed upload journals, rotation, concurrent reuse, bounded caches, and credential-free blob redirects.
+Four selected existing OCI namespace, digest, image, and redirect checks pass with race detection.
+Evidence is output/azure-registry-auth/summary.json and the focused command results.
+No UI build, browser, container, source-runtime build, image build, real registry, cloud operation, registry push, or deployment runs.
+The simulated publication checks protocol and metadata only. It builds no runnable suite image.
+The demonstration and its data remain unchanged.
+
+Azure coded execution stays disabled. Actual network admission, independent absolute stop resources, registry identity binding, native setup, and private service packaging remain required.
+Continue those controls before preparation enablement, remote gateways, recording, and separate deployment verification.
+No broad acceptance item closes from local authentication fixtures alone.
+
+## Previous delivery: durable Azure dispatch, recovery, and native completion
 
 Acceptance **51** and supporting recovery under **52** advance. The total remains **48 verified of 57**, with **9 open**.
 The previous request-contract batch commits as b62ea41. This batch implements the managed provider and production SDK bridge.

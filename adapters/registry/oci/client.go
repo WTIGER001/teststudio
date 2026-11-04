@@ -19,6 +19,9 @@ var repository = regexp.MustCompile(`^[a-z0-9]+(?:(?:[._]|__|[-]+)[a-z0-9]+)*(?:
 var runtimeLabel = regexp.MustCompile(`^(?:go|playwright)[A-Za-z0-9._+-]{1,120}$`)
 
 func New(options Options) (*Client, error) {
+	if options.Tokens != nil && (options.Credentials != nil || options.TokenURL == "" || options.TokenService == "") {
+		return nil, ErrConfiguration
+	}
 	origin, err := url.Parse(options.Origin)
 	if err != nil || origin.Scheme != "https" || origin.Hostname() == "" || origin.User != nil || origin.Path != "" || origin.RawQuery != "" || origin.ForceQuery || origin.Fragment != "" || origin.Opaque != "" || strings.ContainsAny(origin.Host, "\\\r\n\x00") || !repository.MatchString(options.RepositoryPrefix) || len(options.RepositoryPrefix) > 255 || (options.Architecture != "amd64" && options.Architecture != "arm64") {
 		return nil, ErrConfiguration
@@ -46,7 +49,11 @@ func New(options Options) (*Client, error) {
 	if transport == nil {
 		transport = &http.Transport{TLSHandshakeTimeout: 5 * time.Second, ResponseHeaderTimeout: 5 * time.Second, IdleConnTimeout: 30 * time.Second}
 	}
-	return &Client{origin: options.Origin, repositoryPrefix: options.RepositoryPrefix, architecture: options.Architecture, tokenURL: options.TokenURL, tokenService: options.TokenService, credentials: options.Credentials, blobRedirectOrigins: redirects, http: &http.Client{Transport: transport, Timeout: 10 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}, nil
+	return &Client{origin: options.Origin, repositoryPrefix: options.RepositoryPrefix, architecture: options.Architecture, tokenURL: options.TokenURL, tokenService: options.TokenService, credentials: options.Credentials, tokens: options.Tokens, blobRedirectOrigins: redirects, http: &http.Client{Transport: transport, Timeout: 10 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}, nil
+}
+
+func RepositoryWithinPrefix(name, prefix string) bool {
+	return len(name) <= 255 && len(prefix) <= 255 && repository.MatchString(name) && repository.MatchString(prefix) && (name == prefix || strings.HasPrefix(name, prefix+"/"))
 }
 
 func (c *Client) Close() { c.http.CloseIdleConnections() }
@@ -57,7 +64,7 @@ func (c *Client) selected(reference string) (string, string, error) {
 		return "", "", ErrInvalid
 	}
 	repo := strings.TrimPrefix(name, strings.TrimPrefix(c.origin, "https://")+"/")
-	if len(repo) > 255 || !repository.MatchString(repo) || (repo != c.repositoryPrefix && !strings.HasPrefix(repo, c.repositoryPrefix+"/")) {
+	if !RepositoryWithinPrefix(repo, c.repositoryPrefix) {
 		return "", "", ErrInvalid
 	}
 	return repo, hash, nil

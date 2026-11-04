@@ -3,7 +3,8 @@
 ## Current scope
 
 The [Azure provider](azure-worker-lifecycle.md) now implements asynchronous dispatch, ownership checks, cancellation, and durable recovery.
-Concrete network admission, independent stop resources, registry authentication, and command wiring remain unfinished. Azure coded execution stays disabled.
+The [ACR authentication adapter](azure-registry-authentication.md) now supports trusted immutable-image inspection.
+Concrete network admission, independent stop resources, registry identity binding, and command wiring remain unfinished. Azure coded execution stays disabled.
 
 The shared hosted lifecycle driver is implemented in internal/hostedexecution.
 It implements the existing managed executor and timing-profile contracts.

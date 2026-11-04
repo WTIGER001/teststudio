@@ -3,6 +3,7 @@ package oci
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"mime"
 	"net/http"
 	"net/url"
@@ -26,6 +27,21 @@ func (c *Client) tokenActions(ctx context.Context, repo, actions, challenge stri
 		if key != "realm" && key != "service" && key != "scope" {
 			return "", ErrDenied
 		}
+	}
+	if c.tokens != nil {
+		value, err := c.tokens(ctx, repo, actions)
+		if err != nil {
+			for _, known := range []error{ErrUnavailable, ErrDenied, ErrInvalid, ErrConfiguration} {
+				if errors.Is(err, known) {
+					return "", known
+				}
+			}
+			return "", ErrDenied
+		}
+		if value == "" || len(value) > 65536 || strings.ContainsAny(value, "\r\n\x00") {
+			return "", ErrInvalid
+		}
+		return value, nil
 	}
 	location, err := url.Parse(c.tokenURL)
 	if err != nil {

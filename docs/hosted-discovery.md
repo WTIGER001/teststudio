@@ -15,7 +15,8 @@ Complete hosted source operation still requires deployment verification.
 Environment-backed browser and API profiles require remote gateway delivery.
 AWS dispatch is implemented with separate deployment verification pending.
 Azure now has a [durable job provider](azure-worker-lifecycle.md) and [job ownership contract](azure-worker-contract.md).
-Its concrete isolation controls, independent stop resources, registry authentication, and native preparation wiring remain open.
+The [ACR adapter](azure-registry-authentication.md) now supports trusted source registry authentication and publication.
+Concrete isolation controls, independent stop resources, managed identity binding, and native preparation wiring remain open.
 
 ## Configure separate processes
 

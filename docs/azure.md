@@ -9,7 +9,8 @@ The current package supports the catalog, identity, native HTTP execution, sched
 Hosted preparation, Go execution, Playwright execution, and recording remain unfinished.
 The [Azure job contract](azure-worker-contract.md) now builds and verifies SDK requests for execution and discovery.
 The [durable provider](azure-worker-lifecycle.md) now passes local dispatch, status, cancellation, and checkpointed recovery checks.
-Concrete network admission, absolute deadlines, registry authentication, and command wiring remain required before enabling coded jobs.
+The [trusted ACR adapter](azure-registry-authentication.md) now supports separate inspection and preparation credentials.
+Concrete network admission, absolute deadlines, registry identity binding, and command wiring remain required before enabling coded jobs.
 Do not enable local Docker runner flags or mount a Docker socket inside these apps.
 Local packaging checks do not close Azure deployment acceptance.
 

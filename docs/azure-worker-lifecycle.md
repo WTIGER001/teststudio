@@ -8,7 +8,8 @@ Local fixtures exercise the production provider with a reopened SQLite database 
 The production SDK bridge also passes in-memory protocol checks without Azure credentials or connections.
 
 Azure coded execution remains disabled in native commands and the Bicep package.
-Concrete environment network admission, independent absolute deadline resources, registry authentication, and private exchange service packaging remain required.
+The [ACR authentication adapter](azure-registry-authentication.md) now supports trusted inspection and preparation credentials.
+Concrete network admission, independent absolute deadline resources, registry identity wiring, and private exchange service packaging remain required.
 Network, deadline, image inspection, and fresh dispatch authorization are mandatory constructor dependencies.
 No default permissive implementation supplies these dependencies.
 The core Azure package continues to support native HTTP checks.

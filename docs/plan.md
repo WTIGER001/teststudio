@@ -160,7 +160,15 @@ Local race, database-reopen, concurrency, protocol, authorization, cancellation,
 Both native entrypoint packages compile. No cloud, UI, image, browser, or source-runtime matrix verification runs.
 See [Durable Azure lifecycle](azure-worker-lifecycle.md). Acceptance 51 and supporting recovery under 52 advance; the count stays 48 of 57.
 
-Next add actual worker-environment network admission, concrete independent absolute stop resources, and trusted registry authentication.
+Trusted ACR authentication now uses an explicit Azure credential, the registry-specific audience, and exact repository scopes.
+The same OCI client retains challenge validation, immutable metadata checks, source publication, and upload journals.
+Inspection and preparation use separate read and write modes. Expiring in-memory caches bind to source identity and bounded token lifetime.
+Local race checks pass for both runners, publication, identity rotation, malformed responses, foreign challenges, and credential-free blob redirects.
+Four selected existing OCI checks pass. No image, runtime, UI, browser, real registry, or cloud test runs.
+See [Azure registry authentication](azure-registry-authentication.md). Acceptance 51 advances; the count remains 48 of 57.
+
+Next add actual worker-environment network admission and concrete independent absolute stop resources.
+Then bind actual managed identities and registry roles in native setup and infrastructure packaging. The authentication adapter alone enables no worker.
 Keep network and deadline hooks mandatory. A local fake does not establish a deployable Azure isolation boundary.
 Replica timeout alone does not cover queue delay or satisfy the absolute deadline contract.
 Keep inspected non-root images mandatory. Azure lacks the ECS root-filesystem and capability overrides; verify its own isolation arrangement.

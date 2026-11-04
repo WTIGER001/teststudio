@@ -27,6 +27,7 @@ type Options struct {
 	TokenURL            string
 	TokenService        string
 	Credentials         func(context.Context) (Credential, error)
+	Tokens              func(context.Context, string, string) (string, error)
 	Transport           http.RoundTripper
 	BlobRedirectOrigins []string
 }
@@ -45,6 +46,7 @@ type Metadata struct {
 type Client struct {
 	origin, repositoryPrefix, architecture, tokenURL, tokenService string
 	credentials                                                    func(context.Context) (Credential, error)
+	tokens                                                         func(context.Context, string, string) (string, error)
 	http                                                           *http.Client
 	blobRedirectOrigins                                            map[string]bool
 }

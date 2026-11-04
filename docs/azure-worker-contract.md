@@ -6,7 +6,8 @@ The new adapters/execution/azure package builds and verifies Container Apps Job 
 It pins armappcontainers/v4 version 4.0.0 and management API 2025-07-01, matching the core Azure package.
 These local contracts cover Go and Playwright execution and catalog discovery.
 The [durable Azure provider](azure-worker-lifecycle.md) now implements asynchronous dispatch, status, cancellation, and checkpointed recovery.
-Concrete network admission, independent absolute deadline resources, registry authentication, and native command wiring remain unfinished.
+The [trusted ACR authentication adapter](azure-registry-authentication.md) now supplies registry-specific token exchange.
+Concrete network admission, independent absolute deadline resources, registry identity binding, and native command wiring remain unfinished.
 Azure coded execution remains disabled. The core deployment still supports native HTTP checks.
 
 See [Azure core service](azure.md), [hosted lifecycle](hosted-execution.md), and [hosted preparation](hosted-discovery.md).

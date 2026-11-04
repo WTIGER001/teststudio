@@ -4,7 +4,8 @@
 
 The OCI registry adapter reads immutable prepared-image metadata for hosted execution.
 It implements the image-inspection method required by the shared provider contract.
-It uses no Docker daemon, local image cache, AWS client, or Azure client.
+The generic adapter uses no Docker daemon, local image cache, AWS client, or Azure client.
+The [trusted ACR wrapper](azure-registry-authentication.md) now supplies explicit Azure credential exchange for the same OCI checks.
 It reads manifests and image configuration. It downloads no test source or filesystem layer.
 
 Keep prepared-artifact approval enabled alongside metadata checks.
@@ -23,6 +24,7 @@ Create the client with these operator-controlled settings:
 | RepositoryPrefix | One explicit repository namespace. The exact repository and its child paths are eligible. |
 | Architecture | The required Linux amd64 or arm64 platform. |
 | Credentials | An optional callback that reads current private Basic or Bearer credentials for each inspection. |
+| Tokens | An optional provider token callback after exact challenge validation. It excludes Credentials and requires TokenURL and TokenService. |
 | TokenURL | An optional exact HTTPS token endpoint for registry Bearer challenges. |
 | TokenService | The exact expected service value for that endpoint. |
 | BlobRedirectOrigins | Optional explicit HTTPS origins for signed configuration-blob redirects. |
