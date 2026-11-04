@@ -19,6 +19,7 @@ func TestAPIRequestRulesRequireCanonicalPathsAndExplicitReadOnlyReview(t *testin
 		allowed         bool
 	}{
 		{"GET", "/v1/items/7?limit=5", true}, {"POST", "/v1/search", true},
+		{"GET", "/v1/items/", true}, {"GET", "/v1/items//", false},
 		{"DELETE", "/v1/items/7", false}, {"GET", "/v1/items-other", false},
 		{"GET", "/v1/items/../admin", false}, {"GET", "/v1/items//admin", false},
 		{"GET", "/v1/items/%2e%2e/admin", false}, {"GET", "/v1/items/%252e%252e/admin", false},

@@ -16,7 +16,20 @@ go test -race ./internal/sources ./internal/httpapi ./internal/runs \
 ```
 
 These checks exercise real local HTTP and TLS gateway traffic, payload admission, redirects, request budgets, and starter source snapshots.
-They do not prove the complete API worker or authoring workflow. That targeted integration remains the next delivery step.
+The full local API worker check now uses cached capable images with TestGuardedAPIWorkspaceBuildsPublishesAndRunsManuallyAndOnSchedule.
+Set TESTSTUDIO_BROWSER_RUNTIME_IMAGE and TESTSTUDIO_BROWSER_GATEWAY_IMAGE to their immutable local identifiers before selecting that check.
+It builds one newly authored API suite and runs protected manual and scheduled requests through normal execution, history, and trends.
+Owned source images, worker containers, gateways, and output volumes are removed after verification.
+
+For the API authoring wizard, use this single TestStudio UI workflow:
+
+```sh
+bash scripts/test-self.sh --test=STUDIO-API-AUTHOR-001
+```
+
+The workflow verifies typed creation, Advanced validation focus, preserved entries, help, discard protection, source persistence, and narrow dark layout.
+Neither wizard setup nor saving a draft starts an API test run.
+
 
 For native private HTTPS trust and scheduled timing history, run:
 

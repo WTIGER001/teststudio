@@ -2,6 +2,7 @@
   "schemaVersion": "teststudio.selftest/v1",
   "source": "teststudio-selftests",
   "tests": [
+    {"id": "STUDIO-API-AUTHOR-001", "title": "API creation wizard, request-policy review, persistent source and mobile editor", "selector": "@STUDIO-API-AUTHOR-001", "category": "Catalog"},
     { "id": "STUDIO-API-STEPS-001", "title": "API steps preserve one logical test and retained native results", "selector": "@STUDIO-API-STEPS-001", "category": "Runner contracts", "type": "api" },
     {"id": "STUDIO-HISTORY-001", "title": "Retained test history, archived suites, removed working definitions and private evidence", "selector": "@STUDIO-HISTORY-001", "category": "Results"},
     { "id": "STUDIO-TRANSFER-001", "title": "Catalog pagination, retained selection, full export, reviewed file import and stale recovery", "selector": "@STUDIO-TRANSFER-001", "category": "Catalog" },

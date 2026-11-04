@@ -40,5 +40,5 @@ import { SourcePreviewComponent } from './source-preview.component'
 })
 export class SourcesPage {
   readonly service = inject(SourcesService)
-  canLeave(): boolean { return !this.service.draftDirty() || window.confirm('This Playwright draft has unsaved changes. Leave without saving?') }
+  canLeave(): boolean { return !this.service.draftDirty() && !this.service.creationDirty() || window.confirm('This source draft has unsaved changes. Leave without saving?') }
 }

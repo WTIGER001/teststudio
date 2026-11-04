@@ -255,7 +255,11 @@ Required native HTTP follow-ups remain authentication secret bindings, bounded p
 Acceptance **35** advances with method, path, payload, redirect, and request-budget enforcement in the existing trusted gateway.
 The API starter endpoint and exact-revision preparation pass focused local checks. Protected API targets require reviewed read-only rules.
 Older runner and gateway images fail capability checks. Source and runtime policy snapshots must match.
-The API creation choice, canonical editor wiring, and one targeted full API worker flow are next.
+The API creation choice and Name, Request, Review wizard now use the canonical source editor.
+One newly authored API suite passes actual protected manual and scheduled execution with normal history and trend counts.
+The targeted authoring UI workflow passes focus, preservation, Help, discard protection, persistence, and narrow dark layout.
+The API worker harness double-deletion is corrected; exact resource absence is verified without repeating successful execution.
+Acceptances **35** and **37** remain open for their remaining required scope.
 Automatic diagnostic redaction, credential bindings, environment-backed Go clients, and remaining scheduled parity remain required.
 See [Coded API request policies](api-testing.md) for the implemented foundation and current limits.
 Continue remaining storage parity, source, HTTP follow-ups, API and scheduled runner parity, adapter retention, timing, and provider packaging work.

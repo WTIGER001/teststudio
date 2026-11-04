@@ -69,6 +69,47 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: API authoring wizard and real local request runs
+
+Acceptances **35** and **37** advance and remain open. The ledger stays at **42 verified, 15 open, 57 total** items.
+
+Create test now includes API test on its dedicated type route.
+New API draft uses the shared Name, Request, and Review stepper before opening the canonical source editor.
+The wizard configures a title, generated identifier, request method, relative path, expected status, optional JSON, and reviewed request policy.
+Named Advanced sections contain endpoint, path-prefix, request-count, and payload limits.
+Review shows target-policy consequences and the separate needs-review safety label before source generation.
+Request JSON becomes literal application/json data. UI values do not become executable expressions.
+The default catalog uses empty arrays for optional lists.
+
+Back and Help preserve entries. Invalid Advanced fields open and receive focus.
+Unfinished wizard setup and source edits participate in navigation and reload protection.
+Source creation, Save API draft, preparation, publication, and execution stay separate.
+The shared editor retains complete API workspaces and their explicit manifest policy.
+Canonical request validation now accepts one meaningful trailing slash without permitting repeated separators or dot segments.
+
+A newly authored API suite completes real protected manual and scheduled runs through the capable local worker and gateway.
+It checks read-only GET and POST, denied methods and paths, body limits, method overrides, redirect suppression, direct CONNECT rejection, and request budgets.
+Only six permitted fixture requests arrive across both runs. Each run retains one logical API result and its request steps.
+Normal retained history and stacked-area trend data count exactly two passed tests across those runs.
+The functional assertions pass. The first harness exit reports a second deletion of an image already removed by builder cleanup.
+Teardown now treats verified image absence as success. Exact Docker checks confirm all owned containers, volumes, and the source image are absent.
+The successful execution is reused; no duplicate fixture build or API rerun is needed for that teardown-only correction.
+Evidence is output/playwright/api-worker-teb7vb1l/summary.json and cleanup-rechecked.json.
+
+STUDIO-API-AUTHOR-001 passes in 1467 milliseconds through TestStudio's normal self-test contracts.
+It checks request configuration, Advanced focus, policy review, preserved values, Help, canceled navigation, saved code, manifest and catalog contents, and narrow dark layout.
+Final verification also checks JSON review and focus transfer from the wizard to the source editor.
+The initial UI check times out because an empty generated identifier exposes Advanced details before title entry.
+A valid initial identifier fixes that interaction. Only the changed UI workflow repeats.
+Evidence is output/selftest/20261104T061646.879778000-8c7e84b6d2df5172d5a211ed/summary.json and cleanup.json.
+The final mobile screenshot is inspected. The owned controller, browser worker containers, and volumes are verified stopped and absent.
+Pure generation and validation checks pass. The production UI and native server build pass.
+The changed gateway builds once; the unchanged source runtime is reused. No cloud profile runs.
+
+API, creation, editor, self-testing, and contextual help now describe the guided workflow and its limits.
+Automatic diagnostic redaction, credential injection, environment-backed Go clients, and remaining cross-runner schedule parity stay required.
+Continue those requirements before closing **35** or **37**.
+
 ## Current delivery: coded API request-policy foundation
 
 Acceptance **35** advances and remains open. The ledger stays at **42 verified, 15 open, 57 total** items.

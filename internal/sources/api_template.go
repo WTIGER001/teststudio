@@ -15,7 +15,7 @@ func APIStarterDraft(suite string) (PlaywrightDraft, error) {
 	if !domain.ValidID(suite) {
 		return PlaywrightDraft{}, errors.New("API starter requires a valid suite identifier")
 	}
-	document := catalog.Document{Schema: catalog.SchemaVersion, Tests: []catalog.Test{{ID: "API-001", Title: "Check service health", Category: "API", Type: "api", Runner: "playwright", State: "enabled", Safety: "needs-review", Rationale: "Review endpoint behavior and request policy before labeling application requests safe", TimeoutSeconds: 20, Source: "checks/api.spec.ts", Selector: "@API-001", Capture: &catalog.CapturePolicy{Logs: true, Screenshots: "off", Trace: "off", Video: "off", RetentionDays: 7}}}}
+	document := catalog.Document{Schema: catalog.SchemaVersion, Tests: []catalog.Test{{ID: "API-001", Title: "Check service health", Category: "API", Type: "api", Runner: "playwright", Tags: []string{}, Dependencies: []string{}, RequiredBindings: []string{}, State: "enabled", Safety: "needs-review", Rationale: "Review endpoint behavior and request policy before labeling application requests safe", TimeoutSeconds: 20, Source: "checks/api.spec.ts", Selector: "@API-001", Capture: &catalog.CapturePolicy{Logs: true, Screenshots: "off", Trace: "off", Video: "off", RetentionDays: 7}}}}
 	catalogBytes, _ := json.MarshalIndent(document, "", "  ")
 	generated := generatedEditorFiles(suite)
 	var manifest suitespec.Manifest

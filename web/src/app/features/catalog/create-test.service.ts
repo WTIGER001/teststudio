@@ -35,7 +35,7 @@ export class CreateTestService {
   afterCreate(): void { void this.router.navigate(['/projects', this.sources.project(), 'catalog'], { queryParams: { created: this.native.form.controls.id.value } }) }
 
   canLeave(): boolean {
-    const dirty = this.sources.draftDirty() || this.kind() === 'https' && this.native.dirty()
+    const dirty = this.sources.draftDirty() || this.sources.creationDirty() || this.kind() === 'https' && this.native.dirty()
     return !dirty || window.confirm('This test has unsaved changes. Leave without saving?')
   }
 }

@@ -12,6 +12,7 @@ import { sourceFormat } from './source.utils'
 
 @Injectable()
 export class SourcesService {
+  readonly creationDirty = signal(false)
   private readonly api = inject(ApiService)
   private readonly client = inject(AccessClientService)
   readonly workspace = inject(WorkspaceService)

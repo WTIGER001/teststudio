@@ -9,7 +9,7 @@ const privateTraceWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}'
 const diagnosticsWorkflow = ['@STUDIO-DIAGNOSTICS-001', '@STUDIO-TRACE-001'].includes(JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector)
 const recordingWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-CREATE-001'
 const repositoryWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-GIT-001'
-const bundleWorkflow = ['@STUDIO-BUNDLES-001', '@STUDIO-EDITOR-001', '@STUDIO-CREATE-001'].includes(JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector)
+const bundleWorkflow = ['@STUDIO-BUNDLES-001', '@STUDIO-EDITOR-001', '@STUDIO-CREATE-001', '@STUDIO-API-AUTHOR-001'].includes(JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector)
 const linkingWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-LINKS-001'
 const localWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-LOCAL-001'
 const cliWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-CLI-001'

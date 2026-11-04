@@ -72,3 +72,11 @@ Choose a destination suite. Upload its complete source ZIP and enter the suite m
 Inspect preparation diagnostics and review the discovered catalog before publication.
 Repository connections remain under Import and sync tests.
 See source-bundles.md for archive limits and source context rules.
+
+## API request tests
+
+Choose API test to configure a first request and open a complete editable suite workspace.
+The wizard uses Name, Request, and Review steps. Advanced request policy contains uncommon limits and endpoint options.
+Create source draft opens the editor. Save API draft persists it without preparation, publication, or execution.
+The catalog starts with needs-review safety. The selected environment supplies the target when you run the published suite.
+See [API testing](api-testing.md) for source editing, request rules, protection, and current credential limitations.

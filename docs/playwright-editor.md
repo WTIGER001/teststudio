@@ -77,7 +77,7 @@ All routes use /api/v1/projects/{project}/suites/{suite}/playwright-drafts.
 | POST | /{id}/prepare | Snapshot an exact positive revision with an Idempotency-Key and queue preparation. |
 
 Mutations require managed sessions, Origin, and request-forgery protection.
-GET /starter?type=api reads a complete request-restricted API workspace. The default editor button still selects the existing browser starter.
+GET /starter?type=api reads a complete request-restricted API workspace. Create test offers a dedicated API wizard and Save API draft action. The source page keeps its existing browser starter button.
 See [Coded API policies](api-testing.md) for source fields, transport, safety, and remaining authoring work.
 Preparation rechecks source authority, catalog import authority, suite state, and the saved revision in one transaction.
 It uses the same isolated source preparation and immutable release contracts as ZIP uploads.

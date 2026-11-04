@@ -5,6 +5,7 @@ import { ApiError } from '../../core/api.service'
 import type { PlaywrightDraft, PlaywrightDraftRecord } from '../../core/generated/access.types'
 import { PreparationService } from './preparation.service'
 import { editorPathError, protectedEditorFile, replaceEditorFile } from './playwright-editor.utils'
+import { configureAPIStarter, type APIStarterOptions } from './api-draft.utils'
 
 @Injectable()
 export class PlaywrightEditorService {
@@ -25,7 +26,7 @@ export class PlaywrightEditorService {
   constructor() {
     const destroy = inject(DestroyRef)
     this.sources.form.controls.suite.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.saved.set(null); this.document.set(null); this.sources.draftDirty.set(false); void this.load() })
-    const warn = (event: BeforeUnloadEvent) => { if (this.sources.draftDirty()) event.preventDefault() }
+    const warn = (event: BeforeUnloadEvent) => { if (this.sources.draftDirty() || this.sources.creationDirty()) event.preventDefault() }
     window.addEventListener('beforeunload', warn)
     destroy.onDestroy(() => { this.generation++; window.removeEventListener('beforeunload', warn); this.sources.draftDirty.set(false) })
     void this.load()
@@ -45,15 +46,17 @@ export class PlaywrightEditorService {
     finally { if (generation === this.generation) this.busy.set(false) }
   }
 
-  async create(): Promise<void> {
-    if (this.busy() || this.sources.draftDirty()) return
+  async create(type: 'browser' | 'api' = 'browser', options?: APIStarterOptions): Promise<boolean> {
+    if (this.busy() || this.sources.draftDirty()) return false
     const generation = ++this.generation
     this.busy.set(true); this.error.set(''); this.message.set('')
     try {
-      const starter = await this.client.call('readPlaywrightStarter', this.scope())
-      if (generation !== this.generation) return
-      this.saved.set(null); this.document.set({ ...starter, id: crypto.randomUUID() }); this.selectedPath.set(starter.files[0]?.path ?? ''); this.sources.draftDirty.set(true)
-    } catch (error) { if (generation === this.generation) this.fail(error) }
+      const starter = await this.client.call('readPlaywrightStarter', { ...this.scope(), query: { type } })
+      if (generation !== this.generation) return false
+      const document = type === 'api' && options ? configureAPIStarter(starter, options) : starter
+      this.saved.set(null); this.document.set({ ...document, id: crypto.randomUUID() }); this.selectedPath.set(document.files[0]?.path ?? ''); this.sources.draftDirty.set(true)
+      return true
+    } catch (error) { if (generation === this.generation) this.fail(error); return false }
     finally { if (generation === this.generation) this.busy.set(false) }
   }
 

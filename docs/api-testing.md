@@ -6,10 +6,31 @@ The browser recording profile remains separate. It does not inspect encrypted re
 
 ## Current delivery
 
-The policy, trusted gateway, source preparation, API starter endpoint, and runtime compatibility checks are implemented.
-The dedicated API choice and guided authoring controls remain pending in Create test.
-Full worker verification, automatic diagnostic redaction, credential injection, and environment-backed Go clients remain pending.
+Create test includes an API test choice with Name, Request, and Review steps, followed by the shared source editor.
+Manual and scheduled request suites execute through the trusted gateway and retain normal results, timing, history, and trends.
+Automatic diagnostic redaction, credential injection, and environment-backed Go clients remain pending.
 Acceptance 35 stays open.
+
+## Create an API draft
+
+1. Select Create test, then API test. Choose a destination suite.
+2. Select New API draft. Enter its title. The identifier is generated under Advanced details.
+3. Continue to Request. Choose the method, relative path, and expected response status.
+4. Add JSON request data for methods that permit a body. The data remains in the saved source workspace.
+5. Review read-only semantics separately from the method. Writes remain ineligible for protected targets.
+6. Use Advanced request policy only when changing the endpoint, allowed path prefix, request budget, or payload limits.
+7. Continue to Review. Inspect the request, policy, identifier, and needs-review safety label.
+8. Select Create source draft. Review the generated TypeScript, catalog, and manifest in the API test editor.
+9. Select Save API draft. Then validate and prepare the saved revision, review its catalog, and publish explicitly.
+10. Start a run separately. Select a worker-reachable registered environment with the reviewed endpoint name.
+
+Back preserves your entries. Help does not reset them. Leaving unfinished setup or source changes requires an explicit discard choice.
+An invalid Advanced value opens its disclosure and receives keyboard focus.
+The review creates no server record until Save API draft. Saving, preparing, and publishing do not start a run.
+The source catalog retains needs-review until a reviewer changes and publishes its safety label.
+A read-only request policy does not automatically label the test safe.
+The initial request asserts its expected status. Add further steps and assertions in the code editor.
+Request JSON is serialized literally with application/json content type. The wizard evaluates no scripts or expressions.
 
 Code authors can upload complete source bundles or registered repository manifests through Import and sync tests.
 The normal reviewed preparation, publication, optional activation, and explicit run workflow applies.
@@ -54,6 +75,7 @@ Its browser field identifies the registered endpoint and its request restriction
 An API policy accepts 1 through 64 unique method and path-prefix rules.
 Prefixes match a complete path or its slash-separated descendants. /v1/items does not permit /v1/items-other.
 Paths must be canonical. Encoded paths, dot segments, repeated separators, fragments, and backslashes fail closed.
+Requests can retain one trailing slash. Rule prefixes omit a trailing slash except at the root.
 When several rules match, the most specific path prefix sets the payload limit.
 
 GET, HEAD, and OPTIONS prohibit request bodies. POST can declare reviewed read-only semantics.
@@ -100,4 +122,5 @@ Hosted deployment verification remains separate work.
 
 Policy, gateway, compatibility, starter, and source-contract checks use local fixtures only.
 Run the targeted commands in [Self-testing](self-testing.md).
-Full API worker and authoring workflow verification remains the next delivery step.
+The local worker verification checks actual protected manual and scheduled request runs, rejected requests, normal history, and trend counts.
+The targeted STUDIO-API-AUTHOR-001 workflow checks the creation wizard, source persistence, help, focus, unsaved navigation, and narrow layout.

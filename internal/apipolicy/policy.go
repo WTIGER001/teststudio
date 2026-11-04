@@ -69,7 +69,11 @@ func ReadOnly(spec *Spec) bool {
 }
 
 func Match(spec *Spec, method string, target *url.URL) (Rule, error) {
-	if spec == nil || target == nil || !canonicalPath(target.Path) || target.RawPath != "" || target.Opaque != "" || target.User != nil || target.Fragment != "" || len(target.RawQuery) > 4096 || strings.ContainsFunc(target.RawQuery, unicode.IsControl) {
+	if spec == nil || target == nil {
+		return Rule{}, errors.New("API request path is outside the reviewed policy")
+	}
+	validPath := canonicalPath(target.Path) || len(target.Path) > 1 && strings.HasSuffix(target.Path, "/") && canonicalPath(strings.TrimSuffix(target.Path, "/"))
+	if !validPath || target.RawPath != "" || target.Opaque != "" || target.User != nil || target.Fragment != "" || len(target.RawQuery) > 4096 || strings.ContainsFunc(target.RawQuery, unicode.IsControl) {
 		return Rule{}, errors.New("API request path is outside the reviewed policy")
 	}
 	var selected *Rule
