@@ -122,7 +122,36 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: Azure selected private zones, records, and links
+## Current delivery: Azure private endpoint and NIC ownership
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+The previous selected-zone batch commits as 74b9184. This batch binds actual private endpoint resources to their DNS addresses.
+
+EndpointGuard refreshes the complete preceding inspection chain before six concurrent endpoint, NIC, subnet, and NSG reads.
+The registry endpoint must target the configured registry with group registry.
+Its NIC binds distinct login and selected regional data members to their exact DNS addresses.
+The exchange endpoint must target a separate managed environment with group managedEnvironment and one exact exchange address.
+Consumer-side approval must be complete with no outstanding action. Service-side approval remains separate work.
+
+The endpoint subnet is separate from worker and firewall subnets and excludes Azure-reserved addresses.
+It requires enabled private endpoint policies, exact endpoint and NIC references, and a dedicated restrictive NSG.
+The NSG permits only worker HTTPS to the selected addresses before explicit inbound and outbound denies.
+Public attachments, foreign services, swapped addresses, alternate regions, forwarding, unrelated workloads, and permissive rules reject inspection.
+Missing resources, unfinished approval, and incomplete inventories remain unavailable.
+Fresh validated subnet and NSG definitions issue no Azure writes.
+
+The SDK reader permits only six exact GET resources through the existing bounded ARM transport.
+Wrong resource kinds, mutations, collections, foreign services, extra queries, redirects, and paging cannot widen read authority.
+Seven new focused race checks pass across three targeted commands. Two selected existing perimeter checks pass after shared comparator extraction.
+Evidence is output/azure-worker-endpoints/summary.json and the focused command results.
+No cloud credential, cloud API, DNS probe, packet probe, registry push, deployment, UI build, browser, container, or image build runs.
+
+Actual registry configuration and service-side approval, exchange authority, effective DNS visibility, attachment controls, and cross-job isolation remain unfinished.
+Endpoint inspection does not implement Network or enable Azure coded execution.
+Continue service-side registry and exchange inspection, then complete the remaining network boundary and native packaging.
+See [Azure worker private endpoint ownership](azure-worker-endpoints.md).
+
+## Previous delivery: Azure selected private zones, records, and links
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 The previous resolver-policy batch commits as 5152995. This batch verifies the selected private DNS record and link inventories.

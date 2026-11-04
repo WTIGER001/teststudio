@@ -23,7 +23,8 @@ Addresses outside the worker VNet, public addresses, IPv6, duplicates, and missi
 The constructor copies and sorts the endpoint list. Later caller mutations cannot change the saved policy.
 
 Private endpoint addresses represent the intended exchange, registry, and registry data endpoints.
-These settings alone do not verify their ownership or assignment. A later endpoint inspector must bind each address to its actual resource.
+These settings alone do not verify ownership or assignment.
+The [endpoint inspector](azure-worker-endpoints.md) now binds each address to its actual NIC and private endpoint.
 The firewall address alone does not establish a trusted firewall. Its resource, IP configuration, policy, and rule groups need separate inspection.
 
 SecurityGroupDefinition and RouteTableDefinition return fresh SDK values.

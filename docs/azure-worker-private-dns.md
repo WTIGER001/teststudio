@@ -4,11 +4,12 @@
 
 The Azure adapter now inspects the two selected private DNS zones after [resolver policy inspection](azure-worker-dns.md).
 It checks complete record and link inventories, exact role addresses, ready links, registration settings, and public fallback settings.
-Correct DNS records do not establish private endpoint ownership.
+The [endpoint stage](azure-worker-endpoints.md) now binds actual endpoint and NIC resources to the selected DNS addresses.
+Correct DNS records alone do not establish private endpoint ownership.
 This stage inspects selected zones. It does not prove that no other linked zone can change the VNet's effective DNS view.
 
 PrivateDNSGuard.Check does not implement Network or release worker input.
-Private endpoint identity, VNet-wide DNS visibility and attachment controls, isolated exchange authority, workload inventory, and cross-job isolation remain required.
+Service-side approval, VNet-wide DNS visibility and attachment controls, isolated exchange authority, workload inventory, and cross-job isolation remain required.
 Azure coded execution stays disabled in native commands and infrastructure packaging.
 Local fixtures do not perform recursive DNS resolution or establish hosted propagation, cache behavior, CNAME compatibility, or deployment parity.
 
@@ -75,8 +76,9 @@ Resolve effective linked-zone visibility and the authority to attach or change z
 Do not substitute a Resource Graph snapshot or the selected-zone record list for an authoritative effective-view check.
 Keep coded execution disabled while that condition remains unproven.
 
-The endpoint inspector must verify the exact private endpoint resources, approval, subnet, network interfaces, addresses, service identity, and registry data region.
-It must bind those observations to the three DNS role addresses and the perimeter allowlist.
+The endpoint inspector now verifies selected resource identity, consumer-side approval, subnet policy, NIC ownership, and regional address members.
+It binds those observations to the three DNS role addresses and the perimeter allowlist.
+Actual service configuration and service-side approval remain required.
 The exchange service must expose only the isolated worker exchange contract through its selected private path.
 Public DNS lookup success or an A record alone cannot prove any of those conditions.
 

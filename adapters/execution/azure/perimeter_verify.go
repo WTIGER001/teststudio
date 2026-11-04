@@ -29,15 +29,18 @@ func (g *PerimeterGuard) verifyGroup(actual n.SecurityGroup) error {
 	if !value(p.FlushConnection) || len(p.NetworkInterfaces) != 0 || !soleSubnet(p.Subnets, g.settings.Topology.WorkerSubnet) {
 		return hostedexecution.ErrOwnership
 	}
-	wanted := g.settings.rules()
-	if len(p.SecurityRules) != len(wanted) {
+	return verifySecurityRules(expectedID, p.SecurityRules, g.settings.rules())
+}
+
+func verifySecurityRules(expectedID string, rules, wanted []*n.SecurityRule) error {
+	if len(rules) != len(wanted) {
 		return hostedexecution.ErrOwnership
 	}
 	expected := map[string]*n.SecurityRule{}
 	for _, rule := range wanted {
 		expected[value(rule.Name)] = rule
 	}
-	for _, actual := range p.SecurityRules {
+	for _, actual := range rules {
 		if actual == nil || actual.Properties == nil {
 			return hostedexecution.ErrOwnership
 		}

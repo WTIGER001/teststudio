@@ -208,7 +208,13 @@ Aliases, wildcards, IPv6, extra records, automatic registration, public fallback
 The reader permits only selected-zone GET resources and complete bounded inventories. Six new focused race checks and two selected paging checks pass locally.
 See [Azure worker private DNS records](azure-worker-private-dns.md). Acceptance 51 advances; the count remains 48 of 57.
 
-Next inspect actual registry and exchange private endpoint approval, service identity, subnet, network interfaces, address ownership, and data region.
+The endpoint stage now binds actual registry and exchange endpoints, consumer-side approval, NIC ownership, subnet policy, and three role addresses.
+Its registry NIC members distinguish login from selected regional data. A dedicated endpoint NSG restricts worker access to HTTPS.
+The scoped SDK reader performs only six selected-resource GET requests. Seven new focused race checks and two existing perimeter checks pass locally.
+See [Azure worker private endpoint ownership](azure-worker-endpoints.md). Acceptance 51 advances; the count remains 48 of 57.
+
+Next inspect actual registry configuration, regional data endpoints, and service-side connection approval.
+Inspect the separate exchange environment, service-side approval, isolated application inventory, and HTTPS hostname authority.
 Resolve effective VNet-wide private-zone visibility and attachment controls. Selected-zone inspection cannot rule out other shadowing zones.
 Keep that proof separate from configured record correctness and private endpoint ownership.
 Provide trusted preparation with a separate private registry endpoint and DNS path. Do not add controller links to worker zones or peer worker and controller networks.
