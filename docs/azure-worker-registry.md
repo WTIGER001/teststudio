@@ -130,7 +130,8 @@ Acceptance 51 advances. The total remains 48 verified items out of 57.
 
 ## Next implementation
 
-Inspect the separate exchange environment, service-side approval, private application inventory, and HTTPS hostname authority.
+Package the [standalone relay](worker-relay.md) image without UI assets.
+Then inspect the exchange environment, service-side approval, private application inventory, and HTTPS hostname authority.
 Resolve effective VNet-wide private DNS visibility and attachment controls.
 Inspect trusted preparation registry networking and effective managed identity role assignments.
 Establish cross-job isolation and execution placement before composing Network.

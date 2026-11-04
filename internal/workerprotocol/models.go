@@ -1,22 +1,19 @@
 package workerprotocol
 
 import (
-	"encoding/json"
-	"errors"
-	"time"
-
 	"github.com/wtiger001/teststudio/internal/execution"
+	"github.com/wtiger001/teststudio/internal/workerwire"
 )
 
-const MaxTestSubmissionBytes = (2 << 20) + (64 << 10)
+const MaxTestSubmissionBytes = workerwire.MaxTestSubmissionBytes
 
-const MaxSubmissionBytes = (8 << 20) + (256 << 10)
+const MaxSubmissionBytes = workerwire.MaxSubmissionBytes
 
-var ErrDenied = errors.New("worker exchange is unavailable")
-var ErrInvalid = errors.New("worker message does not match its bounded attempt contract")
-var ErrQuota = errors.New("worker exchange staging quota is exhausted")
-var ErrConflict = errors.New("worker message conflicts with the accepted attempt")
-var ErrUnavailable = errors.New("worker exchange storage is unavailable")
+var ErrDenied = workerwire.ErrDenied
+var ErrInvalid = workerwire.ErrInvalid
+var ErrQuota = workerwire.ErrQuota
+var ErrConflict = workerwire.ErrConflict
+var ErrUnavailable = workerwire.ErrUnavailable
 
 type File struct {
 	Path   string `json:"path"`
@@ -32,9 +29,4 @@ type Submission struct {
 	Files                 []File                `json:"files"`
 }
 
-type Packet struct {
-	Operation string          `json:"operation,omitempty"`
-	Execution string          `json:"executionId"`
-	Deadline  time.Time       `json:"deadline"`
-	Input     json.RawMessage `json:"input"`
-}
+type Packet = workerwire.Packet

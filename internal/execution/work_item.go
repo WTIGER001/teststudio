@@ -9,9 +9,10 @@ import (
 	"github.com/wtiger001/teststudio/internal/capture"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/domain"
+	"github.com/wtiger001/teststudio/internal/workerwire"
 )
 
-const MaxWorkItemBytes = 4 << 20
+const MaxWorkItemBytes = workerwire.MaxWorkItemBytes
 
 var imageDigest = regexp.MustCompile(`^(sha256:[a-f0-9]{64}|[A-Za-z0-9][A-Za-z0-9._:/-]*@sha256:[a-f0-9]{64})$`)
 

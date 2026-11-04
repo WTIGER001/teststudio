@@ -69,7 +69,8 @@ bin/teststudio --worker-addr 127.0.0.1:8042
 
 Hosted profiles need a private worker route with trusted TLS termination and explicit network reachability.
 The current provider core packages do not yet provision that route.
-Azure also needs a separate private HTTPS service arrangement for this listener.
+The [standalone relay](worker-relay.md) now supplies a separate worker-facing process without installation credentials.
+Azure still needs private HTTPS ingress, restricted backend termination, image packaging, and service admission for that arrangement.
 These settings belong to the provider adapter batch before any real hosted execution.
 
 The Go client requires an HTTPS origin, execution identifier, worker instance identifier, and ticket.

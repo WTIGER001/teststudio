@@ -3,13 +3,12 @@ package domain
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"regexp"
 	"time"
+
+	"github.com/wtiger001/teststudio/internal/identifier"
 )
 
-var identifier = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$`)
-
-func ValidID(value string) bool { return identifier.MatchString(value) }
+func ValidID(value string) bool { return identifier.Valid(value) }
 
 func NewID() string {
 	var bytes [12]byte

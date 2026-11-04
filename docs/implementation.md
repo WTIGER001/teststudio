@@ -122,7 +122,39 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: Azure registry service configuration and approval
+## Current delivery: standalone private worker relay
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+The preceding registry service batch commits as 71b7801.
+Inspection finds that the current worker listener runs inside the API process. A separate relay supplies the missing worker-facing process first.
+
+The new teststudio-exchange command forwards only input, start, report, and attachment operations to one configured HTTPS backend.
+It carries only the scoped worker ticket and instance identifier. Browser sessions, project headers, forwarding headers, and arbitrary caller authority do not pass.
+Host, path, method, token shape, identifier, body size, response size, and eight-request concurrency bounds reject wider requests.
+The controller retains actual authentication, authorization, activation, durable state, upload validation, and evidence storage.
+The relay has no database, artifact-store, registry, identity-service, or cloud credential configuration.
+
+The new lightweight workerwire package holds the shared packet, errors, and size constants.
+Existing workerprotocol and execution symbols retain aliases. The identifier grammar moves unchanged into a small pure package.
+The production command dependency audit now shows standard-library packages and only the four small relay and wire packages.
+It links no storage driver, identity service, secret provider, or cloud SDK.
+
+Seven new focused race checks pass, including the existing worker client over two local TLS listeners, exact operation forwarding, upload bounds, and shutdown.
+The initial health fixture incorrectly uses an absolute request target. Correcting it to the real listener's relative target resolves that fixture failure.
+After dependency extraction, the complete changed relay and command checks pass together.
+Two existing durable input and report checks pass. No unchanged broad runner or UI suite repeats.
+All owned local test listeners close. The command check verifies that its closed port rejects connections.
+Evidence is output/worker-relay/summary.json and the focused command results.
+
+A separate non-root scratch-image Dockerfile is staged. No image, container, registry push, deployment, browser, or UI build runs.
+The local demonstration and data remain unchanged. No live cloud credential or cloud API is used.
+The relay's process health does not establish backend readiness or Azure service admission.
+
+Complete reproducible relay image packaging, private TLS ingress, restricted worker backend placement, and Azure environment and application authority checks.
+Effective DNS visibility, trusted preparation networking, cross-job isolation, execution placement, role binding, and native configuration remain required.
+Azure coded execution stays disabled. See [standalone private worker relay](worker-relay.md).
+
+## Previous delivery: Azure registry service configuration and approval
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 The preceding endpoint ownership batch commits as 24a42ca.

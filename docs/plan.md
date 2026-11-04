@@ -219,7 +219,14 @@ The stable SDK exposes anonymous access, task bypass, and permission mode. Inspe
 Six new focused local race checks pass. Two changed checks repeat after review fixes; no unchanged broad suite runs.
 See [Azure worker registry service admission](azure-worker-registry.md). Acceptance 51 advances; the count remains 48 of 57.
 
-Next inspect exchange service authority.
+A new prerequisite now supplies the worker-facing process: the standalone teststudio-exchange relay.
+The existing API owns a second worker listener and retains private storage. The relay forwards only four bounded operations to one trusted HTTPS backend.
+The production command links only the standard library and small wire helpers. It has no storage, identity-service, secret, or cloud-SDK dependency.
+Seven new focused local race checks and two existing durable exchange checks pass. Local listener cleanup passes.
+A separate scratch-image Dockerfile is staged. Its reproducible builder and provider wiring remain unfinished; no image build runs.
+See [standalone private worker relay](worker-relay.md). Acceptance 51 advances; the count remains 48 of 57.
+
+Next package the relay image without rebuilding UI assets, then inspect exchange service authority.
 Inspect the separate exchange environment, service-side approval, isolated application inventory, and HTTPS hostname authority.
 Resolve effective VNet-wide private-zone visibility and attachment controls. Selected-zone inspection cannot rule out other shadowing zones.
 Keep that proof separate from configured record correctness and private endpoint ownership.
@@ -235,7 +242,7 @@ Then bind actual managed identities and registry roles in native setup and infra
 Keep network and deadline hooks mandatory. A local fake does not establish a deployable Azure isolation boundary.
 Replica timeout alone does not cover queue delay or satisfy the absolute deadline contract.
 Keep inspected non-root images mandatory. Azure lacks the ECS root-filesystem and capability overrides; verify its own isolation arrangement.
-Add the separate private HTTPS exchange service and preparation wiring before enabling coded execution in the native commands or Bicep package.
+Complete private HTTPS relay ingress, the restricted trusted worker backend, and preparation wiring before enabling native coded execution or Bicep packaging.
 Preserve the later remote gateway and recording requirements. Keep application secrets in trusted gateways.
 Run only targeted local fixtures during these batches. Keep live MMDev and Azure deployment verification separate.
 Acceptances 41, 46, and 51–57 remain open.
