@@ -54,5 +54,5 @@ See http-checks.md for supported assertions.
 
 Choose a destination suite. Upload its complete source ZIP and enter the suite manifest path.
 Inspect preparation diagnostics and review the discovered catalog before publication.
-Repository connections remain under Sources.
+Repository connections remain under Import and sync tests.
 See source-bundles.md for archive limits and source context rules.

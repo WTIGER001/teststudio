@@ -31,3 +31,16 @@ export function definitionFromForm(value: ScheduleForm, original?: ScheduleDefin
     }
   }
 }
+
+export function scheduleWizardIssue(step: number, value: ScheduleForm): string {
+  if (step === 0) {
+    if (!value.name.trim() || value.name.length > 256 || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(value.id)) return 'Enter a name and a valid identifier under Advanced selection options.'
+    if (!value.suite || !value.location.trim()) return 'Choose a suite and an execution location.'
+  }
+  if (step === 1) {
+    if (value.kind === 'interval' && (!Number.isInteger(Number(value.interval)) || value.interval < 5 || value.interval > 2592000)) return 'Enter an interval from 5 seconds through 30 days.'
+    if (value.kind === 'cron' && (!value.cron.trim() || !value.timezone.trim())) return 'Enter a cron expression and timezone.'
+    if (!Number.isInteger(Number(value.timeout)) || value.timeout < 1 || value.timeout > 3600 || !Number.isInteger(Number(value.retries)) || value.retries < 0 || value.retries > 2) return 'Check the run limit and retry count under Advanced run options.'
+  }
+  return ''
+}

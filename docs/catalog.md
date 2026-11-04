@@ -27,7 +27,7 @@ The limit keeps definitions, history, audit records, and guards in one bounded t
 Imports update named definitions and preserve omitted tests.
 Existing lifecycle states require explicit actions. Imports do not change those states.
 Coded tests require source preparation and cannot enter through declarative import.
-Use Sources for reviewed JSON or YAML definitions, complete source ZIP uploads, and registered GitHub source preparation.
+Use Import and sync tests for reviewed JSON or YAML definitions, complete source ZIP uploads, and registered GitHub source preparation.
 
 ## Preview and apply
 
@@ -134,5 +134,5 @@ See [Test timing](timing.md) for baseline scope, adaptive timeouts, estimates, a
 
 ## Native source releases
 
-Use Sources to stage JSON or YAML files and publish their reviewed catalog changes atomically.
+Use Import and sync tests to stage JSON or YAML files and publish their reviewed catalog changes atomically.
 The [source upload guide](sources.md) describes provenance, retention, permissions, and publication retries.

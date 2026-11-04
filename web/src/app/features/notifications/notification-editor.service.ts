@@ -5,8 +5,10 @@ import { ActivatedRoute } from '@angular/router'
 import { ApiError, ApiService, type RecordValue } from '../../core/api.service'
 import { errorMessage } from '../runs/run.utils'
 import type { Channel, SecretReference } from './notification.models'
-import { notificationDefinition, notificationForm, notificationValidation } from './notification.utils'
+import { notificationDefinition, notificationForm, notificationValidation, notificationIdentityValidation } from './notification.utils'
 import { NotificationChannelsService } from './notification-channels.service'
+import { WizardController } from '../../shared/wizard/wizard-controller'
+import { suggestedIdentifier } from '../../shared/wizard/creation.utils'
 
 @Injectable()
 export class NotificationEditorService {
@@ -15,6 +17,8 @@ export class NotificationEditorService {
   private readonly route = inject(ActivatedRoute)
   readonly list = inject(NotificationChannelsService)
   readonly opened = signal(false)
+  readonly flow = new WizardController(3, step => { this.form.markAllAsTouched(); const issue = (step === 0 ? notificationIdentityValidation : notificationValidation)(this.form.getRawValue(), this.references()); this.error.set(issue); return !issue && this.referencesReady() })
+  private suffix = crypto.randomUUID().slice(0, 8)
   readonly editing = signal<RecordValue<Channel> | null>(null)
   readonly references = signal<SecretReference[]>([])
   readonly referencesReady = signal(false)
@@ -34,6 +38,7 @@ export class NotificationEditorService {
   private generation = 0
 
   constructor() {
+    this.form.controls.name.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(name => { if (!this.editing() && this.form.controls.id.pristine) this.form.controls.id.setValue(suggestedIdentifier(name, this.suffix)) })
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(() => {
       this.generation++; this.opened.set(false); this.editing.set(null); this.references.set([]); this.error.set(''); this.busy.set(false)
     })
@@ -41,6 +46,7 @@ export class NotificationEditorService {
   }
   async open(item?: RecordValue<Channel>): Promise<void> {
     const generation = ++this.generation
+    this.suffix = crypto.randomUUID().slice(0, 8); this.flow.reset()
     this.editing.set(item ?? null); this.form.reset(notificationForm(item?.data)); this.opened.set(true); this.error.set(''); this.conflict.set(false)
     this.references.set([]); this.referencesReady.set(false); this.unavailableReference.set(item?.data.secretReference ?? ''); this.list.message.set(''); this.busy.set(true)
     this.list.focus('notification-editor-heading')
@@ -63,8 +69,10 @@ export class NotificationEditorService {
     } catch (error) { if (generation === this.generation) this.error.set(errorMessage(error, 'Stored configuration could not be loaded.')) }
     finally { if (generation === this.generation) this.busy.set(false) }
   }
+  summary() { return notificationDefinition(this.form.getRawValue()) }
+  destinationName(): string { const id = this.form.controls.secretReference.value; return this.references().find(row => row.id === id)?.name || id }
   async submit(): Promise<void> {
-    if (this.busy()) return
+    if (this.busy() || !this.flow.ready()) return
     this.form.markAllAsTouched(); this.conflict.set(false)
     const value = this.form.getRawValue(), validation = notificationValidation(value, this.references())
     this.error.set(validation); if (validation) return

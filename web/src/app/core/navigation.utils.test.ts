@@ -3,11 +3,13 @@ import { test } from 'node:test'
 import { navigationSections } from './navigation.utils.ts'
 
 test('navigation separates daily testing from administration and opens the current scope', () => {
-  const permissions = Object.fromEntries(['projects.read', 'catalog.read', 'sources.read', 'schedules.read', 'notifications.read', 'members.read', 'permissions.read', 'groups.read', 'roles.read', 'users.read', 'providers.read'].map(permission => [`teststudio.${permission}`, true]))
+  const permissions = Object.fromEntries(['projects.read', 'catalog.read', 'sources.read', 'schedules.read', 'suites.read', 'notifications.read', 'members.read', 'permissions.read', 'groups.read', 'roles.read', 'users.read', 'providers.read'].map(permission => [`teststudio.${permission}`, true]))
   const catalog = navigationSections('demo', permissions, permissions, '/projects/demo/catalog')
-  assert.deepEqual(catalog.map(section => section.title), ['Workspace', 'Testing', 'Project administration', 'Installation administration'])
-  assert.deepEqual(catalog.filter(section => section.collapsible).map(section => section.active), [false, false])
-  assert(catalog.find(section => section.id === 'testing')?.links.some(link => link.label === 'Test runs'))
+  assert.deepEqual(catalog.map(section => section.title), ['Workspace', 'Testing', 'Automation', 'Advanced testing', 'Project administration', 'Installation administration'])
+  assert.deepEqual(catalog.filter(section => section.collapsible).map(section => section.active), [false, false, false, false])
+  assert.deepEqual(catalog.find(section => section.id === 'testing')?.links.map(link => link.label), ['Applications', 'Suites', 'Test catalog', 'Test runs', 'Trends'])
+  assert.deepEqual(catalog.find(section => section.id === 'automation')?.links.map(link => link.label), ['Schedules', 'Notifications'])
+  assert.deepEqual(catalog.find(section => section.id === 'advanced')?.links.map(link => link.label), ['Import and sync tests', 'Suite releases'])
   assert(catalog.find(section => section.id === 'testing')?.links.some(link => link.label === 'Applications' && link.path === '/projects/demo/applications'))
   assert(!catalog.find(section => section.id === 'testing')?.links.some(link => link.path.startsWith('/settings/')))
   const settings = navigationSections('demo', permissions, permissions, '/projects/demo/roles/reviewer?tab=rules')
@@ -28,4 +30,14 @@ test('navigation retains capability gates and exact account route matching', () 
   assert(!navigationSections('demo', {}, {}, '/projects/demo/applications').flatMap(section => section.links).some(link => link.label === 'Applications'))
   assert.equal(viewer.find(section => section.id === 'workspace')?.active, false)
   assert.equal(viewer.find(section => section.id === 'installation')?.active, true)
+})
+
+test('creation routes retain catalog context and advanced destinations open their own group', () => {
+  const permissions = { 'teststudio.catalog.read': true, 'teststudio.sources.read': true, 'teststudio.schedules.read': true }
+  const created = navigationSections('demo', permissions, {}, '/projects/demo/tests/new/https?suite=health')
+  assert.equal(created.find(section => section.id === 'testing')?.links.find(link => link.label === 'Test catalog')?.active, true)
+  const sources = navigationSections('demo', permissions, {}, '/projects/demo/sources')
+  assert.equal(sources.find(section => section.id === 'advanced')?.active, true)
+  assert.equal(sources.find(section => section.id === 'automation')?.active, false)
+  assert.equal(navigationSections('demo', {}, {}, '/projects/demo/suites').flatMap(section => section.links).some(link => link.label === 'Suites'), false)
 })

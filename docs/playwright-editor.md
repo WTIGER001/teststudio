@@ -1,6 +1,6 @@
 # Playwright editor
 
-Open Sources and choose a destination suite. Select New Playwright draft.
+Open Import and sync tests and choose a destination suite. Select New Playwright draft.
 Drafts require an active suite. The current isolated preparation profile also requires a suite without a target environment.
 Each draft contains the complete source workspace for one suite.
 

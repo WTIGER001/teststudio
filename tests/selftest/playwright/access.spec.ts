@@ -152,7 +152,7 @@ test('Identity administration, scoped groups, and session controls', { tag: '@ST
     await api.call('POST', '/api/v1/groups', { id: 'other-reviewers', name: 'Other reviewers', projectId: other.project })
     await page.getByRole('button', { name: 'Edit group', exact: true }).click()
     await page.getByLabel('Group name', { exact: true }).fill('Unsaved scope change')
-    await page.getByLabel('Workspace', { exact: true }).selectOption(other.project)
+    await page.getByLabel('Project', { exact: true }).selectOption(other.project)
     await followNavigation(page, 'Project groups')
     await expect(page.getByRole('heading', { name: 'Edit group', exact: true })).toHaveCount(0)
     await expect(page.getByRole('link', { name: 'Other reviewers', exact: true })).toBeVisible()

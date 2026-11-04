@@ -102,3 +102,16 @@ Run the focused browser workflow through TestStudio:
 ```sh
 bash scripts/test-self.sh --test=STUDIO-SCHEDULE-001
 ```
+
+## Guided configuration
+
+Open Automation, then choose Schedules.
+Create and edit uses Tests, Timing, and Review steps.
+Enter a name and choose the suite and target. New identifiers generate from the name.
+Advanced selection options contains the identifier, execution location, release pin, and explicit test selection.
+Continue to Timing. Choose an interval or cron expression and timezone.
+Advanced run options contains overlap, run limits, and retries.
+Continue to Review. Inspect the target, cadence, selection, and limits.
+Preview schedule shows future times and timing readiness without creating runs.
+Choose Enable this schedule only when it should repeat. Save schedule remains the final action.
+Back preserves all entries. Configuration conflicts still require a stored reload.

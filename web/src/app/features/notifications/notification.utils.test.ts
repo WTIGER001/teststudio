@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import type { Channel, Delivery } from './notification.models'
-import { canCancelDelivery, canRetryDelivery, channelDefinition, deliveryStatus, notificationDefinition, notificationForm, notificationValidation } from './notification.utils.ts'
+import { canCancelDelivery, canRetryDelivery, channelDefinition, deliveryStatus, notificationDefinition, notificationForm, notificationValidation, notificationIdentityValidation } from './notification.utils.ts'
 
 const channel = { id: 'alerts', name: 'Alerts', enabled: true, kind: 'webhook', secretReference: 'receiver', suiteIds: ['health'], environmentIds: ['none'], stages: ['acceptance testing'], triggers: ['schedule'], outcomes: ['timed-out'], includeEvidenceGaps: false, maxAttempts: 3, projectId: 'example', owner: 'alice', archived: false, deliveryEpoch: 8 } as Channel
 const references = [{ id: 'receiver', name: 'Local receiver' }]
@@ -41,4 +41,11 @@ test('delivery operations distinguish waiting work, permanent stops, and uncerta
   assert.equal(deliveryStatus(delivery, Date.parse('2026-11-02T12:00:01Z')), 'Recovery pending')
   assert.equal(deliveryStatus(delivery, Date.parse('2026-11-02T11:59:59Z')), 'sending')
   assert.equal(deliveryStatus({ ...delivery, state: 'delivered' }, Date.now()), 'delivered')
+})
+
+test('Destination validation lets users fix selection rules on the next step', () => {
+  const form = { ...notificationForm(channel), schedule: false }
+  assert.equal(notificationIdentityValidation(form, references), '')
+  assert.match(notificationValidation(form, references), /trigger/)
+  assert.match(notificationIdentityValidation(form, []), /registered secret/)
 })

@@ -28,10 +28,13 @@ Open **TestStudio local demo**.
 
 ## Explore applications
 
-Select Applications in the sidebar. Open an application to see its environments and linked suites.
+Use the Project selector to choose a project. Select Applications under Testing. Open an application to see its environments and linked suites.
 View tests opens a suite-filtered catalog. Create test keeps that suite selected through the type chooser.
 Authorized users add applications, environments, and linked suites through Name, Options, and Review steps.
-See applications.md for details.
+Select Suites for test groups, their scoped catalog links, and the shared New suite wizard.
+Automation contains Schedules and Notifications. Both provide guided setup with a final review.
+Advanced testing contains Import and sync tests and Suite releases.
+See applications.md and ui.md for details.
 
 ## Create a test
 

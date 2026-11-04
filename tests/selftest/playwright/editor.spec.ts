@@ -67,5 +67,5 @@ test('Playwright editor retains drafts and freezes reviewed preparation input', 
   await expect(code).not.toBeFocused()
   await testInfo.attach('playwright-editor-mobile-dark', { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' })
   await page.getByRole('button', { name: 'Help', exact: true }).click()
-  await expect(page.getByRole('dialog', { name: 'Sources help', exact: true })).toContainText('Playwright editor')
+  await expect(page.getByRole('dialog', { name: 'Import and sync tests help', exact: true })).toContainText('Playwright editor')
 })

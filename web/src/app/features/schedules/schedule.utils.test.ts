@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { definitionFromForm, scheduleDefinition, scheduleForm, scheduleRows } from './schedule.utils.ts'
+import { definitionFromForm, scheduleDefinition, scheduleForm, scheduleRows, scheduleWizardIssue } from './schedule.utils.ts'
 
 test('Schedule edits retain request options and send configuration fields only', () => {
   const original = { id: 'probe', name: 'Probe', enabled: true, kind: 'interval' as const, intervalSeconds: 5, timezone: 'UTC', overlap: 'skip' as const,
@@ -19,4 +19,14 @@ test('Interval edits use UTC and preserve unknown timing instead of inventing a 
   assert.equal(definition.enabled, false); assert.equal(definition.timezone, 'UTC'); assert.equal(definition.cron, undefined)
   assert.equal(definition.request.releaseId, undefined); assert.deepEqual(definition.request.testIds, [])
   assert.equal(scheduleRows([{ id: 'probe', revision: 1, updatedAt: '', data: { ...definition, owner: 'owner', projectId: 'project', generation: 1, archived: false } }])[0].status, 'Paused')
+})
+
+test('Schedule steps reject invalid cadence and limits while keeping selection separate', () => {
+  const value = { ...scheduleForm(), id: 'health', name: 'Health', suite: 'health' }
+  assert.equal(scheduleWizardIssue(0, { ...value, interval: 0 }), '')
+  assert.match(scheduleWizardIssue(1, { ...value, interval: 0 }), /interval/)
+  assert.match(scheduleWizardIssue(1, { ...value, interval: 5.5 }), /interval/)
+  assert.match(scheduleWizardIssue(1, { ...value, retries: 3 }), /retry/)
+  assert.match(scheduleWizardIssue(1, { ...value, kind: 'cron', timezone: '' }), /timezone/)
+  assert.equal(scheduleWizardIssue(1, { ...value, kind: 'cron', timezone: 'America/New_York' }), '')
 })

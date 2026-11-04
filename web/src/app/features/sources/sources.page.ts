@@ -11,7 +11,7 @@ import { SourcePreviewComponent } from './source-preview.component'
 @Component({
   standalone: true, imports: [DatePipe, ReactiveFormsModule, RouterLink, SourceUploadComponent, SourcePreviewComponent, PreparationComponent, RepositoriesComponent], providers: [SourcesService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Sources</h1><p class="muted">Write Playwright tests, upload HTTP definitions or source ZIPs, or sync a GitHub repository. Review before publishing.</p></div>
+    <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Import and sync tests</h1><p class="muted">Write Playwright tests, upload HTTP definitions or source ZIPs, or sync a GitHub repository. Review before publishing.</p></div>
       @if (service.workspace.can('sources.manage') && service.workspace.can('catalog.import')) { <button type="button" class="button primary" [disabled]="!service.form.controls.suite.value || service.saving()" (click)="service.openEditor()">+ Upload tests</button> }
     </div>
     @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }

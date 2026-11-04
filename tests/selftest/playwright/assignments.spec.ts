@@ -81,7 +81,7 @@ test('Scoped role assignments, delegation, and durable revocation controls', { t
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
       await testInfo.attach(`project-access-${theme}`, { body: await page.screenshot({ fullPage: true, animations: 'disabled' }), contentType: 'image/png' })
     }
-    await page.getByLabel('Workspace', { exact: true }).selectOption(other.project)
+    await page.getByLabel('Project', { exact: true }).selectOption(other.project)
     await followNavigation(page, 'Project access')
     await expect(page.getByRole('heading', { name: 'Add role assignment', exact: true })).toHaveCount(0)
     await expect(row(group, 'Operator')).toHaveCount(0)
@@ -149,7 +149,7 @@ test('Scoped role assignments, delegation, and durable revocation controls', { t
       await expect(page.getByRole('alert')).toContainText('Membership and permission read authority is required')
       await expect(nav().getByRole('link', { name: 'Project access', exact: true, includeHidden: true })).toHaveCount(0)
       await expect(table().getByRole('row')).toHaveCount(1)
-      await expect(page.getByLabel('Workspace', { exact: true }).getByRole('option')).toHaveCount(1)
+      await expect(page.getByLabel('Project', { exact: true }).getByRole('option')).toHaveCount(1)
     } finally { await page.context().addCookies(original); await page.goto(`/projects/${project}/members`) }
     await expect(page.getByRole('button', { name: '+ Add role', exact: true })).toBeVisible()
   })

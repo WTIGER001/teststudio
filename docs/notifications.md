@@ -164,3 +164,16 @@ bash scripts/test-self.sh --test=STUDIO-NOTIFY-001
 Its isolated receiver verifies real generic and Discord requests without external network access.
 The fixture registers only new project bindings and exposes no destination values through application APIs.
 Hosted secret service adapters remain pending.
+
+## Guided configuration
+
+Open Automation, then choose Notifications.
+Create and edit uses Destination, When to notify, and Review steps.
+Enter a name and choose a transport and registered destination reference.
+New identifiers generate from the name. Advanced identity options contains their editor.
+Continue to When to notify. Select triggers, outcomes, and optional evidence gaps.
+Advanced filters and delivery options contains suite, environment, stage, and attempt settings.
+Continue to Review. Inspect the destination, scope, selection, and retry budget.
+Choose Enable this channel only when future matching runs should send summaries.
+Save notification channel remains the final action. Back preserves entries.
+The browser receives registered destination names. It does not receive resolved webhook credentials.

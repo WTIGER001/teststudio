@@ -21,8 +21,8 @@ See demo-readiness.md for the immediate delivery checklist.
 The current user priority is a guided walkthrough of the running local demo.
 Keep that demo available while the user works through its pages.
 The user requests grouped sidebar sections during the walkthrough.
-The sidebar now separates Workspace, Testing, Project administration, and Installation administration.
-The administration sections collapse by default. The current administration page opens its section.
+The sidebar separates Workspace, Testing, Automation, Advanced testing, Project administration, and Installation administration.
+Automation, Advanced testing, and administration collapse by default. The current page opens its section.
 The user also requests Applications in the sidebar.
 Applications now opens a dedicated project list and detail route with environment and linked suite views.
 Those pages reuse the existing registration workflow and preserve the current data ownership model.
@@ -57,6 +57,12 @@ Suite settings and lifecycle controls also pass focused local verification after
 Project settings supports edits, revision conflicts, archive, restoration, and readable affected schedules.
 Exact suite read and management checks protect both lifecycle routes and the existing PUT route.
 Run history, artifact downloads, retained releases, and schedule pins survive archive and restoration.
+The tester sidebar now exposes Suites beside Applications, the catalog, runs, and trends.
+Schedules and Notifications use guided configuration under Automation.
+Imports and retained releases stay under Advanced testing.
+The next interface priority is direct URL entry for a quick HTTPS probe.
+The current probe wizard still requires a registered environment for Save and run.
+Keep this friction visible in the continuation plan. Follow it with environment-backed recorded browser execution.
 The next implementation batches follow the full ledger without adding new gates to the usable demonstration.
 
 ## Current implementation checkpoint

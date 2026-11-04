@@ -60,3 +60,12 @@ bash scripts/test-self.sh --test=STUDIO-SUITES-001
 ```
 
 The checks cover revision conflicts, exact denials, schedule visibility, archive, restore, retained run evidence, and release pins.
+
+## Tester navigation
+
+Choose Suites in the Testing sidebar section.
+Suite cards provide View tests, Create test, and Suite settings actions.
+View tests filters the project catalog. Create test carries the selected suite through the type chooser.
+New suite opens the shared Name, Options, and Review registration wizard.
+Settings reuse the existing suite manager and lifecycle controls.
+Unsaved creation or settings changes require a choice before route navigation.

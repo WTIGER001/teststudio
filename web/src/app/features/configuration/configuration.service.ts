@@ -63,7 +63,7 @@ export class ConfigurationService {
     try {
       const base = `/api/v1/projects/${this.projectId()}`
       const [applications, suites, environments] = await Promise.all([
-        this.api.request<Page<RecordValue<Application>>>(`${base}/applications`),
+        this.workspace.can('projects.read') ? this.api.request<Page<RecordValue<Application>>>(`${base}/applications`) : Promise.resolve({ items: [] }),
         this.workspace.can('suites.read') ? this.api.request<Page<RecordValue<Suite>>>(`${base}/suites`) : Promise.resolve({ items: [] }),
         this.workspace.can('environments.read') ? this.api.request<Page<RecordValue<Environment>>>(`${base}/environments`) : Promise.resolve({ items: [] })
       ])

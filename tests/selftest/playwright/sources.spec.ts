@@ -103,7 +103,7 @@ test('Native source upload, atomic publication, immutable snapshots, and stale r
     await page.setViewportSize({ width: 390, height: 844 })
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy()
     await page.getByRole('button', { name: 'Help', exact: true }).click()
-    const help = page.getByRole('dialog', { name: 'Sources help', exact: true })
+    const help = page.getByRole('dialog', { name: 'Import and sync tests help', exact: true })
     await expect(help).toBeVisible()
     for (const title of ['Introduction', 'Concepts', 'Tutorials']) await expect(help.getByRole('heading', { name: title, exact: true })).toBeVisible()
     await page.keyboard.press('Escape')

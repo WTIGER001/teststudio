@@ -14,11 +14,14 @@ Revision conflicts require a reload before another mutation. See [Suite settings
 
 ## Sidebar navigation
 
-The sidebar separates Workspace, Testing, Project administration, and Installation administration.
-Workspace contains project selection and account navigation.
-Testing contains catalogs, runs, schedules, trends, releases, and sources.
-The administration sections group configuration, notifications, access, users, groups, roles, and identity providers by ownership scope.
-Administration sections start collapsed. Their current page opens the relevant section.
+The Project selector chooses the current project. Workspace contains Projects and Your account.
+Testing contains Applications, Suites, Test catalog, Test runs, and Trends.
+Applications provides application environments. Suites provides test groups and scoped catalog links.
+Automation contains Schedules and Notifications.
+Advanced testing contains Import and sync tests and Suite releases.
+Project administration and Installation administration group access controls by ownership scope.
+Automation, Advanced testing, and administration start collapsed. Their current page opens the relevant section.
+Creation routes keep Test catalog marked as the current destination.
 Native disclosure controls support keyboard operation. Active links expose the current page.
 Existing capability checks still control each protected link.
 On narrow screens, Navigation opens and closes the menu. Selecting a link closes it and returns space to the current page.
@@ -203,3 +206,16 @@ Authorization failures clear private editor and list data, including responses w
 Scope changes discard old editors and responses.
 Server capabilities control creation, expiry editing, and removal. Read-only sessions retain inspection controls.
 Each page provides contextual help. Shared tokens support both themes, and labeled table regions contain horizontal scrolling on narrow screens.
+
+## Guided configuration
+
+Suites provides a first-class list with View tests, Create test, and Suite settings actions.
+New suite uses the existing Name, Options, and Review registration wizard.
+Schedule creation and editing uses Tests, Timing, and Review steps.
+Advanced selection options contains identifiers, release pins, explicit test identifiers, and execution location.
+Advanced run options contains overlap, limits, and retries.
+Notification creation and editing uses Destination, When to notify, and Review steps.
+Advanced identity options contains the permanent identifier.
+Advanced filters and delivery options contains scope filters and automatic attempts.
+The final review keeps enable controls and their future execution or delivery consequences visible.
+These flows reuse the existing services, permissions, conflict handling, preview, and save contracts.

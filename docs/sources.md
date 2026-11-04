@@ -1,6 +1,6 @@
 # Test source publication
 
-The Sources page accepts native HTTP catalogs in JSON or YAML.
+The Import and sync tests page accepts native HTTP catalogs in JSON or YAML.
 Choose a project and an existing suite before uploading a file.
 Use project settings to create a suite when required.
 

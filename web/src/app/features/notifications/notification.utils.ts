@@ -29,11 +29,18 @@ export function notificationDefinition(form: NotificationForm): NotificationDefi
     outcomes: outcomeFields.filter(([key]) => form[key]).map(([, value]) => value), includeEvidenceGaps: form.includeEvidenceGaps, maxAttempts: form.maxAttempts }
 }
 
-export function notificationValidation(form: NotificationForm, references: SecretReference[]): string {
+export function notificationIdentityValidation(form: NotificationForm, references: SecretReference[]): string {
   const definition = notificationDefinition(form)
   if (!identifier.test(definition.id) || !definition.name || bytes(definition.name) > 256) return 'Enter a valid permanent identifier and a name of at most 256 bytes.'
   if (!references.some(ref => ref.id === definition.secretReference)) return 'Choose a registered secret reference for this project.'
   if (!['webhook', 'discord'].includes(definition.kind)) return 'Choose a supported transport.'
+  return ''
+}
+
+export function notificationValidation(form: NotificationForm, references: SecretReference[]): string {
+  const identity = notificationIdentityValidation(form, references)
+  if (identity) return identity
+  const definition = notificationDefinition(form)
   if (!Number.isInteger(definition.maxAttempts) || definition.maxAttempts < 1 || definition.maxAttempts > 10) return 'Select 1 through 10 delivery attempts.'
   if (!triggers.some(key => form[key])) return 'Select at least one run trigger.'
   if (!definition.outcomes?.length && !form.includeEvidenceGaps) return 'Select an outcome or include evidence gaps.'

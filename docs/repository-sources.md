@@ -1,6 +1,6 @@
 # Repository sources
 
-The Sources page registers one GitHub repository with one or more suite manifest paths.
+The Import and sync tests page registers one GitHub repository with one or more suite manifest paths.
 Each binding selects a targetless suite and an offline Go or Playwright build profile.
 Application source, shared libraries, and several suites can share the same repository snapshot.
 
@@ -77,7 +77,7 @@ See the [GitHub App token documentation](https://docs.github.com/en/rest/apps/ap
 
 ## Register and synchronize
 
-Open Sources and select Register repository.
+Open Import and sync tests and select Register repository.
 Enter a permanent source identifier, display name, and owner/repository.
 Choose a branch, tag, or exact commit. The API represents named references as heads/name or tags/name.
 Select public access or an approved private credential reference.

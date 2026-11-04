@@ -1,6 +1,6 @@
 # Source bundles
 
-The Sources page stores complete Go or Playwright ZIP bundles and queues durable preparation jobs.
+The Import and sync tests page stores complete Go or Playwright ZIP bundles and queues durable preparation jobs.
 A separate worker assembles the source and invokes isolated discovery.
 Review and publication use the common immutable release workflow.
 The CLI can also assemble bundles outside the API.
@@ -106,7 +106,7 @@ Each local location uses the same Docker daemon and private build directory acro
 PostgreSQL can also provide the shared metadata database.
 Omit both runtime flags to recover recorded resources without dispatching new builds.
 
-Open Sources and choose a suite without a target environment.
+Open Import and sync tests and choose a suite without a target environment.
 Select a complete ZIP under Source ZIP and enter its manifest path relative to the ZIP root.
 Select Upload and prepare bundle. Repeating a request with the same key returns its original job.
 The worker records ownership before assembly, then records the image before discovery.

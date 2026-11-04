@@ -1,10 +1,10 @@
 # Prepared suite inspection
 
 TestStudio has a versioned manifest and a local isolated artifact inspector.
-The Sources page, API, and publisher CLI enqueue inspection jobs and publish reviewed catalogs.
+The Import and sync tests page, API, and publisher CLI enqueue inspection jobs and publish reviewed catalogs.
 The current worker supports locally available immutable Go and Playwright images.
 Inspection does not start tests. Publication and activation remain explicit actions.
-The Sources page also uploads offline Go or Playwright ZIP bundles for a separate preparation worker.
+The Import and sync tests page also uploads offline Go or Playwright ZIP bundles for a separate preparation worker.
 The CLI can assemble those bundles outside the API.
 Registered GitHub sources use the same durable preparation and reviewed publication workflow.
 See [repository sources](repository-sources.md) and [source bundles](source-bundles.md) for supported offline profiles.
@@ -119,7 +119,7 @@ Each image needs the expected runtime label and its destination `teststudio.proj
 The current local profiles require a suite without a target environment.
 The worker does not pull images or install source dependencies.
 
-Open Sources, select the destination suite, and enter the image digest and runner.
+Open Import and sync tests, select the destination suite, and enter the image digest and runner.
 Select Prepare image, inspect progress and retained logs, then open Review prepared source.
 Review catalog changes and validation issues before publication.
 Activation starts unchecked. Publication does not run tests.

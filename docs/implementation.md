@@ -74,6 +74,53 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Tester sidebar and guided automation
+
+The sidebar keeps Applications, Suites, Test catalog, Test runs, and Trends visible under Testing.
+The selector is labeled Project because it chooses a project.
+Schedules and Notifications move to a collapsed Automation section.
+Import and sync tests and Suite releases move to a collapsed Advanced testing section.
+Project and installation administration remain separate collapsed scopes.
+The current destination opens its section. Create test routes keep Test catalog marked as current.
+Native disclosure controls, mobile menu behavior, and capability gates remain in use.
+The import page and its contextual help use the same plain-language navigation label.
+
+Suites now provides a dedicated project route with scoped View tests and Create test actions.
+New suite reuses the existing Name, Options, and Review registration wizard.
+Suite settings reuses the canonical manager, conflict handling, and retained lifecycle controls.
+Unsaved creation or settings changes require a choice before route navigation.
+Project changes reset the local suite creation state.
+Configuration avoids application registry requests when project read permission is unavailable.
+The new page provides Introduction, Concepts, and Tutorials in contextual help.
+
+Schedule creation and editing now uses Tests, Timing, and Review steps.
+Identifiers generate from names. Advanced sections hold selection pins, execution location, overlap, limits, and retries.
+Review keeps the target, cadence, selection, enable control, and recurring execution consequences visible.
+Preview still shows future times without creating a run.
+Notification creation and editing now uses Destination, When to notify, and Review steps.
+Advanced sections hold identifiers, filters, and retry budgets.
+Review keeps the destination, scope, enable control, and future message consequences visible.
+Back preserves values. Existing server permissions, ownership, conflicts, and save contracts remain unchanged.
+Registered notification credentials stay server-side.
+
+The production Angular build passes. Ten targeted utility checks pass.
+STUDIO-NAV-001 passes for sidebar groups, Suites creation, scoped test creation, dirty settings, active destinations, keyboard controls, and mobile navigation.
+STUDIO-SCHEDULE-001 passes in 20.673 seconds with the new stepper and retained firing, selection, timing, and result contracts.
+STUDIO-NOTIFY-001 passes in 26.827 seconds with guided channel configuration, delivery, retries, history, scope, and mobile checks.
+Evidence is output/selftest/20261104T000316.634912000-62d687eaa13df30dbe9e5e41/summary.json and cleanup.json.
+A targeted navigation repeat passes after final suite state and help changes.
+Final navigation evidence is output/selftest/20261104T000523.976849000-fba71fdf431646d7af6f9d5d/summary.json and cleanup.json.
+All owned verification browsers, controllers, containers, and volumes stop after checks.
+The user demo serves the updated private UI snapshot and retains its data, examples, and evidence.
+The user's open browser tab is not refreshed or changed by this delivery.
+No cloud verification or unrelated broad suite runs for this interface work.
+
+The ledger remains **26 verified, 31 open, 57 total**.
+This extends **05**, **48**, **49**, and **50**, and advances **21**, which remains open.
+Next interface work: accept a full URL directly when creating a quick HTTPS probe.
+Current Save and run still requires a registered target environment.
+Then resume environment-backed recorded browser execution and the remaining full acceptance ledger.
+
 ### Guided configuration and reviewed local execution
 
 Project setup now uses Project, Application, Target, and Review steps.

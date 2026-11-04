@@ -6,8 +6,10 @@ import { ApiError, ApiService, type RecordValue } from '../../core/api.service'
 import { RunLookupsService } from '../runs/run-lookups.service'
 import { errorMessage } from '../runs/run.utils'
 import type { Schedule, SchedulePreview } from './schedule.models'
-import { definitionFromForm, scheduleForm } from './schedule.utils'
+import { definitionFromForm, scheduleForm, scheduleWizardIssue } from './schedule.utils'
 import { SchedulesService } from './schedules.service'
+import { WizardController } from '../../shared/wizard/wizard-controller'
+import { suggestedIdentifier } from '../../shared/wizard/creation.utils'
 
 @Injectable()
 export class ScheduleEditorService {
@@ -17,6 +19,8 @@ export class ScheduleEditorService {
   readonly list = inject(SchedulesService)
   readonly lookups = inject(RunLookupsService)
   readonly opened = signal(false)
+  readonly flow = new WizardController(3, step => { this.form.markAllAsTouched(); const issue = scheduleWizardIssue(step, this.form.getRawValue()); this.error.set(issue); return !issue })
+  private suffix = crypto.randomUUID().slice(0, 8)
   readonly editing = signal<RecordValue<Schedule> | null>(null)
   readonly busy = signal(false)
   readonly error = signal('')
@@ -36,11 +40,13 @@ export class ScheduleEditorService {
   private generation = 0
 
   constructor() {
+    this.form.controls.name.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(name => { if (!this.editing() && this.form.controls.id.pristine) this.form.controls.id.setValue(suggestedIdentifier(name, this.suffix)) })
     this.form.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(() => { this.generation++; this.preview.set(null) })
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(() => { this.generation++; this.opened.set(false); this.editing.set(null); this.preview.set(null); this.error.set(''); this.busy.set(false) })
     this.destroy.onDestroy(() => { this.generation++ })
   }
   async open(item?: RecordValue<Schedule>): Promise<void> {
+    this.suffix = crypto.randomUUID().slice(0, 8); this.flow.reset()
     this.editing.set(item ?? null); this.form.reset(scheduleForm(item?.data)); this.opened.set(true); this.error.set(''); this.conflict.set(false); this.preview.set(null)
     const generation = ++this.generation
     this.list.message.set('')
@@ -56,7 +62,10 @@ export class ScheduleEditorService {
     catch (error) { this.error.set(errorMessage(error, 'Stored configuration could not be loaded.')) }
     finally { this.busy.set(false) }
   }
+  suiteName(): string { const id = this.form.controls.suite.value; return this.lookups.suites().find(row => row.id === id)?.data.name || id }
+  targetName(): string { const id = this.form.controls.environment.value, target = this.lookups.environments().find(row => row.id === id); return target ? `${target.data.name} · ${target.data.stage}${target.data.protected ? ' · Protected' : ''}` : id || 'No target' }
   async submit(preview = false): Promise<void> {
+    if (this.busy() || !this.flow.ready()) return
     this.form.markAllAsTouched(); this.error.set(''); this.conflict.set(false)
     this.list.message.set('')
     if (this.form.invalid) { this.error.set('Complete the required fields and valid run limits.'); return }

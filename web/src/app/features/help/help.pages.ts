@@ -29,7 +29,7 @@ export const helpPages: Record<string, HelpPage> = {
     concepts: [
       { title: 'Playwright recording', description: 'The local recorder opens a dedicated browser and Playwright Inspector on the TestStudio server desktop. Record clicks and assertions, stop the session, then review the generated test. Sessions remain private to their recording owner until saved as a draft.' },
       { title: 'HTTPS probes', description: 'Enter a title and choose a suite. Identifiers are generated under Advanced details. Select a target and configure the request. Review safety before saving a draft or explicitly saving and running.' },
-      { title: 'Go suites', description: 'Upload a complete source bundle with its suite manifest, catalog, and dependency declarations. Follow preparation, review the discovered tests, and publish a release. Repository connections remain under Sources.' },
+      { title: 'Go suites', description: 'Upload a complete source bundle with its suite manifest, catalog, and dependency declarations. Follow preparation, review the discovered tests, and publish a release. Repository connections remain under Import and sync tests.' },
       { title: 'Review and execution', description: 'A recorded test receives a permanent tag and a needs-review safety label. Saving does not start a run. The current isolated browser profile cannot execute recorded website journeys. Keep the draft while environment-backed browser execution remains pending.' }
     ],
     tutorials: [
@@ -38,7 +38,7 @@ export const helpPages: Record<string, HelpPage> = {
     ]
   },
   sources: {
-    id: 'sources', title: 'Sources',
+    id: 'sources', title: 'Import and sync tests',
     introduction: ['Upload native HTTP checks, prepare a Go or Playwright ZIP bundle, register a GitHub repository, or inspect a project-owned Go or Playwright image. Review its catalog and publish an immutable release without starting tests.'],
     concepts: [
       { title: 'Browser recording', description: 'Use Create test to choose a browser journey or an HTTPS probe. The native local recorder captures browser clicks and assertions, then returns generated code for review. Recorded website execution remains pending.' },
@@ -265,7 +265,7 @@ export const helpPages: Record<string, HelpPage> = {
       { title: 'Pause and archive', description: 'Pause blocks later attempts. Reenabling does not revive old messages automatically. Explicit retry requires the original destination and an enabled channel. Archive keeps history; restore leaves the channel paused.' }
     ],
     tutorials: [
-      { title: 'Configure a completion channel', steps: ['Select + New channel and enter a name and permanent identifier.', 'Choose a transport and registered secret reference.', 'Optionally filter suites, environments, and stages. Select triggers and outcomes, or include evidence gaps.', 'Set the automatic attempt budget. Select Enable this channel when ready, then Save notification channel.', 'Queue a new matching run. Earlier runs do not gain new notifications.'] },
+      { title: 'Configure a completion channel', steps: ['Open Automation, choose Notifications, then select New channel.', 'Name the channel and choose its transport and registered destination. The identifier is generated under Advanced identity options.', 'Select Continue. Choose run triggers and outcomes. Advanced filters and delivery options contains scope filters and retries.', 'Select Continue. Review the destination and scope. Choose Enable this channel when ready, then select Save notification channel.', 'Queue a new matching run. Earlier runs do not gain new notifications.'] },
       { title: 'Investigate delivery', steps: ['Read Notification deliveries on this page or one run’s details.', 'Expand Frozen run summary to inspect the captured result and destination reference.', 'Select Attempts for retained HTTP statuses and checkpoint uncertainty.', 'For stopped or waiting deliveries, correct the channel or receiver before selecting Retry delivery.', 'Use Stop retries to cancel pending work. A message already sent cannot be recalled.'] }
     ]
   },
@@ -280,7 +280,7 @@ export const helpPages: Record<string, HelpPage> = {
       { title: 'Firing history', description: 'Triggered firings link to runs. Skipped and blocked firings retain their reasons. Archive keeps history. Restore leaves a schedule paused. Runtime firings do not invalidate configuration edits.' }
     ],
     tutorials: [
-      { title: 'Create a repeating check', steps: ['Select + New schedule and enter a name and permanent identifier.', 'Choose a published suite, its required target, and an execution location.', 'Optionally select test identifiers or pin a release.', 'Choose an interval or cron expression, timezone, overlap rule, run limit, and retries.', 'Select Preview schedule to inspect future times and timing readiness.', 'Select Enable this schedule when it should run, then Save schedule.'] },
+      { title: 'Create a repeating check', steps: ['Open Automation, choose Schedules, then select New schedule.', 'Name the schedule and choose its suite and target. Advanced selection options contains identifiers, release pins, and execution location.', 'Select Continue. Choose the cadence. Advanced run options contains overlap, run limits, and retries.', 'Select Continue to review the target and timing. Preview schedule shows future times without running tests.', 'Choose Enable this schedule only when it should repeat, then select Save schedule.'] },
       { title: 'Investigate or pause a schedule', steps: ['Read the next occurrence and last firing on Project schedules.', 'Select History to inspect triggered, skipped, and blocked occurrences.', 'Follow a run link for attempts, timing, logs, and retained evidence.', 'Use Pause to stop future firings. Existing runs use their normal cancellation controls.', 'Use Edit to correct the selection or cadence. Configuration conflicts require an explicit reload.', 'Use Archive to remove normal scheduling while keeping its identifier and history. Include archived schedules to restore it.'] }
     ]
   },
@@ -308,7 +308,7 @@ export const helpPages: Record<string, HelpPage> = {
       { title: 'Session', description: 'If your session expires, sign in again. The page address still identifies the work you were viewing.' }
     ],
     tutorials: [
-      { title: 'Open your workspace', steps: ['Choose your organization’s sign-in provider, or select Open local workspace on a local installation.', 'Complete sign-in. If a password change is required, enter the current password and a new password before the requested page opens.', 'Use the Workspace selector to choose a project.'] },
+      { title: 'Open your workspace', steps: ['Choose your organization’s sign-in provider, or select Open local workspace on a local installation.', 'Complete sign-in. If a password change is required, enter the current password and a new password before the requested page opens.', 'Use the Project selector to choose a project.'] },
       { title: 'If no sign-in option appears', steps: ['Ask your installation administrator to configure a sign-in provider.', 'Reload this page after the administrator confirms the setup.'] }
     ]
   },
@@ -322,7 +322,7 @@ export const helpPages: Record<string, HelpPage> = {
     ],
     tutorials: [
       { title: 'Create your first project', steps: ['Enter a project name. The permanent identifier is generated; change it under Advanced details when needed.', 'Select Continue. Name your first application and choose whether to create an empty Availability suite.', 'Select Continue. Optionally register a target URL, stage, and protection.', 'Review the selected resources, then select Create project. No tests run during setup.', 'If setup stops after creating resources, Retry remaining setup continues without creating those resources again.'] },
-      { title: 'Return to existing work', steps: ['Open a project card to view its test catalog.', 'Use Applications to explore application environments and linked suites. Use Test runs for execution history or Project settings for other configuration.', 'Use the Workspace selector to switch projects.'] }
+      { title: 'Return to existing work', steps: ['Open a project card to view its test catalog.', 'Use Applications to explore application environments and linked suites. Use Test runs for execution history or Project settings for other configuration.', 'Use the Project selector to switch projects.'] }
     ]
   },
   catalog: {
@@ -338,7 +338,7 @@ export const helpPages: Record<string, HelpPage> = {
       { title: 'Saved selections', description: 'A suite stores explicit test identifiers or a versioned filter. Filters match published metadata and can include child categories. A resolved preview includes dependencies and freezes one release. Empty matches, invalid dependencies, or current lifecycle restrictions block execution explicitly.' }
     ],
     tutorials: [
-      { title: 'Create and publish an HTTPS check', steps: ['Create a suite in Project settings if none exists.', 'Select + Create test, then choose HTTPS probe. Enter a title, choose the suite, and select Continue.', 'Enter the registered endpoint name and relative path. Choose GET or HEAD and the accepted status codes.', 'Add optional text, response header, JSON field, response-time, and certificate lifetime assertions. HEAD cannot assert response bodies.', 'Continue to Review. Confirm the safety label and rationale, then select Save draft.', 'Choose the suite under Publish a release. Select Validate and preview, review the result, then Publish and activate.'] },
+      { title: 'Create and publish an HTTPS check', steps: ['Choose Suites and create a suite if none exists.', 'Select + Create test, then choose HTTPS probe. Enter a title, choose the suite, and select Continue.', 'Enter the registered endpoint name and relative path. Choose GET or HEAD and the accepted status codes.', 'Add optional text, response header, JSON field, response-time, and certificate lifetime assertions. HEAD cannot assert response bodies.', 'Continue to Review. Confirm the safety label and rationale, then select Save draft.', 'Choose the suite under Publish a release. Select Validate and preview, review the result, then Publish and activate.'] },
       { title: 'Find and maintain a test', steps: ['Search by title, identifier, category, or tag. Use suite and lifecycle filters to narrow the list.', 'Use History to inspect retained definitions, or Edit to change the draft.', 'Use Archive to remove a test from normal selection. Choose Archived in the lifecycle filter to find and restore it.', 'Publish a new release when draft changes should apply to future runs.'] },
       { title: 'Save and reuse a selection', steps: ['Select tests from one suite and use Use selected tests under Saved selections, or choose Suite for saved selections and New saved selection.', 'Enter a name and permanent identifier. Choose explicit identifiers or a versioned filter. Select Save selection.', 'Select Preview saved selection and inspect the resolved tests, dependencies, and published release.', 'Open Test runs. Choose the suite and target. Under Advanced selection and run options, choose and preview the saved selection. Select Review run, then Start run.', 'Use Inspect to edit a saved selection. After a conflict, reload before saving. Archive preserves existing run snapshots; restore makes the selection available again.'] },
       { title: 'Edit metadata across tests', steps: ['Filter by suite and select between 1 and 30 tests. Choose Edit metadata under Bulk action.', 'Select Change for each field to replace, then enter its shared value. Unselected fields remain unchanged.', 'Separate tags with commas. Select an empty Owner, Tags, Description, or Operating conditions value to clear that field.', 'Select Safety rationale and enter its explanation when changing a safety label. Current publishing permission is required for safety changes.', 'Select Preview bulk changes. Review the displayed before and after values, then Apply reviewed changes.', 'After a conflict, reload the catalog and prepare a new preview. Publish separately when the new metadata should enter a release.'] }
@@ -356,6 +356,19 @@ export const helpPages: Record<string, HelpPage> = {
     tutorials: [
       { title: 'Find an application', steps: ['Choose a project, then select Applications in the sidebar.', 'Select Open application on its card.', 'Review Environments and Linked suites. Select View tests to inspect one suite in the catalog.'] },
       { title: 'Register related resources', steps: ['Select Add application on the application list. Enter its name and select Continue. Identifiers are generated under Advanced details.', 'Review Options, continue to Review, then select Create.', 'On its detail page, select Add environment or Add suite. The application is already selected.', 'Follow Name, Options, and Review. Use Back to change entries before selecting Create. Unsaved registration changes require confirmation before leaving.'] }
+    ]
+  },
+  suites: {
+    id: 'suites', title: 'Suites',
+    introduction: ['Suites group related tests and their published versions. Choose View tests to open the catalog for one suite.'],
+    concepts: [
+      { title: 'Applications and suites', description: 'Suites belong to a project and can link to several applications. Applications group their target environments.' },
+      { title: 'Drafts and releases', description: 'Draft tests can change. A published release freezes definitions for runs. Ready to run means an active release exists.' },
+      { title: 'Advanced settings', description: 'Suite settings provides application associations, target requirements, and archive or restore controls. These use the same settings as Project settings.' }
+    ],
+    tutorials: [
+      { title: 'Create a suite', steps: ['Select New suite. Enter its name and select Continue.', 'Choose an application and whether tests need a target environment.', 'Select Continue, review the settings, then select Create.', 'Select Create test on the suite card. The chooser keeps this suite selected.'] },
+      { title: 'Find and manage tests', steps: ['Select View tests on a suite card.', 'Use the filtered catalog to edit or publish its tests.', 'Return to Suites and open Suite settings for target requirements or lifecycle changes.'] }
     ]
   },
   configuration: {
