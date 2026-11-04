@@ -8,6 +8,7 @@ The [help guide](docs/help.md) explains contextual guide maintenance.
 Use the [workflow completion checklist](docs/plan.md#workflow-completion-checklist) for each behavior change.
 
 The [AWS core profile](docs/aws.md) documents ECS, separate CloudFront origins, private storage, and local packaging checks.
+The [Azure core profile](docs/azure.md) documents separate Container Apps, managed identities, Key Vault references, and private Blob evidence.
 
 ## Local demonstration
 

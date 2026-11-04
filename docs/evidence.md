@@ -169,3 +169,11 @@ See [Artifact storage](artifact-storage.md) for credential sources, installation
 [Installation transfer](data-transfer.md) preserves artifact identifiers, manifests, pins, and quota records across SQLite and PostgreSQL.
 Artifact bytes stay in their separately configured store. Copy or retain the exact keys with the metadata snapshot.
 Restored evidence uses the same private grants, retention rules, checksum verification, and missing-file feedback.
+
+## Separate artifact service
+
+Operators can deploy the artifact listener as its own service role.
+Its grant checks still read current sessions, credential state, permissions, manifest ownership, and retention from shared installation storage.
+The artifact process supplies no independent sign-in flow and does not change managed password sign-in settings.
+See the [portable service package](service-image.md#separate-service-roles) for listener selection and health probes.
+The [Azure core profile](azure.md) uses separate HTTPS apps with shared PostgreSQL and private Blob storage.

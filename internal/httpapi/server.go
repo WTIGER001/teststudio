@@ -141,16 +141,7 @@ func (s *Server) authenticated(handler http.HandlerFunc, allowPasswordChange boo
 
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /livez", func(w http.ResponseWriter, r *http.Request) {
-		JSON(w, 200, map[string]string{"status": "up", "service": "teststudio"})
-	})
-	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
-		if err := s.Store.DB.PingContext(r.Context()); err != nil {
-			JSON(w, 503, map[string]string{"status": "unavailable"})
-			return
-		}
-		JSON(w, 200, map[string]string{"status": "up", "service": "teststudio"})
-	})
+	s.healthRoutes(mux)
 	s.identityLinkRoutes(mux)
 	s.authRoutes(mux)
 	s.localAccountRoutes(mux)

@@ -128,6 +128,7 @@ func (s *Server) artifactAccess(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) ArtifactHandler() http.Handler {
 	mux := http.NewServeMux()
+	s.healthRoutes(mux)
 	mux.HandleFunc("GET /access/{token}", s.serveArtifact)
 	mux.HandleFunc("GET /trace/{token}/{asset...}", s.serveTraceViewer)
 	mux.HandleFunc("GET /trace-closed", s.traceClosed)

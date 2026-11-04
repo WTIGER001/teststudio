@@ -8,11 +8,24 @@ import { fileURLToPath } from 'node:url'
 const root = fileURLToPath(new URL('..', import.meta.url))
 process.chdir(root)
 const arguments_ = process.argv.slice(2)
-if (arguments_.some(value => !/^--arch=(amd64|arm64)$/.test(value)) || arguments_.length > 1) throw new Error('Use node scripts/build-service-image.mjs [--arch=amd64|arm64]')
+if (arguments_.some(value => !/^--arch=(amd64|arm64)$/.test(value) && !/^--buildx=.+$/.test(value)) || new Set(arguments_.map(value => value.split('=')[0])).size !== arguments_.length) throw new Error('Use node scripts/build-service-image.mjs [--arch=amd64|arm64] [--buildx=PATH]')
+const buildxPath = arguments_.find(value => value.startsWith('--buildx='))?.slice('--buildx='.length)
 const hostName = execFileSync('docker', ['info', '--format', '{{.Architecture}}'], { encoding: 'utf8' }).trim()
 const host = ({ aarch64: 'arm64', arm64: 'arm64', x86_64: 'amd64', amd64: 'amd64' })[hostName]
 if (!host) throw new Error('Unsupported Docker host architecture')
-const architecture = arguments_[0]?.split('=')[1] ?? host
+const architecture = arguments_.find(value => value.startsWith('--arch='))?.split('=')[1] ?? host
+let buildCommand = 'docker', buildPrefix = ['build'], buildBackend = 'docker-legacy'
+try {
+  const command = buildxPath ? path.resolve(buildxPath) : 'docker'
+  const prefix = buildxPath ? [] : ['buildx']
+  const version = execFileSync(command, [...prefix, 'version'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim()
+  const contextName = execFileSync('docker', ['context', 'show'], { encoding: 'utf8' }).trim()
+  buildCommand = command
+  buildPrefix = [...prefix, 'build', '--builder', contextName, '--load', '--provenance=false']
+  buildBackend = version
+} catch (error) {
+  if (buildxPath || architecture !== host) throw new Error('Cross-architecture service packaging requires Docker buildx. Install the plugin or select its trusted executable with --buildx=PATH.')
+}
 const directory = path.join(root, '.data/service-build', architecture)
 fs.mkdirSync(directory, { recursive: true, mode: 0o700 })
 const cacheFile = path.join(directory, 'cache.json')
@@ -42,22 +55,38 @@ for (const name of ['teststudio', 'teststudio-health']) {
   } else console.error(`Reusing unchanged service binary: ${name}.`)
 }
 const dockerfile = path.join(root, 'deploy/service/Dockerfile')
-const sourceKey = digest([architecture, hashFile(dockerfile), hashFile('scripts/build-service-image.mjs'), cache.binaries, assets.uiOutput, assets.traceOutput])
+const certificateSource = JSON.parse(fs.readFileSync('deploy/service/certificate-source.json', 'utf8'))
+if (!/^[^\s]+@sha256:[a-f0-9]{64}$/.test(certificateSource.image) || !/^linux\/(amd64|arm64)$/.test(certificateSource.platform) || certificateSource.path !== '/etc/ssl/certs/ca-certificates.crt') throw new Error('The service certificate source requires a fixed image digest, platform, and certificate path')
+const sourceKey = digest([architecture, buildBackend, certificateSource, hashFile(dockerfile), hashFile('scripts/build-service-image.mjs'), cache.binaries, assets.uiOutput, assets.traceOutput])
 if (cache.sourceKey === sourceKey && cache.image) {
   const previous = inspect(cache.image)
   if (previous?.Id === cache.image && previous.Architecture === architecture) { console.error('Reusing the unchanged service image.'); console.log(JSON.stringify({ image: cache.image, architecture, sourceKey })); process.exit(0) }
 }
-const base = /^FROM --platform=\$\{BUILDPLATFORM\} ([^\s]+) AS files$/m.exec(fs.readFileSync(dockerfile, 'utf8'))?.[1]
-if (!base?.includes('@sha256:')) throw new Error('The service certificate source requires an immutable digest')
-if (!inspect(base)) execFileSync('docker', ['pull', '--platform=linux/' + host, base], { stdio: ['ignore', 2, 2] })
+if (!inspect(certificateSource.image)) execFileSync('docker', ['pull', '--platform=' + certificateSource.platform, certificateSource.image], { stdio: ['ignore', 2, 2] })
+const certificateContainer = 'teststudio-service-certificates-' + crypto.randomUUID()
+let certificateCreated = false
 const context = fs.mkdtempSync(path.join(os.tmpdir(), 'teststudio-service-image-'))
 try {
+  execFileSync('docker', ['create', '--name', certificateContainer, '--platform=' + certificateSource.platform, '--network=none', '--read-only', '--entrypoint=/bin/true', certificateSource.image], { stdio: ['ignore', 'ignore', 2] })
+  certificateCreated = true
+  execFileSync('docker', ['cp', certificateContainer + ':' + certificateSource.path, path.join(context, 'ca-certificates.crt')], { stdio: ['ignore', 'ignore', 2] })
+  for (const [name, mode] of [['data', 0o700], ['temporary', 0o1777]]) {
+    fs.mkdirSync(path.join(context, name), { mode })
+    fs.chmodSync(path.join(context, name), mode)
+  }
   for (const name of ['teststudio', 'teststudio-health']) fs.copyFileSync(path.join(directory, name), path.join(context, name))
   fs.cpSync(assets.ui, path.join(context, 'ui'), { recursive: true, dereference: false })
   fs.cpSync(assets.traceViewer, path.join(context, 'trace-viewer'), { recursive: true, dereference: false })
-  execFileSync('docker', ['build', '--network=none', '--pull=false', '--platform=linux/' + architecture, '--build-arg', 'BUILDPLATFORM=linux/' + host, '--build-arg', 'TARGETARCH=' + architecture, '--build-arg', 'SOURCE_KEY=' + sourceKey, '-q', '-f', dockerfile, '-t', 'teststudio/service:' + architecture + '-local', context], { stdio: ['ignore', 2, 2] })
+  execFileSync(buildCommand, [...buildPrefix, '--network=none', '--pull=false', '--platform=linux/' + architecture, '--build-arg', 'TARGETARCH=' + architecture, '--build-arg', 'SOURCE_KEY=' + sourceKey, '-q', '-f', dockerfile, '-t', 'teststudio/service:' + architecture + '-local', context], { stdio: ['ignore', 2, 2] })
   const image = inspect('teststudio/service:' + architecture + '-local')
   if (!image || image.Architecture !== architecture || !/^sha256:[a-f0-9]{64}$/.test(image.Id) || image.Config.User !== '65532:65532') throw new Error('The built service image metadata does not match the requested package')
   cache.sourceKey = sourceKey; cache.image = image.Id; save()
   console.log(JSON.stringify({ image: image.Id, architecture, sourceKey }))
-} finally { fs.rmSync(context, { recursive: true, force: true }) }
+} finally {
+  fs.rmSync(context, { recursive: true, force: true })
+  if (certificateCreated) {
+    execFileSync('docker', ['rm', '--force', '--volumes', certificateContainer], { stdio: ['ignore', 'ignore', 2] })
+    try { execFileSync('docker', ['inspect', certificateContainer], { stdio: ['ignore', 'pipe', 'pipe'] }); throw new Error('The owned certificate extraction container remains after cleanup') }
+    catch (error) { if (!/no such/i.test(String(error.stderr))) throw error }
+  }
+}

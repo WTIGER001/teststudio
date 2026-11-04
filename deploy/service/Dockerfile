@@ -1,14 +1,11 @@
-ARG BUILDPLATFORM
-FROM --platform=${BUILDPLATFORM} golang:1.26.8-alpine3.23@sha256:33ce311e5eecedee48ec1b84419c1306e9fbd71009f0d5c3f2a6904b579c1ecc AS files
-RUN mkdir -p /data /tmp && chmod 700 /data && chmod 1777 /tmp
 FROM scratch
 ARG TARGETARCH
 ARG SOURCE_KEY
 LABEL org.opencontainers.image.title="TestStudio" org.opencontainers.image.source="https://github.com/wtiger001/teststudio"
 LABEL teststudio.package="service/v1" teststudio.architecture="${TARGETARCH}" teststudio.source-key="${SOURCE_KEY}"
-COPY --from=files /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
-COPY --from=files --chown=65532:65532 /data /data
-COPY --from=files --chown=65532:65532 /tmp /tmp
+COPY ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --chown=65532:65532 data /data
+COPY --chown=65532:65532 temporary /tmp
 COPY teststudio teststudio-health /app/
 COPY ui /app/ui
 COPY trace-viewer /app/trace-viewer

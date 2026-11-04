@@ -69,6 +69,75 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: Azure core packaging and separate service roles
+
+Acceptance **57** advances. The ledger stays at **48 verified, 9 open, 57 total** items.
+The new deploy/azure Bicep modules package independent API and artifact Container Apps with separate HTTPS origins.
+They reference an installation environment, registry, Key Vault, and PostgreSQL connection secret.
+The package creates five managed identities, private Blob storage, scoped permissions, a storage deletion lock, and two service apps.
+It retrieves no secret values or account keys and depends on no AWS setting or credential.
+
+The API runtime receives Blob writer authority on the evidence container. The artifact runtime receives reader authority there.
+Separate startup identities receive read authority only on named Key Vault secrets.
+The artifact startup identity can resolve only the database secret, without provider settings or client credentials.
+Registry pull and startup identities use lifecycle None. Only the selected Blob runtime identity uses lifecycle Main.
+Blob configuration selects each app's exact runtime client identifier.
+Assignment names include the actual principal identifier to permit identity replacement without mutating an existing assignment's principal.
+PostgreSQL, identity reachability, role propagation, TLS, network policy, and real managed identity access remain deployment verification requirements.
+
+The service adds --serve-role=all, api, or artifacts. The existing combined role remains the default.
+The API role binds only its listener and owns background work.
+The artifact role binds only its listener and starts no run, schedule, source, notification, or maintenance worker.
+It rejects initial sign-in, user bootstrap, provider, source, recording, and execution configuration flags.
+It reads the database's current password-authentication mode without changing that mode.
+Grant checks still validate current sessions, credentials, permissions, manifest ownership, and artifact retention.
+The artifact listener adds the same process liveness and database readiness routes without exposing a UI, sign-in route, or catalog API.
+
+Shared listener startup opens every selected port before starting background workers.
+A failed later listener releases earlier ports and starts no workers. Cancellation stops owned listeners and workers.
+Focused Go checks cover failed binding, shutdown, artifact liveness during database failure, and absence of application routes.
+A separate focused artifact-role check preserves enabled password mode, reads a retained private log through a password-backed grant, then rejects that grant after mode disabling.
+All focused checks pass with race detection. No complete API or browser suite repeats.
+
+Local Bicep 0.48.1 compilation validates provider properties and all local modules without registry restoration or warnings.
+Seven packaging checks verify the two roles, origin consistency, ingress, probes, fixed active replicas, identity lifecycle, named-secret permissions, private storage, and digest references.
+The generated template has 15 top-level resources with nested app and permission modules.
+Evidence is output/azure-package/check/summary.json, compile.log, and service.json.
+The first compiler pass rejects runtime-derived resource locations and inline loop expressions. Explicit location input and supported local maps correct those issues.
+The checker follows compiler-inlined output expressions rather than assuming every source variable remains in the emitted template.
+The verified compiler download metadata remains in .data/azure-tools/download.json.
+
+The required AMD64 build exposes the legacy Docker builder's cross-platform stage and scratch-image failure.
+The producer now requires buildx for cross-architecture output and accepts --buildx=PATH for a trusted standalone executable.
+It selects the current context's built-in builder, loads the image locally, and creates no additional builder daemon.
+The build backend version and fixed certificate-source metadata participate in cache selection.
+A stopped container supplies certificates from the pinned image. It never executes. The producer verifies its cleanup and removes the temporary context.
+The final Dockerfile uses a single scratch stage with explicit non-root data and temporary directories.
+The native fallback remains available for a host-architecture build when buildx is unavailable.
+Verified standalone buildx metadata is recorded in .data/docker-tools/download.json.
+
+The final local AMD64 image is sha256:b4f2827a1182b3df1eb8b10b71390f378e988663963083ee9fb1b934e982402c.
+This is a local image identifier, not a pushed registry digest.
+Four focused container checks verify API-only startup, artifact-only boundaries, persisted sign-in mode, and invalid role rejection.
+Evidence is output/azure-package/roles/summary.json and cleanup.json.
+Two configuration and temporary-volume checks pass on that same AMD64 image.
+Evidence is output/azure-package/configuration/summary.json and cleanup.json.
+The role check uses sequential single-process SQLite only for the fresh local fixture. Hosted apps still require shared PostgreSQL.
+All owned containers and named or anonymous volumes are removed. No certificate-extraction container remains.
+The native ARM64 fallback also builds and passes the two targeted configuration and temporary-volume checks.
+Evidence is output/azure-package/native-configuration/summary.json and cleanup.json.
+Its local image identifier is sha256:8b6e0cb88876b8ad9be2edfbf320586b2cab691e9a19a1f5effeef88ab829423.
+UI, private viewer, and trusted execution runtime assets reuse unchanged outputs.
+Each architecture builds only required service binaries. The health command's source remains unchanged.
+The native API and preparation worker build. The demonstration refresh preserves its database, evidence, and existing browser work.
+No browser, source-runner matrix, AWS, Kubernetes, or Azure deployment or live provider check runs.
+
+The selected Container Apps schema exposes no container read-only root or capability-drop property.
+The template uses the non-root image and states that platform limit. It makes no unsupported filesystem or worker-isolation claim.
+Hosted preparation, execution, timing, cancellation, deadlines, provider retention, real identity, replica recovery, and full deployment parity remain open.
+Next implement common private work-packet and result transport, then isolated provider dispatch and recovery adapters.
+See [Azure core service profile](azure.md) for deployment prerequisites and remaining verification.
+
 ## Current delivery: ECS and CloudFront core packaging
 
 Acceptance **57** advances. The ledger stays at **48 verified, 9 open, 57 total** items.

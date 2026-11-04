@@ -22,16 +22,26 @@ node scripts/build-service-image.mjs --arch=amd64
 node scripts/build-service-image.mjs --arch=arm64
 ```
 
+Cross-architecture builds require Docker buildx. An unavailable cross-architecture backend fails explicitly before compilation.
+Use --buildx=PATH to select a trusted standalone buildx executable when the Docker plugin is not installed.
+The producer selects the current Docker context's built-in builder, loads the image locally, and creates no separate builder daemon.
+The build backend version participates in cache selection.
+
 The command returns JSON with the immutable local image identifier, architecture, and source key.
 It tags the image as teststudio/service:ARCH-local. It performs no registry push or deployment.
 The local image identifier differs from a registry distribution digest. Use a registry image digest when preparing hosted manifests.
-The current functional package verification uses arm64. Other architecture execution still requires its own verification.
+The initial functional package verification uses arm64.
+The Azure batch also builds amd64 and verifies its two service roles, environment configuration, non-root temporary writes, UI serving, and persisted sign-in mode.
+The native ARM64 fallback also passes the targeted configuration and temporary-volume startup after certificate assembly changes.
+These architecture checks do not prove hosted deployment acceptance.
 
 The builder reuses the canonical UI and trace-viewer assets through --assets-only.
 It builds only the service and health binaries needed by this package.
 Go workspace mode is off. Module metadata is read-only, and binaries use CGO_ENABLED=0.
 Source inputs, effective compiler settings, binary hashes, asset hashes, Dockerfile content, and image metadata control reuse.
-The container build has no network access and uses an immutable certificate-source image.
+The final container build has no network access and uses a scratch base.
+Its certificate bundle comes from deploy/service/certificate-source.json and a stopped container from the pinned image.
+The producer copies trusted certificates without executing that container. It removes and verifies the extraction container after assembly.
 Its temporary context contains only the selected binaries and static assets. The context is removed after assembly.
 An unchanged image build reuses existing assets, binaries, and the verified image identifier.
 
@@ -126,3 +136,17 @@ Hosted dispatch, preparation, cancellation, deadlines, recovery, and provider-sp
 The package verification does not complete AWS, Kubernetes, Azure, or cross-profile acceptance.
 
 The [Kubernetes service profile](kubernetes.md) supplies Helm configuration, private Secret references, separate origins, storage, and probes for this image.
+
+## Separate service roles
+
+The default --serve-role=all preserves the combined local and existing provider behavior.
+Use --serve-role=api to expose only the UI/API listener and own background workers.
+Use --serve-role=artifacts to expose only the artifact listener without user or provider bootstrap or background workers.
+The artifact role rejects identity bootstrap, initial provider, recording, source, or execution configuration flags.
+It reads current password-authentication state from the database without changing that state.
+Both listeners expose /healthz readiness and /livez liveness. Artifact routes retain no-store responses and contain no UI or sign-in flow.
+Select the artifact port explicitly when configuring a health probe for an artifact-only process.
+The packaged default Docker health command checks API port 8040. Provider probes must override that address for artifact-only instances.
+
+The [Azure core profile](azure.md) uses these roles for separate HTTPS apps with shared PostgreSQL and Blob storage.
+The focused local role checker is scripts/verify-service-roles.py. It uses sequential single-process SQLite startup without a browser or cloud target.

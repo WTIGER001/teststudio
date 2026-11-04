@@ -60,6 +60,7 @@ func main() {
 }
 
 func run() error {
+	serviceRole := flag.String("serve-role", "all", "Service listeners: all, api, or artifacts; artifact role starts no background workers or identity bootstrap")
 	addr := flag.String("addr", "127.0.0.1:8040", "HTTP listen address")
 	dsn := flag.String("database", ".data/teststudio.db", "SQLite path or PostgreSQL connection URL")
 	databaseEnvironment := flag.String("database-env", "", "Environment variable containing the database connection")
@@ -95,6 +96,13 @@ func run() error {
 	recordingHelper := flag.String("recording-helper", "scripts/record-browser.mjs", "Trusted desktop recording helper script")
 	recordingDirectory := flag.String("recording-directory", ".data/recordings", "Private local browser recording directory")
 	flag.Parse()
+	role, err := runtimeconfig.ParseServiceRole(*serviceRole)
+	if err != nil {
+		return err
+	}
+	if !role.API && (*local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *preparedSources || *sourceBundles || *githubSources || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
+		return errors.New("the artifact service role cannot configure identity bootstrap, sign-in, source preparation, recording, or execution")
+	}
 	connection, err := runtimeconfig.DatabaseConnection(*dsn, *databaseEnvironment, runtimeconfig.ExplicitFlag(flag.CommandLine, "database"), os.LookupEnv)
 	if err != nil {
 		return err
@@ -178,6 +186,15 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	blobs, closeArtifacts, err := artifactconfig.Open(ctx, artifactSettings)
+	if err != nil {
+		return err
+	}
+	defer closeArtifacts()
+	evidenceService := &evidence.Service{Store: db, Blobs: blobs}
+	if !role.API {
+		return serveArtifacts(ctx, *artifactAddr, *public, *artifactOrigin, *traceDirectory, db, auth, evidenceService)
+	}
 	localUser := ""
 	if *local {
 		localUser = "local-administrator"
@@ -219,13 +236,7 @@ func run() error {
 	}
 	sessionService := &sessions.Service{LocalAccounts: *localAccounts, Store: db, Directory: directory, Origin: *public, Secure: parsed.Scheme == "https"}
 	oidc := &authoidc.Service{Store: db, Directory: directory, Sessions: sessionService, Origin: *public, SecretRefs: approvedOIDCSecrets}
-	blobs, closeArtifacts, err := artifactconfig.Open(ctx, artifactSettings)
-	if err != nil {
-		return err
-	}
-	defer closeArtifacts()
 	catalogService := &catalog.Service{Store: db, Auth: auth}
-	evidenceService := &evidence.Service{Store: db, Blobs: blobs}
 	runService := &runs.Service{Store: db, Auth: auth, Catalog: catalogService, Evidence: evidenceService, HTTP: &execution.HTTP{Trust: httpTrust}, Location: *location}
 	sourceService := &sources.Service{Store: db, Auth: auth, Location: *location, RecoveryInspectors: map[string]preparation.ArtifactInspector{
 		"go": &localcontainer.Executor{Runner: "go"}, "playwright": &localcontainer.Executor{Runner: "playwright"},
@@ -304,64 +315,19 @@ func run() error {
 	}
 	server := &http.Server{Addr: *addr, Handler: api.Handler(), ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 30 * time.Second, WriteTimeout: 60 * time.Second, IdleTimeout: 90 * time.Second}
 	artifactServer := &http.Server{Addr: *artifactAddr, Handler: api.ArtifactHandler(), ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 30 * time.Second, IdleTimeout: 90 * time.Second}
-	listener, err := net.Listen("tcp", *addr)
-	if err != nil {
-		return err
+	servers := []*http.Server{server}
+	if role.Artifacts {
+		servers = append(servers, artifactServer)
 	}
-	defer listener.Close()
-	artifactListener, err := net.Listen("tcp", *artifactAddr)
-	if err != nil {
-		return err
-	}
-	defer artifactListener.Close()
-	workerContext, cancelWorkers := context.WithCancel(ctx)
-	workersDone := runService.Start(workerContext)
-	recordingMaintenanceDone := recordingService.StartMaintenance(workerContext)
-	cliMaintenanceDone := (&cliauth.Service{Sessions: sessionService}).StartMaintenance(workerContext)
-	maintenanceDone := evidenceService.StartMaintenance(workerContext, 5*time.Second)
-	sourceMaintenanceDone := sourceService.StartMaintenance(workerContext, 5*time.Second)
-	var preparationDone <-chan struct{}
-	preparationDone = sourceService.StartPreparation(workerContext)
-	var schedulesDone <-chan struct{}
+	background := backgroundServices{Runs: runService, Recordings: recordingService, CLI: &cliauth.Service{Sessions: sessionService}, Evidence: evidenceService, Sources: sourceService}
 	if *scheduler {
-		schedulesDone = scheduleService.Start(workerContext)
+		background.Schedules = scheduleService
 	}
-	var notificationsDone <-chan struct{}
 	if *notificationWorker {
-		notificationsDone = notificationService.Start(workerContext)
+		background.Notifications = notificationService
 	}
-	defer func() {
-		cancelWorkers()
-		<-workersDone
-		<-cliMaintenanceDone
-		<-recordingMaintenanceDone
-		<-maintenanceDone
-		<-sourceMaintenanceDone
-		if preparationDone != nil {
-			<-preparationDone
-		}
-		if schedulesDone != nil {
-			<-schedulesDone
-		}
-		if notificationsDone != nil {
-			<-notificationsDone
-		}
-	}()
-	failed := make(chan error, 2)
-	go func() { failed <- server.Serve(listener) }()
-	go func() { failed <- artifactServer.Serve(artifactListener) }()
-	defer server.Close()
-	defer artifactServer.Close()
-	fmt.Printf("TestStudio listens at %s\n", *public)
-	select {
-	case err := <-failed:
-		if !errors.Is(err, http.ErrServerClosed) {
-			return err
-		}
-	case <-ctx.Done():
-		shutdown, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-		return errors.Join(server.Shutdown(shutdown), artifactServer.Shutdown(shutdown))
-	}
-	return nil
+	return serveServers(ctx, servers, func() func() {
+		fmt.Printf("TestStudio listens at %s\n", *public)
+		return background.start(ctx)
+	})
 }

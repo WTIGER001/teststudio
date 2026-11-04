@@ -125,8 +125,23 @@ No AWS operation, browser run, source-runtime rebuild, or unchanged UI build occ
 See [AWS core service profile](aws.md) and the implementation ledger for exact evidence and remaining scope.
 The count remains **48 verified, 9 open**. No hosted acceptance item closes from local packaging checks.
 
-Next, add Azure Container Apps core packaging.
-Then implement their isolated execution adapters and preparation requirements, preserving the full deployment acceptance scope.
+Azure Container Apps core packaging now uses separate API and artifact service roles with shared PostgreSQL and private Blob storage.
+Its Bicep modules compile locally and pass seven packaging checks without Azure account access.
+The profile separates runtime Blob permissions from platform-only registry and named-secret identities.
+The artifact role starts no background workers, exposes no sign-in or UI routes, and preserves current password-authentication state.
+Focused local checks cover health, listener startup failure, shutdown, password-backed artifact access, and later authentication revocation.
+The AMD64 service image now builds through buildx and passes targeted local role and configuration checks.
+The cross-architecture producer fixes the legacy builder failure and verifies certificate-extraction cleanup.
+See [Azure core service profile](azure.md) for operator inputs, platform limits, and exact local evidence.
+The count remains **48 verified, 9 open**. Core packaging does not establish complete hosted execution or deployment parity.
+
+Next, implement isolated execution adapters and preparation requirements, preserving the full deployment acceptance scope.
+First add common attempt-scoped work-packet and result transport for hosted jobs.
+Preserve the existing bounded input, immutable source, timing, result, capture-policy, and gateway contracts.
+Keep real target credentials in the trusted gateway. Untrusted workers receive neither application sessions nor provider SDK credentials.
+Then add provider dispatch, status, cancellation, deadline, and restart reconciliation against local protocol fixtures.
+Preparation must publish and inspect immutable artifacts outside the API before hosted code can execute.
+Do not substitute fire-and-forget job creation for these lifecycle and recovery requirements.
 Preserve separate API/UI and artifact origins. Require installation-specific PostgreSQL, identity, storage, and secret configuration.
 Keep untrusted test execution outside the API. Do not promise hosted coded execution before its network, artifact, deadline, and recovery contracts exist.
 Use local schema, protocol, and packaging checks. Cloud deployment verification remains separate work.

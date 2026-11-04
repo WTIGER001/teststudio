@@ -597,3 +597,13 @@ Evaluate UI-only route rewriting locally with Node. Use the existing service-ima
 The service verifier accepts --configuration-only to check environment-backed JSON and temporary-volume startup after configuration-only changes.
 Retain earlier passing package evidence when the remaining package contracts do not change.
 No browser or test-source image rebuild is needed for this infrastructure batch.
+
+## Azure packaging and service roles
+
+Use scripts/verify-azure-package.py with a trusted Bicep executable, as described in the [Azure core profile](azure.md#compile-and-check-locally).
+The command compiles local modules, checks provider properties, and verifies packaging relationships without Azure CLI or account access.
+Use scripts/verify-service-roles.py for changed listener ownership, route boundaries, or authentication-mode behavior.
+It runs one fresh local installation sequentially and removes all owned containers and volumes.
+Use the service image check's --configuration-only option for changed configuration or directory ownership.
+These checks require no browser suite, source-runtime rebuild, cloud deployment, or provider account.
+Reuse existing complete package and product evidence for unchanged contracts.
