@@ -152,3 +152,9 @@ The default filesystem profile requires no cloud service.
 S3 and Azure Blob profiles use the same private grants, manifests, quotas, pin checks, and retention worker.
 Provider configuration stays outside the test catalog and run request.
 See [Artifact storage](artifact-storage.md) for credential sources, installation prefixes, storage migration, and current verification limits.
+
+## Backup and database transfer
+
+[Installation transfer](data-transfer.md) preserves artifact identifiers, manifests, pins, and quota records across SQLite and PostgreSQL.
+Artifact bytes stay in their separately configured store. Copy or retain the exact keys with the metadata snapshot.
+Restored evidence uses the same private grants, retention rules, checksum verification, and missing-file feedback.

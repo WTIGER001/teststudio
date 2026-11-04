@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 36 verified of 57.
+The acceptance count is 37 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -18,7 +18,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **05.** A new project, application, environment, and suite can be registered without editing Go or TypeScript source.
 - [ ] **06.** PostgreSQL and SQLite pass the same storage behavior checks, including claims, revision conflicts, and restart recovery.
 - [x] **07.** SQLite restarts preserve users, memberships, assignments, custom grants, disabled roles, and sessions without a PostgreSQL service.
-- [ ] **08.** Local SQLite installation requires no database server. Export and import to PostgreSQL preserve identifiers and artifact references.
+- [x] **08.** Local SQLite installation requires no database server. Export and import to PostgreSQL preserve identifiers and artifact references.
 - [x] **09.** Local accounts, OIDC accounts, and mixed sign-in work through the same directory, permission checks, and managed sessions.
 - [x] **10.** Users, groups, membership, custom roles, assignments, and effective permissions are manageable through authorized API and UI workflows.
 - [x] **11.** `wtiger001/go-permissions` evaluates access on PostgreSQL and SQLite through the same service and identity contracts.
@@ -68,6 +68,30 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **55.** Hosted identity and private report access work through installation-specific configuration.
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
+
+## Current delivery: installation backup and database transfer
+
+Acceptance **08** is complete. The ledger has **37 verified, 20 open, 57 total** items.
+
+The new teststudio-data operator tool exports private installation archives and restores them into an empty SQLite or PostgreSQL database.
+Public identifiers, raw metadata, revisions, timestamps, immutable runs, audit history, and artifact references remain unchanged.
+Typed native permission conversion preserves grant identifiers, inherited group access, exact denies, disabled roles, and sequence high-water marks.
+Password hashes and server-side sessions remain usable after restoration.
+
+Export opens SQLite read-only and uses a consistent PostgreSQL snapshot. Active execution, preparation, and recordings block export.
+Private archives publish atomically without overwriting existing output. Artifact bytes and runtime configuration remain separate cutover responsibilities.
+Import requires an empty destination. A checksum, ordered sections, schema versions, and exact counts protect transaction completion.
+Corrupt or truncated input rolls back installation data. Existing destination data remains intact.
+
+Focused local checks pass for SQLite restoration, SQLite-to-PostgreSQL transfer, PostgreSQL-to-SQLite restoration, access, and retained evidence.
+A missing copied artifact stays explicitly missing without changing the original test outcome.
+The actual operator command builds and its help works. Existing storage transaction checks pass after the read-snapshot refactor.
+No browser suite, fixture image rebuild, or cloud deployment runs for this operator-only change.
+Both owned PostgreSQL fixtures and their launcher processes stop and are verified absent.
+
+Evidence is output/installation-transfer/checkpoint.json and the focused transfer logs under .data.
+See [Installation backup and database transfer](data-transfer.md) for cutover commands, storage copying, credentials, and format limits.
+Continue remaining storage parity and local acceptance work. Hosted profile verification remains separate.
 
 ## Current delivery: coded timing and logical count parity
 

@@ -15,7 +15,7 @@ The full product scope remains required. This direction supersedes the testing s
 ## Active delivery plan after the tester walkthrough
 
 This section is the current implementation order. Historical continuation commands below do not override it.
-The local demonstration is usable and verified. The complete product remains unfinished at 36 verified items out of 57.
+The local demonstration is usable and verified. The complete product remains unfinished at 37 verified items out of 57.
 Ordinary project creator access and the first environment-backed local recorded website flow pass targeted verification.
 Tester investigation and failure recovery now pass targeted local verification. Continue with remaining catalog and evidence gaps.
 Do not add new dashboard pages or repeat completed demonstration setup before closing the remaining workflow gaps.
@@ -32,7 +32,7 @@ Do not add new dashboard pages or repeat completed demonstration setup before cl
 | New target configuration | Show new application and environment records on Review before saving. Reuse matching targets and preserve their protection. |
 | Test lifecycle | Keep recording, draft saving, preparation, publication, activation, and execution distinct. Combined actions explain each effect. |
 | Save and run | Retain the implemented non-activating publication behavior. Run the selected test and dependencies without replacing the suite's active release. |
-| Persistence | SQLite is the single-instance local default. PostgreSQL is the hosted and multi-instance default. Storage parity and transfer remain open requirements. |
+| Persistence | SQLite is the single-instance local default. PostgreSQL is the hosted and multi-instance default. Installation export and import preserve identifiers and access across both databases. Full storage parity remains open. |
 | Charts | Keep the existing accessible SVG stacked-area implementation. A chart-library migration is not required. |
 | Local verification | Use local fixtures, cached builds, and targeted checks. Public customer websites are manual user targets, not verification dependencies. |
 | Deployment | Retain local server, AWS ECS with CloudFront, Kubernetes, and Azure Container Apps with Jobs as required profiles. Hosted parity remains unverified. |
@@ -60,7 +60,7 @@ See [initial creator access](access.md#initial-project-creator-access) for curre
 SQLite, local PostgreSQL, and STUDIO-OWNER-001 evidence are recorded in the implementation ledger.
 
 This sequence changes implementation priority, not the scope or numbering of the 57 acceptance criteria.
-Acceptances 13, 21, 25, 26, 29, 36, 42, 43, 44, and 45 are complete. Remaining access checks stay under 12. Other catalog, execution, and evidence requirements remain open.
+Acceptances 08, 13, 21, 25, 26, 29, 36, 42, 43, 44, and 45 are complete. Remaining access checks stay under 12. Other catalog, execution, and evidence requirements remain open.
 Do not treat these batches as additional acceptance items or claim the whole product complete after a demonstration.
 
 ### Recorded browser execution scope
@@ -205,7 +205,7 @@ The next implementation batches follow the full ledger without adding new gates 
 
 ## Current implementation checkpoint
 
-The acceptance ledger has **36 verified, 21 open, 57 total** items.
+The acceptance ledger has **37 verified, 20 open, 57 total** items.
 Private trace viewing now passes targeted local verification. Acceptances **42** and **45** are complete.
 Run details expose recorded attempts, steps, context, logs, screenshots, traces, and configured attachments without HTML reports.
 The pinned installation-hosted viewer uses the separate artifact origin and short-lived grants with current project authorization.
@@ -232,7 +232,11 @@ Acceptance **36** is complete. Go package events, aggregates, retries, and API s
 Acceptance **41** advances with runtime binding, valid zero observations, and censored missing measurements on SQLite and local PostgreSQL.
 The actual local runtime inspection and focused normal self-tests pass. Cross-deployment timing verification remains open.
 See [Timing compatibility](timing.md#runtime-compatibility-and-zero-measurements) and [Logical counts](results.md#logical-count-boundaries). Acceptance **43** is complete. Durable upload recovery and repeated private evidence reads pass after local controller restart.
-Continue adapter retention and timing parity.
+Acceptance **08** is complete. Private installation archives transfer SQLite and PostgreSQL metadata and native permission state without changing public identifiers.
+Focused local checks preserve access, credentials, sessions, run history, grant high-water marks, and artifact references.
+Damaged input rolls back and nonempty destinations reject restoration. Artifact files and runtime configuration require a separate offline cutover copy.
+See [Installation backup and database transfer](data-transfer.md) for commands and limits.
+Continue remaining storage parity, adapter retention, timing, and local acceptance work.
 
 Bulk metadata edits now support reviewed category, tags, owner, title, description, safety, rationale, and condition changes.
 The API and UI preserve source-owned definitions and use atomic revision-controlled preview plans.

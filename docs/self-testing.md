@@ -379,3 +379,22 @@ Focused Go runner checks execute a new aggregate and an independently selected s
 Package and ancestor events remain diagnostics. They do not create additional logical test results.
 Coded execution checks cover passing retries, step evidence, unavailable measurements, valid zero durations, and changed runtimes.
 See [Test timing](timing.md) and [Results](results.md) for their contracts and remaining deployment scope.
+
+## Installation transfer
+
+Run focused SQLite archive and operator command checks with this command:
+
+```sh
+go test -race ./internal/transfer ./cmd/teststudio-data -count=1
+```
+
+Run the cross-database scenario with the local PostgreSQL helper:
+
+```sh
+bash scripts/test-postgres.sh ./internal/transfer -run TestSQLiteToPostgreSQLInstallationTransfer
+```
+
+The fixture creates a new project, access policy, local credential, session, completed HTTP run, and pinned artifact.
+It verifies raw metadata, effective access, preserved native grant identifiers, sequence continuity, and retained bytes.
+The reverse transfer also preserves metadata and access. A damaged archive leaves the destination empty.
+No browser or cloud account is required. See [Database transfer](data-transfer.md) for operator cutover steps.

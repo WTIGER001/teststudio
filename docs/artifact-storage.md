@@ -112,6 +112,7 @@ See [Evidence](evidence.md) for upload leases, retry limits, pins, and expiry pr
 Changing the backend, bucket, container, account, directory, or prefix does not copy existing bytes.
 Copy retained objects with their exact relative keys before selecting a different location for existing metadata.
 Preserve metadata and storage together during backup and restore. Keep all instances on the same installation profile.
+Use [Database transfer](data-transfer.md) to move metadata and native permission state between SQLite and PostgreSQL.
 Source bundle staging and prepared execution images remain under their separate source and runtime storage configuration.
 
 Cloud uploads stage a bounded source in a private temporary file before sending it.

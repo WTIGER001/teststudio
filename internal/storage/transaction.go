@@ -20,10 +20,22 @@ func (s *Store) executor() executor {
 }
 
 func (s *Store) Transaction(ctx context.Context, fn func(*Store, *sql.Tx) error) error {
+	return s.transaction(ctx, nil, fn)
+}
+
+func (s *Store) ReadTransaction(ctx context.Context, fn func(*Store, *sql.Tx) error) error {
+	options := &sql.TxOptions{ReadOnly: true}
+	if s.Dialect == "postgres" {
+		options.Isolation = sql.LevelRepeatableRead
+	}
+	return s.transaction(ctx, options, fn)
+}
+
+func (s *Store) transaction(ctx context.Context, options *sql.TxOptions, fn func(*Store, *sql.Tx) error) error {
 	if s.tx != nil {
 		return errors.New("nested storage transactions are not supported")
 	}
-	tx, err := s.DB.BeginTx(ctx, nil)
+	tx, err := s.DB.BeginTx(ctx, options)
 	if err != nil {
 		return err
 	}
