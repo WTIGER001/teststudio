@@ -25,13 +25,9 @@ type Relay struct {
 }
 
 func New(publicOrigin, backendOrigin string, transport http.RoundTripper) (*Relay, error) {
-	public, err := origin(publicOrigin)
+	public, backend, err := parsedOrigins(publicOrigin, backendOrigin)
 	if err != nil {
 		return nil, err
-	}
-	backend, err := origin(backendOrigin)
-	if err != nil || authority(public) == authority(backend) {
-		return nil, errConfiguration
 	}
 	if transport == nil {
 		transport = &http.Transport{Proxy: nil, DialContext: (&net.Dialer{Timeout: 5 * time.Second, KeepAlive: 30 * time.Second}).DialContext, TLSClientConfig: &tls.Config{MinVersion: tls.VersionTLS12}, TLSHandshakeTimeout: 5 * time.Second, ResponseHeaderTimeout: 15 * time.Second, IdleConnTimeout: 30 * time.Second, MaxConnsPerHost: 8, MaxIdleConnsPerHost: 8, MaxIdleConns: 8, DisableCompression: true}

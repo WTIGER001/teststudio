@@ -88,3 +88,20 @@ func authority(u *url.URL) string {
 	}
 	return strings.ToLower(u.Hostname()) + ":" + strconv.Itoa(port)
 }
+
+func parsedOrigins(publicOrigin, backendOrigin string) (*url.URL, *url.URL, error) {
+	public, err := origin(publicOrigin)
+	if err != nil {
+		return nil, nil, err
+	}
+	backend, err := origin(backendOrigin)
+	if err != nil || authority(public) == authority(backend) {
+		return nil, nil, errConfiguration
+	}
+	return public, backend, nil
+}
+
+func ValidateOrigins(publicOrigin, backendOrigin string) error {
+	_, _, err := parsedOrigins(publicOrigin, backendOrigin)
+	return err
+}

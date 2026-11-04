@@ -234,8 +234,15 @@ A warm invocation reuses both binaries, certificates, and the exact image. Owned
 No UI, runner, broader Go suite, registry push, or deployment runs.
 See [relay packaging](worker-relay.md#packaging-boundary). Acceptances 51 and supporting packaging under 57 advance; the count remains 48 of 57.
 
-Next inspect exchange service authority using the packaged relay.
-Inspect the separate exchange environment, service-side approval, isolated application inventory, and HTTPS hostname authority.
+The selected exchange stage now inspects environment readiness, service-side approval, relay specification, current auth configuration, certificate metadata, routes, and revisions.
+The relay image stays outside the untrusted test repository prefix. Exact command and origin arguments, absent runtime credentials, and pull-only lifecycle None remain required.
+The stage checks SNI certificate binding, SAN coverage, remaining certificate life, one healthy latest revision, and empty environment HTTP routes.
+Six new focused local race checks and one existing relay configuration check pass. Production relay dependencies remain unchanged.
+The reader accesses only eight selected resources and collections. It does not claim complete workload occupancy from an application lookup.
+See [selected Azure exchange binding](azure-worker-exchange.md). Acceptance 51 advances; the count remains 48 of 57.
+
+Next establish complete application and job occupancy, attachment authority, and actual exchange networking.
+Verify the trusted worker backend's restricted route, TLS authority, and placement before completing service admission.
 Resolve effective VNet-wide private-zone visibility and attachment controls. Selected-zone inspection cannot rule out other shadowing zones.
 Keep that proof separate from configured record correctness and private endpoint ownership.
 Provide trusted preparation with a separate private registry endpoint and DNS path. Do not add controller links to worker zones or peer worker and controller networks.

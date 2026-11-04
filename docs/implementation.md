@@ -122,7 +122,40 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: minimal worker relay image packaging
+## Current delivery: selected Azure exchange and HTTPS binding
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+The relay packaging batch commits as 707f54f.
+
+ExchangeGuard now refreshes the preceding registry stage before eight selected environment, app, certificate, auth, approval, link, route, and revision observations.
+The environment must be ready with public access disabled, the selected infrastructure subnet and group, and no environment runtime identity or telemetry credentials.
+Service-side approval must match the worker exchange endpoint and its embedded observation.
+The selected app must retain the immutable relay image, fixed command and origin arguments, one container, no runtime credentials, and lifecycle None for image pull.
+The image repository stays outside the untrusted test source prefix.
+Fresh SDK application and disabled-auth definitions support later packaging without Azure writes.
+
+HTTPS ingress must bind only the configured worker hostname and selected uploaded certificate.
+Certificate metadata must match the hostname and cover the maximum exchange deadline with an admission margin.
+The selected revision list must contain one healthy latest active revision with the same template and all traffic.
+Inactive revisions report no replicas or traffic. Environment HTTP-route inventory must be empty, and Easy Auth must be disabled.
+Foreign identity, different origins, credentials, alternate commands, ports, routes, certificates, and approval reject inspection.
+Missing or inconsistent snapshots, unsettled revisions, pending approval, and near-expiry certificate metadata remain unavailable.
+
+The SDK permits only eight exact selected GET resources or collections through the existing bounded ARM transport.
+It cannot request secrets, certificate export, app auth tokens, subscription discovery, resource-group discovery, writes, filters, or foreign resources.
+Six new focused local race checks pass across targeted commands. One existing relay configuration check passes after pure origin-validator extraction.
+The production dependency audit confirms no new storage, identity, secret, or cloud-SDK dependency in the relay.
+Only changed checks repeat after definition readability and missing or duplicate revision and domain observation review fixes.
+Evidence is output/azure-worker-exchange/summary.json and the focused command results.
+No cloud credential, live cloud API, TLS probe, DNS probe, packet probe, registry push, deployment, UI build, browser, container, or image build runs.
+
+This verifies the selected binding. It does not prove exclusive environment occupancy, attachment authority, actual network isolation, backend authority, or a served TLS chain.
+Container Apps inventory scopes require separate complete workload observation and attachment controls.
+Complete those controls, effective DNS visibility, trusted preparation networking, cross-job isolation, execution placement, role bindings, and native service wiring.
+Azure coded execution stays disabled. The guard does not implement Network or release worker input.
+See [selected Azure worker exchange binding](azure-worker-exchange.md).
+
+## Previous delivery: minimal worker relay image packaging
 
 Acceptance **51** and supporting packaging under **57** advance. The verified count remains **48 of 57**, with **9 open**.
 The standalone relay batch commits as 763daf4.

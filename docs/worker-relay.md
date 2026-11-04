@@ -11,7 +11,8 @@ This process supports the separate worker-facing service needed by Azure Contain
 The existing API worker listener still owns authentication, authorization, staging, durable state, and report validation.
 The relay validates request scope and forwards the bounded worker credential. It does not authenticate that credential itself.
 
-Azure service configuration, network admission, HTTPS binding, backend placement, and provider packaging remain unfinished.
+The [selected Azure exchange inspector](azure-worker-exchange.md) now checks configured relay specification, approval, revisions, and HTTPS metadata.
+Complete network admission, exclusive workload occupancy, backend placement, actual TLS verification, and provider service wiring remain unfinished.
 This command alone enables no Azure coded execution.
 The local demonstration and its stored data remain unchanged.
 
@@ -186,6 +187,6 @@ Acceptance 51 advances. The count remains 48 verified items out of 57.
 ## Next implementation
 
 Use the verified relay image package for the next private service configuration batch.
-Inspect Azure exchange environment approval, isolated application inventory, immutable relay image, argument configuration, and HTTPS certificate binding.
+Compose the selected Azure exchange checks. Establish complete workload occupancy, effective networking, and trusted backend authority.
 Verify that its backend reaches only the trusted worker listener and carries no installation credentials.
 Complete effective DNS visibility, trusted preparation networking, cross-job isolation, execution placement, and role binding before native Azure enablement.
