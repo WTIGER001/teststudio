@@ -6,6 +6,18 @@ It copies no tests or configuration from another application.
 
 ## Run locally
 
+For the empty-installation and optional-example contract, use a built server:
+
+```sh
+node scripts/verify-empty-installation.mjs .data/selftest-build/controller
+```
+
+This focused check starts only owned local server processes with fresh SQLite data and no cloud environment.
+It checks empty startup, empty restart, one selected HTTP example, explicit publication, and unchanged definitions after restart.
+It starts no browser or container. Each owned server stops before the summary records cleanup.
+Evidence stays under output/empty-installation. It does not touch the running demonstration.
+See [First installation](first-installation.md) for the tester workflow.
+
 Install Go, Node, npm, and Docker. Start the Docker daemon.
 Run this command from the repository root:
 

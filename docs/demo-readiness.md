@@ -2,7 +2,7 @@
 
 The first delivery presents a usable local TestStudio application.
 The complete product plan and 57 acceptance items remain the later delivery scope.
-The current acceptance ledger has 28 verified items. It measures full product requirements rather than the size of this demonstration.
+The [acceptance ledger](implementation.md) measures full product requirements rather than the size of this demonstration.
 
 ## Existing application
 
@@ -47,7 +47,8 @@ Clean up only processes and resources created by the demonstration check.
 ## Later delivery
 
 AWS, Kubernetes, and Azure deployment verification follows the local demonstration.
-Additional dependency preparation profiles, database transfer, broader recovery checks, and remaining authorization and evidence requirements remain on the full ledger.
+Additional dependency preparation profiles, broader recovery checks, and remaining authorization and evidence requirements remain on the full ledger.
+Local installation backup and database transfer now pass focused verification. See [Database transfer](data-transfer.md).
 They do not gate this initial local demonstration.
 
 ## Follow-up implementation

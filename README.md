@@ -60,6 +60,7 @@ Open http://127.0.0.1:8040 and select Open local workspace.
 The explicit local mode binds to loopback and provides local installation administrator access.
 The server starts with an empty project registry.
 Data stays under `.data/` by default.
+The [first installation guide](docs/first-installation.md) explains empty startup and selecting optional HTTP examples without Docker.
 
 Create a project, application, suite, and environment through the UI.
 Add native HTTPS checks, save catalog changes, validate a draft, and publish a release.

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "teststudio.catalog/v1",
+  "tests": [
+    {
+      "id": "HTTP-HEALTH-001",
+      "title": "Service health responds",
+      "description": "Check the health route on your registered local service.",
+      "applicationId": "local-service",
+      "category": "Availability",
+      "type": "https",
+      "runner": "http",
+      "state": "enabled",
+      "safety": "safe",
+      "rationale": "Reads the health route on an explicitly selected local target.",
+      "timeoutSeconds": 5,
+      "tags": ["example"],
+      "dependencies": [],
+      "requiredBindings": [],
+      "check": { "endpoint": "api", "path": "/healthz", "method": "GET", "statusCodes": [200] }
+    },
+    {
+      "id": "HTTP-HOME-001",
+      "title": "Service home responds",
+      "description": "Check the home route on your registered local service.",
+      "applicationId": "local-service",
+      "category": "Availability",
+      "type": "https",
+      "runner": "http",
+      "state": "enabled",
+      "safety": "safe",
+      "rationale": "Reads the home route on an explicitly selected local target.",
+      "timeoutSeconds": 5,
+      "tags": ["example"],
+      "dependencies": [],
+      "requiredBindings": [],
+      "check": { "endpoint": "api", "path": "/", "method": "GET", "statusCodes": [200] }
+    }
+  ]
+}

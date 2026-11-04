@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 37 verified of 57.
+The acceptance count is 38 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -13,7 +13,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 
 - [x] **01.** The Go service and UI build from this repository without MarketMaker imports, packages, shared resources, or sibling checkouts.
 - [ ] **02.** No existing tests, fixtures, catalog records, configuration, credentials, reports, or history are copied into the product.
-- [ ] **03.** Installation starts with empty registries and can load only explicitly selected new examples.
+- [x] **03.** Installation starts with empty registries and can load only explicitly selected new examples.
 - [x] **04.** Local durable operation works without a cloud account.
 - [x] **05.** A new project, application, environment, and suite can be registered without editing Go or TypeScript source.
 - [ ] **06.** PostgreSQL and SQLite pass the same storage behavior checks, including claims, revision conflicts, and restart recovery.
@@ -68,6 +68,27 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **55.** Hosted identity and private report access work through installation-specific configuration.
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
+
+## Current delivery: empty installation and selected examples
+
+Acceptance **03** is complete. The ledger has **38 verified, 19 open, 57 total** items.
+
+Normal server startup and restart create no projects or testing registries.
+Initial authentication and built-in access setup remain separate from project, application, suite, environment, test, run, and schedule records.
+The new optional examples/http/catalog.json contains independent native HTTP definitions without endpoints, credentials, or history.
+The first-installation guide explains selecting definitions, reviewing the source, explicit publication, and a separate explicit run.
+The existing full demonstration remains an explicit command with its own database and complete selected example package.
+
+The focused real-server check starts three owned server processes against fresh local SQLite data.
+It verifies empty startup and restart, empty project registries, preview without installation, one selected published definition, and no automatic run.
+A final restart preserves exactly that selection. No demo project or self-test catalog appears.
+All three owned processes stop and their identifiers are verified absent.
+No browser, Docker container, fixture build, or cloud verification runs for this batch.
+Evidence is output/empty-installation/local-qoUlbQ/summary.json.
+The existing demonstration remains available with its retained data.
+
+See [First installation](first-installation.md) and the focused command in [Self-testing](self-testing.md).
+Continue the remaining storage, authorization, and execution contracts without broad regression repeats.
 
 ## Current delivery: installation backup and database transfer
 
