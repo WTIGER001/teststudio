@@ -1794,13 +1794,15 @@ Keep styles scoped to app-owned classes so document elements cannot introduce un
 #### Layout and visual direction
 
 Use a compact operational dashboard with a persistent desktop sidebar and fluid main workspace.
-Place the project switcher at the top of the sidebar.
-Show application and environment filters in the page toolbar when relevant.
+Start the sidebar with Projects, followed by the Project and Application selectors.
+Keep environment filters in the relevant page toolbar.
 Use Start run for reviewed execution and Save and run for the explicit combined test-creation action.
 Make the chosen project, target, and protected state visible before execution.
 
-The Project selector sits above Workspace and Testing navigation.
-Testing contains Applications, Suites, Test catalog, Test runs, and Trends.
+Do not use Workspace as an ownership heading.
+Account access belongs in the global header. Accounts apply across the installation; project memberships grant project access.
+Application testing contains Application overview, Suites, Test catalog, Test runs, and Trends.
+Project overviews contains All applications and HTTPS probes.
 Automation contains Schedules and Notifications.
 Advanced testing contains Import and sync tests and Suite releases.
 Project administration and Installation administration keep access controls separate from daily testing.
