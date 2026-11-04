@@ -6,6 +6,7 @@ import (
 )
 
 type HTTPObservation struct {
+	TrustBundle        *HTTPTrustBundle   `json:"trustBundle,omitempty"`
 	Status             int                `json:"status"`
 	URL                string             `json:"url"`
 	DurationMs         float64            `json:"durationMs"`

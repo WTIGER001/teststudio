@@ -1,0 +1,9 @@
+[
+  {
+    "id": "internal-service-ca",
+    "name": "Internal service certificate authority",
+    "projectId": "example-project",
+    "origin": "https://inventory.internal.example:8443",
+    "caFile": "/run/teststudio/ca/internal-service.pem"
+  }
+]

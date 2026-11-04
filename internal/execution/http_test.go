@@ -36,16 +36,16 @@ func TestHTTPAssertionsAndRedirectIsolation(t *testing.T) {
 	test := definition("/up")
 	test.Check.JSON = map[string]any{"status": "up", "items.0.id": 1}
 	test.Check.Headers = map[string]string{"Content-Type": "application/json"}
-	r := (&HTTP{}).Execute(t.Context(), test, env)
+	r := (&HTTP{}).Execute(t.Context(), "project", test, env)
 	if r.State != "passed" || r.HTTP.Status != 200 || r.DurationMs <= 0 {
 		t.Fatalf("valid JSON check: %+v", r)
 	}
 	test.Check.JSON["status"] = "down"
-	r = (&HTTP{}).Execute(t.Context(), test, env)
+	r = (&HTTP{}).Execute(t.Context(), "project", test, env)
 	if r.State != "failed" || r.FailureKind != "assertion" {
 		t.Fatalf("JSON assertion: %+v", r)
 	}
-	r = (&HTTP{}).Execute(t.Context(), definition("/redirect"), env)
+	r = (&HTTP{}).Execute(t.Context(), "project", definition("/redirect"), env)
 	if r.State != "failed" || r.FailureKind != "http-status" || followed.Load() {
 		t.Fatalf("redirect escaped: %+v followed=%v", r, followed.Load())
 	}
@@ -58,7 +58,7 @@ func TestHTTPDeadlineAndTLSVerification(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { <-r.Context().Done() }))
 	defer server.Close()
 	env := projects.Environment{Stage: "local", Endpoints: map[string]string{"api": server.URL}}
-	r := (&HTTP{}).Execute(t.Context(), definition("/slow"), env)
+	r := (&HTTP{}).Execute(t.Context(), "project", definition("/slow"), env)
 	if r.State != "timed-out" || r.FailureKind != "timeout" || r.DurationMs > 3000 {
 		t.Fatalf("timeout: %+v", r)
 	}
@@ -66,19 +66,19 @@ func TestHTTPDeadlineAndTLSVerification(t *testing.T) {
 	defer secure.Close()
 	secure.Config.ErrorLog = log.New(io.Discard, "", 0)
 	env.Endpoints["api"] = secure.URL
-	r = (&HTTP{}).Execute(t.Context(), definition("/"), env)
+	r = (&HTTP{}).Execute(t.Context(), "project", definition("/"), env)
 	if r.FailureKind != "tls" {
 		t.Fatalf("untrusted TLS passed: %+v", r)
 	}
 	pool := x509.NewCertPool()
 	pool.AddCert(secure.Certificate())
-	r = (&HTTP{RootCAs: pool}).Execute(t.Context(), definition("/"), env)
+	r = (&HTTP{RootCAs: pool}).Execute(t.Context(), "project", definition("/"), env)
 	if r.State != "passed" || r.HTTP.CertificateExpires == nil {
 		t.Fatalf("explicit trust bundle: %+v", r)
 	}
 	test := definition("/")
 	test.Check.MinCertificateDays = int(time.Until(secure.Certificate().NotAfter)/(24*time.Hour)) + 1
-	r = (&HTTP{RootCAs: pool}).Execute(t.Context(), test, env)
+	r = (&HTTP{RootCAs: pool}).Execute(t.Context(), "project", test, env)
 	if r.FailureKind != "tls" {
 		t.Fatalf("certificate threshold: %+v", r)
 	}
@@ -89,26 +89,26 @@ func TestHTTPRejectsUnsupportedTargetsBeforeExecution(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { requests.Add(1); w.WriteHeader(200) }))
 	defer server.Close()
 	env := projects.Environment{Stage: "production", Endpoints: map[string]string{"api": server.URL}}
-	r := (&HTTP{}).Execute(t.Context(), definition("/"), env)
+	r := (&HTTP{}).Execute(t.Context(), "project", definition("/"), env)
 	if r.State != "failed" || requests.Load() != 0 {
 		t.Fatalf("plain production HTTP was sent: %+v", r)
 	}
 	env.Stage = "local"
 	test := definition("//other.example/path")
-	r = (&HTTP{}).Execute(t.Context(), test, env)
+	r = (&HTTP{}).Execute(t.Context(), "project", test, env)
 	if r.State != "failed" || requests.Load() != 0 {
 		t.Fatal("absolute destination was sent")
 	}
 	test = definition("/")
 	test.Check.Method = "HEAD"
 	test.Check.RequiredText = "not valid on HEAD"
-	r = (&HTTP{}).Execute(t.Context(), test, env)
+	r = (&HTTP{}).Execute(t.Context(), "project", test, env)
 	if r.State != "failed" || requests.Load() != 0 {
 		t.Fatal("invalid HEAD definition reached the server")
 	}
 	ctx, cancel := context.WithCancel(t.Context())
 	cancel()
-	r = (&HTTP{}).Execute(ctx, definition("/"), env)
+	r = (&HTTP{}).Execute(ctx, "project", definition("/"), env)
 	if r.FailureKind != "cancelled" {
 		t.Fatalf("cancelled check: %+v", r)
 	}

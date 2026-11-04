@@ -24,6 +24,7 @@ import (
 	authoidc "github.com/wtiger001/teststudio/adapters/auth/oidc"
 	"github.com/wtiger001/teststudio/adapters/execution/localcontainer"
 	"github.com/wtiger001/teststudio/adapters/execution/localplaywright"
+	httptrust "github.com/wtiger001/teststudio/adapters/httptrust/filesystem"
 	"github.com/wtiger001/teststudio/adapters/notifications/webhook"
 	permissionpg "github.com/wtiger001/teststudio/adapters/permissions/postgres"
 	permissionsqlite "github.com/wtiger001/teststudio/adapters/permissions/sqlite"
@@ -77,6 +78,7 @@ func run() error {
 	scheduler := flag.Bool("scheduler", true, "Process durable project schedules on this instance")
 	notificationWorker := flag.Bool("notification-worker", true, "Process durable notification deliveries on this instance")
 	secretBindings := flag.String("secret-bindings", "", "Project and purpose scoped environment or mounted-file secret binding configuration")
+	httpTrustBundles := flag.String("http-trust-bundles", "", "Project and exact-origin scoped private HTTPS certificate authority bindings")
 	localAccounts := flag.Bool("local-accounts", false, "Enable managed local password accounts alongside configured OIDC providers")
 	local := flag.Bool("local", false, "Enable explicit loopback-only local administrator sign-in")
 	recoverLocal := flag.Bool("recover-local-admin", false, "Reenable the loopback local administrator and invalidate its earlier sessions; requires --local")
@@ -109,6 +111,10 @@ func run() error {
 		return err
 	}
 	secretProvider, err := localsecrets.Load(*secretBindings)
+	if err != nil {
+		return err
+	}
+	httpTrust, err := httptrust.Load(*httpTrustBundles)
 	if err != nil {
 		return err
 	}
@@ -215,7 +221,7 @@ func run() error {
 	defer closeArtifacts()
 	catalogService := &catalog.Service{Store: db, Auth: auth}
 	evidenceService := &evidence.Service{Store: db, Blobs: blobs}
-	runService := &runs.Service{Store: db, Auth: auth, Catalog: catalogService, Evidence: evidenceService, HTTP: &execution.HTTP{}, Location: *location}
+	runService := &runs.Service{Store: db, Auth: auth, Catalog: catalogService, Evidence: evidenceService, HTTP: &execution.HTTP{Trust: httpTrust}, Location: *location}
 	sourceService := &sources.Service{Store: db, Auth: auth, Location: *location, RecoveryInspectors: map[string]preparation.ArtifactInspector{
 		"go": &localcontainer.Executor{Runner: "go"}, "playwright": &localcontainer.Executor{Runner: "playwright"},
 	}}

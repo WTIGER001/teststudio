@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 41 verified of 57.
+The acceptance count is 42 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -44,7 +44,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **31.** Go unit suites run without artificial web targets or production credentials.
 - [x] **32.** Go suites preserve test identities, disable cached execution, and distinguish build failures from test assertion failures.
 - [x] **33.** Adding an HTTPS check requires no browser or service deployment.
-- [ ] **34.** HTTPS checks run manually and on schedules, with configurable assertions, TLS checks, response-time history, and normal result records.
+- [x] **34.** HTTPS checks run manually and on schedules, with configurable assertions, TLS checks, response-time history, and normal result records.
 - [ ] **35.** API suites run through guarded direct clients and produce the same history and trends as browser tests.
 - [x] **36.** Package events, subtest aggregates, retries, and API steps do not inflate test counts.
 - [ ] **37.** Local and scheduled executions produce the same logical run and result records.
@@ -68,6 +68,42 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **55.** Hosted identity and private report access work through installation-specific configuration.
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
+
+## Current delivery: private HTTPS trust and scheduled response history
+
+Acceptance **34** is complete. The ledger has **42 verified, 15 open, 57 total** items.
+The complete plan still requires native HTTP authentication bindings, bounded permitted redirects, and redacted response excerpts.
+These requirements remain follow-up implementation scope even though the stable manual, scheduled, assertion, TLS, and history criterion now passes.
+
+Native HTTP execution now receives its explicit project context.
+The operator can configure certificate-authority bundles for one project and exact HTTPS origin through --http-trust-bundles.
+Private trust does not enable private networking. Local stage or an explicit private-network policy remains required.
+Trust configuration accepts bounded regular CA files and rejects private keys, leaf certificates, empty bundles, and trailing data.
+Bindings preserve platform roots, hostname verification, certificate dates, TLS version limits, and configured minimum certificate lifetime.
+The same CA cannot grant trust to another project, origin, or port.
+CA material and filesystem paths remain outside result and browser configuration.
+
+The selected trust identifier and certificate-set fingerprint form part of the frozen native execution profile.
+Certificate order, repeated certificates, and formatting do not change that identity.
+A changed bundle blocks queued dispatch with a readable trust-change reason. Newly created runs use separate compatible timing history.
+HTTP diagnostics retain and show the trust name, identifier, and SHA-256 fingerprint beside the observed certificate and timing data.
+Unavailable certificate information remains unavailable. Browser execution and provider trust configuration remain separate.
+
+New local authorities and endpoint certificates verify trust boundaries, hostname mismatch, expiry, minimum lifetime, and private-network policy.
+Real manual and scheduled HTTPS runs pass status, text, header, JSON, response-time, and certificate-lifetime assertions through the normal executor.
+Both runs retain one logical result, complete evidence, and comparable response-time samples.
+After trust rotation, the queued run remains blocked without another request. A fresh run succeeds with the new profile.
+Focused race checks pass on SQLite and local PostgreSQL. Owned TLS fixtures stop through test teardown.
+The exact PostgreSQL fixture and its launcher are verified absent.
+The HTTP API and installation-transfer fixtures compile after the internal executor signature change.
+
+The production Angular UI and native server build pass. The unchanged trace viewer remains cached.
+The existing STUDIO-HTTPS-001 UI result is inspected and passes in output/selftest/20261104T001333.956188000-718375f9a5a5512ad70e2294/summary.json.
+That retained run also contains a separate, earlier URL-focus failure. This evidence supports the HTTPS workflow result, not the whole historical run.
+No browser suite, runner image build, cloud test, or external website runs for this delivery.
+Evidence is output/http-trust/checkpoint.json and postgres.log.
+The HTTP, backup, self-testing, operator example, and in-app run help describe trust scope, rotation, and retained diagnostics.
+Continue required HTTP follow-ups, API and scheduled runner parity, storage, access, source, and provider packaging work.
 
 ## Current delivery: atomic admission and current dispatch safety
 

@@ -20,9 +20,12 @@ import (
 	"github.com/wtiger001/teststudio/internal/projects"
 )
 
-type HTTP struct{ RootCAs *x509.CertPool }
+type HTTP struct {
+	RootCAs *x509.CertPool
+	Trust   HTTPTrustResolver
+}
 
-func (e *HTTP) Execute(ctx context.Context, test catalog.Test, environment projects.Environment) Result {
+func (e *HTTP) Execute(ctx context.Context, project string, test catalog.Test, environment projects.Environment) Result {
 	start := time.Now()
 	r := Result{TestID: test.ID, Attempt: 1, State: "failed", StartedAt: start.UTC()}
 	var finalize func()
@@ -53,6 +56,13 @@ func (e *HTTP) Execute(ctx context.Context, test catalog.Test, environment proje
 	if base.Scheme != "https" && !(base.Scheme == "http" && (environment.Stage == "local" || environment.AllowHTTP)) {
 		return fail("configuration", errors.New("plain HTTP requires an explicit permitted environment"))
 	}
+	roots, bundle, err := e.trust(ctx, project, test, environment)
+	if err != nil {
+		if ctx.Err() != nil {
+			return fail(failureKind(ctx.Err()), ctx.Err())
+		}
+		return fail("configuration", err)
+	}
 	relative, _ := url.Parse(check.Path)
 	base.Path = strings.TrimRight(base.Path, "/") + relative.Path
 	base.RawPath = ""
@@ -68,10 +78,10 @@ func (e *HTTP) Execute(ctx context.Context, test catalog.Test, environment proje
 	if environment.AllowPrivate || environment.Stage == "local" {
 		scope = networkguard.Private
 	}
-	transport := &http.Transport{DialContext: networkguard.Dial(scope), TLSClientConfig: &tls.Config{RootCAs: e.RootCAs, MinVersion: tls.VersionTLS12}, TLSHandshakeTimeout: 5 * time.Second, ResponseHeaderTimeout: limit, MaxResponseHeaderBytes: 32 << 10}
+	transport := &http.Transport{DialContext: networkguard.Dial(scope), TLSClientConfig: &tls.Config{RootCAs: roots, MinVersion: tls.VersionTLS12}, TLSHandshakeTimeout: 5 * time.Second, ResponseHeaderTimeout: limit, MaxResponseHeaderBytes: 32 << 10}
 	defer transport.CloseIdleConnections()
 	client := &http.Client{Transport: transport, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
-	observation := &HTTPObservation{URL: base.Scheme + "://" + base.Host + base.EscapedPath(), Timings: map[string]float64{}}
+	observation := &HTTPObservation{URL: base.Scheme + "://" + base.Host + base.EscapedPath(), Timings: map[string]float64{}, TrustBundle: bundle}
 	r.HTTP = observation
 	var mu sync.Mutex
 	starts := map[string]time.Time{}

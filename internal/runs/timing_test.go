@@ -73,7 +73,7 @@ type timedExecutor struct {
 	kind      string
 }
 
-func (e *timedExecutor) Execute(ctx context.Context, test catalog.Test, _ projects.Environment) execution.Result {
+func (e *timedExecutor) Execute(ctx context.Context, _ string, test catalog.Test, _ projects.Environment) execution.Result {
 	i := min(int(e.calls.Add(1))-1, len(e.durations)-1)
 	now := time.Now().UTC()
 	return execution.Result{TestID: test.ID, State: e.states[min(i, len(e.states)-1)], FailureKind: e.kind, DurationMs: e.durations[i], StartedAt: now, FinishedAt: now}

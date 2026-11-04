@@ -415,7 +415,7 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 				if p, ok := run.Timing.Tests[test.ID]; ok {
 					attemptCtx, releaseAttempt = context.WithTimeout(ctx, time.Duration(p.EffectiveTimeoutMs)*time.Millisecond)
 				}
-				result = s.HTTP.Execute(attemptCtx, test, *run.Environment)
+				result = s.HTTP.Execute(attemptCtx, run.Project, test, *run.Environment)
 				releaseAttempt()
 			} else {
 				executionError = "No compatible executor is configured."

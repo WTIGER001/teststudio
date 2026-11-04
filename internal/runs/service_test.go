@@ -157,7 +157,7 @@ func TestRunFreezesEnvironmentAndTwoWorkersExecuteOnce(t *testing.T) {
 
 type retryExecutor struct{ calls atomic.Int32 }
 
-func (e *retryExecutor) Execute(_ context.Context, test catalog.Test, _ projects.Environment) execution.Result {
+func (e *retryExecutor) Execute(_ context.Context, _ string, test catalog.Test, _ projects.Environment) execution.Result {
 	now := time.Now().UTC()
 	state := "passed"
 	if e.calls.Add(1) == 1 {

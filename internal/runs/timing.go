@@ -10,6 +10,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/execution"
+	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/storage"
 	"github.com/wtiger001/teststudio/internal/timing"
 )
@@ -43,7 +44,7 @@ func (s *Service) predictTiming(ctx context.Context, run *Run) error {
 			policy = timing.Normalize(*test.Timing)
 		}
 		scope := timingContext(*run, test)
-		profile, err := s.runtimeTimingProfile(ctx, test, run.Release.Draft.Artifact)
+		profile, err := s.runtimeTimingProfile(ctx, test, run.Release.Draft.Artifact, run.Project, run.Environment)
 		if err != nil {
 			return err
 		}
@@ -58,11 +59,14 @@ func (s *Service) predictTiming(ctx context.Context, run *Run) error {
 	return nil
 }
 
-func (s *Service) runtimeTimingProfile(ctx context.Context, test catalog.Test, artifact catalog.Artifact) (string, error) {
+func (s *Service) runtimeTimingProfile(ctx context.Context, test catalog.Test, artifact catalog.Artifact, project string, environment *projects.Environment) (string, error) {
 	driver := s.codedDriver(test.Runner, artifact)
 	if driver == nil {
 		if test.Runner != "http" {
 			return "", errors.New("the frozen coded execution profile is unavailable")
+		}
+		if profiler, ok := s.HTTP.(execution.HTTPRuntimeProfiler); ok && environment != nil {
+			return profiler.HTTPProfile(ctx, project, test, *environment)
 		}
 		return "native-http-v1", nil
 	}
@@ -77,11 +81,14 @@ func (s *Service) admitTimingRuntime(ctx context.Context, run Run, test catalog.
 	if !ok {
 		return errors.New("the run has no frozen timing context for this test")
 	}
-	profile, err := s.runtimeTimingProfile(ctx, test, run.Release.Draft.Artifact)
+	profile, err := s.runtimeTimingProfile(ctx, test, run.Release.Draft.Artifact, run.Project, run.Environment)
 	if err != nil {
 		return err
 	}
 	if profile != prediction.Context.Profile || test.Runner != prediction.Context.Runner {
+		if test.Runner == "http" {
+			return errors.New("HTTP certificate trust changed after review; create a new run with the current trust configuration")
+		}
 		return errors.New("execution runtime changed after timing was frozen; create a new run to review its prediction")
 	}
 	return nil

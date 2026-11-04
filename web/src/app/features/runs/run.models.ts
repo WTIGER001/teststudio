@@ -10,7 +10,7 @@ export interface RunSummary {
   state: string; outcome: string; phase: string; counts: Counts; createdAt: string; finishedAt?: string; evidenceState: string; actor: string; trigger: string; selection: string
 }
 export interface TestStep { title: string; category: string; durationMs: number; error?: string }
-export interface HTTPObservation { status: number; url: string; durationMs: number; timingsMs?: Record<string, number>; certificateExpires?: string }
+export interface HTTPObservation { status: number; url: string; durationMs: number; timingsMs?: Record<string, number>; certificateExpires?: string; trustBundle?: { id: string; name: string; digest: string } }
 export interface GoObservation {
   package: string; test: string; toolchain: string; os: string; architecture: string
   buildDurationMs: number; buildExitCode?: number; exitCode?: number; outputTruncated?: boolean

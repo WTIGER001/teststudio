@@ -25,7 +25,7 @@ import (
 var ErrLeaseLost = errors.New("execution lease is no longer owned by this worker")
 
 type HTTPExecutor interface {
-	Execute(context.Context, catalog.Test, projects.Environment) execution.Result
+	Execute(context.Context, string, catalog.Test, projects.Environment) execution.Result
 }
 
 type Service struct {

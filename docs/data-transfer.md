@@ -102,6 +102,7 @@ Select the matching artifact profile on the destination. See [Artifact storage](
 Also preserve source bundle files, retained source snapshots, and required execution images under their existing storage configuration.
 The archive does not copy Docker images, mounted secret files, environment variables, or deployment settings.
 Keep credential references resolvable and provide the intended local-account and OIDC runtime configuration.
+Preserve configured HTTP trust bindings and mounted CA files. Their certificate fingerprints affect queued dispatch and comparable timing history.
 A different public origin requires users to sign in at that origin.
 
 After restore, inspect a retained run and download a pinned artifact.

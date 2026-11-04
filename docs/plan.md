@@ -15,7 +15,7 @@ The full product scope remains required. This direction supersedes the testing s
 ## Active delivery plan after the tester walkthrough
 
 This section is the current implementation order. Historical continuation commands below do not override it.
-The local demonstration is usable and verified. The complete product remains unfinished at 41 verified items out of 57.
+The local demonstration is usable and verified. The complete product remains unfinished at 42 verified items out of 57.
 Ordinary project creator access and the first environment-backed local recorded website flow pass targeted verification.
 Tester investigation and failure recovery now pass targeted local verification. Continue with remaining catalog and evidence gaps.
 Do not add new dashboard pages or repeat completed demonstration setup before closing the remaining workflow gaps.
@@ -60,7 +60,7 @@ See [initial creator access](access.md#initial-project-creator-access) for curre
 SQLite, local PostgreSQL, and STUDIO-OWNER-001 evidence are recorded in the implementation ledger.
 
 This sequence changes implementation priority, not the scope or numbering of the 57 acceptance criteria.
-Acceptances 03, 08, 13, 20, 21, 25, 26, 28, 29, 36, 38, 42, 43, 44, and 45 are complete. Remaining access checks stay under 12. Other catalog, execution, and evidence requirements remain open.
+Acceptances 03, 08, 13, 20, 21, 25, 26, 28, 29, 34, 36, 38, 42, 43, 44, and 45 are complete. Remaining access checks stay under 12. Other catalog, execution, and evidence requirements remain open.
 Do not treat these batches as additional acceptance items or claim the whole product complete after a demonstration.
 
 ### Recorded browser execution scope
@@ -205,7 +205,7 @@ The next implementation batches follow the full ledger without adding new gates 
 
 ## Current implementation checkpoint
 
-The acceptance ledger has **41 verified, 16 open, 57 total** items.
+The acceptance ledger has **42 verified, 15 open, 57 total** items.
 Private trace viewing now passes targeted local verification. Acceptances **42** and **45** are complete.
 Run details expose recorded attempts, steps, context, logs, screenshots, traces, and configured attachments without HTML reports.
 The pinned installation-hosted viewer uses the separate artifact origin and short-lived grants with current project authorization.
@@ -247,7 +247,12 @@ Acceptances **28** and **38** are complete. Atomic admission guards the reviewed
 Current lifecycle, network policy, permissions, protection, and dependency safety block queued dispatch and retries without rewriting snapshots.
 Focused local SQLite and PostgreSQL checks preserve actual manual and scheduled HTTP runs, earlier attempt evidence, and large guarded selections.
 Acceptance **37** advances; remaining runner parity stays open. See [Dispatch safety](results.md#dispatch-safety-and-frozen-runs).
-Continue remaining storage parity, source, HTTP, API, adapter retention, timing, and local acceptance work.
+Acceptance **34** is complete. Manual and scheduled native HTTPS checks share normal result, evidence, assertion, TLS, and response-time history contracts.
+Project and exact-origin private CA bundles preserve certificate validation and network policy. Trust rotation blocks queued work and separates timing history.
+New local TLS fixtures pass on SQLite and PostgreSQL. The production UI and native server build pass without a browser or runner-image rebuild.
+See [Private HTTPS trust](http-checks.md#private-certificate-authorities) for operator configuration and retained diagnostics.
+Required native HTTP follow-ups remain authentication secret bindings, bounded permitted redirects, and bounded redacted response excerpts.
+Continue remaining storage parity, source, HTTP follow-ups, API and scheduled runner parity, adapter retention, timing, and provider packaging work.
 
 Bulk metadata edits now support reviewed category, tags, owner, title, description, safety, rationale, and condition changes.
 The API and UI preserve source-owned definitions and use atomic revision-controlled preview plans.

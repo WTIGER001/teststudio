@@ -54,6 +54,39 @@ Zero disables the additional lifetime threshold.
 TLS trust, hostname, and certificate dates still require validation.
 A positive lifetime threshold requires TLS certificate information from the endpoint.
 
+## Private certificate authorities
+
+An operator can register additional certificate authorities for one project and exact HTTPS origin.
+The private environment must use the local stage or explicitly permit private networking through allowPrivateNetwork.
+Trust configuration never enables private networking by itself.
+Normal platform roots remain available. Hostname checks, certificate dates, TLS versions, and minimum lifetime assertions stay enabled.
+There is no certificate-verification bypass.
+
+Copy config/http-trust.example.json and set a new project identifier, target origin, and mounted CA file.
+The origin includes its nondefault port. It contains no path, query, credentials, or fragment.
+Start the service with the operator-owned file:
+
+```sh
+bin/teststudio --http-trust-bundles config/http-trust.json
+```
+
+The configuration contains at most 1000 bindings. Project origins and identifiers must be unique within each project.
+Each caFile is an absolute regular file containing only PEM certificate authorities within 64 KiB.
+Private keys, leaf certificates, empty files, and trailing noncertificate data fail startup.
+Mounted certificate files can use the platform's normal projected-file links.
+Configuration errors exclude file contents and private paths from application errors.
+
+The server loads the files once during startup. File replacement takes effect after the operator restarts the service.
+These runtime files remain separate from database backup. Retain them with installation configuration during cutover.
+Certificate order, duplicate certificates, and PEM formatting do not change the trust fingerprint.
+A changed certificate set changes the execution profile and comparable timing history.
+Queued runs keep their original prediction and block dispatch after that change. Create a new run to select the current profile.
+
+The selected bundle applies only to native HTTP execution for its configured project and exact origin.
+It does not apply to another project, another port, browser navigation, OIDC, repository downloads, or artifact storage.
+Operators configure browser and other provider trust separately.
+Testers select the registered environment normally. They do not upload CA files or enter private file paths in the probe wizard.
+
 Publication rejects invalid assertion settings and limits before activation.
 An invalid new draft does not replace the active release.
 The executor uses the same validation when it receives a frozen definition.
@@ -92,6 +125,8 @@ Certificate expiry uses the retained certificate date.
 Displayed certificate lifetime uses the attempt finish time, so historical views do not change as time passes.
 Missing certificate information remains unavailable.
 The interface reads normal result records and needs no HTML report.
+TLS trust shows the selected bundle name, identifier, and SHA-256 fingerprint when custom trust applies.
+The observation stores no CA bytes or file path. Older observations without certificate information keep trust unavailable.
 
 ## Local verification
 
@@ -102,7 +137,9 @@ bash scripts/test-self.sh --test=STUDIO-HTTPS-001
 This workflow creates and publishes assertions through the UI, runs GET and HEAD, and verifies frozen history and retained diagnostics.
 Focused Go checks verify publication limits, HEAD behavior, response-time failures, certificate trust, and certificate lifetime thresholds.
 
-Redirect following, secret references, project trust-bundle configuration, response excerpts, schedules, and response-time history remain pending.
+Focused local TLS checks also execute manual and scheduled runs with new private certificates and compare their shared response-time history.
+Trust rotation blocks queued work and gives newly created runs a separate timing profile.
+Redirect following, authentication secret references, and bounded response excerpts remain pending capabilities in the complete plan.
 
 ## Quick URL entry
 

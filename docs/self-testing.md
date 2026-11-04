@@ -6,6 +6,17 @@ It copies no tests or configuration from another application.
 
 ## Run locally
 
+For native private HTTPS trust and scheduled timing history, run:
+
+```sh
+go test -race ./adapters/httptrust/filesystem ./internal/execution ./internal/runs \
+  -run '^(TestProjectOriginTrust|TestTrustConfiguration|TestPrivateHTTPSManualAndScheduled|TestHTTP)' -count=1
+```
+
+The fixtures generate new authorities and endpoint certificates locally. They use no external website, browser, or execution image.
+Checks cover project and origin boundaries, hostname and expiry validation, private-network policy, manual and scheduled history, and trust rotation.
+Use scripts/test-postgres.sh with the private HTTPS run test for disposable local PostgreSQL parity.
+
 For atomic run admission and protected dispatch, use the focused local checks:
 
 ```sh

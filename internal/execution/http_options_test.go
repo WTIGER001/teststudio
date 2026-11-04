@@ -28,12 +28,12 @@ func TestHTTPHeadKeepsMethodAndAcceptedStatuses(t *testing.T) {
 	test.Check.Method = "HEAD"
 	test.Check.StatusCodes = []int{204}
 	test.Check.Headers = map[string]string{"X-Ready": "yes"}
-	r := (&HTTP{}).Execute(t.Context(), test, env)
+	r := (&HTTP{}).Execute(t.Context(), "project", test, env)
 	if r.State != "passed" || r.HTTP.Status != 204 || heads.Load() != 1 || gets.Load() != 0 {
 		t.Fatalf("HEAD contract: %+v", r)
 	}
 	test.Check.StatusCodes = []int{200}
-	r = (&HTTP{}).Execute(t.Context(), test, env)
+	r = (&HTTP{}).Execute(t.Context(), "project", test, env)
 	if r.FailureKind != "http-status" || heads.Load() != 2 || gets.Load() != 0 {
 		t.Fatal("HEAD status mismatch triggered a GET fallback")
 	}
@@ -45,7 +45,7 @@ func TestHTTPResponseLimitIsAnAssertionRatherThanATimeout(t *testing.T) {
 	env := projects.Environment{Stage: "local", Endpoints: map[string]string{"api": server.URL}}
 	test := definition("/slow")
 	test.Check.MaxResponseMs = 1
-	r := (&HTTP{}).Execute(t.Context(), test, env)
+	r := (&HTTP{}).Execute(t.Context(), "project", test, env)
 	if r.State != "failed" || r.FailureKind != "response-time" || r.DurationMs < 20 || r.HTTP.Status != 200 {
 		t.Fatalf("response limit: %+v", r)
 	}

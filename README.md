@@ -76,6 +76,7 @@ The [prepared suite guide](docs/prepared-suites.md) describes manifests, isolate
 The [repository source guide](docs/repository-sources.md) describes GitHub registration, private App access, manual sync, and shared suite snapshots.
 The [source bundle guide](docs/source-bundles.md) describes Go and Playwright ZIP uploads, trusted runtimes, separate build workers, CLI assembly, and retained snapshots.
 Native HTTP runs use durable local workers and retained attempt records.
+Private HTTPS targets can use project-scoped, exact-origin CA bundles through `--http-trust-bundles`. See [HTTP trust](docs/http-checks.md#private-certificate-authorities).
 The API provides run creation, progress, cancellation, failure reruns, logs, and private evidence access.
 The artifact listener uses `http://127.0.0.1:8041` by default.
 Keep the artifact directory outside the public UI directory.

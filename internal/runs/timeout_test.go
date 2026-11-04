@@ -20,7 +20,7 @@ type timeoutExecutor struct {
 	calls map[string]int
 }
 
-func (e *timeoutExecutor) Execute(_ context.Context, test catalog.Test, _ projects.Environment) execution.Result {
+func (e *timeoutExecutor) Execute(_ context.Context, _ string, test catalog.Test, _ projects.Environment) execution.Result {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	e.calls[test.ID]++

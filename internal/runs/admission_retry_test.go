@@ -21,7 +21,7 @@ type policyChangingHTTP struct {
 	problem chan error
 }
 
-func (e *policyChangingHTTP) Execute(_ context.Context, test catalog.Test, _ projects.Environment) execution.Result {
+func (e *policyChangingHTTP) Execute(_ context.Context, _ string, test catalog.Test, _ projects.Environment) execution.Result {
 	if e.calls.Add(1) == 1 {
 		e.problem <- e.change()
 	}
