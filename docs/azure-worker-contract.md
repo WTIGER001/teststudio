@@ -5,7 +5,8 @@
 The new adapters/execution/azure package builds and verifies Container Apps Job requests through the official Go SDK.
 It pins armappcontainers/v4 version 4.0.0 and management API 2025-07-01, matching the core Azure package.
 These local contracts cover Go and Playwright execution and catalog discovery.
-They do not implement the durable provider, network admission, independent absolute deadline, registry authentication, or native command wiring.
+The [durable Azure provider](azure-worker-lifecycle.md) now implements asynchronous dispatch, status, cancellation, and checkpointed recovery.
+Concrete network admission, independent absolute deadline resources, registry authentication, and native command wiring remain unfinished.
 Azure coded execution remains disabled. The core deployment still supports native HTTP checks.
 
 See [Azure core service](azure.md), [hosted lifecycle](hosted-execution.md), and [hosted preparation](hosted-discovery.md).
@@ -36,7 +37,7 @@ Discovery requires its distinct preparation reference, catalog target, first att
 
 Generated job names combine the prefix and 24 hexadecimal ownership characters. They remain shorter than 32 characters.
 Tags retain complete ownership, installation, project, execution, configuration, operation, deadline, and specification digests.
-The truncated name never substitutes for full ownership verification. Later provider reconciliation must reject a conflicting existing resource.
+The truncated name never substitutes for full ownership verification. Provider reconciliation rejects a conflicting existing resource.
 The timing profile binds all configuration and the fixed Linux AMD64 resource class.
 A changed network profile cannot reuse the previous comparable timing pool.
 
@@ -60,7 +61,8 @@ That separate deadline remains required before dispatch can be enabled.
 
 The selected API has no job container user override, read-only root setting, or capability-drop field.
 The package does not invent those fields or claim ECS storage controls apply to Azure.
-A future provider must inspect the trusted supervised Linux AMD64 image and its non-root identity before creating a job.
+The provider requires supervised Linux AMD64 image inspection before creating a job.
+Native wiring must use the strict OCI inspector, including its non-root identity checks.
 Use the existing OCI inspector's strict image and source checks. Uploaded code cannot choose a replacement entrypoint or image configuration.
 Container-scoped writable storage remains distinct from mounted shared journals. Live isolation still requires deployment verification.
 
@@ -74,10 +76,10 @@ Authorized Azure infrastructure operators can inspect execution environments. Wo
 No application credential or provider SDK credential belongs in that environment.
 
 The Azure Start operation has no caller-selected execution name or idempotency field in this SDK contract.
-The provider must reserve that mutation durably before calling the SDK. Never repeat an uncertain Start after a lost acknowledgment.
+The provider now reserves that mutation durably before calling the SDK. It never repeats an uncertain Start after a lost acknowledgment.
 Reconcile the owned job's bounded execution history and preserve an unresolved state if authority or history is missing.
 A numeric request sequence or HTTP retry is not a logical-run idempotency guarantee.
-Automatic provider retries stay disabled. The future SDK factory must also disable automatic resource-provider registration.
+Automatic provider retries stay disabled. The production SDK bridge also disables automatic resource-provider registration.
 
 ## Response verification
 
@@ -98,7 +100,8 @@ Provider timestamps remain provider facts. They do not become measured test dura
 
 The execution model exposes completion state but no numeric process exit code.
 Observation therefore retains provider completion without manufacturing an exit code or a test result.
-The later lifecycle integration must preserve independent provider completion and the authenticated runner report.
+The shared lifecycle now preserves independent native provider completion and the authenticated runner report.
+A fresh dispatch ticket requires current authorization through ResumeDispatch. A recovery proof alone still cannot start work.
 Missing or inconsistent runner reports must keep explicit evidence gaps and must not create passing tests.
 
 ## Targeted local checks
@@ -119,6 +122,7 @@ go test -race ./adapters/execution/azure -count=1
 
 Current evidence is output/azure-worker-contract/summary.json and the focused command results.
 The local contracts advance acceptance 51. The total remains 48 verified of 57.
+The [lifecycle guide](azure-worker-lifecycle.md) records the subsequent local provider checks.
 Real Azure execution, identity isolation, networking, status consistency, cancellation, deadlines, recovery, and profile parity remain unverified.
 
 ## Primary references

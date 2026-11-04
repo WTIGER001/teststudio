@@ -151,10 +151,17 @@ Local checks cover writable drift, execution receipts, optional list metadata, p
 Provider completion remains separate from numeric process exit codes, which the Azure execution model does not expose.
 See [Azure job contracts](azure-worker-contract.md). Acceptance 51 advances; the total remains 48 of 57.
 
-Next implement durable Azure creation and Start reservations, acknowledgment recovery, exact execution receipts, terminal history, and checkpointed cleanup.
-Never repeat an uncertain Start. The selected API supplies no caller-selected execution name or idempotency field.
-Integrate independent provider completion with the authenticated runner report without inventing process exit codes or test durations.
-Then add actual worker-environment network admission, an independent absolute stop deadline, and trusted registry authentication.
+The Azure provider now reserves Create and Start durably, polls provisioning, reconciles lost responses, and retains exact receipts and terminal history.
+Fresh exchange authorization controls Start after provisioning. Recovery proofs alone still cannot launch another execution.
+Shared native completion preserves validated reports and measured timing without inventing a numeric process exit code.
+Owned cancellation works even when provider status is unknown. Checkpointed cleanup retains missing-history uncertainty and bounded deletion backoff.
+The scoped SDK bridge disables automatic retries and registration, rejects redirects, and binds pagination to the exact parent job.
+Local race, database-reopen, concurrency, protocol, authorization, cancellation, and shared-lifecycle checks pass.
+Both native entrypoint packages compile. No cloud, UI, image, browser, or source-runtime matrix verification runs.
+See [Durable Azure lifecycle](azure-worker-lifecycle.md). Acceptance 51 and supporting recovery under 52 advance; the count stays 48 of 57.
+
+Next add actual worker-environment network admission, concrete independent absolute stop resources, and trusted registry authentication.
+Keep network and deadline hooks mandatory. A local fake does not establish a deployable Azure isolation boundary.
 Replica timeout alone does not cover queue delay or satisfy the absolute deadline contract.
 Keep inspected non-root images mandatory. Azure lacks the ECS root-filesystem and capability overrides; verify its own isolation arrangement.
 Add the separate private HTTPS exchange service and preparation wiring before enabling coded execution in the native commands or Bicep package.

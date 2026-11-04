@@ -7,7 +7,8 @@ It runs no test code inside the API.
 The transport, HTTPS client, and [hosted runner supervisor](job-supervisor.md) are implemented and pass local checks.
 The optional [Kubernetes worker adapter](kubernetes-workers.md) supplies Pod dispatch and recovery.
 Optional [ECS settings](ecs-workers.md) now connect Fargate dispatch and recovery. Its [staged private infrastructure package](aws-workers-package.md) now passes local checks. Deployed acceptance remains open.
-Other provider adapters, trusted remote gateway delivery, and complete hosted acceptance remain unfinished.
+The [Azure lifecycle adapter](azure-worker-lifecycle.md) now passes local checks with mandatory network and deadline hooks.
+Its concrete isolation controls, private service packaging, trusted remote gateways, and complete hosted acceptance remain unfinished.
 No hosted Go or Playwright execution is enabled by this feature alone.
 Keep acceptance 51 and the related hosted acceptance items open.
 
@@ -24,6 +25,11 @@ Concurrent controllers reconstruct the same ticket for the same prepared exchang
 An installation-private signing key and random exchange nonce derive the ticket through HMAC-SHA256.
 The key stays in the database. A worker receives only its own opaque ticket.
 Ticket formatting and JSON serialization omit the secret value.
+
+ResumeDispatch recovers the existing ticket for asynchronous provider provisioning only while work remains gated and unactivated.
+It checks current authorization and asserts both authorization and exchange revisions before returning the token.
+It rejects revoked, activated, expired, ungated, and unauthorized exchanges. It changes neither input nor activation state.
+This internal controller method has no public HTTP route. A saved provider proof alone cannot recreate dispatch authority.
 
 The first input request binds one worker instance identifier.
 A retry from that instance can fetch the same input. Another instance cannot claim or execute the same exchange.

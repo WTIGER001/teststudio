@@ -113,7 +113,7 @@ func (i *DiscoveryInspector) Inspect(ctx context.Context, request preparation.In
 	if submission.ProcessExitCode != 0 || submission.Discovery.Failure != "" {
 		return result, errors.New("hosted source discovery failed; inspect the retained preparation log")
 	}
-	if status.Phase != "succeeded" || status.ExitCode == nil || *status.ExitCode != 0 {
+	if !successful(status) {
 		return result, errors.New("hosted source discovery did not finish successfully")
 	}
 	result.Discovery, err = suitespec.DecodeDiscovery(submission.Discovery.Raw, i.Runner)

@@ -43,6 +43,7 @@ type Job struct {
 
 type Status struct {
 	AdmissionPending bool
+	NativeCompletion bool
 	Reference        execution.Reference
 	Image            string
 	Deadline         time.Time

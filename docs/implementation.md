@@ -122,7 +122,48 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: Azure job request and ownership contracts
+## Current delivery: durable Azure dispatch, recovery, and native completion
+
+Acceptance **51** and supporting recovery under **52** advance. The total remains **48 verified of 57**, with **9 open**.
+The previous request-contract batch commits as b62ea41. This batch implements the managed provider and production SDK bridge.
+
+The azure-dispatches journal reserves Create and Start before each single mutation.
+Provisioning stays asynchronous and gated. A later clock does not change the frozen proof or replica budget.
+Current exchange authorization reconstructs the original short-lived ticket before Start. Revision assertions catch concurrent revocation or permission changes.
+Activated, revoked, expired, ungated, and unauthorized exchanges receive no resumed ticket.
+A recovery proof alone remains unable to create launch authority.
+Lost responses reconcile the exact definition and execution history without another Create or Start.
+Empty history remains unresolved. Multiple executions or changed ownership block admission and deletion.
+
+Network admission, independent deadline verification, image inspection, and fresh authorization remain mandatory hooks.
+The SDK bridge fixes public-cloud management scope, API version, owned job paths, response limits, and bounded pagination.
+It disables automatic retries and provider registration. Redirects and foreign history links fail without forwarding credentials.
+Exact owned cancellation works with unknown provider state. Pending provisioning can cancel without ever starting an execution.
+Cleanup requires revoked work plus a saved result and complete or explicitly abandoned evidence.
+Terminal receipts survive provider history expiry. Deletion retains a 30-second backoff and confirms absence before deadline removal.
+Removed records remain fenced against redispatch and leave recovery inventory.
+
+The shared lifecycle now accepts explicit native completion when a provider exposes no numeric process exit code.
+It rejects conflicting completion evidence. Functional state, measured duration, and evidence still require the authenticated runner report.
+Passing and failing runner reports retain their measured outcomes. Provider failure or missing reports retain unknown states and unavailable duration.
+Existing numeric-exit providers retain their contract.
+
+Targeted local race checks pass for both runners and both provider operations.
+SQLite close/reopen, lost Create and Start responses, hidden history, concurrent controllers, admission drift, cancellation, and checkpointed deletion pass.
+SDK checks pass for scoped single mutations, foreign pagination, redirects, unknown Start responses, and valid escaped resource groups.
+Shared native-completion checks and existing wait, admission-loss, checkpoint, and numeric-exit compatibility checks pass.
+Exchange checks cover fresh authorization and a revocation race detected by revision assertions.
+Both native command packages compile without selecting tests.
+Evidence is output/azure-worker-lifecycle/summary.json and the focused command results.
+No browser, container, UI build, image build, source-runtime matrix, cloud operation, registry push, or deployment runs.
+The demonstration and its data remain unchanged.
+
+Concrete Azure environment network admission, independent absolute deadline resources, registry authentication, private exchange service packaging, and native wiring remain required.
+Azure coded execution stays disabled until those controls exist. Local simulated hooks do not close deployment acceptance.
+Continue those controls, then preparation, remote gateways, recording, and the separate deployment verification work.
+No broad acceptance item closes from this local provider batch.
+
+## Previous delivery: Azure job request and ownership contracts
 
 Acceptance **51** advances. The count remains **48 verified of 57**, with **9 open**.
 The previous goal batch commits ECS backend rotation support as 5afecb1. This batch continues the Azure adapter gap.

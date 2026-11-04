@@ -2,8 +2,8 @@
 
 ## Current scope
 
-The [Azure job contract](azure-worker-contract.md) now provides SDK request construction, ownership checks, and ticket-free recovery proofs.
-It remains separate from an enabled provider. Durable dispatch, network admission, independent deadlines, and command wiring are unfinished.
+The [Azure provider](azure-worker-lifecycle.md) now implements asynchronous dispatch, ownership checks, cancellation, and durable recovery.
+Concrete network admission, independent stop resources, registry authentication, and command wiring remain unfinished. Azure coded execution stays disabled.
 
 The shared hosted lifecycle driver is implemented in internal/hostedexecution.
 It implements the existing managed executor and timing-profile contracts.
@@ -74,12 +74,15 @@ Control calls have five-second bounds inside the enclosing lifecycle deadline.
 Polling defaults to 250 milliseconds.
 The driver forwards one acknowledged test start through the normal run callback.
 Provider-specific execution settings can add a timing profile component for the selected execution pool.
-It checks the complete reference, image, deadline, phase, and exit code on each provider observation.
+It checks the complete reference, image, deadline, phase, and completion evidence on each provider observation.
 
 ## Observation, cancellation, and cleanup
 
 A successful provider job proves supervisor delivery, not a passing assertion.
 A valid failed assertion retains its failed outcome and measured duration.
+Providers without a numeric process exit code can return explicit native completion evidence for a verified succeeded state.
+This evidence requires an unavailable exit code. Conflicting evidence and completion flags on other phases are invalid.
+The authenticated runner report remains required. Missing reports cannot become passing observations or inferred durations.
 A provider failure cannot validate a passing report.
 Available private attachments can remain beside the resulting unknown observation.
 

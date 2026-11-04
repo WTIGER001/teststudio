@@ -26,6 +26,10 @@ func terminal(status Status) bool {
 	return status.Phase == "succeeded" || status.Phase == "failed" || status.Phase == "stopped"
 }
 
+func successful(status Status) bool {
+	return status.Phase == "succeeded" && (status.ExitCode == nil && status.NativeCompletion || status.ExitCode != nil && *status.ExitCode == 0 && !status.NativeCompletion)
+}
+
 func (e *Executor) observe(ctx context.Context, ref execution.Reference, image string, deadline time.Time) (status Status, err error) {
 	err = bounded(ctx, func(ctx context.Context) error { status, err = e.Provider.Observe(ctx, ref); return err })
 	if err != nil {
@@ -40,13 +44,16 @@ func (e *Executor) observe(ctx context.Context, ref execution.Reference, image s
 	if status.ExitCode != nil && (*status.ExitCode < -1 || *status.ExitCode > 255) {
 		return status, ErrOwnership
 	}
+	if status.NativeCompletion && (status.Phase != "succeeded" || status.ExitCode != nil) {
+		return status, ErrOwnership
+	}
 	switch status.Phase {
 	case "pending", "running":
 		if status.ExitCode != nil {
 			return status, ErrOwnership
 		}
 	case "succeeded":
-		if status.ExitCode == nil || *status.ExitCode != 0 {
+		if !successful(status) {
 			return status, ErrOwnership
 		}
 	case "failed":

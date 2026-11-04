@@ -167,7 +167,7 @@ func (e *Executor) collect(ctx context.Context, ref execution.Reference, input e
 	if report.Schema == "" {
 		return unknown(input, kind, started)
 	}
-	providerFailed := controlErr != nil || status.Phase != "succeeded" || status.ExitCode == nil || *status.ExitCode != 0
+	providerFailed := controlErr != nil || !successful(status)
 	if providerFailed {
 		if err := execution.ValidateCodedReport(input, report, ErrUnavailable); err != nil {
 			gap := unknown(input, kind, started)

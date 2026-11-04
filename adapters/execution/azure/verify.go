@@ -68,11 +68,18 @@ func clearEphemeral(containers any) {
 }
 
 func (p *Plan) VerifyDefinition(actual a.Job) error {
-	if !strings.EqualFold(value(actual.ID), p.ResourceID()) || value(actual.Name) != p.name || !strings.EqualFold(value(actual.Type), "Microsoft.App/jobs") || actual.Properties == nil {
-		return hostedexecution.ErrOwnership
+	if err := p.VerifyRetainedDefinition(actual); err != nil {
+		return err
 	}
 	if value(actual.Properties.ProvisioningState) != a.JobProvisioningStateSucceeded {
 		return hostedexecution.ErrUnavailable
+	}
+	return nil
+}
+
+func (p *Plan) VerifyRetainedDefinition(actual a.Job) error {
+	if !strings.EqualFold(value(actual.ID), p.ResourceID()) || value(actual.Name) != p.name || !strings.EqualFold(value(actual.Type), "Microsoft.App/jobs") || actual.Properties == nil {
+		return hostedexecution.ErrOwnership
 	}
 	doc := document(actual)
 	if doc == nil {
@@ -110,32 +117,31 @@ func (p *Plan) VerifyReceipt(receipt a.JobExecutionBase) error {
 	return nil
 }
 
-func (p *Plan) VerifyExecution(receipt a.JobExecutionBase, actual a.JobExecution) (Observation, error) {
-	result := Observation{ExecutionID: value(receipt.ID)}
+func (p *Plan) VerifyExecutionOwnership(receipt a.JobExecutionBase, actual a.JobExecution) error {
 	if p.VerifyReceipt(receipt) != nil || value(actual.Name) != value(receipt.Name) || value(actual.ID) != "" && !strings.EqualFold(value(actual.ID), value(receipt.ID)) || value(actual.Type) != "" && !strings.EqualFold(value(actual.Type), "Microsoft.App/jobs/executions") || actual.Properties == nil || actual.Properties.Template == nil {
-		return result, hostedexecution.ErrOwnership
+		return hostedexecution.ErrOwnership
 	}
 	template := actual.Properties.Template
 	if len(template.Containers) != 1 || template.Containers[0] == nil || len(template.InitContainers) != 0 {
-		return result, hostedexecution.ErrOwnership
+		return hostedexecution.ErrOwnership
 	}
 	container := *template.Containers[0]
 	if len(container.Env) != 2 {
-		return result, hostedexecution.ErrOwnership
+		return hostedexecution.ErrOwnership
 	}
 	env := map[string]string{}
 	for _, field := range container.Env {
 		if field == nil || field.Name == nil || field.Value == nil || field.SecretRef != nil {
-			return result, hostedexecution.ErrOwnership
+			return hostedexecution.ErrOwnership
 		}
 		key := value(field.Name)
 		if _, duplicate := env[key]; duplicate {
-			return result, hostedexecution.ErrOwnership
+			return hostedexecution.ErrOwnership
 		}
 		env[key] = value(field.Value)
 	}
 	if env["TESTSTUDIO_JOB_EXECUTION"] != p.job.Reference.ID || fingerprint(env["TESTSTUDIO_JOB_TOKEN"]) != p.ticketHash {
-		return result, hostedexecution.ErrOwnership
+		return hostedexecution.ErrOwnership
 	}
 	container.Env = nil
 	if container.Resources != nil {
@@ -146,7 +152,15 @@ func (p *Plan) VerifyExecution(receipt a.JobExecutionBase, actual a.JobExecution
 	wanted := p.template().Containers[0]
 	expected := a.JobExecutionContainer{Name: wanted.Name, Image: wanted.Image, Command: wanted.Command, Args: wanted.Args, Resources: wanted.Resources}
 	if fingerprint(document(container)) != fingerprint(document(expected)) {
-		return result, hostedexecution.ErrOwnership
+		return hostedexecution.ErrOwnership
+	}
+	return nil
+}
+
+func (p *Plan) VerifyExecution(receipt a.JobExecutionBase, actual a.JobExecution) (Observation, error) {
+	result := Observation{ExecutionID: value(receipt.ID)}
+	if err := p.VerifyExecutionOwnership(receipt, actual); err != nil {
+		return result, err
 	}
 	properties := actual.Properties
 	if properties.EndTime != nil && properties.StartTime != nil && properties.EndTime.Before(*properties.StartTime) {

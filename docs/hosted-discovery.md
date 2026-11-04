@@ -14,7 +14,8 @@ The optional [Helm preparation package](kubernetes-preparation.md) now supplies 
 Complete hosted source operation still requires deployment verification.
 Environment-backed browser and API profiles require remote gateway delivery.
 AWS dispatch is implemented with separate deployment verification pending.
-Azure now has a [job request and recovery-proof contract](azure-worker-contract.md). Its durable provider and isolation checks remain open.
+Azure now has a [durable job provider](azure-worker-lifecycle.md) and [job ownership contract](azure-worker-contract.md).
+Its concrete isolation controls, independent stop resources, registry authentication, and native preparation wiring remain open.
 
 ## Configure separate processes
 
