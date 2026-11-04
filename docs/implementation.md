@@ -122,7 +122,38 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: Azure private endpoint and NIC ownership
+## Current delivery: Azure registry service configuration and approval
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+The preceding endpoint ownership batch commits as 24a42ca.
+
+RegistryGuard now refreshes endpoint ownership before inspecting actual registry configuration and three complete service inventories.
+The registry must be private, Premium, ready, and bound to the configured login and selected regional data hostname.
+Admin passwords, anonymous pull, public access, task bypass, trusted-service bypass, IP exceptions, and artifact exports cannot widen access.
+The observed legacy permission mode matches the current AcrPull packaging profile. ABAC role packaging remains separate work.
+ARM-audience authentication stays enabled because the platform's managed-identity image pulls require it.
+The trusted registry client keeps its separate registry-scoped audience without ARM fallback.
+
+The required registry group, login member, selected regional data member, private zone, and complete replication inventory must agree.
+Service-side connection approval must cover exactly the worker registry endpoint and a separate selected preparation endpoint.
+The registry's embedded inventory must agree with the complete collection.
+Foreign or duplicate connections, including identities differing only by case, reject inspection.
+Missing policy status, pending approval, unfinished inventory, and different snapshots remain unavailable.
+Trusted preparation NIC, subnet, DNS, and process placement remain separate required checks.
+
+The production reader pins the stable armcontainerregistry/v3 3.0.0 SDK and API 2025-11-01.
+Its transport permits only registry and selected child-collection GET requests.
+Credential listing, regeneration, writes, filters, foreign scopes, redirects, and unsafe paging cannot widen authority.
+Six new focused local race checks pass across targeted commands. Only two changed checks repeat after review fixes.
+Evidence is output/azure-worker-registry/summary.json and the focused command results.
+No live cloud credential, cloud API, DNS probe, packet probe, registry push, deployment, UI build, browser, container, or image build runs.
+
+Registry service checks do not implement Network or enable coded Azure execution.
+Exchange service authority, effective DNS visibility, trusted preparation networking, cross-job isolation, execution placement, and role binding remain unfinished.
+Continue exchange environment, service approval, application inventory, and HTTPS authority inspection.
+See [Azure worker registry service admission](azure-worker-registry.md).
+
+## Previous delivery: Azure private endpoint and NIC ownership
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 The previous selected-zone batch commits as 74b9184. This batch binds actual private endpoint resources to their DNS addresses.

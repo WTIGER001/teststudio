@@ -213,7 +213,13 @@ Its registry NIC members distinguish login from selected regional data. A dedica
 The scoped SDK reader performs only six selected-resource GET requests. Seven new focused race checks and two existing perimeter checks pass locally.
 See [Azure worker private endpoint ownership](azure-worker-endpoints.md). Acceptance 51 advances; the count remains 48 of 57.
 
-Next inspect actual registry configuration, regional data endpoints, and service-side connection approval.
+The registry service stage now checks actual private access configuration, selected data region, required members, and complete service-side approval.
+The worker registry endpoint and separate preparation endpoint must both be approved, with consistent embedded and collection inventories.
+The stable SDK exposes anonymous access, task bypass, and permission mode. Inspection preserves the required platform image-pull authentication setting.
+Six new focused local race checks pass. Two changed checks repeat after review fixes; no unchanged broad suite runs.
+See [Azure worker registry service admission](azure-worker-registry.md). Acceptance 51 advances; the count remains 48 of 57.
+
+Next inspect exchange service authority.
 Inspect the separate exchange environment, service-side approval, isolated application inventory, and HTTPS hostname authority.
 Resolve effective VNet-wide private-zone visibility and attachment controls. Selected-zone inspection cannot rule out other shadowing zones.
 Keep that proof separate from configured record correctness and private endpoint ownership.

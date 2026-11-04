@@ -13,7 +13,8 @@ The [firewall stage](azure-worker-firewall.md) now verifies firewall attachment,
 The [DNS stage](azure-worker-dns.md) now checks actual resolver association, exclusive links, exact lists, and enabled allow/block rules.
 The [selected private-zone stage](azure-worker-private-dns.md) now checks exact records, complete links, registration, and fallback.
 The [endpoint stage](azure-worker-endpoints.md) now checks consumer-side approval, NIC ownership, subnet policy, and regional address roles.
-The complete adapter must also prove effective zone visibility, service-side authority, exchange isolation, and execution placement.
+The [registry service stage](azure-worker-registry.md) now checks private configuration, regional data members, and service-side approval.
+The complete adapter must also prove effective zone visibility, exchange authority, exchange isolation, and execution placement.
 Azure coded execution remains disabled in native commands and infrastructure packaging.
 See [durable Azure execution](azure-worker-lifecycle.md), [job contracts](azure-worker-contract.md), and [independent deadlines](azure-worker-deadlines.md).
 
@@ -108,7 +109,7 @@ Before enabling coded Azure jobs, implement and verify these controls:
 1. Compose the existing topology and perimeter inspectors with the remaining admission stages. Neither stage alone authorizes execution.
 2. Compose the existing firewall inspector. Preserve its fixed platform allowlist, terminal deny, resource ownership, and complete group inventory.
 3. Compose the DNS policy and selected-zone inspectors. Resolve effective zone visibility and attachment controls. Preserve hierarchy and CNAME semantics.
-4. Compose endpoint inspection. Verify registry and exchange service configuration, service-side approval, hostname authority, and trusted registry preparation access.
+4. Compose endpoint and registry service inspection. Verify exchange authority and the separate trusted registry preparation path.
 5. Isolate the exchange from API, database, evidence, registry-write, and identity credentials.
 6. Verify that unrelated workloads cannot share the worker trust boundary. Establish cross-job isolation and execution placement explicitly.
 7. Compose the complete Network implementation and bind its whole policy into the execution profile.

@@ -14,7 +14,8 @@ The [firewall inspector](azure-worker-firewall.md) now checks actual attachment,
 The [DNS inspector](azure-worker-dns.md) now checks actual resolver policy, VNet association, complete rules, and default block.
 The [selected private-zone inspector](azure-worker-private-dns.md) now verifies exact records, completed links, and absence of public fallback.
 The [endpoint inspector](azure-worker-endpoints.md) now binds consumer-side approval, NIC ownership, subnet policy, and exact regional role addresses.
-Complete network admission, service-side approval, identity role binding, and native command wiring remain unfinished.
+The [registry service inspector](azure-worker-registry.md) now verifies private configuration, regional authority, and service-side registry approval.
+Complete network admission, exchange authority, identity role binding, and native command wiring remain unfinished.
 Azure coded execution remains disabled. The core deployment still supports native HTTP checks.
 
 See [Azure core service](azure.md), [hosted lifecycle](hosted-execution.md), and [hosted preparation](hosted-discovery.md).

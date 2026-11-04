@@ -8,7 +8,8 @@ The production reader uses scoped Azure SDK reads. Local fixtures supply the res
 
 This stage does not implement Network, authorize dispatch, or release worker input.
 Azure coded execution remains disabled in native commands and infrastructure packaging.
-Service-side connection approval, actual registry configuration, isolated exchange authority, effective DNS visibility, and cross-job isolation remain required.
+The [registry service stage](azure-worker-registry.md) now checks private configuration, required members, and service-side registry approval.
+Exchange approval, isolated exchange authority, effective DNS visibility, and cross-job isolation remain required.
 Local fixture success does not establish service reachability or deployment compatibility.
 
 ## Explicit settings
@@ -135,7 +136,7 @@ Acceptance 51 advances. The total remains 48 verified items out of 57.
 
 ## Next implementation
 
-Inspect actual registry service configuration, regional data endpoints, and service-side private endpoint approval.
+Compose registry service inspection. Preserve actual private access settings, regional authority, and worker and preparation approval.
 Inspect exchange environment configuration, service-side approval, private application inventory, and HTTPS hostname authority.
 Resolve effective VNet-wide DNS visibility and attachment controls.
 Establish cross-job isolation and execution placement before composing Network.

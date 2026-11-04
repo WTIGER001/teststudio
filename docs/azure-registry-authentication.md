@@ -8,6 +8,9 @@ It exchanges an explicit trusted Azure credential for registry and repository to
 The Azure API and preparation runtime can use this client as their Inspector or source registry client.
 Native Azure worker command wiring and identity role packaging remain unfinished. Coded Azure execution stays disabled.
 
+The [registry service inspector](azure-worker-registry.md) now verifies private access settings, regional data authority, and service-side endpoint approval.
+It preserves platform ARM-audience authentication while this trusted client continues to request only the registry audience.
+
 See [Azure job lifecycle](azure-worker-lifecycle.md), [registry inspection](registry-inspection.md), and [source publication](registry-preparation.md).
 No cloud connection or registry publication occurs during local verification.
 
