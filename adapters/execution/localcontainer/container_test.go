@@ -34,6 +34,33 @@ func assertRemoved(t *testing.T, run string) {
 	}
 }
 
+func TestContainerMissingRequestedMediaPreservesPassingObservation(t *testing.T) {
+	executor, input := containerInput(t, "ADAPTER-NOMEDIA", 30000)
+	input.Capture.Screenshots = "always"
+	input.Capture.Trace = "always"
+	report := executor.Execute(t.Context(), input)
+	assertRemoved(t, input.RunID)
+	data, err := exec.CommandContext(t.Context(), "docker", "volume", "ls", "--filter", "label=teststudio.run="+input.RunID, "--format", "{{.Name}}").Output()
+	if err != nil || strings.TrimSpace(string(data)) != "" {
+		t.Fatalf("worker volume remains: %s %v", data, err)
+	}
+	if report.Result.State != "passed" || len(report.EvidenceErrors) != 2 {
+		t.Fatalf("media gap changed the observation or disappeared: %+v gaps=%v", report.Result, report.EvidenceErrors)
+	}
+	for _, kind := range []string{"screenshot", "trace"} {
+		found := false
+		for _, problem := range report.EvidenceErrors {
+			if strings.Contains(problem, "Requested "+kind+" was not produced") {
+				found = true
+			}
+		}
+		if !found {
+			t.Fatal("requested capture gap is missing", kind, report.EvidenceErrors)
+		}
+	}
+	t.Logf("run=%s state=%s captureGaps=%d resourcesRemoved=true", input.RunID, report.Result.State, len(report.EvidenceErrors))
+}
+
 func TestContainerFailureAndTimeoutPreserveMediaAndSteps(t *testing.T) {
 	for _, tc := range []struct {
 		id, kind, state string

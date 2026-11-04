@@ -1,4 +1,4 @@
-import { DestroyRef, inject, Injectable, signal } from '@angular/core'
+import { DestroyRef, effect, inject, Injectable, signal, untracked } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { ActivatedRoute } from '@angular/router'
 import { ApiService } from '../../core/api.service'
@@ -22,6 +22,7 @@ export class ArtifactViewService {
   private generation = 0
 
   constructor() {
+    effect(() => { this.evidence.focusedTest(); this.evidence.focusedAttempt(); this.evidence.restricted(); untracked(() => { this.close(); this.error.set('') }) })
     const destroy = inject(DestroyRef)
     inject(ActivatedRoute).paramMap.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.close(); this.error.set('') })
     destroy.onDestroy(() => { this.generation++ })

@@ -24,6 +24,13 @@ type LogPage struct {
 }
 
 func (s *Service) Logs(ctx context.Context, project, run, stream, test, cursor string, tail bool, limit int) (LogPage, error) {
+	return s.LogsForAttempt(ctx, project, run, stream, test, 0, cursor, tail, limit)
+}
+
+func (s *Service) LogsForAttempt(ctx context.Context, project, run, stream, test string, attempt int, cursor string, tail bool, limit int) (LogPage, error) {
+	if attempt < 0 || attempt > 3 || attempt > 0 && test == "" {
+		return LogPage{}, errors.New("log attempt requires a test identifier and a value from 1 through 3")
+	}
 	if limit < 1 || limit > 100 {
 		return LogPage{}, errors.New("log page limit must be between 1 and 100")
 	}
@@ -37,7 +44,7 @@ func (s *Service) Logs(ctx context.Context, project, run, stream, test, cursor s
 		if err != nil {
 			return LogPage{}, err
 		}
-		if a.Kind == "log" && (stream == "" || stream == a.Stream) && (test == "" || test == a.Test) {
+		if a.Kind == "log" && (stream == "" || stream == a.Stream) && (test == "" || test == a.Test) && (attempt == 0 || attempt == a.Attempt) {
 			entries = append(entries, a)
 		}
 	}
@@ -58,8 +65,9 @@ func (s *Service) Logs(ctx context.Context, project, run, stream, test, cursor s
 	})
 	data, _ := json.Marshal(struct {
 		Project, Run, Stream, Test string
+		Attempt                    int
 		Entries                    []Artifact
-	}{project, run, stream, test, entries})
+	}{project, run, stream, test, attempt, entries})
 	hash := sha256.Sum256(data)
 	version := hex.EncodeToString(hash[:])
 	position := 0

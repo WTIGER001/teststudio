@@ -79,7 +79,9 @@ Authorized users can create, update, or remove an evidence pin with a reason and
 Polling preserves unsaved pin edits. A stale edit requires reload and review.
 Pinned files keep their access controls. Active pins disable deletion controls.
 Deletion uses a separate form with the artifact filename and a required reason.
-The interface shows pending, failed, expired, and deleted states without broken access links.
+The interface shows pending, failed, expired, missing, and deleted states without broken access links.
+Run investigation applies the selected test and attempt to artifact metadata and logs together.
+Private previews close when their scope changes or evidence access is rejected. See [Test results](results.md#investigate-one-test).
 The Capture summary records collection completeness. File retention remains separate.
 The artifact heading receives keyboard focus after a deletion request.
 Capture configuration screens and cloud artifact adapters remain pending.
@@ -94,6 +96,10 @@ Worker stdout and stderr use separate `playwright.stdout` and `playwright.stderr
 The adapter validates identity, state, timing, attachment paths, file types, sizes, and transfer limits before import.
 Missing or malformed reports cannot produce a passing test.
 A transfer or storage gap stays visible beside the observed result.
+Missing requested browser media also produces an explicit capture gap. It does not rewrite the functional result.
+The website profile supplies matching Playwright capture options. Offline suites must configure their browser capture or attach the requested media.
+A failed upload keeps its upload-failed metadata. Missing content keeps a missing state. Expired content keeps its retention state.
+A passing test with incomplete capture does not become eligible for Rerun failures. Correct the capture setup before starting another run.
 See [Self-testing](self-testing.md) for the local workflow and verified failure probes.
 
 ## Recovery checkpoints

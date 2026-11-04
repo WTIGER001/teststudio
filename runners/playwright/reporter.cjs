@@ -36,7 +36,7 @@ class TestStudioReporter {
     if (this.results.length !== 1 || this.problems.length) { console.error(this.problems.join('\n') || 'The selected test produced no unique result'); return }
     const { result, attachments } = this.results[0]
     if (summary.status !== 'passed' && result.state !== 'failed' && result.state !== 'timed-out') { console.error('The worker failed outside the selected test'); return }
-    const failed = result.state !== 'passed' || this.input.failedBefore || (this.input.timingMode === 'fail' && this.input.slowThresholdMs != null && result.durationMs >= this.input.slowThresholdMs)
+    const failed = result.state === 'failed' || result.state === 'timed-out' || this.input.failedBefore || (this.input.timingMode === 'fail' && this.input.slowThresholdMs != null && result.durationMs >= this.input.slowThresholdMs)
     const files = [], evidenceErrors = []
     for (const attachment of attachments) {
       if (files.length >= 30) { evidenceErrors.push('Attachment count exceeds 30'); break }
@@ -55,7 +55,14 @@ class TestStudioReporter {
         files.push({ path: filename, kind, filename, contentType: attachment.contentType || 'application/octet-stream' })
       } catch (error) { evidenceErrors.push(`${attachment.name}: ${error.message}`) }
     }
-    fs.writeFileSync('/output/report.tmp', JSON.stringify({ schemaVersion: 'teststudio.playwright/v1', testId: this.input.test.id, selector: this.input.test.selector, result, attachments: files, evidenceErrors: evidenceErrors.slice(0, 20) }))
+    for (const [setting, kind] of [['screenshots', 'screenshot'], ['trace', 'trace'], ['video', 'video']]) {
+      const mode = this.input.capture[setting]
+      if ((mode === 'always' || mode === 'failure' && failed) && !files.some(file => file.kind === kind)) evidenceErrors.push(`Requested ${kind} was not produced. Check the Playwright capture configuration or report attachments.`)
+    }
+    this.writeReport({ schemaVersion: 'teststudio.playwright/v1', testId: this.input.test.id, selector: this.input.test.selector, result, attachments: files, evidenceErrors: evidenceErrors.slice(0, 20) })
+  }
+  writeReport(report) {
+    fs.writeFileSync('/output/report.tmp', JSON.stringify(report))
     fs.renameSync('/output/report.tmp', '/output/report.json')
   }
 }

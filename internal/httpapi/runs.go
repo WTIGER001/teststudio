@@ -125,7 +125,15 @@ func (s *Server) runRoutes(m *http.ServeMux) {
 				problem(w, err)
 				return
 			}
-			page, err := s.Store.List(r.Context(), kind+"/"+v.ID, v.Project, r.URL.Query().Get("cursor"), limit)
+			filter, err := evidenceFilter(r.URL.Query())
+			if err != nil {
+				problem(w, err)
+				return
+			}
+			if kind == "executions" {
+				filter = runEvidenceFilter{}
+			}
+			page, err := s.filteredRunEvidence(r.Context(), actor(r), v.Project, v.ID, kind, r.URL.Query().Get("cursor"), limit, filter)
 			if err != nil {
 				problem(w, err)
 				return
@@ -173,7 +181,12 @@ func (s *Server) runRoutes(m *http.ServeMux) {
 			return
 		}
 		q := r.URL.Query()
-		page, err := s.Evidence.Logs(r.Context(), v.Project, v.ID, q.Get("stream"), q.Get("test"), q.Get("cursor"), q.Get("tail") == "true", limit)
+		filter, err := evidenceFilter(q)
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		page, err := s.Evidence.LogsForAttempt(r.Context(), v.Project, v.ID, q.Get("stream"), filter.Test, filter.Attempt, q.Get("cursor"), q.Get("tail") == "true", limit)
 		if err != nil {
 			problem(w, err)
 			return

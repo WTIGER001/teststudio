@@ -95,6 +95,20 @@ Existing capability checks still control each protected link.
 On narrow screens, Navigation opens and closes the menu. Selecting a link closes it and returns space to the current page.
 Sidebar styles stay within focused components and use shared theme tokens.
 
+## Run investigation
+
+Use Inspect test to move from a logical result to its attempts, logs, and artifacts.
+Keep one shared test and attempt selection across these evidence sections.
+Default to all attempts so a passing retry cannot hide an earlier failure.
+Use cards for focused attempts and artifacts. Keep primary investigation actions in the first results column.
+Constrain select controls to their field width. Verify readable content width as well as document overflow.
+Open failed recorded steps within the selected test. Keep technical log filters and execution events under named Advanced disclosures.
+Move focus to the investigation heading and artifact preview heading after the corresponding action.
+Close preview returns focus to its triggering control when it still exists.
+Preserve investigation filters and action errors during Refresh. Hide rejected data after permission loss.
+Explain ambiguous mutation responses and reuse the same request key for an in-page retry.
+State the reload limit of that continuation. Keep saved server records separate from temporary page state.
+
 ## Themes
 
 Light, dark, and system preferences use shared semantic CSS tokens.

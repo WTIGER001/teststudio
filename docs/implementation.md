@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 27 verified of 57.
+The acceptance count is 28 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -54,7 +54,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **41.** Go and browser runners apply the same timing contract across execution and deployment profiles.
 - [ ] **42.** Run details expose attempts, steps, context, logs, screenshots, traces, and configured attachments without requiring HTML reports.
 - [ ] **43.** Available evidence survives service restarts. Duplicate events and upload retries do not create duplicate attachments or rerun tests.
-- [ ] **44.** Capture gaps, failed uploads, expired files, and incomplete evidence remain visible beside the observed test outcome.
+- [x] **44.** Capture gaps, failed uploads, expired files, and incomplete evidence remain visible beside the observed test outcome.
 - [ ] **45.** Artifact access respects project permissions. Private trace viewing requires no public upload or third-party viewer.
 - [ ] **46.** Retention, quotas, and evidence pins work across local, S3, and Azure artifact adapters.
 - [x] **47.** Result-state trends use stacked area charts with consistent state colors, final logical counts, accessible values, and visible missing-history gaps.
@@ -73,6 +73,37 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
+
+### Scoped investigation, failure recovery, and explicit capture gaps
+
+Acceptance **44** is complete. The current ledger has **28 verified, 29 open, 57 total** items.
+Capture gaps, failed uploads, expired or missing files, and incomplete capture remain visible beside the observed outcome.
+The Playwright reporter now names requested screenshots, traces, and video that the suite does not produce.
+Those gaps do not change the measured test state. Failure-only capture does not invent a gap for an ordinary passing or skipped test.
+A real isolated worker probe passes its test and returns two explicit missing-media gaps. Its container and volume are removed.
+Targeted storage and run checks verify failed uploads, missing files, expiry, and capture failure without rewriting a passing observation.
+
+Inspect test now scopes attempts, logs, and artifacts together. All attempts remains the default, including unsuccessful retries.
+Selected attempts and artifacts use readable cards. Failed recorded steps open automatically. The first results column keeps Inspect test visible on mobile.
+Shared field rules constrain long select values. Technical log filters and execution events use named Advanced disclosures.
+Screenshot previews receive focus and return it to their triggering button. Scope changes and rejected evidence reads hide stale previews or content.
+Refresh preserves the selection and action error. Refresh access reloads current capabilities and the run.
+A lost rerun response retains its in-page request key. Retrying returns the existing child. Original run links preserve the parent context.
+The continuation ends on page exit or reload. The guide directs users to retained history before starting another rerun.
+Filtered evidence pages bind their cursor to the actor, run, collection, test, and attempt. A bounded scan can retain a continuation cursor.
+
+STUDIO-DIAGNOSTICS-001 passes through normal TestStudio self-test execution with complete evidence.
+It uses new fixture-backed browser failure metadata and freshly captured private screenshot and trace files for UI checks.
+A separate normal HTTP timeout and successful rerun verify response-loss recovery without creating a duplicate child.
+The test checks keyboard focus, dark mobile layout, readable step width, constrained selects, permission errors, and visible retention states.
+Visual inspection catches table squeezing that a document overflow check misses. Scoped cards correct that problem.
+Evidence is output/selftest/20261104T013400.731748000-9d83080068096b0149207e5f/summary.json and cleanup.json.
+The real missing-media probe is TestContainerMissingRequestedMediaPreservesPassingObservation, run 20261104T012756.134194000-2fd3601107e1db07a965eaea.
+Targeted race checks cover filtered pagination, log retry isolation, quota and upload failure, missing content, expiry, and observed outcome preservation.
+Three pure utility checks and the reporter policy check pass. The production Angular build passes.
+The checkpoint and selected checks are recorded in output/run-investigation/checkpoint.json.
+Owned verification controllers, browser processes, worker containers, and output volumes stop. Verification uses no cloud or public website.
+Items **42** and **45** remain open for their remaining evidence and private trace-viewer scope.
 
 ### Environment-backed recorded website execution locally
 

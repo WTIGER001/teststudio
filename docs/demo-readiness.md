@@ -2,7 +2,7 @@
 
 The first delivery presents a usable local TestStudio application.
 The complete product plan and 57 acceptance items remain the later delivery scope.
-The current acceptance ledger has 27 verified items. It measures full product requirements rather than the size of this demonstration.
+The current acceptance ledger has 28 verified items. It measures full product requirements rather than the size of this demonstration.
 
 ## Existing application
 
@@ -62,6 +62,7 @@ The completed demonstration checklist remains complete. It does not prove all or
 Project creator access now passes ordinary-user setup and scoped-boundary checks.
 The first environment-backed local recorded website flow now passes preparation, publication, execution, and private evidence collection.
 The demo enables the trusted single-origin gateway. The offline starter keeps its separate isolated profile.
-Next, improve tester operation and recovery through the existing result and evidence pages.
+Tester investigation and failure recovery now pass scoped evidence, accessible mobile presentation, and rerun checks without duplicate children.
+Acceptance 44 is complete. Private trace viewing and remaining catalog workflows are next.
 Follow [the active delivery plan](plan.md#active-delivery-plan-after-the-tester-walkthrough) for bounded batches and required evidence.
 Keep the running demonstration available while these workflows are implemented.

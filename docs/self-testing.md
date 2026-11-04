@@ -270,3 +270,25 @@ STUDIO-WIZARD-001 covers run review with the registered endpoint list.
 Evidence is output/recorded-website/checkpoint.json and output/selftest/20261104T005645.164758000-7c3098f80687727af244e78a/summary.json.
 The corresponding cleanup records verify that owned controllers, containers, and volumes stop.
 These checks use local fixtures. They make no public website or cloud verification request.
+
+## Tester investigation and failure recovery
+
+Run only the affected workflow:
+
+```sh
+bash scripts/test-self.sh --test=STUDIO-DIAGNOSTICS-001
+```
+
+The test creates new private browser media through an owned helper process. That process closes its browser before returning.
+An isolated fixture helper writes failure and timeout observations through product metadata and evidence contracts.
+Those observations verify presentation. They do not claim execution of a prepared browser suite.
+The workflow inspects failed steps, selects retry-specific logs, opens a private screenshot, and checks expired, missing, and failed-upload states.
+It also executes a real native HTTP timeout, loses the response after rerun creation, and retries the same in-page request.
+The existing child returns without another run. Refresh preserves the error and selected scope. Permission errors hide rejected content.
+The mobile check measures step readability and select bounds, alongside document overflow and keyboard focus.
+
+The separate ADAPTER-NOMEDIA probe runs a passing check with browser media disabled in its source configuration.
+TestContainerMissingRequestedMediaPreservesPassingObservation requests screenshots and traces, then verifies two capture gaps without changing the pass.
+Select that Go check with TESTSTUDIO_PLAYWRIGHT_IMAGE set to the cached immutable self-test image.
+The reporter unit check is `node --test runners/playwright/reporter.test.mjs`.
+All probes use local fixtures. The checkpoint records selected backend checks and exact cleanup evidence.

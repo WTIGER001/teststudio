@@ -35,3 +35,30 @@ func TestLogPagesBindTheirSelectionAndTailKeepsNewestBytes(t *testing.T) {
 		t.Fatal("cursor accepted a changed log snapshot")
 	}
 }
+
+func TestLogAttemptSelectionAndCursorsDoNotMixRetries(t *testing.T) {
+	s, _ := fixture(t)
+	for attempt := 1; attempt <= 2; attempt++ {
+		for sequence := int64(1); sequence <= 3; sequence++ {
+			if _, err := s.Log(t.Context(), "project", "run", "worker", "stdout", "TEST-1", attempt, int64(attempt-1)*3+sequence, fmt.Sprintf("attempt-%d-%d", attempt, sequence), 1000); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+	first, err := s.LogsForAttempt(t.Context(), "project", "run", "stdout", "TEST-1", 1, "", false, 1)
+	if err != nil || len(first.Segments) != 1 || first.Cursor == "" || first.Segments[0].Artifact.Attempt != 1 {
+		t.Fatal(first, err)
+	}
+	if _, err := s.LogsForAttempt(t.Context(), "project", "run", "stdout", "TEST-1", 2, first.Cursor, false, 1); err == nil {
+		t.Fatal("log cursor accepted another attempt")
+	}
+	tail, err := s.LogsForAttempt(t.Context(), "project", "run", "stdout", "TEST-1", 2, "", true, 100)
+	if err != nil || len(tail.Segments) != 3 {
+		t.Fatal(tail, err)
+	}
+	for _, segment := range tail.Segments {
+		if segment.Artifact.Attempt != 2 || !strings.HasPrefix(segment.Text, "attempt-2-") {
+			t.Fatal("logs mixed retries", segment)
+		}
+	}
+}

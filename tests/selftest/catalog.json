@@ -2,6 +2,7 @@
   "schemaVersion": "teststudio.selftest/v1",
   "source": "teststudio-selftests",
   "tests": [
+    { "id": "STUDIO-DIAGNOSTICS-001", "title": "Scoped failure steps, retry logs, private screenshots, evidence gaps and rerun response recovery", "selector": "@STUDIO-DIAGNOSTICS-001", "category": "Results" },
     { "id": "STUDIO-OWNER-001", "title": "Ordinary creator onboarding, scoped administration, publication and local execution", "selector": "@STUDIO-OWNER-001", "category": "Access" },
     { "id": "STUDIO-URL-001", "title": "Quick URL probe entry, reviewed target registration, protected reuse and local execution", "selector": "@STUDIO-URL-001", "category": "Catalog" },
     { "id": "STUDIO-WIZARD-001", "title": "Guided setup, advanced validation, reviewed probes and recoverable local runs", "selector": "@STUDIO-WIZARD-001", "category": "Interface" },
@@ -39,6 +40,7 @@
     { "id": "STUDIO-TIMING-001", "title": "Timing history and immutable results", "selector": "@STUDIO-TIMING-001", "category": "Timing" }
   ],
   "diagnostics": [
+    { "id": "ADAPTER-NOMEDIA", "title": "Passing observation with missing requested media", "selector": "@ADAPTER-NOMEDIA", "category": "Runner diagnostics" },
     { "id": "ADAPTER-FAIL", "title": "Intentional failure and evidence", "selector": "@ADAPTER-FAIL", "category": "Runner diagnostics" },
     { "id": "ADAPTER-TIMEOUT", "title": "Intentional timeout", "selector": "@ADAPTER-TIMEOUT", "category": "Runner diagnostics" }
   ]

@@ -2,10 +2,11 @@ import { liveTiming } from '../timing/timing.utils'
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { ActivatedRoute, Router } from '@angular/router'
-import { ApiService, type RecordValue } from '../../core/api.service'
+import { ApiError, ApiService, type RecordValue } from '../../core/api.service'
 import { WorkspaceService } from '../../core/workspace.service'
 import { RunEvidenceService } from './run-evidence.service'
 import type { Run } from './run.models'
+import { diagnosticTests, runTestLabels, runActionFeedback, resultSummaries } from './run-diagnostics.utils'
 import { canRerun, errorMessage, terminal } from './run.utils'
 
 @Injectable()
@@ -22,6 +23,11 @@ export class RunDetailService {
   readonly loading = signal(false)
   readonly mutating = signal(false)
   readonly error = signal('')
+  readonly actionError = signal('')
+  readonly refreshingAccess = signal(false)
+  readonly testLabels = computed(() => runTestLabels(this.run()))
+  readonly testChoices = computed(() => diagnosticTests(this.run()))
+  readonly resultSummaries = computed(() => resultSummaries(this.run()))
   readonly canCancel = computed(() => { const run = this.run(); return !!run && !terminal(run.state) && !run.cancelRequested && this.workspace.can('runs.cancel') })
   readonly canRerun = computed(() => { const run = this.run(); return !!run && canRerun(run) && this.workspace.can('runs.create') })
   readonly finished = computed(() => { const run = this.run(); return !!run && terminal(run.state) })
@@ -35,7 +41,7 @@ export class RunDetailService {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => {
       this.generation++; clearTimeout(this.timer)
       this.projectId.set(params.get('projectId') ?? ''); this.runId.set(params.get('runId') ?? '')
-      this.run.set(null); this.error.set(''); this.rerunKey = crypto.randomUUID()
+      this.run.set(null); this.error.set(''); this.actionError.set(''); this.rerunKey = crypto.randomUUID()
       this.evidence.reset(this.projectId(), this.runId())
       void this.load()
     })
@@ -51,7 +57,12 @@ export class RunDetailService {
       if (generation !== this.generation) return
       this.run.set(row.data); this.observedAt.set(Date.now())
       await this.evidence.load()
-    } catch (error) { if (generation === this.generation) this.error.set(errorMessage(error, 'The run could not be loaded.')) }
+    } catch (error) {
+      if (generation === this.generation) {
+        if (error instanceof ApiError && (error.status === 403 || error.status === 404)) { this.run.set(null); this.evidence.restrict() }
+        this.error.set(error instanceof ApiError && error.status === 403 ? 'This run is no longer accessible with your current permissions. Its saved results remain stored. Check project access and select Refresh to retry.' : errorMessage(error, 'The run could not be loaded.'))
+      }
+    }
     finally {
       if (generation === this.generation) {
         this.loading.set(false)
@@ -60,19 +71,26 @@ export class RunDetailService {
     }
   }
 
+  async refreshAccess(): Promise<void> {
+    if (this.refreshingAccess() || this.mutating()) return
+    this.refreshingAccess.set(true)
+    try { await this.workspace.refreshAccess(); await this.load() }
+    finally { this.refreshingAccess.set(false) }
+  }
+
   async cancel(): Promise<void> { await this.mutate('cancel') }
   async rerunFailures(): Promise<void> { await this.mutate('rerun-failures') }
 
   private async mutate(action: string): Promise<void> {
     if (this.mutating()) return
     const base = this.evidence.base()
-    this.mutating.set(true); this.error.set('')
+    this.mutating.set(true); this.actionError.set('')
     try {
       const row = await this.api.request<RecordValue<Run>>(`${base}/${action}`, 'POST', {}, undefined, action === 'rerun-failures' ? this.rerunKey : undefined)
       if (base !== this.evidence.base()) return
       if (action === 'rerun-failures') await this.router.navigate(['/projects', this.projectId(), 'runs', row.id])
       else await this.load()
-    } catch (error) { if (base === this.evidence.base()) this.error.set(errorMessage(error, 'The run action failed.')) }
+    } catch (error) { if (base === this.evidence.base()) this.actionError.set(runActionFeedback(action, error instanceof ApiError ? error.status : 0, errorMessage(error, 'The run action failed.'))) }
     finally { this.mutating.set(false) }
   }
 }

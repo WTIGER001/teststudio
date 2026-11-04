@@ -5,8 +5,9 @@ import { RunTimingComponent } from '../timing/run-timing.component'
 import { RunTimingService } from '../timing/run-timing.service'
 import { TimingResultComponent } from '../timing/timing-result.component'
 import { DatePipe } from '@angular/common'
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
+import { ChangeDetectionStrategy, Component, afterNextRender, inject, Injector, viewChild } from '@angular/core'
 import { RouterLink } from '@angular/router'
+import type { Attempt } from './run.models'
 import { RunDetailService } from './run-detail.service'
 import { RunEvidenceService } from './run-evidence.service'
 import { RunEvidenceComponent } from './run-evidence.component'
@@ -24,6 +25,7 @@ import { RunRetentionService } from './run-retention.service'
       <button type="button" class="button secondary" [disabled]="service.loading()" (click)="service.load()">Refresh</button>
     </div></div>
     @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }
+    @if (service.actionError()) { <div class="notice error" role="alert"><p>{{ service.actionError() }}</p><button type="button" class="button secondary" [disabled]="service.refreshingAccess() || service.mutating()" (click)="service.refreshAccess()">Refresh access</button></div> }
     @if (service.run(); as run) {
       <section class="metrics" aria-label="Run summary">
         <article class="metric"><span class="eyebrow">State</span><strong class="metric-status">{{ run.state }}</strong><span class="small muted">{{ run.phase }}{{ run.cancelRequested ? ' · Cancellation requested' : '' }}</span></article>
@@ -37,6 +39,7 @@ import { RunRetentionService } from './run-retention.service'
       <section class="panel" aria-labelledby="snapshot-title">
         <h2 id="snapshot-title">Execution snapshot</h2><dl class="detail-grid">
           <dt>Suite</dt><dd>{{ run.request.suiteId }} · release <code>{{ run.release.id }}</code></dd><dt>Environment</dt><dd>{{ run.environment?.name || 'No target' }}{{ run.environment?.protected ? ' · Protected' : '' }}<span class="small muted"> {{ run.environment?.stage }}</span></dd>
+          @if (run.request.parentRunId) { <dt>Rerun of</dt><dd><a [routerLink]="['/projects', run.projectId, 'runs', run.request.parentRunId]">Original run</a><span class="table-subtitle muted">The original results and evidence remain available.</span></dd> }
           <dt>Selection</dt><dd>{{ run.request.testIds?.length ? 'Selected tests and dependencies' : 'Full eligible suite' }} · {{ run.tests.length }} tests</dd><dt>Location</dt><dd>{{ run.request.executionLocation }}</dd>
           @if (run.savedSelection; as saved) { <dt>Saved selection</dt><dd>{{ saved.definition.name }} · revision {{ saved.revision }}<code class="table-subtitle">{{ saved.definition.id }} · {{ saved.definition.spec.kind }} · schema {{ saved.definition.spec.schemaVersion }}</code></dd> }
           <dt>Requested by</dt><dd>{{ run.actor }} · {{ run.trigger }}</dd><dt>Created</dt><dd><time [attr.datetime]="run.createdAt">{{ run.createdAt | date:'medium' }}</time></dd>
@@ -47,7 +50,7 @@ import { RunRetentionService } from './run-retention.service'
       <ts-run-timing />
       <section class="panel" aria-labelledby="results-title"><h2 id="results-title">Final test results</h2>
         <div class="table-scroll"><table><caption class="sr-only">One final result for each completed test</caption><thead><tr><th scope="col">Test</th><th scope="col">State</th><th scope="col">Last attempt</th><th scope="col">Duration</th><th scope="col">Details</th></tr></thead><tbody>
-          @for (result of run.results; track result.testId) { <tr><td><code>{{ result.testId }}</code></td><td><span class="badge" [class.timeout]="result.state === 'timed-out'" [class.success]="result.state === 'passed'" [class.warning]="result.state === 'flaky' || result.state === 'failed'">{{ result.state }}</span></td><td>{{ result.attempt }}</td><td><ts-timing-result [result]="result" /></td><td>@if (result.observedState) { <span class="table-subtitle">Functional: {{ result.observedState }}</span> }{{ result.error || result.failureKind || '—' }}</td></tr> } @empty { <tr><td colspan="5">No final results are recorded yet.</td></tr> }
+          @for (result of run.results; track result.testId) { <tr><td><strong>{{ service.testLabels()[result.testId] || result.testId }}</strong><code class="table-subtitle">{{ result.testId }}</code><button type="button" class="button small secondary" [attr.aria-label]="'Inspect test ' + result.testId" (click)="inspect(result)">Inspect test</button></td><td><span class="badge" [class.timeout]="result.state === 'timed-out'" [class.success]="result.state === 'passed'" [class.warning]="result.state === 'flaky' || result.state === 'failed'">{{ result.state }}</span></td><td>{{ result.attempt }}</td><td><ts-timing-result [result]="result" /></td><td>@if (result.observedState) { <span class="table-subtitle">Functional: {{ result.observedState }}</span> }<p class="small wrap-anywhere">{{ service.resultSummaries()[result.testId] || '—' }}</p></td></tr> } @empty { <tr><td colspan="5">No final results are recorded yet.</td></tr> }
         </tbody></table></div>
       </section>
       <ts-run-workers /><ts-run-evidence />
@@ -56,4 +59,12 @@ import { RunRetentionService } from './run-retention.service'
     } @else if (service.loading()) { <p class="loading-state" role="status">Loading run details…</p> }
   `
 })
-export class RunDetailPage { readonly service = inject(RunDetailService) }
+export class RunDetailPage {
+  readonly service = inject(RunDetailService)
+  private readonly injector = inject(Injector)
+  private readonly investigation = viewChild(RunEvidenceComponent)
+  inspect(result: Attempt): void {
+    void this.service.evidence.inspectTest(result.testId)
+    afterNextRender(() => this.investigation()?.focus(), { injector: this.injector })
+  }
+}
