@@ -69,22 +69,29 @@ type Provider struct {
 }
 
 type dispatch struct {
-	Proof             Proof                   `json:"proof"`
-	CreatedAt         time.Time               `json:"createdAt"`
-	CreateAttempted   bool                    `json:"createAttempted"`
-	CreateRejected    bool                    `json:"createRejected,omitempty"`
-	CreationBlocked   bool                    `json:"creationBlocked,omitempty"`
-	DefinitionSeen    bool                    `json:"definitionSeen,omitempty"`
-	DeadlineAttempted bool                    `json:"deadlineAttempted,omitempty"`
-	DeadlineVerified  bool                    `json:"deadlineVerified,omitempty"`
-	StartAttempted    bool                    `json:"startAttempted,omitempty"`
-	StartRejected     bool                    `json:"startRejected,omitempty"`
-	Receipt           *a.JobExecutionBase     `json:"receipt,omitempty"`
-	Stopping          bool                    `json:"stopping,omitempty"`
-	Deleting          bool                    `json:"deleting,omitempty"`
-	DeleteCheckAfter  time.Time               `json:"deleteCheckAfter,omitempty"`
-	Removed           bool                    `json:"removed,omitempty"`
-	Terminal          *hostedexecution.Status `json:"terminal,omitempty"`
+	Proof                   Proof                   `json:"proof"`
+	CreatedAt               time.Time               `json:"createdAt"`
+	CreateAttempted         bool                    `json:"createAttempted"`
+	CreateRejected          bool                    `json:"createRejected,omitempty"`
+	CreationBlocked         bool                    `json:"creationBlocked,omitempty"`
+	DefinitionSeen          bool                    `json:"definitionSeen,omitempty"`
+	DeadlineAttempted       bool                    `json:"deadlineAttempted,omitempty"`
+	DeadlineVerified        bool                    `json:"deadlineVerified,omitempty"`
+	DeadlineProfile         string                  `json:"deadlineProfile,omitempty"`
+	DeadlineCreateAttempted bool                    `json:"deadlineCreateAttempted,omitempty"`
+	DeadlineCreateRejected  bool                    `json:"deadlineCreateRejected,omitempty"`
+	DeadlineSeen            bool                    `json:"deadlineSeen,omitempty"`
+	DeadlineRemoving        bool                    `json:"deadlineRemoving,omitempty"`
+	DeadlineRemoved         bool                    `json:"deadlineRemoved,omitempty"`
+	DeadlineCheckAfter      time.Time               `json:"deadlineCheckAfter,omitempty"`
+	StartAttempted          bool                    `json:"startAttempted,omitempty"`
+	StartRejected           bool                    `json:"startRejected,omitempty"`
+	Receipt                 *a.JobExecutionBase     `json:"receipt,omitempty"`
+	Stopping                bool                    `json:"stopping,omitempty"`
+	Deleting                bool                    `json:"deleting,omitempty"`
+	DeleteCheckAfter        time.Time               `json:"deleteCheckAfter,omitempty"`
+	Removed                 bool                    `json:"removed,omitempty"`
+	Terminal                *hostedexecution.Status `json:"terminal,omitempty"`
 }
 
 func New(options Options) (*Provider, error) {

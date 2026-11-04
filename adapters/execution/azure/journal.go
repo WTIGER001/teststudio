@@ -27,6 +27,9 @@ func (p *Provider) load(ctx context.Context, ref execution.Reference) (dispatch,
 	if err != nil || d.DefinitionSeen && (!d.CreateAttempted || d.CreateRejected || d.CreationBlocked) || d.DeadlineAttempted && !d.DefinitionSeen || d.DeadlineVerified && !d.DeadlineAttempted || d.StartAttempted && !d.DeadlineVerified || d.StartRejected && !d.StartAttempted {
 		return d, row, nil, hostedexecution.ErrOwnership
 	}
+	if d.DeadlineCreateAttempted && (!d.DeadlineAttempted || !checksum.MatchString(d.DeadlineProfile)) || d.DeadlineCreateRejected && !d.DeadlineCreateAttempted || d.DeadlineSeen && (!d.DeadlineCreateAttempted || d.DeadlineCreateRejected) || d.DeadlineRemoving && (!d.DeadlineAttempted || !checksum.MatchString(d.DeadlineProfile)) || d.DeadlineRemoved && !d.DeadlineRemoving || !d.DeadlineCheckAfter.IsZero() && (!d.DeadlineSeen || !d.DeadlineRemoving) {
+		return d, row, nil, hostedexecution.ErrOwnership
+	}
 	if d.Receipt != nil && (!d.StartAttempted || d.StartRejected || plan.VerifyReceipt(*d.Receipt) != nil) {
 		return d, row, nil, hostedexecution.ErrOwnership
 	}

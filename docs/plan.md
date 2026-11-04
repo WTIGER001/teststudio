@@ -167,7 +167,15 @@ Local race checks pass for both runners, publication, identity rotation, malform
 Four selected existing OCI checks pass. No image, runtime, UI, browser, real registry, or cloud test runs.
 See [Azure registry authentication](azure-registry-authentication.md). Acceptance 51 advances; the count remains 48 of 57.
 
-Next add actual worker-environment network admission and concrete independent absolute stop resources.
+The concrete Azure deadline hook now provisions a separate Logic Apps timer for each owned job.
+It binds the absolute due time, exact stop target, full specification, and a distinct stop identity.
+Durable creation and deletion reservations preserve lost-response uncertainty, restart recovery, and cleanup ordering.
+Targeted local race checks cover both runners, discovery, concurrency, changed resources, scoped SDK requests, and absence confirmation.
+Azure service scheduling and shutdown latency remain unverified. A scheduled stop request does not imply exact-second termination.
+See [independent Azure deadlines](azure-worker-deadlines.md). Acceptances 51 and 52 advance; the count remains 48 of 57.
+
+Next add actual worker-environment network admission.
+Bind the stop-only identity role, workflow management authority, capacity limits, and orphan monitoring during infrastructure packaging.
 Then bind actual managed identities and registry roles in native setup and infrastructure packaging. The authentication adapter alone enables no worker.
 Keep network and deadline hooks mandatory. A local fake does not establish a deployable Azure isolation boundary.
 Replica timeout alone does not cover queue delay or satisfy the absolute deadline contract.

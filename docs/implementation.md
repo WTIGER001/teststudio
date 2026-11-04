@@ -122,7 +122,44 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: trusted ACR authentication and scoped source publication
+## Current delivery: independent Azure deadline resources
+
+Acceptance **51** and supporting recovery under **52** advance. The total stays **48 verified of 57**, with **9 open**.
+The previous ACR authentication batch commits as 6e943de. This batch implements the concrete deadline hook.
+
+SDKDeadlines provisions a separate Logic Apps Consumption workflow for each owned job.
+A future recurrence uses the frozen absolute deadline and repeats each minute to catch late execution visibility.
+One fixed HTTP action requests stop on that exact job with a distinct managed identity.
+The workflow holds no ticket, source credential, application secret, or executable input.
+Accepted stop requests remain separate from observed termination. Azure scheduling and shutdown latency remain unverified.
+
+The existing dispatch journal now reserves deadline creation and deletion before each mutation.
+It binds the configuration profile and complete saved specification. Changed identity or proof cannot adopt an older timer.
+Unknown creation responses reconcile through GET without another PUT. Preexisting resources are rejected.
+Enabled state, succeeded provisioning, selected identity, exact schedule, and complete writable workflow content gate admission.
+Unready, changed, foreign, or missing timers do not release work.
+
+Cleanup requires revoked work, a durable result and evidence checkpoint, and independently confirmed job absence.
+An unseen uncertain creation remains unresolved until its owned resource appears or an operator investigates.
+Removal fences creation, reserves a thirty-second deletion backoff, and confirms workflow absence before completion.
+Concurrent controllers retain one creation or deletion reservation. Removed timers stay fenced across database restart.
+The production SDK pins the management endpoint, namespace, version, five-second operation contexts, and one-megabyte reads.
+It disables automatic retries and resource-provider registration. Redirects, foreign operations, and provider diagnostics remain bounded.
+
+Eleven new focused race checks pass across the targeted commands.
+They cover both runners, execution and discovery, SQLite reopen, lost responses, concurrency, immutable configuration, SDK stop shape, and cleanup.
+Two selected existing provider checks pass for journal compatibility and controller concurrency.
+Initial fixture checks expose clock and resource-group encoding expectations. Only affected checks repeat after correction.
+Evidence is output/azure-worker-deadlines/summary.json and the focused command results.
+No UI build, browser, container, image build, source-runtime matrix, Azure credential, cloud operation, registry push, or deployment runs.
+The demo and its data remain unchanged.
+
+Azure coded execution stays disabled. Actual network admission, role binding, private exchange packaging, and native setup remain required.
+Timer quotas, orphan monitoring, service delivery latency, and hosted identity authority need separate deployment verification.
+Continue network admission before enabling native coded jobs. Keep acceptances 41, 46, and 51–57 open.
+See [independent Azure deadlines](azure-worker-deadlines.md).
+
+## Previous delivery: trusted ACR authentication and scoped source publication
 
 Acceptance **51** advances. The count remains **48 verified of 57**, with **9 open**.
 The previous durable Azure lifecycle batch commits as 10cd5f9. This batch implements its trusted registry authentication gap.

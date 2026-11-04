@@ -7,7 +7,8 @@ It pins armappcontainers/v4 version 4.0.0 and management API 2025-07-01, matchin
 These local contracts cover Go and Playwright execution and catalog discovery.
 The [durable Azure provider](azure-worker-lifecycle.md) now implements asynchronous dispatch, status, cancellation, and checkpointed recovery.
 The [trusted ACR authentication adapter](azure-registry-authentication.md) now supplies registry-specific token exchange.
-Concrete network admission, independent absolute deadline resources, registry identity binding, and native command wiring remain unfinished.
+The [independent deadline adapter](azure-worker-deadlines.md) now supplies durable timer resources.
+Concrete network admission, identity role binding, and native command wiring remain unfinished.
 Azure coded execution remains disabled. The core deployment still supports native HTTP checks.
 
 See [Azure core service](azure.md), [hosted lifecycle](hosted-execution.md), and [hosted preparation](hosted-discovery.md).
