@@ -14,7 +14,7 @@ import (
 )
 
 func (s *Service) captureCodedReport(parent context.Context, run Run, worker string, result execution.Result, failedBefore bool, report execution.CodedReport, problems *[]string) bool {
-	retryable := false
+	retryable := report.EvidencePending
 	add := func(message string) {
 		if len(*problems) < 20 {
 			*problems = append(*problems, message)

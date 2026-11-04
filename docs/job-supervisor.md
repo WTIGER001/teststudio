@@ -172,6 +172,9 @@ No AWS, Kubernetes, or Azure functional check runs for this batch.
 
 ## Remaining integration
 
+The [shared hosted lifecycle](hosted-execution.md) implements controller ordering and recovery through the existing managed executor contract.
+It remains disconnected from real provider implementations.
+
 Provider adapters must admit the exact prepared immutable image, create one owned job, and supply only its scoped work identity.
 They must establish private worker HTTPS ingress, resource limits, network isolation, and trusted gateway delivery.
 They must distinguish provider status, runner status, test outcome, and evidence completeness.

@@ -625,3 +625,9 @@ The overlay producer reuses the existing immutable Go and Playwright source base
 Its package probe executes the configuration guard without network access or a test suite.
 Keep the original local runner images and current demonstration runtime cache unchanged.
 Build only changed native binaries and thin overlays. Reuse existing source-runner and UI evidence for unchanged behavior.
+
+The shared hosted lifecycle uses an in-process provider fixture with the production exchange, ledger, and private store.
+Run its targeted race checks for dispatch, cancellation, deadline, or recovery changes.
+Run the two focused recovery-input and pending-evidence checks when those run contracts change.
+Reuse existing supervisor, runtime package, UI, and browser evidence when their behavior is unchanged.
+See [Hosted execution lifecycle](hosted-execution.md) for the fixture boundary and remaining provider requirements.

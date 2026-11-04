@@ -154,7 +154,15 @@ Thin supervised source runtimes reuse the cached Go and Playwright bases without
 Local TLS/process checks and narrow runtime package probes pass. Acceptance 51 advances; the count remains 48 verified and 9 open.
 See [Hosted runner supervisor](job-supervisor.md) for its job contract, packaging, and remaining provider controls.
 
-Next, implement the common provider lifecycle driver and isolated provider execution adapters.
+The common hosted lifecycle driver now connects approved immutable images, frozen work, provider status, and the normal managed execution hooks.
+It validates ownership, deadlines, and exit status. It stops owned jobs on cancellation and recovers ambiguous creation without another dispatch.
+Ticket revocation precedes checkpoint publication. Ledger gates precede provider deletion and exchange staging cleanup.
+Temporary evidence read failures stay retryable. Restart input preserves the original attempt capture flag.
+Focused local fixture and race checks pass. The driver is not enabled with any provider adapter yet.
+Acceptance 51 advances; the count remains 48 verified and 9 open.
+See [Hosted execution lifecycle](hosted-execution.md) for the provider contract and current limits.
+
+Next, implement isolated provider adapters and connect each installation profile to this common lifecycle driver.
 Use the frozen work packet as the runner's existing bounded stdin contract.
 Preserve immutable source approval, timing, result, capture-policy, and gateway contracts.
 Keep real target credentials in the trusted gateway. Untrusted workers receive neither application sessions nor provider SDK credentials.

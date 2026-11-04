@@ -189,6 +189,7 @@ func (s *Service) Observation(ctx context.Context, ref execution.Reference, inpu
 	}
 	report.Attachments = accepted
 	if !complete {
+		report.EvidencePending = true
 		report.EvidenceErrors = append(report.EvidenceErrors[:min(len(report.EvidenceErrors), 19)], "Hosted worker attachments are incomplete; collection can retry without executing the test again.")
 	}
 	return execution.RedactAPIReport(input, report), record.StartedAt, complete, nil
@@ -213,10 +214,17 @@ func (s *Service) Revoke(ctx context.Context, ref execution.Reference) error {
 	return ErrConflict
 }
 
-func (s *Service) Cleanup(ctx context.Context, ref execution.Reference) error {
+func (s *Service) CheckCleanup(ctx context.Context, ref execution.Reference) error {
 	entry, _, err := (workerstate.Ledger{Store: s.Store}).Get(ctx, ref.Run, ref.ID)
 	if err != nil || entry.Reference != ref || !entry.ResultSaved || !entry.EvidenceComplete && !entry.EvidenceAbandoned {
 		return ErrConflict
+	}
+	return nil
+}
+
+func (s *Service) Cleanup(ctx context.Context, ref execution.Reference) error {
+	if err := s.CheckCleanup(ctx, ref); err != nil {
+		return err
 	}
 	if err := s.Revoke(ctx, ref); errors.Is(err, storage.ErrNotFound) {
 		return nil

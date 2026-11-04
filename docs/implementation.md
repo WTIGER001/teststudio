@@ -69,6 +69,45 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: shared hosted lifecycle and evidence recovery
+
+Acceptance **51** advances. Timing identity **41** and replica recovery **52** gain implementation support.
+The verified count remains **48 of 57**, with **9 open** items.
+No hosted deployment acceptance closes from the local fixture.
+
+The new shared managed executor requires approved registry distribution digests and inspected supervised runtime metadata.
+It checks selectors, ownership, private origins, and platform-specific timing identity.
+It currently rejects target-backed artifacts and credential bindings until trusted remote gateway delivery exists.
+No provider adapter is enabled. Existing local execution remains the active demonstration path.
+
+The driver uses the existing durable execution reference and lifecycle callbacks.
+It checks dispatch authority around frozen packet creation and calls provider creation once.
+Ambiguous acknowledgement, ownership mismatch, uncertain stop, and storage failures retain recovery state.
+Recovery stops remaining owned work and reads accepted reports without creating another job.
+Provider success represents delivery. Assertion outcome and measured test duration remain in the structured report.
+A failed provider cannot validate a passing test report or invent a duration.
+
+Ticket revocation precedes checkpoint publication.
+Cleanup checks the result and evidence ledger before stopping or deleting provider resources.
+Provider deletion precedes exchange cleanup. Final ledger completion records cleanup failure separately from the saved outcome.
+The exchange preserves active upload fencing and staging reservation release.
+
+Two integration corrections support restart recovery.
+The run recovery input now derives FailedBefore from the attempt number instead of forcing true for the first attempt.
+The exchange marks missing or temporarily unreadable attachments as internally retryable evidence.
+The run checkpoint retains the result and defers cleanup while evidence collection remains retryable.
+A temporary storage outage recovers its accepted bytes without another test dispatch.
+
+Targeted race checks cover the shared lifecycle, both report schemas, duration preservation, cancellation, deadlines, private evidence, lost acknowledgement, uncertain stop, failed checkpoint, failed cleanup, timing admission, and ownership rejection.
+Two focused run checks cover frozen attempt flags and pending evidence.
+Three focused exchange checks cover immutable observations, active uploads, and staging quota release.
+Evidence is output/job-supervisor/hosted-lifecycle.log and lifecycle-exchange.log.
+Native service builds reuse the unchanged UI and private viewer. No runner image or browser suite rebuild is required.
+The local demonstration retains its database and evidence during refresh.
+
+Provider-specific creation, status, cancellation, isolation, private routing, registry preparation, and deployment verification remain required.
+See [Hosted execution lifecycle](hosted-execution.md) for the concrete provider contract and continuation boundary.
+
 ## Current delivery: hosted runner supervisor and thin runtime overlays
 
 Acceptance **51** advances. The ledger stays at **48 verified, 9 open, 57 total** items.

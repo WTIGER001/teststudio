@@ -44,13 +44,14 @@ type CodedInput struct {
 }
 
 type CodedReport struct {
-	RecoveryError  error        `json:"-"`
-	Schema         string       `json:"schemaVersion"`
-	TestID         string       `json:"testId"`
-	Selector       string       `json:"selector"`
-	Result         Result       `json:"result"`
-	Attachments    []Attachment `json:"attachments"`
-	EvidenceErrors []string     `json:"evidenceErrors"`
+	EvidencePending bool         `json:"-"`
+	RecoveryError   error        `json:"-"`
+	Schema          string       `json:"schemaVersion"`
+	TestID          string       `json:"testId"`
+	Selector        string       `json:"selector"`
+	Result          Result       `json:"result"`
+	Attachments     []Attachment `json:"attachments"`
+	EvidenceErrors  []string     `json:"evidenceErrors"`
 }
 
 type CodedExecutor interface {

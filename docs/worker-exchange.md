@@ -179,3 +179,6 @@ python3 scripts/verify-worker-listener.py --build output/worker-exchange/build.j
 It checks explicit listener startup, absence of UI and unauthenticated work, lazy key creation, and owned process cleanup.
 The focused evidence remains under output/worker-exchange.
 No AWS, Kubernetes, Azure, source-runtime matrix, or browser suite runs for this batch.
+
+The [shared hosted lifecycle](hosted-execution.md) uses controller-only state polling and checkpoint-gated cleanup.
+Missing attachment bytes remain retryable internal evidence instead of immediately becoming a permanent omission.

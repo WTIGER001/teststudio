@@ -225,7 +225,7 @@ func (s *Service) reconcileExecution(parent context.Context, jobRow storage.Reco
 func recoveryInput(run Run, ref execution.Reference) (execution.CodedInput, error) {
 	for _, test := range run.Tests {
 		if test.ID == ref.Test {
-			input := execution.CodedInput{Reference: &ref, RunID: run.ID, Test: test, Artifact: run.Release.Draft.Artifact, Capture: run.TestCapture[test.ID], TimeoutMs: test.TimeoutSeconds * 1000, FailedBefore: true}
+			input := execution.CodedInput{Reference: &ref, RunID: run.ID, Test: test, Artifact: run.Release.Draft.Artifact, Capture: run.TestCapture[test.ID], TimeoutMs: test.TimeoutSeconds * 1000, FailedBefore: ref.Attempt > 1}
 			if p, ok := run.Timing.Tests[test.ID]; ok {
 				input.TimeoutMs = p.EffectiveTimeoutMs
 				input.SlowThresholdMs = p.ThresholdMs
