@@ -16,7 +16,7 @@ type SDKTopologyReader struct {
 	environments *a.ManagedEnvironmentsClient
 	networks     *n.VirtualNetworksClient
 	subnets      *n.SubnetsClient
-	http         *topologyHTTP
+	http         *armReadHTTP
 }
 
 func NewSDKTopologyReader(c Config, s TopologySettings, credential azcore.TokenCredential, transport policy.Transporter) (*SDKTopologyReader, error) {

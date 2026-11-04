@@ -5,10 +5,11 @@
 The Azure adapter now includes a topology inspection stage with a production read-only SDK client.
 It checks actual environment, VNet, and subnet responses against explicit installation settings.
 Local fixtures exercise these SDK requests without Azure credentials or connections.
+The [perimeter stage](azure-worker-perimeter.md) now inspects complete custom NSG rules and the worker route table after topology succeeds.
 
 TopologyGuard.Check does not implement the execution Network interface.
 A successful topology inspection does not authorize dispatch or release worker input.
-The complete network adapter must also verify routing, security rules, DNS policy, private endpoints, exchange isolation, and execution placement.
+The complete network adapter must compose these stages with firewall policy, DNS, private endpoints, exchange isolation, and execution placement.
 Azure coded execution remains disabled in native commands and infrastructure packaging.
 See [durable Azure execution](azure-worker-lifecycle.md), [job contracts](azure-worker-contract.md), and [independent deadlines](azure-worker-deadlines.md).
 
@@ -100,8 +101,8 @@ Close the reader to close idle transport connections.
 
 Before enabling coded Azure jobs, implement and verify these controls:
 
-1. Inspect the complete NSG rules and route table. Reject public, private-network, service-endpoint, and propagated-route bypasses.
-2. Bind permitted platform traffic to the documented Container Apps requirements without allowing arbitrary application destinations.
+1. Compose the existing topology and perimeter inspectors with the remaining admission stages. Neither stage alone authorizes execution.
+2. Inspect the firewall resource, selected IP configuration, effective policy, and rule groups. Reject shared-service and inherited-policy bypasses.
 3. Verify the Azure DNS resolver policy, VNet link, enabled traffic rules, domain lists, default block, and private DNS records.
 4. Verify exact private registry and exchange endpoints, approval, resource ownership, routing, and address bindings.
 5. Isolate the exchange from API, database, evidence, registry-write, and identity credentials.

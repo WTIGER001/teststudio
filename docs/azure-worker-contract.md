@@ -9,6 +9,7 @@ The [durable Azure provider](azure-worker-lifecycle.md) now implements asynchron
 The [trusted ACR authentication adapter](azure-registry-authentication.md) now supplies registry-specific token exchange.
 The [independent deadline adapter](azure-worker-deadlines.md) now supplies durable timer resources.
 The [topology inspector](azure-worker-network.md) now verifies environment and subnet bindings through scoped reads.
+The [perimeter inspector](azure-worker-perimeter.md) now verifies the fixed NSG rules and default route.
 Complete network admission, identity role binding, and native command wiring remain unfinished.
 Azure coded execution remains disabled. The core deployment still supports native HTTP checks.
 

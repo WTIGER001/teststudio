@@ -180,7 +180,16 @@ Fresh bounded reads preserve provisioning and resource uncertainty. It does not 
 Seven new focused race checks and two selected existing SDK checks pass without Azure connections.
 See [Azure worker network admission](azure-worker-network.md). Acceptance 51 advances; the count remains 48 of 57.
 
-Next inspect complete NSG rules, UDRs, DNS resolver policy, private endpoints, and the isolated exchange.
+The Azure perimeter stage now checks the complete fixed NSG policy and one default route through the selected firewall address.
+It refreshes topology first, requires connection reevaluation and disabled BGP propagation, and rejects rule, route, attachment, and ownership drift.
+Validated immutable settings also produce SDK definitions for later packaging. The production reader permits only the two selected GET resources.
+Eight new focused race checks, a 24-case declared traffic matrix, and two selected topology SDK checks pass locally.
+This stage does not implement complete Network admission. Platform compatibility, service-tag membership, and effective packet isolation remain unverified.
+See [Azure worker perimeter](azure-worker-perimeter.md). Acceptance 51 advances; the count remains 48 of 57.
+
+Next inspect actual firewall identity, IP configuration, effective policy, and rule groups.
+Reject inherited-policy, application-rule, network-rule, and NAT bypasses. Do not treat shared platform service tags as exclusive destinations.
+Then inspect DNS resolver policy, private endpoints, and the isolated exchange.
 Bind the actual DNS policy and VNet link. Threat-intelligence filtering or a DNS proxy alone cannot establish the required default block.
 Verify unrelated workload inventory, cross-job isolation, and actual execution placement before composing Network.
 Bind topology and all perimeter settings into networkProfile. Do not substitute a partial topology digest.

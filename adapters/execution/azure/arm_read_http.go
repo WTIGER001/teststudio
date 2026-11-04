@@ -10,23 +10,31 @@ import (
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
 )
 
-type topologyHTTP struct {
+type armReadHTTP struct {
 	base      policy.Transporter
 	resources map[string]string
 }
 
-func newTopologyHTTP(c Config, s TopologySettings, base policy.Transporter) *topologyHTTP {
+func newTopologyHTTP(c Config, s TopologySettings, base policy.Transporter) *armReadHTTP {
+	return newARMReadHTTP(c, map[string]string{c.WorkerEnvironment: "2025-07-01", c.ControllerEnvironment: "2025-07-01", s.WorkerVNet: "2025-03-01", s.ControllerVNet: "2025-03-01", s.WorkerSubnet: "2025-03-01", s.ControllerSubnet: "2025-03-01"}, base)
+}
+
+func newARMReadHTTP(c Config, resources map[string]string, base policy.Transporter) *armReadHTTP {
 	if base == nil {
 		base = newSDKHTTP(c, nil).base
 	}
-	return &topologyHTTP{base: base, resources: map[string]string{c.WorkerEnvironment: "2025-07-01", c.ControllerEnvironment: "2025-07-01", s.WorkerVNet: "2025-03-01", s.ControllerVNet: "2025-03-01", s.WorkerSubnet: "2025-03-01", s.ControllerSubnet: "2025-03-01"}}
+	owned := make(map[string]string, len(resources))
+	for id, version := range resources {
+		owned[id] = version
+	}
+	return &armReadHTTP{base: base, resources: owned}
 }
 
-func (h *topologyHTTP) allows(id, version string) bool {
+func (h *armReadHTTP) allows(id, version string) bool {
 	return version != "" && h.resources[id] == version
 }
 
-func (h *topologyHTTP) Do(r *http.Request) (*http.Response, error) {
+func (h *armReadHTTP) Do(r *http.Request) (*http.Response, error) {
 	u := r.URL
 	if u == nil || u.Scheme != "https" || u.Host != "management.azure.com" || u.User != nil || u.Fragment != "" || u.Opaque != "" || r.Host != "" && r.Host != u.Host || r.Method != "GET" {
 		return nil, hostedexecution.ErrOwnership
@@ -55,7 +63,7 @@ func (h *topologyHTTP) Do(r *http.Request) (*http.Response, error) {
 	return response, nil
 }
 
-func (h *topologyHTTP) CloseIdleConnections() {
+func (h *armReadHTTP) CloseIdleConnections() {
 	if closer, ok := h.base.(interface{ CloseIdleConnections() }); ok {
 		closer.CloseIdleConnections()
 	}

@@ -122,7 +122,40 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: Azure environment and network topology inspection
+## Current delivery: Azure worker NSG and routing inspection
+
+Acceptance **51** advances. The total stays **48 verified of 57**, with **9 open**.
+The previous topology batch commits as f3f7634. This batch adds the actual security-rule and routing inspection stage.
+
+PerimeterGuard performs fresh topology inspection before reading the selected NSG and route table.
+It requires the exact thirteen-rule worker policy, explicit deny defaults, selected private endpoints, and bounded platform dependencies.
+The NSG enables connection reevaluation and attaches only to the worker subnet.
+Changed directions, priorities, protocols, sources, ports, actions, addresses, application groups, child ownership, and rule counts reject inspection.
+Descriptions and documented metadata remain separate from traffic authority. Rule and endpoint order do not create false drift.
+
+The route table requires one default route through the selected private firewall address and explicitly disabled BGP propagation.
+Extra routes, service-tag prefixes, Internet next hops, foreign appliances, shared attachments, and BGP overrides reject inspection.
+Pending rules, routes, resources, topology, or reads remain unavailable.
+Immutable validated settings also produce fresh SDK definitions for later infrastructure packaging.
+Those definitions issue no Azure write request.
+
+The production SDK reader permits GET on only the exact NSG and route table through the pinned network SDK and version.
+Topology and perimeter readers now share one bounded transport implementation while retaining separate resource allowlists.
+Eight new focused race checks pass, including an independent 24-case declared traffic matrix.
+Two selected existing topology SDK boundary checks pass after the transport refactor.
+Only the changed endpoint normalization and rule rejection checks repeat with the new matrix.
+Evidence is output/azure-worker-perimeter/summary.json and the focused command results.
+No Azure credential, cloud API, packet probe, registry push, deployment, UI build, browser, container, or image build runs.
+
+This stage does not implement Network, release worker input, or establish live platform compatibility.
+Actual firewall ownership and effective policy, DNS filtering, private endpoint identity, exchange isolation, and cross-job isolation remain required.
+Shared platform service tags and within-subnet communication cannot prove complete application isolation.
+Verify metadata-deny compatibility with platform-only image pulls in the separate hosted verification phase.
+Azure coded execution stays disabled. No acceptance item closes from these local declaration and response fixtures.
+Continue effective firewall policy, DNS, and endpoint inspection before native enablement or deployment packaging.
+See [Azure worker perimeter](azure-worker-perimeter.md).
+
+## Previous delivery: Azure environment and network topology inspection
 
 Acceptance **51** advances. The total remains **48 verified of 57**, with **9 open**.
 The previous independent deadline batch commits as c3dd6da. This batch implements the actual environment and subnet inspection stage.
