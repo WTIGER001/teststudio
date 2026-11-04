@@ -8,7 +8,8 @@ It then inspects the DNS resources and complete bounded inventories through the 
 A configured policy name alone does not establish that the VNet uses that policy.
 
 This stage does not implement the execution Network interface or release worker input.
-Private DNS zones, private records, endpoint ownership, isolated exchange service, workload inventory, cross-job isolation, and execution placement remain required.
+The [selected private-zone stage](azure-worker-private-dns.md) now checks exact records, completed links, registration, and fallback settings.
+Effective VNet-wide zone visibility, endpoint ownership, isolated exchange service, workload inventory, cross-job isolation, and execution placement remain required.
 Azure coded execution stays disabled in native commands and infrastructure packaging.
 Local fixtures make no DNS lookup and do not establish effective Azure resolution, propagation, CNAME behavior, or hosted deployment parity.
 
@@ -71,7 +72,8 @@ Private DNS and endpoint inspection must establish the exchange hostname's autho
 Do not depend on a customer-controlled public hostname and its descendant queries as the final isolation boundary.
 Verify the exact private registry records and region-specific data records against the selected endpoint addresses.
 Reject alternate records, unsafe aliases, registration, delegation, and public fallback that weaken the intended private path.
-These record and endpoint checks remain unimplemented in this stage.
+The selected-zone inspector now verifies the declared zone, exact records, and complete links.
+It does not establish VNet-wide zone visibility or endpoint ownership. Those remain separate required controls.
 
 The previous topology stage requires Azure-provided DNS and a dedicated worker VNet.
 The previous NSG permits only the intended platform DNS path and denies other external DNS destinations.

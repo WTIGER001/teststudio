@@ -11,7 +11,8 @@ TopologyGuard.Check does not implement the execution Network interface.
 A successful topology inspection does not authorize dispatch or release worker input.
 The [firewall stage](azure-worker-firewall.md) now verifies firewall attachment, dedicated policy, and complete group inventory.
 The [DNS stage](azure-worker-dns.md) now checks actual resolver association, exclusive links, exact lists, and enabled allow/block rules.
-The complete network adapter must compose these stages with private records, private endpoints, exchange isolation, and execution placement.
+The [selected private-zone stage](azure-worker-private-dns.md) now checks exact records, complete links, registration, and fallback.
+The complete network adapter must also prove effective zone visibility, private endpoints, exchange isolation, and execution placement.
 Azure coded execution remains disabled in native commands and infrastructure packaging.
 See [durable Azure execution](azure-worker-lifecycle.md), [job contracts](azure-worker-contract.md), and [independent deadlines](azure-worker-deadlines.md).
 
@@ -105,7 +106,7 @@ Before enabling coded Azure jobs, implement and verify these controls:
 
 1. Compose the existing topology and perimeter inspectors with the remaining admission stages. Neither stage alone authorizes execution.
 2. Compose the existing firewall inspector. Preserve its fixed platform allowlist, terminal deny, resource ownership, and complete group inventory.
-3. Compose the existing DNS policy inspector with authoritative private DNS zone, record, and link verification. Preserve hierarchy and CNAME semantics.
+3. Compose the DNS policy and selected-zone inspectors. Resolve effective zone visibility and attachment controls. Preserve hierarchy and CNAME semantics.
 4. Verify exact private registry and exchange endpoints, approval, resource ownership, routing, and address bindings.
 5. Isolate the exchange from API, database, evidence, registry-write, and identity credentials.
 6. Verify that unrelated workloads cannot share the worker trust boundary. Establish cross-job isolation and execution placement explicitly.

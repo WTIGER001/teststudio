@@ -122,7 +122,36 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: Azure DNS resolver policy and actual VNet association
+## Current delivery: Azure selected private zones, records, and links
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+The previous resolver-policy batch commits as 5152995. This batch verifies the selected private DNS record and link inventories.
+
+PrivateDNSGuard refreshes all previous network stages before reading the exchange and registry private zones, complete record sets, and links.
+The exchange zone must equal the complete configured hostname. A parent zone cannot substitute for that authority.
+Exact exchange, registry login, and regional data A records bind three distinct role addresses to the complete perimeter allowlist.
+The only other permitted record is each zone's SOA. Aliases, wildcards, IPv6, extra addresses, mixed data, and foreign child identity reject inspection.
+Positive and effective negative caching stay bounded to 300 seconds.
+Worker links require completed state, explicit disabled registration, and no public fallback.
+Global zone metadata counts must agree with the complete observed record and link inventories.
+Missing records, unfinished links, unknown counts, and incomplete paging remain unavailable.
+
+Fresh validated SDK definitions support later packaging without making Azure writes.
+The production reader pins the stable private DNS SDK and API and permits only the two zones and their ALL-record and link collections.
+A-only or name-filtered views cannot hide other record types. Foreign records, mutation verbs, POST exceptions, unsafe paging, and excess inventory remain rejected.
+Six new focused local race checks pass. Two selected existing DNS and firewall paging checks pass.
+Evidence is output/azure-worker-private-dns/summary.json and the focused command results.
+No Azure credential, cloud API, DNS probe, packet probe, registry push, deployment, UI build, browser, container, or image build runs.
+
+This is selected-zone inspection. It does not prove the absence of other linked zones that could alter the VNet's effective DNS view.
+Effective-zone visibility and attachment authority remain required before complete admission.
+Private endpoint identity, approval, subnet, NIC address ownership, service identity, registry data region, and isolated exchange service remain required.
+Trusted preparation needs its own private registry endpoint and DNS path. Do not share worker links or peer workers into trusted networking.
+Azure coded execution stays disabled. No complete Network interface or broad acceptance item closes from these local fixtures.
+Continue endpoint ownership and effective-view controls before native enablement or infrastructure packaging.
+See [Azure worker private DNS records](azure-worker-private-dns.md).
+
+## Previous delivery: Azure DNS resolver policy and actual VNet association
 
 Acceptance **51** advances. The verified total stays **48 of 57**, with **9 open**.
 The previous firewall batch commits as 7d212a8. This batch implements actual resolver-policy and VNet association inspection.

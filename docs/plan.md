@@ -202,7 +202,16 @@ Seven new focused race checks, a nineteen-case declaration matrix, and three sel
 Native DNS hierarchy remains explicit. An approved parent can allow descendants; this is not an exact-host-only DNS guarantee.
 See [Azure worker DNS policy inspection](azure-worker-dns.md). Acceptance 51 advances; the count remains 48 of 57.
 
-Next verify authoritative private DNS zones, exact records and links, registry and exchange private endpoints, address ownership, and data region.
+The selected private DNS stage now verifies the exchange hostname zone, registry private zone, complete records, and completed worker-only links.
+It binds three distinct A-record roles to the complete perimeter address allowlist and explicit registry data region.
+Aliases, wildcards, IPv6, extra records, automatic registration, public fallback, and unsettled counts cannot establish admission.
+The reader permits only selected-zone GET resources and complete bounded inventories. Six new focused race checks and two selected paging checks pass locally.
+See [Azure worker private DNS records](azure-worker-private-dns.md). Acceptance 51 advances; the count remains 48 of 57.
+
+Next inspect actual registry and exchange private endpoint approval, service identity, subnet, network interfaces, address ownership, and data region.
+Resolve effective VNet-wide private-zone visibility and attachment controls. Selected-zone inspection cannot rule out other shadowing zones.
+Keep that proof separate from configured record correctness and private endpoint ownership.
+Provide trusted preparation with a separate private registry endpoint and DNS path. Do not add controller links to worker zones or peer worker and controller networks.
 Do not treat the configured public exchange hostname or allowed DNS descendants as a complete private boundary.
 Check live platform aliases and CNAME compatibility in the separate hosted phase. Preserve the root-domain block.
 Then verify the isolated exchange service before composing complete admission.

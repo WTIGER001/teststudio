@@ -114,7 +114,8 @@ Close the reader to close idle transport connections.
 ## Remaining work
 
 The DNS inspector now checks the actual policy, VNet association, exclusive link, default block, and approved domain lists.
-Implement authoritative private DNS zones, exact records, links, and endpoint bindings.
+The [selected private-zone inspector](azure-worker-private-dns.md) now verifies exact records and links.
+Resolve effective zone visibility and endpoint ownership before complete admission.
 Bind private registry and exchange endpoints to approved resources and exact addresses.
 Establish isolated exchange authority, unrelated workload inventory, cross-job isolation, and actual execution placement.
 Then compose complete Network admission, bind the full execution profile, and add native configuration and infrastructure packaging.
