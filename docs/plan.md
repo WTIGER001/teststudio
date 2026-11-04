@@ -12,6 +12,91 @@ Run tests only locally. AWS, Kubernetes, and Azure verification are separate wor
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
+## Active delivery plan after the tester walkthrough
+
+This section is the current implementation order. Historical continuation commands below do not override it.
+The local demonstration is usable and verified. The complete product remains unfinished at 26 verified items out of 57.
+The next goal is a complete tester journey with ordinary project access and a real recorded website test.
+Do not add new dashboard pages or repeat completed demonstration setup before closing these workflow gaps.
+
+### Current decisions
+
+| Area | Decision and current status |
+| --- | --- |
+| Repository | Keep the Go service, Angular UI, adapters, and product-owned tests in the independent TestStudio repository. No second product repository is needed. |
+| Runtime boundaries | Keep API, preparation, recording, and execution responsibilities separate. Uploaded test code never runs inside the API process. |
+| Ownership model | Projects own applications and suites. Environments belong to applications. Suites link to applications and contain tests. Keep this model visible in the UI. |
+| Onboarding | Use guided setup and direct project membership. Support local users, OIDC users, and mixed sign-in. Invitations are not required. |
+| Test creation | Use a dedicated type chooser. Browser tests begin with recording. Quick HTTP checks accept a complete URL with an optional port. |
+| New target configuration | Show new application and environment records on Review before saving. Reuse matching targets and preserve their protection. |
+| Test lifecycle | Keep recording, draft saving, preparation, publication, activation, and execution distinct. Combined actions explain each effect. |
+| Save and run | Retain the implemented non-activating publication behavior. Run the selected test and dependencies without replacing the suite's active release. |
+| Persistence | SQLite is the single-instance local default. PostgreSQL is the hosted and multi-instance default. Storage parity and transfer remain open requirements. |
+| Charts | Keep the existing accessible SVG stacked-area implementation. A chart-library migration is not required. |
+| Local verification | Use local fixtures, cached builds, and targeted checks. Public customer websites are manual user targets, not verification dependencies. |
+| Deployment | Retain local server, AWS ECS with CloudFront, Kubernetes, and Azure Container Apps with Jobs as required profiles. Hosted parity remains unverified. |
+
+### Next implementation batches
+
+Complete one coherent batch before adding the next. Update its user help and relevant technical guides with the behavior.
+
+| Priority | Batch | Completion evidence |
+| --- | --- | --- |
+| 1 | Project creator access | A permitted creator receives the intended project-scoped administrator access and can complete setup without installation administrator privileges. Creation and initial access are atomic and audited. |
+| 2 | Recorded website execution locally | Record a new generic local website journey, review and save it, prepare and publish it, select its registered target, and run it successfully with retained evidence. |
+| 3 | Tester operation and failure recovery | A tester can find a failed step, logs, screenshot, timeout, and retry result. Permission loss and partial failures explain recovery without losing saved work. |
+| 4 | Remaining catalog and evidence gaps | Continue category navigation, remaining catalog actions, private trace viewing, evidence state and retention, and timing parity against the existing acceptance ledger. |
+| 5 | Hosted packaging and provider adapters | Implement and document independent provider configuration, worker dispatch, private artifacts, cancellation, deadlines, and recovery. Use local contract checks first. |
+| 6 | Deployment acceptance | Verify AWS, Kubernetes, and Azure in their separate deployment work. Then close the applicable remaining ledger items with profile-specific evidence. |
+
+The creator-access batch addresses an observed gap in internal/projects/service.go and the project creation handler.
+Current project creation saves a record and audit entry. It does not create an initial project assignment.
+The local installation administrator already has access, so that demonstration does not prove ordinary creator onboarding.
+Use the existing project administrator role for the initial owner experience unless a separate ownership requirement emerges.
+Initial access applies only to the new project. It grants no installation authority and cannot override explicit denies.
+Preserve domain permission checks, durable assignment records, atomic failure behavior, and audit history.
+Verify one authorized creator and one unauthorized actor with targeted local checks.
+Keep direct owner-managed membership and the existing local/OIDC identity model.
+
+This sequence changes implementation priority, not the scope or numbering of the 57 acceptance criteria.
+Relevant open access work remains under 12 and 13. Broad catalog, execution, and evidence requirements remain open.
+Do not treat these batches as additional acceptance items or claim the whole product complete after a demonstration.
+
+### Recorded browser execution scope
+
+The native local recorder and saved source editor exist. Recording a website does not yet make its draft executable.
+The current offline Playwright profile rejects recorded website drafts during preparation.
+Implement a distinct environment-backed browser execution profile. Preserve the existing isolated profile for offline suites.
+Bind reviewed navigation to registered environment endpoints through an explicit runtime configuration.
+Preserve the original recording and source provenance. Do not silently rewrite arbitrary code or remove its target restriction.
+Keep dependencies inside trusted preparation workers. Add bounded dependency preparation only when the selected profile needs it.
+
+Enforce allowed target origins, current permissions, protected-target safety, and dependency safety before dispatch and each attempt.
+Apply network and request policies to browser navigation and direct API clients used by the suite.
+Define redirects, subresources, external origins, and credential bindings explicitly. Do not make the worker network unrestricted.
+Never copy a recorder's personal browser session or cookies into execution by default.
+Keep credentials and sensitive browser evidence within the existing secret, capture, retention, and private-access contracts.
+Retain normal timeout status, inclusive failure reruns, one logical result per test, timing observations, and explicit evidence gaps.
+No hosted recorder or cloud adapter is required to verify the first local website journey.
+
+Hosted recording remains a separate delivery after local execution works.
+Choose a local companion or streamed browser design before promising hosted recording support.
+Remote service localhost, worker localhost, and the user's browser localhost are different network locations.
+Show target reachability and reject incompatible execution locations before creating an executable run.
+Document container-to-host addressing and the selected target policy alongside the implementation.
+
+### Lessons to retain in subsequent work
+
+- Verify the normal tester and project-owner roles. Local administrator success alone does not prove usable access boundaries.
+- A new URL can require environment management authority. Explain that requirement and retain the option to reuse an authorized target.
+- Keep stage and protection independent. Do not infer safety from a hostname, HTTP method, or a name such as Production.
+- Keep current redirect behavior explicit. HTTP probes reject unexpected redirect statuses and do not follow redirects automatically.
+- Improve response and redirect diagnostics before adding a guarded redirect option. Never silently accept an unexpected response as a pass.
+- Continue distinguishing observed test outcome, execution completeness, timing assessment, and evidence availability.
+- Preserve saved resources and explain retry behavior after a partial save. Describe reload limits honestly.
+- Keep the existing demo data and user's browser work intact. Refresh the demo without reseeding or closing unrelated sessions.
+- Use observed workflow durations to improve estimates and timeout behavior. Do not invent completion percentages or dates from code size.
+
 ## Usability and documentation are continuing requirements
 
 Keep the product easy to use as the feature set grows.
@@ -77,7 +162,7 @@ See applications.md for routes, current access, and registration behavior.
 The refreshed local demo serves a private UI snapshot and retains its existing database and evidence.
 Future builds do not replace assets used by this running demo.
 The user also requests in-app Playwright authoring during the walkthrough.
-The Sources page now provides saved browser workspaces and the common preparation, review, and publication flow.
+Import and sync tests now provides saved browser workspaces and the common preparation, review, and publication flow.
 The editor generates package and manifest files. It keeps source editing separate from catalog metadata management.
 See playwright-editor.md for the workflow, API, revision rules, and current isolated profile limits.
 The user chooses browser recording first and requests a dedicated typed creation route.
@@ -91,7 +176,7 @@ Project setup now groups the first application, optional target, and empty suite
 Resource registration uses Name, Options, and Review. HTTPS creation uses Name, Request, and Review.
 Run creation uses Selection and Review. Named Advanced sections hold uncommon controls.
 HTTPS Save and run explicitly publishes a snapshot without replacing the active release and starts a local run.
-Continue environment-backed execution for recorded website journeys after this interface delivery.
+Continue through the active delivery sequence after this interface delivery.
 The current isolated profile deliberately blocks recorded website drafts. That execution work remains open.
 
 Item **01** now passes a build from an isolated copy of the current source tree.
@@ -109,7 +194,7 @@ Imports and retained releases stay under Advanced testing.
 Quick HTTPS probes now accept a complete URL directly, including addresses without an explicit port.
 The wizard reuses matching registered targets and preserves their protection.
 Review lists new target configuration and any new application before explicit saving.
-The next priority is environment-backed recorded browser execution.
+Follow the active delivery sequence above: project creator access, then environment-backed recorded browser execution.
 The next implementation batches follow the full ledger without adding new gates to the usable demonstration.
 
 ## Current implementation checkpoint
@@ -132,7 +217,7 @@ The Suite releases page provides retained definitions, comparisons, immutable so
 Focused catalog checks and STUDIO-RELEASES-001 pass locally. The implementation ledger records evidence and cleanup.
 
 Go ZIP uploads, prebuilt images, and registered GitHub sources use durable preparation and the common catalog review.
-The Sources UI manages repository settings, multiple bindings, manual sync, diagnostics, history, and publication policy.
+The Import and sync tests UI manages repository settings, multiple bindings, manual sync, diagnostics, history, and publication policy.
 The separate worker uses a provider-neutral port and repository-scoped GitHub App credentials for private source.
 It pins a commit and repository identity, shares one archive, and retains exact source provenance.
 Unchanged commits reuse work. Ready reviews refresh metadata without repeating assembly or discovery.
@@ -148,7 +233,7 @@ Use --test=ID to run only the affected workflow. Do not repeat the broad matrix 
 No live GitHub or cloud deployment checks run for this milestone.
 
 Signed push events and durable periodic sync now use the same source queue and current authority checks.
-The Sources UI manages both policies, next due time, webhook address, and trigger history.
+The Import and sync tests UI manages both policies, next due time, webhook address, and trigger history.
 Focused signature, delivery replay, delayed push, scheduler contention, coalescing, and revocation checks pass locally.
 Offline Playwright bundles now use the same builder, discovery, publication, and execution workflow.
 A real local browser bundle and the expanded STUDIO-BUNDLES-001 self-test pass.
@@ -161,7 +246,7 @@ Continue complete GitHub-to-UI publication evidence for item 22 and dependency p
 The cached browser runtime is teststudio/playwright-source-runtime:local. The cached Go runtime is teststudio/go-source-runtime:local.
 Do not repeat the passing real Go or Playwright image integrations without a builder or execution contract change.
 Use the targeted source checks or affected self-test selector after implementation changes.
-Recent feature commits are 6b5a9f1 for registered sources and e1354ef for push and periodic synchronization.
+Source-management milestone commits include 6b5a9f1 and e1354ef. Use git log for the current feature history.
 The current source builder supports offline Go and Playwright bundles with trusted runtimes and fixed copy instructions.
 Items **22**, **25**, **26**, and **29** advance but remain open for their broader scope.
 Items **21** and **29** also advance through retained release controls.
@@ -172,7 +257,8 @@ AWS, Kubernetes, and Azure verification remain separate work.
 ## Historical shutdown checkpoint and continuation
 
 The user requests the earlier pause to power off the computer.
-The user resumes this task with the implementation-first direction above.
+The user resumes this task with the implementation-first direction and active delivery sequence above.
+This checkpoint records earlier work. Do not resume its old numbered steps as the current task queue.
 The complete product plan and all acceptance criteria remain required.
 
 ### Checkout and verified completion
@@ -298,7 +384,7 @@ A remotely hosted service can register a local worker without moving its own dep
 | Azure | Container Apps service. Serve UI from the service or a separate static distribution. | Container Apps Jobs started through the execution adapter. | Blob Storage artifacts and Key Vault references. |
 | Local server | Native Go service or Docker Compose. Serve the built Angular UI locally. | Local container worker. Registered native execution is an explicit trusted option. | Local persistent directories and local secret bindings. |
 
-Azure Container Apps is the proposed Azure baseline.
+Azure Container Apps is the selected planning baseline for Azure. Its deployment implementation and acceptance remain open.
 It fits the continuous Go API and scheduler without requiring a Functions-specific service architecture.
 Use Container Apps Jobs for finite isolated executions.
 Azure Functions is not required for the baseline. Evaluate it separately if a later event handler needs it.
@@ -1436,21 +1522,21 @@ The UI has its own application shell, authentication, design tokens, and runtime
 It builds from this repository alone.
 Use generic interaction patterns without importing another application's controls or styles.
 
-#### Recommended stack
+#### Current stack and dependency policy
 
 Use a standalone Angular application under `web/` in the service repository.
-Use Angular 22 as the proposed target.
-Verify the test tree, result cards, forms, and charts against selected package versions before finalizing dependencies.
+Keep the implemented Angular 22 standalone application. Use web/package.json and its lockfile for exact dependency versions.
+Add packages only when a concrete requirement needs them and targeted checks justify the change.
 No other application requires an upgrade or a shared library build.
 
 Use these building blocks:
 
-| Layer | Proposed choice |
+| Layer | Current approach |
 | --- | --- |
 | Components and state | Standalone Angular components, signals, focused services, and pure utilities. |
-| Accessible interactions | Native controls for simple cases, Angular ARIA for headless widget patterns, and CDK for dialogs, overlays, and accessibility utilities. |
+| Accessible interactions | Native controls now. Add Angular ARIA or CDK only when a new complex interaction requires it. |
 | Styling | App-owned CSS and shared design tokens for spacing, typography, borders, focus, and status colors. |
-| Charts | ECharts through a compatible Angular integration. |
+| Charts | Existing app-owned accessible SVG stacked-area charts and pure chart utilities. |
 | API client | Typed client generated from the service OpenAPI contract, with a small authentication adapter. |
 | Authentication | Local credentials and OIDC authorization code sign-in through Go-managed sessions. Authorization uses `wtiger001/go-permissions`. |
 
@@ -1464,7 +1550,7 @@ Keep styles scoped to app-owned classes so document elements cannot introduce un
 Use a compact operational dashboard with a persistent desktop sidebar and fluid main workspace.
 Place the project switcher at the top of the sidebar.
 Show application and environment filters in the page toolbar when relevant.
-Keep Run tests as the primary execution action.
+Use Start run for reviewed execution and Save and run for the explicit combined test-creation action.
 Make the chosen project, target, and protected state visible before execution.
 
 The Project selector sits above Workspace and Testing navigation.
@@ -1673,21 +1759,29 @@ Verify schedule ownership, execution recovery, and notification retries when rep
 - Test-only publication requires no API or UI deployment.
 - Provider credentials remain outside browser configuration and application logs.
 
-### Decisions before implementation
+### Remaining deployment and product decisions
 
-- UI hostname for TestStudio. The repository name is `wtiger001/teststudio`.
-- Repository visibility. Private remains the proposal.
-- Database driver and migration tooling. PostgreSQL is the hosted default; SQLite is the single-instance local default.
-- Initial OIDC providers, external group mappings, session limits, and external-membership refresh intervals.
-- Pinned go-permissions version, Go toolchain, SQLite store implementation, and permission-cache invalidation strategy.
-- Native binary, Docker Compose, and local worker packaging priorities.
-- Azure static UI hosting when a separate distribution is needed. Container Apps remains the proposed compute baseline.
-- Kubernetes ingress, artifact storage, secret integration, and supported runtime requirements.
-- Final predefined-role action matrix, delegation rules, catalog field ownership, and bulk-operation limits.
-- Default health-check frequency, response and certificate thresholds, concurrency, and notification policy.
-- Initial build backend, upload limits, GitHub connection ownership, and activation policy.
-- Evidence quotas, retention durations, redaction defaults, capture overrides, and trace-viewer packaging.
-- UI wireframes, compatible Angular and chart package versions, and deployment release compatibility.
+The repository, current UI stack, databases, local recorder, and existing source workflow are already selected.
+Do not reopen those choices without a concrete implementation problem.
+Use go.mod and web/package-lock.json as the exact dependency records.
+The existing PostgreSQL and SQLite implementations need remaining parity and transfer verification, not a new database selection.
+Provider-specific choices below remain installation configuration or later implementation decisions:
+
+- Public hostname, repository visibility, and hosted release origins.
+- Actual OIDC providers, group mappings, session limits, and approved secret references for each installation.
+- Packaging of the selected local service, preparation worker, browser runtime, and any future companion recorder.
+- Azure static UI distribution when it is separate from Container Apps. Azure Functions is optional future integration work.
+- Kubernetes ingress, artifact storage, secret integration, worker identity, and runtime requirements.
+- Provider execution policy, concurrency limits, cancellation, deadlines, and recovery behavior.
+- Remaining exact role and delegation boundaries, including initial project administrator assignment.
+- Operator defaults for schedule cadence, response and certificate thresholds, capture, quotas, and retention.
+- Additional dependency preparation profiles and hosted source credentials. The existing offline builder and GitHub workflow remain in use.
+- Private trace-viewer packaging and credential redaction across logs, screenshots, traces, and attachments.
+- Cross-project overview and history scope after the primary tester workflows are complete.
+
+Record a decision when its implementation requires it. Do not invent account identifiers, credentials, or production resource settings.
+The MMDev AWS account is the authorized deployment verification destination. It is not a runtime dependency or a reason to test AWS now.
+Azure subscription and Kubernetes cluster selection remain open for their later deployment work.
 
 ### Protocol references
 
@@ -1718,18 +1812,19 @@ Support light, dark, and system theme preferences throughout the application.
 Persist the explicit preference locally and apply it before the first application render.
 Use shared semantic color tokens for surfaces, text, borders, focus, charts, and status.
 Use native HTML landmarks, headings, labels, buttons, forms, tables, details, and dialogs where appropriate.
-Use Angular ARIA for complex interaction patterns and CDK for accessibility utilities.
+Use native controls for current simple patterns. Add Angular ARIA or CDK when the changed interaction needs their capabilities.
 Support keyboard navigation, visible focus, reduced motion, and narrow viewports in both themes.
 Every status includes text or an icon as well as color.
-Verify complete catalog and run workflows in both themes.
+Verify relevant themes within the changed catalog or run workflow. Reuse passing evidence for unchanged controls.
 
 ## Local-first verification
 
 Run initial functional testing locally.
 Use SQLite and a local PostgreSQL container for persistence and authorization checks.
 Use local application fixtures, browser sessions, workers, and artifact storage for complete workflows.
-Use provider contract tests and local container or Kubernetes checks for deployment adapters.
+Use local provider contract checks where they directly verify changed adapter behavior.
+Do not run AWS, Kubernetes, or Azure deployment checks during the current implementation session.
 Run targeted tests after changes. Add broader checks only when feature integration requires them.
-Use the MMDev account for a small AWS deployment smoke check after local workflows are stable.
+When separate AWS verification begins, use the MMDev account after local workflows are stable.
 Keep account and profile values in installation configuration.
 Cloud smoke tests supplement local functional coverage. They do not replace it.

@@ -55,3 +55,12 @@ They do not gate this initial local demonstration.
 Suite settings, archive, restoration, affected schedule visibility, and exact suite authority checks now pass focused local verification.
 Project settings exposes these controls. See [Suite settings](suites.md).
 This follow-up does not change the demonstration setup or add a demonstration gate.
+
+## Next usable workflow
+
+The completed demonstration checklist remains complete. It does not prove all ordinary-user or hosted workflows.
+The next delivery verifies project creator access, then environment-backed recorded website execution.
+Current project creation does not assign initial project access. The local installation administrator masks that gap.
+Current recording saves source but its website draft cannot execute through the isolated offline profile.
+Follow [the active delivery plan](plan.md#active-delivery-plan-after-the-tester-walkthrough) for bounded batches and required evidence.
+Keep the running demonstration available while these workflows are implemented.

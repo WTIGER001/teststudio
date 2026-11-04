@@ -2,6 +2,7 @@
 
 Build the independent Go and Angular product described in `docs/plan.md`.
 Keep the complete acceptance ledger in `docs/implementation.md`.
+Use the active delivery sequence in `docs/plan.md`. Historical checkpoints are reference material, not the current task queue.
 
 - Use standalone Angular components, OnPush, signals, small services, and pure utilities.
 - Keep components below 450 lines and keep workflows outside components.

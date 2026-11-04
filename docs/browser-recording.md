@@ -23,6 +23,7 @@ Recording, draft saving, publication, and execution remain separate operations.
 The current isolated browser execution profile cannot reach the recorded website.
 Recorded drafts retain their start address and block preparation through that profile.
 Environment-backed browser execution remains required work.
+Follow [the active delivery plan](plan.md#recorded-browser-execution-scope) for target binding, isolation, evidence, and local verification requirements.
 The current native recorder requires a local desktop.
 Hosted recording requires a local companion or streamed browser, which remains pending.
 

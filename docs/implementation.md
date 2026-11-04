@@ -74,6 +74,31 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Plan reconciliation after tester walkthrough
+
+The active plan now separates implemented decisions, bounded delivery batches, and remaining deployment choices.
+A code review confirms that project creation saves the project and audit entry without an initial project assignment.
+Project creator access now precedes recorded website execution in the active queue.
+The planned owner experience uses project-scoped administration. Atomic creation, audit, denies, and installation boundaries remain required verification.
+This is a planned correction. The creation handler and project service do not change in this documentation update.
+
+The next browser batch binds reviewed recordings to registered environments through a separate execution profile.
+Offline suites retain their current isolation. Hosted recording remains a later, separate design decision.
+The plan preserves normal logical results, timeouts, inclusive reruns, timing, evidence gaps, and private artifacts.
+It records the ordinary tester role, target-management permissions, redirects, partial saves, and local network reachability as explicit workflow considerations.
+
+The repository, current Angular UI, accessible SVG charts, database implementations, and source workers are recorded as selected decisions.
+The plan removes the obsolete chart-library proposal and dependency-selection questions already resolved by repository manifests.
+Azure Container Apps with Jobs is the planning baseline. Cloud packaging and acceptance remain open.
+MMDev remains the later AWS verification destination, not an application dependency or permission to test cloud profiles in this session.
+Historical continuation commands are labeled as reference. Repository instructions point to the active queue.
+The demonstration and recording guides link to the reconciled implementation scope.
+
+Documentation validation checks local links, anchors, guide references, and the stable acceptance numbering.
+No application code, data, browser state, or deployment changes. No build or browser suite is required.
+The ledger remains **26 verified, 31 open, 57 total**. Planning changes alone complete no additional acceptance item.
+The next functional work is project creator access under the remaining access boundaries, followed by recorded website execution.
+
 ### Continuing usability and documentation requirements
 
 The plan now makes usability and documentation part of every changed workflow's completion.
