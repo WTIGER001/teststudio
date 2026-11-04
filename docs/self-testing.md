@@ -6,6 +6,18 @@ It copies no tests or configuration from another application.
 
 ## Run locally
 
+For atomic run admission and protected dispatch, use the focused local checks:
+
+```sh
+go test -race ./internal/runs ./internal/catalog \
+  -run '^(TestRunCreationAtomically|TestProtectedManualAndScheduled|TestQueuedHTTPDispatch|TestRunAdmissionSupports|TestExecutionGuards|TestAttemptAdmissionStops)' -count=1
+```
+
+The checks create new local records and targets. They exercise concurrent edits, protected dependency selection, queued policy changes, and blocked retries.
+The safe dependency cases execute actual HTTP requests through normal manual and scheduled runs.
+Use scripts/test-postgres.sh with the same package and test arguments for disposable local PostgreSQL parity.
+No browser or execution image is required. See [Dispatch safety](results.md#dispatch-safety-and-frozen-runs).
+
 For OIDC credential boundaries, run the focused adapter and API checks:
 
 ```sh

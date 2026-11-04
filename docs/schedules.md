@@ -13,6 +13,9 @@ Set `releaseId` to pin a published release.
 The created run freezes its actual release, definitions, target, timing criteria, and capture settings.
 Disabled tests, unsafe dependencies, missing bindings, and unavailable profiles block normal run admission.
 The schedule records blocked firings with their reason. It tries again at its next due time.
+The firing transaction guards the reviewed suite, release, environment, and selected-test revisions with its run and queue entry.
+A concurrent configuration edit cannot commit a stale selection or a partial scheduled run.
+Queued execution and retries apply the same current-policy checks as manual runs. See [Dispatch safety](results.md#dispatch-safety-and-frozen-runs).
 
 ## Cadence and overlap
 

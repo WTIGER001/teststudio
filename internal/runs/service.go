@@ -76,17 +76,17 @@ func (s *Service) Get(ctx context.Context, project, id string) (Run, storage.Rec
 }
 
 func (s *Service) Create(ctx context.Context, user, project string, req Request, key, trigger string) (Run, error) {
-	return s.create(ctx, user, project, req, key, trigger, nil, nil)
+	return s.create(ctx, user, project, req, key, trigger, nil, nil, 0)
 }
 
 func (s *Service) CreateScheduled(ctx context.Context, user, project string, req Request, key string, schedule ScheduleTrigger, commit func(Run) ([]storage.Change, error)) (Run, error) {
 	if commit == nil {
 		return Run{}, errors.New("scheduled runs require an atomic firing checkpoint")
 	}
-	return s.create(ctx, user, project, req, key, "schedule", &schedule, commit)
+	return s.create(ctx, user, project, req, key, "schedule", &schedule, commit, 0)
 }
 
-func (s *Service) create(ctx context.Context, user, project string, req Request, key, trigger string, schedule *ScheduleTrigger, checkpoint func(Run) ([]storage.Change, error)) (Run, error) {
+func (s *Service) create(ctx context.Context, user, project string, req Request, key, trigger string, schedule *ScheduleTrigger, checkpoint func(Run) ([]storage.Change, error), retry int) (Run, error) {
 	if err := s.Auth.Check(ctx, user, project, "", "runs.create"); err != nil {
 		return Run{}, err
 	}
@@ -158,12 +158,12 @@ func (s *Service) create(ctx context.Context, user, project string, req Request,
 		}
 		changes = append(changes, extra...)
 	}
-	err = s.Store.Commit(ctx, changes...)
+	err = s.Store.CommitAll(ctx, changes...)
 	if errors.Is(err, storage.ErrConflict) {
-		if checkpoint != nil {
+		if checkpoint != nil || retry >= 7 {
 			return v, err
 		}
-		return s.Create(ctx, user, project, req, key, trigger)
+		return s.create(ctx, user, project, req, key, trigger, nil, nil, retry+1)
 	}
 	return v, err
 }
@@ -191,7 +191,7 @@ func (s *Service) prepare(ctx context.Context, user, project string, req Request
 	if suite.Archived {
 		return Run{}, nil, errors.New("suite is archived")
 	}
-	admission := []storage.Record{projectRow}
+	admission := []storage.Record{projectRow, suiteRow}
 	var saved *catalog.SavedSelectionSnapshot
 	var resolved []string
 	if req.SelectionPreview != "" {
@@ -224,6 +224,7 @@ func (s *Service) prepare(ctx context.Context, user, project string, req Request
 	if err != nil {
 		return Run{}, nil, err
 	}
+	admission = append(admission, releaseRow)
 	if req.Location != s.Location {
 		return Run{}, nil, errors.New("execution location is not configured on this installation")
 	}
@@ -249,6 +250,7 @@ func (s *Service) prepare(ctx context.Context, user, project string, req Request
 		}
 		environment = &e
 		protected = e.Protected
+		admission = append(admission, r)
 	} else if suite.RequiresTarget {
 		return Run{}, nil, errors.New("suite requires a target environment")
 	}
@@ -278,9 +280,11 @@ func (s *Service) prepare(ctx context.Context, user, project string, req Request
 			return Run{}, nil, errors.New("run tests differ from the reviewed saved selection")
 		}
 	}
-	if err := s.Catalog.CheckCurrentState(ctx, project, req.Suite, tests, protected); err != nil {
+	guards, err := s.Catalog.ExecutionGuards(ctx, project, req.Suite, tests, protected)
+	if err != nil {
 		return Run{}, nil, err
 	}
+	admission = append(admission, guards...)
 	policy := capture.Normalize(release.Draft.Capture)
 	limits := capture.ResolveLimits(p.CaptureLimits)
 	if req.Capture != nil {

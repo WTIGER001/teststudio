@@ -160,24 +160,46 @@ func (s *Service) Tests(ctx context.Context, user, project, suite string) ([]sto
 }
 
 func (s *Service) CheckCurrentState(ctx context.Context, project, suite string, tests []Test, protected bool) error {
+	_, err := s.ExecutionGuards(ctx, project, suite, tests, protected)
+	return err
+}
+
+func (s *Service) ExecutionGuards(ctx context.Context, project, suite string, tests []Test, protected bool) ([]storage.Record, error) {
+	ids := make([]string, 0, len(tests))
+	seen := make(map[string]bool, len(tests))
+	for _, test := range tests {
+		if seen[test.ID] {
+			return nil, fmt.Errorf("duplicate selected test %s", test.ID)
+		}
+		seen[test.ID] = true
+		ids = append(ids, test.ID)
+	}
+	if _, err := ResolveSelection(tests, ids, protected); err != nil {
+		return nil, err
+	}
+	guards := make([]storage.Record, 0, len(tests))
 	for _, t := range tests {
 		if protected && t.Safety != "safe" {
-			return fmt.Errorf("test %s is not labeled safe in the selected release", t.ID)
+			return nil, fmt.Errorf("test %s is not labeled safe in the selected release", t.ID)
 		}
 		r, err := s.Store.Get(ctx, Bucket("tests", project, suite), t.ID)
 		if err != nil {
-			return err
+			if errors.Is(err, storage.ErrNotFound) {
+				return nil, fmt.Errorf("test %s no longer exists in the working catalog", t.ID)
+			}
+			return nil, err
 		}
 		current, err := storage.Decode[Test](r)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if current.State != "enabled" {
-			return fmt.Errorf("test %s is currently %s", t.ID, current.State)
+			return nil, fmt.Errorf("test %s is currently %s", t.ID, current.State)
 		}
 		if protected && current.Safety != "safe" {
-			return fmt.Errorf("test %s is no longer labeled safe", t.ID)
+			return nil, fmt.Errorf("test %s is no longer labeled safe", t.ID)
 		}
+		guards = append(guards, r)
 	}
-	return nil
+	return guards, nil
 }

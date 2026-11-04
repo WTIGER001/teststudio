@@ -596,6 +596,9 @@ func (s *Service) admitAttempt(ctx context.Context, run Run) error {
 	if suite.Archived {
 		return errors.New("suite is archived")
 	}
+	if run.Environment == nil && suite.RequiresTarget {
+		return errors.New("suite now requires a target environment; create a new run")
+	}
 	protected := run.Environment != nil && run.Environment.Protected
 	if run.Environment != nil {
 		r, err := s.Store.Get(ctx, projects.Bucket("environments", run.Project), run.Environment.ID)
@@ -609,7 +612,7 @@ func (s *Service) admitAttempt(ctx context.Context, run Run) error {
 		if environment.Disabled {
 			return errors.New("environment is disabled")
 		}
-		if err := currentBrowserEnvironment(run, environment, suite); err != nil {
+		if err := currentEnvironmentPolicy(run, environment, suite); err != nil {
 			return err
 		}
 		protected = protected || environment.Protected

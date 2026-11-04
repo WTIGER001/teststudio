@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 39 verified of 57.
+The acceptance count is 41 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -38,7 +38,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **25.** Concurrent catalog edits produce explicit conflicts. Source synchronization preserves service-managed metadata.
 - [x] **26.** Failed or duplicate preparation events preserve the active release and do not create unintended test runs.
 - [x] **27.** Runs retain their release across updates, activation changes, and rollbacks.
-- [ ] **28.** Catalog changes do not change existing run snapshots. Disabled tests and invalid dependencies block new dispatch explicitly.
+- [x] **28.** Catalog changes do not change existing run snapshots. Disabled tests and invalid dependencies block new dispatch explicitly.
 - [x] **29.** Removed tests and archived suites retain their history and required artifacts.
 - [x] **30.** TestStudio executes its own new Playwright suite through normal publication, execution, timing, result, and evidence contracts.
 - [x] **31.** Go unit suites run without artificial web targets or production credentials.
@@ -48,7 +48,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **35.** API suites run through guarded direct clients and produce the same history and trends as browser tests.
 - [x] **36.** Package events, subtest aggregates, retries, and API steps do not inflate test counts.
 - [ ] **37.** Local and scheduled executions produce the same logical run and result records.
-- [ ] **38.** Protected environments reject unsafe selections and unsafe dependencies.
+- [x] **38.** Protected environments reject unsafe selections and unsafe dependencies.
 - [x] **39.** Timeouts have a separate test status and count. Failure reruns include them alongside failed and flaky results.
 - [x] **40.** Native HTTP attempts support comparable timing history, bounded adaptive timeouts, slowdown criteria, and API and UI estimates.
 - [ ] **41.** Go and browser runners apply the same timing contract across execution and deployment profiles.
@@ -68,6 +68,39 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **55.** Hosted identity and private report access work through installation-specific configuration.
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
+
+## Current delivery: atomic admission and current dispatch safety
+
+Acceptances **28** and **38** are complete. The ledger has **41 verified, 16 open, 57 total** items.
+Acceptance **37** advances with matching actual manual and scheduled HTTP dependency runs. Other runner parity remains open.
+
+Run creation now guards the reviewed suite, release, environment, and every selected working-test revision with the queued run.
+The project guard remains in place. Saved selection and schedule checkpoints share the same transaction.
+Conflicts revalidate manual requests with bounded retries. Scheduled conflicts retain their atomic firing behavior.
+Large selections use the existing multi-batch transaction rather than exceeding the 100-change batch limit.
+
+Dispatch validates the complete frozen dependency closure, including missing, cyclic, disabled, and duplicate selections.
+Current lifecycle and safety restrictions remain authoritative without replacing saved definitions.
+Native HTTP attempts now recheck current stage, network permissions, credential bindings, execution locations, and suite application links.
+Browser execution retains its stricter origin check. Native HTTP endpoint edits retain their original frozen address.
+A suite that newly requires a target blocks a previously targetless run.
+Protection uses both the frozen and current environment state. Current permissions and published and working safety labels apply throughout the selection.
+Blocked retries retain their first recorded observation and create no invented additional attempt or logical passing result.
+
+Focused race checks pass on SQLite and local PostgreSQL for concurrent admission edits, current target policy, protected roots and dependencies, and large guarded selections.
+The tests verify successful safe manual and scheduled dependency execution through the actual local HTTP executor.
+They also verify atomic firing, normal notification completion, unchanged frozen snapshots, and the existing native endpoint snapshot contract.
+Additional SQLite cases verify both directions of published-versus-working dependency safety changes.
+Missing, cyclic, disabled, and duplicate frozen dependencies fail explicitly before admission guards are issued.
+Retry cases preserve one failed attempt after safety changes, disablement, and protected-permission revocation.
+The first environment-boundary fixture tries to change a permanent application reference. The test now uses a supported suite application-link edit.
+
+The native server and production UI build pass. Help text changes require one UI build; the private trace bundle stays cached.
+No browser suite, runner image build, or cloud verification runs for this batch.
+Owned PostgreSQL fixture cleanup is verified. New local HTTP fixtures stop through test teardown.
+Evidence is output/dispatch-safety/checkpoint.json and its focused PostgreSQL retry log.
+Run help, catalog, result, and schedule guides explain blocked dispatch, frozen settings, and recovery.
+Continue remaining local storage, access, source, HTTP, API, and scheduled runner parity work.
 
 ## Current delivery: provider credential error boundaries
 

@@ -42,7 +42,7 @@ func TestBrowserAttemptsRejectChangedTargetPolicy(t *testing.T) {
 	original := projects.Environment{Application: "app", Stage: "local", Endpoints: map[string]string{"api": "http://host.docker.internal:3000"}, Locations: []string{"local"}}
 	run := Run{Environment: &original, Release: catalog.Release{Draft: catalog.Draft{Artifact: catalog.Artifact{Browser: &browserpolicy.Spec{Endpoint: "api"}}}}, Request: Request{Location: "local"}}
 	suite := projects.Suite{Applications: []string{"app"}}
-	if err := currentBrowserEnvironment(run, original, suite); err != nil {
+	if err := currentEnvironmentPolicy(run, original, suite); err != nil {
 		t.Fatal(err)
 	}
 	for _, mutate := range []func(*projects.Environment){
@@ -59,11 +59,11 @@ func TestBrowserAttemptsRejectChangedTargetPolicy(t *testing.T) {
 	} {
 		current := original
 		mutate(&current)
-		if currentBrowserEnvironment(run, current, suite) == nil {
+		if currentEnvironmentPolicy(run, current, suite) == nil {
 			t.Fatal("changed policy remained executable")
 		}
 	}
-	if currentBrowserEnvironment(run, original, projects.Suite{Applications: []string{"foreign"}}) == nil {
+	if currentEnvironmentPolicy(run, original, projects.Suite{Applications: []string{"foreign"}}) == nil {
 		t.Fatal("current suite application boundary was ignored")
 	}
 }

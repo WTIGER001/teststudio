@@ -2,6 +2,9 @@
 
 Each suite owns permanent test identifiers, revision history, drafts, and immutable releases.
 Catalog edits affect future publications. Existing releases and run snapshots keep their original definitions.
+Current lifecycle and safety restrictions still apply before dispatch and each attempt.
+Selected dependencies must remain enabled. Protected targets require safe published and current labels throughout the dependency closure.
+See [Dispatch safety](results.md#dispatch-safety-and-frozen-runs) for concurrent edits, blocked runs, and retained attempt observations.
 Use explicit lifecycle actions to enable, disable, archive, or restore a test.
 Duplication creates a new identifier in draft state and starts independent history.
 

@@ -37,6 +37,27 @@ The active test retains its timeout result when the worker can save it.
 Selected tests that never dispatch do not receive invented timeout results.
 Cancellation retains an unknown outcome. A lost worker remains incomplete with an unknown outcome.
 
+## Dispatch safety and frozen runs
+
+Run creation commits the reviewed project, suite, release, environment, and current selected-test revisions with the queued run.
+A concurrent edit causes revalidation. A disabled test or archived suite cannot leave a partially queued run.
+Manual requests retry a bounded number of revision conflicts. Scheduled requests retain their atomic firing checkpoint.
+
+The selected release supplies definitions and dependency order. Missing dependencies, cycles, disabled dependencies, and duplicate identifiers block dispatch explicitly.
+Current working tests must also remain enabled. Removing a working definition blocks new dispatch without removing its retained history.
+Protected targets require protected-execution permission and safe labels on every selected test and dependency.
+Both the published safety label and the current working label must permit execution.
+New protection applies to queued work. Removing protection does not relax the protection frozen in that run.
+
+Each attempt rechecks current permissions, suite status, environment status, and target policy.
+Changed stage, network permissions, credential bindings, allowed locations, or suite application links can block execution.
+The run keeps its original target and definitions. It never silently switches to the replacement configuration.
+Native HTTP endpoint edits preserve the frozen address. Browser endpoint edits require a new run because their reviewed source binds one origin.
+
+A blocked retry preserves earlier attempt observations. It creates no additional attempt or synthetic passing result.
+Read the blocked reason, correct the current configuration, and create a new run when ready.
+The original run remains available for investigation.
+
 ## Investigate one test
 
 Select Inspect test beside a final result. The investigation heading receives keyboard focus.
