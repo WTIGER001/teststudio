@@ -122,3 +122,24 @@ They preserve a password hash, a live session, a published release, an actual co
 SQLite-to-PostgreSQL conversion and PostgreSQL-to-SQLite restoration pass against a disposable local PostgreSQL instance.
 Checks compare raw metadata and verify effective access, native grant updates, sequence high-water marks, and artifact references.
 Damaged archives roll back. Existing destinations and active work fail explicitly. No cloud deployment is tested.
+
+## Shared database behavior
+
+Acceptance 06 verifies the same storage and claim contracts on SQLite and local PostgreSQL.
+This verification is separate from installation export and import under acceptance 08.
+
+| Behavior | Verified contract |
+| --- | --- |
+| Revision conflicts | One concurrent writer wins. Stale writes and assertions fail without partial changes. |
+| Transactions | Metadata, sequence values, pending reads, and rollback share the same atomic boundary. |
+| Paging and reopen | Project-bound ascending and descending pages retain ordering. Cursor continuation survives closing and reopening storage. |
+| Startup and identity | Concurrent migrations converge. Concurrent identity creation returns one durable installation identifier. |
+| Worker checkpoints | Claim fencing, cleanup failure, retry state, and queue completion remain durable. |
+| Schedule claims | Concurrent claimants create one logical run. Live claims remain fenced and expired claims recover after reopening. |
+
+The same eleven targeted checks pass with race detection on both databases.
+Evidence is output/storage-acceptance/summary.json and its database-specific logs.
+The check removes its owned local PostgreSQL container. It needs no browser or runner-image build.
+Existing identity, transfer, preparation, and evidence recovery checks remain separate retained evidence.
+SQLite supports one local service instance. Use PostgreSQL for hosted replicas.
+Cloud deployment and provider-specific recovery verification remain separate acceptance work.

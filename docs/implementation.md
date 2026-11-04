@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 46 verified of 57.
+The acceptance count is 47 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -16,7 +16,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **03.** Installation starts with empty registries and can load only explicitly selected new examples.
 - [x] **04.** Local durable operation works without a cloud account.
 - [x] **05.** A new project, application, environment, and suite can be registered without editing Go or TypeScript source.
-- [ ] **06.** PostgreSQL and SQLite pass the same storage behavior checks, including claims, revision conflicts, and restart recovery.
+- [x] **06.** PostgreSQL and SQLite pass the same storage behavior checks, including claims, revision conflicts, and restart recovery.
 - [x] **07.** SQLite restarts preserve users, memberships, assignments, custom grants, disabled roles, and sessions without a PostgreSQL service.
 - [x] **08.** Local SQLite installation requires no database server. Export and import to PostgreSQL preserve identifiers and artifact references.
 - [x] **09.** Local accounts, OIDC accounts, and mixed sign-in work through the same directory, permission checks, and managed sessions.
@@ -68,6 +68,33 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **55.** Hosted identity and private report access work through installation-specific configuration.
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
+
+## Current delivery: shared SQLite and PostgreSQL storage behavior
+
+Acceptance **06** is complete. The ledger has **47 verified, 10 open, 57 total** items.
+The source audit maps the shared store, worker checkpoint ledger, and durable schedule claims to the required storage behavior.
+Both selected backends use the same Store contracts and service-level claim records.
+No missing storage implementation appears in the audited scope.
+
+The same eleven focused checks pass with race detection on SQLite and local PostgreSQL.
+They cover optimistic revision conflicts, one winning concurrent writer, and atomic rollback without leaked records.
+Bound transactions read their own writes and commit or roll back sequence changes with metadata.
+Swallowed failures cannot commit partial work. Stale revision assertions reject dependent changes without changing asserted records.
+Scoped ascending and descending pages preserve boundaries and cursor ordering. Cursor continuation survives a real close and reopen.
+Concurrent schema startup converges on usable storage. Concurrent installation identity creation returns one durable identifier across reopened connections.
+Worker checkpoints retain claimant tokens, results, evidence state, cleanup failure, retry state, and queue removal.
+A stale worker cannot finalize another claimant's checkpoint.
+Competing schedule replicas create one normal logical run through one atomic firing transaction.
+Live claims remain fenced. Expired claims transfer after reopening, preserve one firing, and coalesce missed occurrences without duplicate runs.
+
+SQLite storage, ledger, and run checks take 1.554, 1.537, and 2.094 seconds respectively.
+Local PostgreSQL checks take 1.912, 1.642, and 2.095 seconds respectively.
+Evidence is output/storage-acceptance/summary.json, sqlite.log, and postgres.log.
+The owned PostgreSQL container is verified absent. No browser or test-runtime image is needed.
+No broad product suite or cloud profile runs. The user demo remains running without a rebuild or restart.
+Existing identity restart, installation transfer, preparation recovery, and evidence restart acceptance remains valid without repetition.
+SQLite remains the single-instance local default. PostgreSQL remains the hosted and multi-instance default.
+Deployment-specific execution, timing, identity, and provider lifecycle acceptance remain open under their own ledger numbers.
 
 ## Current delivery: complete scoped grant and revocation coverage
 

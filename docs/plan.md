@@ -15,7 +15,7 @@ The full product scope remains required. This direction supersedes the testing s
 ## Active delivery plan after the tester walkthrough
 
 This section is the current implementation order. Historical continuation commands below do not override it.
-The local demonstration is usable and verified. The complete product remains unfinished at 46 verified items out of 57.
+The local demonstration is usable and verified. The complete product remains unfinished at 47 verified items out of 57.
 Ordinary project creator access and the first environment-backed local recorded website flow pass targeted verification.
 Tester investigation, failure recovery, and local manual/scheduled runner parity pass targeted verification.
 Continue source-workflow, access, storage, and hosted packaging gaps. Reuse passing runner evidence.
@@ -33,7 +33,7 @@ Do not add new dashboard pages or repeat completed demonstration setup before cl
 | New target configuration | Show new application and environment records on Review before saving. Reuse matching targets and preserve their protection. |
 | Test lifecycle | Keep recording, draft saving, preparation, publication, activation, and execution distinct. Combined actions explain each effect. |
 | Save and run | Retain the implemented non-activating publication behavior. Run the selected test and dependencies without replacing the suite's active release. |
-| Persistence | SQLite is the single-instance local default. PostgreSQL is the hosted and multi-instance default. Installation export and import preserve identifiers and access across both databases. Full storage parity remains open. |
+| Persistence | SQLite is the single-instance local default. PostgreSQL is the hosted and multi-instance default. Installation export and import preserve identifiers and access across both databases. Shared storage parity is verified under 06. Hosted profile acceptance remains separate. |
 | Charts | Keep the existing accessible SVG stacked-area implementation. A chart-library migration is not required. |
 | Local verification | Use local fixtures, cached builds, and targeted checks. Public customer websites are manual user targets, not verification dependencies. |
 | Deployment | Retain local server, AWS ECS with CloudFront, Kubernetes, and Azure Container Apps with Jobs as required profiles. Hosted parity remains unverified. |
@@ -66,7 +66,7 @@ Do not treat these batches as additional acceptance items or claim the whole pro
 
 ### Current continuation: access, storage, and provider work
 
-Acceptances **12**, **22**, and **37** are complete. The count is **46 verified, 11 open**.
+Acceptances **06**, **12**, **22**, and **37** are complete. The count is **47 verified, 10 open**.
 The repository editor uses Repository, Suites, and Review through the canonical wizard components.
 Identifiers generate from the name. Uncommon reference and synchronization settings stay under named Advanced sections.
 Review keeps enabled state, automatic publication, future activation, and test-execution consequences visible.
@@ -84,7 +84,11 @@ Acceptance 12 now passes its source audit and nine focused existing checks on SQ
 User, group, role, object, and project grants preserve denies, expiry, inheritance, exact revocation, and administrative boundaries.
 No authorization behavior change, browser test, UI build, or runner image build is needed.
 
-Next, audit remaining storage parity under **06**, then provenance under **02**, provider packaging, and remaining ledger scope.
+Acceptance 06 now passes the same eleven focused storage, ledger, and scheduler checks on SQLite and local PostgreSQL with race detection.
+Atomic writes, revision conflicts, cursor reopen, concurrent identity, worker checkpoints, and claim recovery share verified behavior.
+The owned local database container is removed. No UI rebuild, browser run, or runner-image build is needed.
+
+Next, audit product provenance under **02**, then provider packaging and remaining ledger scope.
 Implement any missing behavior first. Reuse completed service evidence and run only targeted local checks.
 Keep deployment-wide timing **41**, storage-provider retention **46**, and hosted criteria **51–57** open until their required verification passes.
 Do not repeat completed source, native, API, browser, or scheduled-runner fixtures without a concrete contract change or unresolved failure.
@@ -1868,7 +1872,7 @@ Verify schedule ownership, execution recovery, and notification retries when rep
 The repository, current UI stack, databases, local recorder, and existing source workflow are already selected.
 Do not reopen those choices without a concrete implementation problem.
 Use go.mod and web/package-lock.json as the exact dependency records.
-The existing PostgreSQL and SQLite implementations need remaining parity and transfer verification, not a new database selection.
+PostgreSQL and SQLite now pass shared storage parity and installation transfer verification. Hosted deployment acceptance remains separate.
 Provider-specific choices below remain installation configuration or later implementation decisions:
 
 - Public hostname, repository visibility, and hosted release origins.
