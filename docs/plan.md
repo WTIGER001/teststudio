@@ -12,6 +12,52 @@ Run tests only locally. AWS, Kubernetes, and Azure verification are separate wor
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
+## Usability and documentation are continuing requirements
+
+Keep the product easy to use as the feature set grows.
+Apply the shared [UI contract](ui.md#usability-and-documentation-contract) to each changed workflow.
+Use [Page help](help.md) for contextual guide structure and maintenance.
+These requirements apply throughout implementation. They are not a final polish phase.
+The current UI contract supersedes older navigation sketches and form layouts in historical checkpoints.
+Keep one canonical pattern for each interaction. Improve and reuse it across related pages.
+
+Use tester language and a clear task sequence. Preserve project, application, suite, and target context.
+Use steppers for configuration with several decisions. Keep simple tasks short.
+Generate identifiers, retain defaults, and put uncommon controls under named Advanced sections.
+Keep protection, safety, enable state, and execution or delivery consequences visible before submission.
+Preserve entries through Back, help, and lookup refreshes. Explain validation, conflicts, partial saves, and recovery.
+Document supported workflows, defaults, dependencies, permissions, side effects, and current limits.
+Update documentation in the same delivery as behavior. Keep visible labels aligned across the UI and guides.
+Maintain the README guide index so testers, API users, operators, and contributors can find the correct instructions.
+
+## Workflow completion checklist
+
+Apply this checklist to the changed workflow before reporting it complete:
+
+- The tester can find the task through the intended navigation and retain its project, suite, and target context.
+- Common controls are visible. The stepper, Advanced options, defaults, review, and action labels follow the shared UI contract.
+- Relevant loading, empty, denied, validation, conflict, and partial-save states explain the next available action.
+- Current-page help and the affected user guide match actual behavior. API and operator documentation changes accompany affected contracts or operations.
+- Supported behavior and known limits are explicit. Documentation links and guide keys resolve. Planned features do not appear as available.
+- Targeted local checks cover the changed behavior. Record evidence and cleanup in the implementation ledger. Reuse relevant passing evidence.
+
+For documentation-only changes, check consistency, references, and links. Do not rebuild the UI or repeat browser workflows.
+Keep AWS, Kubernetes, and Azure verification separate from current local implementation work.
+Report remaining usability or documentation gaps with the feature status.
+These requirements do not add or renumber acceptance items. The stable ledger remains 57 items.
+Documentation updates alone do not change verified acceptance totals.
+
+## Continuing usability and documentation work
+
+Use small improvements as each affected page changes. Do not start a broad rewrite or repeat unrelated tests.
+Keep these follow-up tasks visible:
+
+- Apply the shared patterns to remaining complex editors as their feature work proceeds.
+- Reconcile route help, feature guides, API contracts, and operator instructions when their behavior changes.
+- Use tester walkthrough feedback to improve project setup, quick checks, run review, and failure-evidence discovery.
+- Document recorded browser execution with its implementation. Keep its present execution limits explicit until verified.
+- Complete provider-specific installation, upgrade, backup, restore, and recovery instructions with the relevant deployment work.
+
 ## Immediate delivery: usable local demonstration
 
 The user prioritizes a usable, demonstrable application on 2026-11-03.
@@ -1421,10 +1467,14 @@ Show application and environment filters in the page toolbar when relevant.
 Keep Run tests as the primary execution action.
 Make the chosen project, target, and protected state visible before execution.
 
-The main sidebar contains Overview, Tests, Runs, Schedules, Trends, Sources, and Settings.
-Tests groups suite catalogs, native check editing, and release details.
-Project settings contain applications, environments, credentials references, and notification settings.
-Global settings contain identity integration and worker configuration when the user has access.
+The Project selector sits above Workspace and Testing navigation.
+Testing contains Applications, Suites, Test catalog, Test runs, and Trends.
+Automation contains Schedules and Notifications.
+Advanced testing contains Import and sync tests and Suite releases.
+Project administration and Installation administration keep access controls separate from daily testing.
+Automation, Advanced testing, and administration collapse by default and open for their current page.
+Application environments remain in application context. Do not require testers to discover them through administration.
+See [the sidebar contract](ui.md#sidebar-navigation) for current labels and behavior.
 The page inventory below does not require a separate sidebar item for every page.
 
 Use neutral light backgrounds, white cards, dark text, subtle borders, and one navigation accent.
@@ -1438,17 +1488,18 @@ Honor reduced-motion settings and visible keyboard focus.
 
 #### Primary screens
 
-The Overview page prioritizes running work, recent failures, health-check status, and upcoming schedules.
+The planned Overview page prioritizes running work, recent failures, health-check status, and upcoming schedules.
 It links directly to the relevant run or test history.
 Use tables for scanning many runs or sources, and cards for detailed test results.
 
-The Tests page provides the catalog table and tree, editing workflows, validation, publication, and revision history.
+The Test catalog provides its table, editing workflows, validation, publication, and revision history.
+Category-tree navigation remains planned.
 It includes test-type and runner filters, safety labels, and suite or application context.
 Run selection supports categories, individual tests, and explicit dependencies.
 Native HTTPS checks and REST definitions use structured editors.
 Go and Playwright tests display their source and release metadata.
 
-The Sources page provides Upload tests and Connect repository actions.
+Import and sync tests provides uploads, source preparation, and registered repository workflows.
 Source detail shows sync state, the resolved revision, build progress, failures, catalog changes, and active releases.
 Keep source preparation status distinct from the outcome of a test execution.
 
@@ -1468,8 +1519,9 @@ Project and environment scope, period, sample counts, and partial-history notice
 HTTPS check views add response-time history and certificate information.
 See [Result trends](trends.md) for paging, logical counts, gaps, rankings, and the current project trend API.
 
-Use separate routes for complex editing, including sources, environments, native checks, and schedules.
-Use dialogs for short actions such as rename or confirmation.
+Use dedicated routes for substantial authoring, including typed test creation and source workflows.
+Focused configuration wizards can remain within their list or application page when this preserves context.
+Use dialogs or compact inline forms for short actions. Follow the current shared UI contract.
 Persist shareable filters in URLs.
 Keep loading, empty, unavailable, and permission-denied states distinct.
 An unavailable API must not appear as an empty healthy project.
@@ -1502,23 +1554,25 @@ Review wireframes for Overview, Source import and build status, Run details, and
 Validate the tree, cards, charts, and login flow with newly written product fixtures.
 Test the complete workflows independently of any existing application or deployment.
 
-Proposed navigation:
+Current navigation and related page inventory:
 
 | Area | Purpose |
 | --- | --- |
-| Overview | Cross-project health, recent runs, and failures. |
-| Projects | Project registration, applications, and project settings. |
-| Run tests | Project, application, suite, environment, test tree, and execution target selection. |
-| Runs | All authorized runs, newest first, with project and environment filters. |
-| Run details | Progress, cards grouped by category, attempts, errors, cancellation, reruns, and reports. |
-| Trends | Overall, category, and test stacked area charts with failure and volatility rankings. |
-| Schedules | Project schedules, target selection, enabled state, and next execution. |
-| Environments | Application targets, named endpoints, stages, protection, and credential references. |
-| Sources | Uploads, repository registration, connection status, synchronization, and source versions. |
-| Suites | Published releases, build history, active and pinned versions, catalog changes, safety labels, and source metadata. |
-| Settings | Users, groups, roles, permissions, OIDC providers, notifications, and worker connections. |
+| Workspace | Projects and Your account. The Project selector changes the current project. |
+| Applications | Application registration, environments, and linked suites. |
+| Suites | Test groups, scoped catalog links, creation, and suite settings. |
+| Test catalog | Definitions, typed test creation, validation, publication, and revision history. |
+| Test runs | Run selection, review, execution history, and filters. |
+| Run details | Progress, results, attempts, logs, evidence, cancellation, and reruns. |
+| Trends | Result-state stacked areas and failure or volatility rankings. |
+| Automation | Schedules, notification channels, and their retained histories. |
+| Advanced testing | Import and sync tests, source preparation, and retained suite releases. |
+| Project administration | Project settings, access, permissions, groups, roles, and access explanations. |
+| Installation administration | Users, identity providers, installation access, permissions, groups, roles, and access explanations. |
 
-The project switcher supports All projects for overview and history.
+Overview, cross-project rollups, and broader worker configuration remain planned work.
+Do not add inactive sidebar links for planned pages.
+The Project selector supports All projects for project discovery. Broader history scope remains separate feature work.
 Execution requires one explicit project and an eligible suite.
 Require an environment only when the suite declares target bindings. Targetless unit suites use No target.
 Within a project, keep All, All Production, All Beta, All Dev, and individual environment filters.
@@ -1554,9 +1608,10 @@ See [Durable completion notifications](notifications.md) for the outbox, scoped 
 5. **Add source management.** Deliver uploads, GitHub connections, isolated preparation, immutable releases, and activation controls.
 6. **Validate independent projects.** Register two generic projects through configuration. Verify isolated identities, data, permissions, and history.
 7. **Validate deployment parity.** Run the same product acceptance scenarios on local, AWS, Kubernetes, and Azure deployments.
-8. **Document operations.** Verify installation, upgrades, backups, restoration, worker recovery, and provider configuration.
+8. **Complete operational coverage.** Verify installation, upgrades, backups, restoration, worker recovery, and provider configuration documentation.
 
-These steps describe implementation order. All four deployment profiles remain required product scope.
+These steps describe implementation order. Usability and documentation work accompanies every step.
+All four deployment profiles remain required product scope.
 Use fresh product-owned resources or resources explicitly configured for this independent installation.
 There is no existing-test import, historical data migration, scheduler cutover, or Admin navigation replacement.
 Upgrade and rollback guarantees apply to this product's own versioned contracts and records.

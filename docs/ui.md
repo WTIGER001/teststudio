@@ -1,5 +1,73 @@
 # Interface design and verification
 
+## Usability and documentation contract
+
+This document is the shared design reference for current and future TestStudio pages.
+Apply these rules when adding or changing a workflow. Reuse the existing components and feature services.
+Record exceptions, their reason, and remaining work in the implementation ledger.
+
+### Design for tester tasks
+
+Lead with the task: create a test, run it, understand its result, or inspect its evidence.
+Use the same visible names in navigation, headings, actions, help, and user guides.
+Keep project, application, suite, target, and protection context visible where they affect the task.
+Projects own applications and suites. Suites link to applications and contain tests. Environments belong to applications.
+Carry the selected suite and application into the next workflow.
+Generate identifiers and retain sensible defaults. Keep identifier editing under a named Advanced section.
+Accept familiar input directly. A quick HTTPS check accepts a complete URL without requiring separate setup pages.
+Empty states explain the next available action. Access failures and unavailable data must not look like empty registries.
+
+### Choose the smallest useful interaction
+
+Use a wizard with a labeled stepper for configuration that spans several decisions or creates related resources.
+Group steps by the tester's decisions. Keep a short form or direct action for a simple task.
+Use dedicated routes for substantial authoring workflows. Small edits can remain beside their context.
+Keep common controls visible. Put uncommon filters, tuning, pins, and identifiers under clearly named Advanced sections.
+Keep target protection, safety, enable state, and execution or notification consequences visible on review.
+Do not hide consequences under Advanced options.
+Show the final resources and effects before saving related configuration or starting execution.
+Keep Save draft, publish, activate, run, and enable actions distinct. Label combined actions explicitly.
+Do not add a confirmation to every ordinary action. Use review where it resolves a meaningful decision or consequence.
+
+### Preserve work and explain recovery
+
+Back and completed step navigation preserve values. Lookup refreshes and help must not reset edits.
+Validate the current step before continuing. Explain the correction beside the field or in a clear error message.
+Reveal invalid Advanced options and move focus to the field after rendering.
+Move focus to the new step heading when the step changes.
+Identify successful steps after a partial save. Explain what retry does and prevent duplicate records or runs.
+State when an in-page continuation ends on reload. Do not imply unsaved fields survive a reload unless they do.
+Keep revision conflicts, permission changes, unavailable data, and failed execution distinct.
+Provide a relevant retry, reload, or return action when recovery is available.
+
+### Keep every supported workflow documented
+
+| Audience | Required documentation |
+| --- | --- |
+| Tester | Current-page Introduction, Concepts, Tutorials, and a linked user guide for the workflow. |
+| API user | Request and response contracts, permissions, validation, revisions, side effects, and retry behavior when relevant. |
+| Operator | Dependencies, configuration, installation, upgrades, backup, restore, and recovery for supported profiles. |
+| Contributor | Shared UI patterns, affected services and components, targeted validation, and remaining work. |
+
+Update the affected documentation in the same delivery as the behavior.
+Use current control labels and task-based examples. Write short, active sentences.
+Explain defaults, target requirements, safety, permissions, persistence, and failure recovery where they affect a task.
+Mark unsupported behavior and unverified deployment profiles explicitly.
+Keep shared rules here. Feature guides explain their own behavior and link to shared concepts.
+Use [Page help](help.md) for guide structure and [the plan](plan.md#workflow-completion-checklist) for the completion checklist.
+
+### Verify the changed workflow locally
+
+Implement first, then select the smallest useful checks for the changed behavior.
+Use pure utility checks for meaningful parsing or transformation rules.
+Use a targeted TestStudio Playwright workflow for changed interaction or execution behavior.
+Check keyboard focus, relevant themes, narrow layout, preserved values, and errors in the affected path.
+Reuse passing evidence when the relevant behavior stays unchanged.
+Document edits require consistency and link checks. They do not require a UI build or browser run.
+Keep cloud acceptance separate from local verification. Close every verification browser and preserve the user's tabs.
+
+## Implementation patterns
+
 The Angular application uses standalone components, OnPush change detection, and signal-based services.
 Components delegate workflows to focused feature services.
 Pure utilities handle catalog filtering and counts.

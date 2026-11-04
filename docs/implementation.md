@@ -74,6 +74,28 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
 
+### Continuing usability and documentation requirements
+
+The plan now makes usability and documentation part of every changed workflow's completion.
+The shared UI contract defines tester language, context, steppers, Advanced options, review, preserved work, and accessible recovery.
+Simple tasks keep short interactions. Consequences remain visible before configuration, execution, or delivery changes.
+A documentation coverage table separates tester, API user, operator, and contributor needs.
+The completion checklist requires affected help, user guides, contracts, operational instructions, known limits, and targeted evidence.
+The README provides a task-based guide index.
+Page help maintenance covers current labels, wizard steps, Advanced sections, side effects, access, and recovery.
+The main plan's older navigation and page inventory now align with the current sidebar and planned-page status.
+Repository instructions carry these requirements into future work.
+
+Remaining work stays explicit: apply patterns as complex editors change, use tester feedback, and complete operational documentation with provider work.
+Recorded browser execution remains the next functional priority and must ship with its user and operator guidance.
+The documentation requirements do not claim every future workflow or deployment profile is already documented or verified.
+
+Validation checks 72 local documentation links and anchors, plus all 27 route help-topic references.
+The stable acceptance list still contains items 01 through 57, with 26 verified and 31 open.
+Whitespace checks pass. No application behavior, browser state, or demo data changes.
+No UI build, browser suite, cloud check, or new verification process is required for these prose changes.
+This records continuing requirements under the existing plan. It does not mark an additional acceptance item complete.
+
 ### Quick HTTPS probes from complete URLs
 
 The HTTPS Request step now accepts a complete website URL by default.

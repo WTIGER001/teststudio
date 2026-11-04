@@ -3,6 +3,9 @@
 TestStudio is an independent test catalog, execution, and evidence platform.
 The implementation follows [the product plan](docs/plan.md).
 The [acceptance ledger](docs/implementation.md) records verified work and pending requirements.
+The [UI contract](docs/ui.md) defines tester workflows, shared interaction patterns, and documentation requirements.
+The [help guide](docs/help.md) explains contextual guide maintenance.
+Use the [workflow completion checklist](docs/plan.md#workflow-completion-checklist) for each behavior change.
 
 ## Local demonstration
 
@@ -21,6 +24,20 @@ Use Ctrl+C or `node scripts/demo.mjs stop` to stop its processes.
 History and evidence stay in `.data/demo` for the next start.
 The [demonstration guide](docs/demo.md) provides a short walkthrough and explains the intentional failures.
 Normal local development still starts with an empty project registry.
+
+## Guide index
+
+| Task or audience | Guides |
+| --- | --- |
+| Start and organize testing | [Demo](docs/demo.md), [Applications](docs/applications.md), [Suites](docs/suites.md). |
+| Create tests | [Create test](docs/create-tests.md), [HTTPS checks](docs/http-checks.md), [Browser recording](docs/browser-recording.md), [Playwright editor](docs/playwright-editor.md), [Go testing](docs/go-testing.md). |
+| Manage test definitions | [Catalog](docs/catalog.md), [Saved selections](docs/saved-selections.md), [Releases](docs/releases.md). |
+| Inspect runs | [Results](docs/results.md), [Evidence](docs/evidence.md), [Timing](docs/timing.md), [Trends](docs/trends.md). |
+| Automate testing | [Schedules](docs/schedules.md), [Notifications](docs/notifications.md). |
+| Import and synchronize | [Native uploads](docs/sources.md), [Source bundles](docs/source-bundles.md), [Prepared suites](docs/prepared-suites.md), [Repositories](docs/repository-sources.md), [CLI sign-in](docs/cli-sign-in.md). |
+| Administer and operate | [Access](docs/access.md), [Provider profiles](docs/providers.md), [Notification transports](docs/notification-transports.md). Current installation commands appear below. |
+| Use the API | [OpenAPI contract](contracts/openapi.yaml), [Source webhook contract](contracts/source-webhooks.openapi.yaml), and the affected feature guide. |
+| Contribute | [Plan](docs/plan.md), [Acceptance ledger](docs/implementation.md), [UI contract](docs/ui.md), [Help maintenance](docs/help.md), [Self-testing](docs/self-testing.md). |
 
 ## Local development
 

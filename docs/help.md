@@ -20,7 +20,7 @@ Focus returns to the Help button. Unsaved page fields remain in place.
 
 ## Guide coverage
 
-The guides cover sign-in, projects, the test catalog, project settings, test runs, run details, trends, schedules, and notifications.
+The guides cover sign-in, projects, applications, suites, typed test creation, the catalog, project settings, runs, trends, schedules, and notifications.
 Users, User details, Groups, Group details, Project access, and Installation access provide administration guides.
 Your account, required password changes, role pages, Project permissions, and Installation permissions also provide contextual guides.
 Explain project access and Explain installation access share a guide for decisions, source scans, privacy, and changed access.
@@ -36,6 +36,11 @@ Edit structured guide content in `web/src/app/features/help/help.pages.ts`.
 Each guide requires a title, introduction paragraphs, concepts, and tutorials.
 Write tutorials for available controls and use their visible labels.
 Update the guide when its page changes.
+Keep wizard steps, Advanced section names, and final action labels aligned with the page.
+Explain relevant defaults, safety, required access, side effects, and partial-save recovery.
+Explain current limits. Do not describe a planned capability as available.
+Link the corresponding feature guide from the documentation index in the README.
+Apply the shared [usability contract](ui.md#usability-and-documentation-contract) and [completion checklist](plan.md#workflow-completion-checklist).
 
 Register each new page with a `helpTopic` value in `web/src/app/app.routes.ts`.
 Add its content under the same key in `help.pages.ts`.
@@ -51,4 +56,6 @@ Run only this workflow with:
 bash scripts/test-self.sh --test=STUDIO-HELP-001
 ```
 
-The test checks all current guides, keyboard focus, dismissal, preserved edits, themes, mobile layout, and reduced motion.
+The test checks representative guides, keyboard focus, dismissal, preserved edits, themes, mobile layout, and reduced motion.
+Feature-specific workflows check their own contextual help where the changed behavior requires it.
+Do not rerun the full help workflow for text-only edits. Check guide keys, visible labels, and documentation links instead.

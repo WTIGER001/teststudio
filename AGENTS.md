@@ -6,6 +6,9 @@ Keep the complete acceptance ledger in `docs/implementation.md`.
 - Use standalone Angular components, OnPush, signals, small services, and pure utilities.
 - Keep components below 450 lines and keep workflows outside components.
 - Use semantic HTML and shared light and dark theme tokens.
+- Follow `docs/ui.md` for tester workflows, navigation, wizards, Advanced options, and accessible feedback.
+- Update affected page help and user, API, or operator guides with behavior changes. Follow the completion checklist in `docs/plan.md`.
+- Keep documentation-only validation to document consistency and links. Do not rebuild or rerun browser suites for prose changes.
 - Use `github.com/wtiger001/go-permissions` through `permissions.Service`.
 - Store identity and memberships in TestStudio. Enforce authorization after parsing resource context.
 - Keep permission checks inside handlers or domain services.
