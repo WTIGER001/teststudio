@@ -173,3 +173,11 @@ Then add native configuration and infrastructure service wiring before separate 
 [Custom domains and certificates](https://learn.microsoft.com/en-us/azure/container-apps/custom-domains-certificates) defines SNI binding and private endpoint DNS configuration.
 [Container Apps operations](https://learn.microsoft.com/en-us/rest/api/resource-manager/containerapps/container-apps?view=rest-resource-manager-containerapps-2025-07-01) documents the available inventory scopes.
 The pinned SDK defines the inspected environment, application, certificate, route, authentication, and revision fields.
+
+## Shared backend observation support
+
+The [trusted backend observer](azure-worker-backend-admission.md) reuses this stage's bounded service reader and application or revision comparison.
+Both service readers require explicit route and revision arrays. Missing or null arrays no longer establish an empty list.
+Private service environment observation also requires the internal network flag explicitly.
+The backend observes its own selected resources. It cannot read the exchange app, certificates, secrets, or unrelated resources through its reader.
+Existing exchange runtime-boundary and read-scope checks retain passing local evidence after extraction.

@@ -34,15 +34,22 @@ func NewWorkloadInventoryGuard(c Config, s ExchangeSettings, exchange *ExchangeG
 	return &WorkloadInventoryGuard{worker: c, settings: s, exchange: exchange, reader: reader}, nil
 }
 
-func (g *WorkloadInventoryGuard) Check(ctx context.Context, c Config) (resultErr error) {
+type workloadSnapshot struct{ applications, jobs []WorkloadPlacement }
+
+func (g *WorkloadInventoryGuard) Check(ctx context.Context, c Config) error {
+	_, err := g.inspect(ctx, c)
+	return err
+}
+
+func (g *WorkloadInventoryGuard) inspect(ctx context.Context, c Config) (_ workloadSnapshot, resultErr error) {
 	defer func() { resultErr = controlError(resultErr) }()
 	if fingerprint(c) != fingerprint(g.worker) {
-		return hostedexecution.ErrOwnership
+		return workloadSnapshot{}, hostedexecution.ErrOwnership
 	}
 	ctx, cancel := context.WithTimeout(ctx, 40*time.Second)
 	defer cancel()
 	if err := g.exchange.Check(ctx, c); err != nil {
-		return err
+		return workloadSnapshot{}, err
 	}
 	var applications, jobs []WorkloadPlacement
 	var errs [2]error
@@ -52,16 +59,19 @@ func (g *WorkloadInventoryGuard) Check(ctx context.Context, c Config) (resultErr
 	group.Wait()
 	for _, err := range errs {
 		if errors.Is(err, hostedexecution.ErrOwnership) {
-			return hostedexecution.ErrOwnership
+			return workloadSnapshot{}, hostedexecution.ErrOwnership
 		}
 	}
 	for _, err := range errs {
 		if err != nil {
-			return hostedexecution.ErrUnavailable
+			return workloadSnapshot{}, hostedexecution.ErrUnavailable
 		}
 	}
 	if err := g.verifyPlacements(applications, "containerApps"); err != nil {
-		return err
+		return workloadSnapshot{}, err
 	}
-	return g.verifyPlacements(jobs, "jobs")
+	if err := g.verifyPlacements(jobs, "jobs"); err != nil {
+		return workloadSnapshot{}, err
+	}
+	return workloadSnapshot{applications: applications, jobs: jobs}, nil
 }

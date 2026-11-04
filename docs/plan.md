@@ -273,11 +273,20 @@ Local schema compilation and six packaging checks pass. The checker inspects no 
 The core package remains unchanged. No image, UI, browser, Go fixture, registry push, deployment, or cloud request runs.
 See [staged Azure trusted backend](azure-worker-backend.md). Acceptance 51 and supporting packaging under 57 advance; the count remains 48 of 57.
 
+The backend observation stage now binds the selected worker-only app, dedicated environment, origin, storage references, identity metadata, and healthy revision.
+It reuses the preceding call's transient subscription placement snapshot for reported backend occupancy without two more scans.
+The backend and relay share bounded service reads and specification comparison. Missing route arrays remain unavailable rather than empty.
+Four new focused race checks and four selected existing exchange or inventory checks pass locally.
+Only checks affected by snapshot reuse and stronger occupant coverage repeat. The composed guard remains separate from Network and native dispatch.
+See [Azure trusted backend observation](azure-worker-backend-admission.md). Acceptance 51 advances; the count remains 48 of 57.
+No browser, UI build, image build, container, live service listener, cloud request, registry push, or deployment runs.
+
 Next verify effective read coverage, environment attachment authority, and actual exchange networking.
 A completed list response does not prove authorization coverage or prevent later attachments. Keep those native installation controls mandatory.
 Use the worker backend role to verify its restricted route, TLS authority, and placement before completing service admission.
 The staged Azure backend selects platform HTTPS termination. Other approved profiles can select direct TLS.
-Bind its actual origin, app, environment, exact private destination, and normally trusted chain.
+Selected origin, app, environment, command, identity metadata, and revision observation now pass local fixtures.
+Bind the exact private destination and normally trusted chain next. Inspect effective identity grants and the actual backend subnet or endpoint.
 Keep the staged backend separate from core deployment and coded worker packaging until admission and private relay access are complete.
 Resolve effective VNet-wide private-zone visibility and attachment controls. Selected-zone inspection cannot rule out other shadowing zones.
 Keep that proof separate from configured record correctness and private endpoint ownership.

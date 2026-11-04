@@ -53,9 +53,7 @@ func (s ExchangeSettings) canonical(c Config) (ExchangeSettings, error) {
 	if len(name) > 32 || strings.Contains(name, "--") {
 		return s, hostedexecution.ErrConfiguration
 	}
-	image, digest, ok := strings.Cut(s.Image, "@sha256:")
-	repo := strings.TrimPrefix(image, c.Registry+"/")
-	if !ok || !strings.HasPrefix(image, c.Registry+"/") || !repository.MatchString(repo) || !checksum.MatchString(digest) || len(s.Image) > 1024 || repo == c.RepositoryPrefix || strings.HasPrefix(repo, c.RepositoryPrefix+"/") {
+	if !trustedServiceImage(c, s.Image) {
 		return s, hostedexecution.ErrConfiguration
 	}
 	return s, nil

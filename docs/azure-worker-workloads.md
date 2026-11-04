@@ -138,3 +138,11 @@ Then compose Network and add native service wiring before separate deployment ac
 [Jobs subscription inventory](https://learn.microsoft.com/en-us/rest/api/resource-manager/containerapps/jobs/list-by-subscription?view=rest-resource-manager-containerapps-2025-07-01) documents the jobs collection and environment reference.
 [Container roles](https://learn.microsoft.com/azure/role-based-access-control/built-in-roles/containers) documents environment join authority and workload permissions.
 The pinned SDK defines the actual list operations and observed placement fields.
+
+## Reuse by backend observation
+
+The [backend observer](azure-worker-backend-admission.md) now reuses one fresh inventory snapshot from this stage.
+It applies the same placement rules to the selected backend environment and rejects other reported backend apps or jobs.
+It issues no second application or job subscription scan. The snapshot contains only the existing reduced placement records.
+The snapshot belongs to one composed check. It adds no persisted inventory, successful cache, or read-authority claim.
+Existing standalone inventory behavior remains unchanged and retains targeted passing evidence.

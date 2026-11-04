@@ -35,8 +35,8 @@ func exchangeServiceTest(t *testing.T) (Config, ExchangeSettings, *exchangeFixtu
 	c, registry, _, guard := registryServiceTest(t)
 	env := registry.Endpoints.ExchangeEnvironment
 	vnet := c.resourceID("Microsoft.Network", "virtualNetworks", "exchange-network")
-	s := ExchangeSettings{Registry: registry, Application: c.resourceID("Microsoft.App", "containerApps", "worker-exchange-relay"), Certificate: env + "/certificates/worker-https", VirtualNetwork: vnet, Subnet: vnet + "/subnets/infrastructure", InfrastructureGroup: "studio-exchange-infra", Image: c.Registry + "/services/worker-relay@sha256:" + strings.Repeat("d", 64), BackendOrigin: "https://controller-workers.internal.example.test"}
-	f := &exchangeFixture{t: t, settings: s, pages: map[string]int{}}
+	s := ExchangeSettings{Registry: registry, Application: c.resourceID("Microsoft.App", "containerApps", "worker-exchange-relay"), Certificate: env + "/certificates/worker-https", VirtualNetwork: vnet, Subnet: vnet + "/subnets/infrastructure", InfrastructureGroup: "studio-exchange-infra", Image: c.Registry + "/services/worker-relay@sha256:" + strings.Repeat("d", 64), BackendOrigin: "https://studio-worker-backend.backendzone." + c.Region + ".azurecontainerapps.io"}
+	f := &exchangeFixture{t: t, settings: s, pages: map[string]int{}, routes: []*a.HTTPRouteConfig{}}
 	_, envName := resourceParts(env)
 	domain := "exchangezone." + c.Region + ".azurecontainerapps.io"
 	f.environment = a.ManagedEnvironment{ID: to.Ptr(env), Name: to.Ptr(envName), Type: to.Ptr("Microsoft.App/managedEnvironments"), Location: to.Ptr(c.Region), Properties: &a.ManagedEnvironmentProperties{ProvisioningState: to.Ptr(a.EnvironmentProvisioningStateSucceeded), VnetConfiguration: &a.VnetConfiguration{InfrastructureSubnetID: to.Ptr(s.Subnet), Internal: to.Ptr(true)}, PublicNetworkAccess: to.Ptr(a.PublicNetworkAccessDisabled), InfrastructureResourceGroup: to.Ptr(s.InfrastructureGroup), DefaultDomain: to.Ptr(domain), AppLogsConfiguration: &a.AppLogsConfiguration{Destination: to.Ptr("none")}, WorkloadProfiles: []*a.WorkloadProfile{{Name: to.Ptr("Consumption"), WorkloadProfileType: to.Ptr("Consumption")}}}}

@@ -11,13 +11,16 @@ import (
 )
 
 func (g *ExchangeGuard) verifyEnvironment(actual a.ManagedEnvironment) error {
-	s := g.settings
-	if err := environmentMatches(actual, s.environment(), s.Subnet, g.worker.Region); err != nil {
+	return verifyPrivateServiceEnvironment(actual, g.settings.environment(), g.settings.Subnet, g.settings.InfrastructureGroup, g.worker.Region)
+}
+
+func verifyPrivateServiceEnvironment(actual a.ManagedEnvironment, environment, subnet, infrastructure, location string) error {
+	if err := environmentMatches(actual, environment, subnet, location); err != nil {
 		return err
 	}
 	p := actual.Properties
-	if value(p.PublicNetworkAccess) != a.PublicNetworkAccessDisabled ||
-		!strings.EqualFold(value(p.InfrastructureResourceGroup), s.InfrastructureGroup) ||
+	if !value(p.VnetConfiguration.Internal) || value(p.PublicNetworkAccess) != a.PublicNetworkAccessDisabled ||
+		!strings.EqualFold(value(p.InfrastructureResourceGroup), infrastructure) ||
 		p.AppLogsConfiguration == nil ||
 		value(p.AppLogsConfiguration.Destination) != "none" ||
 		p.AppLogsConfiguration.LogAnalyticsConfiguration != nil ||
@@ -41,7 +44,7 @@ func (g *ExchangeGuard) verifyEnvironment(actual a.ManagedEnvironment) error {
 	if domain == "" {
 		return hostedexecution.ErrUnavailable
 	}
-	if !hostname.MatchString(domain) || strings.Contains(domain, "..") || !strings.HasSuffix(domain, "."+g.worker.Region+".azurecontainerapps.io") {
+	if !hostname.MatchString(domain) || strings.Contains(domain, "..") || !strings.HasSuffix(domain, "."+location+".azurecontainerapps.io") {
 		return hostedexecution.ErrOwnership
 	}
 	return nil

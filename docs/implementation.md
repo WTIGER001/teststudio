@@ -122,7 +122,41 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: staged Azure trusted backend package
+## Current delivery: selected Azure backend observation
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+The staged backend package batch commits as 7825be6.
+
+BackendGuard now refreshes the preceding exchange and subscription inventory stage and binds a selected trusted backend.
+It compares actual app, environment, HTTPS origin, full known writable worker configuration, secret references, artifact settings, identity metadata, and active revision.
+The app must use the worker-only command and its dedicated internal environment in the intended trusted subnet.
+Only its runtime identity reaches the main container. Its observed runtime client identifier must match artifact settings.
+Secret values, API mode, target bindings, changed storage, different ingress, and inconsistent revisions reject observation.
+
+The backend reuses the preceding call's transient placement snapshot to reject other reported backend apps or jobs.
+The selected backend must itself appear in that snapshot. No second subscription scan, persisted inventory, or successful cache is added.
+This is reported placement, not proof of unrestricted read coverage or future attachment control.
+
+The backend and exchange now share service SDK reads, application normalization, and revision comparison.
+The shared private environment check explicitly requires internal networking.
+Missing or null route and revision arrays remain unavailable. The exchange fixture now reports an explicit empty route array.
+Artifact JSON comparison preserves meaning across formatting changes while rejecting duplicate keys and bounded-structure violations.
+The new backend reader permits only five selected GET resources or collections. It has no secret, certificate, mutation, or unrelated-resource route.
+A normal composed check makes fifty reads within a forty-five-second context. Complete paging remains bounded at 101 reads.
+
+Four new focused local race checks pass. Four selected existing exchange and inventory checks also pass after shared extraction.
+Only cases affected by snapshot reuse and stronger backend occupant coverage repeat. No unchanged broad suite or fixture build repeats.
+Fixtures use explicit fake credentials and in-memory SDK transports. They open no network connection.
+Evidence is output/azure-worker-backend-admission/summary.json and targeted command results.
+No live cloud API, cloud credential, Azure CLI, UI build, image build, browser, container, service listener, registry push, or deployment runs.
+
+This stage does not implement Network, authorize dispatch, or enable coded Azure jobs.
+Effective read coverage, workload attachment authority, actual backend routing and TLS, identity grants, endpoint or subnet controls, DNS visibility, trusted preparation access, and execution isolation remain required.
+The package and observer guides now distinguish intended infrastructure, reported state, and unfinished native admission.
+Continue the actual private relay-to-backend path and remaining native authority checks.
+See [Azure trusted backend observation](azure-worker-backend-admission.md).
+
+## Previous delivery: staged Azure trusted backend package
 
 Acceptance **51** and supporting packaging under **57** advance. The verified total remains **48 of 57**, with **9 open**.
 The direct TLS backend batch commits as 38a5d7a.

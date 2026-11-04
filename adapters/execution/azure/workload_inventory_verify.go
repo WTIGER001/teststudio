@@ -69,13 +69,17 @@ func inventoryProjection(c Config, id, name, resourceType, kind, primary, legacy
 }
 
 func (g *WorkloadInventoryGuard) verifyPlacements(observed []WorkloadPlacement, kind string) error {
+	return verifyWorkloadPlacements(g.worker, observed, kind, g.settings.environment(), g.settings.Application)
+}
+
+func verifyWorkloadPlacements(c Config, observed []WorkloadPlacement, kind, environment, application string) error {
 	if len(observed) > workloadInventoryItems {
 		return hostedexecution.ErrUnavailable
 	}
 	found := false
 	seen := map[string]bool{}
 	for _, placement := range observed {
-		if err := validatePlacement(g.worker, placement, kind); err != nil {
+		if err := validatePlacement(c, placement, kind); err != nil {
 			return err
 		}
 		id := inventoryIdentityKey(placement.ResourceID)
@@ -83,8 +87,8 @@ func (g *WorkloadInventoryGuard) verifyPlacements(observed []WorkloadPlacement, 
 			return hostedexecution.ErrOwnership
 		}
 		seen[id] = true
-		selected := strings.EqualFold(placement.ResourceID, g.settings.Application)
-		exchange := strings.EqualFold(placement.EnvironmentID, g.settings.environment())
+		selected := strings.EqualFold(placement.ResourceID, application)
+		exchange := strings.EqualFold(placement.EnvironmentID, environment)
 		if kind == "containerApps" && selected {
 			if !exchange {
 				return hostedexecution.ErrOwnership

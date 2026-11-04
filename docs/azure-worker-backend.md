@@ -10,7 +10,8 @@ The existing Azure core deployment remains separate and unchanged.
 This is staged backend infrastructure. It is not wired into the native Azure execution provider or the core deployment.
 It creates no test job, worker environment, standalone relay, private endpoint, DNS zone, firewall, or deadline workflow.
 Do not enable coded Azure jobs from this package alone.
-Native resource binding, effective read coverage, attachment authority, network admission, and separate deployment verification remain required.
+The [backend observation stage](azure-worker-backend-admission.md) now checks selected app and environment binding, reported placement, identity metadata, and active revisions.
+Effective read coverage, attachment authority, network admission, and separate deployment verification remain required.
 Acceptance 51 advances. The verified total remains 48 of 57, with nine open.
 
 ## Private ingress and service identity
@@ -65,7 +66,8 @@ Database readiness does not prove artifact availability, complete ingress, or pr
 
 Use the same database, account, container, and teststudio artifact prefix as the controller.
 Select an approved immutable service image containing the worker role. Current cached service images can predate that code.
-Image publication, approval, complete digest validation, and protected repository checks remain prerequisites for native wiring.
+The observer validates complete digest references and the protected repository boundary.
+Image publication, approval, and package inspection remain prerequisites for native wiring.
 Template length constraints do not inspect an image or establish that it is trusted.
 
 Three new user-assigned identities have separate purposes:
@@ -88,7 +90,8 @@ Its relationship to the trusted network must remain explicit in later admission 
 
 ## Remaining installation work
 
-Before native enablement, bind and inspect the actual backend app, environment, revision, runtime configuration, and effective identities.
+The backend observation stage now binds selected app, environment, revision, worker configuration, and identity metadata.
+Before native enablement, verify effective identity grants and the actual private route.
 Verify exclusive backend occupancy and restrictions on creating or joining other workloads in its environment.
 The intended resource definition does not prove future attachment authority.
 
