@@ -100,6 +100,22 @@ Keep deployment-wide timing **41**, storage-provider retention **46**, and hoste
 Do not repeat completed source, native, API, browser, or scheduled-runner fixtures without a concrete contract change or unresolved failure.
 Cloud execution and storage-provider verification remain separate work.
 
+### Current hosted packaging checkpoint
+
+The portable service image now packages the API, UI, private trace viewer, and bounded health command.
+API and preparation processes accept database environment references without exposing their values in arguments or initialization errors.
+The final image uses a non-root user, a read-only root filesystem, separate writable mounts, trusted CA certificates, and embedded timezone data.
+The producer reuses the canonical static assets and hashes compiler, binary, and package inputs. No registry push or deployment occurs.
+The local arm64 package passes startup, health, storage persistence, origin separation, and database-canary checks.
+The implementation ledger records exact evidence and verified cleanup. The count remains **48 verified, 9 open**.
+
+Next, add independent Kubernetes service manifests and runtime configuration against this package.
+Then add AWS ECS with CloudFront and Azure Container Apps packaging, followed by their isolated execution adapters and preparation requirements.
+Preserve separate API/UI and artifact origins. Require installation-specific PostgreSQL, identity, storage, and secret configuration.
+Keep untrusted test execution outside the API. Do not promise hosted coded execution before its network, artifact, deadline, and recovery contracts exist.
+Use local schema, protocol, and packaging checks. Cloud deployment verification remains separate work.
+Do not repeat passing source, browser, native probe, grant, storage, or provenance suites for packaging prose or unrelated changes.
+
 ### Recorded browser execution scope
 
 The native recorder, saved source editor, and first environment-backed local browser profile now work together.

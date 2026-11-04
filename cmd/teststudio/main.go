@@ -18,6 +18,7 @@ import (
 	"strings"
 	"syscall"
 	"time"
+	_ "time/tzdata"
 
 	permissions "github.com/wtiger001/go-permissions"
 	artifactconfig "github.com/wtiger001/teststudio/adapters/artifacts/config"
@@ -44,6 +45,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/recording"
 	"github.com/wtiger001/teststudio/internal/runs"
+	"github.com/wtiger001/teststudio/internal/runtimeconfig"
 	"github.com/wtiger001/teststudio/internal/schedules"
 	"github.com/wtiger001/teststudio/internal/sessions"
 	"github.com/wtiger001/teststudio/internal/sourceprovider"
@@ -61,6 +63,7 @@ func main() {
 func run() error {
 	addr := flag.String("addr", "127.0.0.1:8040", "HTTP listen address")
 	dsn := flag.String("database", ".data/teststudio.db", "SQLite path or PostgreSQL connection URL")
+	databaseEnvironment := flag.String("database-env", "", "Environment variable containing the database connection")
 	public := flag.String("public-url", "http://127.0.0.1:8040", "Public origin")
 	ui := flag.String("ui", "web/dist/web/browser", "Built Angular application directory")
 	artifactAddr := flag.String("artifact-addr", "127.0.0.1:8041", "Private artifact HTTP listen address")
@@ -90,6 +93,10 @@ func run() error {
 	recordingHelper := flag.String("recording-helper", "scripts/record-browser.mjs", "Trusted desktop recording helper script")
 	recordingDirectory := flag.String("recording-directory", ".data/recordings", "Private local browser recording directory")
 	flag.Parse()
+	connection, err := runtimeconfig.DatabaseConnection(*dsn, *databaseEnvironment, runtimeconfig.ExplicitFlag(flag.CommandLine, "database"), os.LookupEnv)
+	if err != nil {
+		return err
+	}
 	if *recordingCLI != "" && !*local {
 		return errors.New("native browser recording requires explicit loopback-only local mode")
 	}
@@ -143,16 +150,16 @@ func run() error {
 			return errors.New("local authentication requires a loopback listen address")
 		}
 	}
-	db, err := storage.Open(ctx, *dsn)
+	db, err := storage.Open(ctx, connection)
 	if err != nil {
-		return err
+		return runtimeconfig.DatabaseError(err, *databaseEnvironment)
 	}
 	defer db.Close()
 	var permissionStore permissions.PermissionStore = permissionsqlite.New(db)
 	if db.Dialect == "postgres" {
-		pg, err := permissionpg.Open(ctx, *dsn)
+		pg, err := permissionpg.Open(ctx, connection)
 		if err != nil {
-			return err
+			return runtimeconfig.DatabaseError(err, *databaseEnvironment)
 		}
 		defer pg.Close()
 		permissionStore = pg

@@ -4,6 +4,27 @@ TestStudio owns a new Playwright suite in `tests/selftest/playwright`.
 The suite runs through the normal catalog, publication, execution, timing, and evidence APIs.
 It copies no tests or configuration from another application.
 
+## Portable service package check
+
+Use scripts/build-service-image.mjs for the common service package and scripts/verify-service-image.py for its focused local verification.
+The builder reuses UI and trace-viewer assets without compiling the self-test image.
+It records compiler inputs and binary hashes, disables workspace mode, and leaves module metadata read-only.
+The verifier checks the actual non-root image with protected root storage, private writable mounts, health, origin separation, and container recreation.
+A malformed environment connection canary verifies private startup errors and arguments.
+
+```sh
+node scripts/build-service-image.mjs
+python3 scripts/verify-service-image.py --image IMAGE_ID \
+  --output output/service-package/local-check
+```
+
+Use the returned immutable image identifier for IMAGE_ID.
+The actual current arm64 evidence is output/service-package/isolated-tzx0qcsx.
+All owned containers and volumes are removed. The built package image remains available for use.
+Cold SQLite snapshots use immutable reader mode. Cleanup handles Docker's lowercase absence diagnostics.
+Targeted configuration, API command, and health checks run with race detection. No browser or cloud profile runs.
+See [Portable service package](service-image.md) for installation configuration and the remaining hosted execution scope.
+
 ## Complete repository publication UI journey
 
 TestRegisteredGitHubSourceCompletesUIReviewPublicationAndExecution closes acceptance 22 with one local integration.

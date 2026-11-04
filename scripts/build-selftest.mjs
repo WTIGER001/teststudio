@@ -37,12 +37,13 @@ function save() {
   fs.renameSync(temporary, filename)
 }
 
-const localOnly = process.argv.includes('--local-only')
-const dockerfile = fs.readFileSync('tests/selftest/Dockerfile', 'utf8')
-const base = /^FROM ([^\s]+)$/m.exec(dockerfile)?.[1]
-if (!base?.includes('@sha256:')) throw new Error('The self-test base must use an immutable digest')
-let baseImage = '', architecture = process.arch === 'arm64' ? 'arm64' : 'amd64'
+const assetsOnly = process.argv.includes('--assets-only')
+const localOnly = assetsOnly || process.argv.includes('--local-only')
+let base = '', baseImage = '', architecture = process.arch === 'arm64' ? 'arm64' : 'amd64'
 if (!localOnly) {
+  const dockerfile = fs.readFileSync('tests/selftest/Dockerfile', 'utf8')
+  base = /^FROM ([^\s]+)$/m.exec(dockerfile)?.[1]
+  if (!base?.includes('@sha256:')) throw new Error('The self-test base must use an immutable digest')
   let baseMetadata = inspect(base)
   if (!baseMetadata) { run('docker', ['pull', base]); baseMetadata = inspect(base) }
   if (!baseMetadata) throw new Error('The pinned self-test base is unavailable')
@@ -62,6 +63,7 @@ if (cache.uiKey !== uiKey || !uiOutput || cache.uiOutput !== uiOutput) {
 
 const traceViewer = execFileSync(process.execPath, ['scripts/build-trace-viewer.mjs'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 2] }).trim()
 const traceOutput = fingerprint([traceViewer])
+if (assetsOnly) { console.log(JSON.stringify({ ui: path.resolve(uiDirectory), uiOutput, traceViewer, traceOutput })); process.exit(0) }
 
 const goVersion = execFileSync('go', ['version'], { encoding: 'utf8' }).trim()
 const goKey = digest([goVersion, fingerprint(['go.mod', 'go.sum', 'internal', 'adapters', 'cmd', 'tests/selftest/seed-access'], true)])

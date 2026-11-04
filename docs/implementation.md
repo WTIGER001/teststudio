@@ -69,6 +69,40 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: portable service image and database environment
+
+Acceptance **57** advances. The ledger stays at **48 verified, 9 open, 57 total** items.
+The new deploy/service/Dockerfile packages the API, Angular UI, private trace viewer, and a bounded Go health command.
+The final image runs as 65532:65532 on a scratch filesystem with trusted CA certificates and embedded timezone data.
+Writable data and temporary storage use separate mounts. No Docker CLI, source bundle, user database, or verification fixture is copied into the service image.
+
+The API and preparation command accept --database-env with explicit environment-name validation.
+It conflicts with an explicitly supplied --database, preserves the ordinary local default, and rejects missing or blank selected variables.
+The selected database value stays out of process arguments. Its initialization failures exclude private values and upstream diagnostics.
+The focused configuration and existing API-command checks pass with race detection. The preparation command compiles.
+The health command requires a bounded TestStudio ready response, rejects redirects, and enforces a two-second default deadline.
+Focused health response, redirect, and deadline checks pass with race detection.
+
+The new builder selects amd64 or arm64, disables Go workspace mode, preserves read-only module metadata, and compiles static Linux binaries.
+Its source key includes the actual compiler inputs, binary hashes, asset hashes, and Dockerfile.
+The canonical asset builder now supports --assets-only, so packaging reuses the UI and private viewer without building native workers or the self-test image.
+Only the new service and health binaries and changed service image build. Trusted execution and gateway images stay unchanged.
+Temporary assembly contexts contain only selected package files and are removed after each build.
+
+The actual local arm64 image passes eight focused checks with a read-only root filesystem, no Linux capabilities, and a private writable volume.
+Its API and UI become ready. The separate artifact origin serves no UI. The in-image health command succeeds.
+Container recreation preserves SQLite migration state. Project, run, and schedule registries remain empty.
+A newly generated malformed database canary stays absent from arguments and startup diagnostics.
+The initial verifier exposes a cold SQLite reader-mode issue and case-sensitive Docker cleanup matching.
+Both verifier issues are corrected. Exact resource inspection confirms cleanup even for the initial failed observation.
+The verified current evidence is output/service-package/isolated-tzx0qcsx/summary.json and cleanup.json.
+Earlier equivalent package evidence is output/service-package/local-6focctb1.
+All owned verification containers and volumes are removed. The produced service image remains as the intended deliverable.
+
+No browser or cloud checks run. The user's demonstration remains running without a rebuild or restart.
+Cross-architecture execution, hosted worker dispatch and recovery, provider secrets, identity, storage lifecycle, and the four deployment profiles remain open.
+See [Portable service package](service-image.md) for build, configuration, and verification commands.
+
 ## Current delivery: independent product material and provenance audit
 
 Acceptance **02** is complete. The ledger has **48 verified, 9 open, 57 total** items.

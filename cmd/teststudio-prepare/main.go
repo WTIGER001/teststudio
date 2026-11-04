@@ -21,6 +21,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/identity"
 	"github.com/wtiger001/teststudio/internal/preparation"
+	"github.com/wtiger001/teststudio/internal/runtimeconfig"
 	"github.com/wtiger001/teststudio/internal/sourceprovider"
 	"github.com/wtiger001/teststudio/internal/sources"
 	"github.com/wtiger001/teststudio/internal/storage"
@@ -33,6 +34,7 @@ func main() {
 }
 func run() error {
 	database := flag.String("database", ".data/teststudio.db", "SQLite path or PostgreSQL URL shared with the API")
+	databaseEnvironment := flag.String("database-env", "", "Environment variable containing the database connection")
 	location := flag.String("execution-location", "local", "Preparation queue location")
 	browserRuntime := flag.String("playwright-runtime", "", "Trusted immutable local Playwright source runtime image ID")
 	runtime := flag.String("go-runtime", "", "Trusted immutable local Go source runtime image ID")
@@ -40,6 +42,10 @@ func run() error {
 	githubSources := flag.Bool("github-sources", false, "Process durable GitHub source synchronization")
 	secretBindings := flag.String("secret-bindings", "", "Project-scoped repository access credential bindings")
 	flag.Parse()
+	connection, err := runtimeconfig.DatabaseConnection(*database, *databaseEnvironment, runtimeconfig.ExplicitFlag(flag.CommandLine, "database"), os.LookupEnv)
+	if err != nil {
+		return err
+	}
 	if !domain.ValidID(*location) {
 		return errors.New("a valid preparation location is required")
 	}
@@ -59,16 +65,16 @@ func run() error {
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	store, err := storage.Open(ctx, *database)
+	store, err := storage.Open(ctx, connection)
 	if err != nil {
-		return err
+		return runtimeconfig.DatabaseError(err, *databaseEnvironment)
 	}
 	defer store.Close()
 	var permissionStore permissions.PermissionStore = permissionsqlite.New(store)
 	if store.Dialect == "postgres" {
-		pg, err := permissionpg.Open(ctx, *database)
+		pg, err := permissionpg.Open(ctx, connection)
 		if err != nil {
-			return err
+			return runtimeconfig.DatabaseError(err, *databaseEnvironment)
 		}
 		defer pg.Close()
 		permissionStore = pg

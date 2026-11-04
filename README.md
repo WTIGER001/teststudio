@@ -36,9 +36,21 @@ Normal local development still starts with an empty project registry.
 | Inspect runs | [Results](docs/results.md), [Test history](docs/test-history.md), [Evidence](docs/evidence.md), [Timing](docs/timing.md), [Trends](docs/trends.md). |
 | Automate testing | [Schedules](docs/schedules.md), [Notifications](docs/notifications.md). |
 | Import and synchronize | [Native uploads](docs/sources.md), [Source bundles](docs/source-bundles.md), [Prepared suites](docs/prepared-suites.md), [Repositories](docs/repository-sources.md), [CLI sign-in](docs/cli-sign-in.md). |
-| Administer and operate | [Access](docs/access.md), [Artifact storage](docs/artifact-storage.md), [Backup and database transfer](docs/data-transfer.md), [Provider profiles](docs/providers.md), [Notification transports](docs/notification-transports.md). Current installation commands appear below. |
+| Administer and operate | [Access](docs/access.md), [Artifact storage](docs/artifact-storage.md), [Backup and database transfer](docs/data-transfer.md), [Service image](docs/service-image.md), [Identity providers](docs/providers.md), [Notification transports](docs/notification-transports.md). Current installation commands appear below. |
 | Use the API | [OpenAPI contract](contracts/openapi.yaml), [Source webhook contract](contracts/source-webhooks.openapi.yaml), and the affected feature guide. |
 | Contribute | [Plan](docs/plan.md), [Acceptance ledger](docs/implementation.md), [UI contract](docs/ui.md), [Help maintenance](docs/help.md), [Self-testing](docs/self-testing.md). |
+
+## Portable service image
+
+Build the API, UI, private trace viewer, and health probe as one non-root Linux image:
+
+```sh
+node scripts/build-service-image.mjs
+```
+
+The builder reuses unchanged UI assets, binaries, and image output. It performs no registry push or deployment.
+The [service image guide](docs/service-image.md) covers architecture, database secrets, storage, identity, health, and local verification.
+Hosted execution adapters and AWS, Kubernetes, and Azure deployment acceptance remain required work.
 
 ## Local development
 
