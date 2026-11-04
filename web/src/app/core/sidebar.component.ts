@@ -11,7 +11,7 @@ import { navigationSections } from './navigation.utils'
   selector: 'ts-sidebar', standalone: true, imports: [FormsModule, SidebarLinksComponent], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <aside class="sidebar">
-      <div class="sidebar-heading"><div class="workspace-picker"><label for="project-picker" class="eyebrow">Project</label><select id="project-picker" [ngModel]="workspace.projectId()" (ngModelChange)="workspace.selectProject($event)"><option value="">All projects</option>@for (project of workspace.projects(); track project.id) { <option [value]="project.id">{{ project.data.name }}</option> }</select></div><button type="button" class="button secondary navigation-toggle" aria-controls="sidebar-navigation" [attr.aria-expanded]="mobileOpen()" (click)="mobileOpen.set(!mobileOpen())"><span aria-hidden="true">☰</span><span class="sr-only">Navigation</span></button></div>
+      <div class="sidebar-heading">@if (showProjectPicker()) { <div class="workspace-picker"><label for="project-picker" class="eyebrow">Project</label><select id="project-picker" #projectPicker [ngModel]="workspace.projectId()" (ngModelChange)="workspace.selectProject($event, projectPicker)"><option value="">All projects</option>@for (project of workspace.projects(); track project.id) { <option [value]="project.id">{{ project.data.name }}</option> }</select>@if (workspace.projectId()) { <label for="application-picker" class="eyebrow">Application</label><select id="application-picker" #applicationPicker [ngModel]="workspace.applicationId()" (ngModelChange)="workspace.selectApplication($event, applicationPicker)"><option value="">All applications</option>@for (application of workspace.applications(); track application.id) { <option [value]="application.id">{{ application.data.name }}</option> }</select>@if (workspace.applicationError()) { <p class="small" role="alert">{{ workspace.applicationError() }}</p> } }</div> }<button type="button" class="button secondary navigation-toggle" aria-controls="sidebar-navigation" [attr.aria-expanded]="mobileOpen()" (click)="mobileOpen.set(!mobileOpen())"><span aria-hidden="true">☰</span><span class="sr-only">Navigation</span></button></div>
       <nav id="sidebar-navigation" aria-label="Main navigation" [class.mobile-open]="mobileOpen()">
         @for (section of sections(); track section.id) {
           @if (section.collapsible) {
@@ -31,5 +31,6 @@ export class SidebarComponent {
   private readonly router = inject(Router)
   private readonly url = toSignal(this.router.events.pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd), map(event => event.urlAfterRedirects)), { initialValue: this.router.url })
   readonly mobileOpen = signal(false)
+  readonly showProjectPicker = computed(() => this.url().split(/[?#]/)[0] !== '/projects')
   readonly sections = computed(() => navigationSections(this.workspace.projectId(), this.workspace.capabilities(), this.workspace.installationCapabilities(), this.url()))
 }

@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop'
 import { FormControl } from '@angular/forms'
 import { ApiError, ApiService, Page, RecordValue } from '../../core/api.service'
 import { RecordCreationService } from '../../core/record-creation.service'
+import { applicationEnvironments } from '../../core/application-scope.utils'
 import { WorkspaceService } from '../../core/workspace.service'
 import type { Application, Environment } from '../configuration/configuration.service'
 import { suggestedIdentifier } from '../../shared/wizard/creation.utils'
@@ -41,13 +42,14 @@ export class ProbeTargetService {
   readonly direct = computed(() => this.selectedMode() === 'url')
   readonly parsed = computed(() => parseProbeAddress(this.selectedAddress()))
   private readonly suite = computed(() => this.creation.native.suites().find(row => row.id === this.suiteId())?.data)
-  readonly environments = computed(() => probeTargets(this.allEnvironments(), this.creation.native.suites(), this.suiteId()))
-  readonly matches = computed(() => matchProbeAddress(this.selectedAddress(), this.allEnvironments(), this.suite()))
+  readonly environments = computed(() => probeTargets(applicationEnvironments(this.allEnvironments(), this.creation.sources.applicationId()), this.creation.native.suites(), this.suiteId()))
+  readonly matches = computed(() => matchProbeAddress(this.selectedAddress(), applicationEnvironments(this.allEnvironments(), this.creation.sources.applicationId()), this.suite()))
   readonly match = computed(() => this.matches().length === 1 ? this.matches()[0] : this.matches().find(row => row.key === this.selectedChoice()))
   readonly target = computed(() => this.direct() ? this.match()?.environment : this.environments().find(row => row.id === this.selectedEnvironment()))
   readonly endpoints = computed(() => Object.keys(this.target()?.data.endpoints ?? {}))
   readonly applications = computed(() => {
-    const linked = this.suite()?.applications ?? []
+    const active = this.creation.sources.applicationId()
+    const linked = active ? [active] : this.suite()?.applications ?? []
     return linked.length ? linked.map(id => ({ id, name: this.allApplications().find(row => row.id === id)?.data.name || id })) : this.allApplications().map(row => ({ id: row.id, name: row.data.name }))
   })
   readonly applicationId = computed(() => this.applications().length === 1 ? this.applications()[0].id : this.selectedApplication())

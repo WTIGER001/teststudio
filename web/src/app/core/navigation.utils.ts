@@ -1,4 +1,5 @@
-export interface NavigationLink { label: string; path: string; icon: string; exact?: boolean; active: boolean }
+import { applicationFromURL } from './application-scope.utils'
+export interface NavigationLink { label: string; path: string; icon: string; exact?: boolean; active: boolean; queryParams?: Record<string, string> }
 export interface NavigationSection { id: string; title: string; collapsible: boolean; active: boolean; links: NavigationLink[] }
 type Capabilities = Record<string, boolean>
 
@@ -10,14 +11,20 @@ export function navigationSections(project: string, capabilities: Capabilities, 
   const add = (id: string, title: string, collapsible: boolean, links: NavigationLink[]) => {
     if (links.length) sections.push({ id, title, collapsible, links, active: links.some(item => item.active) })
   }
-  add('workspace', 'Workspace', false, [link('Projects', '/projects', '▦', true), link('Your account', '/account', '♙', true)])
+  add('workspace', 'Workspace', false, [link(project ? 'Manage projects' : 'Projects', '/projects', '▦', true), link('Your account', '/account', '♙', true)])
   if (project) {
     const base = `/projects/${project}`
-    add('testing', 'Testing', false, [
-      ...(allowed(capabilities, 'projects.read') ? [link('Applications', `${base}/applications`, '▦')] : []),
-      ...(allowed(capabilities, 'suites.read') ? [link('Suites', `${base}/suites`, '▤')] : []),
-      link('Test catalog', `${base}/catalog`, '≡', false, [`${base}/tests`]), link('Test runs', `${base}/runs`, '▷'),
-      link('Trends', `${base}/trends`, '▥')
+    const application = applicationFromURL(url)
+    const testing = application ? `${base}/applications/${application}` : base
+    add('testing', application ? 'Application testing' : 'All application testing', false, [
+      ...(application && allowed(capabilities, 'projects.read') ? [link('Application overview', testing, '▦', true)] : []),
+      ...(allowed(capabilities, 'suites.read') ? [link('Suites', `${testing}/suites`, '▤')] : []),
+      link('Test catalog', `${testing}/catalog`, '≡', false, [`${testing}/tests`]), link('Test runs', `${testing}/runs`, '▷'),
+      link('Trends', `${testing}/trends`, '▥')
+    ])
+    add('overviews', 'Project overviews', false, [
+      ...(allowed(capabilities, 'projects.read') ? [link('All applications', `${base}/applications`, '▦', true)] : []),
+      link('HTTPS probes', `${base}/probes`, '◎', true)
     ])
     add('automation', 'Automation', true, [
       ...(allowed(capabilities, 'schedules.read') ? [link('Schedules', `${base}/schedules`, '◷')] : []),

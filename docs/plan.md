@@ -38,6 +38,18 @@ Do not add new dashboard pages or repeat completed demonstration setup before cl
 | Local verification | Use local fixtures, cached builds, and targeted checks. Public customer websites are manual user targets, not verification dependencies. |
 | Deployment | Retain local server, AWS ECS with CloudFront, Kubernetes, and Azure Container Apps with Jobs as required profiles. Hosted parity remains unverified. |
 
+### Active application navigation correction
+
+Prioritize the tester's reported scope confusion before further hosted adapter work.
+Use one project selector, one application selector, and a persistent project and application context band.
+Application testing contains Overview, Suites, Test catalog, Test runs, and Trends with matching data filters.
+Project overviews provides All applications and HTTPS probes. Keep project administration visibly separate.
+Use explicit application routes. Preserve context in creation and investigation links, reload, and browser history.
+Shared suites retain project ownership and one release. Explain complete-suite operations beside application filters.
+Freeze application context in new runs. Keep unknown legacy context in the project-wide view.
+The focused local navigation workflow and targeted scope checks now pass. See the implementation ledger for the retained run.
+Keep the stable 57 acceptance numbers and the 48 verified count unchanged.
+
 ### Next implementation batches
 
 Complete one coherent batch before adding the next. Update its user help and relevant technical guides with the behavior.

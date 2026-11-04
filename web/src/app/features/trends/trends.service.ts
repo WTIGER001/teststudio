@@ -17,6 +17,7 @@ export class TrendsService {
   private readonly destroy = inject(DestroyRef)
   readonly workspace = inject(WorkspaceService)
   readonly projectId = signal('')
+  readonly applicationId = signal('')
   readonly applied = signal(defaultTrendFilters(Date.now()))
   readonly title = computed(() => trendTitle(this.applied()))
   readonly cursor = signal('')
@@ -32,7 +33,7 @@ export class TrendsService {
 
   constructor() {
     combineLatest([this.route.paramMap, this.route.queryParams]).pipe(takeUntilDestroyed(this.destroy)).subscribe(([params, query]) => {
-      this.projectId.set(params.get('projectId') ?? '')
+      this.applicationId.set(params.get('applicationId') ?? ''); this.projectId.set(params.get('projectId') ?? '')
       const filters = readTrendFilters(query, Date.now())
       this.applied.set(filters); this.form.reset(filters)
       this.cursor.set(typeof query['cursor'] === 'string' ? query['cursor'] : '')
@@ -48,7 +49,7 @@ export class TrendsService {
     if (issue) { this.loading.set(false); this.error.set(issue); return }
     this.loading.set(true)
     try {
-      const report = await this.api.request<TrendReport>(`/api/v1/projects/${encodeURIComponent(this.projectId())}/trends?${trendRequest(this.applied(), this.cursor())}`)
+      const report = await this.api.request<TrendReport>(`/api/v1/projects/${encodeURIComponent(this.projectId())}/trends?${trendRequest(this.applied(), this.cursor())}&application=${encodeURIComponent(this.applicationId())}`)
       if (generation === this.generation) this.report.set(report)
     } catch (error) { if (generation === this.generation) this.error.set(errorMessage(error, 'Trend history could not be loaded.')) }
     finally { if (generation === this.generation) this.loading.set(false) }

@@ -8,7 +8,7 @@ The table starts with 30 matching tests. Load more tests appends another page.
 Showing N of M reports loaded tests and the complete authorized match count.
 Category branches count matching records across all pages, with the category filter itself excluded.
 This preserves sibling navigation while a category is selected.
-Project summary metrics count readable active definitions. Archived definitions remain available through the lifecycle filter.
+Summary metrics count readable active definitions within the application scope. Archived definitions remain available through the lifecycle filter.
 Metadata options contain only values from readable definitions.
 
 Filters and page changes preserve selected test identities across suites.
@@ -35,7 +35,8 @@ The self-test registrar follows suite cursors before updating existing definitio
 | Query | Behavior |
 | --- | --- |
 | `query` | Match identifier, title, description, category, suite name, or tags without case distinctions. |
-| `suite`, `application` | Match exact resource identifiers. A fixed suite route rejects a different suite filter. |
+| `suite` | Match an exact suite identifier. A fixed suite route rejects a different suite filter. |
+| `application` | Match an explicit test application, or inherit suite links when the test has no application. Scope totals, facets, and categories too. |
 | `category` | Match a normalized slash-separated category path. Spaces beside separators do not change the path. |
 | `descendants` | Include child categories. HTTP requests default to true. |
 | `uncategorized` | Select definitions without a category. Do not combine it with a category path. |
@@ -60,3 +61,10 @@ Expired cursors or changed authorized catalog data return a conflict. Start a fr
 Current project, suite, and exact test permissions apply before rows, counts, categories, or options enter the response.
 The current implementation computes the authorized view before slicing its page. It does not claim indexed catalog search.
 OpenAPI 0.28 and the generated client describe both list operations.
+
+## Application navigation
+
+Use the sidebar Application selector for scope. The catalog has no second application selector.
+Application routes preserve context in creation and retained history links. Clear filters keeps the active application.
+HTTPS probes uses /projects/{project}/probes. Clearing its filters keeps the HTTPS type.
+Shared suites retain one complete draft and release. Publication, import, export, and saved selections operate on that complete suite.

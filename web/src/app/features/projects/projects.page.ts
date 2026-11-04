@@ -16,7 +16,7 @@ import { ProjectsService } from './projects.service'
         <h2 id="projects-title" class="section-heading">Your projects</h2>
         <div class="project-grid">
           @for (project of service.workspace.projects(); track project.id) {
-            <a class="project-card" [routerLink]="['/projects', project.id, 'catalog']"><span class="project-icon" aria-hidden="true">▦</span><h3>{{ project.data.name }}</h3><p class="muted">{{ project.data.description || 'Open the catalog and manage this project.' }}</p><span class="small">Open project <span aria-hidden="true">→</span></span></a>
+            <a class="project-card" [routerLink]="['/projects', project.id, 'applications']"><span class="project-icon" aria-hidden="true">▦</span><h3>{{ project.data.name }}</h3><p class="muted">{{ project.data.description || 'Choose an application and start testing.' }}</p><span class="small">Open project <span aria-hidden="true">→</span></span></a>
           } @empty {
             <div class="empty-state"><span class="empty-icon" aria-hidden="true">▦</span>@if (service.workspace.can('projects.create')) { <h3>A fresh start.</h3><p>Create your first project to organize applications and build your test catalog.</p> } @else { <h3>Access not granted</h3><p>Sign-in succeeded. A project owner can add your account and assign access.</p> }</div>
           }

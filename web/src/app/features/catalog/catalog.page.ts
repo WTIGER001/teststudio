@@ -28,15 +28,17 @@ import { CatalogTestFormComponent } from './catalog-test-form.component'
   providers: [RecordCreationService, CatalogTestEditorService, HTTPCheckEditorService, TimingPolicyEditorService, CatalogService, CatalogEntryService, CatalogPlanService, CatalogSelectionService, CatalogBulkMetadataService, CatalogSavedSelectionsService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Test catalog</h1><p class="muted">Know what you test. Keep every release accountable.</p></div>
-      @if (service.workspace.can('catalog.create')) { <a class="button primary" [routerLink]="['/projects', service.projectId(), 'tests', 'new']" [queryParams]="{ suite: service.suiteFilter() || undefined }">+ Create test</a> }
+    <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>{{ service.probeOverview ? 'HTTPS probes' : 'Test catalog' }}</h1><p class="muted">{{ service.probeOverview ? 'Website and endpoint probes across all applications in this project.' : 'Know what you test. Keep every release accountable.' }}</p></div>
+      @if (service.workspace.can('catalog.create')) { <a class="button primary" [routerLink]="service.workspace.path('tests', 'new')" [queryParams]="{ suite: service.suiteFilter() || undefined }">+ Create test</a> }
     </div>
-    <section class="metrics" aria-label="Catalog summary">
-      <article class="metric"><span class="eyebrow">Catalog entries</span><strong>{{ service.counts().total }}</strong><span class="small muted">Across this project</span></article>
+    @if (!service.probeOverview) { <section class="metrics" aria-label="Catalog summary">
+      <article class="metric"><span class="eyebrow">Catalog entries</span><strong>{{ service.counts().total }}</strong><span class="small muted">{{ service.applicationId() ? 'In this application' : 'Across all applications' }}</span></article>
       <article class="metric"><span class="eyebrow">Enabled</span><strong>{{ service.counts().enabled }}</strong><span class="small muted">Available for selection</span></article>
       <article class="metric"><span class="eyebrow">Labeled safe</span><strong>{{ service.counts().safe }}</strong><span class="small muted">Declared operating conditions apply</span></article>
       <article class="metric"><span class="eyebrow">Suites with tests</span><strong>{{ service.counts().suites }}</strong><span class="small muted">Independent releases</span></article>
     </section>
+    }
+    @if (service.hasSharedSuites()) { <p class="notice">Shared suites have one draft and release. Publication, import, export, and saved selections apply to the complete suite.</p> }
     @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }
     @if (service.success()) { <p class="notice success" role="status">{{ service.success() }}</p> }
     <ts-catalog-entry />
@@ -49,7 +51,7 @@ import { CatalogTestFormComponent } from './catalog-test-form.component'
       </section>
     }
     <section class="panel catalog-panel" aria-labelledby="catalog-title">
-      <div class="section-top"><h2 id="catalog-title">All tests <span class="count-label">{{ service.page().matched }}</span></h2><span class="small muted">Definitions and history use stable identifiers.</span></div>
+      <div class="section-top"><h2 id="catalog-title">{{ service.probeOverview ? 'All HTTPS probes' : 'All tests' }} <span class="count-label">{{ service.page().matched }}</span></h2><span class="small muted">Definitions and history use stable identifiers.</span></div>
       <ts-catalog-filters />
       <ts-catalog-bulk />
       <div class="catalog-layout" [class.with-categories]="service.view() === 'categories'">
@@ -61,7 +63,7 @@ import { CatalogTestFormComponent } from './catalog-test-form.component'
       @else if (service.visible().length) {
         <ts-catalog-table />
       } @else if (service.error()) { <p class="notice">Catalog results are unavailable. <button class="button small secondary" type="button" (click)="service.load()">Reload results</button><button class="button small subtle" type="button" (click)="service.workspace.refreshAccess()">Refresh access</button></p> } @else {
-        <div class="empty-state"><span class="empty-icon" aria-hidden="true">✓</span><h3>{{ service.page().total ? 'No matching tests.' : 'Your next good answer starts here.' }}</h3><p>{{ service.page().total ? 'Try another category or clear filters to see all active tests.' : 'Create a suite, then add checks or publish a versioned test catalog.' }}</p>@if (!service.suites().length) { <a class="button secondary" [routerLink]="['/projects', service.projectId(), 'configuration']">Set up a suite</a> }</div>
+        <div class="empty-state"><span class="empty-icon" aria-hidden="true">✓</span><h3>{{ service.page().total ? 'No matching tests.' : 'Your next good answer starts here.' }}</h3><p>{{ service.page().total ? 'Try another category or clear filters to see all active tests.' : 'Create a suite, then add checks or publish a versioned test catalog.' }}</p>@if (!service.suites().length) { <a class="button secondary" [routerLink]="service.workspace.path('suites')">Set up a suite</a> }</div>
       }
         </div>
       </div>
@@ -79,4 +81,4 @@ import { CatalogTestFormComponent } from './catalog-test-form.component'
   `,
   styles: [`:host { display: block; } .catalog-layout { min-width: 0; } .with-categories { display: grid; grid-template-columns: minmax(180px, 240px) minmax(0, 1fr); gap: 20px; } .category-navigation { min-width: 0; border-right: 1px solid var(--border); padding-right: 12px; } .catalog-results { min-width: 0; } @media (max-width: 1000px) { .with-categories { grid-template-columns: minmax(0, 1fr); } .category-navigation { border-right: 0; border-bottom: 1px solid var(--border); padding: 0 0 16px; } }`]
 })
-export class CatalogPage { readonly service = inject(CatalogService); readonly selection = inject(CatalogSelectionService); readonly entry = inject(CatalogEntryService) }
+export class CatalogPage { canLeave(): boolean { return this.service.canLeave() }; readonly service = inject(CatalogService); readonly selection = inject(CatalogSelectionService); readonly entry = inject(CatalogEntryService) }

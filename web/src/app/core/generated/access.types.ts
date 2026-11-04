@@ -291,7 +291,7 @@ export interface AccessRequests {
   changeCatalogTestState: { "project": string; "suite": string; "test": string; "action": "disable" | "enable" | "archive" | "restore"; revision: number }
   readRetainedTest: { "project": string; "suite": string; "test": string }
   listCatalogTestRevisions: { "project": string; "suite": string; "test": string }
-  readTestRunHistory: { "project": string; "suite": string; "test": string; query?: { "cursor"?: string; "limit"?: number } }
+  readTestRunHistory: { "project": string; "suite": string; "test": string; query?: { "application"?: string; "cursor"?: string; "limit"?: number } }
   listProjectCatalog: { "project": string; query?: { "query"?: string; "suite"?: string; "application"?: string; "category"?: string; "tag"?: string; "owner"?: string; "type"?: string; "runner"?: string; "state"?: string; "safety"?: string; "source"?: string; "sort"?: string; "cursor"?: string; "descendants"?: boolean; "uncategorized"?: boolean; "limit"?: number } }
   listInstallationAssignments: { query?: { "limit"?: number; "cursor"?: string } }
   createInstallationAssignment: { body: AssignmentDefinition }

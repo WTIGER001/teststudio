@@ -193,6 +193,16 @@ func (s *Service) prepare(ctx context.Context, user, project string, req Request
 		return Run{}, nil, errors.New("suite is archived")
 	}
 	admission := []storage.Record{projectRow, suiteRow}
+	if req.Application != "" {
+		if !domain.ValidID(req.Application) || !slices.Contains(suite.Applications, req.Application) {
+			return Run{}, nil, errors.New("application must be linked to this suite")
+		}
+		applicationRow, err := s.Store.Get(ctx, projects.Bucket("applications", project), req.Application)
+		if err != nil {
+			return Run{}, nil, err
+		}
+		admission = append(admission, applicationRow)
+	}
 	var saved *catalog.SavedSelectionSnapshot
 	var resolved []string
 	if req.SelectionPreview != "" {
@@ -240,6 +250,9 @@ func (s *Service) prepare(ctx context.Context, user, project string, req Request
 		if err != nil {
 			return Run{}, nil, err
 		}
+		if req.Application != "" && req.Application != e.Application {
+			return Run{}, nil, errors.New("environment must belong to the selected application")
+		}
 		if e.Disabled {
 			return Run{}, nil, errors.New("environment is disabled")
 		}
@@ -262,7 +275,7 @@ func (s *Service) prepare(ctx context.Context, user, project string, req Request
 	}
 	eligible := []catalog.Test{}
 	for _, test := range release.Draft.Tests {
-		if environment != nil && test.Application != "" && test.Application != environment.Application {
+		if req.Application != "" && test.Application != "" && test.Application != req.Application || environment != nil && test.Application != "" && test.Application != environment.Application {
 			continue
 		}
 		eligible = append(eligible, test)
@@ -349,6 +362,7 @@ func (s *Service) prepare(ctx context.Context, user, project string, req Request
 	}
 	now := time.Now().UTC()
 	v := Run{ID: domain.NewID(), Project: project, Request: req, Release: release, Environment: environment, Tests: tests, Capture: release.Draft.Capture, Actor: user, State: "requested", Outcome: "unknown", Phase: "queued", Counts: Counts{Total: len(tests)}, Results: []execution.Result{}, CreatedAt: now, UpdatedAt: now, Deadline: now.Add(time.Duration(req.TimeoutSeconds) * time.Second), EvidenceState: "pending", EvidenceErrors: []string{}}
+	v.Applications = slices.Clone(suite.Applications)
 	v.SavedSelection = saved
 	v.Capture = policy
 	v.CaptureLimits = limits

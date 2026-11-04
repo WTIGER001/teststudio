@@ -83,7 +83,7 @@ Components delegate workflows to focused feature services.
 The server supplies catalog filtering, stable sorting, category counts, authorized metadata options, and paged results.
 Pure UI utilities build typed queries, preserve source definition values, merge loaded identities, and count hidden selections.
 The catalog uses shared rows for its table and category navigation views.
-Common search, suite, application, type, and sort controls stay visible. Metadata and lifecycle filters use Advanced filters.
+Common search, suite, type, and sort controls stay visible. The sidebar owns application selection. Metadata and lifecycle filters use Advanced filters.
 Row editing and applicable lifecycle actions stay visible. History, duplication, and archive use More.
 View, filter, and page changes preserve selection. The bulk bar reports selected tests hidden from current results.
 An outdated catalog cursor hides stale results and requests a reload and fresh selection. Access errors do not appear as empty data.
@@ -99,9 +99,21 @@ Revision conflicts require a reload before another mutation. See [Suite settings
 
 ## Sidebar navigation
 
-The Project selector chooses the current project. Workspace contains Projects and Your account.
-Testing contains Applications, Suites, Test catalog, Test runs, and Trends.
-Applications provides application environments. Suites provides test groups and scoped catalog links.
+Project selection lives in one sidebar selector. The Projects landing page uses project cards instead of a second selector.
+Opening a project shows All applications. Opening an application makes it the active testing context.
+The Application selector switches applications without returning to the application list.
+The context band shows the project and active application above every project page.
+Application testing contains Application overview, Suites, Test catalog, Test runs, and Trends.
+These destinations use application routes and real server filters. Reload, browser Back, and shared links retain their context.
+Switching applications keeps the main destination and clears old suite, environment, test, cursor, and detail filters.
+Existing unsaved-work guards run before changing scope. A rejected change restores the selector value.
+All applications opens project-wide testing. Unassigned suites and unknown legacy run scopes remain available there.
+Project overviews contains All applications and HTTPS probes. Its destinations visibly use project scope.
+HTTPS probes has its own project route. Clear filters retains the HTTPS type.
+Shared suites keep project ownership. Their cards show a Shared suite badge.
+Application catalogs explain that publication, transfer, and saved selections operate on the complete shared suite.
+Run lists and trends count matching application tests. Shared run details explicitly show the complete saved run.
+New runs freeze application context. Later suite changes cannot move their history between applications.
 Automation contains Schedules and Notifications.
 Advanced testing contains Import and sync tests and Suite releases.
 Project administration and Installation administration group access controls by ownership scope.

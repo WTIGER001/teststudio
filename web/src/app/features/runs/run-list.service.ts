@@ -16,6 +16,7 @@ export class RunListService {
   readonly workspace = inject(WorkspaceService)
   readonly lookups = inject(RunLookupsService)
   readonly projectId = signal('')
+  readonly applicationId = signal('')
   readonly items = signal<RecordValue<RunSummary>[]>([])
   readonly cursor = signal('')
   readonly partial = signal(false)
@@ -31,7 +32,7 @@ export class RunListService {
 
   constructor() {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => {
-      this.projectId.set(params.get('projectId') ?? '')
+      this.generation++; this.applicationId.set(params.get('applicationId') ?? ''); this.projectId.set(params.get('projectId') ?? '')
       this.filters.reset(); this.items.set([]); this.newRunOpen.set(false)
       void this.initialize()
     })
@@ -39,17 +40,17 @@ export class RunListService {
   }
 
   private async initialize(): Promise<void> {
-    const project = this.projectId()
-    try { await this.lookups.load(project) }
-    catch (error) { if (project === this.projectId()) this.error.set(errorMessage(error, 'Run options could not be loaded.')) }
-    if (project === this.projectId()) await this.load()
+    const project = this.projectId(), application = this.applicationId()
+    try { await this.lookups.load(project, application) }
+    catch (error) { if (project === this.projectId() && application === this.applicationId()) this.error.set(errorMessage(error, 'Run options could not be loaded.')) }
+    if (project === this.projectId() && application === this.applicationId()) await this.load()
   }
 
   async load(more = false): Promise<void> {
     if (more && (!this.cursor() || this.loading())) return
     const generation = ++this.generation
     this.loading.set(true); this.error.set('')
-    if (!more) this.activeFilters = queryString(this.filters.getRawValue())
+    if (!more) this.activeFilters = queryString({ ...this.filters.getRawValue(), application: this.applicationId() })
     const position = more ? `&cursor=${encodeURIComponent(this.cursor())}` : ''
     try {
       const page = await this.api.request<Page<RecordValue<RunSummary>> & { partial: boolean }>(`/api/v1/projects/${encodeURIComponent(this.projectId())}/runs?limit=30&${this.activeFilters}${position}`)

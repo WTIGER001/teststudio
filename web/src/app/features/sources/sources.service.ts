@@ -6,6 +6,7 @@ import { AccessClientService } from '../../core/access-client.service'
 import { ApiError, ApiService, type Page, type RecordValue } from '../../core/api.service'
 import type { SourceUploadPreview, SourceUploadRecord } from '../../core/generated/access.types'
 import { SessionService } from '../../core/session.service'
+import { applicationSuites } from '../../core/application-scope.utils'
 import { WorkspaceService } from '../../core/workspace.service'
 import type { Suite } from '../configuration/configuration.service'
 import { sourceFormat } from './source.utils'
@@ -18,6 +19,7 @@ export class SourcesService {
   readonly workspace = inject(WorkspaceService)
   readonly session = inject(SessionService)
   readonly project = signal('')
+  readonly applicationId = signal('')
   readonly suites = signal<RecordValue<Suite>[]>([])
   readonly items = signal<SourceUploadRecord[]>([])
   readonly cursor = signal('')
@@ -43,7 +45,7 @@ export class SourcesService {
     const destroy = inject(DestroyRef)
     this.form.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.generation++; this.saving.set(false); this.preview.set(null); this.content.set(''); this.message.set(''); this.error.set('') })
     this.form.controls.suite.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.items.set([]); this.cursor.set(''); void this.list() })
-    inject(ActivatedRoute).paramMap.pipe(takeUntilDestroyed(destroy)).subscribe(params => { this.project.set(params.get('projectId') ?? ''); void this.load() })
+    inject(ActivatedRoute).paramMap.pipe(takeUntilDestroyed(destroy)).subscribe(params => { this.applicationId.set(params.get('applicationId') ?? ''); this.project.set(params.get('projectId') ?? ''); void this.load() })
     destroy.onDestroy(() => { this.generation++; this.listGeneration++ })
   }
 
@@ -54,7 +56,7 @@ export class SourcesService {
     try {
       const response = await this.api.request<Page<RecordValue<Suite>>>(`/api/v1/projects/${encodeURIComponent(this.project())}/suites`)
       if (generation !== this.generation) return
-      this.suites.set(response.items.filter(row => !row.data.archived))
+      this.suites.set(applicationSuites(response.items.filter(row => !row.data.archived), this.applicationId()))
     } catch (error) { if (generation === this.generation) this.error.set(error instanceof Error ? error.message : 'Suites could not be loaded.') }
     finally { if (generation === this.generation) this.loading.set(false) }
   }

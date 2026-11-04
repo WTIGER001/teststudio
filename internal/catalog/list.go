@@ -91,6 +91,9 @@ func (s *Service) ListTests(ctx context.Context, user, project, routeSuite strin
 			if test.ID != row.ID || suite.ID != suiteRow.ID {
 				return result, storage.ErrNotFound
 			}
+			if q.Application != "" && (test.Application != "" && test.Application != q.Application || test.Application == "" && !slices.Contains(suite.Applications, q.Application)) {
+				continue
+			}
 			all = append(all, listItem{Entry: ListEntry{ID: row.ID, Project: project, Suite: suite.ID, SuiteName: suite.Name, Revision: row.Revision, Data: row.Data, Updated: row.Updated}, Test: test})
 		}
 	}

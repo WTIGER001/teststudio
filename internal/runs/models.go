@@ -11,6 +11,7 @@ import (
 )
 
 type Request struct {
+	Application      string          `json:"applicationId,omitempty"`
 	SelectionPreview string          `json:"savedSelectionPreviewId,omitempty"`
 	Suite            string          `json:"suiteId"`
 	Environment      string          `json:"environmentId,omitempty"`
@@ -34,6 +35,7 @@ type Counts struct {
 }
 
 type Run struct {
+	Applications         []string                        `json:"applicationIds,omitempty"`
 	SavedSelection       *catalog.SavedSelectionSnapshot `json:"savedSelection,omitempty"`
 	Schedule             *ScheduleTrigger                `json:"schedule,omitempty"`
 	ID                   string                          `json:"id"`

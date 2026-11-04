@@ -37,7 +37,7 @@ func matchesList(test Test, suiteName string, q ListQuery, category bool) bool {
 	if q.State != "all" && (q.State == "active" && test.State == "archived" || q.State != "active" && test.State != q.State) {
 		return false
 	}
-	for _, pair := range [][2]string{{q.Application, test.Application}, {q.Owner, test.Owner}, {q.Type, test.Type}, {q.Runner, test.Runner}, {q.Safety, test.Safety}} {
+	for _, pair := range [][2]string{{q.Owner, test.Owner}, {q.Type, test.Type}, {q.Runner, test.Runner}, {q.Safety, test.Safety}} {
 		if pair[0] != "" && pair[0] != pair[1] {
 			return false
 		}

@@ -79,6 +79,7 @@
     "get": {
       "operationId": "readTestRunHistory",
       "parameters": [
+        { "in": "query", "name": "application", "schema": { "type": "string" }, "description": "Filter by frozen application context. Omit for all applications." },
         {
           "in": "path",
           "name": "project",

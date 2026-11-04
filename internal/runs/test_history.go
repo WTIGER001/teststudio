@@ -42,8 +42,12 @@ type testHistoryCursor struct {
 }
 
 func (s *Service) TestHistory(ctx context.Context, user, project, suite, id, cursor string, limit int) (TestHistoryPage, error) {
+	return s.ApplicationTestHistory(ctx, user, project, suite, id, "", cursor, limit)
+}
+
+func (s *Service) ApplicationTestHistory(ctx context.Context, user, project, suite, id, application, cursor string, limit int) (TestHistoryPage, error) {
 	result := TestHistoryPage{Items: []TestHistoryItem{}}
-	if !domain.ValidID(project) || !domain.ValidID(suite) || !domain.ValidID(id) || limit < 1 || limit > 100 {
+	if !domain.ValidID(project) || !domain.ValidID(suite) || !domain.ValidID(id) || application != "" && !domain.ValidID(application) || limit < 1 || limit > 100 {
 		return result, errors.New("test history requires valid identifiers and a page limit from 1 through 100")
 	}
 	for _, check := range [][2]string{{"", "runs.read"}, {"suite/" + suite, "catalog.read"}, {"test/" + suite + "/" + id, "catalog.read"}} {
@@ -51,7 +55,7 @@ func (s *Service) TestHistory(ctx context.Context, user, project, suite, id, cur
 			return result, err
 		}
 	}
-	scope := fmt.Sprintf("%s\x00%s\x00%s\x00%s\x00%d", user, project, suite, id, limit)
+	scope := fmt.Sprintf("%s\x00%s\x00%s\x00%s\x00%d", user, project, suite, id, limit) + "\x00" + application
 	raw, err := paging.Open(ctx, s.Store, "test-history-settings", scope, cursor)
 	if err != nil {
 		return result, err
@@ -81,7 +85,7 @@ func (s *Service) TestHistory(ctx context.Context, user, project, suite, id, cur
 			title := ""
 			found := false
 			for _, test := range value.Tests {
-				if test.ID == id {
+				if test.ID == id && TestInApplication(value, test, application) {
 					title = test.Title
 					found = true
 					break

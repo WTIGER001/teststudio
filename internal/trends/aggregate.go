@@ -41,6 +41,9 @@ func inPeriod(run runs.Run, f Filter) bool {
 }
 
 func matches(run runs.Run, f Filter) bool {
+	if !runs.InApplication(run, f.Application) {
+		return false
+	}
 	if f.Suite != "" && run.Request.Suite != f.Suite {
 		return false
 	}
@@ -88,7 +91,7 @@ func Aggregate(input []runs.Run, f Filter) Report {
 		}
 		seen := map[string]bool{}
 		for _, test := range run.Tests {
-			if test.ID == "" || seen[test.ID] || (f.Category != "" && test.Category != f.Category) || (f.Test != "" && test.ID != f.Test) {
+			if !runs.TestInApplication(run, test, f.Application) || test.ID == "" || seen[test.ID] || (f.Category != "" && test.Category != f.Category) || (f.Test != "" && test.ID != f.Test) {
 				continue
 			}
 			seen[test.ID] = true

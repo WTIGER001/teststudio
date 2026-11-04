@@ -8,6 +8,7 @@ import { WorkspaceService } from '../../core/workspace.service'
 import { RunEvidenceService } from './run-evidence.service'
 import type { Run } from './run.models'
 import { historyEvidenceTest, diagnosticTests, runTestLabels, runActionFeedback, resultSummaries } from './run-diagnostics.utils'
+import { runApplications } from './run-application.utils'
 import { canRerun, errorMessage, terminal } from './run.utils'
 
 @Injectable()
@@ -26,6 +27,7 @@ export class RunDetailService {
   readonly error = signal('')
   readonly actionError = signal('')
   readonly refreshingAccess = signal(false)
+  readonly shared = computed(() => !!this.run() && runApplications(this.run()!).length > 1)
   readonly testLabels = computed(() => runTestLabels(this.run()))
   readonly testChoices = computed(() => diagnosticTests(this.run()))
   readonly resultSummaries = computed(() => resultSummaries(this.run()))
@@ -57,6 +59,8 @@ export class RunDetailService {
     try {
       const row = await this.api.request<RecordValue<Run>>(this.evidence.base())
       if (generation !== this.generation) return
+      const application = this.route.snapshot.paramMap.get('applicationId') ?? ''
+      if (application && !runApplications(row.data).includes(application)) throw new Error('This saved run has no snapshot for the active application. Choose All applications to inspect project-wide history.')
       this.run.set(row.data); this.observedAt.set(Date.now())
       const requested = this.historyScopeApplied ? '' : historyEvidenceTest(row.data, this.route.snapshot.queryParamMap.get('test') ?? '')
       this.historyScopeApplied = true
@@ -93,7 +97,7 @@ export class RunDetailService {
     try {
       const row = await this.api.request<RecordValue<Run>>(`${base}/${action}`, 'POST', {}, undefined, action === 'rerun-failures' ? this.rerunKey : undefined)
       if (base !== this.evidence.base()) return
-      if (action === 'rerun-failures') await this.router.navigate(['/projects', this.projectId(), 'runs', row.id])
+      if (action === 'rerun-failures') await this.router.navigate(this.workspace.path('runs', row.id))
       else await this.load()
     } catch (error) { if (base === this.evidence.base()) this.actionError.set(runActionFeedback(action, error instanceof ApiError ? error.status : 0, errorMessage(error, 'The run action failed.'))) }
     finally { this.mutating.set(false) }

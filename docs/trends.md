@@ -26,6 +26,7 @@ Use `GET /api/v1/projects/{projectId}/trends` with the following query parameter
 | Parameter | Operation |
 | --- | --- |
 | `since`, `until` | Required RFC 3339 boundaries for run creation time. The maximum period is 366 days. |
+| `application` | Match frozen application context and count only its selected tests. Options use the same application scope. |
 | `suite` | Match a suite identifier. |
 | `environment` | Match an environment identifier. Use `none` for targetless runs. |
 | `location` | Match an execution location. |
@@ -96,3 +97,6 @@ Focused Go checks cover aggregation, permissions, validation, and cursor boundar
 Pure chart checks verify area totals and missing-history breaks.
 
 Cross-project rollups and HTTPS response-time and certificate history remain pending.
+
+The Application selector controls the page scope. Application routes and ranking links retain it after reload.
+Choose All applications to inspect project-wide history. Shared run details show their complete snapshot.

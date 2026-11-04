@@ -43,7 +43,7 @@ func (s *Service) Read(ctx context.Context, user, project string, filter Filter,
 	if len(filter.Category) > 256 || len(filter.Location) > 128 {
 		return Report{}, errors.New("trend filter exceeds its length limit")
 	}
-	if filter.Suite != "" && !domain.ValidID(filter.Suite) || filter.Test != "" && !domain.ValidID(filter.Test) || filter.Environment != "" && !domain.ValidID(filter.Environment) {
+	if filter.Application != "" && !domain.ValidID(filter.Application) || filter.Suite != "" && !domain.ValidID(filter.Suite) || filter.Test != "" && !domain.ValidID(filter.Test) || filter.Environment != "" && !domain.ValidID(filter.Environment) {
 		return Report{}, errors.New("invalid trend resource identifier")
 	}
 	if filter.Test != "" && filter.Suite == "" {

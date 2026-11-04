@@ -297,3 +297,45 @@ func TestRevokedExecutionPermissionBlocksQueuedWork(t *testing.T) {
 		t.Fatalf("revoked user executed work: %+v", result)
 	}
 }
+
+func TestRunApplicationAdmissionAndFrozenAssociations(t *testing.T) {
+	s, p, _ := setup(t, nil)
+	if _, err := s.Create(t.Context(), "admin", "project", runs.Request{Suite: "health", Application: "missing", Environment: "local"}, "missing-app", "manual"); err == nil {
+		t.Fatal("unlinked application accepted")
+	}
+	run, err := s.Create(t.Context(), "admin", "project", runs.Request{Suite: "health", Application: "app", Environment: "local"}, "app-run", "manual")
+	if err != nil || run.Request.Application != "app" || len(run.Applications) != 1 || run.Applications[0] != "app" {
+		t.Fatal(run, err)
+	}
+	if err := p.SaveApplication(t.Context(), "admin", "project", projects.Application{ID: "other", Name: "Other"}, 0); err != nil {
+		t.Fatal(err)
+	}
+	if err := p.SaveEnvironment(t.Context(), "admin", "project", projects.Environment{ID: "other", Name: "Other", Application: "other", Stage: "local", Endpoints: map[string]string{"api": "http://127.0.0.1:8040"}}, 0); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.Create(t.Context(), "admin", "project", runs.Request{Suite: "health", Application: "app", Environment: "other"}, "wrong-target", "manual"); err == nil {
+		t.Fatal("foreign environment accepted")
+	}
+	row, err := s.Store.Get(t.Context(), projects.Bucket("suites", "project"), "health")
+	if err != nil {
+		t.Fatal(err)
+	}
+	suite, _ := storage.Decode[projects.Suite](row)
+	suite.Applications = []string{"other"}
+	change, _ := storage.Put(row.Bucket, row.ID, "project", row.Revision, suite)
+	if err := s.Store.CommitAll(t.Context(), change); err != nil {
+		t.Fatal(err)
+	}
+	retained, _, err := s.Get(t.Context(), "project", run.ID)
+	if err != nil || !runs.InApplication(retained, "app") || runs.InApplication(retained, "other") {
+		t.Fatal(retained, err)
+	}
+	page, err := s.List(t.Context(), "admin", "project", runs.Filter{Application: "app"}, "", 20)
+	if err != nil || len(page.Items) != 1 {
+		t.Fatal(page, err)
+	}
+	history, err := s.ApplicationTestHistory(t.Context(), "admin", "project", "health", "HEALTH-1", "other", "", 20)
+	if err != nil || len(history.Items) != 0 {
+		t.Fatal(history, err)
+	}
+}

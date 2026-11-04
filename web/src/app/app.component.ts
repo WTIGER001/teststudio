@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { RouterLink, RouterOutlet } from '@angular/router'
 import { ApplicationService } from './core/application.service'
 import { ThemeService } from './core/theme.service'
+import { ScopeContextComponent } from './core/scope-context.component'
 import { SidebarComponent } from './core/sidebar.component'
 import { PasswordSigninComponent } from './features/auth/password-signin.component'
 import { RequiredPasswordComponent } from './features/auth/required-password.component'
@@ -12,7 +13,7 @@ import { HelpComponent } from './features/help/help.component'
 @Component({
   selector: 'ts-root',
   standalone: true,
-  imports: [RouterLink, RouterOutlet, SidebarComponent, HelpComponent, PasswordSigninComponent, RequiredPasswordComponent, AuthFeedbackComponent],
+  imports: [RouterLink, RouterOutlet, SidebarComponent, ScopeContextComponent, HelpComponent, PasswordSigninComponent, RequiredPasswordComponent, AuthFeedbackComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <a class="skip-link" href="#main">Skip to content</a>
@@ -60,7 +61,7 @@ import { HelpComponent } from './features/help/help.component'
     } @else {
       <div class="app-layout">
         <ts-sidebar />
-        <main id="main" class="workspace-main"><ts-auth-feedback />
+        <main id="main" class="workspace-main"><ts-scope-context /><ts-auth-feedback />
           @if (app.error()) { <p class="notice error" role="alert">{{ app.error() }}</p> }
           @if (app.message()) { <p class="notice success" role="status">{{ app.message() }}</p> }
           <router-outlet />

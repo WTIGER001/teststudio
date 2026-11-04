@@ -7,6 +7,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
 
@@ -22,6 +23,8 @@ type Filter struct {
 }
 
 type Summary struct {
+	Shared          bool       `json:"shared,omitempty"`
+	Application     string     `json:"applicationId,omitempty"`
 	ID              string     `json:"id"`
 	Project         string     `json:"projectId"`
 	Suite           string     `json:"suiteId"`
@@ -62,6 +65,42 @@ func Summarize(v Run) Summary {
 	return s
 }
 
+func summarizeApplication(v Run, application string) Summary {
+	summary := Summarize(v)
+	summary.Application = v.Request.Application
+	if v.Environment != nil {
+		summary.Application = v.Environment.Application
+	}
+	applications := map[string]bool{}
+	for _, test := range v.Tests {
+		if test.Application != "" {
+			applications[test.Application] = true
+		} else {
+			for _, id := range v.Applications {
+				applications[id] = true
+			}
+		}
+	}
+	summary.Shared = summary.Application == "" && len(applications) > 1
+	if application == "" {
+		return summary
+	}
+	ids := map[string]bool{}
+	for _, test := range v.Tests {
+		if TestInApplication(v, test, application) {
+			ids[test.ID] = true
+		}
+	}
+	results := []execution.Result{}
+	for _, result := range v.Results {
+		if ids[result.TestID] {
+			results = append(results, result)
+		}
+	}
+	summary.Counts = Count(len(ids), results)
+	return summary
+}
+
 func matches(v Run, f Filter) bool {
 	if f.Environment == "none" {
 		if v.Environment != nil {
@@ -73,7 +112,7 @@ func matches(v Run, f Filter) bool {
 	if f.Suite != "" && v.Request.Suite != f.Suite {
 		return false
 	}
-	if f.Application != "" && (v.Environment == nil || v.Environment.Application != f.Application) {
+	if f.Application != "" && !InApplication(v, f.Application) {
 		return false
 	}
 	if f.State != "" && v.State != f.State {
@@ -127,7 +166,7 @@ func (s *Service) List(ctx context.Context, user, project string, filter Filter,
 				return Page{}, err
 			}
 			if matches(v, filter) {
-				row.Data, err = json.Marshal(Summarize(v))
+				row.Data, err = json.Marshal(summarizeApplication(v, filter.Application))
 				if err != nil {
 					return Page{}, err
 				}

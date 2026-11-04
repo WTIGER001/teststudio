@@ -87,7 +87,7 @@ export class ProjectsService {
       await this.workspace.load()
       if (!this.disposed) {
         this.form.markAsPristine()
-        await this.router.navigate(value.addSuite ? ['/projects', value.id, 'tests', 'new'] : ['/projects', value.id, 'applications'], value.addSuite ? { queryParams: { suite: this.suiteId() } } : {})
+        await this.router.navigate(value.addSuite ? ['/projects', value.id, ...(value.addApplication ? ['applications', this.applicationId()] : []), 'tests', 'new'] : ['/projects', value.id, 'applications'], value.addSuite ? { queryParams: { suite: this.suiteId() } } : {})
       }
     } catch (error) { this.error.set(`${this.completed().length ? `${this.completed().join(', ')} created. Retry continues the remaining setup; it does not create these resources again. ` : ''}${error instanceof Error ? error.message : 'Project setup failed.'}`) }
     finally { this.saving.set(false) }

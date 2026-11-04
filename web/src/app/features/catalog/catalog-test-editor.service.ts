@@ -5,10 +5,12 @@ import type { Suite } from '../configuration/configuration.service'
 import { TimingPolicyEditorService } from '../timing/timing-policy-editor.service'
 import { HTTPCheckEditorService } from './http-check-editor.service'
 import type { CatalogItem, TestDefinition } from './catalog.models'
+import { WorkspaceService } from '../../core/workspace.service'
 import { RecordCreationService } from '../../core/record-creation.service'
 
 @Injectable()
 export class CatalogTestEditorService {
+  private readonly workspace = inject(WorkspaceService)
   private readonly api = inject(ApiService)
   private readonly creation = inject(RecordCreationService)
   readonly timingEditor = inject(TimingPolicyEditorService)
@@ -60,7 +62,7 @@ export class CatalogTestEditorService {
       const existing = this.editing()
       const test: TestDefinition = {
         ...(existing?.data ?? { description: '', tags: [], dependencies: [], requiredBindings: [], type: 'https', runner: 'http', state: 'enabled', timeoutSeconds: 10 }),
-        id: value.id, title: value.title, category: value.category, timeoutSeconds: value.timeout, timing: this.timingEditor.policy(), safety: value.safety, rationale: value.rationale
+        applicationId: (existing ? existing.data.applicationId : this.workspace.applicationId()) || undefined, id: value.id, title: value.title, category: value.category, timeoutSeconds: value.timeout, timing: this.timingEditor.policy(), safety: value.safety, rationale: value.rationale
       }
       if (this.editingHTTP()) test.check = { ...test.check, ...this.checkEditor.check()! }
       const base = `/api/v1/projects/${this.project}/suites/${value.suite}/tests`

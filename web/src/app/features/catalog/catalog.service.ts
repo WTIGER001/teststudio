@@ -1,6 +1,8 @@
 import { randomId } from '../../core/random-id'
 import { computed, DestroyRef, effect, inject, Injectable, signal, untracked } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
+import { combineLatest } from 'rxjs'
+import { applicationSuites } from '../../core/application-scope.utils'
 import { ActivatedRoute } from '@angular/router'
 import { ApiError, ApiService, type Page, type RecordValue } from '../../core/api.service'
 import { AccessClientService } from '../../core/access-client.service'
@@ -21,11 +23,14 @@ export class CatalogService {
   readonly testEditor = inject(CatalogTestEditorService)
   readonly timingEditor = this.testEditor.timingEditor
   readonly checkEditor = this.testEditor.checkEditor
+  readonly probeOverview = this.route.snapshot.data['testType'] === 'https'
   readonly projectId = signal('')
+  readonly applicationId = signal('')
   readonly items = signal<CatalogItem[]>([])
   readonly applicationNotice = signal('')
   readonly applications = signal<RecordValue<Application>[]>([])
   readonly suites = signal<RecordValue<Suite>[]>([])
+  readonly hasSharedSuites = computed(() => !!this.applicationId() && this.suites().some(row => row.data.applications.length > 1))
   readonly loading = signal(true)
   readonly saving = signal(false)
   readonly error = signal('')
@@ -66,13 +71,14 @@ export class CatalogService {
   private publicationKey = ''
 
   constructor() {
-    this.route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => {
-      this.projectId.set(params.get('projectId') ?? ''); this.suiteFilter.set(this.route.snapshot.queryParamMap.get('suite') ?? ''); this.typeFilter.set(''); this.query.set(''); this.state.set('active'); this.filters.set({}); this.view.set('table'); this.review.set(null); this.publicationConflict.set(false); this.publicationUncertain.set(false); this.publicationAttempt.set(null); this.publicationDenied.set(false); this.publicationGeneration++; this.releaseSuite.set(''); this.draft.set(null)
+    combineLatest([this.route.paramMap, this.route.queryParamMap]).pipe(takeUntilDestroyed(this.destroy)).subscribe(([params, query]) => {
+      this.generation++; this.applicationId.set(params.get('applicationId') ?? '')
+      this.projectId.set(params.get('projectId') ?? ''); this.suiteFilter.set(query.get('suite') ?? ''); this.typeFilter.set(this.probeOverview ? 'https' : query.get('type') ?? ''); this.query.set(''); this.state.set('active'); this.filters.set({}); this.view.set('table'); this.review.set(null); this.publicationConflict.set(false); this.publicationUncertain.set(false); this.publicationAttempt.set(null); this.publicationDenied.set(false); this.publicationGeneration++; this.releaseSuite.set(''); this.draft.set(null)
       this.editorOpen.set(false); this.editing.set(null); this.items.set([]); this.visible.set([]); this.page.set(emptyCatalogPage()); this.suites.set([]); this.applications.set([]); this.success.set(this.route.snapshot.queryParamMap.has('created') ? 'Draft changes saved. Publish a release to use the updated definition.' : '')
     })
     effect(() => {
       const project = this.projectId()
-      this.query(); this.state(); this.suiteFilter(); this.typeFilter(); this.filters()
+      this.query(); this.state(); this.suiteFilter(); this.typeFilter(); this.filters(); this.applicationId()
       untracked(() => {
         clearTimeout(this.loadTimer); this.generation++; this.loading.set(true); this.loadingMore.set(false); this.visible.set([])
         if (project) this.loadTimer = setTimeout(() => { void this.load() }, 120)
@@ -88,14 +94,16 @@ export class CatalogService {
     this.destroy.onDestroy(() => { this.generation++; this.applicationGeneration++; this.publicationGeneration++; clearTimeout(this.loadTimer) })
   }
 
+  canLeave(): boolean { return !(this.editorOpen() && this.testEditor.dirty() || this.publicationUncertain() || this.saving()) || window.confirm('This catalog has unsaved edits or a publication in progress. Leave this page?') }
+
   filter(field: keyof CatalogFilters, value: string | boolean): void { this.filters.update(filters => ({ ...filters, [field]: value })) }
-  clearFilters(): void { this.query.set(''); this.state.set('active'); this.suiteFilter.set(''); this.typeFilter.set(''); this.filters.set({}) }
+  clearFilters(): void { this.query.set(''); this.state.set('active'); this.suiteFilter.set(''); this.typeFilter.set(this.probeOverview ? 'https' : ''); this.filters.set({}) }
 
   async load(more = false): Promise<void> {
     if (more && (this.loading() || this.loadingMore() || !this.page().cursor)) return
     clearTimeout(this.loadTimer)
     const generation = ++this.generation, project = this.projectId()
-    const query = catalogListRequest(this.query(), this.state(), this.suiteFilter(), this.typeFilter(), this.filters(), more ? this.page().cursor : '')
+    const query = catalogListRequest(this.query(), this.state(), this.suiteFilter(), this.typeFilter(), { ...this.filters(), application: this.applicationId() }, more ? this.page().cursor : '')
     this.loading.set(!more); this.loadingMore.set(more); this.error.set('')
     try {
       const [page, suites] = await Promise.all([
@@ -105,8 +113,8 @@ export class CatalogService {
       if (generation !== this.generation) return
       const incoming = page.items.map(catalogListItem)
       this.visible.set(more ? mergeCatalogItems(this.visible(), incoming) : incoming)
-      this.items.set(mergeCatalogItems(this.items(), incoming)); this.page.set(page); this.suites.set(suites.items)
-      if (!this.releaseSuite()) this.releaseSuite.set(suites.items[0]?.id ?? '')
+      this.items.set(mergeCatalogItems(this.items(), incoming)); this.page.set(page); this.suites.set(applicationSuites(suites.items, this.applicationId()))
+      if (!this.releaseSuite()) this.releaseSuite.set(this.suites()[0]?.id ?? '')
     } catch (error) {
       if (generation !== this.generation) return
       this.visible.set([])

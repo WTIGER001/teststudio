@@ -1,3 +1,4 @@
+import type { CatalogPage } from './features/catalog/catalog.page'
 import type { SuitesPage } from './features/configuration/suites.page'
 import type { ProjectsPage } from './features/projects/projects.page'
 import type { ApplicationsPage } from './features/applications/applications.page'
@@ -5,7 +6,8 @@ import type { CreateTestPage } from './features/catalog/create-test.page'
 import type { SourcesPage } from './features/sources/sources.page'
 import type { Routes } from '@angular/router'
 
-export const routes: Routes = [
+const projectRoutes: Routes = [
+  { path: 'projects/:projectId/probes', canDeactivate: [(page: CatalogPage) => page.canLeave()], data: { helpTopic: 'catalog', testType: 'https' }, loadComponent: () => import('./features/catalog/catalog.page').then(m => m.CatalogPage) },
   { path: 'projects/:projectId/suites', canDeactivate: [(page: SuitesPage) => page.canLeave()], data: { helpTopic: 'suites' }, loadComponent: () => import('./features/configuration/suites.page').then(m => m.SuitesPage) },
   { path: 'projects/:projectId/applications', canDeactivate: [(page: ApplicationsPage) => page.canLeave()], data: { helpTopic: 'applications' }, loadComponent: () => import('./features/applications/applications.page').then(m => m.ApplicationsPage) },
   { path: 'projects/:projectId/applications/:applicationId', canDeactivate: [(page: ApplicationsPage) => page.canLeave()], data: { helpTopic: 'applications' }, loadComponent: () => import('./features/applications/applications.page').then(m => m.ApplicationsPage) },
@@ -36,7 +38,7 @@ export const routes: Routes = [
   { path: 'settings/groups/:groupId', data: { helpTopic: 'group' }, loadComponent: () => import('./features/access/group-detail.page').then(m => m.GroupDetailPage) },
   { path: 'projects/:projectId/groups', data: { helpTopic: 'groups' }, loadComponent: () => import('./features/access/groups.page').then(m => m.GroupsPage) },
   { path: 'projects/:projectId/groups/:groupId', data: { helpTopic: 'group' }, loadComponent: () => import('./features/access/group-detail.page').then(m => m.GroupDetailPage) },
-  { path: 'projects/:projectId/catalog', data: { helpTopic: 'catalog' }, loadComponent: () => import('./features/catalog/catalog.page').then(m => m.CatalogPage) },
+  { path: 'projects/:projectId/catalog', canDeactivate: [(page: CatalogPage) => page.canLeave()], data: { helpTopic: 'catalog' }, loadComponent: () => import('./features/catalog/catalog.page').then(m => m.CatalogPage) },
   { path: 'projects/:projectId/configuration', data: { helpTopic: 'configuration' }, loadComponent: () => import('./features/configuration/configuration.page').then(m => m.ConfigurationPage) },
   { path: 'projects/:projectId/runs', data: { helpTopic: 'runs' }, loadComponent: () => import('./features/runs/run-list.page').then(m => m.RunListPage) },
   { path: 'projects/:projectId/trends', data: { helpTopic: 'trends' }, loadComponent: () => import('./features/trends/trends.page').then(m => m.TrendsPage) },
@@ -44,4 +46,9 @@ export const routes: Routes = [
   { path: 'projects/:projectId/notifications', data: { helpTopic: 'notifications' }, loadComponent: () => import('./features/notifications/notifications.page').then(m => m.NotificationsPage) },
   { path: 'projects/:projectId/runs/:runId', data: { helpTopic: 'run' }, loadComponent: () => import('./features/runs/run-detail.page').then(m => m.RunDetailPage) },
   { path: '**', redirectTo: 'projects' }
+]
+
+export const routes: Routes = [
+  ...projectRoutes.filter(route => /^projects\/:projectId\/(suites|catalog|runs|trends|tests)(\/|$)/.test(route.path ?? '')).map(route => ({ ...route, path: route.path!.replace('projects/:projectId/', 'projects/:projectId/applications/:applicationId/') })),
+  ...projectRoutes
 ]

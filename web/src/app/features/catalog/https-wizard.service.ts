@@ -97,8 +97,8 @@ export class HTTPSWizardService {
         this.release = release.id
       }
       this.progress.set('Starting local run…')
-      const result = await this.api.request<{ id: string }>(`/api/v1/projects/${project}/runs`, 'POST', { suiteId: value.suite, releaseId: this.release, environmentId: this.targets.environmentId(), testIds: [value.id], timeoutSeconds: 900, retries: 0 }, undefined, this.runKey)
-      if (!this.disposed && project === this.creation.sources.project()) await this.router.navigate(['/projects', project, 'runs', result.id])
+      const result = await this.api.request<{ id: string }>(`/api/v1/projects/${project}/runs`, 'POST', { applicationId: this.workspace.applicationId() || undefined, suiteId: value.suite, releaseId: this.release, environmentId: this.targets.environmentId(), testIds: [value.id], timeoutSeconds: 900, retries: 0 }, undefined, this.runKey)
+      if (!this.disposed && project === this.creation.sources.project()) await this.router.navigate(this.workspace.path('runs', result.id))
     } catch (error) { this.error.set(`${this.saved() ? 'The test is saved. ' : this.targets.targetSaved() || this.targets.applicationSaved() ? 'Target configuration is saved. Retry to continue saving the test. ' : ''}${error instanceof Error ? error.message : 'The action could not be completed.'}`) }
     finally { this.busy.set(false); this.progress.set('') }
   }

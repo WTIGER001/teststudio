@@ -82,7 +82,7 @@ export class NewRunService {
     const generation = ++this.estimateGeneration
     this.estimating.set(true); this.error.set('')
     try {
-      const estimate = await this.api.request<TimingEstimate>(`/api/v1/projects/${encodeURIComponent(this.workspace.projectId())}/runs/estimate`, 'POST', requestFromForm(this.form.getRawValue(), this.selectionPreview()?.id))
+      const estimate = await this.api.request<TimingEstimate>(`/api/v1/projects/${encodeURIComponent(this.workspace.projectId())}/runs/estimate`, 'POST', { ...requestFromForm(this.form.getRawValue(), this.selectionPreview()?.id), applicationId: this.workspace.applicationId() || undefined })
       if (generation === this.estimateGeneration) this.estimate.set(estimate)
     } catch (error) { if (generation === this.estimateGeneration) this.error.set(errorMessage(error, 'Timing could not be estimated.')) }
     finally { if (generation === this.estimateGeneration) this.estimating.set(false) }
@@ -97,11 +97,11 @@ export class NewRunService {
     if (!this.flow.ready() || this.saving()) return
     this.saving.set(true); this.error.set('')
     try {
-      const input = requestFromForm(this.form.getRawValue(), this.selectionPreview()?.id)
+      const input = { ...requestFromForm(this.form.getRawValue(), this.selectionPreview()?.id), applicationId: this.workspace.applicationId() || undefined }
       const fingerprint = JSON.stringify(input)
       if (fingerprint !== this.fingerprint) { this.key = randomId(); this.fingerprint = fingerprint }
       const run = await this.api.request<RecordValue<Run>>(`/api/v1/projects/${encodeURIComponent(this.workspace.projectId())}/runs`, 'POST', input, undefined, this.key)
-      await this.router.navigate(['/projects', this.workspace.projectId(), 'runs', run.id])
+      await this.router.navigate(this.workspace.path('runs', run.id))
     } catch (error) { if (this.selectionPreview() && error instanceof ApiError && error.status === 409) { this.selectionPreview.set(null); this.error.set('The saved selection changed. Preview the saved selection again before starting the run.') } else this.error.set(errorMessage(error, 'The run could not be started.')) }
     finally { this.saving.set(false) }
   }

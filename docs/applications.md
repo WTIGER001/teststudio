@@ -1,16 +1,23 @@
 # Applications
 
-Choose a project, then select Applications in the Testing sidebar section.
+Choose a project, then select All applications under Project overviews.
 The page lists the applications registered in that project.
 Each card shows readable environment and linked suite counts.
-Select Open application to view its detail page.
+Select Open application to make it the active application.
+Use the sidebar Application selector to switch quickly.
+The context above the page shows the project and active application.
+Suites, Test catalog, Test runs, and Trends follow this selection.
+Choose All applications for project-wide work. HTTPS probes provides a separate project overview.
 
 ## Relationships
 
 Applications belong to projects. Environments belong to applications.
 Suites belong to projects and can link to zero, one, or several applications.
 An application's Linked suites section shows those associations without changing suite ownership.
-An unassigned suite remains available in the project catalog.
+An unassigned suite remains available under All applications.
+A test with an explicit application appears only in that application.
+A test without an explicit application inherits its suite links.
+Shared suites keep one draft and release. Publication and transfer affect the complete suite.
 Archived suites retain their visible history and show an Archived badge.
 
 Select View tests to open the catalog filtered to that suite.
@@ -49,9 +56,16 @@ Management permissions control the environment and suite registration buttons.
 | Route | Purpose |
 | --- | --- |
 | /projects/{project}/applications | Application list and registration. |
-| /projects/{project}/applications/{application} | Application environments and linked suites. |
+| /projects/{project}/applications/{application} | Active application overview, environments, and linked suites. |
+| /projects/{project}/applications/{application}/suites | Suites linked to the active application. |
+| /projects/{project}/applications/{application}/catalog | Tests and summary counts for the active application. |
+| /projects/{project}/applications/{application}/runs | Application run history and creation. |
+| /projects/{project}/applications/{application}/trends | Application result trends. |
+| /projects/{project}/probes | HTTPS probes across project applications. |
 
-Both routes provide Introduction, Concepts, and Tutorials in the shared help drawer.
+These pages provide Introduction, Concepts, and Tutorials in the shared help drawer.
+Application routes retain context after reload or browser Back. Switching applications clears old filters.
+Unsaved-work confirmation can cancel the switch. The selector then keeps the original application.
 
 ## Guided registration
 

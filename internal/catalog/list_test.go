@@ -179,3 +179,45 @@ func TestCatalogExportRejectsExactExportDenyWithoutRestrictingListReads(t *testi
 		t.Fatal("exact export denial was bypassed", err)
 	}
 }
+
+func TestCatalogApplicationScopeIncludesInheritedTestsAndScopesCounts(t *testing.T) {
+	s := listFixture(t)
+	row, err := s.Store.Get(t.Context(), projects.Bucket("suites", "alpha"), "health")
+	if err != nil {
+		t.Fatal(err)
+	}
+	suite, err := storage.Decode[projects.Suite](row)
+	if err != nil {
+		t.Fatal(err)
+	}
+	suite.Applications = []string{"app", "other"}
+	change, _ := storage.Put(row.Bucket, row.ID, "alpha", row.Revision, suite)
+	if err := s.Store.CommitAll(t.Context(), change); err != nil {
+		t.Fatal(err)
+	}
+	for _, item := range []struct{ id, application string }{{"A", "app"}, {"B", "other"}, {"C", ""}, {"HIDDEN", ""}} {
+		row, err := s.Store.Get(t.Context(), catalog.Bucket("tests", "alpha", "health"), item.id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		test, _ := storage.Decode[catalog.Test](row)
+		test.Application = item.application
+		change, _ := storage.Put(row.Bucket, row.ID, "alpha", row.Revision, test)
+		if err := s.Store.CommitAll(t.Context(), change); err != nil {
+			t.Fatal(err)
+		}
+	}
+	page, err := s.ListTests(t.Context(), "admin", "alpha", "", catalog.ListQuery{Application: "app", Sort: "id"}, "")
+	if err != nil || page.Total != 3 || page.Matched != 3 || page.Counts.Total != 3 || page.Counts.Suites != 1 {
+		t.Fatal(page, err)
+	}
+	for _, item := range page.Items {
+		if item.Suite != "health" || item.ID == "B" {
+			t.Fatal("foreign application entered the scope", item)
+		}
+	}
+	none, err := s.ListTests(t.Context(), "admin", "alpha", "", catalog.ListQuery{Application: "missing"}, "")
+	if err != nil || none.Total != 0 || none.Counts.Total != 0 {
+		t.Fatal(none, err)
+	}
+}

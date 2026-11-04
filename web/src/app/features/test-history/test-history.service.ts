@@ -14,6 +14,7 @@ export class TestHistoryService {
   private readonly api = inject(ApiService)
   readonly workspace = inject(WorkspaceService)
   readonly project = signal('')
+  readonly applicationId = signal('')
   readonly suite = signal('')
   readonly test = signal('')
   readonly returnRun = signal('')
@@ -39,7 +40,7 @@ export class TestHistoryService {
     const route = inject(ActivatedRoute), destroy = inject(DestroyRef)
     route.paramMap.pipe(takeUntilDestroyed(destroy)).subscribe(params => {
       this.generation++; this.historyGeneration++; this.revisionGeneration++; this.runLoading.set(false); this.runQueryStarted = false; this.context.set(null); this.runs.set([]); this.revisions.set([]); this.cursor.set(''); this.error.set(''); this.runError.set(''); this.revisionError.set(''); this.revisionsLoaded = false
-      this.project.set(params.get('projectId') ?? ''); this.suite.set(params.get('suiteId') ?? ''); this.test.set(params.get('testId') ?? ''); this.returnRun.set(route.snapshot.queryParamMap.get('run') ?? '')
+      this.applicationId.set(params.get('applicationId') ?? ''); this.project.set(params.get('projectId') ?? ''); this.suite.set(params.get('suiteId') ?? ''); this.test.set(params.get('testId') ?? ''); this.returnRun.set(route.snapshot.queryParamMap.get('run') ?? '')
       void this.load()
     })
     effect(() => {
@@ -74,7 +75,7 @@ export class TestHistoryService {
     const generation = ++this.historyGeneration
     this.runQueryStarted = true; this.runLoading.set(true); this.runError.set('')
     try {
-      const page = await this.client.call('readTestRunHistory', { ...this.scope(), query: { limit: 20, cursor: more ? this.cursor() : undefined } })
+      const page = await this.client.call('readTestRunHistory', { ...this.scope(), query: { application: this.applicationId() || undefined, limit: 20, cursor: more ? this.cursor() : undefined } })
       if (generation !== this.historyGeneration) return
       this.runs.set(more ? [...this.runs(), ...page.items] : page.items); this.cursor.set(page.cursor ?? ''); this.partial.set(page.partial)
     } catch (error) { if (generation === this.historyGeneration) { this.runs.set([]); this.cursor.set(''); this.runError.set(error instanceof Error ? error.message : 'Run history is unavailable. Refresh access and retry.') } }

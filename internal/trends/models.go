@@ -3,6 +3,7 @@ package trends
 import "time"
 
 type Filter struct {
+	Application string    `json:"application,omitempty"`
 	Environment string    `json:"environment,omitempty"`
 	Suite       string    `json:"suite,omitempty"`
 	Category    string    `json:"category,omitempty"`

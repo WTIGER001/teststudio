@@ -154,3 +154,15 @@ An independently registered subtest owns its own result. Overlapping aggregate a
 Playwright browser and API operations remain recorded steps within the selected test.
 Framework assertions, nested steps, attachments, and retries do not add logical tests.
 Passing after an unsuccessful attempt remains one flaky result with separate retained attempts.
+
+## Application scope
+
+Run creation accepts an optional applicationId. It must identify an application linked to the suite.
+A selected environment must belong to that application. Foreign application tests and dependencies cannot enter its selection.
+The run freezes its suite applicationIds and the reviewed applicationId. Later suite edits do not reclassify this history.
+GET /api/v1/projects/{project}/runs accepts application to select matching frozen runs.
+Application result counts include matching tests only. Shared indicates a saved run that spans several applications.
+Run state, outcome, and evidence state describe the complete saved run.
+Shared run details show the complete saved snapshot with an explicit notice.
+Legacy environment snapshots provide their application. Explicit selected-test applications also identify targetless legacy history.
+Targetless legacy runs without known application context remain available under All applications. No current suite links reclassify them.

@@ -18,7 +18,7 @@ func (s *Server) testHistoryRoutes(m *http.ServeMux) {
 			problem(w, err)
 			return
 		}
-		page, err := s.Runs.TestHistory(r.Context(), actor(r), r.PathValue("project"), r.PathValue("suite"), r.PathValue("test"), r.URL.Query().Get("cursor"), limit)
+		page, err := s.Runs.ApplicationTestHistory(r.Context(), actor(r), r.PathValue("project"), r.PathValue("suite"), r.PathValue("test"), r.URL.Query().Get("application"), r.URL.Query().Get("cursor"), limit)
 		if err != nil {
 			problem(w, err)
 			return

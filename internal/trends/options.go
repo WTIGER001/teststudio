@@ -11,7 +11,7 @@ func options(input []runs.Run, f Filter) Options {
 	suites, environments := map[string]string{}, map[string]string{}
 	categories, locations := map[string]bool{}, map[string]bool{}
 	for _, run := range input {
-		if !inPeriod(run, f) {
+		if !inPeriod(run, f) || !runs.InApplication(run, f.Application) {
 			continue
 		}
 		suites[run.Request.Suite] = run.Request.Suite
@@ -21,7 +21,7 @@ func options(input []runs.Run, f Filter) Options {
 		}
 		locations[run.Request.Location] = true
 		for _, test := range run.Tests {
-			if test.Category != "" {
+			if runs.TestInApplication(run, test, f.Application) && test.Category != "" {
 				categories[test.Category] = true
 			}
 		}

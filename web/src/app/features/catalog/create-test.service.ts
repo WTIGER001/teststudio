@@ -19,7 +19,7 @@ export class CreateTestService {
   constructor() {
     effect(() => {
       const project = this.sources.project(), suites = this.sources.suites(), kind = this.kind()
-      const key = `${project}:${kind}`
+      const key = `${project}:${this.sources.applicationId()}:${kind}`
       untracked(() => {
         this.native.configure(project, suites)
         const preferred = this.route.snapshot.queryParamMap.get('suite')
@@ -27,12 +27,12 @@ export class CreateTestService {
         if (key === this.initialized) { if (!this.native.form.controls.suite.value && suites.length) this.native.form.controls.suite.setValue(suites[0].id); return }
         this.initialized = key
         this.native.create()
-        if (preferred) this.native.form.controls.suite.setValue(preferred)
+        if (preferred && suites.some(row => row.id === preferred)) this.native.form.controls.suite.setValue(preferred)
       })
     })
   }
 
-  afterCreate(): void { void this.router.navigate(['/projects', this.sources.project(), 'catalog'], { queryParams: { created: this.native.form.controls.id.value } }) }
+  afterCreate(): void { void this.router.navigate(this.sources.workspace.path('catalog'), { queryParams: { created: this.native.form.controls.id.value } }) }
 
   canLeave(): boolean {
     const dirty = this.sources.draftDirty() || this.sources.creationDirty() || this.kind() === 'https' && this.native.dirty()

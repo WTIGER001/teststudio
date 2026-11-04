@@ -65,3 +65,7 @@ The workflow checks archived suites, removed working definitions, saved titles, 
 It also checks current access denial, contextual help, keyboard return focus, themes, and narrow layout.
 Focused Go checks cover bounded scans, cursors, missing observations, exact permissions, and immutable snapshots.
 The fixture removal operates only inside the disposable self-test database. Production exposes no working-definition deletion route.
+
+Run history accepts an optional application query. It uses frozen run context and binds pagination cursors to that application.
+Application catalog links retain the same scope through history, trends, and evidence navigation.
+The retained definition and revision history still describe the permanent suite test identity.

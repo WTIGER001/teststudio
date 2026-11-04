@@ -114,3 +114,27 @@ func TestSnapshotIdentityDeduplicatesAndDoesNotInventMissingMetadata(t *testing.
 		t.Fatalf("ambiguous data appeared healthy: %+v", r)
 	}
 }
+
+func TestApplicationTrendsExcludeForeignRunsTestsAndOptions(t *testing.T) {
+	now := time.Now().UTC()
+	shared := sample("shared", now, "passed", "failed", "timed-out")
+	shared.Environment = nil
+	shared.Request.Environment = ""
+	shared.Applications = []string{"shop", "warehouse"}
+	shared.Tests[0].Application = "shop"
+	shared.Tests[1].Application = "warehouse"
+	shared.Tests[1].Category = "Warehouse only"
+	foreign := sample("foreign", now.Add(time.Minute), "failed")
+	foreign.Environment.Application = "warehouse"
+	foreign.Request.Suite = "foreign-suite"
+	report := Aggregate([]runs.Run{shared, foreign}, Filter{Application: "shop", Since: now.Add(-time.Hour), Until: now.Add(time.Hour)})
+	if report.Totals.Total != 2 || report.Totals.Passed != 1 || report.Totals.TimedOut != 1 || len(report.Points) != 1 {
+		t.Fatal(report)
+	}
+	if len(report.Options.Suites) != 1 || len(report.Options.Categories) != 1 || report.Options.Categories[0] != "Availability" {
+		t.Fatal(report.Options)
+	}
+	if len(report.FailureRankings) != 1 || report.FailureRankings[0].Test != "C" {
+		t.Fatal(report.FailureRankings)
+	}
+}

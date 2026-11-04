@@ -11,7 +11,7 @@ func (s *Server) trendRoutes(m *http.ServeMux) {
 	service := trends.Service{Store: s.Store, Auth: s.Auth}
 	m.HandleFunc("GET /api/v1/projects/{project}/trends", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
-		filter := trends.Filter{Environment: q.Get("environment"), Suite: q.Get("suite"), Category: q.Get("category"), Test: q.Get("test"), Location: q.Get("location")}
+		filter := trends.Filter{Application: q.Get("application"), Environment: q.Get("environment"), Suite: q.Get("suite"), Category: q.Get("category"), Test: q.Get("test"), Location: q.Get("location")}
 		var err error
 		filter.Since, err = time.Parse(time.RFC3339, q.Get("since"))
 		if err == nil {

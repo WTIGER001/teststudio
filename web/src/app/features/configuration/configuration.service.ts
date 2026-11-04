@@ -98,6 +98,7 @@ export class ConfigurationService {
       this.form.controls.credentials.clear()
       this.form.markAsPristine(); this.created.update(value => value + 1)
       await this.load()
+      if (this.kind() === 'applications') await this.workspace.load()
       return true
     } catch (error) { this.error.set(error instanceof Error ? error.message : 'Creation failed.'); return false }
     finally { this.saving.set(false) }

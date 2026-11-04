@@ -6,6 +6,32 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 48 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
+## Active application navigation correction — 2026-11-04
+
+The sidebar now has one project selector and an explicit application selector.
+Projects landing uses management cards without a duplicate project selector.
+A persistent context band identifies the project and active application.
+Application testing contains Overview, Suites, Test catalog, Test runs, and Trends.
+Project overviews contains All applications and a dedicated HTTPS probes route.
+Application routes retain scope through reload, browser Back, test creation, history, and investigation links.
+Switches retain the main destination and clear the previous application's filters and run details.
+Canceled unsaved-work switches restore the selector and retain the edited suite.
+Shared suite badges explain project ownership. Catalog notices explain complete-suite publication, transfer, and saved selections.
+Server catalog filtering scopes counts, facets, and categories, including tests that inherit suite links.
+New runs validate application and environment agreement and freeze application associations.
+Run lists, retained history, trends, options, and rankings use frozen scope. Shared run details retain the complete snapshot.
+Unknown legacy targetless application scope remains available under All applications.
+
+Validation passes six focused UI utility checks, Angular production build, generated API contract synchronization, and targeted Go scope and compatibility checks.
+STUDIO-NAV-001 passes through normal TestStudio publication and execution with two new applications.
+It verifies filtered tests, shared suites, filtered run lists, scoped trends, reload, Back, creation context, unsaved-work cancellation, keyboard navigation, and narrow light and dark layouts.
+Run: 20261104T143026.653455000-ee7f64897d689cd1c0a78fe7. Evidence is complete and the execution ledger is cleaned.
+The updated local demo retains its existing SQLite data and evidence at http://127.0.0.1:8040.
+Visual inspection confirms the active application and grouped navigation. The owned browser and automation daemon exit.
+Page help, application, catalog, result, retained-history, trend, UI, and plan documentation match the new scope rules.
+This improves verified items 05, 21, 27, 29, 30, 47, 49, and 50. The count remains 48 verified, 9 open.
+No cloud verification runs. Continue the remaining hosted adapter work after this usability correction.
+
 ## Acceptance criteria
 
 These stable numbers match the priority list supplied to the user.
