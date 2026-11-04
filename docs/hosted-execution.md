@@ -6,7 +6,8 @@ The shared hosted lifecycle driver is implemented in internal/hostedexecution.
 It implements the existing managed executor and timing-profile contracts.
 It connects a provider implementation to the private worker exchange and the durable execution ledger.
 
-The optional [Kubernetes Pod adapter](kubernetes-workers.md) now connects this lifecycle to a concrete provider.
+The optional [Kubernetes Pod adapter](kubernetes-workers.md) and [ECS adapter](ecs-workers.md) now connect this lifecycle to concrete providers.
+ECS private worker infrastructure packaging remains incomplete.
 The default local API keeps its existing local runners.
 Complete hosted execution and deployment acceptance remain incomplete.
 Native [hosted preparation](hosted-discovery.md) and its Helm deployment are implemented. Trusted gateways, remaining adapters, and deployment verification remain required.

@@ -1,0 +1,37 @@
+{
+  "worker": {
+    "region": "us-east-1",
+    "account": "123456789012",
+    "cluster": "arn:aws:ecs:us-east-1:123456789012:cluster/teststudio-workers",
+    "executionRole": "arn:aws:iam::123456789012:role/teststudio-worker-pull",
+    "deadlineRole": "arn:aws:iam::123456789012:role/teststudio-worker-deadline",
+    "scheduleGroup": "teststudio-workers",
+    "familyPrefix": "teststudio",
+    "architecture": "arm64",
+    "platformVersion": "1.4.0",
+    "subnets": ["subnet-aaaaaaaa", "subnet-bbbbbbbb"],
+    "securityGroups": ["sg-aaaaaaaa"],
+    "exchangeOrigin": "https://jobs.example.test"
+  },
+  "network": {
+    "vpc": "vpc-aaaaaaaa",
+    "controllerVpc": "vpc-bbbbbbbb",
+    "exchangeGroup": "sg-bbbbbbbb",
+    "registryGroup": "sg-cccccccc",
+    "loadBalancerGroup": "sg-dddddddd",
+    "controllerGroup": "sg-eeeeeeee",
+    "exchangeEndpoint": "vpce-11111111111111111",
+    "exchangeService": "com.amazonaws.vpce.us-east-1.vpce-svc-55555555555555555",
+    "apiEndpoint": "vpce-22222222222222222",
+    "dkrEndpoint": "vpce-33333333333333333",
+    "s3Endpoint": "vpce-44444444444444444",
+    "s3PrefixList": "pl-aaaaaaaa",
+    "repositoryPrefix": "teststudio",
+    "loadBalancer": "arn:aws:elasticloadbalancing:us-east-1:123456789012:loadbalancer/net/workers/aaaaaaaaaaaaaaaa",
+    "targetGroup": "arn:aws:elasticloadbalancing:us-east-1:123456789012:targetgroup/workers/bbbbbbbbbbbbbbbb",
+    "firewallGroup": "rslvr-frg-11111111111111111",
+    "firewallAssociation": "rslvr-frgassoc-22222222222222222",
+    "allowList": "rslvr-fdl-33333333333333333",
+    "blockList": "rslvr-fdl-44444444444444444"
+  }
+}

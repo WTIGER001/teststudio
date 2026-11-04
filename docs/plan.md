@@ -120,8 +120,22 @@ Its bounded settings loader binds network identity into timing and recovery owne
 Use a dedicated worker VPC; VPC-wide DNS restrictions must not affect trusted controller traffic.
 No Route 53 Profile overlay is permitted in that worker VPC. See [network admission](ecs-network-admission.md).
 The corrected Fargate contract uses task-local volumes, an explicit 21 GiB allocation, and inspected non-root storage capability.
-Both thin overlays and source metadata preservation pass focused local checks. Next add SDK construction, ECR authentication, and command wiring.
+Both thin overlays and source metadata preservation pass focused local checks.
+Scoped SDK construction, account verification, rotating ECR authentication, and optional command wiring now pass local checks.
 Package the private worker network and HTTPS route afterward. Preserve the separate cloud verification phase.
+
+The optional ECS commands now require PostgreSQL, the ecs location, a private port-8042 listener, and separate public origins.
+They reject mixed providers, local runners, ambiguous JSON sources, and artifact-role execution before database creation.
+The SDK factory verifies the configured calling account and fixes regional service endpoints, retries, and HTTP limits.
+ECR authorization stays in trusted processes, refreshes with credential identity, and strips credentials from expected S3 blob redirects.
+Native startup guards and focused SDK protocol race checks pass without credential discovery or provider calls.
+The shared hosted wiring keeps execution, discovery, approval, and cleanup contracts for both ECS and Kubernetes.
+See [ECS workers](ecs-workers.md) for complete settings, commands, roles, local evidence, and current deployment limits.
+Next add a private worker infrastructure package: dedicated worker VPC, DNS firewall, endpoints, PrivateLink, internal TLS listener, and scoped roles.
+Add a separate preparation workload with durable private registry journals. Connect optional settings to the API service.
+Resolve default endpoint-group egress during provisioning so the deployed state matches admission exactly.
+Build only the changed service image. Reuse UI, trace assets, and the unchanged supervised runtime bases.
+Keep MMDev deployment verification separate. Acceptances 41, 46, and 51–57 remain open.
 
 ### Current hosted packaging checkpoint
 
@@ -255,7 +269,8 @@ See [Durable ECS lifecycle](ecs-worker-lifecycle.md) for exact evidence, ownersh
 This advances 51 and supporting replica recovery under 52. The total remains 48 verified and 9 open.
 
 The production network checker, bounded settings loader, and supported task storage now pass focused local checks.
-Next implement the scoped SDK factory and ECR credential callbacks. Keep actual task and pool network admission mandatory.
+The scoped SDK factory, ECR credential callback, and optional API and preparation flags now pass focused local checks.
+Keep actual task and pool network admission mandatory. Next package private worker infrastructure and independent controller permissions.
 Add server and preparation wiring plus the private HTTPS route and scoped roles before enabling AWS workers.
 Do not recreate uncertain tasks after the finite RunTask idempotency window. Missing live tasks remain unresolved without a saved terminal observation.
 Keep exact image approval, gated dispatch, provider ownership, cancellation, deadlines, and checkpointed cleanup.

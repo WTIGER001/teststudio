@@ -6,8 +6,8 @@ The ECS adapter now includes SDK-backed network admission and bounded private se
 Its typed clients read EC2, ELBv2, Route 53 Resolver, and Route 53 Profiles state.
 They perform no network mutation. Local verification supplies authored protocol fixtures instead of live clients.
 
-The API and preparation commands do not enable this adapter yet.
-SDK construction, ECR authentication, command wiring, and worker infrastructure remain required.
+The API and preparation commands now have optional [ECS worker settings and SDK setup](ecs-workers.md).
+Worker infrastructure and private routing packaging remain required. The shipped core template enables no ECS coded workers.
 The current AWS service profile continues to execute native HTTP checks only.
 See [worker lifecycle](ecs-worker-lifecycle.md) for dispatch and checkpoint recovery.
 

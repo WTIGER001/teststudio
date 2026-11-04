@@ -10,7 +10,8 @@ Hosted Go and Playwright execution, preparation workers, and hosted recording re
 The [ECS task and deadline contracts](ecs-worker-contract.md) now provide immutable SDK drafts and recovery proofs for the worker adapter.
 The [durable provider lifecycle](ecs-worker-lifecycle.md) now adds reserved dispatch, recovery, and checkpointed cleanup.
 These components do not enable hosted coded execution. Network admission, settings parsing, and supported task-local storage now pass local checks.
-Scoped SDK setup, command wiring, private routing infrastructure, and worker packaging remain required.
+Scoped SDK setup, rotating ECR authentication, and optional [native worker settings](ecs-workers.md) now pass local checks.
+Private routing infrastructure and worker packaging remain required.
 Do not enable local Docker runner flags inside this service.
 Keep acceptance 57 and the related hosted acceptance items open.
 
@@ -183,5 +184,6 @@ All owned verification containers and volumes are removed. Existing demonstratio
 The optional ECS adapter now has [SDK-backed network admission](ecs-network-admission.md) and bounded private settings parsing.
 Workers require a dedicated VPC with exact registry endpoints, DNS filtering, and a PrivateLink exchange path to the controller VPC.
 The core service template does not provision or enable these worker resources yet.
-SDK initialization, command wiring, private routing infrastructure, and worker packaging remain required.
+Optional [native worker settings](ecs-workers.md), account verification, and ECR authentication are implemented.
+Private routing infrastructure and worker packaging remain required.
 Local protocol checks do not establish deployed network isolation or hosted execution acceptance.

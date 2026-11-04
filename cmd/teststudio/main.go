@@ -22,6 +22,7 @@ import (
 	permissions "github.com/wtiger001/go-permissions"
 	artifactconfig "github.com/wtiger001/teststudio/adapters/artifacts/config"
 	authoidc "github.com/wtiger001/teststudio/adapters/auth/oidc"
+	ecsworker "github.com/wtiger001/teststudio/adapters/execution/ecs"
 	"github.com/wtiger001/teststudio/adapters/execution/kubernetes"
 	"github.com/wtiger001/teststudio/adapters/execution/localcontainer"
 	"github.com/wtiger001/teststudio/adapters/execution/localplaywright"
@@ -64,6 +65,8 @@ func main() {
 
 func run() error {
 	workerAddr := flag.String("worker-addr", "", "Optional private job transport listen address; requires trusted ingress and remote TLS termination")
+	ecsConfiguration := flag.String("ecs-workers-config", "", "Private ECS worker and network JSON settings")
+	ecsEnvironment := flag.String("ecs-workers-env", "", "Environment variable containing private ECS worker settings")
 	kubernetesConfiguration := flag.String("kubernetes-workers-config", "", "Operator JSON settings for isolated Kubernetes workers")
 	kubernetesEnvironment := flag.String("kubernetes-workers-env", "", "Environment variable containing isolated Kubernetes worker settings")
 	serviceRole := flag.String("serve-role", "all", "Service listeners: all, api, or artifacts; artifact role starts no background workers or identity bootstrap")
@@ -110,7 +113,7 @@ func run() error {
 	if !role.API && (*workerAddr != "" || *local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *preparedSources || *sourceBundles || *githubSources || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
 		return errors.New("the artifact service role cannot configure identity bootstrap, sign-in, source preparation, recording, execution, or private worker transport")
 	}
-	if !role.API && (*kubernetesConfiguration != "" || *kubernetesEnvironment != "") {
+	if !role.API && (*kubernetesConfiguration != "" || *kubernetesEnvironment != "" || *ecsConfiguration != "" || *ecsEnvironment != "") {
 		return errors.New("the artifact service role cannot configure hosted execution")
 	}
 	connection, err := runtimeconfig.DatabaseConnection(*dsn, *databaseEnvironment, runtimeconfig.ExplicitFlag(flag.CommandLine, "database"), os.LookupEnv)
@@ -181,6 +184,27 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	if (*kubernetesConfiguration != "" || *kubernetesEnvironment != "") && (*ecsConfiguration != "" || *ecsEnvironment != "") {
+		return errors.New("choose one hosted execution provider")
+	}
+	ecsSettings, err := ecsworker.LoadSettings(*ecsConfiguration, *ecsEnvironment, os.LookupEnv)
+	if err != nil {
+		return err
+	}
+	if ecsSettings != nil {
+		if *location != "ecs" || *workerAddr == "" || *local || *goImages != "" || *playwrightImages != "" || *browserGateway != "" {
+			return errors.New("ECS workers require their execution location and private listener without local coded execution or inspection")
+		}
+		if _, port, err := net.SplitHostPort(*workerAddr); err != nil || port != "8042" {
+			return errors.New("ECS workers require the private listener on port 8042")
+		}
+		if sameHTTPOrigin(ecsSettings.Worker.ExchangeOrigin, *public) || sameHTTPOrigin(ecsSettings.Worker.ExchangeOrigin, *artifactOrigin) {
+			return errors.New("the private worker origin must differ from UI and artifact origins")
+		}
+		if err := runtimeconfig.RequirePostgres(connection, true); err != nil {
+			return err
+		}
+	}
 	kubernetesSettings, err := kubernetes.LoadSettings(*kubernetesConfiguration, *kubernetesEnvironment, os.LookupEnv)
 	if err != nil {
 		return err
@@ -189,7 +213,7 @@ func run() error {
 		if *location != "kubernetes" || *workerAddr == "" || *local || *goImages != "" || *playwrightImages != "" || *browserGateway != "" {
 			return errors.New("Kubernetes workers require their execution location and private listener without local coded execution or inspection")
 		}
-		if kubernetesSettings.Worker.ExchangeOrigin == *public || kubernetesSettings.Worker.ExchangeOrigin == *artifactOrigin {
+		if sameHTTPOrigin(kubernetesSettings.Worker.ExchangeOrigin, *public) || sameHTTPOrigin(kubernetesSettings.Worker.ExchangeOrigin, *artifactOrigin) {
 			return errors.New("the private worker origin must differ from UI and artifact origins")
 		}
 		if err := runtimeconfig.RequirePostgres(connection, true); err != nil {
@@ -311,13 +335,21 @@ func run() error {
 			runService.GoAPI = &apiDriver
 		}
 	}
+	if ecsSettings != nil {
+		runtime, err := ecsSettings.Open(ctx, db, sourceService.AuthorizeDiscoveryCleanup)
+		if err != nil {
+			return err
+		}
+		defer runtime.Close()
+		configureHostedWorkers(runService, sourceService, workerExchange, runtime.Provider, "ecs", ecsSettings.Worker.ExchangeOrigin, *preparedSources)
+	}
 	if kubernetesSettings != nil {
 		provider, err := kubernetesSettings.Open(db, os.LookupEnv, sourceService.AuthorizeDiscoveryCleanup)
 		if err != nil {
 			return err
 		}
 		defer provider.Close()
-		configureKubernetesWorkers(runService, sourceService, workerExchange, provider, kubernetesSettings.Worker.ExchangeOrigin, *preparedSources)
+		configureHostedWorkers(runService, sourceService, workerExchange, provider, "kubernetes", kubernetesSettings.Worker.ExchangeOrigin, *preparedSources)
 	}
 	scheduleService := &schedules.Service{Store: db, Auth: auth, Runs: runService, RepositorySources: sourceService}
 	notificationService := &notifications.Service{Store: db, Auth: auth, Secrets: secretProvider, Sender: &webhook.Sender{}, Origin: *public}

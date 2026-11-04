@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	permissions "github.com/wtiger001/go-permissions"
+	ecsworker "github.com/wtiger001/teststudio/adapters/execution/ecs"
 	"github.com/wtiger001/teststudio/adapters/execution/kubernetes"
 	"github.com/wtiger001/teststudio/adapters/execution/localcontainer"
 	permissionpg "github.com/wtiger001/teststudio/adapters/permissions/postgres"
@@ -37,6 +38,8 @@ func run() error {
 	database := flag.String("database", ".data/teststudio.db", "SQLite path or PostgreSQL URL shared with the API")
 	databaseEnvironment := flag.String("database-env", "", "Environment variable containing the database connection")
 	requirePostgres := flag.Bool("require-postgres", false, "Require PostgreSQL for a hosted or multi-instance installation")
+	ecsConfig := flag.String("ecs-workers-config", "", "Private ECS worker and network preparation settings")
+	ecsEnv := flag.String("ecs-workers-env", "", "Environment variable containing private ECS preparation settings")
 	kubernetesConfig := flag.String("kubernetes-workers-config", "", "Private Kubernetes and registry preparation settings")
 	kubernetesEnv := flag.String("kubernetes-workers-env", "", "Environment variable containing private Kubernetes preparation settings")
 	registryGo := flag.String("registry-go-runtime", "", "Trusted supervised Go runtime distribution digest")
@@ -52,14 +55,24 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	if (*kubernetesConfig != "" || *kubernetesEnv != "") && (*ecsConfig != "" || *ecsEnv != "") {
+		return errors.New("choose one hosted execution provider")
+	}
+	ecsSettings, err := ecsworker.LoadSettings(*ecsConfig, *ecsEnv, os.LookupEnv)
+	if err != nil {
+		return err
+	}
+	if ecsSettings != nil && (*location != "ecs" || *runtime != "" || *browserRuntime != "") {
+		return errors.New("ECS preparation requires its execution location without local source runtime flags")
+	}
 	kubernetesSettings, err := kubernetes.LoadSettings(*kubernetesConfig, *kubernetesEnv, os.LookupEnv)
 	if err != nil {
 		return err
 	}
-	if kubernetesSettings != nil && (*location != "kubernetes" || *runtime != "" || *browserRuntime != "") || kubernetesSettings == nil && (*registryGo != "" || *registryPlaywright != "") {
-		return errors.New("hosted preparation requires Kubernetes settings and its location without local source runtime flags")
+	if kubernetesSettings != nil && (*location != "kubernetes" || *runtime != "" || *browserRuntime != "") || kubernetesSettings == nil && ecsSettings == nil && (*registryGo != "" || *registryPlaywright != "") {
+		return errors.New("hosted preparation requires Kubernetes settings or ECS settings and the matching location without local source runtime flags")
 	}
-	if err := runtimeconfig.RequirePostgres(connection, *requirePostgres || kubernetesSettings != nil); err != nil {
+	if err := runtimeconfig.RequirePostgres(connection, *requirePostgres || kubernetesSettings != nil || ecsSettings != nil); err != nil {
 		return err
 	}
 	if !domain.ValidID(*location) {
@@ -100,7 +113,16 @@ func run() error {
 		return err
 	}
 	service := &sources.Service{Store: store, Auth: auth, Location: *location, Inspectors: map[string]preparation.ArtifactInspector{}, RecoveryInspectors: map[string]preparation.ArtifactInspector{}, Builders: map[string]preparation.ArtifactBuilder{}, RecoveryBuilders: map[string]preparation.ArtifactBuilder{}}
-	if kubernetesSettings != nil {
+	if ecsSettings != nil {
+		runtime, err := ecsSettings.Open(ctx, store, service.AuthorizeDiscoveryCleanup)
+		if err != nil {
+			return err
+		}
+		defer runtime.Close()
+		if err := attachRegistryPreparation(service, runtime.Provider, runtime.Registry, "ecs", ecsSettings.Worker.ExchangeOrigin, root, map[string]string{"go": *registryGo, "playwright": *registryPlaywright}); err != nil {
+			return err
+		}
+	} else if kubernetesSettings != nil {
 		close, err := configureRegistryPreparation(service, *kubernetesSettings, root, map[string]string{"go": *registryGo, "playwright": *registryPlaywright}, os.LookupEnv)
 		if err != nil {
 			return err

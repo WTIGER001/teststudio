@@ -6,10 +6,10 @@ The ECS provider now implements the shared hosted execution and discovery lifecy
 It reserves creation in PostgreSQL or SQLite records, verifies provider receipts, observes owned tasks, stops work, and reconciles cleanup.
 The existing immutable [task and deadline contracts](ecs-worker-contract.md) remain the resource specification.
 
-The provider is not enabled by server or preparation flags yet.
+The provider now has optional [server and preparation settings](ecs-workers.md), scoped SDK construction, and rotating ECR authentication.
 Its constructor requires an image inspector and both installation and task network-admission checks. No default network bypass exists.
 The [production network checker and bounded settings loader](ecs-network-admission.md) are implemented with local protocol verification.
-The scoped client factory, command wiring, private exchange route, and deployment package remain to implement.
+Private exchange infrastructure and the worker deployment package remain to implement.
 The current AWS service profile continues to support native HTTP checks only.
 Keep all hosted acceptance items open until their complete scope is verified.
 
@@ -110,8 +110,8 @@ The UI, service images, trusted runtimes, and browser dependencies remain unchan
 Keep the implemented network checker mandatory. Its dedicated worker VPC and PrivateLink path separate worker egress from trusted controller access.
 The corrected task contract uses supported task-local volumes, an explicit 21 GiB allocation, and a new timing-pool identity.
 Require the inspected non-root volume capability before execution admission.
-Add the scoped SDK factory and bounded private settings to the API and preparation commands.
+The scoped SDK factory and private settings now connect the API and preparation commands.
 Preserve explicit account and region scope, disabled creation retries, current credentials, and private error handling.
-Then package private worker HTTPS routing, controller permissions, platform-only pull permissions, and the independent deadline role.
+Package private worker HTTPS routing, controller permissions, platform-only pull permissions, and the independent deadline role.
 Connect registry assembly and hosted discovery through the existing preparation queue.
-Keep ECS disabled until these controls and routes are implemented and pass targeted local checks.
+The core service template must keep ECS worker settings disabled until its private resources and permissions are packaged and checked locally.

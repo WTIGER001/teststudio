@@ -6,10 +6,10 @@ The ECS worker package builds fixed AWS SDK task definitions, launch requests, d
 It supports the existing offline Go and Playwright execution and discovery operations.
 Pinned dependencies are ECS v1.103.1 and Scheduler v1.26.1. They retain the existing AWS core SDK version.
 
-This delivery does not enable ECS workers in the API or preparation command.
+Optional [API and preparation flags](ecs-workers.md) now connect these contracts to the existing durable lifecycle.
 The [durable provider lifecycle](ecs-worker-lifecycle.md) now implements dispatch, observations, and checkpointed cleanup with required network-admission hooks.
 The [network checker and bounded settings parsing](ecs-network-admission.md) are implemented.
-SDK initialization, command wiring, private exchange routing, and AWS packaging remain required.
+Scoped SDK initialization and command wiring pass local checks. Private exchange infrastructure and AWS worker packaging remain required.
 The existing AWS service profile continues to support native HTTP execution only.
 No cloud account, registry, or deployment is contacted by these contract checks.
 
@@ -136,5 +136,6 @@ Supported task-local storage and non-root overlay volumes now pass focused local
 Evidence is output/ecs-network-admission/task-storage-contract.log and output/ecs-task-storage.
 The package probe verifies both runner overlays with real local volume initialization, writable scratch paths, and rejected runtime writes.
 It starts no browser or source suite. All owned containers and anonymous volumes exit through removal.
-Next add scoped SDK initialization, private HTTPS routing, controller roles, command wiring, and AWS service packaging.
+Scoped SDK initialization, ECR authentication, and command wiring now pass local checks.
+Next add private HTTPS routing infrastructure, controller roles, and AWS worker packaging.
 Keep the AWS provider disabled until those lifecycle and routing contracts are complete.

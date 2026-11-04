@@ -122,7 +122,40 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: supported Fargate storage and non-root runtime volumes
+## Current delivery: scoped ECS SDK setup, ECR authentication, and native wiring
+
+Acceptance **51** advances. The total remains **48 verified of 57**, with **9 open**.
+The optional SDK factory verifies STS account and ARN ownership, then constructs scoped regional ECS and network clients.
+It retains the SDK credential chain for trusted controllers without copying ambient service endpoints, logging, proxies, or retry settings into control clients.
+Control requests require expected HTTPS service hosts, bounded responses, request timeouts, and disabled automatic retries.
+ECR authorization binds the configured registry and repository namespace. It remains in process memory rather than settings or worker input.
+A bounded cache coalesces authorization and refreshes on SDK credential rotation or expiry. Failed refresh never falls back to stale authority.
+Expected signed S3 configuration-blob redirects strip credentials and retain checksum and size verification.
+Runtime closure releases owned SDK and registry connections.
+
+Both native commands now accept ecs-workers-config or ecs-workers-env.
+The API requires PostgreSQL, the ecs location, private port 8042, separate origins, and no local coded runner settings.
+Origin checks normalize host case and default ports for both hosted providers.
+The artifact role rejects ECS settings. Mixed ECS and Kubernetes configuration is rejected before storage initialization.
+The canonical hosted driver wiring now accepts either provider name and retains approval, scoped discovery, and cleanup recovery.
+Preparation uses the same registry builder and discovery workflow with a separate trusted process identity and durable private journal directory.
+Omitting runtime flags retains cleanup-only configuration. API and preparation must retain identical worker and network settings while cleanup remains unresolved.
+The example settings contain only independent resource placeholders. They enable no existing account resources.
+
+Six focused ECR and real-SDK protocol checks pass with race detection in output/ecs-sdk-wiring/final-sdk-contract.log.
+They use explicit fixture credentials and intercepted HTTP transports; the credential chain and external endpoints are never accessed.
+A checksummed OCI image passes through the actual SDK authorization and credential-free S3 redirect path.
+Account mismatch, endpoint drift, private errors, disabled retries, token rotation, cache expiry, and response limits are covered.
+Both native binaries build. Twelve startup guards pass in output/ecs-sdk-wiring/startup/summary.json without initializing their database.
+No browser, container, service image rebuild, trusted runtime rebuild, UI build, registry push, or live provider operation occurs.
+The existing demo remains healthy and retains its data. Source-page help already describes configured locations without provider-specific restrictions.
+Operator, network, lifecycle, preparation, exchange, AWS, and plan guides reflect the new optional flags and remaining package boundary.
+
+Next package private routing, worker networking, least-authority control and deadline roles, optional service settings, and the separate preparation workload.
+Preserve the required endpoint-group egress state, private durable journals, exact image approval, and cleanup-only operation.
+Rebuild the service image once these inputs change. Keep target-profile verification in its separate session.
+
+## Previous delivery: supported Fargate storage and non-root runtime volumes
 
 Acceptance **51** advances, with supporting resource-class timing identity under **41**. The total remains **48 verified of 57**, with **9 open**.
 Primary-source review finds two errors in the earlier draft: Fargate rejects tmpfs, and explicit ephemeral storage starts at 21 GiB.

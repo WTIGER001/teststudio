@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/wtiger001/teststudio/adapters/execution/kubernetes"
 	"github.com/wtiger001/teststudio/adapters/preparation/registryimage"
+	"github.com/wtiger001/teststudio/adapters/registry/oci"
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
 	"github.com/wtiger001/teststudio/internal/sources"
 	"github.com/wtiger001/teststudio/internal/workerexchange"
@@ -24,9 +25,24 @@ func configureRegistryPreparation(service *sources.Service, settings kubernetes.
 		registry.Close()
 		return nil, err
 	}
+	if err := attachRegistryPreparation(service, provider, registry, "kubernetes", settings.Worker.ExchangeOrigin, directory, runtimes); err != nil {
+		provider.Close()
+		registry.Close()
+		return nil, err
+	}
+	return func() { provider.Close(); registry.Close() }, nil
+}
+
+func attachRegistryPreparation(service *sources.Service, provider hostedexecution.Provider, registry *oci.Client, name, origin, directory string, runtimes map[string]string) error {
+	for _, image := range runtimes {
+		if image != "" && registry.ValidateReference(image) != nil {
+			return hostedexecution.ErrConfiguration
+		}
+	}
+
 	exchange := &workerexchange.Service{Store: service.Store, Authorize: service.AuthorizeDiscovery, AuthorizeDiscoveryCleanup: service.AuthorizeDiscoveryCleanup}
 	for _, runner := range []string{"go", "playwright"} {
-		inspector := &hostedexecution.DiscoveryInspector{Provider: provider, Exchange: exchange, Name: "kubernetes", Runner: runner, ExchangeOrigin: settings.Worker.ExchangeOrigin}
+		inspector := &hostedexecution.DiscoveryInspector{Provider: provider, Exchange: exchange, Name: name, Runner: runner, ExchangeOrigin: origin}
 		builder := &registryimage.Builder{Registry: registry, RuntimeImage: runtimes[runner], Directory: directory}
 		service.RecoveryInspectors[runner] = inspector
 		service.RecoveryBuilders[runner] = builder
@@ -34,5 +50,5 @@ func configureRegistryPreparation(service *sources.Service, settings kubernetes.
 			service.Inspectors[runner], service.Builders[runner] = inspector, builder
 		}
 	}
-	return func() { provider.Close(); registry.Close() }, nil
+	return nil
 }

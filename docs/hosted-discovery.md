@@ -2,7 +2,9 @@
 
 ## Current scope
 
-The preparation command connects registry source assembly to the durable source queue and isolated Kubernetes discovery.
+The preparation command connects registry source assembly to the durable source queue and isolated provider discovery.
+Kubernetes uses Pods. Optional [ECS settings](ecs-workers.md) now use the same queue with Fargate tasks and ECR authentication.
+ECS private infrastructure packaging and deployed acceptance remain required.
 It supports the offline Go and Playwright profiles. Local preparation retains its existing behavior.
 The API accepts source uploads and presents the normal source review. It does not assemble uploaded source in its process.
 The portable service image now includes /app/teststudio-prepare for a separate preparation process.
@@ -75,8 +77,8 @@ For repository synchronization, use the existing [repository settings](repositor
 1. A tester stages a supported ZIP or pinned repository snapshot through the existing source workflow.
 2. The preparation worker claims the durable job and assembles source against the selected trusted runtime.
 3. Registry publication saves an immutable distribution reference and retained source digest in the existing build checkpoint.
-4. The worker creates a gated discovery exchange and one owned discovery Pod.
-5. The controller verifies provider creation before releasing input to that exact Pod.
+4. The worker creates a gated discovery exchange and one owned discovery worker.
+5. The controller verifies provider creation before releasing input to that exact worker.
 6. The supervisor invokes only the selected runner's fixed --discover operation with no test work item on standard input.
 7. The exchange validates the discovery schema, suite, runner, source digest, and offline profile.
 8. A successful provider termination and accepted discovery produce the existing source review.
@@ -98,7 +100,7 @@ The cleanup guard uses the exact preparation reference instead of a fabricated t
 
 Ready reviews can show cleanup pending while their source remains available for review.
 Cleanup stops owned work, confirms termination, deletes with provider ownership preconditions, and then removes the exchange and upload journals.
-Recovery claims expired leases and performs cleanup only. It never repeats discovery or dispatches another Pod.
+Recovery claims expired leases and performs cleanup only. It never repeats discovery or dispatches another worker.
 An interrupted active preparation becomes failed after cleanup. The tester starts any replacement explicitly.
 Uncertain provider termination or upload cleanup retains a pending record for another reconciliation attempt.
 Published manifests and source blobs remain available for retained releases. Preparation cleanup does not delete them.
