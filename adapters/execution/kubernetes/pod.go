@@ -26,7 +26,10 @@ func (p *Provider) scope() string {
 }
 
 func validReference(ref execution.Reference) bool {
-	return domain.ValidID(ref.ID) && domain.ValidID(ref.Installation) && domain.ValidID(ref.Project) && domain.ValidID(ref.Run) && domain.ValidID(ref.Test) && domain.ValidID(ref.Worker) && ref.Attempt >= 1 && ref.Attempt <= 3 && ref.Volume == "" && ref.Gateway == "" && (ref.Profile == "go-kubernetes-isolated-v1" || ref.Profile == "playwright-kubernetes-isolated-v1") && ref.Container == "teststudio-job-"+func() string { sum := sha256.Sum256([]byte(ref.ID)); return hex.EncodeToString(sum[:20]) }()
+	if strings.HasSuffix(ref.Profile, "-discovery-v1") && (!strings.HasPrefix(ref.Installation, "preparation-") || ref.Test != "catalog" || ref.Attempt != 1) {
+		return false
+	}
+	return domain.ValidID(ref.ID) && domain.ValidID(ref.Installation) && domain.ValidID(ref.Project) && domain.ValidID(ref.Run) && domain.ValidID(ref.Test) && domain.ValidID(ref.Worker) && ref.Attempt >= 1 && ref.Attempt <= 3 && ref.Volume == "" && ref.Gateway == "" && (ref.Profile == "go-kubernetes-isolated-v1" || ref.Profile == "playwright-kubernetes-isolated-v1" || ref.Profile == "go-kubernetes-discovery-v1" || ref.Profile == "playwright-kubernetes-discovery-v1") && ref.Container == "teststudio-job-"+func() string { sum := sha256.Sum256([]byte(ref.ID)); return hex.EncodeToString(sum[:20]) }()
 }
 
 func labels(ref execution.Reference) map[string]string {
@@ -45,10 +48,14 @@ func (p *Provider) build(job hostedexecution.Job, seconds int) pod {
 	}
 	security := map[string]any{"runAsNonRoot": true, "runAsUser": 1000, "runAsGroup": 1000, "fsGroup": 1000, "fsGroupChangePolicy": "OnRootMismatch", "seccompProfile": map[string]any{"type": "RuntimeDefault"}}
 	containerSecurity := map[string]any{"allowPrivilegeEscalation": false, "readOnlyRootFilesystem": true, "capabilities": map[string]any{"drop": []string{"ALL"}}}
+	args := []string{"--runner=" + job.Runner, "--exchange-origin=" + job.ExchangeOrigin}
+	if job.Operation == "discover" {
+		args = append(args, "--operation=discover")
+	}
 	return pod{APIVersion: "v1", Kind: "Pod", Metadata: metadata{Name: job.Reference.Container, Namespace: p.config.Namespace, Labels: labels(job.Reference), Annotations: map[string]string{ownerAnnotation: string(ref), deadlineAnnotation: job.Ticket.Deadline.UTC().Format(time.RFC3339Nano), secondsAnnotation: strconv.Itoa(seconds), "sidecar.istio.io/inject": "false", "linkerd.io/inject": "disabled"}}, Spec: map[string]any{
 		"serviceAccountName": p.config.ServiceAccount, "automountServiceAccountToken": false, "enableServiceLinks": false, "restartPolicy": "Never", "runtimeClassName": p.config.RuntimeClass, "activeDeadlineSeconds": seconds, "terminationGracePeriodSeconds": 10, "hostNetwork": false, "hostPID": false, "hostIPC": false, "shareProcessNamespace": false, "dnsPolicy": "ClusterFirst", "nodeSelector": selectors, "imagePullSecrets": pulls, "securityContext": security,
 		"tolerations": []any{map[string]any{"key": "node.kubernetes.io/not-ready", "operator": "Exists", "effect": "NoExecute", "tolerationSeconds": 0}, map[string]any{"key": "node.kubernetes.io/unreachable", "operator": "Exists", "effect": "NoExecute", "tolerationSeconds": 0}},
-		"containers":  []any{map[string]any{"name": "runner", "image": job.Image, "imagePullPolicy": "IfNotPresent", "command": []string{"/runner/teststudio-job"}, "args": []string{"--runner=" + job.Runner, "--exchange-origin=" + job.ExchangeOrigin}, "env": []any{map[string]any{"name": "TESTSTUDIO_JOB_EXECUTION", "value": job.Reference.ID}, map[string]any{"name": "TESTSTUDIO_JOB_TOKEN", "value": job.Ticket.Token}, map[string]any{"name": "TESTSTUDIO_JOB_INSTANCE", "valueFrom": map[string]any{"fieldRef": map[string]any{"apiVersion": "v1", "fieldPath": "metadata.uid"}}}}, "securityContext": containerSecurity, "terminationMessagePath": "/dev/termination-log", "terminationMessagePolicy": "File", "resources": map[string]any{"requests": map[string]string{"cpu": "2", "memory": "2Gi", "ephemeral-storage": "2Gi"}, "limits": map[string]string{"cpu": "2", "memory": "2Gi", "ephemeral-storage": "2Gi"}}, "volumeMounts": []any{map[string]any{"name": "temporary", "mountPath": "/tmp"}, map[string]any{"name": "output", "mountPath": "/output"}}}},
+		"containers":  []any{map[string]any{"name": "runner", "image": job.Image, "imagePullPolicy": "IfNotPresent", "command": []string{"/runner/teststudio-job"}, "args": args, "env": []any{map[string]any{"name": "TESTSTUDIO_JOB_EXECUTION", "value": job.Reference.ID}, map[string]any{"name": "TESTSTUDIO_JOB_TOKEN", "value": job.Ticket.Token}, map[string]any{"name": "TESTSTUDIO_JOB_INSTANCE", "valueFrom": map[string]any{"fieldRef": map[string]any{"apiVersion": "v1", "fieldPath": "metadata.uid"}}}}, "securityContext": containerSecurity, "terminationMessagePath": "/dev/termination-log", "terminationMessagePolicy": "File", "resources": map[string]any{"requests": map[string]string{"cpu": "2", "memory": "2Gi", "ephemeral-storage": "2Gi"}, "limits": map[string]string{"cpu": "2", "memory": "2Gi", "ephemeral-storage": "2Gi"}}, "volumeMounts": []any{map[string]any{"name": "temporary", "mountPath": "/tmp"}, map[string]any{"name": "output", "mountPath": "/output"}}}},
 		"volumes":     []any{map[string]any{"name": "temporary", "emptyDir": map[string]any{"medium": "Memory", "sizeLimit": "1Gi"}}, map[string]any{"name": "output", "emptyDir": map[string]any{"sizeLimit": "1Gi"}}},
 	}}
 }
@@ -113,7 +120,12 @@ func (p *Provider) verifyPod(value pod, record dispatch) error {
 }
 
 func (p *Provider) jobRecord(job hostedexecution.Job) (dispatch, pod, error) {
-	if !validReference(job.Reference) || job.Runner != "go" && job.Runner != "playwright" || job.Reference.Profile != job.Runner+"-kubernetes-isolated-v1" || job.ExchangeOrigin != p.config.ExchangeOrigin || !immutable.MatchString(job.Image) || job.Ticket.Execution != job.Reference.ID || len(job.Ticket.Token) != 43 || strings.ContainsAny(job.Ticket.Token, "\r\n\x00") || !job.Ticket.Deadline.After(time.Now()) || job.Ticket.Deadline.After(time.Now().Add(2*time.Hour)) {
+	profile := job.Runner + "-kubernetes-isolated-v1"
+	if job.Operation == "discover" {
+		profile = job.Runner + "-kubernetes-discovery-v1"
+	}
+
+	if !validReference(job.Reference) || job.Runner != "go" && job.Runner != "playwright" || job.Operation != "" && job.Operation != "discover" || job.Reference.Profile != profile || job.ExchangeOrigin != p.config.ExchangeOrigin || !immutable.MatchString(job.Image) || job.Ticket.Execution != job.Reference.ID || len(job.Ticket.Token) != 43 || strings.ContainsAny(job.Ticket.Token, "\r\n\x00") || !job.Ticket.Deadline.After(time.Now()) || job.Ticket.Deadline.After(time.Now().Add(2*time.Hour)) {
 		return dispatch{}, pod{}, hostedexecution.ErrConfiguration
 	}
 	seconds := int(time.Until(job.Ticket.Deadline).Seconds()) + 1

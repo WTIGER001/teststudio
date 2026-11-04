@@ -76,9 +76,13 @@ func (e *Executor) pause(ctx context.Context) error {
 }
 
 func (e *Executor) wait(ctx context.Context, ref execution.Reference, input execution.CodedInput, deadline time.Time) (Status, error) {
+	return e.waitWorker(ctx, ref, input.Artifact.Image, deadline, input.OnStart)
+}
+
+func (e *Executor) waitWorker(ctx context.Context, ref execution.Reference, image string, deadline time.Time, onStart func(time.Time) error) (Status, error) {
 	forwarded := false
 	for {
-		status, err := e.observe(ctx, ref, input.Artifact.Image, deadline)
+		status, err := e.observe(ctx, ref, image, deadline)
 		if err != nil {
 			return status, err
 		}
@@ -89,8 +93,8 @@ func (e *Executor) wait(ctx context.Context, ref execution.Reference, input exec
 		if state.Revoked {
 			return Status{}, ErrUnavailable
 		}
-		if state.StartedAt != nil && !forwarded && input.OnStart != nil {
-			if err := input.OnStart(*state.StartedAt); err != nil {
+		if state.StartedAt != nil && !forwarded && onStart != nil {
+			if err := onStart(*state.StartedAt); err != nil {
 				return Status{}, ErrUnavailable
 			}
 			forwarded = true

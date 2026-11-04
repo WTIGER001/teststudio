@@ -36,7 +36,12 @@ type Runner interface {
 	Run(context.Context, execution.CodedInput, []byte, func(time.Time)) (Prepared, error)
 }
 
+type DiscoveryRunner interface {
+	Discover(context.Context, workerprotocol.DiscoveryInput, func(time.Time)) (Prepared, error)
+}
+
 type Supervisor struct {
+	Operation  string
 	Transport  Transport
 	Runner     Runner
 	Attempts   int

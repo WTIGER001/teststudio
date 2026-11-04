@@ -7,8 +7,9 @@ It assembles validated offline Go and Playwright snapshots outside the API.
 It publishes an immutable OCI image through the registry HTTPS protocol.
 It needs no Docker daemon, local image cache, cloud SDK, shell, or uploaded Dockerfile execution.
 
-This adapter is an implementation foundation. The preparation worker does not enable it yet.
-Hosted discovery, durable queue integration, operator settings, and deployment packaging remain required.
+The preparation worker now enables this adapter through explicit Kubernetes settings and registry runtime flags.
+It connects the durable build queue to hosted discovery and the existing source review and approval workflow.
+See [hosted preparation](hosted-discovery.md) for native setup, cleanup ordering, and remaining deployment packaging.
 Do not use the local image inspector for registry references.
 Published registry content alone is not an approved TestStudio artifact or executable catalog release.
 The normal discovery, source review, approval, and publication steps remain required before dispatch.
@@ -23,6 +24,7 @@ The runtime reference must identify an existing distribution digest within that 
 The base and assembled artifact use the same repository. No layer download or cross-repository copy is required.
 
 The selected runtime must pass the existing platform, digest, fixed entrypoint, non-root user, and supervisor checks.
+It must also advertise the hosted discovery supervisor contract. Older supervised runtimes fail before publication.
 A base with project, installation, preparation, or source ownership labels is rejected.
 Use a trusted source runtime, not another project's prepared source image.
 ONBUILD instructions and unsupported runtime contracts remain invalid.

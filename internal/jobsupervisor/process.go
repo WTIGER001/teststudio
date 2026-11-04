@@ -1,7 +1,6 @@
 package jobsupervisor
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -9,7 +8,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/execution"
@@ -25,17 +23,25 @@ type Process struct {
 	Command       func(context.Context) *exec.Cmd
 }
 
-func (p *Process) command(ctx context.Context) (*exec.Cmd, error) {
+func (p *Process) command(ctx context.Context, discovery bool) (*exec.Cmd, error) {
 	if p.Command != nil {
 		return p.Command(ctx), nil
 	}
 	switch p.Runner {
 	case "go":
-		return exec.CommandContext(ctx, "/runner/teststudio-go"), nil
+		args := []string{}
+		if discovery {
+			args = append(args, "--discover")
+		}
+		return exec.CommandContext(ctx, "/runner/teststudio-go", args...), nil
 	case "playwright":
 		for _, name := range []string{"/usr/local/bin/node", "/usr/bin/node", "/bin/node"} {
 			if info, err := os.Stat(name); err == nil && info.Mode().IsRegular() {
-				return exec.CommandContext(ctx, name, "/runner/run.mjs"), nil
+				args := []string{"/runner/run.mjs"}
+				if discovery {
+					args = append(args, "--discover")
+				}
+				return exec.CommandContext(ctx, name, args...), nil
 			}
 		}
 	}
@@ -65,39 +71,8 @@ func (p *Process) Run(ctx context.Context, input execution.CodedInput, wire []by
 	started := time.Now().UTC()
 	wall, stop := context.WithTimeout(ctx, time.Duration(input.TimeoutMs)*time.Millisecond+60*time.Second)
 	defer stop()
-	command, err := p.command(wall)
-	if err != nil {
-		return Prepared{}, err
-	}
-	if command == nil {
-		return Prepared{}, ErrRunner
-	}
-	command.Dir = p.Directory
-	command.Env = childEnvironment()
-	command.Stdin = bytes.NewReader(wire)
-	ownGroup(command)
-	grace := p.StopGrace
-	if grace == 0 {
-		grace = 7 * time.Second
-	}
-	if grace < 0 || grace > 10*time.Second {
-		return Prepared{}, ErrRunner
-	}
-	var forced *time.Timer
-	var forceDone chan struct{}
-	var timerMu sync.Mutex
-	command.Cancel = func() error {
-		timerMu.Lock()
-		defer timerMu.Unlock()
-		err := stopGroup(command, false)
-		forceDone = make(chan struct{})
-		forced = time.AfterFunc(grace, func() { _ = stopGroup(command, true); close(forceDone) })
-		return err
-	}
-	command.WaitDelay = grace + 2*time.Second
-	var stdout, stderr execution.Output
 	seen := false
-	stdout.OnLine = func(line string) {
+	onLine := func(line string) {
 		if seen || onStart == nil {
 			return
 		}
@@ -115,21 +90,9 @@ func (p *Process) Run(ctx context.Context, input execution.CodedInput, wire []by
 		seen = true
 		onStart(event.At)
 	}
-	command.Stdout = &stdout
-	command.Stderr = &stderr
-	runErr := command.Run()
-	timerMu.Lock()
-	waitForForce := forced != nil && !forced.Stop()
-	timerMu.Unlock()
-	if waitForForce {
-		<-forceDone
-	}
-	exit := -1
-	if command.ProcessState != nil {
-		exit = command.ProcessState.ExitCode()
-	}
-	if command.Process != nil {
-		_ = stopGroup(command, true)
+	stdout, stderr, exit, runErr := p.runCommand(wall, wire, false, onLine)
+	if errors.Is(runErr, ErrRunner) {
+		return Prepared{}, runErr
 	}
 	report, readErr := readReport(root, input, runErr)
 	failure := ""

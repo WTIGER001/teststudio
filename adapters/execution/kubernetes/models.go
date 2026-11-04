@@ -44,20 +44,22 @@ type Inspector interface {
 }
 
 type Options struct {
-	Config    Config
-	Store     *storage.Store
-	Inspector Inspector
-	Transport http.RoundTripper
-	Token     func(context.Context) (string, error)
+	DiscoveryCleanup func(context.Context, execution.Reference) error
+	Config           Config
+	Store            *storage.Store
+	Inspector        Inspector
+	Transport        http.RoundTripper
+	Token            func(context.Context) (string, error)
 }
 
 type Provider struct {
-	config        Config
-	store         *storage.Store
-	inspector     Inspector
-	token         func(context.Context) (string, error)
-	http          *http.Client
-	closeRegistry func()
+	discoveryCleanup func(context.Context, execution.Reference) error
+	config           Config
+	store            *storage.Store
+	inspector        Inspector
+	token            func(context.Context) (string, error)
+	http             *http.Client
+	closeRegistry    func()
 }
 
 type dispatch struct {

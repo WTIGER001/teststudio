@@ -10,7 +10,7 @@ It reads manifests and image configuration. It downloads no test source or files
 Keep prepared-artifact approval enabled alongside metadata checks.
 The resulting image identity feeds the [hosted execution lifecycle](hosted-execution.md).
 Provider dispatch uses the Kubernetes adapter. Remote assembly now has a separate [registry source builder](registry-preparation.md).
-Hosted discovery and preparation-worker integration remain required.
+The preparation worker now connects this adapter to [hosted discovery](hosted-discovery.md) through explicit native configuration.
 No provider is enabled by this adapter alone.
 
 ## Installation inputs

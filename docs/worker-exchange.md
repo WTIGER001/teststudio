@@ -196,3 +196,17 @@ Activation rechecks live run authority and commits with its storage guards.
 Activation retries are idempotent. Revoked or expired work cannot reactivate.
 No worker HTTP route exposes activation.
 Legacy direct transport preparation preserves its earlier behavior unless the trusted caller selects the gate.
+
+## Source discovery
+
+The separate preparation worker can prepare an operation=discover packet for the exact active source job.
+This operation always starts with the controller activation gate closed.
+The API checks source permissions, lease, cancellation, project, suite, and repository authority instead of test-run authority.
+Its input freezes the project, suite, runner, immutable registry image, and source digest.
+The report contains discovery data or a bounded failure and scrubbed log. It contains no coded test report or attachments.
+Raw discovery is limited to 8 MiB. Logs are limited to 128 KiB; the complete envelope is limited to 8 MiB plus 256 KiB.
+Ordinary test submissions retain their 2 MiB plus 64 KiB bound.
+Exact retries remain idempotent. Changed reports conflict, and revoked or expired workers cannot submit.
+Discovery cleanup requires a saved preparation checkpoint or a valid cleanup-only recovery claim.
+The normal test-run result and evidence gate remains unchanged.
+See [Hosted preparation](hosted-discovery.md) for queue integration and operator setup.

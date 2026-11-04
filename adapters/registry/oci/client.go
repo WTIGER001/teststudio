@@ -159,3 +159,8 @@ func decode(data []byte, output any) error {
 	}
 	return nil
 }
+
+func (c *Client) ValidateReference(reference string) error {
+	_, _, err := c.selected(reference)
+	return err
+}

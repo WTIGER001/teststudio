@@ -206,12 +206,14 @@ Supply the same installation database through the worker's protected environment
 Missing variables and conflicting explicit database options fail before worker startup.
 Hosted preparation processes can add --require-postgres to reject accidental SQLite configuration.
 Initialization errors exclude private environment connection values.
-The [service image](service-image.md) packages the API and static assets. Local Docker preparation remains a separate trusted host process.
-Hosted preparation and execution adapters remain separate implementation work.
+The [service image](service-image.md) packages the API, separate preparation command, and static assets.
+Local Docker preparation remains a separate trusted host process.
+Optional [hosted preparation](hosted-discovery.md) uses registry assembly and Kubernetes discovery without a Docker daemon.
 
-## Hosted registry assembly foundation
+## Hosted registry assembly
 
 The [registry source builder](registry-preparation.md) assembles offline snapshots without a Docker daemon.
 It retains source ownership and publishes immutable distribution digests through a trusted preparation process.
-It is not enabled in the preparation worker yet. Existing local bundle workflows retain their current behavior.
-Hosted discovery and queue integration must complete before a registry bundle becomes a reviewed hosted source workflow.
+The preparation worker enables it through explicit provider settings and immutable registry runtime flags.
+Hosted discovery feeds the existing source review, exact artifact approval, publication, and optional activation workflow.
+Its Helm preparation deployment and complete provider verification remain open. Existing local bundle workflows retain their current behavior.

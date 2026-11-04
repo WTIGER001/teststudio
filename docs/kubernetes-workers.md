@@ -8,7 +8,8 @@ The Helm profile supplies the private listener route, worker namespace, service 
 Local protocol and packaging checks pass. No cluster deployment is verified in this work session.
 Acceptance 51 remains open across providers. The total stays 48 verified items out of 57.
 
-Remote source assembly, registry publication, and remote discovery remain required before the complete hosted source workflow is usable.
+The separate preparation command now connects registry assembly, immutable publication, and hosted discovery to the existing source queue.
+Native setup is documented in [Hosted preparation](hosted-discovery.md). The Helm preparation deployment and durable journal mounts remain to implement.
 The catalog still requires a prepared and approved immutable artifact.
 Source import does not automatically approve a new registry image.
 Environment-backed browser and API artifacts remain blocked until trusted remote gateway delivery exists.
@@ -66,7 +67,8 @@ The Helm ConfigMap renders that object as kubernetes-workers.json.
 The private listener uses --worker-addr=0.0.0.0:8042 behind the private TLS ingress.
 
 Kubernetes execution requires execution-location=kubernetes and PostgreSQL.
-It cannot combine local administrator mode, local coded image lists, local gateway images, or local prebuilt inspection with this profile.
+It cannot combine local administrator mode, local coded image lists, or local gateway images with this profile.
+The --prepared-sources flag selects hosted discovery when Kubernetes settings are present. The --source-bundles flag enables source staging.
 The artifact-only service role cannot enable hosted execution or its private listener.
 The normal API and artifact origins remain separate from the worker origin.
 
@@ -166,8 +168,8 @@ The service image rebuild reuses the UI, private viewer, and unchanged health bi
 No source runner image rebuild, browser suite, registry push, cloud operation, or cluster test occurs.
 The local demonstration retains its database and evidence.
 
-Next implement remote source assembly, immutable registry publication, and hosted discovery through the preparation queue.
-Preserve the admission gate and durable cleanup ordering when adding preparation work.
+Next package the separate preparation worker, durable private journal storage, and scoped registry writer settings in Helm.
+Preserve the admission gate and durable cleanup ordering in that deployment.
 Then continue AWS and Azure adapters through the same lifecycle contract.
 Actual deployment, CNI isolation, RuntimeClass behavior, OIDC, and multi-replica acceptance remain separate verification work.
 

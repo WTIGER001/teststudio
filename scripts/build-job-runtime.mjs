@@ -52,7 +52,7 @@ try {
   fs.copyFileSync(binary, path.join(context, 'teststudio-job'))
   execFileSync(backend.command, [...backend.prefix, '--network=none', '--pull=false', '--platform=linux/' + architecture, '--build-arg', 'RUNTIME_IMAGE=' + baseTag, '--build-arg', 'RUNTIME_DIGEST=' + base.Id, '--build-arg', 'SOURCE_KEY=' + sourceKey, '-q', '-f', dockerfile, '-t', 'teststudio/job-runtime:' + runner + '-' + architecture + '-local', context], { stdio: ['ignore', 2, 2] })
   const image = inspect('teststudio/job-runtime:' + runner + '-' + architecture + '-local')
-  if (image.Architecture !== architecture || image.Config.User !== '1000:1000' || image.Config.Labels?.['teststudio.job-supervisor'] !== 'worker-exchange/v1' || image.Config.Labels?.['teststudio.job-runtime-base'] !== base.Id) throw new Error('The hosted runtime metadata does not match its source package')
+  if (image.Architecture !== architecture || image.Config.User !== '1000:1000' || image.Config.Labels?.['teststudio.job-supervisor'] !== 'worker-exchange/v1' || image.Config.Labels?.['teststudio.discovery-supervisor'] !== 'worker-exchange/v1' || image.Config.Labels?.['teststudio.job-runtime-base'] !== base.Id) throw new Error('The hosted runtime metadata does not match its source package')
   cache.image = image.Id; cache.sourceKey = sourceKey; save()
   console.log(JSON.stringify({ image: image.Id, base: base.Id, runner, architecture, sourceKey }))
 } finally { fs.rmSync(context, { recursive: true, force: true }) }

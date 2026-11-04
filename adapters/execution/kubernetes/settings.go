@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/wtiger001/teststudio/adapters/registry/oci"
+	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
 	"github.com/wtiger001/teststudio/internal/runtimeconfig"
 	"github.com/wtiger001/teststudio/internal/storage"
@@ -70,7 +71,7 @@ func LoadSettings(file, variable string, lookup func(string) (string, bool)) (*S
 	return &settings, nil
 }
 
-func (s Settings) Open(store *storage.Store, lookup func(string) (string, bool)) (*Provider, error) {
+func (s Settings) Open(store *storage.Store, lookup func(string) (string, bool), discoveryCleanup func(context.Context, execution.Reference) error) (*Provider, error) {
 	if err := s.validate(); err != nil {
 		return nil, err
 	}
@@ -79,6 +80,23 @@ func (s Settings) Open(store *storage.Store, lookup func(string) (string, bool))
 	}
 	data, err := readPrivate(s.Worker.TokenFile, 64<<10)
 	if err != nil || strings.TrimSpace(string(data)) == "" {
+		return nil, hostedexecution.ErrConfiguration
+	}
+	registry, err := s.OpenRegistry(lookup)
+	if err != nil {
+		return nil, err
+	}
+	provider, err := New(Options{Config: s.Worker, Store: store, Inspector: registry, DiscoveryCleanup: discoveryCleanup})
+	if err != nil {
+		registry.Close()
+		return nil, err
+	}
+	provider.closeRegistry = registry.Close
+	return provider, nil
+}
+
+func (s Settings) OpenRegistry(lookup func(string) (string, bool)) (*oci.Client, error) {
+	if s.validate() != nil || lookup == nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
 	r := s.Registry
@@ -126,11 +144,5 @@ func (s Settings) Open(store *storage.Store, lookup func(string) (string, bool))
 	if err != nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
-	provider, err := New(Options{Config: s.Worker, Store: store, Inspector: registry})
-	if err != nil {
-		registry.Close()
-		return nil, err
-	}
-	provider.closeRegistry = registry.Close
-	return provider, nil
+	return registry, nil
 }

@@ -6,7 +6,7 @@ LABEL teststudio.package="service/v1" teststudio.architecture="${TARGETARCH}" te
 COPY ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --chown=65532:65532 data /data
 COPY --chown=65532:65532 temporary /tmp
-COPY teststudio teststudio-health /app/
+COPY teststudio teststudio-health teststudio-prepare /app/
 COPY ui /app/ui
 COPY trace-viewer /app/trace-viewer
 ENV HOME=/tmp TESTSTUDIO_DATABASE=/data/teststudio.db

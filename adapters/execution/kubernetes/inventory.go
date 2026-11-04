@@ -26,9 +26,21 @@ func (p *Provider) adopt(ctx context.Context, ref execution.Reference) (dispatch
 	} else if err != nil {
 		return dispatch{}, hostedexecution.ErrUnavailable
 	}
-	entry, _, err := (workerstate.Ledger{Store: p.store}).Get(ctx, ref.Run, ref.ID)
-	if err != nil || entry.Reference != ref {
-		return dispatch{}, hostedexecution.ErrOwnership
+	discovery := strings.HasSuffix(ref.Profile, "-discovery-v1")
+	if discovery {
+		row, err := p.store.Get(ctx, workerexchange.Bucket, ref.ID)
+		if err != nil {
+			return dispatch{}, hostedexecution.ErrOwnership
+		}
+		record, err := storage.Decode[workerexchange.Record](row)
+		if err != nil || record.Reference != ref || record.Operation != "discover" || !record.DispatchGated {
+			return dispatch{}, hostedexecution.ErrOwnership
+		}
+	} else {
+		entry, _, err := (workerstate.Ledger{Store: p.store}).Get(ctx, ref.Run, ref.ID)
+		if err != nil || entry.Reference != ref {
+			return dispatch{}, hostedexecution.ErrOwnership
+		}
 	}
 	data, _ := json.Marshal(value.Spec["containers"])
 	var containers []struct {
@@ -59,8 +71,11 @@ func (p *Provider) adopt(ctx context.Context, ref execution.Reference) (dispatch
 	if err != nil || seconds < 1 || seconds > 7201 {
 		return dispatch{}, hostedexecution.ErrOwnership
 	}
-	runner := strings.TrimSuffix(ref.Profile, "-kubernetes-isolated-v1")
+	runner := strings.TrimSuffix(strings.TrimSuffix(ref.Profile, "-kubernetes-isolated-v1"), "-kubernetes-discovery-v1")
 	job := hostedexecution.Job{Reference: ref, Image: containers[0].Image, Runner: runner, ExchangeOrigin: p.config.ExchangeOrigin, Ticket: workerexchange.Ticket{Execution: ref.ID, Token: token, Deadline: deadline}}
+	if discovery {
+		job.Operation = "discover"
+	}
 	expected := p.build(job, seconds)
 	normalized, err := normalizedSpec(expected.Spec, seconds, false)
 	if err != nil {

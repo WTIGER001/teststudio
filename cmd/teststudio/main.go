@@ -83,7 +83,7 @@ func run() error {
 	playwrightImages := flag.String("playwright-images", "", "Comma-separated immutable local Playwright image references; enables the isolated local worker")
 	browserGateway := flag.String("browser-gateway-image", "", "Immutable trusted gateway image; enables single-origin environment-backed local Playwright and Go API execution")
 	goImages := flag.String("go-images", "", "Comma-separated immutable local Go suite image references; enables the isolated local Go worker")
-	preparedSources := flag.Bool("prepared-sources", false, "Enable local prebuilt preparation and project-labelled immutable suite images")
+	preparedSources := flag.Bool("prepared-sources", false, "Enable source discovery and project-owned immutable suite images for the configured execution provider")
 	sourceBundles := flag.Bool("source-bundles", false, "Enable Go ZIP staging for the separate teststudio-prepare worker")
 	githubSources := flag.Bool("github-sources", false, "Enable GitHub repository registration and durable sync queues")
 	scheduler := flag.Bool("scheduler", true, "Process durable project schedules on this instance")
@@ -181,7 +181,7 @@ func run() error {
 		return err
 	}
 	if kubernetesSettings != nil {
-		if *location != "kubernetes" || *workerAddr == "" || *local || *goImages != "" || *playwrightImages != "" || *browserGateway != "" || *preparedSources {
+		if *location != "kubernetes" || *workerAddr == "" || *local || *goImages != "" || *playwrightImages != "" || *browserGateway != "" {
 			return errors.New("Kubernetes workers require their execution location and private listener without local coded execution or inspection")
 		}
 		if kubernetesSettings.Worker.ExchangeOrigin == *public || kubernetesSettings.Worker.ExchangeOrigin == *artifactOrigin {
@@ -307,12 +307,12 @@ func run() error {
 		}
 	}
 	if kubernetesSettings != nil {
-		provider, err := kubernetesSettings.Open(db, os.LookupEnv)
+		provider, err := kubernetesSettings.Open(db, os.LookupEnv, sourceService.AuthorizeDiscoveryCleanup)
 		if err != nil {
 			return err
 		}
 		defer provider.Close()
-		configureKubernetesWorkers(runService, sourceService, workerExchange, provider, kubernetesSettings.Worker.ExchangeOrigin)
+		configureKubernetesWorkers(runService, sourceService, workerExchange, provider, kubernetesSettings.Worker.ExchangeOrigin, *preparedSources)
 	}
 	scheduleService := &schedules.Service{Store: db, Auth: auth, Runs: runService, RepositorySources: sourceService}
 	notificationService := &notifications.Service{Store: db, Auth: auth, Secrets: secretProvider, Sender: &webhook.Sender{}, Origin: *public}

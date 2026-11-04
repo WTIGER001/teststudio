@@ -4,7 +4,7 @@ The Helm chart in deploy/kubernetes packages the TestStudio service, identity se
 It uses the portable service image and installation-specific PostgreSQL and OIDC settings.
 The current chart runs the API, UI, schedules, notifications, and native HTTP checks.
 Optional offline coded execution uses the [Kubernetes worker profile](kubernetes-workers.md).
-Remote source preparation and Kubernetes deployment acceptance remain open.
+Native remote preparation is implemented. Its Helm deployment and Kubernetes acceptance remain open.
 
 ## Installation inputs
 
@@ -134,5 +134,5 @@ Keep the full acceptance scope in [Implementation verification](implementation.m
 ## Isolated execution workers
 
 The optional [worker profile](kubernetes-workers.md) now supplies Pod dispatch, a private exchange route, controller permissions, and a dedicated restricted namespace.
-It is disabled by default. Remote source preparation and complete hosted verification remain required.
+It is disabled by default. The separate preparation-worker deployment and complete hosted verification remain required.
 Use the new worker guide for configuration, local evidence, and remaining scope.

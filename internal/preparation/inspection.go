@@ -34,3 +34,7 @@ type ArtifactInspector interface {
 	Inspect(context.Context, InspectionRequest) (Inspection, error)
 	CleanupInspection(context.Context, InspectionRequest) error
 }
+
+type DeferredInspector interface {
+	DeferredCleanup() bool
+}

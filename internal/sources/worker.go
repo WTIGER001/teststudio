@@ -277,7 +277,7 @@ func (s *Service) finishPreparation(ctx context.Context, claimed Job, worker str
 		if err != nil {
 			return err
 		}
-		if job.State == "failed" && job.Bundle != "" {
+		if job.State == "failed" && job.Bundle != "" || s.deferredInspection(job) {
 			job.CleanupPending = true
 			retry := now.Add(5 * time.Second)
 			job.LeaseUntil = &retry
@@ -286,7 +286,11 @@ func (s *Service) finishPreparation(ctx context.Context, claimed Job, worker str
 			if err != nil {
 				return err
 			}
-			return bound.Store.Commit(ctx, saved)
+			queued, err := bound.queueRepositoryPublication(ctx, job)
+			if err != nil {
+				return err
+			}
+			return bound.Store.Commit(ctx, append(queued, saved)...)
 		}
 		queued, err := bound.queueRepositoryPublication(ctx, job)
 		if err != nil {
@@ -321,7 +325,7 @@ func (s *Service) failPreparation(ctx context.Context, claimed Job, worker strin
 		if job.CancelRequested {
 			job.State, job.Error = "cancelled", ""
 		}
-		job.CleanupPending = errors.Is(failure, preparation.ErrCleanupIncomplete) || job.Bundle != ""
+		job.CleanupPending = errors.Is(failure, preparation.ErrCleanupIncomplete) || job.Bundle != "" || s.deferredInspection(job)
 		changes := []storage.Change{}
 		if job.CleanupPending {
 			lease := now.Add(5 * time.Second)

@@ -17,6 +17,7 @@ var ErrOwnership = errors.New("hosted worker ownership or immutable execution se
 var ErrConfiguration = errors.New("hosted execution requires an approved supervised image, private exchange, and durable lifecycle hooks")
 
 type Image struct {
+	Discovery        string
 	Reference        string
 	Runner           string
 	Runtime          string
@@ -29,6 +30,7 @@ type Image struct {
 }
 
 type Job struct {
+	Operation      string
 	Reference      execution.Reference
 	Image          string
 	Runner         string

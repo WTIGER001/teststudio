@@ -46,7 +46,7 @@ func fixture(t *testing.T, runner string, alter func(map[string]any)) *registry 
 		entrypoint = []string{"node", "/runner/run.mjs"}
 	}
 	layer := []byte("owned protocol fixture base layer")
-	base := map[string]any{"architecture": "arm64", "os": "linux", "rootfs": map[string]any{"type": "layers", "diff_ids": []string{checksum(layer)}}, "config": map[string]any{"User": "1000:1000", "WorkingDir": "/suite", "Entrypoint": entrypoint, "Env": []string{"GOPROXY=off", "TRUSTED_RUNTIME=preserved"}, "StopSignal": "SIGTERM", "Labels": map[string]string{"teststudio.runtime": runner + "-registry-fixture-v1", "teststudio.runtime-kind": "source-base/v1", "teststudio.work-item-bytes": "4194304", "teststudio.job-supervisor": "worker-exchange/v1", "teststudio.job-runtime-base": "sha256:" + strings.Repeat("b", 64), "teststudio.playwright-version": "1.64.1"}}}
+	base := map[string]any{"architecture": "arm64", "os": "linux", "rootfs": map[string]any{"type": "layers", "diff_ids": []string{checksum(layer)}}, "config": map[string]any{"User": "1000:1000", "WorkingDir": "/suite", "Entrypoint": entrypoint, "Env": []string{"GOPROXY=off", "TRUSTED_RUNTIME=preserved"}, "StopSignal": "SIGTERM", "Labels": map[string]string{"teststudio.runtime": runner + "-registry-fixture-v1", "teststudio.runtime-kind": "source-base/v1", "teststudio.work-item-bytes": "4194304", "teststudio.job-supervisor": "worker-exchange/v1", "teststudio.discovery-supervisor": "worker-exchange/v1", "teststudio.job-runtime-base": "sha256:" + strings.Repeat("b", 64), "teststudio.playwright-version": "1.64.1"}}}
 	if alter != nil {
 		alter(base)
 	}

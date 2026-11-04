@@ -31,13 +31,14 @@ def main():
             assert image['Config']['Entrypoint'] == base['Config']['Entrypoint']
             labels = image['Config']['Labels']
             assert labels['teststudio.job-supervisor'] == 'worker-exchange/v1'
+            assert labels['teststudio.discovery-supervisor'] == 'worker-exchange/v1'
             assert labels['teststudio.job-runtime-base'] == base['Id']
             assert labels['teststudio.job-source-key'] == build['sourceKey']
             for key in ['teststudio.runtime', 'teststudio.runtime-kind', 'teststudio.work-item-bytes', 'teststudio.api-policy']:
                 assert labels[key] == base['Config']['Labels'][key]
             name = 'teststudio-job-package-' + uuid.uuid4().hex[:12]
             containers.append(name)
-            result = docker('run', '--rm', '--name', name, '--platform=linux/' + build['architecture'], '--read-only', '--network=none', '--cap-drop=ALL', '--security-opt=no-new-privileges', '--entrypoint=/runner/teststudio-job', build['image'], '--runner=' + build['runner'], '--exchange-origin=https://jobs.example.test', check=False)
+            result = docker('run', '--rm', '--name', name, '--platform=linux/' + build['architecture'], '--read-only', '--network=none', '--cap-drop=ALL', '--security-opt=no-new-privileges', '--entrypoint=/runner/teststudio-job', build['image'], '--runner=' + build['runner'], '--operation=discover', '--exchange-origin=https://jobs.example.test', check=False)
             assert result.returncode == 2 and 'job execution identity is missing or invalid' in result.stderr
             assert not result.stdout.strip()
             summary['checks'].append(build['runner'] + ': immutable base and runner contracts retained; non-root supervisor executes without ambient work or network')

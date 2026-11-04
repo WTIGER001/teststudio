@@ -38,6 +38,7 @@ type UploadLease struct {
 }
 
 type Record struct {
+	Operation      string                 `json:"operation,omitempty"`
 	DispatchGated  bool                   `json:"dispatchGated,omitempty"`
 	DispatchReady  bool                   `json:"dispatchReady,omitempty"`
 	Reference      execution.Reference    `json:"reference"`
@@ -57,9 +58,10 @@ type Record struct {
 }
 
 type Service struct {
-	Store      *storage.Store
-	Blobs      artifacts.Store
-	Authorize  func(context.Context, execution.Reference) (workerstate.Access, error)
-	uploadOnce sync.Once
-	uploads    chan struct{}
+	Store                     *storage.Store
+	Blobs                     artifacts.Store
+	Authorize                 func(context.Context, execution.Reference) (workerstate.Access, error)
+	AuthorizeDiscoveryCleanup func(context.Context, execution.Reference) error
+	uploadOnce                sync.Once
+	uploads                   chan struct{}
 }

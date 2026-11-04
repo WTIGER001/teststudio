@@ -111,10 +111,45 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: registry source assembly and immutable publication
+## Current delivery: hosted discovery and preparation queue integration
+
+Acceptance **51** advances with supporting preparation failover work under **52**.
+The total remains **48 verified of 57**, with **9 open** items. No hosted acceptance closes from local fixtures.
+
+The preparation command now selects registry assembly and Kubernetes discovery through explicit settings and immutable runtime flags.
+The API stages source and presents the existing review. Uploaded source assembly remains outside the API process.
+The existing build checkpoint, discovery validation, exact artifact approval, and publication contracts accept registry distribution references.
+The service image includes the separate preparation command. Older runtime overlays fail the discovery capability check before registry publication.
+
+The exchange uses a distinct gated discovery operation with source-job authority and no measured test report or attachments.
+Discovery logs, output size, source digest, suite, runner, and offline profile are bounded and validated.
+The supervisor uses fixed discovery commands, owned process groups, stripped child credentials, redaction, and bounded delivery retries.
+Provider success and process exit remain separate from valid report delivery. A failed provider cannot create a ready review.
+
+The source service saves the ready review or failure before permitting provider deletion.
+Cleanup verifies the exact preparation reference and uses provider termination and deletion preconditions.
+Recovery adopts owned discovery Pods from the exchange without inventing a test-run ledger.
+Cleanup-only recovery works with new builds disabled. Ready cancellation reuses the existing lease without a conflicting insert.
+Interrupted work never dispatches or discovers again automatically.
+
+Targeted race checks pass for the source workflow, both discovery schemas, supervisor behavior, Kubernetes protocol fixtures, registry assembly, and normal execution compatibility.
+Follow-up checks pass for failed-provider reports, disabled-build recovery, ready cancellation, and normal exchange compatibility.
+Native and packaged startup guards pass seven cases before opening SQLite or contacting a provider.
+Both thin runtime package probes pass with the new discovery capability and fixed CLI operation.
+The owned package probe containers are removed and their absence is verified.
+The trace viewer, health binary, trusted Go base, and trusted Playwright base are reused.
+The Angular production build includes the updated source help. No browser workflow rerun is needed for that text change.
+No browser, external registry, cluster, AWS, or Azure verification runs. The existing demonstration is preserved.
+
+Evidence is output/hosted-discovery: contract.log, provider-outcome.log, deferred-recovery.log, exchange-compatibility.log, startup, and runtime-package.
+See [Hosted preparation](hosted-discovery.md) for exact native configuration, package command overrides, and recovery requirements.
+Next implement the Helm preparation deployment, durable private journal volume, and separate registry writer credential references.
+Remote gateway delivery, other provider adapters, and deployment acceptance remain open.
+
+## Previous delivery: registry source assembly and immutable publication
 
 Acceptance **51** advances. The total remains **48 verified of 57**, with **9 open** items.
-This delivery provides the builder adapter. Hosted discovery and preparation-worker wiring remain required.
+This delivery provides the builder adapter. The current delivery above adds hosted discovery and preparation-worker wiring.
 No provider or complete source workflow acceptance closes from the local fixture.
 
 The registry builder implements ArtifactBuilder for validated offline Go and Playwright snapshots.
@@ -136,7 +171,7 @@ No external registry push, cloud account, cluster, browser, UI build, or runtime
 The local demonstration stays running with its existing data and evidence.
 
 Next connect hosted discovery and the existing preparation queue to this builder.
-Current build checkpoints still accept local image identifiers only. Extend those contracts with explicit profile validation before enabling remote assembly.
+The existing immutable-image validation already accepts registry distribution references. Current queue integration verifies that contract without weakening local validation.
 Preserve source review, approval, catalog publication, activation, cancellation, and cleanup-only recovery.
 See [Registry source assembly](registry-preparation.md) for the operator contract and exact remaining scope.
 

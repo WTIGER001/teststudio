@@ -99,7 +99,7 @@ func New(options Options) (*Provider, error) {
 			return strings.TrimSpace(string(data)), nil
 		}
 	}
-	return &Provider{config: options.Config, store: options.Store, inspector: options.Inspector, token: token, http: &http.Client{Transport: transport, Timeout: 5 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}, nil
+	return &Provider{discoveryCleanup: options.DiscoveryCleanup, config: options.Config, store: options.Store, inspector: options.Inspector, token: token, http: &http.Client{Transport: transport, Timeout: 5 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}, nil
 }
 
 func (p *Provider) Close() {

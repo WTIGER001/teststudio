@@ -171,15 +171,19 @@ func (s *Service) CancelJob(ctx context.Context, user, project, suite, id string
 			}
 			changes = append(changes, saved)
 		}
-		if job.Bundle != "" && job.State == "ready" && job.Reference != nil {
+		if (job.Bundle != "" || s.deferredInspection(job)) && job.State == "ready" && job.Reference != nil {
 			job.CleanupPending = true
 			deadline := time.Now().UTC()
 			job.LeaseUntil = &deadline
-			lease, err := storage.Put(leaseBucket(job.Location), job.ID, project, 0, jobIndex{Job: job.ID, Suite: suite, Location: job.Location})
-			if err != nil {
+			if _, err := bound.Store.Get(ctx, leaseBucket(job.Location), job.ID); errors.Is(err, storage.ErrNotFound) {
+				lease, err := storage.Put(leaseBucket(job.Location), job.ID, project, 0, jobIndex{Job: job.ID, Suite: suite, Location: job.Location})
+				if err != nil {
+					return err
+				}
+				changes = append(changes, lease)
+			} else if err != nil {
 				return err
 			}
-			changes = append(changes, lease)
 		}
 		job.CancelRequested = true
 		if !activeJob(job.State) {

@@ -6,8 +6,8 @@ It runs inside the worker image. It never executes uploaded test code inside the
 
 The supervisor, runtime overlay producer, and targeted local verification are implemented.
 The optional [Kubernetes worker profile](kubernetes-workers.md) now supplies dispatch, private ingress configuration, and provider recovery.
-Trusted remote gateway delivery, remote preparation, other providers, and hosted acceptance remain unfinished.
-These components do not yet enable hosted Go or Playwright runs from the application.
+Native remote preparation and discovery now connect to the existing source queue and approval workflow.
+Its Helm deployment, trusted remote gateway delivery, other providers, and hosted acceptance remain unfinished.
 Keep acceptance 51 and the related hosted acceptance items open.
 
 ## Job contract
@@ -171,10 +171,21 @@ It uses no network, test suite, or browser.
 Evidence remains in output/job-supervisor with targeted Go logs and package cleanup records.
 No AWS, Kubernetes, or Azure functional check runs for this batch.
 
+## Discovery operation
+
+The provider adds --operation=discover for a source preparation job.
+The frozen packet must name that same operation. Execution and discovery packets cannot substitute for each other.
+The supervisor invokes the fixed Go or Playwright runner with --discover and empty standard input.
+It accepts one bounded discovery.json file from an initially empty output directory and rejects extra outputs.
+Discovery uses the same owned process-group shutdown, stripped child environment, private-value redaction, and bounded delivery retries.
+Its submission contains discovery data or an explicit worker, timeout, or cancellation failure. It contains no test result or attachments.
+Runtime overlays advertise teststudio.discovery-supervisor=worker-exchange/v1. The registry builder requires this capability before publishing source.
+See [Hosted preparation](hosted-discovery.md) for source authority, review, approval, and checkpointed provider cleanup.
+
 ## Remaining integration
 
 The [shared hosted lifecycle](hosted-execution.md) implements controller ordering and recovery through the existing managed executor contract.
-It remains disconnected from real provider implementations.
+The optional Kubernetes provider implements that lifecycle with explicit configuration.
 
 Provider adapters must admit the exact prepared immutable image, create one owned job, and supply only its scoped work identity.
 They must establish private worker HTTPS ingress, resource limits, network isolation, and trusted gateway delivery.
@@ -182,7 +193,7 @@ They must distinguish provider status, runner status, test outcome, and evidence
 They must reconcile cancellation, hard deadlines, orphaned jobs, and persisted reports after controller restart.
 Revoke worker tickets before publishing collected results or evidence.
 Keep staging cleanup and provider cleanup ahead of the final worker ledger completion.
-Remote source preparation and publication remain separate required work.
+The Helm preparation deployment, remote gateway profiles, remaining providers, and hosted verification remain required work.
 
 A managed worker can receive a retryable input response while provider verification remains pending.
 The existing bounded input retry policy handles that activation gate without invoking uploaded code early.

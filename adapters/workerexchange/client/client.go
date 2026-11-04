@@ -99,7 +99,11 @@ func (c *Client) Started(ctx context.Context, at time.Time) error {
 
 func (c *Client) Submit(ctx context.Context, submission workerprotocol.Submission) error {
 	data, err := json.Marshal(submission)
-	if err != nil || len(data) > workerprotocol.MaxSubmissionBytes {
+	limit := workerprotocol.MaxTestSubmissionBytes
+	if submission.Discovery != nil {
+		limit = workerprotocol.MaxSubmissionBytes
+	}
+	if err != nil || len(data) > limit {
 		return workerprotocol.ErrInvalid
 	}
 	return c.request(ctx, http.MethodPut, "/report", bytes.NewReader(data), nil, 1024)

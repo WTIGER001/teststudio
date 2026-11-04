@@ -1,6 +1,6 @@
 # Portable service package
 
-The service image contains the Go API, Angular UI, private trace viewer, and bounded health probe.
+The service image contains the Go API, separate preparation command, Angular UI, private trace viewer, and bounded health probe.
 It uses the same product code and configuration contracts as the local server.
 The image supplies a common package for local containers and future AWS, Kubernetes, and Azure profiles.
 Hosted execution adapters and deployment acceptance remain open under the implementation ledger.
@@ -36,7 +36,7 @@ The native ARM64 fallback also passes the targeted configuration and temporary-v
 These architecture checks do not prove hosted deployment acceptance.
 
 The builder reuses the canonical UI and trace-viewer assets through --assets-only.
-It builds only the service and health binaries needed by this package.
+It builds only the service, preparation, and health binaries needed by this package.
 Go workspace mode is off. Module metadata is read-only, and binaries use CGO_ENABLED=0.
 Source inputs, effective compiler settings, binary hashes, asset hashes, Dockerfile content, and image metadata control reuse.
 The final container build has no network access and uses a scratch base.
@@ -81,8 +81,10 @@ The packaged entrypoint includes these settings:
 | Angular assets | /app/ui |
 | Private trace viewer | /app/trace-viewer |
 | Health command | /app/teststudio-health |
+| Separate preparation command | /app/teststudio-prepare; requires an entrypoint override and its own flags. |
 
 Additional command arguments use the normal service flags.
+See [Hosted preparation](hosted-discovery.md) for the separate command's registry runtimes, durable journals, and private provider settings.
 Use --oidc-config-env and --artifact-store-env for bounded JSON environment configuration without mounted configuration files.
 These options name variables. Their values do not become command arguments.
 The [AWS profile](aws.md) packages these references through ECS secrets and explicit environment settings.

@@ -34,7 +34,7 @@ const goEnvironment = { ...process.env, GOWORK: 'off', GOFLAGS: '', GOOS: 'linux
 const buildArguments = ['build', '-mod=readonly', '-trimpath', '-ldflags=-s -w']
 const goVersion = execFileSync('go', ['version'], { encoding: 'utf8', env: goEnvironment }).trim()
 cache.binaries ??= {}
-for (const name of ['teststudio', 'teststudio-health']) {
+for (const name of ['teststudio', 'teststudio-health', 'teststudio-prepare']) {
   const package_ = './cmd/' + name
   const dependencies = execFileSync('go', ['list', '-mod=readonly', '-deps', '-f', '{{if .Module}}{{if .Module.Main}}{{.Dir}}{{end}}{{end}}', package_], { encoding: 'utf8', env: goEnvironment }).trim().split(/\r?\n/).filter(Boolean)
   const inputs = [goVersion, architecture, buildArguments, { GOWORK: 'off', GOFLAGS: '', CGO_ENABLED: '0', GOOS: 'linux', GOARCH: architecture, GOEXPERIMENT: process.env.GOEXPERIMENT ?? '', GOAMD64: process.env.GOAMD64 ?? '', GOARM64: process.env.GOARM64 ?? '' }, hashFile('go.mod'), hashFile('go.sum')]
@@ -65,7 +65,7 @@ try {
     fs.mkdirSync(path.join(context, name), { mode })
     fs.chmodSync(path.join(context, name), mode)
   }
-  for (const name of ['teststudio', 'teststudio-health']) fs.copyFileSync(path.join(directory, name), path.join(context, name))
+  for (const name of ['teststudio', 'teststudio-health', 'teststudio-prepare']) fs.copyFileSync(path.join(directory, name), path.join(context, name))
   fs.cpSync(assets.ui, path.join(context, 'ui'), { recursive: true, dereference: false })
   fs.cpSync(assets.traceViewer, path.join(context, 'trace-viewer'), { recursive: true, dereference: false })
   execFileSync(buildCommand, [...buildPrefix, '--network=none', '--pull=false', '--platform=linux/' + architecture, '--build-arg', 'TARGETARCH=' + architecture, '--build-arg', 'SOURCE_KEY=' + sourceKey, '-q', '-f', dockerfile, '-t', 'teststudio/service:' + architecture + '-local', context], { stdio: ['ignore', 2, 2] })

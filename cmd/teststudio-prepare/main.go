@@ -11,6 +11,7 @@ import (
 	"syscall"
 
 	permissions "github.com/wtiger001/go-permissions"
+	"github.com/wtiger001/teststudio/adapters/execution/kubernetes"
 	"github.com/wtiger001/teststudio/adapters/execution/localcontainer"
 	permissionpg "github.com/wtiger001/teststudio/adapters/permissions/postgres"
 	permissionsqlite "github.com/wtiger001/teststudio/adapters/permissions/sqlite"
@@ -36,6 +37,10 @@ func run() error {
 	database := flag.String("database", ".data/teststudio.db", "SQLite path or PostgreSQL URL shared with the API")
 	databaseEnvironment := flag.String("database-env", "", "Environment variable containing the database connection")
 	requirePostgres := flag.Bool("require-postgres", false, "Require PostgreSQL for a hosted or multi-instance installation")
+	kubernetesConfig := flag.String("kubernetes-workers-config", "", "Private Kubernetes and registry preparation settings")
+	kubernetesEnv := flag.String("kubernetes-workers-env", "", "Environment variable containing private Kubernetes preparation settings")
+	registryGo := flag.String("registry-go-runtime", "", "Trusted supervised Go runtime distribution digest")
+	registryPlaywright := flag.String("registry-playwright-runtime", "", "Trusted supervised Playwright runtime distribution digest")
 	location := flag.String("execution-location", "local", "Preparation queue location")
 	browserRuntime := flag.String("playwright-runtime", "", "Trusted immutable local Playwright source runtime image ID")
 	runtime := flag.String("go-runtime", "", "Trusted immutable local Go source runtime image ID")
@@ -47,7 +52,14 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	if err := runtimeconfig.RequirePostgres(connection, *requirePostgres); err != nil {
+	kubernetesSettings, err := kubernetes.LoadSettings(*kubernetesConfig, *kubernetesEnv, os.LookupEnv)
+	if err != nil {
+		return err
+	}
+	if kubernetesSettings != nil && (*location != "kubernetes" || *runtime != "" || *browserRuntime != "") || kubernetesSettings == nil && (*registryGo != "" || *registryPlaywright != "") {
+		return errors.New("hosted preparation requires Kubernetes settings and its location without local source runtime flags")
+	}
+	if err := runtimeconfig.RequirePostgres(connection, *requirePostgres || kubernetesSettings != nil); err != nil {
 		return err
 	}
 	if !domain.ValidID(*location) {
@@ -88,14 +100,22 @@ func run() error {
 		return err
 	}
 	service := &sources.Service{Store: store, Auth: auth, Location: *location, Inspectors: map[string]preparation.ArtifactInspector{}, RecoveryInspectors: map[string]preparation.ArtifactInspector{}, Builders: map[string]preparation.ArtifactBuilder{}, RecoveryBuilders: map[string]preparation.ArtifactBuilder{}}
-	for runner, image := range map[string]string{"go": *runtime, "playwright": *browserRuntime} {
-		inspector := &localcontainer.Executor{Runner: runner, AllowProjectImages: true, RequireProject: true}
-		builder := &localimage.Builder{RuntimeImage: image, TempDirectory: root}
-		service.RecoveryInspectors[runner] = inspector
-		service.RecoveryBuilders[runner] = builder
-		if image != "" {
-			service.Inspectors[runner] = inspector
-			service.Builders[runner] = builder
+	if kubernetesSettings != nil {
+		close, err := configureRegistryPreparation(service, *kubernetesSettings, root, map[string]string{"go": *registryGo, "playwright": *registryPlaywright}, os.LookupEnv)
+		if err != nil {
+			return err
+		}
+		defer close()
+	} else {
+		for runner, image := range map[string]string{"go": *runtime, "playwright": *browserRuntime} {
+			inspector := &localcontainer.Executor{Runner: runner, AllowProjectImages: true, RequireProject: true}
+			builder := &localimage.Builder{RuntimeImage: image, TempDirectory: root}
+			service.RecoveryInspectors[runner] = inspector
+			service.RecoveryBuilders[runner] = builder
+			if image != "" {
+				service.Inspectors[runner] = inspector
+				service.Builders[runner] = builder
+			}
 		}
 	}
 	if len(service.Builders) > 0 {

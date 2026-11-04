@@ -3,11 +3,14 @@ package workerprotocol
 import (
 	"encoding/json"
 	"errors"
-	"github.com/wtiger001/teststudio/internal/execution"
 	"time"
+
+	"github.com/wtiger001/teststudio/internal/execution"
 )
 
-const MaxSubmissionBytes = (2 << 20) + (64 << 10)
+const MaxTestSubmissionBytes = (2 << 20) + (64 << 10)
+
+const MaxSubmissionBytes = (8 << 20) + (256 << 10)
 
 var ErrDenied = errors.New("worker exchange is unavailable")
 var ErrInvalid = errors.New("worker message does not match its bounded attempt contract")
@@ -24,11 +27,13 @@ type File struct {
 type Submission struct {
 	ProcessExitCode       int                   `json:"processExitCode"`
 	InfrastructureFailure string                `json:"infrastructureFailure,omitempty"`
-	Report                execution.CodedReport `json:"report"`
+	Report                execution.CodedReport `json:"report,omitzero"`
+	Discovery             *DiscoveryReport      `json:"discovery,omitempty"`
 	Files                 []File                `json:"files"`
 }
 
 type Packet struct {
+	Operation string          `json:"operation,omitempty"`
 	Execution string          `json:"executionId"`
 	Deadline  time.Time       `json:"deadline"`
 	Input     json.RawMessage `json:"input"`

@@ -12,6 +12,7 @@ import (
 
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/storage"
+	"github.com/wtiger001/teststudio/internal/workerprotocol"
 )
 
 var checksum = regexp.MustCompile(`^[a-f0-9]{64}$`)
@@ -37,7 +38,7 @@ func (s *Service) Input(ctx context.Context, id, token, instance string) (Packet
 				return Packet{}, err
 			}
 		}
-		return Packet{Execution: id, Deadline: record.Deadline, Input: record.Input}, nil
+		return Packet{Operation: record.Operation, Execution: id, Deadline: record.Deadline, Input: record.Input}, nil
 	}
 	return Packet{}, ErrConflict
 }
@@ -72,7 +73,7 @@ func (s *Service) Started(ctx context.Context, id, token, instance string, at ti
 
 func validateSubmission(input execution.CodedInput, submission Submission) error {
 	data, err := json.Marshal(submission.Report)
-	if err != nil || len(data) > 2<<20 || len(submission.Files) != len(submission.Report.Attachments) || len(submission.Files) > 32 {
+	if err != nil || submission.Discovery != nil || len(data) > 2<<20 || len(submission.Files) != len(submission.Report.Attachments) || len(submission.Files) > 32 {
 		return ErrInvalid
 	}
 	if submission.ProcessExitCode < -1 || submission.ProcessExitCode > 255 {
@@ -129,7 +130,11 @@ func validateSubmission(input execution.CodedInput, submission Submission) error
 
 func (s *Service) Submit(ctx context.Context, id, token, instance string, submission Submission) error {
 	data, err := json.Marshal(submission)
-	if err != nil || len(data) > MaxSubmissionBytes {
+	limit := workerprotocol.MaxTestSubmissionBytes
+	if submission.Discovery != nil {
+		limit = MaxSubmissionBytes
+	}
+	if err != nil || len(data) > limit {
 		return ErrInvalid
 	}
 	submission.Report.Result = execution.NormalizeTimeout(submission.Report.Result)
@@ -141,12 +146,18 @@ func (s *Service) Submit(ctx context.Context, id, token, instance string, submis
 		if record.Instance != instance {
 			return ErrDenied
 		}
-		var input execution.CodedInput
-		if json.Unmarshal(record.Input, &input) != nil {
-			return ErrUnavailable
-		}
-		if err := validateSubmission(input, submission); err != nil {
-			return err
+		if record.Operation == "discover" {
+			if err := validateDiscoverySubmission(record.Input, submission); err != nil {
+				return err
+			}
+		} else {
+			var input execution.CodedInput
+			if json.Unmarshal(record.Input, &input) != nil {
+				return ErrUnavailable
+			}
+			if err := validateSubmission(input, submission); err != nil {
+				return err
+			}
 		}
 		canonical, err := json.Marshal(submission)
 		if err != nil {

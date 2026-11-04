@@ -67,6 +67,10 @@ func (s *Service) Prepare(ctx context.Context, ref execution.Reference, input ex
 	if err != nil {
 		return Ticket{}, ErrInvalid
 	}
+	return s.prepare(ctx, ref, payload, deadline, "", input.AwaitDispatch)
+}
+
+func (s *Service) prepare(ctx context.Context, ref execution.Reference, payload []byte, deadline time.Time, operation string, gated bool) (Ticket, error) {
 	if s.Authorize == nil {
 		return Ticket{}, ErrDenied
 	}
@@ -88,7 +92,7 @@ func (s *Service) Prepare(ctx context.Context, ref execution.Reference, input ex
 			if err != nil {
 				return Ticket{}, ErrUnavailable
 			}
-			if record.Reference != ref || record.InputHash != fingerprint(payload) || !record.Deadline.Equal(deadline) || record.Revoked || record.DispatchGated != input.AwaitDispatch {
+			if record.Reference != ref || record.InputHash != fingerprint(payload) || !record.Deadline.Equal(deadline) || record.Revoked || record.DispatchGated != gated || record.Operation != operation {
 				return Ticket{}, ErrConflict
 			}
 		} else if errors.Is(err, storage.ErrNotFound) {
@@ -99,7 +103,7 @@ func (s *Service) Prepare(ctx context.Context, ref execution.Reference, input ex
 			if _, err := rand.Read(nonce); err != nil {
 				return Ticket{}, ErrUnavailable
 			}
-			record = Record{DispatchGated: input.AwaitDispatch, DispatchReady: !input.AwaitDispatch, Reference: ref, Input: payload, InputHash: fingerprint(payload), Nonce: hex.EncodeToString(nonce), CreatedAt: time.Now().UTC(), Deadline: deadline, Uploaded: map[string]bool{}}
+			record = Record{Operation: operation, DispatchGated: gated, DispatchReady: !gated, Reference: ref, Input: payload, InputHash: fingerprint(payload), Nonce: hex.EncodeToString(nonce), CreatedAt: time.Now().UTC(), Deadline: deadline, Uploaded: map[string]bool{}}
 			change, err := storage.Put(Bucket, ref.ID, ref.Project, 0, record)
 			if err != nil {
 				return Ticket{}, ErrUnavailable

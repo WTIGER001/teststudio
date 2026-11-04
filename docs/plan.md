@@ -207,10 +207,21 @@ Private upload journals retain exact ownership, cancellation, lost acknowledgeme
 Local TLS and race checks cover Go and Playwright. Registry inspection and local assembly retain their existing behavior.
 The API, preparation-worker, and publisher packages compile. No live registry, image rebuild, UI build, or cloud operation occurs.
 See [Registry source assembly](registry-preparation.md) for its exact scope and recovery limits.
-This adapter is not enabled in the preparation worker yet. The count remains 48 verified and 9 open.
+The preparation worker now enables registry assembly through explicit Kubernetes settings and immutable runtime flags.
+Hosted discovery uses a distinct gated packet and report. It creates no test result or timing baseline.
+The normal build checkpoint, source review, exact artifact approval, and publication accept immutable registry references.
+Provider success remains required alongside a valid discovery report.
+Source leases and current permissions control worker authority. Saved preparation checkpoints control provider and exchange cleanup.
+Cleanup-only recovery remains available when new builds are disabled. It never repeats discovery or provider dispatch.
+The service image includes the separate preparation command. Both thin runtime overlays advertise the discovery supervisor capability.
+Targeted local race, TLS/process, native startup, and package checks pass. Trusted runtime bases and trace assets are reused.
+The source help reflects the configured execution location, and the Angular production build passes.
+See [Hosted preparation](hosted-discovery.md) for exact native setup and retained evidence.
+Acceptances 51 and supporting preparation isolation in 52 advance. The count remains 48 verified and 9 open.
 
-Next implement hosted discovery and wire registry assembly into the existing preparation queue.
-Add immutable registry references to the build checkpoint, discovery result, approval, and publication contracts without weakening local validation.
+Next add the separate preparation deployment to Helm with its durable private journal volume and scoped registry writer credential references.
+Keep API registry access read-only and give the preparation process its own provider identity and bounded resource profile.
+Do not enable source staging in the chart without the preparation process and its recovery storage.
 Retain private upload journals on durable preparation storage and preserve cleanup-only recovery when new builds are disabled.
 The first Kubernetes source workflow must become usable before repeating generic execution implementation for other providers.
 Keep uploaded source outside the API and retain exact source approval, project ownership, catalog review, and publication boundaries.

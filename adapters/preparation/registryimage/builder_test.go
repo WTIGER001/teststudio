@@ -65,6 +65,23 @@ func buildInput(t *testing.T, runner string) preparation.BuildRequest {
 	return preparation.BuildRequest{Snapshot: snapshot, Origin: suitespec.Origin{SnapshotDigest: snapshot.Digest}, Reference: execution.Reference{ID: "source-job", Installation: "preparation-registry", Project: "invoicing"}}
 }
 
+func TestRegistryAssemblyRejectsRuntimeWithoutHostedDiscoveryBeforePublication(t *testing.T) {
+	f := fixture(t, "go", func(base map[string]any) {
+		delete(base["config"].(map[string]any)["Labels"].(map[string]string), "teststudio.discovery-supervisor")
+	})
+	input := buildInput(t, "go")
+	builder := &Builder{Registry: f.client, RuntimeImage: f.base, Directory: filepath.Join(t.TempDir(), "private")}
+	if _, err := builder.Build(t.Context(), input); err == nil {
+		t.Fatal("runtime without hosted discovery was published")
+	}
+	if f.posts != 0 || f.manifests != 0 {
+		t.Fatal("unsupported runtime created registry uploads")
+	}
+	if err := builder.CleanupBuild(t.Context(), input.Reference); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestRegistryAssemblyPublishesBothRunnersWithFrozenRuntimeAndSource(t *testing.T) {
 	for _, runner := range []string{"go", "playwright"} {
 		t.Run(runner, func(t *testing.T) {

@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
 	"github.com/wtiger001/teststudio/internal/storage"
+	"github.com/wtiger001/teststudio/internal/workerexchange"
 	"github.com/wtiger001/teststudio/internal/workerstate"
 )
 
@@ -38,9 +40,23 @@ func (p *Provider) Stop(ctx context.Context, ref execution.Reference) error {
 }
 
 func (p *Provider) Remove(ctx context.Context, ref execution.Reference) error {
-	entry, _, err := (workerstate.Ledger{Store: p.store}).Get(ctx, ref.Run, ref.ID)
-	if err != nil || entry.Reference != ref || !entry.ResultSaved || !entry.EvidenceComplete && !entry.EvidenceAbandoned {
-		return hostedexecution.ErrUnavailable
+	if strings.HasSuffix(ref.Profile, "-discovery-v1") {
+		if p.discoveryCleanup == nil || p.discoveryCleanup(ctx, ref) != nil {
+			return hostedexecution.ErrUnavailable
+		}
+		row, err := p.store.Get(ctx, workerexchange.Bucket, ref.ID)
+		if err != nil {
+			return hostedexecution.ErrUnavailable
+		}
+		record, err := storage.Decode[workerexchange.Record](row)
+		if err != nil || record.Reference != ref || record.Operation != "discover" || !record.Revoked {
+			return hostedexecution.ErrOwnership
+		}
+	} else {
+		entry, _, err := (workerstate.Ledger{Store: p.store}).Get(ctx, ref.Run, ref.ID)
+		if err != nil || entry.Reference != ref || !entry.ResultSaved || !entry.EvidenceComplete && !entry.EvidenceAbandoned {
+			return hostedexecution.ErrUnavailable
+		}
 	}
 	status, err := p.Observe(ctx, ref)
 	if err != nil && !errors.Is(err, hostedexecution.ErrNotFound) {

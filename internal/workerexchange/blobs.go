@@ -215,6 +215,16 @@ func (s *Service) Revoke(ctx context.Context, ref execution.Reference) error {
 }
 
 func (s *Service) CheckCleanup(ctx context.Context, ref execution.Reference) error {
+	record, _, lookupErr := s.owned(ctx, ref)
+	if lookupErr == nil && record.Operation == "discover" {
+		if s.AuthorizeDiscoveryCleanup == nil {
+			return ErrDenied
+		}
+		return s.AuthorizeDiscoveryCleanup(ctx, ref)
+	}
+	if lookupErr != nil && !errors.Is(lookupErr, storage.ErrNotFound) {
+		return lookupErr
+	}
 	entry, _, err := (workerstate.Ledger{Store: s.Store}).Get(ctx, ref.Run, ref.ID)
 	if err != nil || entry.Reference != ref || !entry.ResultSaved || !entry.EvidenceComplete && !entry.EvidenceAbandoned {
 		return ErrConflict

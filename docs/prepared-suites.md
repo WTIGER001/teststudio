@@ -2,7 +2,8 @@
 
 TestStudio has a versioned manifest and a local isolated artifact inspector.
 The Import and sync tests page, API, and publisher CLI enqueue inspection jobs and publish reviewed catalogs.
-The current worker supports locally available immutable Go and Playwright images.
+The local worker supports locally available immutable Go and Playwright images.
+Optional [hosted preparation](hosted-discovery.md) supports registry distribution images through the Kubernetes provider and private exchange.
 Inspection does not start tests. Publication and activation remain explicit actions.
 The Import and sync tests page also uploads offline Go or Playwright ZIP bundles for a separate preparation worker.
 The CLI can assemble those bundles outside the API.

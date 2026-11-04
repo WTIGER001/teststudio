@@ -9,7 +9,7 @@ It connects a provider implementation to the private worker exchange and the dur
 The optional [Kubernetes Pod adapter](kubernetes-workers.md) now connects this lifecycle to a concrete provider.
 The default local API keeps its existing local runners.
 Complete hosted execution and deployment acceptance remain incomplete.
-Remote preparation, trusted gateways, remaining provider adapters, and deployment verification remain required.
+Native [hosted preparation](hosted-discovery.md) is implemented. Its Helm deployment, trusted gateways, remaining adapters, and deployment verification remain required.
 The shared driver currently admits offline Go and Playwright work only.
 It rejects environment-backed artifacts and credential bindings until trusted gateway delivery exists.
 

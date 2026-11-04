@@ -19,7 +19,20 @@ func (s *Supervisor) Run(ctx context.Context) (Outcome, error) {
 	if err := s.retry(ctx, func() error { var err error; packet, err = s.Transport.Input(ctx); return err }); err != nil {
 		return Outcome{}, ErrWork
 	}
-	if len(packet.Input) > execution.MaxWorkItemBytes || packet.Deadline.IsZero() || !time.Now().Before(packet.Deadline) || packet.Deadline.After(time.Now().Add(2*time.Hour)) {
+	if packet.Operation != s.Operation || len(packet.Input) > execution.MaxWorkItemBytes || packet.Deadline.IsZero() || !time.Now().Before(packet.Deadline) || packet.Deadline.After(time.Now().Add(2*time.Hour)) {
+		return Outcome{}, ErrWork
+	}
+	ctx, cancel := context.WithDeadline(ctx, packet.Deadline)
+	defer cancel()
+	if packet.Operation == "discover" {
+		var input workerprotocol.DiscoveryInput
+		runner, ok := s.Runner.(DiscoveryRunner)
+		if !ok || json.Unmarshal(packet.Input, &input) != nil || workerprotocol.ValidateDiscoveryInput(input) != nil {
+			return Outcome{}, ErrWork
+		}
+		return s.execute(ctx, func(progress func(time.Time)) (Prepared, error) { return runner.Discover(ctx, input, progress) })
+	}
+	if packet.Operation != "" {
 		return Outcome{}, ErrWork
 	}
 	var input execution.CodedInput
@@ -30,7 +43,11 @@ func (s *Supervisor) Run(ctx context.Context) (Outcome, error) {
 	if err != nil {
 		return Outcome{}, ErrWork
 	}
-	ctx, cancel := context.WithDeadline(ctx, packet.Deadline)
+	return s.execute(ctx, func(progress func(time.Time)) (Prepared, error) { return s.Runner.Run(ctx, input, wire, progress) })
+}
+
+func (s *Supervisor) execute(ctx context.Context, run func(func(time.Time)) (Prepared, error)) (Outcome, error) {
+	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	progress := make(chan time.Time, 1)
 	stopProgress := make(chan struct{})
@@ -58,7 +75,7 @@ func (s *Supervisor) Run(ctx context.Context) (Outcome, error) {
 		}
 		progressDone <- err
 	}()
-	prepared, err := s.Runner.Run(ctx, input, wire, func(at time.Time) {
+	prepared, err := run(func(at time.Time) {
 		select {
 		case progress <- at:
 		default:
@@ -72,7 +89,7 @@ func (s *Supervisor) Run(ctx context.Context) (Outcome, error) {
 	if err != nil {
 		return Outcome{}, ErrRunner
 	}
-	if progressError != nil {
+	if progressError != nil && prepared.Submission.Discovery == nil {
 		prepared.Submission.Report.EvidenceErrors = appendProblem(prepared.Submission.Report.EvidenceErrors, "Worker start progress was not acknowledged.")
 	}
 	if ctx.Err() != nil {
@@ -80,7 +97,7 @@ func (s *Supervisor) Run(ctx context.Context) (Outcome, error) {
 	}
 	submission := prepared.Submission
 	err = s.retry(ctx, func() error { return s.Transport.Submit(ctx, submission) })
-	if errors.Is(err, workerprotocol.ErrQuota) {
+	if errors.Is(err, workerprotocol.ErrQuota) && submission.Discovery == nil {
 		submission.Report.Attachments = nil
 		submission.Files = nil
 		submission.Report.EvidenceErrors = appendProblem(submission.Report.EvidenceErrors, "Hosted worker evidence omitted because private staging quota is exhausted.")

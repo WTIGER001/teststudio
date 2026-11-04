@@ -44,6 +44,9 @@ func (c *Client) SourceRuntime(ctx context.Context, reference string) (Runtime, 
 	if err != nil {
 		return Runtime{}, err
 	}
+	if metadata.Image.Discovery != "worker-exchange/v1" {
+		return Runtime{}, ErrInvalid
+	}
 	for _, key := range []string{"teststudio.project", "teststudio.installation", "teststudio.preparation", "teststudio.source"} {
 		if metadata.template.labels[key] != "" {
 			return Runtime{}, ErrInvalid
