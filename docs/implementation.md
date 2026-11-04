@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 43 verified of 57.
+The acceptance count is 44 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -47,7 +47,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **34.** HTTPS checks run manually and on schedules, with configurable assertions, TLS checks, response-time history, and normal result records.
 - [x] **35.** API suites run through guarded direct clients and produce the same history and trends as browser tests.
 - [x] **36.** Package events, subtest aggregates, retries, and API steps do not inflate test counts.
-- [ ] **37.** Local and scheduled executions produce the same logical run and result records.
+- [x] **37.** Local and scheduled executions produce the same logical run and result records.
 - [x] **38.** Protected environments reject unsafe selections and unsafe dependencies.
 - [x] **39.** Timeouts have a separate test status and count. Failure reruns include them alongside failed and flaky results.
 - [x] **40.** Native HTTP attempts support comparable timing history, bounded adaptive timeouts, slowdown criteria, and API and UI estimates.
@@ -69,10 +69,37 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: manual and scheduled runner parity
+
+Acceptance **37** is complete. The ledger has **44 verified, 13 open, 57 total** items.
+Manual creation and scheduled firing use the same admission, frozen selection, execution queue, worker, and completion path.
+No separate scheduled runner or result format is introduced.
+
+A focused contract matrix covers targetless Go and Playwright runs with passed, failed, timed-out, flaky, and skipped results.
+Each trigger preserves the release, selected definitions, capture policy, targetless context, timeout, retries, and coded work item.
+Prediction timestamps remain specific to each run. Comparable timing contexts and criteria remain equal.
+Attempts and child steps produce one logical result per test. Both triggers retain readable logs, normal history, and trend counts.
+The race-enabled matrix passes in 6.906 seconds.
+
+One actual recorded website source prepares once and executes manually and through the durable scheduler.
+Both runs use the same registered target and immutable source release through the current private gateway protocol.
+Each run retains one passed logical test, measured timing, child steps, logs, one screenshot, and one trace.
+Stored checksums match readable evidence. Screenshot decoding and trace archive inspection pass.
+Normal history contains two entries. Trends contain exactly two passed observations.
+The workflow passes in 23.095 seconds. Cached trusted runtimes and the gateway are reused.
+Evidence is output/playwright/scheduled-website-tyizhg7i/summary.json and cleanup.json.
+Owned containers, volumes, preparation contexts, and the prepared source image are verified absent.
+The verification worker and fixture listener stop with the test process. The user's demo remains running.
+
+Existing native HTTP and HTTPS evidence under acceptance 34 already verifies both triggers.
+Existing guarded Go and Playwright API evidence under acceptance 35 verifies both triggers and normal history and trends.
+Those unchanged workflows do not repeat. No cloud checks run, and no demo rebuild or restart is needed.
+Hosted execution and timing parity remain separate open requirements under 41 and 51 through 57.
+
 ## Current delivery: guarded Go API execution and acceptance 35
 
 Acceptance **35** is complete. The ledger has **43 verified, 14 open, 57 total** items.
-Acceptance **37** remains open for the remaining local and scheduled runner parity scope.
+The later manual and scheduled parity checkpoint closes acceptance **37**.
 
 Go API suites now use go-environment, the registered endpoint policy, and the same trusted gateway as Playwright API suites.
 Standard net/http clients use the loopback relay supplied to the selected test process after compilation.

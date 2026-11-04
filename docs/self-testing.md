@@ -4,6 +4,24 @@ TestStudio owns a new Playwright suite in `tests/selftest/playwright`.
 The suite runs through the normal catalog, publication, execution, timing, and evidence APIs.
 It copies no tests or configuration from another application.
 
+## Manual and scheduled parity
+
+Acceptance 37 reuses the passing native HTTP, HTTPS, and guarded API workflow evidence.
+The focused targetless Go and Playwright matrix compares frozen execution settings and normal logical records across both triggers.
+It covers passed, failed, timed-out, flaky, and skipped tests without building runtime images.
+
+```sh
+go test -race ./internal/runs \
+  -run '^TestTargetlessCodedManualAndScheduledRunsKeepIdenticalLogicalContracts$' -count=1
+```
+
+The opt-in TestRecordedWebsiteManualAndScheduledRunsKeepNormalHistoryAndEvidence prepares one source and executes it twice.
+Use the saved product-owned recording and cached trusted Playwright and gateway images from the recorded website workflow.
+It checks matching snapshots, measured timing, child steps, readable evidence checksums, screenshot decoding, trace archives, history, and trends.
+Evidence is output/playwright/scheduled-website-tyizhg7i/summary.json and cleanup.json.
+The local check takes 23 seconds and removes its owned execution and preparation resources.
+Do not repeat it for documentation changes or unrelated work. Hosted parity remains separate.
+
 ## Run locally
 
 For the new coded API request-policy foundation, use focused local checks:

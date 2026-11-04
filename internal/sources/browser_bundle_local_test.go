@@ -292,7 +292,12 @@ func verifyBrowserSourceWorkflow(t *testing.T, editor bool, website ...bool) {
 			t.Fatal(err)
 		}
 	}
-	for _, id := range []string{row.ID, run.ID} {
+	resourceIDs := []string{row.ID, run.ID}
+	if len(website) > 1 && website[1] {
+		scheduled := verifyScheduledWebsiteParity(t, runner, current, root)
+		resourceIDs = append(resourceIDs, scheduled.ID)
+	}
+	for _, id := range resourceIDs {
 		for _, kind := range []string{"container", "volume"} {
 			args := []string{kind, "ls", "-q", "--filter", "label=teststudio.run=" + id}
 			if kind == "container" {

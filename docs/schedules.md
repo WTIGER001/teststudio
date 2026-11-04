@@ -17,6 +17,20 @@ The firing transaction guards the reviewed suite, release, environment, and sele
 A concurrent configuration edit cannot commit a stale selection or a partial scheduled run.
 Queued execution and retries apply the same current-policy checks as manual runs. See [Dispatch safety](results.md#dispatch-safety-and-frozen-runs).
 
+## Shared execution and results
+
+Manual and scheduled requests use the same admission, queue, worker, and completion contracts.
+Supported local runners include native HTTP and HTTPS, targetless Go and Playwright, recorded websites, and guarded API suites.
+Targetless suites need no environment. Target-backed suites require the same registered environment and current authority as manual runs.
+Each firing freezes its actual release, target, capture, timeout, retry, and timing settings.
+Prediction timestamps belong to each run. Baselines can advance between separate runs.
+
+Attempts and child steps remain within one final logical result per selected test.
+Timeouts retain their separate status. A successful retry produces one flaky result.
+Schedules retain normal logs, screenshots, traces, history, trends, and explicit evidence gaps when the profile supports them.
+The run records its schedule identifier, firing identifier, and due time for investigation.
+Hosted profile verification remains separate from this local parity evidence.
+
 ## Cadence and overlap
 
 Interval schedules accept 5 through 2592000 seconds and use UTC.

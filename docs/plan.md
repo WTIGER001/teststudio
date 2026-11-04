@@ -15,9 +15,10 @@ The full product scope remains required. This direction supersedes the testing s
 ## Active delivery plan after the tester walkthrough
 
 This section is the current implementation order. Historical continuation commands below do not override it.
-The local demonstration is usable and verified. The complete product remains unfinished at 43 verified items out of 57.
+The local demonstration is usable and verified. The complete product remains unfinished at 44 verified items out of 57.
 Ordinary project creator access and the first environment-backed local recorded website flow pass targeted verification.
-Tester investigation and failure recovery now pass targeted local verification. Continue with remaining catalog and evidence gaps.
+Tester investigation, failure recovery, and local manual/scheduled runner parity pass targeted verification.
+Continue source-workflow, access, storage, and hosted packaging gaps. Reuse passing runner evidence.
 Do not add new dashboard pages or repeat completed demonstration setup before closing the remaining workflow gaps.
 
 ### Current decisions
@@ -46,7 +47,7 @@ Complete one coherent batch before adding the next. Update its user help and rel
 | Complete | Project creator access | Ordinary creator setup, managed scoped roles, publication, local execution, atomic rollback, and project boundaries pass on SQLite and local PostgreSQL. Acceptance 13 is verified. |
 | Complete | Recorded website execution locally | New native recording, reviewed local website steps, saved preparation, publication, registered target execution, guarded direct request, and blocked off-site redirect pass with retained logs, screenshot, trace, and timing. |
 | Complete | Tester operation and failure recovery | Scoped attempts, logs, screenshots, timeout and retry inspection, permission-loss recovery, and retry after a lost rerun response without another child pass. Acceptance 44 is verified. |
-| 4 | Remaining catalog and evidence gaps | Private trace viewing and category browsing are implemented. Reviewed publication also passes local verification. Catalog workflows and the shared paged API now pass verification. Preparation safety and retained history now close 26 and 29. Evidence restart recovery closes 43. S3 and Azure Blob adapters now have operator selection and local protocol checks. Keep 46 open for provider verification. Local coded timing and logical counts now pass focused checks. Keep 41 open across deployment profiles. Continue provider packaging and remaining acceptance work against the ledger. |
+| 4 | Remaining catalog and evidence gaps | Private trace viewing and category browsing are implemented. Reviewed publication also passes local verification. Catalog workflows and the shared paged API now pass verification. Preparation safety and retained history now close 26 and 29. Evidence restart recovery closes 43. S3 and Azure Blob adapters now have operator selection and local protocol checks. Keep 46 open for provider verification. Local coded timing and logical counts now pass focused checks. Manual and scheduled parity closes 37 across implemented local runners. Keep 41 open across deployment profiles. Continue provider packaging and remaining acceptance work against the ledger. |
 | 5 | Hosted packaging and provider adapters | Implement and document independent provider configuration, worker dispatch, private artifacts, cancellation, deadlines, and recovery. Use local contract checks first. |
 | 6 | Deployment acceptance | Verify AWS, Kubernetes, and Azure in their separate deployment work. Then close the applicable remaining ledger items with profile-specific evidence. |
 
