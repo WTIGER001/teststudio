@@ -119,11 +119,11 @@ func (s *Service) config(ctx context.Context, id string) (Provider, *coreoidc.Pr
 	client := s.httpClient()
 	remote, err := coreoidc.NewProvider(coreoidc.ClientContext(ctx, client), p.Issuer)
 	if err != nil {
-		return p, nil, oauth2.Config{}, err
+		return p, nil, oauth2.Config{}, errors.New("OIDC provider discovery failed")
 	}
 	var metadata coreoidc.ProviderConfig
 	if err := remote.Claims(&metadata); err != nil {
-		return p, nil, oauth2.Config{}, err
+		return p, nil, oauth2.Config{}, errors.New("OIDC provider metadata is invalid")
 	}
 	for _, endpoint := range []string{metadata.AuthURL, metadata.TokenURL, metadata.JWKSURL} {
 		if err := protocolEndpoint(endpoint); err != nil {
@@ -145,8 +145,8 @@ func (s *Service) config(ctx context.Context, id string) (Provider, *coreoidc.Pr
 		} else {
 			err = errors.New("unsupported OIDC credential reference")
 		}
-		if err != nil {
-			return p, nil, oauth2.Config{}, err
+		if err != nil || secret == "" {
+			return p, nil, oauth2.Config{}, errors.New("OIDC credential reference is unavailable")
 		}
 	}
 	scopes := []string{coreoidc.ScopeOpenID, "profile", "email"}

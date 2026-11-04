@@ -28,6 +28,10 @@ The browser accepts no client secret values.
 Select No client secret for a public client, or select an operator-approved credential reference.
 The server resolves the reference during provider sign-in.
 Provider responses, audit records, and public choices never contain the resolved credential value.
+The credential enters only the server's token exchange. Browser redirects, cookies, sessions, and stored provider settings contain no resolved value.
+Discovery and credential-resolution failures return fixed error messages. They exclude upstream response bodies and resolver diagnostics from application errors.
+A configured reference must resolve to a nonempty value. An empty result blocks sign-in rather than selecting public-client behavior.
+Token exchange and identity verification also use fixed failures. Browser recovery continues through the readable sign-in outcome.
 
 The operator supplies the environment variable through the server's protected runtime configuration.
 Approve its reference when starting the service:

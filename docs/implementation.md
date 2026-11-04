@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 38 verified of 57.
+The acceptance count is 39 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -30,7 +30,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **17.** Duplicate email addresses from different issuer-subject pairs do not merge accounts or transfer access.
 - [x] **18.** Unmapped, missing, incomplete, or outdated external groups do not silently preserve elevated project access.
 - [x] **19.** Browser sessions keep provider tokens server-side. Expiry, revocation, callback rejection, and request-forgery protection pass focused checks.
-- [ ] **20.** Provider credentials remain outside browser configuration and application logs.
+- [x] **20.** Provider credentials remain outside browser configuration and application logs.
 - [x] **21.** Catalog creation, editing, validation, publication, import, export, bulk actions, archive, and restoration work through both API and UI.
 - [ ] **22.** Declarative uploads, complete source bundles, and registered GitHub repositories can produce versioned releases through the UI.
 - [x] **23.** One repository can provide multiple suites, including suites beside existing application source.
@@ -68,6 +68,29 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **55.** Hosted identity and private report access work through installation-specific configuration.
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
+
+## Current delivery: provider credential error boundaries
+
+Acceptance **20** is complete. The ledger has **39 verified, 18 open, 57 total** items.
+
+OIDC discovery and credential resolution now return fixed errors without upstream bodies or resolver diagnostics.
+A configured reference must resolve to a nonempty credential. Empty resolution blocks sign-in without a login transaction.
+Existing token exchange and verification failures keep their fixed messages. Browser routes retain readable generic sign-in outcomes.
+The service resolves credentials on the server and supplies them only to the token endpoint.
+Provider records, browser choices, redirects, cookies, sessions, and audit records contain no resolved value.
+Authentication routes do not log provider response bodies or resolved credentials.
+
+New local canary checks cover discovery body and transport failures, resolver failures, empty resolution, successful token exchange, and rejected exchange.
+The rejected provider deliberately echoes private diagnostic text. Returned errors and browser responses exclude that text.
+OAuth client authentication can use either the supported server-side header or form mode. Neither mode sends a secret through the browser.
+Focused API checks also verify private provider administration and readable callback outcomes.
+The race checks pass. The first rejected-exchange fixture assumes header-only authentication; it now permits the supported server-side form fallback.
+No cloud profile or browser suite runs. Owned HTTP fixtures stop through test cleanup.
+The native server builds successfully. UI and trace builds stay cached.
+Evidence is output/provider-credentials/checkpoint.json.
+
+See [Provider credentials](providers.md#server-credentials) and [Self-testing](self-testing.md) for setup and focused checks.
+Continue remaining local storage, access, catalog, and execution acceptance work.
 
 ## Current delivery: empty installation and selected examples
 

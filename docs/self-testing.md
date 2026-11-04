@@ -6,6 +6,16 @@ It copies no tests or configuration from another application.
 
 ## Run locally
 
+For OIDC credential boundaries, run the focused adapter and API checks:
+
+```sh
+go test -race ./adapters/auth/oidc ./internal/httpapi \
+  -run '^(TestOIDCProviderAndResolverErrorsExcludePrivateText|TestOIDCClientCredentialStaysInServerTokenExchange|TestProviderAdministrationKeepsOwnershipRevisionsAndCredentialValuesPrivate|TestOIDCCallbackErrorsReturnReadableSignInOutcomes)$' -count=1
+```
+
+New local provider fixtures exercise discovery failures, credential resolution, successful exchange, and rejected exchange with private diagnostic text.
+The checks verify server-only credentials, fixed errors, private stored metadata, and readable browser failure outcomes without a browser suite.
+
 For the empty-installation and optional-example contract, use a built server:
 
 ```sh

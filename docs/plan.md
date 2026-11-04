@@ -15,7 +15,7 @@ The full product scope remains required. This direction supersedes the testing s
 ## Active delivery plan after the tester walkthrough
 
 This section is the current implementation order. Historical continuation commands below do not override it.
-The local demonstration is usable and verified. The complete product remains unfinished at 38 verified items out of 57.
+The local demonstration is usable and verified. The complete product remains unfinished at 39 verified items out of 57.
 Ordinary project creator access and the first environment-backed local recorded website flow pass targeted verification.
 Tester investigation and failure recovery now pass targeted local verification. Continue with remaining catalog and evidence gaps.
 Do not add new dashboard pages or repeat completed demonstration setup before closing the remaining workflow gaps.
@@ -60,7 +60,7 @@ See [initial creator access](access.md#initial-project-creator-access) for curre
 SQLite, local PostgreSQL, and STUDIO-OWNER-001 evidence are recorded in the implementation ledger.
 
 This sequence changes implementation priority, not the scope or numbering of the 57 acceptance criteria.
-Acceptances 03, 08, 13, 21, 25, 26, 29, 36, 42, 43, 44, and 45 are complete. Remaining access checks stay under 12. Other catalog, execution, and evidence requirements remain open.
+Acceptances 03, 08, 13, 20, 21, 25, 26, 29, 36, 42, 43, 44, and 45 are complete. Remaining access checks stay under 12. Other catalog, execution, and evidence requirements remain open.
 Do not treat these batches as additional acceptance items or claim the whole product complete after a demonstration.
 
 ### Recorded browser execution scope
@@ -205,7 +205,7 @@ The next implementation batches follow the full ledger without adding new gates 
 
 ## Current implementation checkpoint
 
-The acceptance ledger has **38 verified, 19 open, 57 total** items.
+The acceptance ledger has **39 verified, 18 open, 57 total** items.
 Private trace viewing now passes targeted local verification. Acceptances **42** and **45** are complete.
 Run details expose recorded attempts, steps, context, logs, screenshots, traces, and configured attachments without HTML reports.
 The pinned installation-hosted viewer uses the separate artifact origin and short-lived grants with current project authorization.
@@ -240,6 +240,9 @@ Acceptance **03** is complete. Fresh server startup and restart preserve empty t
 A selected native HTTP example publishes without loading omitted examples or creating a run.
 The focused real-server check stops all owned processes. No browser or container is needed.
 See [First installation](first-installation.md) for optional examples and [Self-testing](self-testing.md) for the focused check.
+Acceptance **20** is complete. OIDC credential resolution and discovery failures exclude upstream private text from application errors.
+Local canary checks verify server-only token exchange, empty-secret rejection, private provider data, and readable generic browser failures.
+See [Provider credentials](providers.md#server-credentials) for the boundary and focused verification.
 Continue remaining storage parity, adapter retention, timing, and local acceptance work.
 
 Bulk metadata edits now support reviewed category, tags, owner, title, description, safety, rationale, and condition changes.
