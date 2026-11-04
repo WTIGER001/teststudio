@@ -16,7 +16,7 @@ export function navigationSections(project: string, capabilities: Capabilities, 
     add('testing', 'Testing', false, [
       ...(allowed(capabilities, 'projects.read') ? [link('Applications', `${base}/applications`, '▦')] : []),
       ...(allowed(capabilities, 'suites.read') ? [link('Suites', `${base}/suites`, '▤')] : []),
-      link('Test catalog', `${base}/catalog`, '≡', false, [`${base}/tests/new`]), link('Test runs', `${base}/runs`, '▷'),
+      link('Test catalog', `${base}/catalog`, '≡', false, [`${base}/tests`]), link('Test runs', `${base}/runs`, '▷'),
       link('Trends', `${base}/trends`, '▥')
     ])
     add('automation', 'Automation', true, [

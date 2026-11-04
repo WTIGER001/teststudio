@@ -4,6 +4,7 @@ import { randomBytes } from 'node:crypto'
 import { writeFile, unlink } from 'node:fs/promises'
 import { createOIDCFixture } from './oidc-fixture.mjs'
 
+const historyWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-HISTORY-001'
 const privateTraceWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-TRACE-001'
 const diagnosticsWorkflow = ['@STUDIO-DIAGNOSTICS-001', '@STUDIO-TRACE-001'].includes(JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector)
 const recordingWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-CREATE-001'
@@ -55,10 +56,10 @@ const server = createServer(async (request, response) => {
       } finally { restarting = false }
       return
     }
-    if (request.method === 'POST' && ['/access/prepare', '/access/creator', ...(diagnosticsWorkflow ? ['/diagnostics/prepare'] : []), ...(privateTraceWorkflow ? ['/trace/expire'] : [])].includes(request.url)) {
+    if (request.method === 'POST' && ['/access/prepare', '/access/creator', ...(diagnosticsWorkflow ? ['/diagnostics/prepare'] : []), ...(privateTraceWorkflow ? ['/trace/expire'] : []), ...(historyWorkflow ? ['/history/prepare', '/history/remove-working'] : [])].includes(request.url)) {
       if (typeof body.project !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(body.project)) { response.writeHead(400).end(); return }
       const fixture = await new Promise((resolve, reject) => {
-        const helper = execFile('/app/access-fixture', request.url === '/access/creator' ? [body.project, 'creator'] : request.url === '/diagnostics/prepare' ? [body.project, 'diagnostics'] : request.url === '/trace/expire' ? [body.project, 'expire-viewer'] : [body.project], { env: { PATH: process.env.PATH, TMPDIR: '/tmp', ...(request.url === '/trace/expire' ? { TESTSTUDIO_SELFTEST_VIEWER_TOKEN: String(body.token ?? '') } : {}) }, timeout: 10000, maxBuffer: 4096 }, (error, stdout) => {
+        const helper = execFile('/app/access-fixture', request.url === '/access/creator' ? [body.project, 'creator'] : request.url === '/diagnostics/prepare' ? [body.project, 'diagnostics'] : request.url === '/trace/expire' ? [body.project, 'expire-viewer'] : request.url.startsWith('/history/') ? [body.project, 'history'] : [body.project], { env: { PATH: process.env.PATH, TMPDIR: '/tmp', ...(request.url === '/trace/expire' ? { TESTSTUDIO_SELFTEST_VIEWER_TOKEN: String(body.token ?? '') } : {}), ...(request.url.startsWith('/history/') ? { TESTSTUDIO_SELFTEST_HISTORY_RUN: String(body.run ?? ''), TESTSTUDIO_SELFTEST_HISTORY_REMOVE: request.url === '/history/remove-working' ? 'true' : 'false' } : {}) }, timeout: 10000, maxBuffer: 4096 }, (error, stdout) => {
           helpers.delete(helper)
           if (error) reject(new Error('Fixture preparation failed')); else resolve(stdout)
         })

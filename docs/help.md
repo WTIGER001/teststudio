@@ -26,6 +26,8 @@ Your account, required password changes, role pages, Project permissions, and In
 Explain project access and Explain installation access share a guide for decisions, source scans, privacy, and changed access.
 Import and sync tests provides a guide for uploads, digests, conflicts, publication, activation, and source retention.
 Identity providers and Identity provider provide guides for credentials, permanent group ownership, exact mappings, and fresh authentication.
+Test history provides archive, removed-definition, saved-run, and retained evidence guidance.
+See [Retained test history](test-history.md) for its API and tester workflow.
 Sign-in help appears whenever the user has no active session.
 Signed-in pages select their guide from the route's `helpTopic` data.
 Unmapped routes use the projects guide after normal route handling.

@@ -1,7 +1,7 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio API"
-  "version": "0.28.0"
+  "version": "0.29.0"
   "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Includes optional client-identifier RP-initiated provider logout after local session revocation. Includes staged native JSON and YAML sources with atomic catalog publication and retained source provenance. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
@@ -10,6 +10,151 @@
   -
     "SessionCookie": []
 "paths":
+  "/api/v1/projects/{project}/suites/{suite}/tests/{test}/retained": {
+    "get": {
+      "operationId": "readRetainedTest",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "suite",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "test",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "summary": "Read the working or last saved test definition, including archived suites and removed working definitions.",
+      "security": [
+        {
+          "SessionCookie": []
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Retained test history context.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RetainedTest"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      }
+    }
+  }
+  "/api/v1/projects/{project}/suites/{suite}/tests/{test}/run-history": {
+    "get": {
+      "operationId": "readTestRunHistory",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "suite",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "test",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "cursor",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 20
+          }
+        }
+      ],
+      "summary": "Read bounded, permission-filtered run history from immutable run snapshots. The current test and suite need not be active.",
+      "security": [
+        {
+          "SessionCookie": []
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Retained test history context.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestHistoryPage"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      }
+    }
+  }
   "/api/v1/projects/{project}/suites/{suite}/tests/{test}": {
     "get": {
       "operationId": "readCatalogTest",
@@ -6605,6 +6750,136 @@
           "schema":
             "$ref": "#/components/schemas/Problem"
   "schemas":
+    "RetainedTest": {
+      "type": "object",
+      "properties": {
+        "projectId": {
+          "type": "string"
+        },
+        "suiteId": {
+          "type": "string"
+        },
+        "suiteName": {
+          "type": "string"
+        },
+        "suiteArchived": {
+          "type": "boolean"
+        },
+        "test": {
+          "$ref": "#/components/schemas/SourceCatalogTest"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "current": {
+          "type": "boolean"
+        },
+        "lifecycle": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "projectId",
+        "suiteId",
+        "suiteName",
+        "suiteArchived",
+        "test",
+        "revision",
+        "updatedAt",
+        "current",
+        "lifecycle"
+      ]
+    }
+    "TestHistoryItem": {
+      "type": "object",
+      "properties": {
+        "runId": {
+          "type": "string"
+        },
+        "releaseId": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "finishedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "environmentName": {
+          "type": "string"
+        },
+        "executionLocation": {
+          "type": "string"
+        },
+        "runState": {
+          "type": "string"
+        },
+        "runOutcome": {
+          "type": "string"
+        },
+        "testState": {
+          "type": "string"
+        },
+        "attempt": {
+          "type": "integer"
+        },
+        "durationMs": {
+          "type": "number"
+        },
+        "error": {
+          "type": "string"
+        },
+        "evidenceState": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "runId",
+        "releaseId",
+        "title",
+        "createdAt",
+        "executionLocation",
+        "runState",
+        "runOutcome",
+        "testState",
+        "attempt",
+        "evidenceState"
+      ]
+    }
+    "TestHistoryPage": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/TestHistoryItem"
+          }
+        },
+        "cursor": {
+          "type": "string"
+        },
+        "scanned": {
+          "type": "integer"
+        },
+        "partial": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "items",
+        "scanned",
+        "partial"
+      ]
+    }
     "CatalogTestRecord": {
       "type": "object",
       "properties": {

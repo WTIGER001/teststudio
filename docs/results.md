@@ -1,5 +1,8 @@
 # Test results and timeouts
 
+Open a result title to follow its [retained test history](test-history.md).
+Inspect run and evidence returns to the selected test across its saved attempts.
+
 ## Test status
 
 Attempts and final logical test results use these states:

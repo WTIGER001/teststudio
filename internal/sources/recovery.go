@@ -11,14 +11,28 @@ import (
 )
 
 func (s *Service) RecoverPreparations(ctx context.Context, worker string) error {
-	page, err := s.Store.List(ctx, leaseBucket(s.Location), "", "", 100)
+	cursor := ""
+	for {
+		next, err := s.recoverPreparationPage(ctx, worker, cursor)
+		if err != nil {
+			return err
+		}
+		if next == "" {
+			return nil
+		}
+		cursor = next
+	}
+}
+
+func (s *Service) recoverPreparationPage(ctx context.Context, worker, cursor string) (string, error) {
+	page, err := s.Store.List(ctx, leaseBucket(s.Location), "", cursor, 100)
 	if err != nil {
-		return err
+		return "", err
 	}
 	for _, index := range page.Items {
 		item, err := storage.Decode[jobIndex](index)
 		if err != nil {
-			return err
+			return "", err
 		}
 		var claimed Job
 		recovered := false
@@ -58,7 +72,7 @@ func (s *Service) RecoverPreparations(ctx context.Context, worker string) error 
 			continue
 		}
 		if err != nil {
-			return err
+			return "", err
 		}
 		if !recovered {
 			continue
@@ -115,8 +129,8 @@ func (s *Service) RecoverPreparations(ctx context.Context, worker string) error 
 			return store.Commit(ctx, append(changes, saved)...)
 		})
 		if err != nil && !errors.Is(err, storage.ErrConflict) {
-			return err
+			return "", err
 		}
 	}
-	return nil
+	return page.Cursor, nil
 }

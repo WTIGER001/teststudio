@@ -50,6 +50,9 @@ The page uses the server's exact suite-scoped activation decision.
 Read-only users can inspect releases without receiving activation authority.
 Release identifiers from another project or suite cannot activate through this registry.
 
+Open a published test title to inspect its [retained history](test-history.md), including archived suites.
+The history page labels current definitions separately from original run snapshots.
+
 ## Local verification
 
 STUDIO-RELEASES-001 exercises comparison, a stale activation conflict, refresh, activation, rollback, frozen run definitions, future selection, and release pins.

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import type { RecordValue } from '../../core/api.service'
 import type { Attempt, Run } from './run.models'
-import { diagnosticAttempts, diagnosticTests, failedSteps, resultSummaries, runActionFeedback, runTestLabels } from './run-diagnostics.utils'
+import { historyEvidenceTest, diagnosticAttempts, diagnosticTests, failedSteps, resultSummaries, runActionFeedback, runTestLabels } from './run-diagnostics.utils'
 
 test('diagnostic choices preserve frozen titles and bounded attempt identity', () => {
   const run = { tests: [{ id: 'A', title: 'Checkout' }, { id: 'B', title: 'Login' }], results: [{ testId: 'A', state: 'timed-out', attempt: 2 }], request: { retries: 1 } } as Run
@@ -25,4 +25,10 @@ test('final result summaries stay compact while the source error remains intact'
   const run = { results: [{ testId: 'A', error }] } as Run
   assert.deepEqual(resultSummaries(run), { A: 'Assertion mismatch' })
   assert.equal(run.results[0].error, error)
+})
+
+test('history links select only a test from the immutable run snapshot', () => {
+  const run = { tests: [{ id: 'KEPT', title: 'Original' }] } as Run
+  assert.equal(historyEvidenceTest(run, 'KEPT'), 'KEPT')
+  assert.equal(historyEvidenceTest(run, 'OTHER'), '')
 })

@@ -217,3 +217,11 @@ No cloud account or remote application is required.
 Targeted source, API, and CLI tests cover queued publication, retries, metadata preservation, cancellation, and interrupted-job cleanup.
 Use these focused checks after publication changes. Reuse cached images for local end-to-end checks when available.
 AWS, Kubernetes, and Azure verification remain separate work.
+
+## Interrupted preparation recovery
+
+Preparation recovery advances through bounded lease pages. Live jobs on an earlier page cannot hide later interrupted jobs.
+The worker scans one recovery page before its normal preparation work, then continues from that cursor.
+An explicit recovery sweep scans all pages. Cleanup preserves the original terminal failure or cancellation.
+An interrupted active preparation becomes failed. Recovery does not inspect, publish, activate, or run tests again.
+Resubmit the same preparation key to read its existing result. Use a new key for an explicit new preparation.

@@ -1,6 +1,18 @@
 import type { HelpPage } from './help.models'
 
 export const helpPages: Record<string, HelpPage> = {
+  'test-history': {
+    id: 'test-history', title: 'Test history',
+    introduction: ['Follow a permanent test identity through its saved runs, definitions, and retained evidence. The test or suite can be archived.'],
+    concepts: [
+      { title: 'Permanent identity', description: 'The project, suite, and test identifier define this history. Identical test identifiers in other suites keep separate histories.' },
+      { title: 'Saved runs', description: 'Run titles, release, outcomes, and durations come from saved snapshots. Editing or archiving a test does not rewrite them. A missing test result displays not-recorded, never a passing result.' },
+      { title: 'Archived and removed definitions', description: 'Archived tests and suites keep their history. If the working definition is missing, the last saved revision provides context. History does not restore a definition or enable execution.' },
+      { title: 'Evidence and permissions', description: 'Inspect run and evidence opens the original run with this test selected. Current run and artifact permissions still apply. Normal retention applies; use an evidence pin for an investigation.' },
+      { title: 'Older history', description: 'History scans are bounded. Load older runs continues the saved query. An empty partial scan does not prove that older matching runs do not exist.' }
+    ],
+    tutorials: [{ title: 'Investigate an old test', steps: ['Open a test title or History from the catalog, a retained release, or a run result.', 'Read the lifecycle and archived-suite notices. Compare the current title with each saved run title.', 'Select Inspect run and evidence to inspect the original attempts, logs, screenshots, traces, and attachments for this test.', 'Use Return to run when this page opened from a run. Test trends opens its stacked state history.', 'Expand Advanced revision history to inspect saved definitions. Load older runs when the page has a continuation.', 'If access changes, select Refresh access. Missing or denied data must not be read as a passing test.'] }]
+  },
   releases: {
     id: 'releases', title: 'Suite releases',
     introduction: ['Browse immutable suite releases, compare definitions and artifacts, and select a release for future runs.'],
@@ -330,7 +342,7 @@ export const helpPages: Record<string, HelpPage> = {
     introduction: ['The catalog describes what each test checks and how TestStudio runs it. Draft edits become executable through a published suite release.'],
     concepts: [
       { title: 'Test identity and lifecycle', description: 'A permanent identifier connects a test to its history. Enabled tests can be selected. Disabled and archived tests retain their definitions.' },
-      { title: 'Draft and release', description: 'Editing changes the draft. Validate and preview compares it with the active release, including safety, policy, and readable schedule effects. Publish release freezes it without activation. Publish and activate changes the active release for future unpinned runs. Stale reviews require a new preview. Validation does not execute tests or prove they pass.' },
+      { title: 'Draft and release', description: 'Open a test title for retained run history. Revisions under More shows saved definition revisions. Editing changes the draft. Validate and preview compares it with the active release, including safety, policy, and readable schedule effects. Publish release freezes it without activation. Publish and activate changes the active release for future unpinned runs. Stale reviews require a new preview. Validation does not execute tests or prove they pass.' },
       { title: 'Safety', description: 'Each test has a safety label and rationale. Protected targets require safe definitions and the required permissions.' },
       { title: 'HTTP assertions', description: 'Native checks support GET, HEAD, accepted statuses, exact response headers, body text, JSON fields, response-time limits, and certificate lifetime. Redirects stay disabled. Expected headers describe responses, not authentication credentials.' },
       { title: 'Timing policy', description: 'Comparable clean runs build a duration baseline. Timing rules can warn or fail on slow execution and recommend bounded timeouts.' },

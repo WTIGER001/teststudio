@@ -201,6 +201,28 @@ func TestPrebuiltPreparationPublicationPreservesMetadataAndHistory(t *testing.T)
 	if active.ID != release.ID {
 		t.Fatal("failed preparation replaced the active release")
 	}
+	for _, replayKey := range []string{"a-first", "c-failed"} {
+		image := first.Image
+		if replayKey == "c-failed" {
+			image = failed.Image
+		}
+		before := probe.calls.Load()
+		replayed, err := s.EnqueuePrebuilt(t.Context(), "admin", "alpha", "health", replayKey, sources.PrebuiltInput{Runner: "go", Image: image})
+		if err != nil {
+			t.Fatal(err)
+		}
+		stored, _ := storage.Decode[sources.Job](replayed)
+		expectedID, expectedState := first.ID, "published"
+		if replayKey == "c-failed" {
+			expectedID, expectedState = failed.ID, "failed"
+		}
+		if stored.ID != expectedID || stored.State != expectedState {
+			t.Fatal("duplicate terminal event changed the preparation", stored)
+		}
+		if processed, err := s.ProcessNext(t.Context(), "duplicate-worker"); err != nil || processed || probe.calls.Load() != before {
+			t.Fatal("duplicate event restarted inspection", processed, err)
+		}
+	}
 	runs, err := s.Store.All(t.Context(), "runs", "alpha")
 	if err != nil || len(runs) != 0 {
 		t.Fatal("publication or preparation started tests")
@@ -301,5 +323,58 @@ func TestPrebuiltOwnershipCannotBeAssignedByEditingOrDuplication(t *testing.T) {
 	detached.DefinitionSource = owned.DefinitionSource
 	if err := c.SaveTest(t.Context(), "admin", "alpha", "health", detached, row.Revision); err == nil {
 		t.Fatal("manual edit assigned source ownership")
+	}
+}
+
+func TestPreparationRecoveryReachesExpiredLeasesBeyondActiveFirstPage(t *testing.T) {
+	s, c, probe := preparedService(t)
+	_, queued := queue(t, s, "a-recovery-baseline")
+	ready := process(t, s, queued.ID)
+	original, err := s.Publish(t.Context(), "admin", "alpha", "health", ready.Upload, 1, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	before := probe.calls.Load()
+	changes := []storage.Change{}
+	for index := 0; index < 101; index++ {
+		id := fmt.Sprintf("held-%03d", index)
+		until := time.Now().UTC().Add(time.Hour)
+		if index == 100 {
+			id = "zz-interrupted"
+			until = time.Now().UTC().Add(-time.Minute)
+		}
+		reference := probe.Reference(execution.Reference{ID: "recovery-" + id, Run: id, Installation: "preparation-local", Project: "alpha", Test: "catalog", Attempt: 1, Worker: "old-worker"})
+		job := sources.Job{ID: id, Project: "alpha", Suite: "health", Actor: "admin", Runner: "go", Location: "local", State: "discovering", Phase: "discovering", Worker: "old-worker", Reference: &reference, LeaseUntil: &until, CreatedAt: time.Now().UTC()}
+		saved, err := storage.Put(sources.JobBucket("alpha", "health"), id, "alpha", 0, job)
+		if err != nil {
+			t.Fatal(err)
+		}
+		lease, err := storage.Put("preparation-leases/local", id, "alpha", 0, map[string]string{"jobId": id, "suiteId": "health", "executionLocation": "local"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		changes = append(changes, saved, lease)
+	}
+	if err := s.Store.CommitAll(t.Context(), changes...); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.RecoverPreparations(t.Context(), "new-worker"); err != nil {
+		t.Fatal(err)
+	}
+	row, err := s.ReadJob(t.Context(), "admin", "alpha", "health", "zz-interrupted")
+	if err != nil {
+		t.Fatal(err)
+	}
+	recovered, _ := storage.Decode[sources.Job](row)
+	if recovered.State != "failed" || recovered.Phase != "finished" || probe.calls.Load() != before {
+		t.Fatal("expired preparation stayed blocked or ran again", recovered)
+	}
+	active, err := c.ActiveRelease(t.Context(), "alpha", "health")
+	if err != nil || active.ID != original.ID {
+		t.Fatal("recovery changed activation", err)
+	}
+	stored, err := s.Store.All(t.Context(), "runs", "alpha")
+	if err != nil || len(stored) != 0 {
+		t.Fatal("recovery dispatched tests", err)
 	}
 }

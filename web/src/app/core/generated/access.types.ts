@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.28.0"
+export const accessContractVersion = "0.29.0"
 
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "team"?: string }
@@ -100,6 +100,7 @@ export type PublicationSchedule = { "enabled": boolean; "followsActive": boolean
 export type PublicationSettings = { "artifact": SourceCatalogArtifact; "capture": SourceCapturePolicy; "timing": SourceTimingPolicy }
 export type Reason = { "reason": string }
 export type ReleaseRegistry = { "activeReleaseId"?: string; "archived": boolean; "canActivate": boolean; "items": (SourceCatalogRelease)[]; "suiteId": string; "suiteName": string; "suiteRevision": number }
+export type RetainedTest = { "current": boolean; "lifecycle": string; "projectId": string; "revision": number; "suiteArchived": boolean; "suiteId": string; "suiteName": string; "test": SourceCatalogTest; "updatedAt": string }
 export type ReviewedPublicationInput = { "activate": boolean; "reviewId": string }
 export type Revoked = { "revoked": boolean }
 export type Role = { "builtIn": boolean; "delegatable": boolean; "disabled": boolean; "id": string; "name": string; "permissions": (string)[]; "scope": "project" | "installation" }
@@ -168,6 +169,8 @@ export type SuiteDefinition = { "activeReleaseId"?: string; "applications": (str
 export type SuiteLifecycle = { "canManage": boolean; "revision": number; "schedules": (SuiteSchedule)[]; "suite": SuiteDefinition; "updatedAt": string }
 export type SuiteSchedule = { "enabled": boolean; "id": string; "name": string; "releaseId"?: string }
 export type SuiteSettings = { "applications": (string)[] | null; "description": string; "name": string; "requiresTarget": boolean }
+export type TestHistoryItem = { "attempt": number; "createdAt": string; "durationMs"?: number; "environmentName"?: string; "error"?: string; "evidenceState": string; "executionLocation": string; "finishedAt"?: string; "releaseId": string; "runId": string; "runOutcome": string; "runState": string; "testState": string; "title": string }
+export type TestHistoryPage = { "cursor"?: string; "items": (TestHistoryItem)[]; "partial": boolean; "scanned": number }
 export type User = { "createdAt": string; "disabled": boolean; "email"?: string; "emailVerified": boolean; "id": string; "lastSignIn"?: string; "name": string; "sessionEpoch": number }
 export type UserDefinition = { "email"?: string; "id": string; "name": string }
 export type UserPage = { "cursor"?: string; "items": (UserRecord)[] }
@@ -282,7 +285,9 @@ export interface AccessRequests {
   updateCatalogTest: { "project": string; "suite": string; "test": string; revision: number; body: SourceCatalogTest }
   duplicateCatalogTest: { "project": string; "suite": string; "test": string; revision: number; body: CatalogDuplicateInput }
   changeCatalogTestState: { "project": string; "suite": string; "test": string; "action": "disable" | "enable" | "archive" | "restore"; revision: number }
+  readRetainedTest: { "project": string; "suite": string; "test": string }
   listCatalogTestRevisions: { "project": string; "suite": string; "test": string }
+  readTestRunHistory: { "project": string; "suite": string; "test": string; query?: { "cursor"?: string; "limit"?: number } }
   listProjectCatalog: { "project": string; query?: { "query"?: string; "suite"?: string; "application"?: string; "category"?: string; "tag"?: string; "owner"?: string; "type"?: string; "runner"?: string; "state"?: string; "safety"?: string; "source"?: string; "sort"?: string; "cursor"?: string; "descendants"?: boolean; "uncategorized"?: boolean; "limit"?: number } }
   listInstallationAssignments: { query?: { "limit"?: number; "cursor"?: string } }
   createInstallationAssignment: { body: AssignmentDefinition }
@@ -429,7 +434,9 @@ export interface AccessResponses {
   updateCatalogTest: CatalogTestRecord
   duplicateCatalogTest: CatalogTestRecord
   changeCatalogTestState: CatalogTestRecord
+  readRetainedTest: RetainedTest
   listCatalogTestRevisions: CatalogRevisionPage
+  readTestRunHistory: TestHistoryPage
   listProjectCatalog: CatalogListPage
   listInstallationAssignments: AssignmentPage
   createInstallationAssignment: AssignmentRecord
@@ -576,7 +583,9 @@ export const accessOperations = {
   updateCatalogTest: { method: "PUT", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}" },
   duplicateCatalogTest: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/actions/duplicate" },
   changeCatalogTestState: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/actions/{action}" },
+  readRetainedTest: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/retained" },
   listCatalogTestRevisions: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/revisions" },
+  readTestRunHistory: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/run-history" },
   listProjectCatalog: { method: "GET", path: "/api/v1/projects/{project}/tests" },
   listInstallationAssignments: { method: "GET", path: "/api/v1/role-assignments" },
   createInstallationAssignment: { method: "POST", path: "/api/v1/role-assignments" },

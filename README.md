@@ -32,7 +32,7 @@ Normal local development still starts with an empty project registry.
 | Start and organize testing | [Demo](docs/demo.md), [Applications](docs/applications.md), [Suites](docs/suites.md). |
 | Create tests | [Create test](docs/create-tests.md), [HTTPS checks](docs/http-checks.md), [Browser recording](docs/browser-recording.md), [Website execution](docs/browser-execution.md), [Playwright editor](docs/playwright-editor.md), [Go testing](docs/go-testing.md). |
 | Manage test definitions | [Catalog](docs/catalog.md), [Saved selections](docs/saved-selections.md), [Releases](docs/releases.md). |
-| Inspect runs | [Results](docs/results.md), [Evidence](docs/evidence.md), [Timing](docs/timing.md), [Trends](docs/trends.md). |
+| Inspect runs | [Results](docs/results.md), [Test history](docs/test-history.md), [Evidence](docs/evidence.md), [Timing](docs/timing.md), [Trends](docs/trends.md). |
 | Automate testing | [Schedules](docs/schedules.md), [Notifications](docs/notifications.md). |
 | Import and synchronize | [Native uploads](docs/sources.md), [Source bundles](docs/source-bundles.md), [Prepared suites](docs/prepared-suites.md), [Repositories](docs/repository-sources.md), [CLI sign-in](docs/cli-sign-in.md). |
 | Administer and operate | [Access](docs/access.md), [Provider profiles](docs/providers.md), [Notification transports](docs/notification-transports.md). Current installation commands appear below. |

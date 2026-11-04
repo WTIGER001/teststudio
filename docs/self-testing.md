@@ -329,3 +329,13 @@ Export must include unloaded records and produce a real JSON download.
 The browser loads a new file, rejects invalid assertions, handles a stale import atomically, reloads without losing the document, and reviews again.
 It then imports and publishes without activation. The existing run and active release remain unchanged.
 Use STUDIO-BROWSE-001 for category navigation, combined filters, lifecycle actions, keyboard behavior, and themes.
+
+## Retained test history
+
+Run STUDIO-HISTORY-001 for the [retained history workflow](test-history.md).
+It creates two fresh native HTTP runs and separate diagnostic screenshot and trace attachments.
+The media helper closes its owned browser before returning.
+A selector-scoped fixture can remove the archived working definition inside that disposable database.
+The production service exposes no corresponding deletion endpoint.
+The workflow checks saved snapshots, current permissions, retained private evidence, help, focus, themes, and mobile width.
+STUDIO-BROWSE-001 covers the shared revision renderer and renamed Revisions action.

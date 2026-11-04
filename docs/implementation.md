@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 32 verified of 57.
+The acceptance count is 34 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -36,10 +36,10 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **23.** One repository can provide multiple suites, including suites beside existing application source.
 - [x] **24.** Test-only publication requires no API or UI deployment.
 - [x] **25.** Concurrent catalog edits produce explicit conflicts. Source synchronization preserves service-managed metadata.
-- [ ] **26.** Failed or duplicate preparation events preserve the active release and do not create unintended test runs.
+- [x] **26.** Failed or duplicate preparation events preserve the active release and do not create unintended test runs.
 - [x] **27.** Runs retain their release across updates, activation changes, and rollbacks.
 - [ ] **28.** Catalog changes do not change existing run snapshots. Disabled tests and invalid dependencies block new dispatch explicitly.
-- [ ] **29.** Removed tests and archived suites retain their history and required artifacts.
+- [x] **29.** Removed tests and archived suites retain their history and required artifacts.
 - [x] **30.** TestStudio executes its own new Playwright suite through normal publication, execution, timing, result, and evidence contracts.
 - [x] **31.** Go unit suites run without artificial web targets or production credentials.
 - [x] **32.** Go suites preserve test identities, disable cached execution, and distinguish build failures from test assertion failures.
@@ -68,6 +68,49 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **55.** Hosted identity and private report access work through installation-specific configuration.
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
+
+## Current delivery: preparation recovery and retained test history
+
+Acceptances **26** and **29** are complete.
+The current ledger has **34 verified, 23 open, 57 total** items.
+
+Preparation recovery now advances through bounded lease pages.
+A worker scans one page before normal preparation work. An explicit recovery sweep scans all pages.
+One hundred live leases no longer hide an expired job on a later page.
+Recovery records interruption, cleans owned resources, and preserves the active release without running tests.
+Terminal preparation replay returns the original published or failed record without another inspection or queued job.
+Concurrent publication returns one release. Existing bundle checks preserve failed-build and cancelled outcomes during cleanup.
+The focused race checks pass on SQLite and local PostgreSQL. No fixture images or cloud profiles are rebuilt for these checks.
+
+Retained history implementation adds current lifecycle context, saved run snapshots, and scoped evidence entry.
+It supports archived suites and a missing working definition with a retained revision.
+The shared history route opens from catalog titles, More > History, published definitions, and run-result titles.
+Runs retain original title, release, result, target, timing, and evidence state. Missing observations display not-recorded.
+Bounded older-run scans use actor-bound, scoped, expiring cursors. Exact run denies omit rows.
+The page reuses the revision renderer. Technical definitions, revisions, and identifiers use named disclosures.
+Scoped evidence entry validates the requested test against the saved run snapshot.
+Refresh preserves a tester's later manual evidence selection.
+
+New API and run-domain checks pass with the race detector on SQLite and local PostgreSQL.
+They cover archive, working-row removal, retained bytes, pinned evidence, immutable snapshots, current exact permissions, and bounded scans.
+Generated-client synchronization and the production build pass. Seven focused UI utility checks pass.
+STUDIO-HISTORY-001 passes through normal TestStudio execution with complete evidence in 2.073 seconds.
+It uses two actual HTTP runs and fresh browser diagnostic media attached separately through the evidence service.
+The check covers saved titles, archive, missing working definitions, revisions, screenshot focus, private trace bytes, help, themes, and mobile width.
+It also verifies that current permission loss hides rejected history. No extra logical runs appear.
+STUDIO-BROWSE-001 passes in 4.430 seconds with the shared revision renderer and renamed Revisions action.
+Two early history checks require fixture corrections: a grant cannot target a deleted object, and revocation must follow the initial load.
+The corrected selector passes. Only the affected failed workflow reruns. No broad suite or remote profile runs.
+
+History evidence is output/selftest/20261104T034449.754604000-244062383774ad54492c2264/summary.json and cleanup.json.
+Browse evidence is output/selftest/20261104T034140.144453000-c9f1d856dade4c45f83d183f/summary.json and cleanup.json.
+The concise milestone record is output/test-history/checkpoint.json.
+All owned verification controllers, browser containers, output volumes, and exact PostgreSQL fixtures are stopped and verified.
+The user's demo data and browser remain intact.
+
+History does not extend normal artifact retention or reconstruct deleted revision records.
+Source omissions use archive. A missing working-row fallback is an additional recovery read, not a production deletion feature.
+Evidence restart recovery, provider retention parity, timing parity, and hosted acceptance remain separate open scope.
 
 ## Feature log
 

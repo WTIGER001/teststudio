@@ -6,7 +6,7 @@ import { ApiError, ApiService, type RecordValue } from '../../core/api.service'
 import { WorkspaceService } from '../../core/workspace.service'
 import { RunEvidenceService } from './run-evidence.service'
 import type { Run } from './run.models'
-import { diagnosticTests, runTestLabels, runActionFeedback, resultSummaries } from './run-diagnostics.utils'
+import { historyEvidenceTest, diagnosticTests, runTestLabels, runActionFeedback, resultSummaries } from './run-diagnostics.utils'
 import { canRerun, errorMessage, terminal } from './run.utils'
 
 @Injectable()
@@ -33,6 +33,7 @@ export class RunDetailService {
   readonly finished = computed(() => { const run = this.run(); return !!run && terminal(run.state) })
   readonly observedAt = signal(Date.now())
   readonly timingProgress = computed(() => liveTiming(this.run(), this.observedAt()))
+  private historyScopeApplied = false
   private generation = 0
   private timer: ReturnType<typeof setTimeout> | undefined
   private rerunKey = crypto.randomUUID()
@@ -40,7 +41,7 @@ export class RunDetailService {
   constructor() {
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => {
       this.generation++; clearTimeout(this.timer)
-      this.projectId.set(params.get('projectId') ?? ''); this.runId.set(params.get('runId') ?? '')
+      this.projectId.set(params.get('projectId') ?? ''); this.runId.set(params.get('runId') ?? ''); this.historyScopeApplied = false
       this.run.set(null); this.error.set(''); this.actionError.set(''); this.rerunKey = crypto.randomUUID()
       this.evidence.reset(this.projectId(), this.runId())
       void this.load()
@@ -56,7 +57,10 @@ export class RunDetailService {
       const row = await this.api.request<RecordValue<Run>>(this.evidence.base())
       if (generation !== this.generation) return
       this.run.set(row.data); this.observedAt.set(Date.now())
-      await this.evidence.load()
+      const requested = this.historyScopeApplied ? '' : historyEvidenceTest(row.data, this.route.snapshot.queryParamMap.get('test') ?? '')
+      this.historyScopeApplied = true
+      if (requested) await this.evidence.inspectTest(requested)
+      else await this.evidence.load()
     } catch (error) {
       if (generation === this.generation) {
         if (error instanceof ApiError && (error.status === 403 || error.status === 404)) { this.run.set(null); this.evidence.restrict() }

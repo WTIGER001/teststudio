@@ -161,6 +161,7 @@ func (s *Server) Handler() http.Handler {
 	s.permissionExplanationRoutes(mux)
 	s.projectRoutes(mux)
 	s.catalogRoutes(mux)
+	s.testHistoryRoutes(mux)
 	s.catalogTransferRoutes(mux)
 	s.savedSelectionRoutes(mux)
 	s.sourceRoutes(mux)

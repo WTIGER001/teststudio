@@ -30,3 +30,5 @@ export function runActionFeedback(action: string, status: number, message: strin
 export function resultSummaries(run: Run | null): Record<string, string> {
   return Object.fromEntries((run?.results ?? []).map(result => { const first = (result.error || result.failureKind || '').split('\n').find(line => line.trim())?.trim() ?? ''; return [result.testId, first.length > 220 ? first.slice(0, 217) + '…' : first] }))
 }
+
+export function historyEvidenceTest(run: Run, requested: string): string { return run.tests.some(test => test.id === requested) ? requested : '' }

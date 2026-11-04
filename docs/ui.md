@@ -96,7 +96,10 @@ Automation contains Schedules and Notifications.
 Advanced testing contains Import and sync tests and Suite releases.
 Project administration and Installation administration group access controls by ownership scope.
 Automation, Advanced testing, and administration start collapsed. Their current page opens the relevant section.
-Creation routes keep Test catalog marked as the current destination.
+Creation and retained test-history routes keep Test catalog marked as the current destination.
+Test history remains a contextual route. It adds no sidebar destination.
+Catalog titles, retained release definitions, and saved result titles link to that route.
+Keep common run inspection visible. Put definition JSON, revision details, and identifiers under named disclosures.
 Native disclosure controls support keyboard operation. Active links expose the current page.
 Existing capability checks still control each protected link.
 On narrow screens, Navigation opens and closes the menu. Selecting a link closes it and returns space to the current page.

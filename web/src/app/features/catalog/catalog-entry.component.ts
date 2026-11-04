@@ -1,10 +1,10 @@
-import { DatePipe, JsonPipe } from '@angular/common'
 import { afterRenderEffect, ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } from '@angular/core'
 import { ReactiveFormsModule } from '@angular/forms'
+import { TestRevisionsComponent } from './test-revisions.component'
 import { CatalogEntryService } from './catalog-entry.service'
 
 @Component({
-  selector: 'ts-catalog-entry', standalone: true, imports: [DatePipe, JsonPipe, ReactiveFormsModule], changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'ts-catalog-entry', standalone: true, imports: [ReactiveFormsModule, TestRevisionsComponent], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (service.entry(); as entry) {
       <section class="panel" aria-labelledby="catalog-entry-title"><div class="section-top"><h2 #heading tabindex="-1" id="catalog-entry-title">{{ service.mode() === 'history' ? 'Revision history' : 'Duplicate test' }} · {{ entry.id }}</h2><button class="button subtle" type="button" (click)="service.close()">Close details</button></div>
@@ -14,7 +14,7 @@ import { CatalogEntryService } from './catalog-entry.service'
           <form [formGroup]="service.form" (ngSubmit)="service.duplicate()"><div class="field"><label for="duplicate-test-id">New permanent identifier</label><input id="duplicate-test-id" formControlName="id" required pattern="[A-Za-z0-9](?:[A-Za-z0-9._]|-){0,127}"></div><button class="button primary" type="submit" [disabled]="service.newID.invalid || service.loading()">Create duplicate</button></form>
         } @else {
           <p class="small muted">{{ entry.data.title }} · {{ entry.suiteName }}</p>
-          @for (revision of service.revisions(); track revision.id) { <details class="revision-entry"><summary>Revision {{ revision.number }} · {{ revision.data.at | date:'medium' }} · {{ revision.data.actor }}</summary><pre class="log-view">{{ revision.data.test | json }}</pre></details> } @empty { <p class="small muted">{{ service.loading() ? 'Loading revisions…' : 'No revisions are available.' }}</p> }
+          @if (service.loading()) { <p class="small muted">Loading revisions…</p> } @else { <ts-test-revisions [revisions]="service.revisions()" /> }
         }
       </section>
     }

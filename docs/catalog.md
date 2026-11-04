@@ -5,6 +5,9 @@ Catalog edits affect future publications. Existing releases and run snapshots ke
 Use explicit lifecycle actions to enable, disable, archive, or restore a test.
 Duplication creates a new identifier in draft state and starts independent history.
 
+Open a test title or More > History to inspect its [retained history](test-history.md).
+Revisions under More opens the compact definition history beside its catalog row.
+
 ## JSON transfer
 
 The export route returns a document with `schemaVersion: "teststudio.catalog/v1"` and a `tests` array.

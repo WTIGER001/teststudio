@@ -67,7 +67,7 @@ test('Browse category paths, combine filters, retain selection, and manage lifec
   await page.getByLabel('Lifecycle state', { exact: true }).selectOption('active')
   await expect(row('COPY')).toContainText('enabled')
   await row('COPY').locator('summary').click()
-  await row('COPY').getByRole('button', { name: 'History', exact: true }).click()
+  await row('COPY').getByRole('button', { name: 'Revisions', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Revision history · COPY', exact: true })).toBeFocused()
   await expect(page.getByText(/^Revision 5 ·/)).toBeVisible()
   await page.getByRole('button', { name: 'Close details', exact: true }).click()

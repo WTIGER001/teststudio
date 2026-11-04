@@ -27,15 +27,23 @@ func (s *Service) startPreparation(ctx context.Context, builds bool) <-chan stru
 	go func() {
 		defer close(done)
 		worker := domain.NewID()
+		recoveryCursor := ""
 		ticker := time.NewTicker(500 * time.Millisecond)
 		defer ticker.Stop()
 		for {
 			if ctx.Err() != nil {
 				return
 			}
-			if err := s.RecoverPreparations(ctx, worker); err != nil && ctx.Err() == nil {
-				slog.Error("preparation recovery failed")
+			nextRecovery, recoveryErr := s.recoverPreparationPage(ctx, worker, recoveryCursor)
+			if recoveryErr != nil {
+				recoveryCursor = ""
+				if ctx.Err() == nil {
+					slog.Error("preparation recovery failed")
+				}
+			} else {
+				recoveryCursor = nextRecovery
 			}
+
 			var err error
 			if builds {
 				if _, publishErr := s.ProcessRepositoryPublication(ctx); publishErr != nil && ctx.Err() == nil {
