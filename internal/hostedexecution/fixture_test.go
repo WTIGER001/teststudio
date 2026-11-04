@@ -35,17 +35,19 @@ type fixture struct {
 }
 
 type provider struct {
-	f             *fixture
-	job           hostedexecution.Job
-	status        *hostedexecution.Status
-	mode          string
-	ensureCount   int
-	removeCount   int
-	inspectCount  int
-	removeError   bool
-	stopError     bool
-	startCallback func()
-	inventory     []execution.Reference
+	f              *fixture
+	job            hostedexecution.Job
+	status         *hostedexecution.Status
+	mode           string
+	ensureCount    int
+	removeCount    int
+	inspectCount   int
+	admissionPolls int
+	loseAdmission  bool
+	removeError    bool
+	stopError      bool
+	startCallback  func()
+	inventory      []execution.Reference
 }
 
 func fresh(t *testing.T, runner string) *fixture {
@@ -198,6 +200,25 @@ func (p *provider) Observe(ctx context.Context, ref execution.Reference) (hosted
 	}
 	if p.status == nil {
 		return hostedexecution.Status{}, hostedexecution.ErrNotFound
+	}
+	if p.admissionPolls > 0 {
+		state, err := p.f.exchange.State(ctx, ref)
+		if err != nil || !state.DispatchPending {
+			p.f.t.Fatal("worker activation preceded provider admission", err)
+		}
+		p.admissionPolls--
+		p.f.events = append(p.f.events, "admission-pending")
+		status := *p.status
+		status.AdmissionPending = true
+		return status, nil
+	}
+	if p.loseAdmission {
+		state, err := p.f.exchange.State(ctx, ref)
+		if err == nil && !state.DispatchPending && !state.Revoked {
+			status := *p.status
+			status.AdmissionPending = true
+			return status, nil
+		}
 	}
 	if p.status.Phase == "running" && p.mode != "running" {
 		state, err := p.f.exchange.State(ctx, ref)

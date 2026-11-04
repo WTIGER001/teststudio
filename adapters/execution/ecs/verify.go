@@ -91,7 +91,15 @@ func (p *Plan) VerifyTags(actual []types.Tag) error {
 }
 
 func (p *Plan) VerifyDefinition(actual *ecs.DescribeTaskDefinitionOutput) error {
-	if actual == nil || actual.TaskDefinition == nil || !p.validDefinitionARN(aws.ToString(actual.TaskDefinition.TaskDefinitionArn)) || actual.TaskDefinition.Status != types.TaskDefinitionStatusActive || actual.TaskDefinition.Revision < 1 || p.VerifyTags(actual.Tags) != nil {
+	return p.verifyDefinition(actual, false)
+}
+
+func (p *Plan) verifyDefinition(actual *ecs.DescribeTaskDefinitionOutput, cleanup bool) error {
+	if actual == nil || actual.TaskDefinition == nil || !p.validDefinitionARN(aws.ToString(actual.TaskDefinition.TaskDefinitionArn)) || actual.TaskDefinition.Revision < 1 || p.VerifyTags(actual.Tags) != nil {
+		return hostedexecution.ErrOwnership
+	}
+	state := actual.TaskDefinition.Status
+	if state != types.TaskDefinitionStatusActive && (!cleanup || state != types.TaskDefinitionStatusInactive && state != types.TaskDefinitionStatusDeleteInProgress) {
 		return hostedexecution.ErrOwnership
 	}
 	if !strings.HasSuffix(*actual.TaskDefinition.TaskDefinitionArn, ":"+strconv.FormatInt(int64(actual.TaskDefinition.Revision), 10)) {

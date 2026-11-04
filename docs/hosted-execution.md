@@ -16,6 +16,12 @@ It rejects environment-backed artifacts and credential bindings until trusted ga
 See [Hosted runner supervisor](job-supervisor.md) for worker packaging.
 See [Private worker exchange](worker-exchange.md) for frozen work, tickets, reports, and staging limits.
 
+The lifecycle now supports an explicit provider AdmissionPending state before controller activation.
+Execution and discovery wait within their existing deadlines while the worker gate stays closed.
+Admission loss after activation revokes the ticket and starts owned cleanup.
+The optional ECS provider uses this state while its task and network interface become ready.
+See [ECS provider lifecycle](ecs-worker-lifecycle.md) for its implementation boundary and remaining installation controls.
+
 ## Admission and timing
 
 The installation supplies one provider, runner, profile name, private HTTPS origin, and artifact approval callback.

@@ -7,7 +7,8 @@ It supports the existing offline Go and Playwright execution and discovery opera
 Pinned dependencies are ECS v1.103.1 and Scheduler v1.26.1. They retain the existing AWS core SDK version.
 
 This delivery does not enable ECS workers in the API or preparation command.
-Durable provider dispatch, task observations, network admission, cleanup, private exchange routing, and AWS packaging remain required.
+The [durable provider lifecycle](ecs-worker-lifecycle.md) now implements dispatch, observations, and checkpointed cleanup with required network-admission hooks.
+Production network checks, configuration, private exchange routing, and AWS packaging remain required.
 The existing AWS service profile continues to support native HTTP execution only.
 No cloud account, registry, or deployment is contacted by these contract checks.
 
@@ -112,9 +113,7 @@ Credentials come only from that owned fixture's explicit callback. No AWS creden
 The fixture shuts down after the check. No browser, service image, UI, or source-runtime build is required.
 The API, preparation command, and supervisor retain successful compilation checks in compile.log.
 
-Next implement the durable ECS provider state machine and its bounded ECS and Scheduler clients.
-Reserve registration and launch before network work. Recover lost acknowledgements through exact owned-resource discovery.
-Verify task creation, immutable definition, network isolation, and independent deadline before opening the existing dispatch gate.
-Retain terminal status and checkpoint-gated schedule and task-definition cleanup.
-Then add the private HTTPS route, scoped controller roles, optional server settings, and AWS service packaging.
+The durable ECS state machine now reserves registration and launch, recovers lost acknowledgements, and retains terminal observations and cleanup state.
+The shared driver waits for explicit provider admission before opening the exchange gate.
+Next implement production network checks, scoped SDK initialization, private HTTPS routing, controller roles, optional settings, and AWS service packaging.
 Keep the AWS provider disabled until those lifecycle and routing contracts are complete.

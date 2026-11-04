@@ -39,11 +39,12 @@ type Job struct {
 }
 
 type Status struct {
-	Reference execution.Reference
-	Image     string
-	Deadline  time.Time
-	Phase     string
-	ExitCode  *int
+	AdmissionPending bool
+	Reference        execution.Reference
+	Image            string
+	Deadline         time.Time
+	Phase            string
+	ExitCode         *int
 }
 
 type Provider interface {

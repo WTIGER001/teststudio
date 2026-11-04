@@ -57,7 +57,22 @@ func (e *Executor) observe(ctx context.Context, ref execution.Reference, image s
 	default:
 		return status, ErrOwnership
 	}
+	if status.AdmissionPending && terminal(status) {
+		return status, ErrOwnership
+	}
 	return status, nil
+}
+
+func (e *Executor) awaitAdmission(ctx context.Context, ref execution.Reference, image string, deadline time.Time) (Status, error) {
+	for {
+		status, err := e.observe(ctx, ref, image, deadline)
+		if err != nil || !status.AdmissionPending {
+			return status, err
+		}
+		if err := e.pause(ctx); err != nil {
+			return status, err
+		}
+	}
 }
 
 func (e *Executor) pause(ctx context.Context) error {
@@ -85,6 +100,9 @@ func (e *Executor) waitWorker(ctx context.Context, ref execution.Reference, imag
 		status, err := e.observe(ctx, ref, image, deadline)
 		if err != nil {
 			return status, err
+		}
+		if status.AdmissionPending {
+			return status, ErrUnavailable
 		}
 		state, err := e.state(ctx, ref)
 		if err != nil {

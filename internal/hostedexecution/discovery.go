@@ -95,7 +95,7 @@ func (i *DiscoveryInspector) Inspect(ctx context.Context, request preparation.In
 	if err := bounded(wall, func(ctx context.Context) error { return i.Provider.Ensure(ctx, job) }); err != nil {
 		return result, errors.Join(ErrUnavailable, preparation.ErrCleanupIncomplete)
 	}
-	status, err := controller.observe(wall, request.Reference, request.Image, ticket.Deadline)
+	status, err := controller.awaitAdmission(wall, request.Reference, request.Image, ticket.Deadline)
 	if err == nil && !terminal(status) {
 		err = bounded(wall, func(ctx context.Context) error { return i.Exchange.Activate(ctx, request.Reference) })
 		if err == nil {

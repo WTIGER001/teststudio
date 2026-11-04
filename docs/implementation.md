@@ -111,7 +111,38 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: ECS task, independent deadline, and recovery proof contracts
+## Current delivery: durable ECS dispatch and checkpointed recovery
+
+Acceptance **51** advances with supporting replica recovery under **52**.
+The total remains **48 verified of 57**, with **9 open** items. ECS remains disabled until production admission, settings, and private routing exist.
+
+The provider now implements the shared lifecycle through typed SDK-compatible ECS and Scheduler clients.
+Durable reservations and exchange assertions precede registration, launch, and deadline creation.
+Only the winning reservation creates resources. Recovery lists and verifies existing resources without another creation request.
+Exact definition and task ARNs, ticket-free proofs, terminal observations, and replay tombstones survive database reopen.
+
+The shared status contract adds AdmissionPending for accepted tasks whose runtime or network interface is still becoming ready.
+Execution and discovery keep executable input gated until admission completes. Admission loss after activation revokes and stops owned work.
+The ECS constructor requires installation and actual-task network checks. No production network bypass is supplied.
+Stop-time tag loss preserves exact saved ownership. Missing live tasks remain unresolved without a saved terminal receipt.
+
+Cleanup requires revoked exchange ownership and the saved result/evidence or preparation checkpoint.
+It verifies and deletes the exact deadline and immutable definition after confirmed termination.
+Asynchronous definition deletion retains the saved result and backs off cloud reads for one minute.
+Public control errors exclude raw provider diagnostics. Existing installation-transfer guards retain the exchange until cleanup finishes.
+
+Targeted race checks pass for both runners and both operations, concurrent controllers, lost registration/launch/deadline responses, late task appearance, and missing live history.
+Database-reopen recovery, checkpoint and revocation separation, changed schedules, delayed deletion, admission rejection, and private error handling pass.
+The shared real exchange and ledger path passes delayed admission and admission-loss checks.
+Targeted existing discovery and Kubernetes compatibility checks pass. API and preparation commands compile.
+Evidence is output/ecs-worker-lifecycle: final-contract.log, restart-and-control.log, checkpoint-invariants.log, discovery-compatibility.log, kubernetes-compatibility.log, and compile.log.
+No cloud account, registry, browser, UI build, service image build, or source-runtime rebuild occurs. The existing demonstration is preserved.
+
+See [Durable ECS worker lifecycle](ecs-worker-lifecycle.md) for exact implementation boundaries and recovery limitations.
+Next implement actual EC2 network admission, scoped SDK initialization, bounded private settings, private worker HTTPS routing, and deployment permissions.
+Keep AWS disabled until these controls are wired and verified locally. Hosted deployment acceptance remains separate work.
+
+## Previous delivery: ECS task, independent deadline, and recovery proof contracts
 
 Acceptance **51** advances. The total remains **48 verified of 57**, with **9 open** items.
 These contracts do not enable ECS workers or close provider acceptance.

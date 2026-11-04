@@ -71,7 +71,7 @@ func (e *Executor) Execute(ctx context.Context, input execution.CodedInput) (rep
 		}
 		return report
 	}
-	status, waitErr := e.observe(wall, *input.Reference, input.Artifact.Image, ticket.Deadline)
+	status, waitErr := e.awaitAdmission(wall, *input.Reference, input.Artifact.Image, ticket.Deadline)
 	if waitErr == nil && !terminal(status) {
 		waitErr = bounded(wall, func(ctx context.Context) error { return e.Exchange.Activate(ctx, *input.Reference) })
 		if waitErr == nil {

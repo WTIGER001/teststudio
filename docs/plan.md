@@ -236,10 +236,18 @@ Targeted local race and signed TLS wire checks pass. Current API, preparation, a
 See [ECS task and deadline contracts](ecs-worker-contract.md) for current scope, verified AWS constraints, and exact remaining work.
 Acceptance 51 advances. The total remains 48 verified and 9 open.
 
-Next implement durable ECS registration and launch reservations, lost-acknowledgement discovery, provider observations, independent deadline verification, and checkpointed cleanup.
-Persist task and task-definition ARNs before stopping work. AWS removes task tags during StopTask; recovery must preserve ownership without them.
+The durable ECS provider now reserves registration and launch, recovers lost acknowledgements without redispatch, observes exact tasks, and verifies independent deadlines.
+Task and definition receipts survive stop-time tag loss. Saved terminal observations survive later task-history expiry.
+Checkpointed cleanup verifies the owned schedule and definition. Asynchronous definition deletion retains its result and uses a one-minute read backoff.
+The shared lifecycle waits for provider admission before opening executable input and stops work after admission loss.
+Local race, database-reopen, mutation, concurrency, missing-history, and targeted compatibility checks pass.
+See [Durable ECS lifecycle](ecs-worker-lifecycle.md) for exact evidence, ownership, cleanup, and uncertainty rules.
+This advances 51 and supporting replica recovery under 52. The total remains 48 verified and 9 open.
+
+Next implement the required production network-admission checker, scoped SDK factory, and bounded private ECS settings.
+Verify the actual task interface and exact private worker egress, including registry endpoint policies, before admission.
+Add server and preparation wiring plus the private HTTPS route and scoped roles before enabling AWS workers.
 Do not recreate uncertain tasks after the finite RunTask idempotency window. Missing live tasks remain unresolved without a saved terminal observation.
-Then add optional server settings and the private HTTPS exchange route before enabling AWS workers.
 Keep exact image approval, gated dispatch, provider ownership, cancellation, deadlines, and checkpointed cleanup.
 Use local protocol fixtures and package rendering. Do not run AWS, cluster, or Azure deployment checks in this session.
 Keep uploaded source outside the API and retain exact source approval, project ownership, catalog review, and publication boundaries.
