@@ -124,3 +124,12 @@ Log cursors also bind the selected attempt and retained log snapshot.
 A collection request scans at most 200 metadata rows. A filtered page can be empty while its cursor permits another scan.
 Collection limits remain 1 through 1000. Log pages remain limited to 100 segments with existing content bounds.
 Changing the selection requires a new first page. Do not reuse a cursor after changing filters.
+
+## Logical count boundaries
+
+Count each registered test once in its final result, regardless of its attempt count.
+Go package events and dynamic descendants remain diagnostics beneath the selected aggregate.
+An independently registered subtest owns its own result. Overlapping aggregate and child registrations remain invalid.
+Playwright browser and API operations remain recorded steps within the selected test.
+Framework assertions, nested steps, attachments, and retries do not add logical tests.
+Passing after an unsuccessful attempt remains one flaky result with separate retained attempts.

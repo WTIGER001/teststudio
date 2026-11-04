@@ -113,3 +113,11 @@ Run focused container checks with the built image:
 teststudio_go_image=$(docker image inspect teststudio/go-selftests:local --format '{{.Id}}')
 TESTSTUDIO_GO_IMAGE="$teststudio_go_image" go test -race ./adapters/execution/localcontainer -run TestGoContainer
 ```
+
+## Frozen timing compatibility
+
+Queued runs retain the runtime profile used for their timing prediction.
+The service blocks dispatch if that profile changes before an attempt. Start a new run for the new profile.
+Framework measurements stay separate from compilation and worker coordination.
+Measured zero durations can train history. Missing measurements remain censored.
+See [Test timing](timing.md#runtime-compatibility-and-zero-measurements) for the shared rule.

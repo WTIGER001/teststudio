@@ -41,7 +41,7 @@ func (s *Service) Prediction(ctx context.Context, v Context, p Policy, hardTimeo
 }
 
 func (s *Service) RecordChanges(ctx context.Context, p Prediction, sample Sample) ([]storage.Change, error) {
-	if !finite(sample.DurationMs) || sample.DurationMs <= 0 || sample.Run == "" || sample.At.IsZero() {
+	if !finite(sample.DurationMs) || sample.DurationMs < 0 || sample.Run == "" || sample.At.IsZero() {
 		return nil, nil
 	}
 	r, err := s.Store.Get(ctx, "timing-windows", p.Key)

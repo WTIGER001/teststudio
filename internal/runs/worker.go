@@ -284,6 +284,10 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 				executionError = err.Error()
 				break
 			}
+			if err := s.admitTimingRuntime(ctx, run, test); err != nil {
+				executionError = err.Error()
+				break
+			}
 			_, err := s.mutate(ctx, run.Project, run.ID, func(v *Run) error {
 				if err := owned(v, worker); err != nil {
 					return err
@@ -360,7 +364,10 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 						if err := owned(&current, worker); err != nil {
 							return err
 						}
-						return s.admitAttempt(ctx, run)
+						if err := s.admitAttempt(ctx, run); err != nil {
+							return err
+						}
+						return s.admitTimingRuntime(ctx, run, test)
 					}
 					input.BeforeCleanup = func(observation execution.CodedReport) error {
 						if observation.RecoveryError != nil {

@@ -102,3 +102,16 @@ func TestPolicyRejectsInvalidControls(t *testing.T) {
 		}
 	}
 }
+
+func TestMeasuredZeroWithZeroNoiseGuardDoesNotRegressAgainstItself(t *testing.T) {
+	zero := 0.0
+	prediction := Prediction{Ready: true, MedianMs: &zero, ThresholdMs: &zero, Policy: DefaultPolicy()}
+	normal := Assess(prediction, 0, "passed", "")
+	if normal.Status != "normal" || normal.Ratio != nil || normal.Censored {
+		t.Fatal("zero measurement regressed against itself", normal)
+	}
+	slow := Assess(prediction, 1, "passed", "")
+	if slow.Status != "slow" || slow.Ratio != nil {
+		t.Fatal("zero noise policy lost a positive regression", slow)
+	}
+}

@@ -89,7 +89,7 @@ if (localOnly) {
 }
 const imageKey = digest([baseImage, architecture, uiOutput, traceOutput, cache.binaries.teststudio.hash, cache.binaries['access-fixture'].hash, cache.binaries['teststudio-publish'].hash, fingerprint(['tests/selftest/Dockerfile', 'tests/selftest/playwright', 'runners/playwright'])])
 if (cache.imageKey !== imageKey || !cache.image || !inspect(cache.image)) {
-  run('docker', ['build', '--pull=false', '-q', '-f', 'tests/selftest/Dockerfile', '-t', 'teststudio/selftests:local', '.'])
+  run('docker', ['build', '--pull=false', '--build-arg', `TARGETARCH=${architecture}`, '-q', '-f', 'tests/selftest/Dockerfile', '-t', 'teststudio/selftests:local', '.'])
   const image = inspect('teststudio/selftests:local')?.[0]
   if (!image || !/^sha256:[a-f0-9]{64}$/.test(image)) throw new Error('The built self-test image cannot be verified')
   cache.imageKey = imageKey; cache.image = image; save()

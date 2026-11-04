@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 35 verified of 57.
+The acceptance count is 36 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -46,7 +46,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **33.** Adding an HTTPS check requires no browser or service deployment.
 - [ ] **34.** HTTPS checks run manually and on schedules, with configurable assertions, TLS checks, response-time history, and normal result records.
 - [ ] **35.** API suites run through guarded direct clients and produce the same history and trends as browser tests.
-- [ ] **36.** Package events, subtest aggregates, retries, and API steps do not inflate test counts.
+- [x] **36.** Package events, subtest aggregates, retries, and API steps do not inflate test counts.
 - [ ] **37.** Local and scheduled executions produce the same logical run and result records.
 - [ ] **38.** Protected environments reject unsafe selections and unsafe dependencies.
 - [x] **39.** Timeouts have a separate test status and count. Failure reruns include them alongside failed and flaky results.
@@ -68,6 +68,47 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **55.** Hosted identity and private report access work through installation-specific configuration.
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
+
+## Current delivery: coded timing and logical count parity
+
+Acceptance **36** is complete. Acceptance **41** advances and remains open across deployment profiles.
+The ledger has **36 verified, 21 open, 57 total** items.
+
+Go, Playwright, and API-typed coded tests now recheck runtime compatibility before each attempt and managed dispatch.
+Runtime drift blocks execution before another test starts. Original predictions remain unchanged; a new run selects the current history.
+Runtime contexts include inspected operating system and architecture independently of the declared toolchain label.
+Unlabelled approved Playwright images use their actual immutable local image identifier instead of a shared unknown profile.
+Known compatible labels retain history across source-only releases. The self-test image declares its runtime and explicit build architecture.
+
+Unavailable measurements stay censored even when the functional result passes. They cannot train history or become measured zero values.
+Actual zero measurements now enter clean history. Zero-median predictions retain the configured absolute noise guard and historical tail.
+Regression messages avoid dividing by zero. A configured zero noise guard does not make a zero measurement regress against itself.
+Preparation and worker coordination remain separate from execution duration.
+
+Focused race checks pass for frozen adaptive budgets, slowdown retries, unavailable measurements, real zeros, runtime drift, and separate contexts.
+They pass on SQLite and local PostgreSQL. Core timing checks and the zero-noise edge check pass.
+A direct local image inspection verifies the actual Docker metadata format and platform binding without starting another browser.
+The first coded zero check exposes the old sample filter. Both recording and prediction now retain valid zero observations.
+
+New API-typed Playwright self-testing preserves each API operation and assertion as a step within one logical result.
+The registrar respects the declared API type instead of forcing every definition to browser.
+STUDIO-API-STEPS-001 passes in 415 milliseconds with 64 recorded steps and one result.
+STUDIO-TIMEOUT-001 passes in 2958 milliseconds with 96 recorded steps and one result.
+Their normal TestStudio run has two registered tests and exactly two completed logical results.
+Focused Go runner checks execute a newly written aggregate and an independent subtest. Package and ancestor events remain diagnostics.
+Coded retry checks retain two attempts and three steps per attempt while producing one flaky logical result.
+The same shared reduction applies across Go, browser, and API-typed coded results.
+
+Evidence is output/selftest/20261104T042513.552815000-000b05a7679da65d8998edf6/summary.json and cleanup.json.
+The concise milestone record is output/coded-timing/checkpoint.json.
+Owned browser containers, output volumes, controller, and exact PostgreSQL fixture are stopped and verified.
+The final native server build passes. UI and trace outputs remain cached after the help update build.
+No broad suite or cloud profile runs. The user's demo data and browser remain intact.
+
+Timing, Go, result, and self-testing guides describe runtime drift, valid zero values, and logical count boundaries.
+Run details help explains the changed timing and recovery behavior.
+Acceptance **41** still requires the applicable deployment profiles. Provider storage acceptance remains open under **46**.
+Continue remaining local acceptance work and provider packaging without treating local checks as hosted verification.
 
 ## Current delivery: provider artifact storage selection
 

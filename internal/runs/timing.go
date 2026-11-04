@@ -43,16 +43,11 @@ func (s *Service) predictTiming(ctx context.Context, run *Run) error {
 			policy = timing.Normalize(*test.Timing)
 		}
 		scope := timingContext(*run, test)
-		if driver := s.codedDriver(test.Runner, run.Release.Draft.Artifact); driver != nil {
-			scope.Profile = driver.Profile()
-			if profiler, ok := driver.(execution.RuntimeProfiler); ok {
-				profile, err := profiler.TimingProfile(ctx, run.Release.Draft.Artifact)
-				if err != nil {
-					return err
-				}
-				scope.Profile = profile
-			}
+		profile, err := s.runtimeTimingProfile(ctx, test, run.Release.Draft.Artifact)
+		if err != nil {
+			return err
 		}
+		scope.Profile = profile
 		p, err := service.Prediction(ctx, scope, policy, test.TimeoutSeconds*1000, run.CreatedAt)
 		if err != nil {
 			return err
@@ -60,6 +55,35 @@ func (s *Service) predictTiming(ctx context.Context, run *Run) error {
 		predictions[test.ID] = p
 	}
 	run.Timing = timing.Summarize(predictions, run.Request.Retries, run.Request.TimeoutSeconds)
+	return nil
+}
+
+func (s *Service) runtimeTimingProfile(ctx context.Context, test catalog.Test, artifact catalog.Artifact) (string, error) {
+	driver := s.codedDriver(test.Runner, artifact)
+	if driver == nil {
+		if test.Runner != "http" {
+			return "", errors.New("the frozen coded execution profile is unavailable")
+		}
+		return "native-http-v1", nil
+	}
+	if profiler, ok := driver.(execution.RuntimeProfiler); ok {
+		return profiler.TimingProfile(ctx, artifact)
+	}
+	return driver.Profile(), nil
+}
+
+func (s *Service) admitTimingRuntime(ctx context.Context, run Run, test catalog.Test) error {
+	prediction, ok := run.Timing.Tests[test.ID]
+	if !ok {
+		return errors.New("the run has no frozen timing context for this test")
+	}
+	profile, err := s.runtimeTimingProfile(ctx, test, run.Release.Draft.Artifact)
+	if err != nil {
+		return err
+	}
+	if profile != prediction.Context.Profile || test.Runner != prediction.Context.Runner {
+		return errors.New("execution runtime changed after timing was frozen; create a new run to review its prediction")
+	}
 	return nil
 }
 
@@ -88,11 +112,22 @@ func assessResult(run Run, result execution.Result) execution.Result {
 	result.ObservedState = result.State
 	if p, ok := run.Timing.Tests[result.TestID]; ok {
 		a := timing.Assess(p, result.DurationMs, result.State, result.FailureKind)
+		if result.DurationUnavailable && result.State != "skipped" {
+			a.Status = "censored"
+			a.Censored = true
+			a.Ratio = nil
+		}
 		result.Timing = &a
 		if result.State == "passed" && a.Status == "slow" && p.Policy.Mode == "fail" {
 			result.State = "failed"
 			result.FailureKind = "duration-regression"
-			result.Error = fmt.Sprintf("Duration %.1f ms exceeds %.1f ms threshold (%.2fx baseline, %d samples).", result.DurationMs, *p.ThresholdMs, *a.Ratio, p.Samples)
+			comparison := fmt.Sprintf("%d samples", p.Samples)
+			if a.Ratio != nil {
+				comparison = fmt.Sprintf("%.2fx baseline, %s", *a.Ratio, comparison)
+			} else if p.MedianMs != nil {
+				comparison = fmt.Sprintf("%.1f ms baseline, %s", *p.MedianMs, comparison)
+			}
+			result.Error = fmt.Sprintf("Duration %.1f ms exceeds %.1f ms threshold (%s).", result.DurationMs, *p.ThresholdMs, comparison)
 		}
 	}
 	return result
@@ -120,7 +155,7 @@ func (s *Service) finalResult(ctx context.Context, run Run, worker string, resul
 			return err
 		}
 		changes := []storage.Change{c}
-		if result.State == "passed" && result.Attempt == 1 && result.Timing != nil && !result.Timing.Censored && result.Timing.Status != "slow" && (result.Timing.Prediction.ThresholdMs == nil || result.DurationMs < *result.Timing.Prediction.ThresholdMs) {
+		if result.State == "passed" && result.Attempt == 1 && result.Timing != nil && !result.Timing.Censored && result.Timing.Status != "slow" && (result.Timing.Prediction.ThresholdMs == nil || result.DurationMs < *result.Timing.Prediction.ThresholdMs || result.DurationMs == 0 && *result.Timing.Prediction.ThresholdMs == 0) {
 			service := timing.Service{Store: s.Store}
 			samples, err := service.RecordChanges(ctx, result.Timing.Prediction, timing.Sample{Run: v.ID, DurationMs: result.DurationMs, At: result.FinishedAt})
 			if err != nil {

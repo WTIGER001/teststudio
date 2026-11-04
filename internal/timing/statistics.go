@@ -12,7 +12,7 @@ func Predict(window Window, revision int64, p Policy, hardTimeoutMs int, asOf ti
 	cutoff := asOf.Add(-time.Duration(p.MaxAgeDays) * 24 * time.Hour)
 	samples := []Sample{}
 	for _, sample := range window.Samples {
-		if finite(sample.DurationMs) && sample.DurationMs > 0 && !sample.At.Before(cutoff) && !sample.At.After(asOf) {
+		if finite(sample.DurationMs) && sample.DurationMs >= 0 && !sample.At.Before(cutoff) && !sample.At.After(asOf) {
 			samples = append(samples, sample)
 		}
 	}
@@ -86,7 +86,7 @@ func Assess(prediction Prediction, durationMs float64, observedState, failureKin
 	}
 	if prediction.Ready && prediction.ThresholdMs != nil {
 		a.Status = "normal"
-		if durationMs >= *prediction.ThresholdMs {
+		if durationMs >= *prediction.ThresholdMs && (durationMs > 0 || *prediction.ThresholdMs > 0) {
 			a.Status = "slow"
 		}
 	}

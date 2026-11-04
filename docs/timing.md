@@ -1,6 +1,7 @@
 # Test timing
 
-Each native HTTP attempt records UTC start and finish times and monotonic elapsed milliseconds.
+Each attempt records UTC start and finish times and measured execution milliseconds.
+Native HTTP uses monotonic elapsed time. Go and Playwright use their framework execution durations.
 The final logical test also records total execution milliseconds across its attempts.
 Queue delay, evidence writes, and worker coordination do not enter this measurement.
 Interrupted attempts retain elapsed time. Their timing assessment has a censored status.
@@ -111,3 +112,29 @@ Toolchain and platform changes require a new runtime label.
 Panics, timeouts, unknown observations, and interruptions remain censored.
 Build and discovery problems retain unavailable test durations and do not train history.
 See [Local Go suites](go-testing.md) for selectors, diagnostics, and local verification.
+
+## Runtime compatibility and zero measurements
+
+Go, browser, and API tests use the same frozen prediction, adaptive timeout, slowdown assessment, and clean-history rules.
+Before each attempt and managed dispatch, the service checks the current runtime against the run's frozen timing profile.
+A changed or unavailable runtime blocks execution before another test starts.
+Create a new run to review the current runtime's history. Existing predictions remain unchanged.
+Recovered diagnostics do not dispatch tests and retain their separate recovery rules.
+
+Known coded images use their teststudio.runtime label to separate toolchains, platforms, and execution flags.
+The inspected operating system and architecture also enter the context, independently of the declared label.
+Source-only image updates can share history when that label and the test context remain compatible.
+Explicitly approved Playwright images without a label use their immutable image digest as a separate timing context.
+They cannot share unproven compatibility across image changes. Go images still require a valid runtime label.
+The product's self-test image declares its pinned framework, base image identity, and target architecture.
+
+Duration unavailable stays censored even when the functional outcome is passed.
+It does not train a baseline or appear as a measured zero.
+A recorded zero duration remains valid. It can train history when the observation meets the normal clean-pass rules.
+A zero median uses the configured absolute noise guard and historical tail. Its slowdown ratio remains unavailable.
+If the absolute guard is zero, another measured zero remains normal. A positive duration can still exceed that threshold.
+Regression messages show the baseline milliseconds instead of inventing a ratio or dividing by zero.
+
+Focused checks cover Go, Playwright, and API-typed coded results, retries, worker overhead, runtime drift, and zero observations.
+They run on SQLite and local PostgreSQL.
+Cross-deployment timing acceptance remains open until provider profiles pass their separate verification.

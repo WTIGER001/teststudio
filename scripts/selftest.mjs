@@ -52,10 +52,10 @@ for (const definition of selected) {
   const old = existing.find(item => item.id === definition.id)
   if (old && old.data.source !== catalog.source) throw new Error(`Test ${definition.id} belongs to another source`)
   const test = {
-    ...definition, source: catalog.source, type: 'browser', runner: 'playwright', state: 'enabled', safety: 'safe',
+    ...definition, source: catalog.source, type: definition.type ?? 'browser', runner: 'playwright', state: 'enabled', safety: 'safe',
     rationale: 'Runs against a new isolated TestStudio instance with no external network access', description: '', tags: ['selftest'], dependencies: [], requiredBindings: [], timeoutSeconds: timeoutProbe ? 3 : 60,
     capture: { logs: true, screenshots: 'always', trace: 'failure', video: 'off', maxBytes: 104857600, maxFileBytes: 67108864, retentionDays: 7 },
-    ...old?.data, source: catalog.source, selector: definition.selector, runner: 'playwright', type: 'browser'
+    ...old?.data, source: catalog.source, selector: definition.selector, runner: 'playwright', type: definition.type ?? 'browser'
   }
   await call(old ? 'PUT' : 'POST', `${base}/suites/${suite}/tests${old ? '/' + definition.id : ''}`, test, old?.revision)
   if (test.state === 'enabled') ids.push(test.id)

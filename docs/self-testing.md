@@ -365,3 +365,17 @@ The fixture owns no cloud resource and uses no configured account credentials.
 It closes its HTTP servers when the check finishes. No browser starts.
 The common lifecycle check can use the local PostgreSQL helper through the existing test database setting.
 See [Artifact storage](artifact-storage.md#verification-status) for verified behavior and provider acceptance limits.
+
+## Coded timing and logical counts
+
+The self-test image carries an explicit runtime label and target architecture.
+Unchanged source-only releases can retain compatible timing history.
+STUDIO-API-STEPS-001 registers an API-typed Playwright test with several API operations and nested assertions.
+Its reporter retains those operations as steps within one registered logical result.
+STUDIO-TIMEOUT-001 verifies timeout counts, attempts, and failure reruns through the normal application.
+The registrar respects an explicit API test type and defaults other workflows to browser.
+
+Focused Go runner checks execute a new aggregate and an independently selected subtest.
+Package and ancestor events remain diagnostics. They do not create additional logical test results.
+Coded execution checks cover passing retries, step evidence, unavailable measurements, valid zero durations, and changed runtimes.
+See [Test timing](timing.md) and [Results](results.md) for their contracts and remaining deployment scope.
