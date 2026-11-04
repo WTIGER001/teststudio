@@ -6,7 +6,7 @@ It runs no test code inside the API.
 
 The transport, HTTPS client, and [hosted runner supervisor](job-supervisor.md) are implemented and pass local checks.
 The optional [Kubernetes worker adapter](kubernetes-workers.md) supplies Pod dispatch and recovery.
-Optional [ECS settings](ecs-workers.md) now connect Fargate dispatch and recovery. Its private infrastructure package remains incomplete.
+Optional [ECS settings](ecs-workers.md) now connect Fargate dispatch and recovery. Its [staged private infrastructure package](aws-workers-package.md) now passes local checks. Deployed acceptance remains open.
 Other provider adapters, trusted remote gateway delivery, and complete hosted acceptance remain unfinished.
 No hosted Go or Playwright execution is enabled by this feature alone.
 Keep acceptance 51 and the related hosted acceptance items open.

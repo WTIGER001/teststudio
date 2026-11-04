@@ -9,9 +9,10 @@ Environment-backed coded tests and hosted browser recording remain unfinished.
 Native HTTP checks retain their existing controller execution.
 
 This implementation has local protocol and native startup evidence only.
-The current CloudFormation service template does not provision the private worker network, deadline roles, or preparation workload yet.
-It does not pass ECS worker settings to the service. Worker infrastructure packaging remains the next delivery.
-Do not treat these flags as a complete deployed profile or close hosted acceptance from these checks.
+The [staged AWS worker package](aws-workers-package.md) now provisions private networking, roles, repositories, and separate preparation.
+The core template accepts its generated settings and private target group. Defaults keep coded workers and new source work disabled.
+DNS ownership verification, connection sealing, and a healthy private listener remain deployment prerequisites.
+Do not treat local package checks as a verified deployed profile or close hosted acceptance from them.
 No live AWS account or registry is used during current verification.
 
 ## Required settings
@@ -41,7 +42,7 @@ The artifact-only service role rejects ECS settings. ECS and Kubernetes settings
 The optional factory uses the AWS SDK credential chain only after ECS settings are selected.
 Prefer an ECS task role for each trusted controller or preparation process. The SDK refreshes workload credentials.
 Environment credentials and selected shared profiles follow standard SDK behavior. Changing static credentials requires a process restart.
-No AWS credential discovery occurs when ECS settings are absent.
+Worker SDK initialization occurs only when ECS settings are selected.
 
 Startup calls regional STS GetCallerIdentity and checks both its account and ARN account against the configured account.
 The initial provider supports only the standard aws partition.

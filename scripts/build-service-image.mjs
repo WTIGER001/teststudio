@@ -61,7 +61,7 @@ try {
   execFileSync('docker', ['create', '--name', certificateContainer, '--platform=' + certificateSource.platform, '--network=none', '--read-only', '--entrypoint=/bin/true', certificateSource.image], { stdio: ['ignore', 'ignore', 2] })
   certificateCreated = true
   execFileSync('docker', ['cp', certificateContainer + ':' + certificateSource.path, path.join(context, 'ca-certificates.crt')], { stdio: ['ignore', 'ignore', 2] })
-  for (const [name, mode] of [['data', 0o700], ['temporary', 0o1777]]) {
+  for (const [name, mode] of [['data', 0o700], ['temporary', 0o1777], ['journals', 0o700]]) {
     fs.mkdirSync(path.join(context, name), { mode })
     fs.chmodSync(path.join(context, name), mode)
   }

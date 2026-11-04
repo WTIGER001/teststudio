@@ -67,12 +67,37 @@ Parameters:
     Type: String
     Default: 'false'
     AllowedValues: ['false', 'true']
+  WorkerSettingsSecretArn:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|^arn:aws:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[A-Za-z0-9/_+=.@-]+$'
+  WorkerTargetGroupArn:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|^arn:aws:elasticloadbalancing:[a-z0-9-]+:[0-9]{12}:targetgroup/[A-Za-z0-9-]+/[a-f0-9]{16}$'
+  WorkerNewSources:
+    Type: String
+    Default: 'false'
+    AllowedValues: ['false', 'true']
+  WorkerSourceRunners:
+    Type: String
+    Default: go,playwright
+    AllowedValues: [go, playwright, 'go,playwright']
   DesiredCount:
     Type: Number
     Default: 1
     MinValue: 1
     MaxValue: 10
 Rules:
+  WorkerReferencesTogether:
+    Assertions:
+      - Assert: !Or [!And [!Equals [!Ref WorkerSettingsSecretArn, ''], !Equals [!Ref WorkerTargetGroupArn, '']], !And [!Not [!Equals [!Ref WorkerSettingsSecretArn, '']], !Not [!Equals [!Ref WorkerTargetGroupArn, '']]]]
+        AssertDescription: Supply both sealed worker settings and its private target group, or neither
+  NewSourcesRequireWorkers:
+    RuleCondition: !Equals [!Ref WorkerNewSources, 'true']
+    Assertions:
+      - Assert: !Not [!Equals [!Ref WorkerSettingsSecretArn, '']]
+        AssertDescription: New hosted source work requires the configured worker profile
   SeparateOrigins:
     Assertions:
       - Assert: !Not [!Equals [!Ref UiHostname, !Ref ArtifactHostname]]
@@ -82,6 +107,8 @@ Rules:
       - Assert: !Not [!Equals [!Ref ArtifactHostname, !Ref OriginHostname]]
         AssertDescription: The load balancer origin requires a separate host
 Conditions:
+  Workers: !Not [!Equals [!Ref WorkerSettingsSecretArn, '']]
+  NewWorkerSources: !And [!Not [!Equals [!Ref WorkerSettingsSecretArn, '']], !Equals [!Ref WorkerNewSources, 'true']]
   ClientOne: !Not [!Equals [!Ref OidcClientOneSecretArn, '']]
   ClientTwo: !Not [!Equals [!Ref OidcClientTwoSecretArn, '']]
   SecretKms: !Not [!Equals [!Ref SecretKmsKeyArn, '']]
@@ -303,6 +330,7 @@ Resources:
                 Resource:
                   - !Ref DatabaseSecretArn
                   - !Ref OidcConfigurationSecretArn
+                  - !If [Workers, !Ref WorkerSettingsSecretArn, !Ref 'AWS::NoValue']
                   - !If [ClientOne, !Ref OidcClientOneSecretArn, !Ref 'AWS::NoValue']
                   - !If [ClientTwo, !Ref OidcClientTwoSecretArn, !Ref 'AWS::NoValue']
               - !If
@@ -365,13 +393,19 @@ Resources:
           PortMappings:
             - {ContainerPort: 8040, Protocol: tcp, Name: api}
             - {ContainerPort: 8041, Protocol: tcp, Name: artifacts}
+            - !If [Workers, {ContainerPort: 8042, Protocol: tcp, Name: workers}, !Ref 'AWS::NoValue']
           Command:
             - !Sub '--public-url=https://${UiHostname}'
             - !Sub '--artifact-origin=https://${ArtifactHostname}'
             - --require-postgres=true
             - --oidc-config-env=TESTSTUDIO_OIDC_CONFIGURATION
             - --artifact-store-env=TESTSTUDIO_ARTIFACT_CONFIGURATION
-            - --execution-location=aws-ecs
+            - --execution-location=ecs
+            - !If [Workers, --ecs-workers-env=TESTSTUDIO_ECS_CONFIGURATION, !Ref 'AWS::NoValue']
+            - !If [Workers, '--worker-addr=0.0.0.0:8042', !Ref 'AWS::NoValue']
+            - !If [NewWorkerSources, --prepared-sources, !Ref 'AWS::NoValue']
+            - !If [NewWorkerSources, --source-bundles, !Ref 'AWS::NoValue']
+            - !If [NewWorkerSources, !Sub '--source-bundle-runners=${WorkerSourceRunners}', !Ref 'AWS::NoValue']
             - !Sub '--local-accounts=${LocalAccounts}'
             - !Sub '--bootstrap-issuer=${BootstrapIssuer}'
             - !Sub '--bootstrap-subject=${BootstrapSubject}'
@@ -386,6 +420,7 @@ Resources:
           Secrets:
             - {Name: TESTSTUDIO_DATABASE, ValueFrom: !Ref DatabaseSecretArn}
             - {Name: TESTSTUDIO_OIDC_CONFIGURATION, ValueFrom: !Ref OidcConfigurationSecretArn}
+            - !If [Workers, {Name: TESTSTUDIO_ECS_CONFIGURATION, ValueFrom: !Ref WorkerSettingsSecretArn}, !Ref 'AWS::NoValue']
             - !If
               - ClientOne
               - {Name: TESTSTUDIO_OIDC_CLIENT_ONE, ValueFrom: !Ref OidcClientOneSecretArn}
@@ -431,6 +466,7 @@ Resources:
       LoadBalancers:
         - {ContainerName: service, ContainerPort: 8040, TargetGroupArn: !Ref ApiTarget}
         - {ContainerName: service, ContainerPort: 8041, TargetGroupArn: !Ref ArtifactTarget}
+        - !If [Workers, {ContainerName: service, ContainerPort: 8042, TargetGroupArn: !Ref WorkerTargetGroupArn}, !Ref 'AWS::NoValue']
   UiOriginAccess:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
@@ -687,3 +723,7 @@ Outputs:
     Value: !Ref Cluster
   ServiceName:
     Value: !GetAtt Service.Name
+  TaskRoleName:
+    Value: !Ref TaskRole
+  ClusterArn:
+    Value: !GetAtt Cluster.Arn

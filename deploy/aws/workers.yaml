@@ -1,0 +1,830 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Independent TestStudio isolated worker pool and separate registry preparation service
+Parameters:
+  Stage:
+    Type: String
+    Default: prepare
+    AllowedValues: [prepare, connect, ready]
+  ControllerVpcId:
+    Type: AWS::EC2::VPC::Id
+  ControllerSubnetOne:
+    Type: AWS::EC2::Subnet::Id
+  ControllerSubnetTwo:
+    Type: AWS::EC2::Subnet::Id
+  AvailabilityZoneOne:
+    Type: AWS::EC2::AvailabilityZone::Name
+  AvailabilityZoneTwo:
+    Type: AWS::EC2::AvailabilityZone::Name
+  ControllerClusterArn:
+    Type: String
+    AllowedPattern: '^arn:aws:ecs:[a-z0-9-]+:[0-9]{12}:cluster/[A-Za-z0-9_-]+$'
+  ControllerTaskRoleName:
+    Type: String
+    AllowedPattern: '^[A-Za-z0-9_+=,.@-]{1,64}$'
+  ControllerSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+  DatabaseSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+  DatabasePort:
+    Type: Number
+    Default: 5432
+    MinValue: 1
+    MaxValue: 65535
+  WorkerVpcCidr:
+    Type: String
+    Default: 10.70.0.0/16
+    AllowedPattern: '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/(?:1[6-9]|2[0-8])$'
+  WorkerSubnetOneCidr:
+    Type: String
+    Default: 10.70.1.0/24
+    AllowedPattern: '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/(?:1[6-9]|2[0-8])$'
+  WorkerSubnetTwoCidr:
+    Type: String
+    Default: 10.70.2.0/24
+    AllowedPattern: '^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/(?:1[6-9]|2[0-8])$'
+  S3PrefixListId:
+    Type: String
+    AllowedPattern: '^pl-[a-f0-9]{8,17}$'
+  ExchangeHostname:
+    Type: String
+    AllowedPattern: '^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$'
+    MaxLength: 253
+  ExchangeCertificateArn:
+    Type: String
+    AllowedPattern: '^arn:aws:acm:[a-z0-9-]+:[0-9]{12}:certificate/[a-f0-9-]+$'
+  WorkerFamilyPrefix:
+    Type: String
+    AllowedPattern: '^[a-z][a-z0-9-]{0,31}$'
+  WorkerArchitecture:
+    Type: String
+    Default: arm64
+    AllowedValues: [arm64, amd64]
+  RuntimeRepositoryPrefix:
+    Type: String
+    AllowedPattern: '^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:/[a-z0-9]+(?:[._-][a-z0-9]+)*)*$'
+    MaxLength: 240
+  ServiceRepositoryName:
+    Type: String
+    AllowedPattern: '^[a-z0-9]+(?:[._/-][a-z0-9]+)*$'
+    MaxLength: 256
+  ServiceImageDigest:
+    Type: String
+    AllowedPattern: '^sha256:[a-f0-9]{64}$'
+  ServiceArchitecture:
+    Type: String
+    Default: ARM64
+    AllowedValues: [ARM64, X86_64]
+  DatabaseSecretArn:
+    Type: String
+    AllowedPattern: '^arn:aws:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[A-Za-z0-9/_+=.@-]+$'
+  SecretKmsKeyArn:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|^arn:aws:kms:[a-z0-9-]+:[0-9]{12}:key/[a-f0-9-]+$'
+  EnablePreparation:
+    Type: String
+    Default: 'false'
+    AllowedValues: ['false', 'true']
+  EnableNewBuilds:
+    Type: String
+    Default: 'false'
+    AllowedValues: ['false', 'true']
+  GoRuntimeDigest:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|^sha256:[a-f0-9]{64}$'
+  PlaywrightRuntimeDigest:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|^sha256:[a-f0-9]{64}$'
+  PreparationCount:
+    Type: Number
+    Default: 1
+    MinValue: 1
+    MaxValue: 10
+Rules:
+  SeparateSubnets:
+    Assertions:
+      - Assert: !Not [!Equals [!Ref ControllerSubnetOne, !Ref ControllerSubnetTwo]]
+        AssertDescription: The private load balancer and preparation services require two distinct subnets
+      - Assert: !Not [!Equals [!Ref AvailabilityZoneOne, !Ref AvailabilityZoneTwo]]
+        AssertDescription: Worker subnets must use the two corresponding controller availability zones
+  PreparationRequiresReady:
+    RuleCondition: !Equals [!Ref EnablePreparation, 'true']
+    Assertions:
+      - Assert: !Equals [!Ref Stage, ready]
+        AssertDescription: Finish private DNS, endpoint connection, and sealing before preparation starts
+  NewBuildsRequireRuntime:
+    RuleCondition: !Equals [!Ref EnableNewBuilds, 'true']
+    Assertions:
+      - Assert: !Equals [!Ref EnablePreparation, 'true']
+        AssertDescription: New builds require the separate preparation service
+      - Assert: !Or [!Not [!Equals [!Ref GoRuntimeDigest, '']], !Not [!Equals [!Ref PlaywrightRuntimeDigest, '']]]
+        AssertDescription: New builds require at least one immutable supervised runtime
+Conditions:
+  Connected: !Not [!Equals [!Ref Stage, prepare]]
+  Ready: !Equals [!Ref Stage, ready]
+  Preparation: !And [!Equals [!Ref Stage, ready], !Equals [!Ref EnablePreparation, 'true']]
+  NewGo: !And [!Equals [!Ref EnableNewBuilds, 'true'], !Not [!Equals [!Ref GoRuntimeDigest, '']]]
+  NewPlaywright: !And [!Equals [!Ref EnableNewBuilds, 'true'], !Not [!Equals [!Ref PlaywrightRuntimeDigest, '']]]
+  SecretKms: !Not [!Equals [!Ref SecretKmsKeyArn, '']]
+Resources:
+  WorkerVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref WorkerVpcCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags: [{Key: Name, Value: !Sub '${AWS::StackName}-isolated-workers'}]
+  WorkerDhcp:
+    Type: AWS::EC2::DHCPOptions
+    Properties:
+      DomainNameServers: [AmazonProvidedDNS]
+  WorkerDhcpAssociation:
+    Type: AWS::EC2::VPCDHCPOptionsAssociation
+    Properties:
+      VpcId: !Ref WorkerVpc
+      DhcpOptionsId: !Ref WorkerDhcp
+  WorkerSubnetOne:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref WorkerVpc
+      AvailabilityZone: !Ref AvailabilityZoneOne
+      CidrBlock: !Ref WorkerSubnetOneCidr
+      MapPublicIpOnLaunch: false
+      AssignIpv6AddressOnCreation: false
+      EnableDns64: false
+  WorkerSubnetTwo:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref WorkerVpc
+      AvailabilityZone: !Ref AvailabilityZoneTwo
+      CidrBlock: !Ref WorkerSubnetTwoCidr
+      MapPublicIpOnLaunch: false
+      AssignIpv6AddressOnCreation: false
+      EnableDns64: false
+  WorkerRoutes:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref WorkerVpc
+  WorkerRouteOne:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref WorkerSubnetOne
+      RouteTableId: !Ref WorkerRoutes
+  WorkerRouteTwo:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref WorkerSubnetTwo
+      RouteTableId: !Ref WorkerRoutes
+  WorkerGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Isolated test workers with no inbound access
+      VpcId: !Ref WorkerVpc
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          DestinationPrefixListId: !Ref S3PrefixListId
+  ExchangeGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Private exchange endpoint accepts only isolated workers
+      VpcId: !Ref WorkerVpc
+      SecurityGroupIngress:
+        - {IpProtocol: tcp, FromPort: 443, ToPort: 443, SourceSecurityGroupId: !Ref WorkerGroup}
+      SecurityGroupEgress:
+        - {IpProtocol: tcp, FromPort: 443, ToPort: 443, DestinationSecurityGroupId: !Ref WorkerGroup}
+  RegistryGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Private ECR endpoints accept only isolated workers
+      VpcId: !Ref WorkerVpc
+      SecurityGroupIngress:
+        - {IpProtocol: tcp, FromPort: 443, ToPort: 443, SourceSecurityGroupId: !Ref WorkerGroup}
+      SecurityGroupEgress:
+        - {IpProtocol: tcp, FromPort: 443, ToPort: 443, DestinationSecurityGroupId: !Ref WorkerGroup}
+  WorkerExchangeEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref WorkerGroup
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      DestinationSecurityGroupId: !Ref ExchangeGroup
+  WorkerRegistryEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref WorkerGroup
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      DestinationSecurityGroupId: !Ref RegistryGroup
+  WorkerCluster:
+    Type: AWS::ECS::Cluster
+  WorkerPullRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: ecs-tasks.amazonaws.com}
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals: {aws:SourceAccount: !Ref 'AWS::AccountId'}
+              ArnLike: {aws:SourceArn: !Sub 'arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:*'}
+      Policies:
+        - PolicyName: platform-image-pull-only
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - {Effect: Allow, Action: 'ecr:GetAuthorizationToken', Resource: '*'}
+              - Effect: Allow
+                Action: [ecr:BatchCheckLayerAvailability, ecr:BatchGetImage, ecr:GetDownloadUrlForLayer]
+                Resource: [!Sub 'arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${RuntimeRepositoryPrefix}', !Sub 'arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${RuntimeRepositoryPrefix}/*']
+  EcrApi:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Interface
+      VpcId: !Ref WorkerVpc
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.api'
+      IpAddressType: ipv4
+      PrivateDnsEnabled: true
+      SubnetIds: [!Ref WorkerSubnetOne, !Ref WorkerSubnetTwo]
+      SecurityGroupIds: [!Ref RegistryGroup]
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: RuntimePull
+            Effect: Allow
+            Principal: '*'
+            Action: [ecr:BatchCheckLayerAvailability, ecr:BatchGetImage, ecr:GetDownloadUrlForLayer]
+            Resource: [!Sub 'arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${RuntimeRepositoryPrefix}', !Sub 'arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${RuntimeRepositoryPrefix}/*']
+            Condition:
+              ArnEquals: {aws:PrincipalArn: !GetAtt WorkerPullRole.Arn}
+          - Sid: RuntimeAuthorization
+            Effect: Allow
+            Principal: '*'
+            Action: ecr:GetAuthorizationToken
+            Resource: '*'
+            Condition:
+              ArnEquals: {aws:PrincipalArn: !GetAtt WorkerPullRole.Arn}
+  EcrDocker:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Interface
+      VpcId: !Ref WorkerVpc
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.ecr.dkr'
+      IpAddressType: ipv4
+      PrivateDnsEnabled: true
+      SubnetIds: [!Ref WorkerSubnetOne, !Ref WorkerSubnetTwo]
+      SecurityGroupIds: [!Ref RegistryGroup]
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: RuntimePull
+            Effect: Allow
+            Principal: '*'
+            Action: [ecr:BatchCheckLayerAvailability, ecr:BatchGetImage, ecr:GetDownloadUrlForLayer]
+            Resource: [!Sub 'arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${RuntimeRepositoryPrefix}', !Sub 'arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${RuntimeRepositoryPrefix}/*']
+            Condition:
+              ArnEquals: {aws:PrincipalArn: !GetAtt WorkerPullRole.Arn}
+          - Sid: RuntimeAuthorization
+            Effect: Allow
+            Principal: '*'
+            Action: ecr:GetAuthorizationToken
+            Resource: '*'
+            Condition:
+              ArnEquals: {aws:PrincipalArn: !GetAtt WorkerPullRole.Arn}
+  ImageLayers:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Gateway
+      VpcId: !Ref WorkerVpc
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.s3'
+      IpAddressType: ipv4
+      RouteTableIds: [!Ref WorkerRoutes]
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: RuntimeLayers
+            Effect: Allow
+            Principal: '*'
+            Action: s3:GetObject
+            Resource: !Sub 'arn:aws:s3:::prod-${AWS::Region}-starport-layer-bucket/*'
+  ExchangeLoadBalancerGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: PrivateLink exchange load balancer with no direct ingress
+      VpcId: !Ref ControllerVpcId
+      SecurityGroupEgress:
+        - {IpProtocol: tcp, FromPort: 8042, ToPort: 8042, DestinationSecurityGroupId: !Ref ControllerSecurityGroupId}
+  ControllerWorkerIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref ControllerSecurityGroupId
+      IpProtocol: tcp
+      FromPort: 8042
+      ToPort: 8042
+      SourceSecurityGroupId: !Ref ExchangeLoadBalancerGroup
+  ExchangeLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Type: network
+      Scheme: internal
+      IpAddressType: ipv4
+      Subnets: [!Ref ControllerSubnetOne, !Ref ControllerSubnetTwo]
+      SecurityGroups: [!Ref ExchangeLoadBalancerGroup]
+      EnforceSecurityGroupInboundRulesOnPrivateLinkTraffic: 'off'
+      LoadBalancerAttributes:
+        - {Key: load_balancing.cross_zone.enabled, Value: 'true'}
+  ExchangeTarget:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      VpcId: !Ref ControllerVpcId
+      TargetType: ip
+      IpAddressType: ipv4
+      Protocol: TCP
+      Port: 8042
+      HealthCheckEnabled: true
+      HealthCheckProtocol: HTTP
+      HealthCheckPort: traffic-port
+      HealthCheckPath: /healthz
+      Matcher: {HttpCode: '404'}
+      TargetGroupAttributes:
+        - {Key: deregistration_delay.timeout_seconds, Value: '30'}
+        - {Key: preserve_client_ip.enabled, Value: 'false'}
+  ExchangeListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref ExchangeLoadBalancer
+      Port: 443
+      Protocol: TLS
+      SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
+      Certificates: [{CertificateArn: !Ref ExchangeCertificateArn}]
+      DefaultActions: [{Type: forward, TargetGroupArn: !Ref ExchangeTarget}]
+  ExchangeService:
+    Type: AWS::EC2::VPCEndpointService
+    DependsOn: ExchangeListener
+    Properties:
+      AcceptanceRequired: !If [Ready, true, false]
+      NetworkLoadBalancerArns: [!Ref ExchangeLoadBalancer]
+      SupportedIpAddressTypes: [ipv4]
+  ExchangePermissions:
+    Type: AWS::EC2::VPCEndpointServicePermissions
+    Properties:
+      ServiceId: !Ref ExchangeService
+      AllowedPrincipals: [!Sub 'arn:aws:iam::${AWS::AccountId}:root']
+  ExchangeEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Condition: Connected
+    DependsOn: ExchangePermissions
+    Properties:
+      VpcEndpointType: Interface
+      VpcId: !Ref WorkerVpc
+      ServiceName: !Sub 'com.amazonaws.vpce.${AWS::Region}.${ExchangeService}'
+      IpAddressType: ipv4
+      PrivateDnsEnabled: true
+      SubnetIds: [!Ref WorkerSubnetOne, !Ref WorkerSubnetTwo]
+      SecurityGroupIds: [!Ref ExchangeGroup]
+  AllowedDomains:
+    Type: AWS::Route53Resolver::FirewallDomainList
+    Properties:
+      Domains:
+        - !Ref ExchangeHostname
+        - !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com'
+        - !Sub 'api.ecr.${AWS::Region}.amazonaws.com'
+        - !Sub 'prod-${AWS::Region}-starport-layer-bucket.s3.${AWS::Region}.amazonaws.com'
+        - !Sub 'prod-${AWS::Region}-starport-layer-bucket.s3.amazonaws.com'
+  BlockedDomains:
+    Type: AWS::Route53Resolver::FirewallDomainList
+    Properties:
+      Domains: ['*']
+  DnsRules:
+    Type: AWS::Route53Resolver::FirewallRuleGroup
+    Properties:
+      FirewallRules:
+        - Action: ALLOW
+          Priority: 100
+          FirewallDomainListId: !Ref AllowedDomains
+          FirewallDomainRedirectionAction: TRUST_REDIRECTION_DOMAIN
+        - Action: BLOCK
+          Priority: 200
+          FirewallDomainListId: !Ref BlockedDomains
+          FirewallDomainRedirectionAction: TRUST_REDIRECTION_DOMAIN
+          BlockResponse: NXDOMAIN
+  DnsAssociation:
+    Type: AWS::Route53Resolver::FirewallRuleGroupAssociation
+    Properties:
+      VpcId: !Ref WorkerVpc
+      FirewallRuleGroupId: !Ref DnsRules
+      Priority: 100
+      MutationProtection: ENABLED
+  Deadlines:
+    Type: AWS::Scheduler::ScheduleGroup
+    Properties:
+      Name: !Sub '${WorkerFamilyPrefix}-deadlines'
+  DeadlineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: scheduler.amazonaws.com}
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals: {aws:SourceAccount: !Ref 'AWS::AccountId'}
+              ArnEquals: {aws:SourceArn: !GetAtt Deadlines.Arn}
+      Policies:
+        - PolicyName: stop-owned-worker-tasks
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: ecs:StopTask
+                Resource: !Sub 'arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task/${WorkerCluster}/*'
+                Condition:
+                  ArnEquals: {ecs:cluster: !GetAtt WorkerCluster.Arn}
+  GoRepository:
+    Type: AWS::ECR::Repository
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RepositoryName: !Sub '${RuntimeRepositoryPrefix}/go'
+      ImageTagMutability: IMMUTABLE
+      ImageScanningConfiguration: {ScanOnPush: true}
+      EncryptionConfiguration: {EncryptionType: AES256}
+      EmptyOnDelete: false
+  PlaywrightRepository:
+    Type: AWS::ECR::Repository
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RepositoryName: !Sub '${RuntimeRepositoryPrefix}/playwright'
+      ImageTagMutability: IMMUTABLE
+      ImageScanningConfiguration: {ScanOnPush: true}
+      EncryptionConfiguration: {EncryptionType: AES256}
+      EmptyOnDelete: false
+  PreparationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: ecs-tasks.amazonaws.com}
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals: {aws:SourceAccount: !Ref 'AWS::AccountId'}
+              ArnLike: {aws:SourceArn: !Sub 'arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:*'}
+      Policies:
+        - PolicyName: publish-prepared-sources
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: [ecr:InitiateLayerUpload, ecr:UploadLayerPart, ecr:CompleteLayerUpload, ecr:PutImage]
+                Resource: [!GetAtt GoRepository.Arn, !GetAtt PlaywrightRepository.Arn]
+  ControllerPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Roles: [!Ref ControllerTaskRoleName, !Ref PreparationRole]
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: InspectWorkerNetwork
+            Effect: Allow
+            Action: [ec2:DescribeVpcs, ec2:DescribeVpcAttribute, ec2:DescribeDhcpOptions, ec2:DescribeSubnets, ec2:DescribeSecurityGroups, ec2:DescribeRouteTables, ec2:DescribeVpcEndpoints, ec2:DescribePrefixLists, ec2:DescribeNetworkInterfaces, ec2:DescribeVpcEndpointServiceConfigurations, ec2:DescribeVpcEndpointServicePermissions, elasticloadbalancing:DescribeLoadBalancers, elasticloadbalancing:DescribeListeners, elasticloadbalancing:DescribeTargetGroups, elasticloadbalancing:DescribeTargetHealth, route53resolver:GetFirewallConfig, route53resolver:ListFirewallRuleGroupAssociations, route53resolver:GetFirewallRuleGroup, route53resolver:ListFirewallRules, route53resolver:GetFirewallDomainList, route53resolver:ListFirewallDomains, route53profiles:ListProfileAssociations]
+            Resource: '*'
+            Condition:
+              StringEquals: {aws:RequestedRegion: !Ref 'AWS::Region'}
+          - Sid: RegisterOwnedDefinitions
+            Effect: Allow
+            Action: ecs:RegisterTaskDefinition
+            Resource: !Sub 'arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${WorkerFamilyPrefix}-*:*'
+            Condition:
+              StringEquals: {aws:RequestTag/teststudio:worker: isolated-v1, aws:RequestedRegion: !Ref 'AWS::Region'}
+          - Sid: InspectOwnedDefinitions
+            Effect: Allow
+            Action: [ecs:DescribeTaskDefinition, ecs:ListTaskDefinitions]
+            Resource: '*'
+            Condition:
+              StringEquals: {aws:RequestedRegion: !Ref 'AWS::Region'}
+          - Sid: DeleteOwnedDefinitions
+            Effect: Allow
+            Action: [ecs:DeregisterTaskDefinition, ecs:DeleteTaskDefinitions]
+            Resource: !Sub 'arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${WorkerFamilyPrefix}-*:*'
+          - Sid: LaunchOwnedTasks
+            Effect: Allow
+            Action: ecs:RunTask
+            Resource: !Sub 'arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${WorkerFamilyPrefix}-*:*'
+            Condition:
+              ArnEquals: {ecs:cluster: !GetAtt WorkerCluster.Arn}
+              StringEquals: {aws:RequestTag/teststudio:worker: isolated-v1}
+          - Sid: InspectAndStopOwnedTasks
+            Effect: Allow
+            Action: [ecs:DescribeTasks, ecs:StopTask]
+            Resource: !Sub 'arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task/${WorkerCluster}/*'
+            Condition:
+              ArnEquals: {ecs:cluster: !GetAtt WorkerCluster.Arn}
+          - Sid: ListOwnedTasks
+            Effect: Allow
+            Action: ecs:ListTasks
+            Resource: '*'
+            Condition:
+              ArnEquals: {ecs:cluster: !GetAtt WorkerCluster.Arn}
+          - Sid: TagCreatedWorkers
+            Effect: Allow
+            Action: ecs:TagResource
+            Resource: [!Sub 'arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task/${WorkerCluster}/*', !Sub 'arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${WorkerFamilyPrefix}-*:*']
+            Condition:
+              StringEquals:
+                ecs:CreateAction: [RegisterTaskDefinition, RunTask]
+                aws:RequestTag/teststudio:worker: isolated-v1
+          - Sid: ReadWorkerTags
+            Effect: Allow
+            Action: ecs:ListTagsForResource
+            Resource: [!Sub 'arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task/${WorkerCluster}/*', !Sub 'arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${WorkerFamilyPrefix}-*:*']
+          - Sid: PassPlatformRole
+            Effect: Allow
+            Action: iam:PassRole
+            Resource: !GetAtt WorkerPullRole.Arn
+            Condition:
+              StringEquals: {iam:PassedToService: ecs-tasks.amazonaws.com}
+          - Sid: PassDeadlineRole
+            Effect: Allow
+            Action: iam:PassRole
+            Resource: !GetAtt DeadlineRole.Arn
+            Condition:
+              StringEquals: {iam:PassedToService: scheduler.amazonaws.com}
+          - Sid: OwnDeadlineSchedules
+            Effect: Allow
+            Action: [scheduler:CreateSchedule, scheduler:GetSchedule, scheduler:DeleteSchedule]
+            Resource: !Sub 'arn:aws:scheduler:${AWS::Region}:${AWS::AccountId}:schedule/${Deadlines}/*'
+          - Sid: RegistryAuthorization
+            Effect: Allow
+            Action: ecr:GetAuthorizationToken
+            Resource: '*'
+            Condition:
+              StringEquals: {aws:RequestedRegion: !Ref 'AWS::Region'}
+          - Sid: InspectRuntimeRepositories
+            Effect: Allow
+            Action: [ecr:BatchCheckLayerAvailability, ecr:BatchGetImage, ecr:GetDownloadUrlForLayer]
+            Resource: [!Sub 'arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${RuntimeRepositoryPrefix}', !Sub 'arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${RuntimeRepositoryPrefix}/*']
+  WorkerSettings:
+    Type: AWS::SecretsManager::Secret
+    Condition: Ready
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Description: Private installation-specific TestStudio worker references without credentials
+      SecretString: !Sub
+        - >-
+          {"worker":{"region":"${AWS::Region}","account":"${AWS::AccountId}","cluster":"${WorkerCluster.Arn}","executionRole":"${WorkerPullRole.Arn}","deadlineRole":"${DeadlineRole.Arn}","scheduleGroup":"${Deadlines}","familyPrefix":"${WorkerFamilyPrefix}","architecture":"${WorkerArchitecture}","platformVersion":"1.4.0","subnets":["${WorkerSubnetOne}","${WorkerSubnetTwo}"],"securityGroups":["${WorkerGroup}"],"exchangeOrigin":"https://${ExchangeHostname}"},"network":{"vpc":"${WorkerVpc}","controllerVpc":"${ControllerVpcId}","exchangeGroup":"${ExchangeGroup}","registryGroup":"${RegistryGroup}","loadBalancerGroup":"${ExchangeLoadBalancerGroup}","controllerGroup":"${ControllerSecurityGroupId}","exchangeEndpoint":"${ExchangeEndpoint}","exchangeService":"com.amazonaws.vpce.${AWS::Region}.${ExchangeService}","apiEndpoint":"${EcrApi}","dkrEndpoint":"${EcrDocker}","s3Endpoint":"${ImageLayers}","s3PrefixList":"${S3PrefixListId}","repositoryPrefix":"${RuntimeRepositoryPrefix}","loadBalancer":"${ExchangeLoadBalancer}","targetGroup":"${ExchangeTarget}","firewallGroup":"${FirewallGroupId}","firewallAssociation":"${FirewallAssociationId}","allowList":"${AllowListId}","blockList":"${BlockListId}"}}
+        - FirewallGroupId: !GetAtt DnsRules.Id
+          FirewallAssociationId: !GetAtt DnsAssociation.Id
+          AllowListId: !GetAtt AllowedDomains.Id
+          BlockListId: !GetAtt BlockedDomains.Id
+  PreparationGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Trusted source assembly and discovery controller without inbound access
+      VpcId: !Ref ControllerVpcId
+      SecurityGroupEgress:
+        - {IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 0.0.0.0/0}
+        - {IpProtocol: tcp, FromPort: !Ref DatabasePort, ToPort: !Ref DatabasePort, DestinationSecurityGroupId: !Ref DatabaseSecurityGroupId}
+  PreparationDatabaseIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref DatabaseSecurityGroupId
+      IpProtocol: tcp
+      FromPort: !Ref DatabasePort
+      ToPort: !Ref DatabasePort
+      SourceSecurityGroupId: !Ref PreparationGroup
+  JournalGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Private journal mount targets accept only the trusted preparation service
+      VpcId: !Ref ControllerVpcId
+      SecurityGroupIngress:
+        - {IpProtocol: tcp, FromPort: 2049, ToPort: 2049, SourceSecurityGroupId: !Ref PreparationGroup}
+      SecurityGroupEgress:
+        - {IpProtocol: tcp, FromPort: 2049, ToPort: 2049, DestinationSecurityGroupId: !Ref PreparationGroup}
+  PreparationJournalEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !Ref PreparationGroup
+      IpProtocol: tcp
+      FromPort: 2049
+      ToPort: 2049
+      DestinationSecurityGroupId: !Ref JournalGroup
+  Journals:
+    Type: AWS::EFS::FileSystem
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Encrypted: true
+      BackupPolicy: {Status: ENABLED}
+      ThroughputMode: bursting
+      FileSystemPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyPlaintext
+            Effect: Deny
+            Principal: '*'
+            Action: elasticfilesystem:ClientMount
+            Resource: '*'
+            Condition:
+              Bool: {aws:SecureTransport: 'false'}
+          - Sid: DenyRoot
+            Effect: Deny
+            Principal: '*'
+            Action: elasticfilesystem:ClientRootAccess
+            Resource: '*'
+          - Sid: RequireAccessPoint
+            Effect: Deny
+            Principal: '*'
+            Action: [elasticfilesystem:ClientMount, elasticfilesystem:ClientWrite]
+            Resource: '*'
+            Condition:
+              'Null': {elasticfilesystem:AccessPointArn: 'true'}
+  JournalAccessPoint:
+    Type: AWS::EFS::AccessPoint
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      FileSystemId: !Ref Journals
+      PosixUser: {Uid: '65532', Gid: '65532'}
+      RootDirectory:
+        Path: /source-journals
+        CreationInfo: {OwnerUid: '65532', OwnerGid: '65532', Permissions: '0700'}
+  JournalMountOne:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref Journals
+      SubnetId: !Ref ControllerSubnetOne
+      SecurityGroups: [!Ref JournalGroup]
+  JournalMountTwo:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref Journals
+      SubnetId: !Ref ControllerSubnetTwo
+      SecurityGroups: [!Ref JournalGroup]
+  PreparationFilesystemPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: private-preparation-journals
+      Roles: [!Ref PreparationRole]
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action: [elasticfilesystem:ClientMount, elasticfilesystem:ClientWrite]
+            Resource: !GetAtt Journals.Arn
+            Condition:
+              StringEquals: {elasticfilesystem:AccessPointArn: !GetAtt JournalAccessPoint.Arn}
+              Bool: {elasticfilesystem:AccessedViaMountTarget: 'true', aws:SecureTransport: 'true'}
+  PreparationLog:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RetentionInDays: 30
+  PreparationExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: ecs-tasks.amazonaws.com}
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals: {aws:SourceAccount: !Ref 'AWS::AccountId'}
+              ArnLike: {aws:SourceArn: !Sub 'arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:*'}
+      Policies:
+        - PolicyName: preparation-startup-only
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - {Effect: Allow, Action: 'ecr:GetAuthorizationToken', Resource: '*'}
+              - Effect: Allow
+                Action: [ecr:BatchCheckLayerAvailability, ecr:BatchGetImage, ecr:GetDownloadUrlForLayer]
+                Resource: !Sub 'arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${ServiceRepositoryName}'
+              - Effect: Allow
+                Action: [logs:CreateLogStream, logs:PutLogEvents]
+                Resource: !GetAtt PreparationLog.Arn
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource:
+                  - !Ref DatabaseSecretArn
+                  - !If [Ready, !Ref WorkerSettings, !Ref 'AWS::NoValue']
+              - !If
+                - SecretKms
+                - Effect: Allow
+                  Action: kms:Decrypt
+                  Resource: !Ref SecretKmsKeyArn
+                  Condition:
+                    StringEquals: {kms:ViaService: !Sub 'secretsmanager.${AWS::Region}.amazonaws.com'}
+                - !Ref 'AWS::NoValue'
+  PreparationTask:
+    Type: AWS::ECS::TaskDefinition
+    Condition: Ready
+    Properties:
+      RequiresCompatibilities: [FARGATE]
+      NetworkMode: awsvpc
+      Cpu: '512'
+      Memory: '1024'
+      RuntimePlatform: {CpuArchitecture: !Ref ServiceArchitecture, OperatingSystemFamily: LINUX}
+      ExecutionRoleArn: !GetAtt PreparationExecutionRole.Arn
+      TaskRoleArn: !GetAtt PreparationRole.Arn
+      Volumes:
+        - Name: temporary
+        - Name: journals
+          EFSVolumeConfiguration:
+            FilesystemId: !Ref Journals
+            TransitEncryption: ENABLED
+            AuthorizationConfig: {AccessPointId: !Ref JournalAccessPoint, IAM: ENABLED}
+      ContainerDefinitions:
+        - Name: preparation
+          Image: !Sub '${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ServiceRepositoryName}@${ServiceImageDigest}'
+          Essential: true
+          User: '65532:65532'
+          ReadonlyRootFilesystem: true
+          LinuxParameters: {InitProcessEnabled: true, Capabilities: {Drop: [ALL]}}
+          EntryPoint: [/app/teststudio-prepare]
+          Command:
+            - --database-env=TESTSTUDIO_DATABASE
+            - --require-postgres=true
+            - --execution-location=ecs
+            - --ecs-workers-env=TESTSTUDIO_ECS_CONFIGURATION
+            - --build-directory=/private/source-journals
+            - !If [NewGo, !Sub '--registry-go-runtime=${GoRepository.RepositoryUri}@${GoRuntimeDigest}', !Ref 'AWS::NoValue']
+            - !If [NewPlaywright, !Sub '--registry-playwright-runtime=${PlaywrightRepository.RepositoryUri}@${PlaywrightRuntimeDigest}', !Ref 'AWS::NoValue']
+          MountPoints:
+            - {SourceVolume: temporary, ContainerPath: /tmp, ReadOnly: false}
+            - {SourceVolume: journals, ContainerPath: /private/source-journals, ReadOnly: false}
+          Secrets:
+            - {Name: TESTSTUDIO_DATABASE, ValueFrom: !Ref DatabaseSecretArn}
+            - {Name: TESTSTUDIO_ECS_CONFIGURATION, ValueFrom: !Ref WorkerSettings}
+          StopTimeout: 90
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref PreparationLog
+              awslogs-region: !Ref 'AWS::Region'
+              awslogs-stream-prefix: preparation
+              mode: non-blocking
+              max-buffer-size: 4m
+  PreparationService:
+    Type: AWS::ECS::Service
+    Condition: Preparation
+    DependsOn: [JournalMountOne, JournalMountTwo, PreparationFilesystemPolicy, ControllerPolicy, PreparationDatabaseIngress, PreparationJournalEgress]
+    Properties:
+      Cluster: !Ref ControllerClusterArn
+      LaunchType: FARGATE
+      PlatformVersion: '1.4.0'
+      TaskDefinition: !Ref PreparationTask
+      DesiredCount: !Ref PreparationCount
+      EnableExecuteCommand: false
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker: {Enable: true, Rollback: true}
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          Subnets: [!Ref ControllerSubnetOne, !Ref ControllerSubnetTwo]
+          SecurityGroups: [!Ref PreparationGroup]
+Outputs:
+  Stage:
+    Value: !Ref Stage
+  WorkerVpcId:
+    Value: !Ref WorkerVpc
+  WorkerClusterArn:
+    Value: !GetAtt WorkerCluster.Arn
+  ExchangeServiceId:
+    Value: !Ref ExchangeService
+  ExchangeHostname:
+    Value: !Ref ExchangeHostname
+  ExchangeTargetGroupArn:
+    Value: !Ref ExchangeTarget
+  ExchangeEndpointId:
+    Condition: Connected
+    Value: !Ref ExchangeEndpoint
+  WorkerSettingsSecretArn:
+    Condition: Ready
+    Value: !Ref WorkerSettings
+  GoRepositoryUri:
+    Value: !GetAtt GoRepository.RepositoryUri
+  PlaywrightRepositoryUri:
+    Value: !GetAtt PlaywrightRepository.RepositoryUri
+  JournalFileSystemId:
+    Value: !Ref Journals
+  JournalAccessPointArn:
+    Value: !GetAtt JournalAccessPoint.Arn
+  PreparationRoleArn:
+    Value: !GetAtt PreparationRole.Arn

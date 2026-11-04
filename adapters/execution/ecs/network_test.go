@@ -54,6 +54,9 @@ func TestECSNetworkMutationStopsAdmissionWithoutPrivateDiagnostics(t *testing.T)
 		"external-dns-server": func(f *networkFixture) {
 			f.DescribeDhcpOptionsValue.DhcpOptions[0].DhcpConfigurations[0].Values[0].Value = aws.String("8.8.8.8")
 		},
+		"endpoint-internet-egress": func(f *networkFixture) {
+			f.DescribeSecurityGroupsValue.SecurityGroups[1].IpPermissionsEgress = []e.IpPermission{{IpProtocol: aws.String("tcp"), FromPort: aws.Int32(443), ToPort: aws.Int32(443), IpRanges: []e.IpRange{{CidrIp: aws.String("0.0.0.0/0")}}}}
+		},
 		"worker-inbound": func(f *networkFixture) {
 			f.DescribeSecurityGroupsValue.SecurityGroups[0].IpPermissions = []e.IpPermission{sgRule("123456789012", "sg-bbbbbbbb", 443)}
 		},

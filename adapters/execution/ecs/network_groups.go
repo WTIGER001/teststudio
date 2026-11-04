@@ -88,6 +88,9 @@ func (g *NetworkGuard) checkGroups(ctx context.Context) error {
 			wantOut = []string{"443:sg:" + s.ExchangeGroup, "443:sg:" + s.RegistryGroup, "443:pl:" + s.S3PrefixList}
 		case s.ExchangeGroup, s.RegistryGroup:
 			wantIn = []string{"443:sg:" + c.SecurityGroups[0]}
+			if len(egress) > 0 {
+				wantOut = []string{"443:sg:" + c.SecurityGroups[0]}
+			}
 		case s.LoadBalancerGroup:
 			wantOut = []string{"8042:sg:" + s.ControllerGroup}
 		}

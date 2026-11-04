@@ -131,10 +131,15 @@ ECR authorization stays in trusted processes, refreshes with credential identity
 Native startup guards and focused SDK protocol race checks pass without credential discovery or provider calls.
 The shared hosted wiring keeps execution, discovery, approval, and cleanup contracts for both ECS and Kubernetes.
 See [ECS workers](ecs-workers.md) for complete settings, commands, roles, local evidence, and current deployment limits.
-Next add a private worker infrastructure package: dedicated worker VPC, DNS firewall, endpoints, PrivateLink, internal TLS listener, and scoped roles.
-Add a separate preparation workload with durable private registry journals. Connect optional settings to the API service.
-Resolve default endpoint-group egress during provisioning so the deployed state matches admission exactly.
-Build only the changed service image. Reuse UI, trace assets, and the unchanged supervised runtime bases.
+The staged AWS worker package now supplies the dedicated VPC, DNS lists, endpoints, PrivateLink, internal TLS listener, scoped roles, and separate preparation.
+Generated private settings connect to the optional API worker listener. Private EFS journals retain source upload recovery state.
+An explicit endpoint-to-worker HTTPS rule suppresses CloudFormation default egress while worker ingress remains empty.
+Nine local profile previews, eleven rejected configurations, production admission alignment, and three changed-image probes pass.
+The ARM64 service image rebuild reuses the UI and trace assets. Trusted source runtime bases stay unchanged.
+See [AWS worker packaging](aws-workers-package.md) for ordered prepare, connect, and ready stages, DNS operator steps, and evidence.
+Before continuous rolling deployment acceptance, revise target-health admission to tolerate authorized backend transitions while retaining ownership checks.
+The current guard requires all registered backends healthy. Drain active work before initial API rollouts.
+Then continue Azure worker and gateway implementation gaps. Keep live MMDev deployment verification separate.
 Keep MMDev deployment verification separate. Acceptances 41, 46, and 51–57 remain open.
 
 ### Current hosted packaging checkpoint
@@ -270,7 +275,8 @@ This advances 51 and supporting replica recovery under 52. The total remains 48 
 
 The production network checker, bounded settings loader, and supported task storage now pass focused local checks.
 The scoped SDK factory, ECR credential callback, and optional API and preparation flags now pass focused local checks.
-Keep actual task and pool network admission mandatory. Next package private worker infrastructure and independent controller permissions.
+Keep actual task and pool network admission mandatory. Private worker infrastructure and independent controller permissions now have staged packaging.
+Next address rolling target-health admission and the remaining provider and gateway implementation gaps.
 Add server and preparation wiring plus the private HTTPS route and scoped roles before enabling AWS workers.
 Do not recreate uncertain tasks after the finite RunTask idempotency window. Missing live tasks remain unresolved without a saved terminal observation.
 Keep exact image approval, gated dispatch, provider ownership, cancellation, deadlines, and checkpointed cleanup.

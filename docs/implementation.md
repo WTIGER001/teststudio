@@ -122,7 +122,45 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: scoped ECS SDK setup, ECR authentication, and native wiring
+## Current delivery: staged AWS worker infrastructure and separate preparation
+
+Acceptances **51** and **57** advance, with supporting private-journal recovery packaging under **52**.
+The total remains **48 verified of 57**, with **9 open**. Local packaging does not close deployed acceptance.
+
+The new worker template has 50 resources. The core template retains its 31 resources and gains optional worker references and source controls.
+The worker package supplies an independent IPv4 VPC, exact endpoints and policies, DNS lists, internal TLS exchange, private connection, and deadline group.
+It scopes controller creation, task management, tags, registry reads, role passing, and deadline management to the owned worker resources.
+The platform image-pull role and stop-only Scheduler role remain separate from trusted controllers and untrusted test containers.
+Immutable Go and Playwright repositories retain historical source images.
+
+Prepare, connect, and ready stages withhold private settings until endpoint connection and acceptance sealing.
+DNS ownership verification and explicit failure-mode configuration use documented operator steps supported by the pinned regional schema boundary.
+No custom mutation function or broad DNS bypass is added. Runtime admission checks the actual verified and fail-closed state.
+Generated settings contain resource references only. The API and preparation consume the same private document.
+Explicit endpoint peer egress suppresses AWS default outbound rules. Worker ingress stays empty and broader endpoint destinations fail admission.
+
+The separate preparation service uses its own role and security group, private PostgreSQL access, and retained encrypted EFS journals.
+Its access point fixes user and group 65532 with mode 0700. IAM and TLS protect the mount; the filesystem denies plaintext, root, and access-point-free mounts.
+Untrusted workers receive no journal mount or AWS task role. Preparation has no listener or load balancer.
+New builds, new API source staging, and cleanup-only operation use separate controls. Registry writes stay on the preparation identity.
+The service image gains a private owned journal mount directory. Its existing public and artifact entrypoints remain available.
+
+Both templates pass local schema and dependency checks in two regions.
+Nine stage or service previews and eleven rejected configurations pass in output/aws-workers-package/check.
+The generated settings, groups, endpoints, policies, DNS rules, and private listener properties also pass production admission with simulated AWS responses.
+Evidence is admission.log and endpoint-egress.log. Documented DNS operator prerequisites are simulated, not performed.
+The changed ARM64 service image builds from cached UI and trace assets. No trusted runtime rebuild occurs.
+Three local image probes pass: both packaged ECS entrypoints reject SQLite, and non-root preparation creates a private child on a real mounted volume.
+An initial copied WAL-database read uses the wrong mode; immutable read mode corrects that checker failure.
+All owned probe containers, named journal volumes, and anonymous temporary volumes are removed after failed and successful checks.
+Evidence is image/summary.json and image/cleanup.json. Live EFS and IAM are not tested.
+The local demo remains healthy. No browser, source suite, cloud account operation, registry push, or deployment runs.
+
+Operator, worker, network, lifecycle, preparation, image, AWS, and plan guides match the staged package and current limits.
+Before continuous rollout acceptance, update admission for authorized target-health rotation; the current guard requires all registered targets healthy.
+Initial API rollouts must drain active work. Continue remaining Azure execution, gateway, recording, storage, and deployment verification work.
+
+## Previous delivery: scoped ECS SDK setup, ECR authentication, and native wiring
 
 Acceptance **51** advances. The total remains **48 verified of 57**, with **9 open**.
 The optional SDK factory verifies STS account and ARN ownership, then constructs scoped regional ECS and network clients.

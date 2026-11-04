@@ -7,8 +7,9 @@ Its typed clients read EC2, ELBv2, Route 53 Resolver, and Route 53 Profiles stat
 They perform no network mutation. Local verification supplies authored protocol fixtures instead of live clients.
 
 The API and preparation commands now have optional [ECS worker settings and SDK setup](ecs-workers.md).
-Worker infrastructure and private routing packaging remain required. The shipped core template enables no ECS coded workers.
-The current AWS service profile continues to execute native HTTP checks only.
+The [staged worker infrastructure package](aws-workers-package.md) now supplies private routing and optional core integration.
+The default core profile enables no coded workers. Live profile verification remains required.
+The default AWS service profile executes native HTTP checks. Coded workers require the separate staged package.
 See [worker lifecycle](ecs-worker-lifecycle.md) for dispatch and checkpoint recovery.
 
 ## Separate worker network
@@ -26,9 +27,11 @@ The worker security group has no ingress. Its egress permits only TCP 443 to:
 - The ECR endpoint security group.
 - The AWS-managed regional S3 prefix list.
 
-Both interface endpoint groups accept TCP 443 only from the worker group and have no egress rules.
-Remove default allow-all egress before admission. CloudFormation adds that default when initial group creation supplies no egress rules.
-Infrastructure packaging must account for this behavior. An empty configuration array alone does not establish the required state.
+Both interface endpoint groups accept TCP 443 only from the worker group.
+Their egress is either empty or exactly TCP 443 to that same worker group. Broader or different destinations fail admission.
+The staged template uses the explicit peer rule to suppress CloudFormation default outbound access without a custom mutation function.
+The worker group has no ingress, so the peer rule adds no reachable worker listener. Return traffic already uses stateful group behavior.
+An empty CloudFormation array alone does not suppress the initial default rule.
 
 ECR API and Docker endpoints use private DNS, IPv4, the expected security group, and every configured worker subnet.
 Their policies permit the configured platform execution role to pull only the configured repository prefix and its descendants.
@@ -106,7 +109,7 @@ No provider credentials, registry tokens, or worker tickets belong in this setti
 
 ## Controller read permissions
 
-SDK wiring requires these read actions in the selected region and account.
+SDK wiring requires these read actions in the selected region and account. The staged controller policy supplies them.
 These permissions belong to trusted controllers, never to the test container.
 
 | Service | Actions |

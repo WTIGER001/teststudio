@@ -161,3 +161,11 @@ Hosted use requires a separate private route with trusted TLS termination.
 The artifact-only role rejects this setting.
 See [Private hosted worker exchange](worker-exchange.md) for ticket scope, limits, staging quotas, and integration order.
 Current provider packages still require their worker routing and isolated execution adapters before this listener supports hosted test execution.
+
+## Preparation journal mount
+
+The image also includes /private/source-journals, owned by user 65532 with mode 0700.
+The AWS preparation service mounts its private EFS access point at that path. It is separate from artifact storage and test scratch volumes.
+Only /tmp remains an image-declared volume. The API needs no journal mount.
+The focused local journal probe verifies non-root child creation through a mounted volume under a read-only root filesystem.
+It verifies local ownership and packaged flags, not live EFS or AWS authority. See [AWS worker packaging](aws-workers-package.md).

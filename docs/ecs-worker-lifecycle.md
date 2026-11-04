@@ -9,8 +9,9 @@ The existing immutable [task and deadline contracts](ecs-worker-contract.md) rem
 The provider now has optional [server and preparation settings](ecs-workers.md), scoped SDK construction, and rotating ECR authentication.
 Its constructor requires an image inspector and both installation and task network-admission checks. No default network bypass exists.
 The [production network checker and bounded settings loader](ecs-network-admission.md) are implemented with local protocol verification.
-Private exchange infrastructure and the worker deployment package remain to implement.
-The current AWS service profile continues to support native HTTP checks only.
+The [staged worker deployment package](aws-workers-package.md) now supplies private exchange infrastructure, permissions, and preparation.
+Target-profile execution, recovery, and upgrade verification remain required.
+The default AWS core profile runs native HTTP checks. Optional coded workers require the staged package.
 Keep all hosted acceptance items open until their complete scope is verified.
 
 ## Durable creation and ownership
@@ -112,6 +113,7 @@ The corrected task contract uses supported task-local volumes, an explicit 21 Gi
 Require the inspected non-root volume capability before execution admission.
 The scoped SDK factory and private settings now connect the API and preparation commands.
 Preserve explicit account and region scope, disabled creation retries, current credentials, and private error handling.
-Package private worker HTTPS routing, controller permissions, platform-only pull permissions, and the independent deadline role.
+The staged package now supplies private worker HTTPS routing, controller permissions, platform-only pull permissions, and the independent deadline role.
 Connect registry assembly and hosted discovery through the existing preparation queue.
-The core service template must keep ECS worker settings disabled until its private resources and permissions are packaged and checked locally.
+Keep core worker settings disabled until private DNS, endpoint connection, acceptance protection, and the private listener pass the staged deployment checks.
+Review target-health rotation before continuous rolling upgrades. The initial admission guard requires every registered backend to be healthy.

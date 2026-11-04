@@ -4,7 +4,7 @@
 
 The preparation command connects registry source assembly to the durable source queue and isolated provider discovery.
 Kubernetes uses Pods. Optional [ECS settings](ecs-workers.md) now use the same queue with Fargate tasks and ECR authentication.
-ECS private infrastructure packaging and deployed acceptance remain required.
+ECS now has a [staged infrastructure and preparation package](aws-workers-package.md). Deployed acceptance remains required.
 It supports the offline Go and Playwright profiles. Local preparation retains its existing behavior.
 The API accepts source uploads and presents the normal source review. It does not assemble uploaded source in its process.
 The portable service image now includes /app/teststudio-prepare for a separate preparation process.
