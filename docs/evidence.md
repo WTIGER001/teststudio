@@ -114,3 +114,33 @@ Recovered observations remain separate from the run's original final outcome.
 An incomplete run remains incomplete after diagnostics become available.
 Transient evidence errors retain the worker volume for bounded retries. Permanent capture gaps remain visible.
 The execution history route reports checkpoint, recovery, retry, and cleanup status.
+
+## Interrupted upload recovery
+
+Upload admission stores its pending manifest, byte reservations, expiration index, and recovery work in one transaction.
+Successful or failed upload finalization removes its recovery work with the manifest update.
+A service restart cannot lose that pending work. Available manifests and private bytes remain durable.
+
+Maintenance scans ten upload records per cycle. The default cycle is five seconds.
+Each scan advances past live leases, so active uploads cannot hide later interrupted work.
+An upload lease lasts thirty seconds. Recovery waits for that lease before claiming the manifest.
+Claims prevent another instance, an upload retry, or normal cleanup from changing the same manifest during verification.
+Recovery reads at most the recorded size plus one byte, within the 64 MiB file limit.
+It verifies both size and SHA-256 checksum before marking existing bytes available.
+It does not upload those bytes again, reserve more capacity, extend retention, or start a test.
+
+Missing or corrupt content becomes upload-failed with an explicit explanation.
+The source worker can retry the same attachment identity. A retry retains its original reservation.
+A temporary storage read error keeps pending work and a visible error for another recovery attempt.
+Backlog size and storage outages can delay recovery beyond one cycle.
+Older finished runs receive the upload index through the existing bounded retention migration.
+
+A duplicate pending upload does not count as complete worker capture.
+The execution ledger keeps its source checkpoint until capture finishes or its bounded retry policy ends.
+Recovered diagnostics keep the original run outcome, result identities, and log sequence.
+An incomplete run remains incomplete. Recovering evidence does not imply that a test passed.
+
+Focused SQLite and local PostgreSQL checks cover interrupted finalization, database reopening, duplicate uploads, current leases, storage outages, and competing instances.
+The local controller restart check verifies private evidence bytes and stable run, attempt, and attachment identities after another restart.
+See [Self-testing](self-testing.md#restart-and-cleanup-recovery) for the restart command and owned-resource cleanup.
+Cloud artifact adapter and deployment verification remain separate acceptance work.

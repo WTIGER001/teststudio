@@ -76,10 +76,13 @@ func (s *Service) captureCodedReport(parent context.Context, run Run, worker str
 			artifact.Sequence = sequence
 		}
 		artifact.ExpiresAt = capture.Expiry(time.Now().UTC(), policy, file.Kind, result.State)
-		_, err := s.Evidence.Save(ctx, artifact, file.Data, evidence.Budget{RunBytes: base.MaxBytes, TestBytes: policy.MaxBytes, FileBytes: min(base.MaxFileBytes, policy.MaxFileBytes, run.CaptureLimits.FileBytes), ProjectBytes: run.CaptureLimits.ProjectBytes})
+		saved, err := s.Evidence.Save(ctx, artifact, file.Data, evidence.Budget{RunBytes: base.MaxBytes, TestBytes: policy.MaxBytes, FileBytes: min(base.MaxFileBytes, policy.MaxFileBytes, run.CaptureLimits.FileBytes), ProjectBytes: run.CaptureLimits.ProjectBytes})
 		if err != nil {
 			retryable = true
 			add(file.Filename + ": " + err.Error())
+		} else if saved.State != "available" {
+			retryable = true
+			add(file.Filename + ": upload is " + saved.State + "; evidence recovery will retry without running the test again.")
 		}
 	}
 	return retryable

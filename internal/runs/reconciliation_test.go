@@ -294,3 +294,131 @@ func TestRecoveredEvidenceRetriesAfterRestartWithoutQuotaDuplication(t *testing.
 		t.Fatalf("recovered file metadata: %+v %v", file, err)
 	}
 }
+
+type pendingEvidenceUpload struct {
+	artifacts.Store
+	entered chan struct{}
+	release chan struct{}
+}
+
+func (b *pendingEvidenceUpload) Put(ctx context.Context, key string, source io.Reader, limit int64) (artifacts.Object, error) {
+	close(b.entered)
+	select {
+	case <-b.release:
+		return b.Store.Put(ctx, key, source, limit)
+	case <-ctx.Done():
+		return artifacts.Object{}, ctx.Err()
+	}
+}
+
+func TestPendingDuplicateEvidenceKeepsCheckpointUntilUploadCommits(t *testing.T) {
+	s, _, _ := setup(t, nil)
+	driver := recoveredDriver("failed")
+	run, ref := lostExecution(t, s, driver, false)
+	blobs := s.Evidence.Blobs
+	s.Evidence.Blobs = interruptedUpload{blobs}
+	s.RecoveryDriver = driver
+	s.RecoveryInterval = 5 * time.Millisecond
+	stop := start(t, s)
+	awaitExecution(t, s, ref, "cleanup-failed")
+	stop()
+	s.Evidence.Blobs = blobs
+	files, err := s.Store.All(t.Context(), "artifacts/"+run.ID, run.Project)
+	if err != nil || len(files) != 1 {
+		t.Fatal("failed upload manifest missing", err)
+	}
+	file, err := storage.Decode[evidence.Artifact](files[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	gate := &pendingEvidenceUpload{Store: blobs, entered: make(chan struct{}), release: make(chan struct{})}
+	uploader := &evidence.Service{Store: s.Store, Blobs: gate}
+	uploadCtx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+	written := make(chan error, 1)
+	go func() { _, err := uploader.SaveBytes(uploadCtx, file, []byte("diagnostics"), 100<<20); written <- err }()
+	defer func() {
+		cancel()
+		select {
+		case <-written:
+		case <-time.After(time.Second):
+			t.Error("owned upload did not stop")
+		}
+	}()
+	select {
+	case <-gate.entered:
+	case <-time.After(3 * time.Second):
+		t.Fatal("retry did not claim the attachment")
+	}
+	ledger := workerstate.Ledger{Store: s.Store}
+	advance := func() {
+		record, row, err := ledger.Get(t.Context(), run.ID, ref.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		record.NextCheck = time.Now().Add(-time.Second)
+		change, err := storage.Put(row.Bucket, row.ID, row.Project, row.Revision, record)
+		if err == nil {
+			err = s.Store.Commit(t.Context(), change)
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	advance()
+	stop = start(t, s)
+	var pending workerstate.Record
+	deadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(deadline) {
+		pending, _, err = ledger.Get(t.Context(), run.ID, ref.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if pending.ReconcileAttempts >= 2 && pending.State == "cleanup-failed" {
+			break
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	stop()
+	if pending.EvidenceComplete || pending.EvidenceAbandoned || driver.cleanups.Load() != 0 || driver.recoveries.Load() != 2 {
+		t.Fatal("pending duplicate discarded its source checkpoint", pending)
+	}
+	close(gate.release)
+	select {
+	case err := <-written:
+		if err != nil {
+			t.Fatal(err)
+		}
+		written <- nil
+	case <-time.After(3 * time.Second):
+		t.Fatal("owned upload did not finish")
+	}
+	advance()
+	stop = start(t, s)
+	complete := awaitExecution(t, s, ref, "cleaned")
+	stop()
+	if !complete.EvidenceComplete || driver.cleanups.Load() != 1 || driver.recoveries.Load() != 3 {
+		t.Fatal("checkpoint did not finish after upload", complete)
+	}
+	files, err = s.Store.All(t.Context(), "artifacts/"+run.ID, run.Project)
+	if err != nil || len(files) != 1 {
+		t.Fatal("pending retry duplicated evidence", err)
+	}
+	quota, err := s.Store.Get(t.Context(), "artifact-quotas", run.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	reserved, err := storage.Decode[evidence.Quota](quota)
+	if err != nil || reserved.Bytes != int64(len("diagnostics")) {
+		t.Fatal("pending retry duplicated quota", reserved, err)
+	}
+	current, _, err := s.Get(t.Context(), run.Project, run.ID)
+	if err != nil || current.State != "incomplete" || current.Outcome != "unknown" || current.Counts.Completed != 0 {
+		t.Fatal("diagnostic recovery changed the logical outcome", current, err)
+	}
+	attempts, _ := s.Store.All(t.Context(), "attempts/"+run.ID, run.Project)
+	runs, _ := s.Store.All(t.Context(), "runs", run.Project)
+	if len(attempts) != 1 || len(runs) != 1 {
+		t.Fatal("diagnostic recovery duplicated attempts or runs")
+	}
+}

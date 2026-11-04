@@ -61,7 +61,7 @@ func (s *Service) EnsureRetentionIndex(ctx context.Context, limit int) error {
 			if err != nil {
 				return err
 			}
-			if status.IndexVersion >= 1 {
+			if status.IndexVersion >= 2 {
 				continue
 			}
 		}

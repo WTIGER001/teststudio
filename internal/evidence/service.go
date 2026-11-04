@@ -28,6 +28,7 @@ type Service struct {
 	retentionCursor string
 	indexCursor     string
 	cleanupCursor   string
+	uploadCursor    string
 }
 
 func Bucket(run string) string  { return "artifacts/" + run }
@@ -95,7 +96,11 @@ func (s *Service) Save(ctx context.Context, a Artifact, data []byte, budget Budg
 		if err != nil {
 			return a, err
 		}
-		if err := s.Store.Commit(ctx, change); err == nil {
+		changes, err := s.uploadChanges(ctx, a)
+		if err != nil {
+			return a, err
+		}
+		if err := s.Store.Commit(ctx, append(changes, change)...); err == nil {
 			return a, uploadErr
 		} else if !errors.Is(err, storage.ErrConflict) {
 			return a, err
@@ -151,7 +156,11 @@ func (s *Service) admit(ctx context.Context, a Artifact, budget Budget) (storage
 			if err != nil {
 				return row, old, err
 			}
-			if err := s.Store.Commit(ctx, change); errors.Is(err, storage.ErrConflict) {
+			changes, err := s.uploadChanges(ctx, old)
+			if err != nil {
+				return row, old, err
+			}
+			if err := s.Store.Commit(ctx, append(changes, change)...); errors.Is(err, storage.ErrConflict) {
 				continue
 			} else if err != nil {
 				return row, old, err
@@ -175,7 +184,12 @@ func (s *Service) admit(ctx context.Context, a Artifact, budget Budget) (storage
 		if err != nil {
 			return row, a, err
 		}
-		if err := s.Store.Commit(ctx, append(reservations, entry, index)...); errors.Is(err, storage.ErrConflict) {
+		uploads, err := s.uploadChanges(ctx, a)
+		if err != nil {
+			return row, a, err
+		}
+		changes := append(reservations, entry, index)
+		if err := s.Store.Commit(ctx, append(changes, uploads...)...); errors.Is(err, storage.ErrConflict) {
 			continue
 		} else if err != nil {
 			return row, a, err

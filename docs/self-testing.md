@@ -209,6 +209,10 @@ TESTSTUDIO_SELFTEST_IMAGE="$teststudio_selftest_image" TESTSTUDIO_RECOVERY_SERVE
 The check kills only the controller that it starts.
 It waits for the normal worker lease to expire and restarts the same installation with dispatch disabled.
 It verifies an incomplete outcome, recovered diagnostics, and removal of the owned container and volume.
+It restarts the controller again with dispatch disabled, downloads private evidence, and compares its size, checksum, and bytes.
+Run, attempt, and attachment identities remain unchanged. Only one logical run exists.
+The product-owned runner diagnostics provide exact ADAPTER-FAIL and ADAPTER-TIMEOUT selectors.
+They use fresh in-memory pages and no external target.
 The check stops its replacement controller and preserves verification data under `.data/worker-recovery-*` and `output/worker-recovery/`.
 
 
@@ -339,3 +343,11 @@ A selector-scoped fixture can remove the archived working definition inside that
 The production service exposes no corresponding deletion endpoint.
 The workflow checks saved snapshots, current permissions, retained private evidence, help, focus, themes, and mobile width.
 STUDIO-BROWSE-001 covers the shared revision renderer and renamed Revisions action.
+
+## Upload finalization checks
+
+Focused evidence recovery checks interrupt the request after durable bytes are written and before its manifest commits.
+They close and reopen database and artifact handles, then recover without uploading the same bytes again.
+Additional cases cover missing content, corrupt bytes, transient reads, active leases, bounded pages, and older pending manifests.
+Execution checks hold a duplicate upload open. Its checkpoint remains until the attachment becomes available.
+These checks require no browser build or cloud account.

@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import net from 'node:net'
+import { createHash } from 'node:crypto'
 import { spawn, execFileSync } from 'node:child_process'
 import { once } from 'node:events'
 import { LocalTestClient } from './selftest-api.mjs'
@@ -63,9 +64,29 @@ try {
   const remaining = execFileSync('docker', ['ps', '-a', '--filter', `label=teststudio.execution=${reference.id}`, '--format', '{{.Names}}'], { encoding: 'utf8' }).trim()
   if (remaining) throw new Error('The abandoned container remains')
   try { execFileSync('docker', ['volume', 'inspect', reference.volume], { stdio: 'ignore' }); throw new Error('The abandoned volume remains') } catch (error) { if (error.status == null) throw error }
+  const retained = artifacts.items.find(item => item.data.kind === 'log' && item.data.state === 'available')
+  if (!retained) throw new Error('No available diagnostic bytes survived initial recovery')
+  const readEvidence = async () => {
+    const grant = await client.call('POST', `${base}/runs/${run.id}/artifacts/${retained.id}/access`, { action: 'download' })
+    const response = await fetch(grant.url)
+    if (!response.ok) throw new Error('Private recovered evidence access failed')
+    const bytes = Buffer.from(await response.arrayBuffer())
+    if (bytes.length !== retained.data.size || createHash('sha256').update(bytes).digest('hex') !== retained.data.checksum) throw new Error('Recovered evidence bytes do not match the durable manifest')
+    return bytes
+  }
+  const beforeRestart = await readEvidence()
+  await stop('SIGTERM')
+  await start(false)
+  const afterRestart = await readEvidence()
+  const restartedRun = (await client.call('GET', `${base}/runs/${run.id}`)).data
+  const restartedAttempts = await client.call('GET', `${base}/runs/${run.id}/attempts`)
+  const restartedArtifacts = await client.call('GET', `${base}/runs/${run.id}/artifacts`)
+  const restartedRuns = await client.call('GET', `${base}/runs`)
+  const identities = rows => rows.map(item => item.id).sort().join(',')
+  if (!beforeRestart.equals(afterRestart) || restartedRun.state !== final.state || restartedRun.outcome !== final.outcome || identities(restartedAttempts.items) !== identities(attempts.items) || identities(restartedArtifacts.items) !== identities(artifacts.items) || restartedRuns.items.length !== 1) throw new Error('Restart changed retained evidence, attempts, or the logical run')
   const output = path.resolve('output/worker-recovery', run.id); fs.mkdirSync(output, { recursive: true })
-  fs.writeFileSync(path.join(output, 'summary.json'), JSON.stringify({ run: final, execution: recovered, attempts: attempts.items, artifacts: artifacts.items, installation: root }, null, 2))
-  console.log(`Verified incomplete outcome, recovered diagnostics, and removal of the owned container and volume. Output: ${output}`)
+  fs.writeFileSync(path.join(output, 'summary.json'), JSON.stringify({ run: final, execution: recovered, attempts: attempts.items, artifacts: artifacts.items, restartVerified: true, verifiedArtifactId: retained.id, installation: root }, null, 2))
+  console.log(`Verified incomplete outcome, private evidence bytes after another restart, stable identities, and removal of the owned container and volume. Output: ${output}`)
 } finally {
   await stop('SIGTERM')
   if (reference) {

@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 34 verified of 57.
+The acceptance count is 35 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -53,7 +53,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **40.** Native HTTP attempts support comparable timing history, bounded adaptive timeouts, slowdown criteria, and API and UI estimates.
 - [ ] **41.** Go and browser runners apply the same timing contract across execution and deployment profiles.
 - [x] **42.** Run details expose attempts, steps, context, logs, screenshots, traces, and configured attachments without requiring HTML reports.
-- [ ] **43.** Available evidence survives service restarts. Duplicate events and upload retries do not create duplicate attachments or rerun tests.
+- [x] **43.** Available evidence survives service restarts. Duplicate events and upload retries do not create duplicate attachments or rerun tests.
 - [x] **44.** Capture gaps, failed uploads, expired files, and incomplete evidence remain visible beside the observed test outcome.
 - [x] **45.** Artifact access respects project permissions. Private trace viewing requires no public upload or third-party viewer.
 - [ ] **46.** Retention, quotas, and evidence pins work across local, S3, and Azure artifact adapters.
@@ -68,6 +68,40 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **55.** Hosted identity and private report access work through installation-specific configuration.
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
+
+## Current delivery: durable evidence upload recovery
+
+Acceptance **43** is complete. The current ledger has **35 verified, 22 open, 57 total** items.
+
+Upload admission now records durable recovery work with the pending manifest and quota reservations.
+Finalization removes that work with its manifest update. Recovery claims expired upload leases and verifies existing size and checksum.
+Verified bytes become available without another upload or quota reservation. Missing or corrupt content remains upload-failed.
+Temporary storage read failures keep pending work and visible errors for retry.
+Bounded scans advance beyond live leases. Competing instances respect the current upload claim.
+The retention migration indexes older pending manifests without changing their accounting.
+A duplicate pending upload no longer satisfies capture completion. Its execution checkpoint remains available for bounded collection retries.
+Recovered evidence does not create another test run or change the original logical outcome.
+
+Focused race checks pass on SQLite and local PostgreSQL.
+They cover database and filesystem reopening after interrupted manifest finalization, identical upload replay, current leases, and late completion fencing.
+They also cover missing and corrupt bytes, storage read outages, competing recovery claims, paged work, older indexes, and worker checkpoint retention.
+Pending upload retry preserves one attachment, one attempt, one logical run, and one byte reservation.
+The production UI and native server builds pass. Unchanged trace assets and trusted runtimes remain cached.
+
+The existing local controller restart check now verifies private evidence bytes after another restart with dispatch disabled.
+It compares size, checksum, bytes, attachment identities, attempt identities, and the unchanged incomplete outcome.
+Its first invocation exposes missing ADAPTER-TIMEOUT fixture coverage. New product-owned diagnostic fixtures provide the declared exact selectors.
+Only the affected runner image rebuilds. The corrected controller restart scenario passes.
+The check stops its controller, replacement controllers, browser container, and output volume. Exact cleanup checks find none remaining.
+The earlier failed check also leaves no owned container or volume. The local PostgreSQL fixture is removed.
+No broad browser suite or cloud profile runs. The user's demo and browser remain intact.
+
+Restart evidence is output/worker-recovery/20261104T035538.601559000-afba5699c513d0beff0b98dd/summary.json and cleanup.json.
+The concise milestone record is output/evidence-recovery/checkpoint.json.
+User and operator behavior appears in evidence.md. Self-testing instructions and Run details help describe recovery without another test execution.
+
+Acceptance **46** retains local, S3, and Azure retention, quota, and pin parity scope.
+Timing parity and provider deployment verification also remain open. This milestone does not claim hosted adapter acceptance.
 
 ## Current delivery: preparation recovery and retained test history
 

@@ -93,6 +93,11 @@ func (s *Service) retentionPage(ctx context.Context, jobRow storage.Record, job 
 		if a.State == "expired" || a.State == "deleted" {
 			continue
 		}
+		uploads, err := s.uploadChanges(ctx, a)
+		if err != nil {
+			return err
+		}
+		changes = append(changes, uploads...)
 		changed := false
 		if a.QuotaVersion < 1 {
 			legacySizes[a.Test] += a.Size
@@ -135,6 +140,8 @@ func (s *Service) retentionPage(ctx context.Context, jobRow storage.Record, job 
 				return err
 			}
 			changes = append(changes, change)
+		} else if len(uploads) > 0 {
+			changes = append(changes, storage.Change{Record: row, Assert: true})
 		}
 		index, err := s.expirationChange(ctx, a)
 		if err != nil {
@@ -172,7 +179,7 @@ func (s *Service) retentionStatusChange(ctx context.Context, project, run, state
 	if err != nil && !errors.Is(err, storage.ErrNotFound) {
 		return storage.Change{}, err
 	}
-	return storage.Put("evidence-retention-status", run, project, r.Revision, RetentionStatus{State: state, Error: message, UpdatedAt: time.Now().UTC(), IndexVersion: 1})
+	return storage.Put("evidence-retention-status", run, project, r.Revision, RetentionStatus{State: state, Error: message, UpdatedAt: time.Now().UTC(), IndexVersion: 2})
 }
 
 func (s *Service) StartMaintenance(ctx context.Context, interval time.Duration) <-chan struct{} {
@@ -188,6 +195,7 @@ func (s *Service) StartMaintenance(ctx context.Context, interval time.Duration) 
 			if ctx.Err() != nil {
 				return
 			}
+			_ = s.RecoverUploads(ctx, 10)
 			_ = s.ProcessRetention(ctx, 10)
 			_ = s.EnsureRetentionIndex(ctx, 10)
 			_ = s.Sweep(ctx, 30)
