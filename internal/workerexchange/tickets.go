@@ -88,7 +88,7 @@ func (s *Service) Prepare(ctx context.Context, ref execution.Reference, input ex
 			if err != nil {
 				return Ticket{}, ErrUnavailable
 			}
-			if record.Reference != ref || record.InputHash != fingerprint(payload) || !record.Deadline.Equal(deadline) || record.Revoked {
+			if record.Reference != ref || record.InputHash != fingerprint(payload) || !record.Deadline.Equal(deadline) || record.Revoked || record.DispatchGated != input.AwaitDispatch {
 				return Ticket{}, ErrConflict
 			}
 		} else if errors.Is(err, storage.ErrNotFound) {
@@ -99,7 +99,7 @@ func (s *Service) Prepare(ctx context.Context, ref execution.Reference, input ex
 			if _, err := rand.Read(nonce); err != nil {
 				return Ticket{}, ErrUnavailable
 			}
-			record = Record{Reference: ref, Input: payload, InputHash: fingerprint(payload), Nonce: hex.EncodeToString(nonce), CreatedAt: time.Now().UTC(), Deadline: deadline, Uploaded: map[string]bool{}}
+			record = Record{DispatchGated: input.AwaitDispatch, DispatchReady: !input.AwaitDispatch, Reference: ref, Input: payload, InputHash: fingerprint(payload), Nonce: hex.EncodeToString(nonce), CreatedAt: time.Now().UTC(), Deadline: deadline, Uploaded: map[string]bool{}}
 			change, err := storage.Put(Bucket, ref.ID, ref.Project, 0, record)
 			if err != nil {
 				return Ticket{}, ErrUnavailable
@@ -153,6 +153,9 @@ func (s *Service) authenticated(ctx context.Context, id, token, instance string)
 	access, err := s.Authorize(ctx, record.Reference)
 	if err != nil || !time.Now().Before(access.Deadline) {
 		return record, row, nil, ErrDenied
+	}
+	if record.DispatchGated && !record.DispatchReady {
+		return record, row, nil, ErrUnavailable
 	}
 	return record, row, access.Records, nil
 }

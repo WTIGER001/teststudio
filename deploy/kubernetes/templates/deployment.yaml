@@ -70,6 +70,10 @@ spec:
             - {{ printf "--local-accounts=%t" .Values.localAccounts | quote }}
             - --artifact-store-config=/etc/teststudio/artifact-store.json
             - --execution-location=kubernetes
+            {{- if .Values.workers.enabled }}
+            - --worker-addr=0.0.0.0:8042
+            - --kubernetes-workers-config=/etc/teststudio/kubernetes-workers.json
+            {{- end }}
           env:
             - name: TESTSTUDIO_DATABASE
               valueFrom:
@@ -83,6 +87,15 @@ spec:
                   name: {{ $reference.existingSecret | quote }}
                   key: {{ $reference.key | quote }}
             {{- end }}
+            {{- if .Values.workers.enabled }}
+            {{- range $name, $reference := .Values.workers.registry.credentials }}
+            - name: {{ $name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $reference.existingSecret | quote }}
+                  key: {{ $reference.key | quote }}
+            {{- end }}
+            {{- end }}
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
@@ -93,6 +106,10 @@ spec:
               containerPort: 8040
             - name: artifacts
               containerPort: 8041
+            {{- if .Values.workers.enabled }}
+            - name: worker
+              containerPort: 8042
+            {{- end }}
           startupProbe:
             httpGet:
               path: /healthz
@@ -124,6 +141,16 @@ spec:
               mountPath: /data
             - name: temporary
               mountPath: /tmp
+            {{- if .Values.workers.enabled }}
+            - name: controller-identity
+              mountPath: /var/run/teststudio-controller
+              readOnly: true
+            {{- if .Values.workers.registry.caSecret }}
+            - name: registry-ca
+              mountPath: /etc/teststudio-registry
+              readOnly: true
+            {{- end }}
+            {{- end }}
       volumes:
         - name: config
           configMap:
@@ -141,3 +168,27 @@ spec:
           emptyDir:
             medium: Memory
             sizeLimit: 64Mi
+
+        {{- if .Values.workers.enabled }}
+        - name: controller-identity
+          projected:
+            defaultMode: 0440
+            sources:
+              - serviceAccountToken:
+                  path: token
+                  expirationSeconds: 3600
+              - configMap:
+                  name: kube-root-ca.crt
+                  items:
+                    - key: ca.crt
+                      path: ca.crt
+        {{- if .Values.workers.registry.caSecret }}
+        - name: registry-ca
+          secret:
+            secretName: {{ .Values.workers.registry.caSecret | quote }}
+            defaultMode: 0440
+            items:
+              - key: ca.crt
+                path: ca.crt
+        {{- end }}
+        {{- end }}

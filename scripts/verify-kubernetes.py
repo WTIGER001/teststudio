@@ -14,6 +14,8 @@ def main():
     parser.add_argument('--helm', default='helm')
     parser.add_argument('--kubeconform', default='kubeconform')
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--workers-only', action='store_true')
+    parser.add_argument('--pod', type=Path)
     arguments = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     chart = root / 'deploy/kubernetes'
@@ -53,8 +55,12 @@ def main():
             by_kind = {}
             for item in objects:
                 by_kind.setdefault(item['kind'], []).append(item)
-                assert item['metadata']['namespace'] == 'teststudio-fixture'
-            assert not any(kind in by_kind for kind in ['Secret', 'Role', 'RoleBinding', 'ClusterRole', 'ClusterRoleBinding'])
+                if item['kind'] not in ['Namespace', 'ClusterRole', 'ClusterRoleBinding']:
+                    assert item['metadata']['namespace'] in ['teststudio-fixture', values.get('workers', {}).get('namespace')]
+            enabled = values.get('workers', {}).get('enabled', False)
+            assert 'Secret' not in by_kind
+            if not enabled:
+                assert not any(kind in by_kind for kind in ['Role', 'RoleBinding', 'ClusterRole', 'ClusterRoleBinding'])
             deployment = by_kind['Deployment'][0]
             pod = deployment['spec']['template']['spec']
             assert pod['automountServiceAccountToken'] is False
@@ -90,7 +96,7 @@ def main():
                 assert store == values['artifactStore'] and 'PersistentVolumeClaim' not in by_kind
                 assert 'emptyDir' in next(item for item in pod['volumes'] if item['name'] == 'data')
             services = {item['metadata']['name']: item for item in by_kind['Service']}
-            ingress = by_kind['Ingress'][0]
+            ingress = next(item for item in by_kind['Ingress'] if item['metadata']['name'] == 'fixture')
             assert len(ingress['spec']['rules']) == 2
             for rule, origin, port in zip(ingress['spec']['rules'], [values['origins']['ui'], values['origins']['artifacts']], ['api', 'artifacts']):
                 assert rule['host'] == origin.removeprefix('https://')
@@ -98,7 +104,7 @@ def main():
                 service = services[backend['name']]
                 assert backend['port']['name'] == port and service['spec']['ports'][0]['targetPort'] == port
                 assert service['spec']['selector'] == deployment['spec']['selector']['matchLabels']
-            policy = by_kind['NetworkPolicy'][0]['spec']
+            policy = next(item for item in by_kind['NetworkPolicy'] if item['metadata']['name'] == 'fixture')['spec']
             assert policy['policyTypes'] == ['Ingress'] and policy['podSelector']['matchLabels'] == deployment['spec']['selector']['matchLabels']
             peer = policy['ingress'][0]['from'][0]
             assert peer['namespaceSelector']['matchLabels']['kubernetes.io/metadata.name'] == values['networkPolicy']['ingressNamespace']
@@ -110,6 +116,50 @@ def main():
                 assert deployment['spec']['strategy']['type'] == 'Recreate'
             else:
                 assert deployment['spec']['strategy']['type'] == 'RollingUpdate'
+            if enabled:
+                worker = values['workers']
+                settings = json.loads(config['kubernetes-workers.json'])
+                assert '--worker-addr=0.0.0.0:8042' in container['args']
+                assert '--kubernetes-workers-config=/etc/teststudio/kubernetes-workers.json' in container['args']
+                assert settings['worker']['namespace'] == worker['namespace']
+                assert settings['worker']['exchangeOrigin'] == worker['origin']
+                assert settings['worker']['architecture'] == values['image']['architecture']
+                assert settings['worker']['tokenFile'] == '/var/run/teststudio-controller/token'
+                assert settings['worker']['exchangePort'] == worker['privateIngress'].get('port', 443)
+                assert set(item['name'] for item in container['env']) >= set(worker['registry']['credentials'])
+                identity = next(item for item in pod['volumes'] if item['name'] == 'controller-identity')['projected']
+                assert identity['sources'][0]['serviceAccountToken']['expirationSeconds'] == 3600
+                namespace = by_kind['Namespace'][0]
+                assert namespace['metadata']['name'] == worker['namespace']
+                assert namespace['metadata']['labels']['pod-security.kubernetes.io/enforce'] == 'restricted'
+                assert namespace['metadata']['annotations']['helm.sh/resource-policy'] == 'keep'
+                account = next(item for item in by_kind['ServiceAccount'] if item['metadata']['namespace'] == worker['namespace'])
+                assert account['automountServiceAccountToken'] is False and not account['metadata'].get('annotations', {})
+                bindings = by_kind['RoleBinding'] + by_kind['ClusterRoleBinding']
+                assert all(item['subjects'] == [{'kind': 'ServiceAccount', 'name': 'fixture', 'namespace': 'teststudio-fixture'}] for item in bindings)
+                role = by_kind['Role'][0]
+                assert role['metadata']['namespace'] == worker['namespace']
+                assert {resource for rule in role['rules'] for resource in rule['resources']} == {'pods', 'serviceaccounts', 'networkpolicies'}
+                cluster_role = by_kind['ClusterRole'][0]
+                assert all(rule['verbs'] == ['get'] and rule['resourceNames'] for rule in cluster_role['rules'])
+                egress = next(item for item in by_kind['NetworkPolicy'] if item['metadata']['namespace'] == worker['namespace'])
+                (output / (name + '-settings.json')).write_text(json.dumps(settings, indent=2) + '\n')
+                (output / (name + '-policy.json')).write_text(json.dumps(egress['spec'], indent=2) + '\n')
+                assert egress['metadata']['annotations']['helm.sh/resource-policy'] == 'keep'
+                assert egress['spec']['policyTypes'] == ['Ingress', 'Egress'] and egress['spec']['ingress'] == []
+                assert egress['spec']['podSelector']['matchLabels'] == {'teststudio.io/worker': 'isolated-v1'}
+                assert len(egress['spec']['egress']) == 2
+                exchange = egress['spec']['egress'][0]
+                assert exchange['ports'] == [{'protocol': 'TCP', 'port': worker['privateIngress'].get('port', 443)}]
+                assert exchange['to'][0]['podSelector']['matchLabels'] == worker['privateIngress']['podLabels']
+                private_ingress = next(item for item in by_kind['Ingress'] if item['metadata']['name'] == 'fixture-worker')
+                assert private_ingress['spec']['ingressClassName'] == worker['privateIngress']['className']
+                assert private_ingress['spec']['rules'][0]['host'] == worker['origin'].removeprefix('https://')
+                assert policy['ingress'][1]['ports'] == [{'protocol': 'TCP', 'port': 8042}]
+            else:
+                assert 'kubernetes-workers.json' not in config
+                assert not any(item['name'] == 'controller-identity' for item in pod['volumes'])
+                assert not any(item.startswith('--kubernetes-workers') for item in container['args'])
             checked = execute([arguments.kubeconform, '-strict', '-summary', '-exit-on-error', '-kubernetes-version', source['kubernetesVersion'], '-schema-location', source['schemaLocation'], '-cache', str(cache), str(manifest)])
             (output / (name + '-schema.log')).write_text(checked.stdout)
             report['validProfiles'].append({'name': name, 'resources': len(objects), 'schemaValidated': True})
@@ -120,30 +170,59 @@ def main():
         lint = execute([arguments.helm, 'lint', str(chart), '--strict', '--values', str(values_file)])
         (output / 'lint.log').write_text(lint.stdout)
         original_checksum = render('filesystem-single', base)
-        azure = copy.deepcopy(base)
-        azure['replicas'] = 2
-        azure['artifactStore'] = {'driver': 'azure', 'azure': {'serviceUrl': 'https://teststudiofixture.blob.core.windows.net', 'container': 'evidence', 'prefix': 'installation'}}
-        azure['oidc']['providers'].append({'id': 'second-provider', 'name': 'Second sign-in', 'issuer': 'https://second-identity.example.test', 'clientId': 'second-studio', 'autoProvision': False})
-        assert render('azure-multiple', azure) != original_checksum
-        shared = copy.deepcopy(base)
-        shared.update(replicas=2, persistence={'existingClaim': 'fixture-shared-evidence', 'accessMode': 'ReadWriteMany'})
-        render('filesystem-shared', shared)
-        s3 = copy.deepcopy(base)
-        s3['artifactStore'] = {'driver': 's3', 's3': {'region': 'us-east-1', 'bucket': 'teststudio-fixture-evidence', 'prefix': 'installation'}}
-        s3['image']['architecture'] = 'arm64'
-        render('s3-config', s3)
-        invalid = {}
-        value = copy.deepcopy(base); value['image']['digest'] = ''; invalid['missing-image-digest'] = value
-        value = copy.deepcopy(base); value['origins']['artifacts'] = value['origins']['ui']; invalid['same-evidence-origin'] = value
-        value = copy.deepcopy(base); value['database']['value'] = 'private-inline-canary'; invalid['inline-database-secret'] = value
-        value = copy.deepcopy(base); value['oidc']['credentials'] = {}; invalid['unmapped-identity-secret'] = value
-        value = copy.deepcopy(base); value['replicas'] = 2; invalid['multiple-rwo-replicas'] = value
-        value = copy.deepcopy(base); value['bootstrap']['issuer'] = 'https://foreign.example.test'; invalid['foreign-bootstrap-issuer'] = value
-        value = copy.deepcopy(base); value['podLabels'] = {'app.kubernetes.io/instance': 'another-installation'}; invalid['selector-label-override'] = value
-        value = copy.deepcopy(base); value['oidc']['providers'].append(copy.deepcopy(value['oidc']['providers'][0])); invalid['duplicate-provider-id'] = value
-        value = copy.deepcopy(base); value['image']['repository'] += ':latest'; invalid['mutable-image-tag'] = value
-        for name, values in invalid.items():
-            render(name, values, expected=False)
+        if arguments.workers_only:
+            worker_values = yaml.safe_load((chart / 'workers.example.yaml').read_text())
+            enabled = copy.deepcopy(base)
+            enabled.update(worker_values)
+            render('private-workers', enabled)
+            invalid = {}
+            value = copy.deepcopy(enabled); value['workers']['namespace'] = 'teststudio-fixture'; invalid['shared-worker-namespace'] = value
+            value = copy.deepcopy(enabled); value['workers']['origin'] = value['origins']['ui']; invalid['public-worker-origin'] = value
+            value = copy.deepcopy(enabled); value['workers']['privateIngress']['className'] = value['ingress']['className']; invalid['public-worker-ingress'] = value
+            value = copy.deepcopy(enabled); value['workers']['registry']['credentials'] = {}; invalid['unmapped-registry-credential'] = value
+            for name, values in invalid.items():
+                render(name, values, expected=False)
+        else:
+            azure = copy.deepcopy(base)
+            azure['replicas'] = 2
+            azure['artifactStore'] = {'driver': 'azure', 'azure': {'serviceUrl': 'https://teststudiofixture.blob.core.windows.net', 'container': 'evidence', 'prefix': 'installation'}}
+            azure['oidc']['providers'].append({'id': 'second-provider', 'name': 'Second sign-in', 'issuer': 'https://second-identity.example.test', 'clientId': 'second-studio', 'autoProvision': False})
+            assert render('azure-multiple', azure) != original_checksum
+            shared = copy.deepcopy(base)
+            shared.update(replicas=2, persistence={'existingClaim': 'fixture-shared-evidence', 'accessMode': 'ReadWriteMany'})
+            render('filesystem-shared', shared)
+            s3 = copy.deepcopy(base)
+            s3['artifactStore'] = {'driver': 's3', 's3': {'region': 'us-east-1', 'bucket': 'teststudio-fixture-evidence', 'prefix': 'installation'}}
+            s3['image']['architecture'] = 'arm64'
+            render('s3-config', s3)
+            invalid = {}
+            value = copy.deepcopy(base); value['image']['digest'] = ''; invalid['missing-image-digest'] = value
+            value = copy.deepcopy(base); value['origins']['artifacts'] = value['origins']['ui']; invalid['same-evidence-origin'] = value
+            value = copy.deepcopy(base); value['database']['value'] = 'private-inline-canary'; invalid['inline-database-secret'] = value
+            value = copy.deepcopy(base); value['oidc']['credentials'] = {}; invalid['unmapped-identity-secret'] = value
+            value = copy.deepcopy(base); value['replicas'] = 2; invalid['multiple-rwo-replicas'] = value
+            value = copy.deepcopy(base); value['bootstrap']['issuer'] = 'https://foreign.example.test'; invalid['foreign-bootstrap-issuer'] = value
+            value = copy.deepcopy(base); value['podLabels'] = {'app.kubernetes.io/instance': 'another-installation'}; invalid['selector-label-override'] = value
+            value = copy.deepcopy(base); value['oidc']['providers'].append(copy.deepcopy(value['oidc']['providers'][0])); invalid['duplicate-provider-id'] = value
+            value = copy.deepcopy(base); value['image']['repository'] += ':latest'; invalid['mutable-image-tag'] = value
+            for name, values in invalid.items():
+                render(name, values, expected=False)
+    if arguments.pod:
+        worker_pod = json.loads(arguments.pod.read_text())
+        spec = worker_pod['spec']
+        assert worker_pod['kind'] == 'Pod' and spec['restartPolicy'] == 'Never'
+        assert spec['automountServiceAccountToken'] is False and spec['enableServiceLinks'] is False
+        assert spec['securityContext']['runAsUser'] == spec['securityContext']['fsGroup'] == 1000
+        assert spec['activeDeadlineSeconds'] > 0 and spec['runtimeClassName']
+        runner = spec['containers'][0]
+        assert len(spec['containers']) == 1 and runner['command'] == ['/runner/teststudio-job']
+        assert {item['name'] for item in runner['env']} == {'TESTSTUDIO_JOB_EXECUTION', 'TESTSTUDIO_JOB_TOKEN', 'TESTSTUDIO_JOB_INSTANCE'}
+        assert runner['securityContext']['allowPrivilegeEscalation'] is False
+        assert runner['securityContext']['readOnlyRootFilesystem'] is True
+        assert all('emptyDir' in volume for volume in spec['volumes'])
+        checked = execute([arguments.kubeconform, '-strict', '-summary', '-exit-on-error', '-kubernetes-version', source['kubernetesVersion'], '-schema-location', source['schemaLocation'], '-cache', str(cache), str(arguments.pod.resolve())])
+        (output / 'worker-pod-schema.log').write_text(checked.stdout)
+        report['workerPodSchemaValidated'] = True
     report['passed'] = True
     report['tools'] = {'helm': execute([arguments.helm, 'version', '--short']).stdout.strip(), 'kubeconform': execute([arguments.kubeconform, '-v']).stdout.strip()}
     (output / 'summary.json').write_text(json.dumps(report, indent=2) + '\n')

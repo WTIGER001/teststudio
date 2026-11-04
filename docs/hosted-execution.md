@@ -6,10 +6,10 @@ The shared hosted lifecycle driver is implemented in internal/hostedexecution.
 It implements the existing managed executor and timing-profile contracts.
 It connects a provider implementation to the private worker exchange and the durable execution ledger.
 
-No provider implementation is enabled by this batch.
-The local API keeps its existing local runners.
-AWS, Kubernetes, and Azure execution remain incomplete.
-Their adapters, private routing, isolation, remote preparation, and deployment verification remain required.
+The optional [Kubernetes Pod adapter](kubernetes-workers.md) now connects this lifecycle to a concrete provider.
+The default local API keeps its existing local runners.
+Complete hosted execution and deployment acceptance remain incomplete.
+Remote preparation, trusted gateways, remaining provider adapters, and deployment verification remain required.
 The shared driver currently admits offline Go and Playwright work only.
 It rejects environment-backed artifacts and credential bindings until trusted gateway delivery exists.
 
@@ -50,6 +50,8 @@ The driver checks dispatch authority before preparing the packet and again befor
 The work packet keeps its immutable input and discovered selector.
 Its deadline is bounded by the attempt, caller, and current exchange authority.
 The provider receives the approved image, fixed runner, private origin, reference, and scoped ticket.
+The packet stays behind a controller activation gate until provider creation and identity verification succeed.
+A pending or rejected provider cannot release uploaded code through that gate.
 The ticket does not serialize with the job or appear in its diagnostic string.
 
 The driver calls Ensure once for this dispatch.
@@ -61,6 +63,7 @@ A provider can return ErrRejected only when it proves that no creation was accep
 Control calls have five-second bounds inside the enclosing lifecycle deadline.
 Polling defaults to 250 milliseconds.
 The driver forwards one acknowledged test start through the normal run callback.
+Provider-specific execution settings can add a timing profile component for the selected execution pool.
 It checks the complete reference, image, deadline, phase, and exit code on each provider observation.
 
 ## Observation, cancellation, and cleanup

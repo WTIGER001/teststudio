@@ -17,14 +17,15 @@ var ErrOwnership = errors.New("hosted worker ownership or immutable execution se
 var ErrConfiguration = errors.New("hosted execution requires an approved supervised image, private exchange, and durable lifecycle hooks")
 
 type Image struct {
-	Reference    string
-	Runner       string
-	Runtime      string
-	OS           string
-	Architecture string
-	Supervisor   string
-	Project      string
-	SourceDigest string
+	Reference        string
+	Runner           string
+	Runtime          string
+	OS               string
+	Architecture     string
+	Supervisor       string
+	Project          string
+	SourceDigest     string
+	ExecutionProfile string
 }
 
 type Job struct {
@@ -53,6 +54,7 @@ type Provider interface {
 }
 
 type Exchange interface {
+	Activate(context.Context, execution.Reference) error
 	Prepare(context.Context, execution.Reference, execution.CodedInput, time.Time) (workerexchange.Ticket, error)
 	State(context.Context, execution.Reference) (workerexchange.State, error)
 	Observation(context.Context, execution.Reference, execution.CodedInput, error) (execution.CodedReport, *time.Time, bool, error)

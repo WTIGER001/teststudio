@@ -635,3 +635,10 @@ See [Hosted execution lifecycle](hosted-execution.md) for the fixture boundary a
 The OCI registry inspector uses a focused local TLS fixture with race detection.
 Its metadata-only checks need no Docker image, browser, provider account, or unchanged service build.
 See [Hosted registry inspection](registry-inspection.md) for its exact coverage.
+
+Kubernetes worker changes use local TLS protocol fixtures and the existing chart verifier's --workers-only mode.
+The fixture can export a sanitized Pod for strict schema validation.
+Rendered operator settings pass the real loader and compare with the adapter's exact admission policy.
+The startup verifier checks native and local packaged guard failures without network or cluster access.
+Reuse prior source-runtime, browser, and UI checks when those inputs are unchanged.
+See [Kubernetes execution workers](kubernetes-workers.md) for the exact boundary.

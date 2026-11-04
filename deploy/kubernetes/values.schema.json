@@ -510,6 +510,232 @@
       "additionalProperties": {
         "type": "string"
       }
+    },
+    "workers": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "namespace": {
+          "type": "string",
+          "pattern": "^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+          "maxLength": 63
+        },
+        "apiOrigin": {
+          "type": "string",
+          "pattern": "^https://[^\\s/?#@]+$"
+        },
+        "serviceAccount": {
+          "type": "string",
+          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+          "maxLength": 63
+        },
+        "runtimeClass": {
+          "type": "string",
+          "pattern": "^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+          "maxLength": 63
+        },
+        "policyName": {
+          "type": "string",
+          "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+          "maxLength": 63
+        },
+        "origin": {
+          "type": "string",
+          "pattern": "^$|^https://[a-z0-9]([a-z0-9.-]*[a-z0-9])?$"
+        },
+        "imagePullSecrets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+            "maxLength": 63
+          },
+          "maxItems": 16,
+          "uniqueItems": true
+        },
+        "nodeSelector": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "maxProperties": 16
+        },
+        "registry": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "origin": {
+              "type": "string",
+              "pattern": "^$|^https://[^\\s/?#@]+$"
+            },
+            "repositoryPrefix": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255
+            },
+            "tokenURL": {
+              "type": "string",
+              "pattern": "^$|^https://[^\\s?#@]+$"
+            },
+            "tokenService": {
+              "type": "string",
+              "maxLength": 255
+            },
+            "blobRedirectOrigins": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^https://[^\\s/?#@]+$"
+              },
+              "maxItems": 16,
+              "uniqueItems": true
+            },
+            "usernameEnvironment": {
+              "type": "string",
+              "pattern": "^$|^TESTSTUDIO_REGISTRY_[A-Z0-9_]{1,96}$"
+            },
+            "passwordEnvironment": {
+              "type": "string",
+              "pattern": "^$|^TESTSTUDIO_REGISTRY_[A-Z0-9_]{1,96}$"
+            },
+            "bearerEnvironment": {
+              "type": "string",
+              "pattern": "^$|^TESTSTUDIO_REGISTRY_[A-Z0-9_]{1,96}$"
+            },
+            "credentials": {
+              "type": "object",
+              "patternProperties": {
+                "^TESTSTUDIO_REGISTRY_[A-Z0-9_]{1,96}$": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "existingSecret": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+                      "maxLength": 63
+                    },
+                    "key": {
+                      "type": "string",
+                      "pattern": "^[A-Za-z0-9._-]+$",
+                      "maxLength": 253
+                    }
+                  },
+                  "required": [
+                    "existingSecret",
+                    "key"
+                  ]
+                }
+              },
+              "additionalProperties": false,
+              "maxProperties": 8
+            },
+            "caSecret": {
+              "type": "string",
+              "pattern": "^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+              "maxLength": 63
+            }
+          },
+          "required": [
+            "origin",
+            "repositoryPrefix",
+            "tokenURL",
+            "tokenService",
+            "blobRedirectOrigins",
+            "usernameEnvironment",
+            "passwordEnvironment",
+            "bearerEnvironment",
+            "credentials",
+            "caSecret"
+          ]
+        },
+        "privateIngress": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "className": {
+              "type": "string",
+              "pattern": "^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+              "maxLength": 63
+            },
+            "tlsSecret": {
+              "type": "string",
+              "pattern": "^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+              "maxLength": 63
+            },
+            "annotations": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "namespace": {
+              "type": "string",
+              "pattern": "^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+              "maxLength": 63
+            },
+            "podLabels": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "maxProperties": 16
+            },
+            "port": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 65535
+            }
+          },
+          "required": [
+            "className",
+            "tlsSecret",
+            "annotations",
+            "namespace",
+            "podLabels",
+            "port"
+          ]
+        },
+        "dns": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "namespace": {
+              "type": "string",
+              "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+              "maxLength": 63
+            },
+            "podLabels": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "maxProperties": 16,
+              "minProperties": 1
+            }
+          },
+          "required": [
+            "namespace",
+            "podLabels"
+          ]
+        }
+      },
+      "required": [
+        "enabled",
+        "namespace",
+        "apiOrigin",
+        "serviceAccount",
+        "runtimeClass",
+        "policyName",
+        "origin",
+        "imagePullSecrets",
+        "nodeSelector",
+        "registry",
+        "privateIngress",
+        "dns"
+      ]
     }
   },
   "required": [
@@ -527,7 +753,8 @@
     "resources",
     "serviceAccount",
     "podAnnotations",
-    "podLabels"
+    "podLabels",
+    "workers"
   ],
   "$schema": "http://json-schema.org/draft-07/schema#",
   "allOf": [
@@ -594,6 +821,83 @@
                   "type": "string"
                 },
                 "minProperties": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "workers": {
+            "properties": {
+              "enabled": {
+                "const": true
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "workers": {
+            "properties": {
+              "namespace": {
+                "type": "string",
+                "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+                "maxLength": 63
+              },
+              "runtimeClass": {
+                "type": "string",
+                "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+                "maxLength": 63
+              },
+              "origin": {
+                "type": "string",
+                "pattern": "^https://[a-z0-9]([a-z0-9.-]*[a-z0-9])?$"
+              },
+              "registry": {
+                "properties": {
+                  "origin": {
+                    "type": "string",
+                    "pattern": "^https://[^\\s/?#@]+$"
+                  }
+                }
+              },
+              "privateIngress": {
+                "properties": {
+                  "className": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+                    "maxLength": 63
+                  },
+                  "tlsSecret": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+                    "maxLength": 63
+                  },
+                  "namespace": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+                    "maxLength": 63
+                  },
+                  "podLabels": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "maxProperties": 16,
+                    "minProperties": 1
+                  }
+                }
+              }
+            }
+          },
+          "networkPolicy": {
+            "properties": {
+              "enabled": {
+                "const": true
               }
             }
           }

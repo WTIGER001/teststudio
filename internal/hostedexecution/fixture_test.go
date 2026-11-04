@@ -136,9 +136,6 @@ func (p *provider) Ensure(ctx context.Context, job hostedexecution.Job) error {
 		return hostedexecution.ErrRejected
 	}
 	p.status = &hostedexecution.Status{Reference: job.Reference, Image: job.Image, Deadline: job.Ticket.Deadline, Phase: "running"}
-	if p.mode != "running" {
-		p.publish(ctx)
-	}
 	if p.mode == "wrong-image" {
 		p.status.Image = "registry.example.test/other@sha256:" + strings.Repeat("b", 64)
 	}
@@ -195,9 +192,18 @@ func (p *provider) publish(ctx context.Context) {
 	}
 }
 
-func (p *provider) Observe(_ context.Context, ref execution.Reference) (hostedexecution.Status, error) {
+func (p *provider) Observe(ctx context.Context, ref execution.Reference) (hostedexecution.Status, error) {
+	if ctx.Err() != nil {
+		return hostedexecution.Status{}, ctx.Err()
+	}
 	if p.status == nil {
 		return hostedexecution.Status{}, hostedexecution.ErrNotFound
+	}
+	if p.status.Phase == "running" && p.mode != "running" {
+		state, err := p.f.exchange.State(ctx, ref)
+		if err == nil && !state.DispatchPending && !state.Revoked {
+			p.publish(ctx)
+		}
 	}
 	return *p.status, nil
 }

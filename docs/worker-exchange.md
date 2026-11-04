@@ -5,7 +5,8 @@ It uses shared installation storage and the existing private artifact store.
 It runs no test code inside the API.
 
 The transport, HTTPS client, and [hosted runner supervisor](job-supervisor.md) are implemented and pass local checks.
-Provider dispatch, gateway delivery, and provider recovery adapters remain unfinished.
+The optional [Kubernetes worker adapter](kubernetes-workers.md) now supplies Pod dispatch and recovery.
+Other provider adapters, trusted remote gateway delivery, and complete hosted acceptance remain unfinished.
 No hosted Go or Playwright execution is enabled by this feature alone.
 Keep acceptance 51 and the related hosted acceptance items open.
 
@@ -29,7 +30,7 @@ Provider adapters must disable automatic execution retries that create another i
 Use result recovery and explicit product retries instead of silently running an accepted attempt again.
 
 The deadline cannot exceed the run deadline and cannot extend more than two hours from preparation.
-The future dispatcher must select the effective attempt wall deadline, including its permitted startup allowance.
+The managed dispatcher selects the effective attempt wall deadline, including its permitted startup allowance.
 The test's selected timeout remains in the work item. Queue and startup time do not become an invented test duration.
 Expired tickets stop worker reads and writes. Trusted controller collection can still recover retained reports and bytes afterward.
 
@@ -138,19 +139,20 @@ The trusted collector supplies controller-held redaction values. Those values ne
 The provider managed executor must use this order:
 
 1. Register the normal execution reference and recheck dispatch authority.
-2. Prepare the bounded exchange and create one provider job through an idempotent provider operation.
-3. Deliver only the assigned ticket and worker instance identity to the trusted supervisor.
-4. Fetch work, execute the immutable runner under the selected isolation profile, and report start progress.
-5. Submit the report and upload its declared files with exact retries after lost acknowledgements.
-6. Reconcile provider status and the report. Validate the actual runner or provider failure consistently with the shared report contract.
-7. Revoke worker access before publishing collected results or evidence.
-8. Invoke the normal result and evidence checkpoint hooks.
-9. Remove staged objects and release staging reservations after evidence completes or is explicitly abandoned.
-10. Finish the normal worker cleanup ledger only after transport and provider cleanup succeed.
+2. Prepare bounded input behind the controller activation gate.
+3. Create one provider job with only its scoped ticket and instance identity.
+4. Verify the provider identity and immutable settings, then activate the exact attempt with current authority.
+5. Fetch work, execute the selected runner, report progress, and deliver checksummed evidence with exact retries.
+6. Reconcile provider status and the structured report without treating provider duration as test duration.
+7. Revoke worker access before the normal result and evidence checkpoint.
+8. Stop and remove provider resources only after evidence completes or is explicitly abandoned.
+9. Remove staged objects and release staging reservations through the exchange cleanup contract.
+10. Finish the normal worker cleanup ledger only after provider and transport cleanup succeed.
 
 A provider failure cannot turn a passing report into a passing execution merely because the report exists.
 The shared validator rejects a passing report paired with an incompatible failed process outcome.
-Provider cancellation, hard deadlines, gateway credentials, network isolation, job discovery, and restart reconciliation still require their adapters.
+The Kubernetes adapter now supplies its Pod lifecycle and isolation configuration.
+Other profiles and trusted remote gateway delivery remain required.
 The client library alone establishes none of those provider behaviors.
 
 Cleanup is idempotent after a lost acknowledgement.
@@ -182,3 +184,15 @@ No AWS, Kubernetes, Azure, source-runtime matrix, or browser suite runs for this
 
 The [shared hosted lifecycle](hosted-execution.md) uses controller-only state polling and checkpoint-gated cleanup.
 Missing attachment bytes remain retryable internal evidence instead of immediately becoming a permanent omission.
+
+## Controller activation
+
+Managed hosted execution prepares input with AwaitDispatch set in trusted controller memory.
+The exchange persists a pending activation gate separately from the canonical worker JSON.
+Authenticated worker reads and writes receive a retryable unavailable response until activation.
+No instance binds and no uploaded code receives input during that interval.
+The trusted controller activates only after provider creation and matching identity checks succeed.
+Activation rechecks live run authority and commits with its storage guards.
+Activation retries are idempotent. Revoked or expired work cannot reactivate.
+No worker HTTP route exposes activation.
+Legacy direct transport preparation preserves its earlier behavior unless the trusted caller selects the gate.

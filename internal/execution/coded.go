@@ -25,6 +25,7 @@ type Attachment struct {
 }
 
 type CodedInput struct {
+	AwaitDispatch       bool                    `json:"-"`
 	CredentialReference string                  `json:"-"`
 	RedactionValues     []string                `json:"-"`
 	Browser             *browserpolicy.Target   `json:"browser,omitempty"`

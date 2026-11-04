@@ -3,7 +3,8 @@
 The Helm chart in deploy/kubernetes packages the TestStudio service, identity settings, private evidence storage, and ingress configuration.
 It uses the portable service image and installation-specific PostgreSQL and OIDC settings.
 The current chart runs the API, UI, schedules, notifications, and native HTTP checks.
-Hosted coded execution and preparation adapters remain required work. Kubernetes deployment acceptance remains open.
+Optional offline coded execution uses the [Kubernetes worker profile](kubernetes-workers.md).
+Remote source preparation and Kubernetes deployment acceptance remain open.
 
 ## Installation inputs
 
@@ -129,3 +130,9 @@ helm upgrade --install teststudio deploy/kubernetes \
 
 The deployment command is documented for the separate deployment phase. It is not run by the local verifier.
 Keep the full acceptance scope in [Implementation verification](implementation.md), including hosted workers, recovery, identity, and private artifact access.
+
+## Isolated execution workers
+
+The optional [worker profile](kubernetes-workers.md) now supplies Pod dispatch, a private exchange route, controller permissions, and a dedicated restricted namespace.
+It is disabled by default. Remote source preparation and complete hosted verification remain required.
+Use the new worker guide for configuration, local evidence, and remaining scope.

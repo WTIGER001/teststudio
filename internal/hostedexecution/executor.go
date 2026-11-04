@@ -41,6 +41,7 @@ func (e *Executor) Execute(ctx context.Context, input execution.CodedInput) (rep
 		deadline = at
 	}
 	var ticket workerexchange.Ticket
+	input.AwaitDispatch = true
 	err := bounded(ctx, func(ctx context.Context) error {
 		var err error
 		ticket, err = e.Exchange.Prepare(ctx, *input.Reference, input, deadline)
@@ -70,7 +71,13 @@ func (e *Executor) Execute(ctx context.Context, input execution.CodedInput) (rep
 		}
 		return report
 	}
-	status, waitErr := e.wait(wall, *input.Reference, input, ticket.Deadline)
+	status, waitErr := e.observe(wall, *input.Reference, input.Artifact.Image, ticket.Deadline)
+	if waitErr == nil && !terminal(status) {
+		waitErr = bounded(wall, func(ctx context.Context) error { return e.Exchange.Activate(ctx, *input.Reference) })
+		if waitErr == nil {
+			status, waitErr = e.wait(wall, *input.Reference, input, ticket.Deadline)
+		}
+	}
 	kind := "worker-lost"
 	finish, release := context.WithTimeout(context.WithoutCancel(ctx), 20*time.Second)
 	defer release()

@@ -8,11 +8,12 @@ import (
 )
 
 type State struct {
-	Deadline  time.Time
-	StartedAt *time.Time
-	Submitted bool
-	Uploaded  bool
-	Revoked   bool
+	DispatchPending bool
+	Deadline        time.Time
+	StartedAt       *time.Time
+	Submitted       bool
+	Uploaded        bool
+	Revoked         bool
 }
 
 func (s *Service) State(ctx context.Context, ref execution.Reference) (State, error) {
@@ -20,7 +21,7 @@ func (s *Service) State(ctx context.Context, ref execution.Reference) (State, er
 	if err != nil {
 		return State{}, err
 	}
-	state := State{Deadline: record.Deadline, StartedAt: record.StartedAt, Submitted: record.Submission != nil, Uploaded: record.Submission != nil, Revoked: record.Revoked}
+	state := State{DispatchPending: record.DispatchGated && !record.DispatchReady, Deadline: record.Deadline, StartedAt: record.StartedAt, Submitted: record.Submission != nil, Uploaded: record.Submission != nil, Revoked: record.Revoked}
 	if record.Submission != nil {
 		for _, file := range record.Submission.Files {
 			state.Uploaded = state.Uploaded && record.Uploaded[file.Path]

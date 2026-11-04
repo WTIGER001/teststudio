@@ -39,7 +39,7 @@ func (e *Executor) image(ctx context.Context, artifact catalog.Artifact) (Image,
 	if err != nil {
 		return Image{}, ErrUnavailable
 	}
-	if image.Reference != artifact.Image || image.Runner != e.Runner || !runtime.MatchString(image.Runtime) || image.OS != "linux" || (image.Architecture != "amd64" && image.Architecture != "arm64") || image.Supervisor != "worker-exchange/v1" {
+	if image.Reference != artifact.Image || image.Runner != e.Runner || !runtime.MatchString(image.Runtime) || image.OS != "linux" || (image.Architecture != "amd64" && image.Architecture != "arm64") || image.Supervisor != "worker-exchange/v1" || image.ExecutionProfile != "" && !runtime.MatchString(image.ExecutionProfile) {
 		return Image{}, ErrConfiguration
 	}
 	if artifact.SourceProject != "" && image.Project != artifact.SourceProject || artifact.Provenance != nil && artifact.Provenance.SnapshotDigest != "" && image.SourceDigest != artifact.Provenance.SnapshotDigest {
@@ -68,7 +68,11 @@ func (e *Executor) TimingProfile(ctx context.Context, artifact catalog.Artifact)
 	if err != nil {
 		return "", err
 	}
-	return e.Profile() + ":" + image.Runtime + ":" + image.OS + "-" + image.Architecture, nil
+	profile := e.Profile() + ":" + image.Runtime + ":" + image.OS + "-" + image.Architecture
+	if image.ExecutionProfile != "" {
+		profile += ":" + image.ExecutionProfile
+	}
+	return profile, nil
 }
 
 func (e *Executor) Reference(ref execution.Reference) execution.Reference {

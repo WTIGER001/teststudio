@@ -30,6 +30,17 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end -}}
 {{- if not $configured -}}{{ fail "Bootstrap issuer must match an initially configured OIDC provider" }}{{- end -}}
 {{- if and (eq .Values.artifactStore.driver "filesystem") (gt (int .Values.replicas) 1) (ne .Values.persistence.accessMode "ReadWriteMany") -}}{{ fail "Multiple filesystem replicas require a shared ReadWriteMany artifact claim" }}{{- end -}}
+{{- if .Values.workers.enabled -}}
+{{- if or (eq .Values.workers.namespace .Release.Namespace) (eq .Values.workers.namespace "") -}}{{ fail "Workers require a separate dedicated namespace" }}{{- end -}}
+{{- if or (eq .Values.workers.origin .Values.origins.ui) (eq .Values.workers.origin .Values.origins.artifacts) -}}{{ fail "Workers require a separate private HTTPS origin" }}{{- end -}}
+{{- if eq .Values.workers.privateIngress.className .Values.ingress.className -}}{{ fail "Worker ingress must use a separate private ingress class" }}{{- end -}}
+{{- if not .Values.networkPolicy.enabled -}}{{ fail "Workers require ingress network policy" }}{{- end -}}
+{{- $registry := .Values.workers.registry -}}
+{{- if or (and $registry.bearerEnvironment (or $registry.usernameEnvironment $registry.passwordEnvironment)) (and $registry.usernameEnvironment (not $registry.passwordEnvironment)) (and $registry.passwordEnvironment (not $registry.usernameEnvironment)) -}}{{ fail "Registry authentication requires a Basic pair or one Bearer reference" }}{{- end -}}
+{{- range $name := list $registry.usernameEnvironment $registry.passwordEnvironment $registry.bearerEnvironment -}}
+{{- if and $name (not (hasKey $registry.credentials $name)) -}}{{ fail "Registry credential references require an existing Secret mapping" }}{{- end -}}
+{{- end -}}
+{{- end -}}
 {{- end -}}
 {{- define "teststudio.oidcReferences" -}}
 {{- $references := list -}}
@@ -37,4 +48,13 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- $references = append $references (printf "env:%s" $name) -}}
 {{- end -}}
 {{- join "," $references -}}
+{{- end -}}
+
+{{- define "teststudio.workerConfiguration" -}}
+{{- $w := .Values.workers -}}
+{{- $worker := dict "apiOrigin" $w.apiOrigin "namespace" $w.namespace "serviceAccount" $w.serviceAccount "tokenFile" "/var/run/teststudio-controller/token" "caFile" "/var/run/teststudio-controller/ca.crt" "architecture" .Values.image.architecture "runtimeClass" $w.runtimeClass "policyName" $w.policyName "exchangeOrigin" $w.origin "exchangePeer" (dict "namespace" $w.privateIngress.namespace "labels" $w.privateIngress.podLabels) "exchangePort" $w.privateIngress.port "dnsPeer" (dict "namespace" $w.dns.namespace "labels" $w.dns.podLabels) "imagePullSecrets" $w.imagePullSecrets "nodeSelector" $w.nodeSelector -}}
+{{- $r := $w.registry -}}
+{{- $registry := dict "origin" $r.origin "repositoryPrefix" $r.repositoryPrefix "tokenURL" $r.tokenURL "tokenService" $r.tokenService "blobRedirectOrigins" $r.blobRedirectOrigins "usernameEnvironment" $r.usernameEnvironment "passwordEnvironment" $r.passwordEnvironment "bearerEnvironment" $r.bearerEnvironment -}}
+{{- if $r.caSecret -}}{{- $_ := set $registry "caFile" "/etc/teststudio-registry/ca.crt" -}}{{- end -}}
+{{- dict "worker" $worker "registry" $registry | toPrettyJson -}}
 {{- end -}}

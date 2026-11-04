@@ -1,0 +1,25 @@
+workers:
+  enabled: true
+  namespace: teststudio-workers
+  runtimeClass: teststudio-isolated
+  origin: https://worker.studio.internal.example.test
+  imagePullSecrets: [teststudio-worker-registry]
+  registry:
+    origin: https://registry.example.test
+    repositoryPrefix: teststudio
+    usernameEnvironment: TESTSTUDIO_REGISTRY_USERNAME
+    passwordEnvironment: TESTSTUDIO_REGISTRY_PASSWORD
+    credentials:
+      TESTSTUDIO_REGISTRY_USERNAME:
+        existingSecret: teststudio-registry-reader
+        key: username
+      TESTSTUDIO_REGISTRY_PASSWORD:
+        existingSecret: teststudio-registry-reader
+        key: password
+  privateIngress:
+    className: installation-private-ingress
+    tlsSecret: teststudio-worker-tls
+    namespace: installation-private-routing
+    podLabels:
+      app.kubernetes.io/name: installation-private-ingress
+    port: 443

@@ -15,3 +15,8 @@ data:
     {{- else }}
     {{- .Values.artifactStore | toPrettyJson | nindent 4 }}
     {{- end }}
+
+  {{- if .Values.workers.enabled }}
+  kubernetes-workers.json: |-
+    {{- include "teststudio.workerConfiguration" . | nindent 4 }}
+  {{- end }}

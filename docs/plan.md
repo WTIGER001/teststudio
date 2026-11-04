@@ -143,7 +143,7 @@ An HTTPS client rejects redirects and excludes private diagnostics. The optional
 Focused service, live-run TLS, report compatibility, export barrier, and native listener checks pass locally.
 See [Private hosted worker exchange](worker-exchange.md) for exact limits and integration order.
 Acceptance **51** advances. The count stays **48 verified, 9 open**.
-The transport and supervisor do not yet dispatch a hosted provider job.
+The transport and supervisor now connect to the optional Kubernetes provider described below.
 
 The trusted hosted runner supervisor now fetches frozen work and invokes the fixed Go or Playwright runner outside the API.
 It strips ambient credentials from the child environment, forwards bounded progress, and snapshots owned files for exact upload retries.
@@ -158,25 +158,49 @@ The common hosted lifecycle driver now connects approved immutable images, froze
 It validates ownership, deadlines, and exit status. It stops owned jobs on cancellation and recovers ambiguous creation without another dispatch.
 Ticket revocation precedes checkpoint publication. Ledger gates precede provider deletion and exchange staging cleanup.
 Temporary evidence read failures stay retryable. Restart input preserves the original attempt capture flag.
-Focused local fixture and race checks pass. The driver is not enabled with any provider adapter yet.
+Focused local fixture and race checks pass. The driver now has an optional Kubernetes adapter described below.
 Acceptance 51 advances; the count remains 48 verified and 9 open.
 See [Hosted execution lifecycle](hosted-execution.md) for the provider contract and current limits.
 
 The OCI registry inspector now verifies approved distribution metadata for Go and Playwright without a Docker daemon or cloud SDK.
 It binds one explicit registry namespace, selects the configured platform, and checks digest, size, runtime, supervisor, and source ownership metadata.
 Scoped registry authentication supports credential rotation. Approved configuration-blob redirects strip registry credentials.
-Focused local TLS race checks pass. No provider adapter is enabled yet.
+Focused local TLS race checks pass. Provider enablement remains explicit and optional.
 See [Hosted registry inspection](registry-inspection.md) for the contract and bounds.
 Acceptance 51 advances; the count remains 48 verified and 9 open.
 
-Next, implement isolated provider adapters and connect each installation profile to this common lifecycle driver.
+The first concrete provider adapter now dispatches one owned Kubernetes Pod per offline Go or Playwright attempt.
+A durable reservation prevents another controller from submitting the same creation. Lost acknowledgement leads to discovery instead of another launch.
+The adapter checks Pod ownership, immutable settings, namespace protection, service account, RuntimeClass, and exact network policy.
+Cancellation shortens the Pod runtime deadline. Deletion waits for terminal state and uses UID and revision preconditions.
+Lost live Pods remain unresolved instead of being treated as confirmed stopped workers.
+Timing identity now includes the provider execution pool so class or node-selection changes start a separate baseline.
+
+The shared exchange now gates executable input until the controller verifies provider creation and activates that exact attempt.
+Unexpected admission mutations never receive uploaded code. Recovery does not activate an uncertain pending job.
+Already accepted reports still recover after later checkpoint failure without another launch.
+The gate rechecks current run authority. It has no worker HTTP activation route.
+
+The server accepts bounded file or environment Kubernetes worker settings and requires PostgreSQL, a private listener, and its Kubernetes location.
+The Helm profile adds an optional dedicated restricted namespace, worker-only service account, narrow controller permissions, rotating API credentials, and private ingress.
+Local race checks, rendered settings comparison, two schema profiles, four rejected worker configurations, a generated Pod schema, and five startup guards pass.
+No cluster, cloud account, registry push, source-runtime rebuild, browser suite, or unchanged UI rebuild is used.
+See [Kubernetes execution workers](kubernetes-workers.md) and the implementation ledger for exact local evidence.
+Acceptance 51 advances. Acceptance 41 gains execution-pool identity support. The count remains 48 verified and 9 open.
+
+Next implement remote source assembly, immutable registry publication, and hosted discovery through the existing preparation queue.
+The first Kubernetes source workflow must become usable before repeating generic execution implementation for other providers.
+Keep uploaded source outside the API and retain exact source approval, project ownership, catalog review, and publication boundaries.
+Reuse trusted supervised runtimes. Do not execute uploaded Dockerfiles or add privileged building inside the API.
+Preserve the activation gate, cancellation, deadline, evidence, and cleanup contracts for preparation work.
+Then continue AWS and Azure provider adapters and their private routes through the same managed lifecycle.
 Use the frozen work packet as the runner's existing bounded stdin contract.
 Preserve immutable source approval, timing, result, capture-policy, and gateway contracts.
 Keep real target credentials in the trusted gateway. Untrusted workers receive neither application sessions nor provider SDK credentials.
 Keep resolved gateway secret versions available for restart redaction without sending their values to the test worker.
-Add private worker HTTPS routing to each provider profile before enabling hosted dispatch.
+Preserve the configured private Kubernetes route. Add private worker HTTPS routing to the remaining provider profiles before enabling their dispatch.
 Azure needs its own private service arrangement for the worker listener rather than an additional public TCP port.
-Then add provider dispatch, status, cancellation, deadline, and restart reconciliation against local protocol fixtures.
+Use local protocol fixtures for the remaining provider dispatch, status, cancellation, deadline, and restart reconciliation paths.
 Preparation must publish and inspect immutable artifacts outside the API before hosted code can execute.
 Do not substitute fire-and-forget job creation for these lifecycle and recovery requirements.
 Preserve separate API/UI and artifact origins. Require installation-specific PostgreSQL, identity, storage, and secret configuration.

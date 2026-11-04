@@ -78,6 +78,10 @@ func (e *Executor) pause(ctx context.Context) error {
 func (e *Executor) wait(ctx context.Context, ref execution.Reference, input execution.CodedInput, deadline time.Time) (Status, error) {
 	forwarded := false
 	for {
+		status, err := e.observe(ctx, ref, input.Artifact.Image, deadline)
+		if err != nil {
+			return status, err
+		}
 		state, err := e.state(ctx, ref)
 		if err != nil {
 			return Status{}, ErrUnavailable
@@ -91,9 +95,8 @@ func (e *Executor) wait(ctx context.Context, ref execution.Reference, input exec
 			}
 			forwarded = true
 		}
-		status, err := e.observe(ctx, ref, input.Artifact.Image, deadline)
-		if err != nil || terminal(status) {
-			return status, err
+		if terminal(status) {
+			return status, nil
 		}
 		if err := e.pause(ctx); err != nil {
 			return status, err

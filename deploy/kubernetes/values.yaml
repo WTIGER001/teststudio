@@ -47,3 +47,35 @@ serviceAccount:
   annotations: {}
 podAnnotations: {}
 podLabels: {}
+workers:
+  enabled: false
+  namespace: ""
+  apiOrigin: https://kubernetes.default.svc
+  serviceAccount: teststudio-runner
+  runtimeClass: ""
+  policyName: teststudio-isolated-workers
+  origin: ""
+  imagePullSecrets: []
+  nodeSelector: {}
+  registry:
+    origin: ""
+    repositoryPrefix: teststudio
+    tokenURL: ""
+    tokenService: ""
+    blobRedirectOrigins: []
+    usernameEnvironment: ""
+    passwordEnvironment: ""
+    bearerEnvironment: ""
+    credentials: {}
+    caSecret: ""
+  privateIngress:
+    className: ""
+    tlsSecret: ""
+    annotations: {}
+    namespace: ""
+    podLabels: {}
+    port: 443
+  dns:
+    namespace: kube-system
+    podLabels:
+      k8s-app: kube-dns

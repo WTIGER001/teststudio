@@ -69,6 +69,63 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: Kubernetes Pod execution, private routing, and activation gate
+
+Acceptance **51** advances. Timing **41** and replica recovery **52** gain implementation support.
+The total remains **48 verified of 57**, with **9 open** items.
+No live provider or deployment acceptance closes from this local fixture.
+
+The first concrete provider uses one owned Kubernetes Pod per offline Go or Playwright attempt.
+Its shared database reservation allows only one creation across concurrent controllers.
+It retains the reference, specification hash, creation uncertainty guard, API scope, and terminal observation without persisting worker or API tokens.
+Recovery discovers an uncertain creation, stops owned work, and reuses accepted private reports without creating another Pod.
+Removed references remain replay tombstones.
+
+The adapter verifies namespace restriction, runner service account, RuntimeClass, and exact namespace network policy before creation.
+The returned Pod must match its complete reference, frozen image, deadline, and immutable specification.
+Known API defaults normalize before comparison. Unexpected admission injection prevents executable input delivery.
+Cancellation uses a guarded deadline update. Deletion requires terminal state and exact UID and resource-version preconditions.
+A previously observed live Pod that disappears remains uncertain. No forced deletion manufactures proof of termination.
+Inventory validates namespace resources and durable outstanding dispatches.
+The timing key now includes cluster scope, RuntimeClass, node selection, and fixed resource profile.
+
+The shared managed lifecycle freezes work behind an activation gate.
+Workers cannot fetch input, bind an instance, or commit start progress until controller verification succeeds.
+Activation rechecks run authority with storage guards. No worker endpoint exposes activation.
+A rejected or uncertain provider stays blocked. Recovery never activates uncertain work.
+An already accepted report remains recoverable after a later checkpoint failure.
+Legacy direct transport preparation retains its existing behavior unless the trusted caller selects the gate.
+
+Explicit file or environment settings connect the adapter to the API and private listener.
+The mode requires PostgreSQL and the Kubernetes execution location. It rejects artifact-only service roles and local coded configuration.
+The chart optionally supplies a dedicated restricted namespace, token-free runner service account, narrow controller RBAC, rotating controller token, private TLS ingress, and worker network policy.
+The worker namespace and policy remain after Helm uninstall until explicit operator cleanup.
+The default profile keeps workers disabled. No RuntimeClass, private ingress controller, registry secret, or TLS secret is invented.
+
+Focused local TLS race checks pass for both runner report schemas, assertion outcomes, deadlines, concurrent creation, lost acknowledgements, checkpoint recovery, missing live Pods, admission mutation, ownership, mounted trust, rotating tokens, and timing-pool changes.
+The real settings parser accepts the rendered configuration and matches the adapter's expected policy.
+The activation gate and affected shared lifecycle checks pass with race detection.
+Evidence is output/kubernetes-workers/provider.log.
+The final terminal-state and rendered-policy checks pass in provider-final.log.
+
+The targeted chart verifier passes two profiles, four rejected configurations, and the generated worker Pod's strict schema.
+Evidence is output/kubernetes-workers/package/summary.json.
+Five native and packaged startup probes reject unsupported database, service-role, or execution-location combinations before dispatch.
+Evidence is output/kubernetes-workers/startup/summary.json and cleanup.json. Both owned probe containers are confirmed removed.
+The image probe uses environment JSON because the local Docker daemon does not share the host temporary bind path.
+It clears the image's default database environment argument when exercising the explicit SQLite rejection.
+
+The changed ARM64 service image is sha256:2519658629aaceb903566f9065157c8373476fc1a8dc0c0d39cbba068f96786c.
+Its exact inputs are output/kubernetes-workers/service-image.json. This is a local image identifier, not a distribution digest.
+Native and service builds reuse the UI, private trace viewer, health binary, and source runtime images.
+The local demonstration refresh preserves its database and private evidence.
+No registry push, browser suite, source-runner matrix, cluster operation, or cloud account access occurs.
+
+Next implement remote source assembly, registry publication, and hosted discovery through preparation.
+A newly prepared registry artifact must retain normal approval and publication before execution becomes a usable hosted source workflow.
+Trusted remote gateways, AWS and Azure adapters, and complete deployment acceptance remain required.
+See [Kubernetes execution workers](kubernetes-workers.md) for exact operator inputs, platform dependencies, evidence, and continuation limits.
+
 ## Current delivery: immutable registry inspection for hosted workers
 
 Acceptance **51** advances. The verified count stays **48 of 57**, with **9 open** items.

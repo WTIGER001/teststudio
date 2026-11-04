@@ -38,6 +38,8 @@ type UploadLease struct {
 }
 
 type Record struct {
+	DispatchGated  bool                   `json:"dispatchGated,omitempty"`
+	DispatchReady  bool                   `json:"dispatchReady,omitempty"`
 	Reference      execution.Reference    `json:"reference"`
 	Input          json.RawMessage        `json:"input,omitempty"`
 	InputHash      string                 `json:"inputHash"`

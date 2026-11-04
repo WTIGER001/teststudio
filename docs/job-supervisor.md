@@ -5,7 +5,8 @@ It fetches one frozen work item, starts its fixed runner, forwards start progres
 It runs inside the worker image. It never executes uploaded test code inside the API.
 
 The supervisor, runtime overlay producer, and targeted local verification are implemented.
-Provider job dispatch, private ingress, trusted gateway delivery, remote preparation, and provider recovery remain unfinished.
+The optional [Kubernetes worker profile](kubernetes-workers.md) now supplies dispatch, private ingress configuration, and provider recovery.
+Trusted remote gateway delivery, remote preparation, other providers, and hosted acceptance remain unfinished.
 These components do not yet enable hosted Go or Playwright runs from the application.
 Keep acceptance 51 and the related hosted acceptance items open.
 
@@ -182,3 +183,6 @@ They must reconcile cancellation, hard deadlines, orphaned jobs, and persisted r
 Revoke worker tickets before publishing collected results or evidence.
 Keep staging cleanup and provider cleanup ahead of the final worker ledger completion.
 Remote source preparation and publication remain separate required work.
+
+A managed worker can receive a retryable input response while provider verification remains pending.
+The existing bounded input retry policy handles that activation gate without invoking uploaded code early.

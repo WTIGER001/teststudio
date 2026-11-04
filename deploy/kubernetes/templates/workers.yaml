@@ -1,0 +1,156 @@
+{{- if .Values.workers.enabled }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.workers.namespace | quote }}
+  annotations:
+    helm.sh/resource-policy: keep
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    app.kubernetes.io/name: teststudio-workers
+    app.kubernetes.io/instance: {{ .Release.Name | quote }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.workers.serviceAccount | quote }}
+  namespace: {{ .Values.workers.namespace | quote }}
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Release.Name }}-workers
+  namespace: {{ .Values.workers.namespace | quote }}
+rules:
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, list, create, patch, delete]
+  - apiGroups: [""]
+    resources: [serviceaccounts]
+    resourceNames: [{{ .Values.workers.serviceAccount | quote }}]
+    verbs: [get]
+  - apiGroups: [networking.k8s.io]
+    resources: [networkpolicies]
+    verbs: [list]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Release.Name }}-workers
+  namespace: {{ .Values.workers.namespace | quote }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "teststudio.name" . }}
+    namespace: {{ .Release.Namespace | quote }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ .Release.Name }}-workers
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Namespace }}-{{ .Release.Name }}-workers
+rules:
+  - apiGroups: [""]
+    resources: [namespaces]
+    resourceNames: [{{ .Values.workers.namespace | quote }}]
+    verbs: [get]
+  - apiGroups: [node.k8s.io]
+    resources: [runtimeclasses]
+    resourceNames: [{{ .Values.workers.runtimeClass | quote }}]
+    verbs: [get]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Release.Namespace }}-{{ .Release.Name }}-workers
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "teststudio.name" . }}
+    namespace: {{ .Release.Namespace | quote }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Release.Namespace }}-{{ .Release.Name }}-workers
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Values.workers.policyName | quote }}
+  namespace: {{ .Values.workers.namespace | quote }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  podSelector:
+    matchLabels:
+      teststudio.io/worker: isolated-v1
+  policyTypes: [Ingress, Egress]
+  ingress: []
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.workers.privateIngress.namespace | quote }}
+          podSelector:
+            matchLabels:
+              {{- toYaml .Values.workers.privateIngress.podLabels | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.workers.privateIngress.port }}
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.workers.dns.namespace | quote }}
+          podSelector:
+            matchLabels:
+              {{- toYaml .Values.workers.dns.podLabels | nindent 14 }}
+      ports:
+        - protocol: TCP
+          port: 53
+        - protocol: UDP
+          port: 53
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "teststudio.name" . }}-worker
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "teststudio.selector" . | nindent 4 }}
+  ports:
+    - name: worker
+      port: 80
+      targetPort: worker
+      protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "teststudio.name" . }}-worker
+  namespace: {{ .Release.Namespace | quote }}
+  {{- with .Values.workers.privateIngress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.workers.privateIngress.className | quote }}
+  tls:
+    - hosts: [{{ trimPrefix "https://" .Values.workers.origin | quote }}]
+      secretName: {{ .Values.workers.privateIngress.tlsSecret | quote }}
+  rules:
+    - host: {{ trimPrefix "https://" .Values.workers.origin | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "teststudio.name" . }}-worker
+                port:
+                  name: worker
+{{- end }}

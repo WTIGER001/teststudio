@@ -22,6 +22,7 @@ import (
 	permissions "github.com/wtiger001/go-permissions"
 	artifactconfig "github.com/wtiger001/teststudio/adapters/artifacts/config"
 	authoidc "github.com/wtiger001/teststudio/adapters/auth/oidc"
+	"github.com/wtiger001/teststudio/adapters/execution/kubernetes"
 	"github.com/wtiger001/teststudio/adapters/execution/localcontainer"
 	"github.com/wtiger001/teststudio/adapters/execution/localplaywright"
 	httptrust "github.com/wtiger001/teststudio/adapters/httptrust/filesystem"
@@ -63,6 +64,8 @@ func main() {
 
 func run() error {
 	workerAddr := flag.String("worker-addr", "", "Optional private job transport listen address; requires trusted ingress and remote TLS termination")
+	kubernetesConfiguration := flag.String("kubernetes-workers-config", "", "Operator JSON settings for isolated Kubernetes workers")
+	kubernetesEnvironment := flag.String("kubernetes-workers-env", "", "Environment variable containing isolated Kubernetes worker settings")
 	serviceRole := flag.String("serve-role", "all", "Service listeners: all, api, or artifacts; artifact role starts no background workers or identity bootstrap")
 	addr := flag.String("addr", "127.0.0.1:8040", "HTTP listen address")
 	dsn := flag.String("database", ".data/teststudio.db", "SQLite path or PostgreSQL connection URL")
@@ -105,6 +108,9 @@ func run() error {
 	}
 	if !role.API && (*workerAddr != "" || *local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *preparedSources || *sourceBundles || *githubSources || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
 		return errors.New("the artifact service role cannot configure identity bootstrap, sign-in, source preparation, recording, execution, or private worker transport")
+	}
+	if !role.API && (*kubernetesConfiguration != "" || *kubernetesEnvironment != "") {
+		return errors.New("the artifact service role cannot configure hosted execution")
 	}
 	connection, err := runtimeconfig.DatabaseConnection(*dsn, *databaseEnvironment, runtimeconfig.ExplicitFlag(flag.CommandLine, "database"), os.LookupEnv)
 	if err != nil {
@@ -169,6 +175,21 @@ func run() error {
 	initialProviders, err := authoidc.InitialProviders(*providers, *providersEnvironment, os.LookupEnv)
 	if err != nil {
 		return err
+	}
+	kubernetesSettings, err := kubernetes.LoadSettings(*kubernetesConfiguration, *kubernetesEnvironment, os.LookupEnv)
+	if err != nil {
+		return err
+	}
+	if kubernetesSettings != nil {
+		if *location != "kubernetes" || *workerAddr == "" || *local || *goImages != "" || *playwrightImages != "" || *browserGateway != "" || *preparedSources {
+			return errors.New("Kubernetes workers require their execution location and private listener without local coded execution or inspection")
+		}
+		if kubernetesSettings.Worker.ExchangeOrigin == *public || kubernetesSettings.Worker.ExchangeOrigin == *artifactOrigin {
+			return errors.New("the private worker origin must differ from UI and artifact origins")
+		}
+		if err := runtimeconfig.RequirePostgres(connection, true); err != nil {
+			return err
+		}
 	}
 	db, err := storage.Open(ctx, connection)
 	if err != nil {
@@ -241,6 +262,7 @@ func run() error {
 	oidc := &authoidc.Service{Store: db, Directory: directory, Sessions: sessionService, Origin: *public, SecretRefs: approvedOIDCSecrets}
 	catalogService := &catalog.Service{Store: db, Auth: auth}
 	runService := &runs.Service{Store: db, Auth: auth, Catalog: catalogService, Evidence: evidenceService, HTTP: &execution.HTTP{Trust: httpTrust}, Location: *location}
+	workerExchange := &workerexchange.Service{Store: db, Blobs: blobs, Authorize: runService.AuthorizeWorkerAttempt}
 	sourceService := &sources.Service{Store: db, Auth: auth, Location: *location, RecoveryInspectors: map[string]preparation.ArtifactInspector{
 		"go": &localcontainer.Executor{Runner: "go"}, "playwright": &localcontainer.Executor{Runner: "playwright"},
 	}}
@@ -284,6 +306,14 @@ func run() error {
 			runService.GoAPI = &apiDriver
 		}
 	}
+	if kubernetesSettings != nil {
+		provider, err := kubernetesSettings.Open(db, os.LookupEnv)
+		if err != nil {
+			return err
+		}
+		defer provider.Close()
+		configureKubernetesWorkers(runService, sourceService, workerExchange, provider, kubernetesSettings.Worker.ExchangeOrigin)
+	}
 	scheduleService := &schedules.Service{Store: db, Auth: auth, Runs: runService, RepositorySources: sourceService}
 	notificationService := &notifications.Service{Store: db, Auth: auth, Secrets: secretProvider, Sender: &webhook.Sender{}, Origin: *public}
 	runService.Completion = notificationService
@@ -323,8 +353,7 @@ func run() error {
 		servers = append(servers, artifactServer)
 	}
 	if *workerAddr != "" {
-		exchange := &workerexchange.Service{Store: db, Blobs: blobs, Authorize: runService.AuthorizeWorkerAttempt}
-		servers = append(servers, &http.Server{Addr: *workerAddr, Handler: workerhttp.Handler(exchange), ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 45 * time.Second, WriteTimeout: 60 * time.Second, IdleTimeout: 90 * time.Second, MaxHeaderBytes: 16 << 10})
+		servers = append(servers, &http.Server{Addr: *workerAddr, Handler: workerhttp.Handler(workerExchange), ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 45 * time.Second, WriteTimeout: 60 * time.Second, IdleTimeout: 90 * time.Second, MaxHeaderBytes: 16 << 10})
 	}
 	background := backgroundServices{Runs: runService, Recordings: recordingService, CLI: &cliauth.Service{Sessions: sessionService}, Evidence: evidenceService, Sources: sourceService}
 	if *scheduler {

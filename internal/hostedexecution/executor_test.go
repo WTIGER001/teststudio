@@ -44,6 +44,9 @@ func TestHostedLifecycleCheckpointsPrivateObservationsBeforeDeletingResources(t 
 				if mode != "provider-failed" && report.Result.DurationMs != 1 {
 					t.Fatal("provider duration replaced the test duration")
 				}
+				if !slices.Contains(f.events, "started") {
+					t.Fatal("the acknowledged test start was not forwarded")
+				}
 				if slices.Index(f.events, "checkpoint") >= slices.Index(f.events, "remove") || slices.Index(f.events, "remove") >= slices.Index(f.events, "finished") {
 					t.Fatal(f.events)
 				}
@@ -130,7 +133,7 @@ func TestHostedLostCreateAcknowledgementRecoversWithoutDispatchingAgain(t *testi
 	}
 	restarted := *f.driver
 	recovered := restarted.Recover(t.Context(), *f.input.Reference, f.input)
-	if recovered.RecoveryError != nil || recovered.Result.State != "passed" || len(recovered.Attachments) != 1 || f.provider.ensureCount != 1 {
+	if recovered.RecoveryError != nil || recovered.Result.State != "unknown" || len(recovered.Attachments) != 0 || f.provider.ensureCount != 1 {
 		t.Fatal("frozen observation did not recover", recovered.RecoveryError)
 	}
 	if err := f.input.BeforeCleanup(recovered); err != nil {
