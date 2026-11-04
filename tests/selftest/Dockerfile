@@ -9,6 +9,7 @@ COPY .data/selftest-build/teststudio /app/teststudio
 COPY .data/selftest-build/teststudio-publish /app/teststudio-publish
 COPY .data/selftest-build/access-fixture /app/access-fixture
 COPY web/dist/web/browser /app/ui
+COPY web/dist/trace-viewer /app/trace-viewer
 WORKDIR /suite
 ENV HOME=/tmp
 ENTRYPOINT ["node", "/runner/run.mjs"]

@@ -98,6 +98,10 @@ func prepareDiagnostics(ctx context.Context, db *storage.Store, auth *authorizat
 			return err
 		}
 	}
+	attachment, _ := json.Marshal(map[string]string{"fixture": "local trace inspection", "testId": "BROWSER-1", "runId": value.ID})
+	if _, err := service.SaveBytes(ctx, evidence.Artifact{Project: project, Run: value.ID, Test: "BROWSER-1", Attempt: 1, Kind: "attachment", Filename: "run-context.json", ContentType: "application/json"}, attachment, 100<<20); err != nil {
+		return err
+	}
 	missing, err := service.SaveBytes(ctx, evidence.Artifact{Project: project, Run: value.ID, Test: "BROWSER-1", Attempt: 1, Kind: "attachment", Filename: "missing.txt", ContentType: "text/plain"}, []byte("Unavailable fixture content"), 100<<20)
 	if err != nil {
 		return err

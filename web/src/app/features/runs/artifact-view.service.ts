@@ -6,9 +6,10 @@ import { WorkspaceService } from '../../core/workspace.service'
 import { RunEvidenceService } from './run-evidence.service'
 import { RunRetentionService } from './run-retention.service'
 import type { Artifact } from './run.models'
+import { privateTraceURL } from './trace-viewer.utils'
 import { errorMessage, previewKind } from './run.utils'
 
-interface Preview { artifact: Artifact; kind: 'text' | 'image' | 'video' | 'download'; url: string; text: string; truncated: boolean; expiresAt: string }
+interface Preview { artifact: Artifact; kind: 'text' | 'image' | 'video' | 'download' | 'trace'; viewerURL?: string; viewerUnavailable?: string; url: string; text: string; truncated: boolean; expiresAt: string }
 
 @Injectable()
 export class ArtifactViewService {
@@ -35,8 +36,11 @@ export class ArtifactViewService {
     const base = this.evidence.base()
     this.loading.set(true); this.error.set(''); this.preview.set(null)
     try {
-      const grant = await this.api.request<{ url: string; expiresAt: string }>(`${base}/artifacts/${encodeURIComponent(artifact.id)}/access`, 'POST', { action })
-      const kind = action === 'download' ? 'download' : previewKind(artifact.contentType)
+      const grant = await this.api.request<{ url: string; expiresAt: string; traceViewerUrl?: string; traceViewerUnavailable?: string }>(`${base}/artifacts/${encodeURIComponent(artifact.id)}/access`, 'POST', { action })
+      const kind = action === 'download' ? 'download' : artifact.kind === 'trace' ? 'trace' : previewKind(artifact.contentType)
+      const traceSupported = globalThis.isSecureContext && 'serviceWorker' in navigator
+      const viewerURL = kind === 'trace' && traceSupported ? privateTraceURL(grant.traceViewerUrl, grant.url) : ''
+      const viewerUnavailable = kind === 'trace' && !traceSupported ? 'Private trace viewing requires HTTPS or localhost and browser service-worker support. Download the trace for local inspection if permitted.' : grant.traceViewerUnavailable
       let text = '', truncated = false
       if (kind === 'text') {
         const response = await fetch(grant.url, { credentials: 'omit', cache: 'no-store' })
@@ -54,7 +58,7 @@ export class ArtifactViewService {
           }
         } finally { await reader.cancel() }
       }
-      if (generation === this.generation && base === this.evidence.base()) this.preview.set({ artifact, kind, url: grant.url, expiresAt: grant.expiresAt, text, truncated })
+      if (generation === this.generation && base === this.evidence.base()) this.preview.set({ artifact, kind, url: grant.url, expiresAt: grant.expiresAt, text, truncated, viewerURL, viewerUnavailable })
     } catch (error) { if (generation === this.generation) this.error.set(errorMessage(error, 'Artifact access could not be prepared.')) }
     finally { if (generation === this.generation) this.loading.set(false) }
   }

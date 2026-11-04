@@ -54,11 +54,14 @@ const uiKey = fingerprint(['web/src', 'web/public', 'web/angular.json', 'web/tsc
 const uiDirectory = 'web/dist/web/browser'
 let uiOutput = fs.existsSync(`${uiDirectory}/index.html`) ? fingerprint([uiDirectory]) : ''
 if (cache.uiKey !== uiKey || !uiOutput || cache.uiOutput !== uiOutput) {
-  if (!fs.existsSync('web/node_modules')) run('npm', ['--prefix', 'web', 'ci'])
+  if (!fs.existsSync('web/node_modules/playwright-core/package.json')) run('npm', ['--prefix', 'web', 'ci'])
   run('npm', ['--prefix', 'web', 'run', 'build'])
   uiOutput = fingerprint([uiDirectory]); cache.uiKey = uiKey; cache.uiOutput = uiOutput
   save()
 } else console.error('Reusing the unchanged self-test UI build.')
+
+const traceViewer = execFileSync(process.execPath, ['scripts/build-trace-viewer.mjs'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 2] }).trim()
+const traceOutput = fingerprint([traceViewer])
 
 const goVersion = execFileSync('go', ['version'], { encoding: 'utf8' }).trim()
 const goKey = digest([goVersion, fingerprint(['go.mod', 'go.sum', 'internal', 'adapters', 'cmd', 'tests/selftest/seed-access'], true)])
@@ -81,10 +84,10 @@ for (const target of targets) {
   } else console.error(`Reusing unchanged self-test binary: ${target.id}.`)
 }
 if (localOnly) {
-  console.log(JSON.stringify({ server: path.resolve(directory, 'controller'), preparation: path.resolve(directory, 'preparation-worker'), ui: path.resolve(uiDirectory) }))
+  console.log(JSON.stringify({ server: path.resolve(directory, 'controller'), preparation: path.resolve(directory, 'preparation-worker'), traceViewer, ui: path.resolve(uiDirectory) }))
   process.exit(0)
 }
-const imageKey = digest([baseImage, architecture, uiOutput, cache.binaries.teststudio.hash, cache.binaries['access-fixture'].hash, cache.binaries['teststudio-publish'].hash, fingerprint(['tests/selftest/Dockerfile', 'tests/selftest/playwright', 'runners/playwright'])])
+const imageKey = digest([baseImage, architecture, uiOutput, traceOutput, cache.binaries.teststudio.hash, cache.binaries['access-fixture'].hash, cache.binaries['teststudio-publish'].hash, fingerprint(['tests/selftest/Dockerfile', 'tests/selftest/playwright', 'runners/playwright'])])
 if (cache.imageKey !== imageKey || !cache.image || !inspect(cache.image)) {
   run('docker', ['build', '--pull=false', '-q', '-f', 'tests/selftest/Dockerfile', '-t', 'teststudio/selftests:local', '.'])
   const image = inspect('teststudio/selftests:local')?.[0]

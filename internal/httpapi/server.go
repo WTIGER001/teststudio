@@ -26,6 +26,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/sessions"
 	"github.com/wtiger001/teststudio/internal/sources"
 	"github.com/wtiger001/teststudio/internal/storage"
+	"github.com/wtiger001/teststudio/internal/traceviewer"
 )
 
 type Server struct {
@@ -40,6 +41,7 @@ type Server struct {
 	Notifications  *notifications.Service
 	Evidence       *evidence.Service
 	ArtifactOrigin string
+	TraceViewer    *traceviewer.Bundle
 	Sessions       *sessions.Service
 	OIDC           *authoidc.Service
 	LocalUser      string
@@ -195,10 +197,12 @@ func (s *Server) Handler() http.Handler {
 		w.Header().Set("X-Content-Type-Options", "nosniff")
 		w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
 		artifactSource := ""
+		frameSource := " 'none'"
 		if validOrigin(s.ArtifactOrigin) {
 			artifactSource = " " + s.ArtifactOrigin
+			frameSource = artifactSource
 		}
-		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:"+artifactSource+"; media-src 'self'"+artifactSource+"; connect-src 'self'"+artifactSource+"; object-src 'none'; base-uri 'self'; frame-ancestors 'none'")
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:"+artifactSource+"; media-src 'self'"+artifactSource+"; connect-src 'self'"+artifactSource+"; frame-src"+frameSource+"; object-src 'none'; base-uri 'self'; frame-ancestors 'none'")
 		if strings.HasPrefix(r.URL.Path, "/auth/") || strings.HasPrefix(r.URL.Path, "/api/") {
 			w.Header().Set("Cache-Control", "no-store")
 		}

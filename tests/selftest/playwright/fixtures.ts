@@ -1,7 +1,7 @@
 import { test as base, expect, type APIRequestContext, type Page, type Locator } from '@playwright/test'
 import crypto from 'node:crypto'
 
-const expectedFailures = new WeakMap<Page, { url: string; status: number; consoleSeen: boolean; responseSeen: boolean }[]>()
+const expectedFailures = new WeakMap<Page, { url: string; status: number; consoleSeen: boolean; responseSeen: boolean; allowRepeated?: boolean }[]>()
 
 export async function navigationLink(page: Page, name: string): Promise<Locator> {
   const navigation = page.getByRole('navigation', { name: 'Main navigation', includeHidden: true })
@@ -16,8 +16,8 @@ export async function navigationLink(page: Page, name: string): Promise<Locator>
 
 export async function followNavigation(page: Page, name: string): Promise<void> { await (await navigationLink(page, name)).click() }
 
-export async function expectHTTPFailure(page: Page, method: string, path: string, status: number, action: () => Promise<unknown>) {
-  const expected = { url: new URL(path, 'http://127.0.0.1:8040').href, status, consoleSeen: false, responseSeen: false }
+export async function expectHTTPFailure(page: Page, method: string, path: string, status: number, action: () => Promise<unknown>, options: { allowRepeated?: boolean } = {}) {
+  const expected = { url: new URL(path, 'http://127.0.0.1:8040').href, status, consoleSeen: false, responseSeen: false, allowRepeated: options.allowRepeated }
   const entries = expectedFailures.get(page) ?? []
   entries.push(expected); expectedFailures.set(page, entries)
   const [response] = await Promise.all([page.waitForResponse(response => response.url() === expected.url && response.request().method() === method), action()])
@@ -69,7 +69,7 @@ export const test = base.extend<{ api: API }>({
     page.on('console', message => {
       if (message.type() !== 'error' && message.type() !== 'warning') return
       const status = /^Failed to load resource: the server responded with a status of (\d+)\b/.exec(message.text())
-      const expected = status && expectedFailures.get(page)?.find(item => !item.consoleSeen && item.url === message.location().url && item.status === Number(status[1]))
+      const expected = status && expectedFailures.get(page)?.find(item => (!item.consoleSeen || item.allowRepeated) && item.url === message.location().url && item.status === Number(status[1]))
       if (message.type() === 'error' && expected) { expected.consoleSeen = true; add('expected-http', `${expected.status} ${expected.url}`) }
       else add(message.type(), `${message.text()}${message.type() === 'error' ? ' · ' + message.location().url : ''}`)
     })

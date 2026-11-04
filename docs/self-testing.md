@@ -292,3 +292,13 @@ TestContainerMissingRequestedMediaPreservesPassingObservation requests screensho
 Select that Go check with TESTSTUDIO_PLAYWRIGHT_IMAGE set to the cached immutable self-test image.
 The reporter unit check is `node --test runners/playwright/reporter.test.mjs`.
 All probes use local fixtures. The checkpoint records selected backend checks and exact cleanup evidence.
+
+## Private trace workflow
+
+Run `bash scripts/test-self.sh --test=STUDIO-TRACE-001` after private trace viewer changes.
+The focused workflow uses fresh browser captures and fixture-backed failed-attempt metadata in its disposable installation.
+It checks attempts, recorded steps, execution context, logs, screenshots, a JSON attachment, and the installation-hosted viewer.
+The original fixture website stops before inspection. The viewer must replay recorded CSS and images from the archive.
+The check expires the real server grant, refreshes access, requests a separate download, and verifies keyboard return focus.
+It permits no external network responses. Its isolated browser and controller stop with normal self-test cleanup.
+This fixture does not replace the separate real prepared-suite execution checks.

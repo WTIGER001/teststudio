@@ -90,6 +90,8 @@ node scripts/demo.mjs status
 The launcher stops its server, source worker, target, and control listener.
 The server cleans up its own execution resources. Shared Docker runtimes stay cached.
 The database, source images, and evidence remain available in `.data/demo`.
+The launcher also snapshots the pinned private trace viewer outside the main UI directory.
+Available browser traces open through View on run details. See [Private trace viewing](trace-viewer.md).
 Run the same start command to resume. Existing demonstrations are not seeded again.
 Process errors are recorded in `.data/demo/processes.log`.
 

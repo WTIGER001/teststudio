@@ -6,7 +6,8 @@
   "scripts": {
     "start": "ng serve --host 127.0.0.1 --port 4200 --proxy-config proxy.json",
     "build": "ng build",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit",
+    "postbuild": "node ../scripts/build-trace-viewer.mjs"
   },
   "dependencies": {
     "@angular/common": "22.2.4",
@@ -29,6 +30,7 @@
     "@angular/build": "22.2.4",
     "@angular/cli": "22.2.4",
     "@angular/compiler-cli": "22.2.4",
+    "playwright-core": "1.64.1",
     "typescript": "~6.0.0"
   }
 }

@@ -82,6 +82,9 @@ Deletion uses a separate form with the artifact filename and a required reason.
 The interface shows pending, failed, expired, missing, and deleted states without broken access links.
 Run investigation applies the selected test and attempt to artifact metadata and logs together.
 Private previews close when their scope changes or evidence access is rejected. See [Test results](results.md#investigate-one-test).
+Available Playwright traces open in the installation-hosted private viewer on the separate artifact origin.
+View actions and page snapshots without publishing evidence. Refresh expired access or request an authorized local download.
+See [Private trace viewing](trace-viewer.md) for limits, permissions, and installation configuration.
 The Capture summary records collection completeness. File retention remains separate.
 The artifact heading receives keyboard focus after a deletion request.
 Capture configuration screens and cloud artifact adapters remain pending.

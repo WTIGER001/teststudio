@@ -133,6 +133,7 @@ async function serve() {
     progress('Preparing local server and UI builds. Docker must be running for the browser example.')
     const build = JSON.parse(execFileSync(process.execPath, ['scripts/build-selftest.mjs', '--local-only'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] }))
     const ui = snapshotDemoUI(build.ui, directory)
+    const traceViewer = snapshotDemoUI(build.traceViewer, path.join(directory, 'trace-viewer'))
     const image = runtimeImage()
     const gateway = execFileSync('node', ['scripts/build-browser-gateway.mjs'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 2] }).trim()
     if (owner.ports) await requireFreePorts(owner.ports)
@@ -161,7 +162,7 @@ async function serve() {
     const database = path.join(directory, 'teststudio.db')
     const recordingCLI = path.join(root, 'runners/playwright/node_modules/playwright/cli.js')
     if (!fs.existsSync(recordingCLI)) execFileSync('npm', ['ci', '--prefix', path.join(root, 'runners/playwright'), '--ignore-scripts', '--no-audit', '--no-fund'], { stdio: 'inherit' })
-    const server = start('TestStudio server', build.server, ['--local', '--source-bundles', '--browser-gateway-image', gateway, '--recording-cli', recordingCLI, '--recording-helper', path.join(root, 'scripts/record-browser.mjs'), '--recording-directory', path.join(directory, 'recordings'), '--addr', `127.0.0.1:${owner.ports.api}`, '--public-url', origin, '--artifact-addr', `127.0.0.1:${owner.ports.artifacts}`, '--artifact-origin', artifactOrigin, '--database', database, '--artifact-directory', path.join(directory, 'artifacts'), '--ui', ui], `TestStudio listens at ${origin}`)
+    const server = start('TestStudio server', build.server, ['--local', '--trace-viewer-directory', traceViewer, '--source-bundles', '--browser-gateway-image', gateway, '--recording-cli', recordingCLI, '--recording-helper', path.join(root, 'scripts/record-browser.mjs'), '--recording-directory', path.join(directory, 'recordings'), '--addr', `127.0.0.1:${owner.ports.api}`, '--public-url', origin, '--artifact-addr', `127.0.0.1:${owner.ports.artifacts}`, '--artifact-origin', artifactOrigin, '--database', database, '--artifact-directory', path.join(directory, 'artifacts'), '--ui', ui], `TestStudio listens at ${origin}`)
     let available = false
     for (let attempt = 0; attempt < 100 && !stopping; attempt++) { if (server.listening) { try { available = (await fetch(origin + '/healthz', { signal: AbortSignal.timeout(1000) })).ok } catch {} } if (available) break; await new Promise(resolve => setTimeout(resolve, 100)) }
     if (!available || stopping) throw new Error('The local demo API did not start; inspect its process log')

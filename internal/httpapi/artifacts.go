@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"context"
 	"errors"
 	"io"
 	"mime"
@@ -16,13 +17,14 @@ import (
 )
 
 type artifactGrant struct {
-	Session   string    `json:"session"`
-	User      string    `json:"user"`
-	Project   string    `json:"project"`
-	Run       string    `json:"run"`
-	Artifact  string    `json:"artifact"`
-	Action    string    `json:"action"`
-	ExpiresAt time.Time `json:"expiresAt"`
+	Session     string    `json:"session"`
+	User        string    `json:"user"`
+	Project     string    `json:"project"`
+	Run         string    `json:"run"`
+	Artifact    string    `json:"artifact"`
+	Action      string    `json:"action"`
+	TraceViewer bool      `json:"traceViewer,omitempty"`
+	ExpiresAt   time.Time `json:"expiresAt"`
 }
 
 func validOrigin(origin string) bool {
@@ -87,8 +89,19 @@ func (s *Server) artifactAccess(w http.ResponseWriter, r *http.Request) {
 	if session.AuthenticationUntil.Before(expires) {
 		expires = session.AuthenticationUntil
 	}
+	viewerAllowed := false
+	viewerUnavailable := ""
+	if input.Action == "view" && a.Kind == "trace" {
+		if s.TraceViewer == nil {
+			viewerUnavailable = "The private trace viewer is not installed. Use Download if your current permissions allow it."
+		} else if err := s.Evidence.ValidateTrace(r.Context(), v.Project, v.ID, a.ID); err != nil {
+			viewerUnavailable = "This file is not a supported Playwright trace or exceeds the viewer limits. Download it for local inspection if permitted."
+		} else {
+			viewerAllowed = true
+		}
+	}
 	token := sessions.Random()
-	grant := artifactGrant{Session: session.ID, User: session.UserID, Project: v.Project, Run: v.ID, Artifact: a.ID, Action: input.Action, ExpiresAt: expires}
+	grant := artifactGrant{TraceViewer: viewerAllowed, Session: session.ID, User: session.UserID, Project: v.Project, Run: v.ID, Artifact: a.ID, Action: input.Action, ExpiresAt: expires}
 	change, err := storage.Put("artifact-access", sessions.Digest(token), v.Project, 0, grant)
 	if err != nil {
 		problem(w, err)
@@ -102,12 +115,22 @@ func (s *Server) artifactAccess(w http.ResponseWriter, r *http.Request) {
 		problem(w, err)
 		return
 	}
-	JSON(w, 200, map[string]any{"url": s.ArtifactOrigin + "/access/" + token, "expiresAt": expires})
+	response := map[string]any{"url": s.ArtifactOrigin + "/access/" + token, "expiresAt": expires}
+	if viewerUnavailable != "" {
+		response["traceViewerUnavailable"] = viewerUnavailable
+	}
+	if viewerAllowed {
+		query := url.Values{"trace": {s.ArtifactOrigin + "/access/" + token}, "expires": {expires.Format(time.RFC3339)}}
+		response["traceViewerUrl"] = s.ArtifactOrigin + "/trace/" + token + "/index.html?" + query.Encode()
+	}
+	JSON(w, 200, response)
 }
 
 func (s *Server) ArtifactHandler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /access/{token}", s.serveArtifact)
+	mux.HandleFunc("GET /trace/{token}/{asset...}", s.serveTraceViewer)
+	mux.HandleFunc("GET /trace-closed", s.traceClosed)
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "no-store")
 		w.Header().Set("Referrer-Policy", "no-referrer")
@@ -123,30 +146,8 @@ func (s *Server) ArtifactHandler() http.Handler {
 }
 
 func (s *Server) serveArtifact(w http.ResponseWriter, r *http.Request) {
-	if s.Evidence == nil || len(r.PathValue("token")) != 43 {
-		problem(w, storage.ErrNotFound)
-		return
-	}
-	row, err := s.Store.Get(r.Context(), "artifact-access", sessions.Digest(r.PathValue("token")))
+	g, err := s.authorizeArtifactGrant(r.Context(), r.PathValue("token"))
 	if err != nil {
-		problem(w, storage.ErrNotFound)
-		return
-	}
-	g, err := storage.Decode[artifactGrant](row)
-	if err != nil || !time.Now().Before(g.ExpiresAt) {
-		problem(w, sessions.ErrUnauthenticated)
-		return
-	}
-	session, err := s.Sessions.Validate(r.Context(), g.Session)
-	if err != nil || session.MustChangePassword || session.UserID != g.User {
-		problem(w, sessions.ErrUnauthenticated)
-		return
-	}
-	permission := "evidence.read"
-	if g.Action == "download" {
-		permission = "evidence.download"
-	}
-	if err := s.Auth.Check(r.Context(), g.User, g.Project, "run/"+g.Run, permission); err != nil {
 		problem(w, err)
 		return
 	}
@@ -176,4 +177,27 @@ func (s *Server) serveArtifact(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "HEAD" {
 		_, _ = io.Copy(w, reader)
 	}
+}
+
+func (s *Server) authorizeArtifactGrant(ctx context.Context, token string) (artifactGrant, error) {
+	if s.Evidence == nil || len(token) != 43 {
+		return artifactGrant{}, storage.ErrNotFound
+	}
+	row, err := s.Store.Get(ctx, "artifact-access", sessions.Digest(token))
+	if err != nil {
+		return artifactGrant{}, storage.ErrNotFound
+	}
+	g, err := storage.Decode[artifactGrant](row)
+	if err != nil || !time.Now().Before(g.ExpiresAt) {
+		return g, sessions.ErrUnauthenticated
+	}
+	session, err := s.Sessions.Validate(ctx, g.Session)
+	if err != nil || session.MustChangePassword || session.UserID != g.User {
+		return g, sessions.ErrUnauthenticated
+	}
+	permission := "evidence.read"
+	if g.Action == "download" {
+		permission = "evidence.download"
+	}
+	return g, s.Auth.Check(ctx, g.User, g.Project, "run/"+g.Run, permission)
 }

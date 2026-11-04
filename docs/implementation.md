@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 28 verified of 57.
+The acceptance count is 30 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -52,10 +52,10 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **39.** Timeouts have a separate test status and count. Failure reruns include them alongside failed and flaky results.
 - [x] **40.** Native HTTP attempts support comparable timing history, bounded adaptive timeouts, slowdown criteria, and API and UI estimates.
 - [ ] **41.** Go and browser runners apply the same timing contract across execution and deployment profiles.
-- [ ] **42.** Run details expose attempts, steps, context, logs, screenshots, traces, and configured attachments without requiring HTML reports.
+- [x] **42.** Run details expose attempts, steps, context, logs, screenshots, traces, and configured attachments without requiring HTML reports.
 - [ ] **43.** Available evidence survives service restarts. Duplicate events and upload retries do not create duplicate attachments or rerun tests.
 - [x] **44.** Capture gaps, failed uploads, expired files, and incomplete evidence remain visible beside the observed test outcome.
-- [ ] **45.** Artifact access respects project permissions. Private trace viewing requires no public upload or third-party viewer.
+- [x] **45.** Artifact access respects project permissions. Private trace viewing requires no public upload or third-party viewer.
 - [ ] **46.** Retention, quotas, and evidence pins work across local, S3, and Azure artifact adapters.
 - [x] **47.** Result-state trends use stacked area charts with consistent state colors, final logical counts, accessible values, and visible missing-history gaps.
 - [x] **48.** Manual and scheduled notifications use the same configured completion path.
@@ -73,6 +73,44 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 
 Record feature commits and targeted validation here.
 Each entry records its verification checkpoint. The acceptance ledger defines current verified completion.
+
+### Private trace viewing and complete run evidence inspection
+
+Acceptances **42** and **45** are complete. The current ledger has **30 verified, 27 open, 57 total** items.
+Run details expose attempts, recorded steps, the execution snapshot, logs, screenshots, traces, and configured attachments without HTML reports.
+Shared test and attempt scopes preserve the investigation workflow from acceptance 44.
+Available traces now open in the installation-hosted Playwright 1.64.1 viewer on the separate artifact origin.
+Recorded actions and DOM snapshots replay archived styles and images without contacting the original website.
+Current project permissions, session state, grant expiry, artifact identity, and availability protect each server read.
+The scoped service worker also checks authorization before returning cached recorded content and blocks external network fetches.
+Expired or revoked views close. Refresh trace access requests a new grant. Download trace requires its separate current permission.
+Evidence already delivered to a browser cannot be recalled.
+Invalid or oversized archives and installations without a viewer retain an authorized local download fallback.
+The viewer requires HTTPS or localhost with service-worker support.
+
+The trusted bundle contains pinned assets, checksums, and license notices outside the main UI output.
+The Go service loads immutable verified bytes at startup and needs no Node process to serve them.
+The demo launcher and isolated self-test image package this bundle. Hosted deployment packaging remains open.
+The new trace guide covers API response fields, viewer limits, operator setup, proxy log redaction, and refresh behavior.
+Page help and the results, evidence, demo, and self-testing guides match the implemented workflow.
+
+Targeted private-trace API and archive checks pass with the race detector.
+Existing artifact origin, permission, expiry, and missing-content checks pass after shared authorization extraction.
+Pure URL validation, service-worker authorization and network checks, TypeScript checking, and the production Angular build pass.
+STUDIO-TRACE-001 passes through normal TestStudio publication, execution, timing, and evidence contracts.
+It uses fixture-backed failed-attempt metadata with fresh real browser screenshot and trace captures.
+The original fixture server stops before viewing. The browser verifies archived CSS and image replay, steps, context, logs, screenshots, and a JSON attachment.
+It also verifies actual server-side grant expiry, clean viewer closure, renewed access, separate download authorization, and keyboard return focus.
+Earlier focused passes expose and correct nested preview focus and snapshot policy issues.
+A later expiry race requires closing the viewer before a rejected cached response reaches its parser.
+The final harness permits repeated expected 401 responses only for the exact expired authorization URL.
+Evidence is output/selftest/20261104T021538.903511000-9ae6bffb5462461d36e93110/summary.json and cleanup.json.
+The concise milestone record is output/private-trace/checkpoint.json.
+All seven focused verification runs have confirmed controller, browser container, and output-volume cleanup.
+The user demo remains preserved. No AWS, Kubernetes, or Azure verification runs.
+
+Items **43** and **46** remain open for complete recovery, retry, retention, and storage-adapter scope.
+Next, continue remaining catalog actions and category navigation, followed by timing parity and evidence recovery.
 
 ### Scoped investigation, failure recovery, and explicit capture gaps
 

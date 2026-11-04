@@ -48,6 +48,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/sourceprovider"
 	"github.com/wtiger001/teststudio/internal/sources"
 	"github.com/wtiger001/teststudio/internal/storage"
+	"github.com/wtiger001/teststudio/internal/traceviewer"
 )
 
 func main() {
@@ -63,6 +64,7 @@ func run() error {
 	ui := flag.String("ui", "web/dist/web/browser", "Built Angular application directory")
 	artifactAddr := flag.String("artifact-addr", "127.0.0.1:8041", "Private artifact HTTP listen address")
 	artifactOrigin := flag.String("artifact-origin", "http://127.0.0.1:8041", "Separate public artifact origin")
+	traceDirectory := flag.String("trace-viewer-directory", "", "Trusted pinned trace viewer bundle, served only on the separate artifact origin")
 	artifactDirectory := flag.String("artifact-directory", ".data/artifacts", "Private local artifact directory")
 	location := flag.String("execution-location", "local", "Execution location identifier")
 	playwrightImages := flag.String("playwright-images", "", "Comma-separated immutable local Playwright image references; enables the isolated local worker")
@@ -264,7 +266,14 @@ func run() error {
 		defer driver.Close()
 		recordingService.Driver = driver
 	}
-	api := &httpapi.Server{Recordings: recordingService, Sources: sourceService, Store: db, Auth: auth, Projects: &projects.Service{Store: db, Auth: auth}, Catalog: catalogService, Runs: runService, Schedules: scheduleService, Notifications: notificationService, Evidence: evidenceService, ArtifactOrigin: *artifactOrigin, Sessions: sessionService, OIDC: oidc, LocalUser: localUser, UI: *ui}
+	var traceBundle *traceviewer.Bundle
+	if *traceDirectory != "" {
+		traceBundle, err = traceviewer.Load(*traceDirectory)
+		if err != nil {
+			return err
+		}
+	}
+	api := &httpapi.Server{TraceViewer: traceBundle, Recordings: recordingService, Sources: sourceService, Store: db, Auth: auth, Projects: &projects.Service{Store: db, Auth: auth}, Catalog: catalogService, Runs: runService, Schedules: scheduleService, Notifications: notificationService, Evidence: evidenceService, ArtifactOrigin: *artifactOrigin, Sessions: sessionService, OIDC: oidc, LocalUser: localUser, UI: *ui}
 	if *localAccounts {
 		api.LocalAccounts, err = localauth.New(ctx, sessionService)
 		if err != nil {

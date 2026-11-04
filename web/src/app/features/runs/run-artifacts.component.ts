@@ -2,11 +2,12 @@ import { DatePipe, DecimalPipe } from '@angular/common'
 import { ChangeDetectionStrategy, Component, ElementRef, afterNextRender, inject, Injector, viewChild } from '@angular/core'
 import type { Artifact } from './run.models'
 import { ArtifactViewService } from './artifact-view.service'
+import { PrivateTraceComponent } from './private-trace.component'
 import { ArtifactActionsComponent } from './artifact-actions.component'
 import { ArtifactDeletionComponent } from './artifact-deletion.component'
 
 @Component({
-  selector: 'ts-run-artifacts', standalone: true, imports: [ArtifactActionsComponent, DatePipe, DecimalPipe, ArtifactDeletionComponent], providers: [ArtifactViewService], changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'ts-run-artifacts', standalone: true, imports: [PrivateTraceComponent, ArtifactActionsComponent, DatePipe, DecimalPipe, ArtifactDeletionComponent], providers: [ArtifactViewService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="panel" aria-labelledby="artifacts-title">
       <div class="section-top"><h2 #heading tabindex="-1" id="artifacts-title">Run artifacts</h2><span class="small muted">Private evidence with retention and checksums.</span></div>
@@ -39,6 +40,10 @@ import { ArtifactDeletionComponent } from './artifact-deletion.component'
             @case ('text') { <pre class="log-view" tabindex="0">{{ preview.text }}</pre>@if (preview.truncated) { <p class="notice">The preview shows the first 1 MiB. Use Download for the complete artifact.</p> } }
             @case ('image') { <img class="evidence-image" [src]="preview.url" [alt]="preview.artifact.filename" (error)="service.error.set('The image link expired or content is unavailable. Select View to refresh it.')"> }
             @case ('video') { <video class="evidence-video" [src]="preview.url" controls preload="metadata" aria-label="Recorded test video" (error)="service.error.set('The video link expired or content is unavailable. Select View to refresh it.')"></video> }
+            @case ('trace') {
+              @if (preview.viewerURL) { <ts-private-trace [url]="preview.viewerURL" /> } @else { <p class="notice warning">{{ preview.viewerUnavailable || 'Private trace viewing is unavailable. Download the trace for local inspection if permitted.' }}</p> }
+              <div class="row-actions"><button type="button" class="button secondary" [disabled]="service.loading()" (click)="open(preview.artifact, 'view', $event)">Refresh trace access</button>@if (service.workspace.can('evidence.download')) { <button type="button" class="button secondary" [disabled]="service.loading()" (click)="open(preview.artifact, 'download', $event)">Download trace</button> }</div>
+            }
             @case ('download') { <p class="small muted">Your download link is ready.</p><a class="button primary" [href]="preview.url" target="_blank" rel="noopener noreferrer">Download {{ preview.artifact.filename }}</a> }
           }
           <p class="small muted">Access expires {{ preview.expiresAt | date:'mediumTime' }}. Select the artifact again to refresh access.</p>
@@ -59,7 +64,7 @@ export class RunArtifactsComponent {
     const trigger = event.currentTarget as HTMLElement
     await this.service.open(artifact, action)
     if (!this.service.preview()) return
-    this.returnFocus = trigger
+    if (!trigger.closest('.artifact-preview')) this.returnFocus = trigger
     afterNextRender(() => this.previewHeading()?.nativeElement.focus(), { injector: this.injector })
   }
   closePreview(): void { this.service.close(); if (this.returnFocus?.isConnected) this.returnFocus.focus() }

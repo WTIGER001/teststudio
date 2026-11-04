@@ -43,6 +43,11 @@ All attempts is the default. It preserves unsuccessful attempts when a later ret
 Selected attempts and artifacts use readable cards. Failed recorded steps open automatically. Final logical counts stay unchanged.
 Final result summaries stay compact. Failure details and recorded steps retain the complete diagnostic text.
 
+Select View beside a trace to inspect recorded actions and page snapshots inside TestStudio.
+The viewer uses the installation artifact origin. Refresh trace access renews authorization. Download trace requires its separate permission.
+Configured JSON attachments open as bounded text previews. Other attachment types retain authorized downloads.
+See [Private trace viewing](trace-viewer.md) for requirements and operator setup.
+
 Select View beside a screenshot to open its private preview. The preview heading receives focus.
 Close preview returns focus to its View button when that button remains available.
 A scope change closes the old preview. Unavailable, expired, or missing files retain their state without unusable access buttons.

@@ -81,6 +81,7 @@ Keep the artifact directory outside the public UI directory.
 Use `--artifact-origin`, `--artifact-addr`, and `--artifact-directory` to change these settings.
 Select Test runs to start a run, inspect progress, cancel execution, or rerun failed tests.
 The detail page shows attempts, filtered logs, events, and private artifact previews or downloads.
+The [private trace guide](docs/trace-viewer.md) describes installation-hosted action and snapshot inspection, expiry, and local download fallback.
 Other plan areas remain tracked in the acceptance ledger.
 
 ## TestStudio self-tests
