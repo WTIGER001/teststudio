@@ -14,6 +14,29 @@ User-owned identity linking and project-owned pending access use explicit, audit
 The full acceptance ledger remains in [Implementation verification](implementation.md).
 The [OpenAPI contract](../contracts/openapi.yaml) describes identity, role policy, direct grants, permission catalog, and assignment routes. Other route families remain pending.
 
+## Grant acceptance coverage
+
+Acceptance 12 covers the same permission-service and managed API behavior on SQLite and local PostgreSQL.
+The selected checks use the pinned permission library. They do not substitute a separate permission evaluator.
+
+| Required behavior | Verified coverage |
+| --- | --- |
+| User and group grants | Direct managed grants, group membership, inherited role access, and group-deny precedence. |
+| Role grants | Custom parent and child rules, disabled policies, exact assignments, and atomic policy changes. |
+| Object scope | Exact suite rules reject other suites, unscoped requests, and the same relative object in another project. |
+| Project scope | Server-derived team bindings preserve independent alpha and beta assignments. |
+| Explicit denies | Applicable direct user, direct group, and inherited role denies override allows. |
+| Expiry | Expired allows withdraw access. Expired denies remain inspectable and stop blocking access. |
+| Inheritance | Alternate paths retain access. Removing the final path or disabling a required policy withdraws access. |
+| Revocation | Removing an exact binding updates an existing evaluator without removing another project's binding. |
+| Administrative boundaries | Read-only access, object denies, filtered lists, conflict revisions, and audited mutations remain enforced. |
+
+The focused nine-check selection runs with race detection on both local databases.
+Evidence is output/access-acceptance/summary.json and its database-specific logs.
+It includes managed grant, custom role, assignment, pending policy, and inheritance-removal checks.
+The check removes its owned PostgreSQL container. No browser or cloud deployment is involved.
+See [Implementation verification](implementation.md) for completion counts and separate remaining acceptance scope.
+
 ## Typed client contract
 
 Generate identity request types, response types, operation methods, and route templates from the OpenAPI contract:

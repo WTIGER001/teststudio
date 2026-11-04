@@ -15,7 +15,7 @@ The full product scope remains required. This direction supersedes the testing s
 ## Active delivery plan after the tester walkthrough
 
 This section is the current implementation order. Historical continuation commands below do not override it.
-The local demonstration is usable and verified. The complete product remains unfinished at 45 verified items out of 57.
+The local demonstration is usable and verified. The complete product remains unfinished at 46 verified items out of 57.
 Ordinary project creator access and the first environment-backed local recorded website flow pass targeted verification.
 Tester investigation, failure recovery, and local manual/scheduled runner parity pass targeted verification.
 Continue source-workflow, access, storage, and hosted packaging gaps. Reuse passing runner evidence.
@@ -61,12 +61,12 @@ See [initial creator access](access.md#initial-project-creator-access) for curre
 SQLite, local PostgreSQL, and STUDIO-OWNER-001 evidence are recorded in the implementation ledger.
 
 This sequence changes implementation priority, not the scope or numbering of the 57 acceptance criteria.
-Acceptances 03, 08, 13, 20, 21, 25, 26, 28, 29, 34, 36, 38, 42, 43, 44, and 45 are complete. Remaining access checks stay under 12. Other catalog, execution, and evidence requirements remain open.
+Acceptances 03, 08, 13, 20, 21, 25, 26, 28, 29, 34, 36, 38, 42, 43, 44, and 45 are complete. Acceptance 12 now passes the focused grant and revocation audit. Remaining requirements stay open under their stable ledger numbers.
 Do not treat these batches as additional acceptance items or claim the whole product complete after a demonstration.
 
 ### Current continuation: access, storage, and provider work
 
-Acceptances **22** and **37** are complete. The count is **45 verified, 12 open**.
+Acceptances **12**, **22**, and **37** are complete. The count is **46 verified, 11 open**.
 The repository editor uses Repository, Suites, and Review through the canonical wizard components.
 Identifiers generate from the name. Uncommon reference and synchronization settings stay under named Advanced sections.
 Review keeps enabled state, automatic publication, future activation, and test-execution consequences visible.
@@ -80,9 +80,12 @@ The shared randomId helper preserves secure UUID generation with a secure-random
 The Angular build and targeted identifier checks pass. Existing native-upload and ZIP UI evidence remains valid without repetition.
 See the implementation ledger for exact runs and verified cleanup.
 
-Next, audit remaining user, group, role, object, and project grant coverage under **12**.
-Implement any missing access behavior, then run only its focused local checks.
-Continue storage parity under **06**, provenance under **02**, provider packaging, and remaining ledger scope.
+Acceptance 12 now passes its source audit and nine focused existing checks on SQLite and local PostgreSQL with race detection.
+User, group, role, object, and project grants preserve denies, expiry, inheritance, exact revocation, and administrative boundaries.
+No authorization behavior change, browser test, UI build, or runner image build is needed.
+
+Next, audit remaining storage parity under **06**, then provenance under **02**, provider packaging, and remaining ledger scope.
+Implement any missing behavior first. Reuse completed service evidence and run only targeted local checks.
 Keep deployment-wide timing **41**, storage-provider retention **46**, and hosted criteria **51–57** open until their required verification passes.
 Do not repeat completed source, native, API, browser, or scheduled-runner fixtures without a concrete contract change or unresolved failure.
 Cloud execution and storage-provider verification remain separate work.

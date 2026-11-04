@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 45 verified of 57.
+The acceptance count is 46 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Acceptance criteria
@@ -22,7 +22,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **09.** Local accounts, OIDC accounts, and mixed sign-in work through the same directory, permission checks, and managed sessions.
 - [x] **10.** Users, groups, membership, custom roles, assignments, and effective permissions are manageable through authorized API and UI workflows.
 - [x] **11.** `wtiger001/go-permissions` evaluates access on PostgreSQL and SQLite through the same service and identity contracts.
-- [ ] **12.** User, group, role, object, and project grant checks cover explicit denies, expired grants, inheritance, and assignment revocation.
+- [x] **12.** User, group, role, object, and project grant checks cover explicit denies, expired grants, inheritance, and assignment revocation.
 - [x] **13.** Project administrators cannot grant installation privileges or affect another project's groups, assignments, results, or evidence.
 - [x] **14.** Membership and grant revocation reach all instances within the documented limit. Disabled users and revoked sessions fail their next request.
 - [x] **15.** Local credential changes, resets, disabling, and recovery preserve audit records and the last usable administrator.
@@ -68,6 +68,31 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **55.** Hosted identity and private report access work through installation-specific configuration.
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
+
+## Current delivery: complete scoped grant and revocation coverage
+
+Acceptance **12** is complete. The ledger has **46 verified, 11 open, 57 total** items.
+A source audit maps every required grant dimension to existing permission-service and managed API behavior.
+No missing behavior or permission bypass appears in this focused scope. No new authorization implementation is needed.
+
+Nine existing focused checks pass with race detection on SQLite and local PostgreSQL.
+They cover user and group grants, custom and built-in role assignments, inherited object rules, and exact project bindings.
+Explicit user and group denies override applicable direct and inherited allows.
+Expired denies retain their administrative records without affecting current access. Expired allows withdraw access.
+Object grants apply only to the exact resource. Project grants do not cross into another project.
+Inherited parent and child disabling withdraw access. Removing the last inheritance path withdraws access while alternate paths remain valid.
+Exact assignment revocation reaches an already-created independent evaluator and preserves another project's binding.
+Stale assignment removal fails after recreation. Grant, policy, and assignment changes retain atomic audit and revision behavior.
+Read-only and exact-object denials also control managed grant reads, mutation capabilities, and list filtering.
+All access decisions continue through wtiger001/go-permissions v0.0.31.
+
+SQLite authorization checks take 1.668 seconds. SQLite API checks take 8.480 seconds.
+Local PostgreSQL authorization checks take 1.839 seconds. Local PostgreSQL API checks take 6.137 seconds.
+Evidence is output/access-acceptance/summary.json, sqlite.log, and postgres.log.
+The owned local PostgreSQL container is verified absent after the check.
+No browser, UI build, runner image build, source fixture, broad matrix, or cloud check runs.
+The user demo stays running. See [Grant acceptance coverage](access.md#grant-acceptance-coverage) for the behavior map.
+Storage parity, provenance, timing profiles, artifact-provider lifecycle, and hosted acceptance remain separate open requirements.
 
 ## Current delivery: complete repository publication through the UI
 
