@@ -6,7 +6,7 @@ TestStudio now supplies a Kubernetes Pod adapter and explicit server configurati
 Both offline Go and Playwright execution use the shared hosted lifecycle and private worker exchange.
 The Helm profile supplies the private listener route, worker namespace, service account, controller permissions, and worker network policy.
 Local protocol and packaging checks pass. A dedicated [local k3s cluster](local-kubernetes.md) now has a Ready node.
-Application installation and actual isolated worker runs remain pending.
+Core application installation and TLS ingress checks now pass. Actual isolated worker runs remain pending.
 Acceptance 51 remains open across providers. The total stays 48 verified items out of 57.
 
 The separate preparation command now connects registry assembly, immutable publication, and hosted discovery to the existing source queue.

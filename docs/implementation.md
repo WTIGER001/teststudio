@@ -131,9 +131,15 @@ The cluster API binds only to loopback. Its private kubeconfig has mode 0600 and
 Helm connects from the host using that kubeconfig and its Secret driver. The default Docker context remains unchanged.
 The existing demo remains on port 8040. No Azure work resumes.
 Evidence is output/local-k3s/cluster-summary.json, nodes.json, system-pods.json, helm-connectivity.json, and cluster-create.log.
-Local ownership and tool checksum metadata remain in .data/local-k3s. The cluster stays available for application installation.
-No TestStudio chart installation, application run, or coded worker scenario is verified on the cluster yet.
-The next measurable result is a chart installation and one newly authored HTTPS probe with retained evidence.
+Local ownership and tool checksum metadata remain in .data/local-k3s. The cluster stays available for application verification.
+The actual Helm installation now passes with a fresh PostgreSQL database and separate persistent evidence storage.
+Release teststudio is deployed in namespace teststudio-local. Both Pods are Ready, and both persistent claims are Bound.
+The service image uses the imported ARM64 manifest digest. No registry push occurs.
+The UI, API health, and artifact health return 200 through TLS ingress with certificate verification.
+Anonymous project access returns 401. Evidence is output/local-k3s/installation-checks.json and helm-install.log.
+The first service start precedes database readiness. Kubernetes restarts it once, and the next start succeeds.
+The configured local OIDC issuer is reserved test metadata. Authentication and probe execution remain unverified.
+The next measurable result is working local sign-in and one newly authored HTTPS probe with retained evidence.
 See [local Kubernetes](local-kubernetes.md) for scoped commands and stop instructions.
 No numbered acceptance item closes. The total remains **48 verified, 9 open**.
 
@@ -141,10 +147,10 @@ No numbered acceptance item closes. The total remains **48 verified, 9 open**.
 
 The user defers Azure implementation and verification until a later deployment script and account setup.
 The staged Azure changes are preserved. No Azure resource or account has been tested.
-Kubernetes evidence currently consists of local SDK protocol, Helm rendering, schema, and container startup checks.
-A dedicated local cluster is now verified. No TestStudio chart deployment is verified yet.
+Kubernetes evidence includes local SDK protocol, Helm rendering, schema, and container startup checks.
+A dedicated local cluster and actual TestStudio chart startup are now verified.
 The user now authorizes dedicated local k3s/k3d verification with a separate kubeconfig.
-The next measurable result is a Ready cluster, then a chart installation and one newly authored HTTPS probe.
+The next measurable result is authenticated execution of one newly authored HTTPS probe through that installation.
 Isolated coded workers, cancellation, deadlines, artifacts, and restart recovery follow on that local cluster.
 The default Docker workloads and demo on port 8040 remain preserved.
 The active plan and repository instructions record this change of priority.

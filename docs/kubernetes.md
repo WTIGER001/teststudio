@@ -95,12 +95,13 @@ The chart contains no example projects, copied test suites, or imported history.
 ## Local cluster integration
 
 A dedicated [local k3s cluster](local-kubernetes.md) now has a Ready node and verified host-client connectivity.
-TestStudio chart installation and actual application scenarios are next. Azure implementation remains deferred.
+The actual TestStudio chart installation passes with fresh PostgreSQL storage and TLS ingress.
+Authenticated application scenarios and isolated workers are next. Azure implementation remains deferred.
 
 ## Local packaging checks
 
 The packaging verifier renders and validates locally without contacting a cluster.
-The separate local k3s phase now verifies actual cluster infrastructure. Application deployment remains pending.
+The separate local k3s phase now verifies actual cluster infrastructure, core application startup, and TLS ingress.
 The current checks use Helm 4.3.1, kubeconform 0.8.0, and PyYAML 6.0.3.
 Install Helm and kubeconform from their verified upstream releases.
 Use the local Python helper environment:

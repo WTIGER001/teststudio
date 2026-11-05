@@ -30,7 +30,7 @@ Preserve the staged Azure code. Add no more Azure metadata or permission inspect
 Prepare an Azure deployment script when the user requests it. An Azure account is not currently available for verification.
 Keep Azure acceptance open under the existing numbers. Deferral does not prove completion or remove the target.
 
-Kubernetes has local SDK protocol and Helm/schema evidence, but no real cluster verification.
+Kubernetes now has actual local cluster and core installation evidence alongside SDK protocol and Helm/schema checks.
 Use a dedicated local k3s cluster through k3d on this Mac. Keep its kubeconfig separate from user contexts.
 The existing default Colima VM has two CPUs and 2 GiB of memory.
 Use a separate test profile when more capacity is required. Preserve the default Docker workloads and the demo on port 8040.
@@ -40,13 +40,15 @@ Deliver observable milestones in this order:
 | Milestone | State |
 | --- | --- |
 | Dedicated cluster with Ready nodes | Verified. k3d v5.9.0 runs k3s v1.35.5+k3s1 in the separate teststudio-k3s Colima profile. |
-| Chart installation with local PostgreSQL and private evidence | Next. No TestStudio application deployment is verified yet. |
-| Newly authored HTTPS probe through the installation | Pending installation. Retain its result and evidence. |
+| Chart installation with local PostgreSQL and private evidence | Verified startup. Helm release teststudio is deployed. PostgreSQL and service Pods are Ready; both persistent claims are Bound. |
+| Newly authored HTTPS probe through the installation | Next. Configure working local identity, sign in, and retain the probe result and evidence. |
 | Isolated Go and Playwright workers | Pending an enforced RuntimeClass and network policy. |
 | Cancellation, deadlines, artifacts, and restart recovery | Pending actual worker execution. |
 
 The private kubeconfig uses the observed loopback API mapping and mode 0600. Helm host connectivity passes.
 CoreDNS, storage provisioning, metrics, and Traefik report Running. The default Docker context remains unchanged.
+The UI, API health, and artifact health return 200 through TLS ingress. Anonymous project access returns 401.
+The configured local OIDC issuer is reserved test metadata. Sign-in and authenticated execution remain unverified.
 See [local Kubernetes](local-kubernetes.md) and output/local-k3s/cluster-summary.json for evidence and continuation instructions.
 
 Report which milestone runs on a real cluster and which checks remain simulated.
