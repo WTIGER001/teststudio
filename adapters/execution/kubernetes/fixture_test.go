@@ -54,7 +54,7 @@ func (i imageInspector) InspectImage(_ context.Context, ref string) (hostedexecu
 	return hostedexecution.Image{Reference: ref, Runner: i.runner, Runtime: i.runner + "-fixture-v1", OS: "linux", Architecture: "arm64", Supervisor: "worker-exchange/v1", Project: "project"}, nil
 }
 
-func fresh(t *testing.T, runner string) *fixture {
+func fresh(t *testing.T, runner string, wrappers ...func(http.Handler) http.Handler) *fixture {
 	t.Helper()
 	db, err := testkit.Open(t, filepath.Join(t.TempDir(), "provider.db"))
 	if err != nil {
@@ -69,7 +69,11 @@ func fresh(t *testing.T, runner string) *fixture {
 	f.exchange = &workerexchange.Service{Store: db, Blobs: blobs, Authorize: func(context.Context, execution.Reference) (workerstate.Access, error) {
 		return workerstate.Access{Deadline: time.Now().Add(time.Minute), ProjectBytes: 1 << 30, RunBytes: 1 << 30}, nil
 	}}
-	f.server = httptest.NewTLSServer(http.HandlerFunc(f.serve))
+	handler := http.Handler(http.HandlerFunc(f.serve))
+	for _, wrap := range wrappers {
+		handler = wrap(handler)
+	}
+	f.server = httptest.NewTLSServer(handler)
 	t.Cleanup(func() { f.provider.Close(); f.server.Close(); blobs.Close(); db.Close() })
 	config := Config{APIOrigin: f.server.URL, Namespace: "studio-workers", ServiceAccount: "runner", Architecture: "arm64", RuntimeClass: "isolated", PolicyName: "isolate", ExchangeOrigin: "https://worker.example.test", ExchangePeer: Peer{Namespace: "private-ingress", Labels: map[string]string{"app": "private-ingress"}}, DNSPeer: Peer{Namespace: "kube-system", Labels: map[string]string{"k8s-app": "kube-dns"}}}
 	f.provider, err = New(Options{Config: config, Store: db, Inspector: imageInspector{runner}, Transport: f.server.Client().Transport, Token: func(context.Context) (string, error) { f.mu.Lock(); defer f.mu.Unlock(); return f.token, nil }})

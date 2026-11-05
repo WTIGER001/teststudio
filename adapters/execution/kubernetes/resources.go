@@ -15,7 +15,14 @@ import (
 )
 
 func (p *Provider) Stop(ctx context.Context, ref execution.Reference) error {
-	status, err := p.Observe(ctx, ref)
+	if ref.Gateway != "" {
+		return p.stopNetwork(ctx, ref)
+	}
+	return p.stopWorker(ctx, ref)
+}
+
+func (p *Provider) stopWorker(ctx context.Context, ref execution.Reference) error {
+	status, err := p.observeWorker(ctx, ref)
 	if err != nil {
 		return err
 	}
@@ -40,7 +47,7 @@ func (p *Provider) Stop(ctx context.Context, ref execution.Reference) error {
 	return p.verifyPod(value, record)
 }
 
-func (p *Provider) Remove(ctx context.Context, ref execution.Reference) error {
+func (p *Provider) checkRemoval(ctx context.Context, ref execution.Reference) error {
 	if strings.HasSuffix(ref.Profile, "-discovery-v1") {
 		if p.discoveryCleanup == nil || p.discoveryCleanup(ctx, ref) != nil {
 			return hostedexecution.ErrUnavailable
@@ -59,7 +66,21 @@ func (p *Provider) Remove(ctx context.Context, ref execution.Reference) error {
 			return hostedexecution.ErrUnavailable
 		}
 	}
-	status, err := p.Observe(ctx, ref)
+	return nil
+}
+
+func (p *Provider) Remove(ctx context.Context, ref execution.Reference) error {
+	if ref.Gateway != "" {
+		return p.removeNetwork(ctx, ref)
+	}
+	return p.removeWorker(ctx, ref)
+}
+
+func (p *Provider) removeWorker(ctx context.Context, ref execution.Reference) error {
+	if err := p.checkRemoval(ctx, ref); err != nil {
+		return err
+	}
+	status, err := p.observeWorker(ctx, ref)
 	if err != nil && !errors.Is(err, hostedexecution.ErrNotFound) {
 		return err
 	}
@@ -90,7 +111,12 @@ func (p *Provider) Remove(ctx context.Context, ref execution.Reference) error {
 	} else if !errors.Is(err, errAbsent) {
 		return hostedexecution.ErrUnavailable
 	}
-	_, err = p.update(ctx, ref, func(record *dispatch) error { record.Removed = true; return nil })
+	_, err = p.update(ctx, ref, func(record *dispatch) error {
+		if record.Network == nil {
+			record.Removed = true
+		}
+		return nil
+	})
 	if errors.Is(err, storage.ErrNotFound) {
 		return nil
 	}

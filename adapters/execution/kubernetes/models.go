@@ -23,6 +23,7 @@ type Peer struct {
 }
 
 type Config struct {
+	Gateway          *GatewayConfig    `json:"gateway,omitempty"`
 	APIOrigin        string            `json:"apiOrigin"`
 	Namespace        string            `json:"namespace"`
 	ServiceAccount   string            `json:"serviceAccount"`
@@ -44,6 +45,7 @@ type Inspector interface {
 }
 
 type Options struct {
+	GatewayAuthority GatewayAuthority
 	DiscoveryCleanup func(context.Context, execution.Reference) error
 	Config           Config
 	Store            *storage.Store
@@ -53,6 +55,8 @@ type Options struct {
 }
 
 type Provider struct {
+	gatewayAuthority GatewayAuthority
+	gatewayCA        []byte
 	discoveryCleanup func(context.Context, execution.Reference) error
 	config           Config
 	store            *storage.Store
@@ -63,6 +67,7 @@ type Provider struct {
 }
 
 type dispatch struct {
+	Network       *networkDispatch        `json:"network,omitempty"`
 	Scope         string                  `json:"scope"`
 	Reference     execution.Reference     `json:"reference"`
 	Image         string                  `json:"image"`
@@ -99,6 +104,7 @@ type pod struct {
 		Phase      string `json:"phase"`
 		Containers []struct {
 			Name     string `json:"name"`
+			Ready    bool   `json:"ready"`
 			Restarts int    `json:"restartCount"`
 			State    struct {
 				Terminated *struct {

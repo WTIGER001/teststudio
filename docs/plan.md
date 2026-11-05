@@ -105,7 +105,10 @@ The [remote gateway transport](remote-gateway.md) now implements scoped TLS forw
 Targeted local policy, credential, authorization, TLS, and cancellation checks pass, including the race detector.
 Separate private initialization, frozen application credential references, bound instance authority, and supervisor bridge delivery now pass targeted local checks.
 New runtime overlays advertise the optional gateway transport capability. No images are rebuilt for these shared components.
-Next wire Kubernetes workload ownership, actual instance confirmation, installation secrets and trust, network policy, and durable cleanup.
+The [Kubernetes gateway bundle](kubernetes-gateway.md) now owns both workloads, the Service, and per-execution policies.
+Its local checks cover identity, readiness, lost acknowledgements, partial creation, shutdown, inventory, and guarded cleanup.
+Next connect normal executor and discovery admission, gateway image capability inspection, service-role secrets and authority, and Helm installation configuration.
+Then verify the complete browser and coded API paths on the dedicated local cluster.
 Do not rebuild runtime images or deploy the gateway before that dispatch path exists.
 Read [deployment readiness](deployment-readiness.md) before the historical Azure continuation material below.
 Do not remove admission barriers or grant uploaded code direct target egress to bypass the missing gateway.

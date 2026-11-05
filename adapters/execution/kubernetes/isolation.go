@@ -2,7 +2,6 @@ package kubernetes
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"strings"
 
@@ -33,16 +32,12 @@ func (p *Provider) checkIsolation(ctx context.Context) error {
 	if err := p.request(ctx, http.MethodGet, "/api/v1/namespaces/"+p.config.Namespace, nil, nil, &namespace); err != nil || namespace.Metadata.Name != p.config.Namespace || namespace.Metadata.Labels["pod-security.kubernetes.io/enforce"] != "restricted" {
 		return hostedexecution.ErrConfiguration
 	}
-	var account struct {
-		Metadata  metadata `json:"metadata"`
-		Automount *bool    `json:"automountServiceAccountToken"`
+	if err := p.checkAccount(ctx, p.config.ServiceAccount); err != nil {
+		return err
 	}
-	if err := p.request(ctx, http.MethodGet, "/api/v1/namespaces/"+p.config.Namespace+"/serviceaccounts/"+p.config.ServiceAccount, nil, nil, &account); err != nil || account.Metadata.Name != p.config.ServiceAccount || account.Automount == nil || *account.Automount {
-		return hostedexecution.ErrConfiguration
-	}
-	for key := range account.Metadata.Annotations {
-		if !strings.HasPrefix(key, "meta.helm.sh/") && key != "kubectl.kubernetes.io/last-applied-configuration" {
-			return hostedexecution.ErrConfiguration
+	if p.config.Gateway != nil {
+		if err := p.checkAccount(ctx, p.config.Gateway.ServiceAccount); err != nil {
+			return err
 		}
 	}
 	var runtime struct {
@@ -68,26 +63,21 @@ func (p *Provider) checkIsolation(ctx context.Context) error {
 			return hostedexecution.ErrConfiguration
 		}
 	}
-	var list struct {
-		Items []struct {
-			Metadata metadata       `json:"metadata"`
-			Spec     map[string]any `json:"spec"`
-		} `json:"items"`
-		Metadata struct {
-			Continue string `json:"continue"`
-		} `json:"metadata"`
+	return p.checkPolicies(ctx)
+}
+
+func (p *Provider) checkAccount(ctx context.Context, name string) error {
+	var account struct {
+		Metadata  metadata `json:"metadata"`
+		Automount *bool    `json:"automountServiceAccountToken"`
 	}
-	if err := p.request(ctx, http.MethodGet, "/apis/networking.k8s.io/v1/namespaces/"+p.config.Namespace+"/networkpolicies", nil, nil, &list); err != nil || len(list.Items) != 1 || list.Metadata.Continue != "" || list.Items[0].Metadata.Name != p.config.PolicyName {
+	if err := p.request(ctx, http.MethodGet, "/api/v1/namespaces/"+p.config.Namespace+"/serviceaccounts/"+name, nil, nil, &account); err != nil || account.Metadata.Name != name || account.Automount == nil || *account.Automount {
 		return hostedexecution.ErrConfiguration
 	}
-	spec := list.Items[0].Spec
-	if value, ok := spec["ingress"]; !ok || value == nil {
-		spec["ingress"] = []any{}
-	}
-	expected, _ := json.Marshal(p.policy())
-	actual, _ := json.Marshal(spec)
-	if string(expected) != string(actual) {
-		return hostedexecution.ErrConfiguration
+	for key := range account.Metadata.Annotations {
+		if !strings.HasPrefix(key, "meta.helm.sh/") && key != "kubectl.kubernetes.io/last-applied-configuration" {
+			return hostedexecution.ErrConfiguration
+		}
 	}
 	return nil
 }

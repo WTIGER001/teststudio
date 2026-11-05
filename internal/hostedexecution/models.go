@@ -45,13 +45,14 @@ type Job struct {
 }
 
 type Status struct {
-	AdmissionPending bool
-	NativeCompletion bool
-	Reference        execution.Reference
-	Image            string
-	Deadline         time.Time
-	Phase            string
-	ExitCode         *int
+	InfrastructureFailure bool
+	AdmissionPending      bool
+	NativeCompletion      bool
+	Reference             execution.Reference
+	Image                 string
+	Deadline              time.Time
+	Phase                 string
+	ExitCode              *int
 }
 
 type Provider interface {

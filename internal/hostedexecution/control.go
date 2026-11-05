@@ -27,7 +27,7 @@ func terminal(status Status) bool {
 }
 
 func successful(status Status) bool {
-	return status.Phase == "succeeded" && (status.ExitCode == nil && status.NativeCompletion || status.ExitCode != nil && *status.ExitCode == 0 && !status.NativeCompletion)
+	return !status.InfrastructureFailure && status.Phase == "succeeded" && (status.ExitCode == nil && status.NativeCompletion || status.ExitCode != nil && *status.ExitCode == 0 && !status.NativeCompletion)
 }
 
 func (e *Executor) observe(ctx context.Context, ref execution.Reference, image string, deadline time.Time) (status Status, err error) {
@@ -73,6 +73,9 @@ func (e *Executor) observe(ctx context.Context, ref execution.Reference, image s
 func (e *Executor) awaitAdmission(ctx context.Context, ref execution.Reference, image string, deadline time.Time) (Status, error) {
 	for {
 		status, err := e.observe(ctx, ref, image, deadline)
+		if err == nil && status.InfrastructureFailure {
+			return status, ErrUnavailable
+		}
 		if err != nil || !status.AdmissionPending {
 			return status, err
 		}
@@ -108,7 +111,7 @@ func (e *Executor) waitWorker(ctx context.Context, ref execution.Reference, imag
 		if err != nil {
 			return status, err
 		}
-		if status.AdmissionPending {
+		if status.AdmissionPending || status.InfrastructureFailure {
 			return status, ErrUnavailable
 		}
 		state, err := e.state(ctx, ref)

@@ -29,7 +29,17 @@ func validReference(ref execution.Reference) bool {
 	if strings.HasSuffix(ref.Profile, "-discovery-v1") && (!strings.HasPrefix(ref.Installation, "preparation-") || ref.Test != "catalog" || ref.Attempt != 1) {
 		return false
 	}
-	return domain.ValidID(ref.ID) && domain.ValidID(ref.Installation) && domain.ValidID(ref.Project) && domain.ValidID(ref.Run) && domain.ValidID(ref.Test) && domain.ValidID(ref.Worker) && ref.Attempt >= 1 && ref.Attempt <= 3 && ref.Volume == "" && ref.Gateway == "" && (ref.Profile == "go-kubernetes-isolated-v1" || ref.Profile == "playwright-kubernetes-isolated-v1" || ref.Profile == "go-kubernetes-discovery-v1" || ref.Profile == "playwright-kubernetes-discovery-v1") && ref.Container == "teststudio-job-"+func() string { sum := sha256.Sum256([]byte(ref.ID)); return hex.EncodeToString(sum[:20]) }()
+	sum := sha256.Sum256([]byte(ref.ID))
+	suffix := hex.EncodeToString(sum[:20])
+	gateway := ""
+	switch ref.Profile {
+	case "go-kubernetes-isolated-v1", "playwright-kubernetes-isolated-v1", "go-kubernetes-discovery-v1", "playwright-kubernetes-discovery-v1":
+	case "go-kubernetes-environment-v1", "playwright-kubernetes-environment-v1":
+		gateway = "teststudio-gateway-" + suffix
+	default:
+		return false
+	}
+	return domain.ValidID(ref.ID) && domain.ValidID(ref.Installation) && domain.ValidID(ref.Project) && domain.ValidID(ref.Run) && domain.ValidID(ref.Test) && domain.ValidID(ref.Worker) && ref.Attempt >= 1 && ref.Attempt <= 3 && ref.Volume == "" && ref.Gateway == gateway && ref.Container == "teststudio-job-"+suffix
 }
 
 func labels(ref execution.Reference) map[string]string {
@@ -121,6 +131,9 @@ func (p *Provider) verifyPod(value pod, record dispatch) error {
 
 func (p *Provider) jobRecord(job hostedexecution.Job) (dispatch, pod, error) {
 	profile := job.Runner + "-kubernetes-isolated-v1"
+	if job.Reference.Gateway != "" {
+		profile = job.Runner + "-kubernetes-environment-v1"
+	}
 	if job.Operation == "discover" {
 		profile = job.Runner + "-kubernetes-discovery-v1"
 	}

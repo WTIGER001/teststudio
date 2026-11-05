@@ -30,8 +30,27 @@ These changed exchange and supervisor checks pass with the race detector.
 Targeted command configuration and pinned-registry inspection checks pass. Runtime build-script syntax passes.
 New runtime overlays advertise the gateway capability. No image rebuild, cluster deployment, cloud test, or browser process occurs.
 The shared gateway process can fetch private configuration. Its complete provider installation path remains unverified.
-Continue Kubernetes workload ownership, instance confirmation, installation trust and secrets, network policy, and durable cleanup.
+Continue Kubernetes provider delivery and installation integration.
 The total remains 50 of 57. This advances 51, 56, and 57 without closing their broader requirements.
+
+### Kubernetes bundle lifecycle
+
+The provider now owns the runner, trusted gateway, headless Service, and two scoped execution network policies.
+The shared dispatch journal records resource hashes, creation attempts, UIDs, and independent Pod deadlines.
+Gateway identity binding precedes private configuration. Readiness precedes admission.
+Inventory includes all bundle resource kinds and partial creation.
+Shutdown attempts both workloads. Removal requires saved results, complete or abandoned evidence, and guarded resource absence.
+Lost acknowledgements do not replay creation. A changed resource retains ownership uncertainty and pending cleanup.
+Missing dispatch authority remains pending instead of being reconstructed from annotations.
+
+New local protocol checks cover full lifecycle, lost acknowledgement restart, partial creation cleanup, foreign gateway rejection, and policy loss.
+A stalled runner observation still permits independent gateway shutdown. Unconfirmed runner termination keeps the bundle nonterminal.
+Those changed provider checks pass with the race detector. Selected existing offline provider checks also pass.
+Two focused shared lifecycle scenarios reject infrastructure failure before activation and prevent a reported pass from overriding it.
+No image rebuild, cluster deployment, cloud test, browser session, or catalog execution occurs for this provider component.
+Normal environment executor registration, source discovery admission, image capability inspection, service-role secrets, and Helm installation wiring remain unfinished.
+See [Kubernetes gateway lifecycle](kubernetes-gateway.md) for current boundaries and exact continuation work.
+The verified total remains 50 of 57. This advances implementation under 51, 56, and 57. Azure remains deferred.
 
 ## Active application navigation correction — 2026-11-04
 

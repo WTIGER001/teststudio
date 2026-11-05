@@ -44,8 +44,9 @@ Their evidence does not close these separate cross-profile criteria.
 
 The [shared hosted admission](../internal/hostedexecution/admission.go) explicitly rejects artifacts with a browser target and tests with required credential bindings.
 Its image and runtime checks also reject environment-backed artifacts.
-The [Kubernetes Pod reference](../adapters/execution/kubernetes/pod.go) currently requires an empty gateway reference.
-Its worker policy permits only the private exchange and DNS.
+The [Kubernetes gateway component](kubernetes-gateway.md) now supports separate environment references and provider-owned gateway bundles.
+Its normal executor registration, image approval, source discovery, and installation path remain unwired.
+The deployed offline worker policy still permits only the private exchange and DNS.
 These are deliberate safety boundaries. Removing the checks does not implement hosted networking.
 
 The working local [gateway adapter](../adapters/execution/localcontainer/gateway.go) starts a separate trusted container.
@@ -91,7 +92,8 @@ Do not grant direct target egress to the runner as a shortcut.
 Bind gateway initialization and transport to the frozen execution, current dispatch authority, and deadline.
 The [remote transport component](remote-gateway.md) now provides an authenticated TLS gateway and a supervisor-owned Unix socket bridge.
 Shared private initialization, instance binding, frozen credential references, and supervisor delivery now pass targeted local checks.
-Hosted dispatch, provider identity confirmation, installation configuration, network policies, and provider cleanup remain unwired.
+The Kubernetes bundle provider now verifies resource identity and implements scoped policies, inventory, shutdown, and guarded cleanup.
+Normal admission, source discovery admission, image capability approval, installation wiring, and actual network execution remain unfinished.
 Resolve application credential references only inside the trusted delivery boundary.
 Credential values must not enter uploaded source, runner input, diagnostics, or durable execution metadata.
 Keep gateway configuration distinct from the ordinary worker packet and activation authority.

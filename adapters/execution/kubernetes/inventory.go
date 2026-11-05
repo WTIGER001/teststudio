@@ -20,6 +20,9 @@ import (
 )
 
 func (p *Provider) adopt(ctx context.Context, ref execution.Reference) (dispatch, error) {
+	if ref.Gateway != "" {
+		return dispatch{}, hostedexecution.ErrUnavailable
+	}
 	var value pod
 	if err := p.request(ctx, http.MethodGet, p.podPath(ref.Container), nil, nil, &value); errors.Is(err, errAbsent) {
 		return dispatch{}, hostedexecution.ErrNotFound
@@ -90,8 +93,11 @@ func (p *Provider) adopt(ctx context.Context, ref execution.Reference) (dispatch
 }
 
 func (p *Provider) Inventory(ctx context.Context, installation, profile string) ([]execution.Reference, error) {
-	if !domain.ValidID(installation) || (profile != "go-kubernetes-isolated-v1" && profile != "playwright-kubernetes-isolated-v1") {
+	if !domain.ValidID(installation) || (profile != "go-kubernetes-isolated-v1" && profile != "playwright-kubernetes-isolated-v1" && profile != "go-kubernetes-environment-v1" && profile != "playwright-kubernetes-environment-v1") {
 		return nil, hostedexecution.ErrConfiguration
+	}
+	if strings.HasSuffix(profile, "-environment-v1") {
+		return p.networkInventory(ctx, installation, profile)
 	}
 	found := map[string]execution.Reference{}
 	continuation := ""
@@ -139,6 +145,10 @@ func (p *Provider) Inventory(ctx context.Context, installation, profile string) 
 		}
 		continuation = list.Metadata.Continue
 	}
+	return p.inventoryRecords(ctx, installation, profile, found)
+}
+
+func (p *Provider) inventoryRecords(ctx context.Context, installation, profile string, found map[string]execution.Reference) ([]execution.Reference, error) {
 	cursor := ""
 	for {
 		page, err := p.store.List(ctx, Bucket, "", cursor, 100)

@@ -11,7 +11,7 @@ Actual local gVisor execution and selective worker network denial also pass.
 Fresh Go and Playwright suites now pass actual preparation, publication, execution, timing, and private evidence checks.
 See [local source execution](local-kubernetes-source-execution.md). Actual cancellation, test timeout, and interrupted-controller recovery now pass.
 See [local lifecycle](local-kubernetes-lifecycle.md). Independent Pod deadline enforcement now passes while guest processes and the controller are stopped. Actual controller peer failover now passes and closes acceptance 52. See [local controllers](local-kubernetes-controllers.md).
-Acceptance 51 remains open across providers. The total stays 48 verified items out of 57.
+Acceptance 51 remains open across providers. The total stays 50 verified items out of 57.
 
 The separate preparation command now connects registry assembly, immutable publication, and hosted discovery to the existing source queue.
 Native setup is documented in [Hosted preparation](hosted-discovery.md).
@@ -19,7 +19,9 @@ The optional [preparation package](kubernetes-preparation.md) adds its Helm depl
 The catalog still requires a prepared and approved immutable artifact.
 Source import does not automatically approve a new registry image.
 Environment-backed browser and API artifacts remain blocked until trusted remote gateway delivery exists.
-AWS and Azure execution adapters remain separate implementation work.
+The [gateway bundle component](kubernetes-gateway.md) now implements provider lifecycle controls and passes targeted local checks.
+Its normal admission, discovery, image approval, installation wiring, and actual network execution remain unfinished.
+Live AWS verification remains separate. Azure implementation and verification remain deferred.
 
 See [Shared hosted execution](hosted-execution.md), [Registry inspection](registry-inspection.md), and [Private worker exchange](worker-exchange.md).
 
@@ -74,7 +76,9 @@ Workers can reach only that peer and the selected DNS Pods through the supplied 
 Policy programming can briefly reject the permitted endpoint after Pod creation. Keep bounded input retries without relaxing the destination policy.
 The dedicated namespace contains exactly the supplied worker policy.
 Additional namespace network policies require review because Kubernetes combines their permissions.
-The adapter rejects an additional policy instead of assuming the intended restriction remains effective.
+The adapter rejects an unrecognized policy instead of assuming the intended restriction remains effective.
+The staged gateway component additionally permits only journal-verified execution policies.
+The currently installed offline profile keeps its existing single policy.
 
 The namespace and worker network policy have Helm keep annotations.
 Drain active work before uninstalling. Retained namespace and policy resources require explicit operator cleanup afterward.

@@ -6,7 +6,8 @@ The remote transport connects a trusted worker supervisor to the existing browse
 It implements the first component of the [hosted networking plan](deployment-readiness.md).
 Hosted dispatch remains disabled for environment-backed coded tests and credential bindings.
 Shared private initialization and supervisor bridge delivery are implemented.
-Provider resources, controller identity binding, installation configuration, network policies, and durable cleanup remain unfinished.
+The [Kubernetes resource lifecycle](kubernetes-gateway.md) now implements bundle ownership, instance binding, network policies, stop, inventory, and cleanup.
+Normal executor admission, discovery admission, image approval, installation wiring, and actual network execution remain unfinished.
 This component does not establish Kubernetes, ECS, or Azure deployment acceptance.
 Azure implementation remains deferred.
 
@@ -117,7 +118,7 @@ No cloud account, cluster deployment, browser process, image rebuild, or new cat
 Use the implemented private initialization and supervisor contracts when wiring the provider.
 Configure the trusted private exchange's secret provider before admitting authenticated suites.
 Mount the gateway server certificate and approved exchange trust through installation configuration.
-Extend Kubernetes admission, durable references, inventory, observation, stop, and cleanup to own both workloads.
+Use the implemented Kubernetes bundle lifecycle for admission and installation wiring.
 Verify both workload identities and the enforced network boundary before releasing the activation gate.
 Require the inspected supervisor gateway capability for environment-backed images.
 Extend hosted source-discovery validation for the reviewed environment build profiles while keeping discovery network-isolated.

@@ -37,6 +37,11 @@ func validPeer(peer Peer) bool {
 }
 
 func Validate(config Config) error {
+	if g := config.Gateway; g != nil {
+		if !immutable.MatchString(g.Image) || !dnsName.MatchString(g.ServiceAccount) || g.ServiceAccount == config.ServiceAccount || !dnsName.MatchString(g.TLSSecret) || g.ExchangeTrustSecret != "" && !dnsName.MatchString(g.ExchangeTrustSecret) {
+			return hostedexecution.ErrConfiguration
+		}
+	}
 	if config.ExchangePort < 0 || config.ExchangePort > 65535 {
 		return hostedexecution.ErrConfiguration
 	}
@@ -77,6 +82,14 @@ func New(options Options) (*Provider, error) {
 	if Validate(options.Config) != nil || options.Store == nil || options.Inspector == nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
+	var gatewayCA []byte
+	if options.Config.Gateway != nil && options.Config.Gateway.CAFile != "" {
+		var err error
+		gatewayCA, err = readPrivate(options.Config.Gateway.CAFile, 64<<10)
+		if err != nil || !x509.NewCertPool().AppendCertsFromPEM(gatewayCA) {
+			return nil, hostedexecution.ErrConfiguration
+		}
+	}
 	transport := options.Transport
 	if transport == nil {
 		data, err := readPrivate(options.Config.CAFile, 1<<20)
@@ -99,7 +112,7 @@ func New(options Options) (*Provider, error) {
 			return strings.TrimSpace(string(data)), nil
 		}
 	}
-	return &Provider{discoveryCleanup: options.DiscoveryCleanup, config: options.Config, store: options.Store, inspector: options.Inspector, token: token, http: &http.Client{Transport: transport, Timeout: 5 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}, nil
+	return &Provider{gatewayAuthority: options.GatewayAuthority, gatewayCA: gatewayCA, discoveryCleanup: options.DiscoveryCleanup, config: options.Config, store: options.Store, inspector: options.Inspector, token: token, http: &http.Client{Transport: transport, Timeout: 5 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}, nil
 }
 
 func (p *Provider) Close() {

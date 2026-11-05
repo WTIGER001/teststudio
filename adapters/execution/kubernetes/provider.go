@@ -13,6 +13,9 @@ import (
 )
 
 func (p *Provider) Ensure(ctx context.Context, job hostedexecution.Job) error {
+	if job.Reference.Gateway != "" {
+		return p.ensureNetwork(ctx, job)
+	}
 	record, value, err := p.jobRecord(job)
 	if err != nil {
 		return err
@@ -58,6 +61,13 @@ func (p *Provider) Ensure(ctx context.Context, job hostedexecution.Job) error {
 }
 
 func (p *Provider) Observe(ctx context.Context, ref execution.Reference) (hostedexecution.Status, error) {
+	if ref.Gateway != "" {
+		return p.observeNetwork(ctx, ref)
+	}
+	return p.observeWorker(ctx, ref)
+}
+
+func (p *Provider) observeWorker(ctx context.Context, ref execution.Reference) (hostedexecution.Status, error) {
 	record, _, err := p.load(ctx, ref)
 	if errors.Is(err, storage.ErrNotFound) {
 		record, err = p.adopt(ctx, ref)
@@ -70,6 +80,9 @@ func (p *Provider) Observe(ctx context.Context, ref execution.Reference) (hosted
 	if errors.Is(err, errAbsent) {
 		if record.Terminal != nil {
 			return *record.Terminal, nil
+		}
+		if record.Network != nil && (record.UID != "" || !record.Network.WorkerAttempted || time.Now().After(record.GuardUntil)) {
+			return hostedexecution.Status{}, hostedexecution.ErrNotFound
 		}
 		if record.Rejected || record.Removed || record.UID == "" && time.Now().After(record.GuardUntil) {
 			return hostedexecution.Status{}, hostedexecution.ErrNotFound
