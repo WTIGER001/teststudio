@@ -33,7 +33,7 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- if .Values.workers.enabled -}}
 {{- if or (eq .Values.workers.namespace .Release.Namespace) (eq .Values.workers.namespace "") -}}{{ fail "Workers require a separate dedicated namespace" }}{{- end -}}
 {{- if or (eq .Values.workers.origin .Values.origins.ui) (eq .Values.workers.origin .Values.origins.artifacts) -}}{{ fail "Workers require a separate private HTTPS origin" }}{{- end -}}
-{{- if eq .Values.workers.privateIngress.className .Values.ingress.className -}}{{ fail "Worker ingress must use a separate private ingress class" }}{{- end -}}
+{{- if and .Values.workers.privateIngress.enabled (eq .Values.workers.privateIngress.className .Values.ingress.className) -}}{{ fail "Worker ingress must use a separate private ingress class" }}{{- end -}}
 {{- if not .Values.networkPolicy.enabled -}}{{ fail "Workers require ingress network policy" }}{{- end -}}
 {{- include "teststudio.registryAuthentication" .Values.workers.registry -}}
 {{- end -}}

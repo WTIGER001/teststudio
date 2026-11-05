@@ -42,7 +42,7 @@ Deliver observable milestones in this order:
 | Dedicated cluster with Ready nodes | Verified. k3d v5.9.0 runs k3s v1.35.5+k3s1 in the separate teststudio-k3s Colima profile. |
 | Chart installation with local PostgreSQL and private evidence | Verified startup. Helm release teststudio is deployed. PostgreSQL and service Pods are Ready; both persistent claims are Bound. |
 | Newly authored HTTPS probe through the installation | Verified. Normal OIDC sign-in, catalog publication, execution, measured TLS, logs, and checksum-verified private evidence download pass. |
-| Isolated Go and Playwright workers | Pending an enforced RuntimeClass and network policy. |
+| Isolated Go and Playwright workers | Actual gVisor and selective network denial now pass. Local registry, preparation, and actual coded suite runs are next. |
 | Cancellation, deadlines, artifacts, and restart recovery | Pending actual worker execution. |
 
 The private kubeconfig uses the observed loopback API mapping and mode 0600. Helm host connectivity passes.
@@ -54,6 +54,10 @@ Run 20261105T135704.336870446-2120fdc092213d2c32b6024c passes with one logical p
 The probe duration is 2.293329 ms, including a measured 1.418414 ms TLS handshake.
 See output/local-k3s/probe/summary.json for the actual run and private-download evidence.
 Service Pod replacement preserves that same single run and downloadable evidence. No second test execution occurs.
+The local cluster now has a verified gVisor 20261005.0 systrap runtime and an exchange-only private TLS proxy.
+A diagnostic Pod reaches the exchange while its API, artifact, database, and probe-target connections are denied.
+Node-side checks confirm that those four services are available. Temporary diagnostics are removed.
+Three focused routing profiles and four invalid configuration checks pass. See [local isolation](local-kubernetes-isolation.md).
 See [local Kubernetes](local-kubernetes.md) and output/local-k3s/cluster-summary.json for evidence and continuation instructions.
 
 Report which milestone runs on a real cluster and which checks remain simulated.

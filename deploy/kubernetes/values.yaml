@@ -97,6 +97,7 @@ workers:
     credentials: {}
     caSecret: ""
   privateIngress:
+    enabled: true
     className: ""
     tlsSecret: ""
     annotations: {}

@@ -6,7 +6,8 @@ TestStudio now supplies a Kubernetes Pod adapter and explicit server configurati
 Both offline Go and Playwright execution use the shared hosted lifecycle and private worker exchange.
 The Helm profile supplies the private listener route, worker namespace, service account, controller permissions, and worker network policy.
 Local protocol and packaging checks pass. A dedicated [local k3s cluster](local-kubernetes.md) now has a Ready node.
-Core application installation and TLS ingress checks now pass. Actual isolated worker runs remain pending.
+Core application installation, OIDC sign-in, and a newly authored HTTPS probe now pass.
+Actual local gVisor execution and selective worker network denial also pass. Actual coded suite runs remain pending.
 Acceptance 51 remains open across providers. The total stays 48 verified items out of 57.
 
 The separate preparation command now connects registry assembly, immutable publication, and hosted discovery to the existing source queue.
@@ -25,7 +26,7 @@ Start with the [core Kubernetes profile](kubernetes.md).
 Use the changed service image and its registry distribution digest when preparing a deployment.
 The local ARM64 package for this batch is recorded in output/kubernetes-workers/service-image.json.
 A local image identifier is not a registry distribution digest.
-No image push or cluster operation occurs during local verification.
+Protocol and rendering checks contact no cluster. The separate [local isolation verification](local-kubernetes-isolation.md) uses the dedicated test cluster.
 
 The worker profile is disabled by default.
 Select deploy/kubernetes/workers.example.yaml alongside the core values when preparing the enabled configuration.
@@ -49,9 +50,25 @@ The selected private ingress controller routes only the worker exchange. It must
 The worker namespace cannot share the API namespace in this chart.
 The private ingress class and host must differ from the public application route.
 
+### Existing private TLS routing
+
+workers.privateIngress.enabled defaults to true and creates the worker Ingress resource.
+Set it to false when the installation supplies an existing private TLS proxy or gateway.
+The chart still creates the worker Service, controller listener, permissions, and restrictive network policies.
+The ingress class and TLS Secret inputs are then optional. The separate worker origin and exact peer selectors remain required.
+Route that origin only to RELEASE-worker in the application namespace on Service port 80, targeting the private listener on port 8042.
+Retain hostname and certificate validation. Configure the worker runtime to trust the exchange authority.
+The existing route must expose no UI, API, artifact, or general target access through the worker's permitted peer.
+Its actual Pod TLS port must match workers.privateIngress.port.
+
+The dedicated local cluster uses this option with a small test-only TLS proxy in a separate restricted namespace.
+It exposes only the worker path prefix and exact worker host. Its outbound policy permits only the controller and cluster DNS.
+This proxy is a verification fixture, not a production ingress implementation.
+
 The private ingress peer port names the actual ingress Pod TLS port.
 Its default is 443. Set it to the ingress container's port when service translation uses another target port.
 Workers can reach only that peer and the selected DNS Pods through the supplied network policy.
+Policy programming can briefly reject the permitted endpoint after Pod creation. Keep bounded input retries without relaxing the destination policy.
 The dedicated namespace contains exactly the supplied worker policy.
 Additional namespace network policies require review because Kubernetes combines their permissions.
 The adapter rejects an additional policy instead of assuming the intended restriction remains effective.

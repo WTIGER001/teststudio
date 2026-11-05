@@ -153,6 +153,18 @@ This verifies core persistence across that restart. It does not establish replic
 Evidence is output/local-k3s/probe/summary.json and the adjacent retained run, event, attempt, artifact, and log records.
 No browser, AWS, or Azure test runs. This advances the Kubernetes portions of 51, 55, and 56 without closing their full scope.
 The next measurable result is actual isolated Go and Playwright execution with enforced runtime and network boundaries.
+The local cluster now runs the verified gVisor 20261005.0 package through RuntimeClass teststudio-isolated.
+An actual non-root diagnostic Pod reports the gVisor kernel and exits zero.
+The chart can use external private TLS routing while preserving the worker Service, controller permissions, and exact policy peers.
+The dedicated local proxy exposes only the worker exchange host and path prefix.
+A worker-namespace diagnostic reaches that exchange and has no Kubernetes API token.
+Its connections to the API, artifact service, PostgreSQL, and local probe target are denied.
+The positive node-side baseline confirms that those four destination services accept connections.
+Four readiness retries allow policy convergence without relaxing the network policy.
+The diagnostic Pod, public-CA ConfigMap, and temporary node helper are removed after the check.
+Three focused routing profiles and four invalid configurations pass local rendering and schema validation.
+Actual Go and Playwright suite runs still require the local registry and preparation workflow.
+This advances the Kubernetes portion of 51. The total remains 48 verified, 9 open.
 See [local Kubernetes](local-kubernetes.md) for scoped commands and stop instructions.
 No numbered acceptance item closes. The total remains **48 verified, 9 open**.
 

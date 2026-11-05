@@ -4,7 +4,17 @@ Database Secret: {{ .Values.database.existingSecret }} / {{ .Values.database.key
 
 Configure the declared TLS Secrets, ingress controller, PostgreSQL connection, and OIDC callbacks before use.
 Filesystem artifact claims remain after release removal. Manage retention and backups explicitly.
-Hosted coded execution requires the separate provider worker adapters described in the product plan.
+{{ if .Values.workers.enabled }}
+Worker namespace: {{ .Values.workers.namespace }}
+RuntimeClass: {{ .Values.workers.runtimeClass }}
+Private exchange: {{ .Values.workers.origin }}
+{{ if not .Values.workers.privateIngress.enabled }}
+Private routing is externally managed. Route only the worker origin to the worker Service and retain the configured network-policy peers.
+{{ end }}
+Approved immutable images and working private exchange routing are required before coded dispatch.
+{{ else }}
+Hosted coded execution requires the separate provider worker profile described in the product plan.
+{{ end }}
 {{ if .Values.preparation.enabled }}
 Preparation worker: {{ include "teststudio.preparationName" . }}
 New source staging and builds: {{ .Values.preparation.acceptNewWork }}

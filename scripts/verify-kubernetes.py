@@ -18,6 +18,7 @@ def main():
     selection = parser.add_mutually_exclusive_group()
     selection.add_argument('--workers-only', action='store_true')
     selection.add_argument('--preparation-only', action='store_true')
+    selection.add_argument('--routing-only', action='store_true')
     parser.add_argument('--pod', type=Path)
     arguments = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
@@ -158,9 +159,13 @@ def main():
                 exchange = egress['spec']['egress'][0]
                 assert exchange['ports'] == [{'protocol': 'TCP', 'port': worker['privateIngress'].get('port', 443)}]
                 assert exchange['to'][0]['podSelector']['matchLabels'] == worker['privateIngress']['podLabels']
-                private_ingress = next(item for item in by_kind['Ingress'] if item['metadata']['name'] == 'fixture-worker')
-                assert private_ingress['spec']['ingressClassName'] == worker['privateIngress']['className']
-                assert private_ingress['spec']['rules'][0]['host'] == worker['origin'].removeprefix('https://')
+                private_routes = [item for item in by_kind['Ingress'] if item['metadata']['name'] == 'fixture-worker']
+                if worker['privateIngress'].get('enabled', True):
+                    assert len(private_routes) == 1
+                    assert private_routes[0]['spec']['ingressClassName'] == worker['privateIngress']['className']
+                    assert private_routes[0]['spec']['rules'][0]['host'] == worker['origin'].removeprefix('https://')
+                else:
+                    assert not private_routes
                 assert policy['ingress'][1]['ports'] == [{'protocol': 'TCP', 'port': 8042}]
             else:
                 assert 'kubernetes-workers.json' not in config
@@ -179,7 +184,23 @@ def main():
         lint = execute([arguments.helm, 'lint', str(chart), '--strict', '--values', str(values_file)])
         (output / 'lint.log').write_text(lint.stdout)
         original_checksum = render('filesystem-single', base)
-        if arguments.preparation_only:
+        if arguments.routing_only:
+            enabled = copy.deepcopy(base)
+            enabled.update(yaml.safe_load((chart / 'workers.example.yaml').read_text()))
+            render('managed-private-routing', enabled)
+            external = copy.deepcopy(enabled)
+            external['workers']['privateIngress'].update(enabled=False, className='', tlsSecret='')
+            render('external-private-routing', external)
+            for name, selected, change in [
+                ('managed-missing-class', enabled, {'className': ''}),
+                ('managed-missing-tls', enabled, {'tlsSecret': ''}),
+                ('external-missing-peer', external, {'namespace': ''}),
+                ('external-empty-peer-labels', external, {'podLabels': {}}),
+            ]:
+                invalid = copy.deepcopy(selected)
+                invalid['workers']['privateIngress'].update(change)
+                render(name, invalid, expected=False)
+        elif arguments.preparation_only:
             enabled = copy.deepcopy(base)
             enabled.update(yaml.safe_load((chart / 'workers.example.yaml').read_text()))
             render('workers-without-preparation', enabled)
