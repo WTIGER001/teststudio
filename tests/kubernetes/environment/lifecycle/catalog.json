@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "teststudio.catalog/v1",
+  "tests": [
+    {
+      "id": "NET-GATEWAY-CANCEL-001",
+      "title": "Cancel an active gateway execution",
+      "applicationId": "gateway-fixture",
+      "category": "Gateway lifecycle",
+      "type": "api",
+      "runner": "go",
+      "state": "enabled",
+      "safety": "safe",
+      "rationale": "Reads the independent fixture before a bounded cancellation window",
+      "requiredBindings": ["reader"],
+      "timeoutSeconds": 60,
+      "source": "module/lifecycle_test.go",
+      "selector": ".::TestGatewayCancellation",
+      "capture": { "logs": true, "screenshots": "off", "trace": "off", "video": "off" }
+    },
+    {
+      "id": "NET-GATEWAY-RECOVERY-001",
+      "title": "Recover the original gateway execution",
+      "applicationId": "gateway-fixture",
+      "category": "Gateway lifecycle",
+      "type": "api",
+      "runner": "go",
+      "state": "enabled",
+      "safety": "safe",
+      "rationale": "Reads the independent fixture before a bounded controller interruption window",
+      "requiredBindings": ["reader"],
+      "timeoutSeconds": 60,
+      "source": "module/lifecycle_test.go",
+      "selector": ".::TestGatewayRecovery",
+      "capture": { "logs": true, "screenshots": "off", "trace": "off", "video": "off" }
+    }
+  ]
+}

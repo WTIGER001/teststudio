@@ -119,4 +119,32 @@ Read each runner's summary, run, preparation, artifact, log, and execution files
 Private download grants stay in memory and are not written into those summaries.
 The stable acceptance count changes only after a complete acceptance requirement passes.
 These scenarios advance 41, 51, 56, and 57. The verified count remains 50 of 57.
-Actual gateway cancellation and interrupted-run recovery remain the next targeted local lifecycle checks.
+### Verify gateway lifecycle boundaries
+
+```sh
+python3 scripts/verify-kubernetes-gateway-lifecycle.py --case=cancel
+python3 scripts/verify-kubernetes-gateway-lifecycle.py --case=recovery
+```
+
+Both actual cases now pass on Helm revision 14 without rebuilding any image.
+One new lifecycle suite uses the existing authenticated target and runtime.
+The selected test writes a private output marker only after its gateway request succeeds.
+The verifier checks that marker inside the owned worker before the requested action.
+It confirms the worker UID, gateway UID, original execution identifier, and controller identity.
+It saves each operation identifier before polling or interrupting a process.
+Reusing the command observes the existing run and never dispatches a replacement.
+
+Cancellation run 20261105T190905.111792480-6395b63f6393d2b50ee25bda reaches cancelled and cleaned.
+Its interrupted attempt remains unknown, with unavailable duration and incomplete evidence.
+Five private diagnostic artifacts pass checksum and credential-absence checks.
+
+Recovery run 20261105T191000.981246578-8b2e6eef59d96658294be7ea receives one verified controller SIGKILL after its authenticated request.
+Its original execution retains a passing observation measured at 12010 ms.
+The run remains incomplete with unknown outcome. Its execution evidence is complete, and cleanup reaches cleaned.
+Five private diagnostic artifacts pass verification. The same controller Pod restarts, and both controllers return Ready.
+
+Both cases keep one execution each. Their worker Pods, gateway Pods, Services, and execution policies are absent.
+CRI reports no running worker or gateway container. All twelve previous offline runs remain unchanged.
+The two checks use one preparation and pass once each. They start no host browser or cloud test.
+Retained records live in output/local-k3s/gateway/lifecycle.
+The next implementation step is the ECS trusted gateway integration with targeted local checks.

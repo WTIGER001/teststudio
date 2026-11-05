@@ -95,7 +95,7 @@ Both actual local cluster workflows pass with measured durations, private eviden
 ECS still needs the shared gateway integration. Hosted recording still needs its local companion.
 
 1. Keep the completed Kubernetes gateway and its two passing application workflows as retained evidence.
-2. Verify only the new gateway cancellation and interrupted-run recovery boundaries on the dedicated local cluster.
+2. Retain the passing gateway cancellation and interrupted-run recovery cases. Both use their original execution identities and clean both workloads.
 3. Port the completed shared gateway contract to ECS packaging and adapters using local contract checks.
 4. Add a scoped local recorder companion for hosted authoring, preserving the existing wizard and source workflow.
 5. Complete target verification only in separately authorized deployment work. Keep Azure implementation deferred.
@@ -118,7 +118,10 @@ Integration fixes cover target-suite discovery authorization, Docker's exact def
 The local proxy permits the new trusted gateway role. The local preparation CPU reservation permits a worker and gateway to fit together.
 The upgraded controller also cleans the retained failed execution without another dispatch.
 Retain unsuccessful attempts and both passing run identifiers in output/local-k3s/gateway/references.json.
-Continue only the changed-boundary cancellation and interrupted-run recovery checks before the ECS gateway port.
+Actual gateway cancellation and interrupted-run recovery now pass once each, using one new source preparation and no image rebuilds.
+Cancellation keeps an unknown interrupted attempt and unavailable duration. Recovery retains a passing observation measured at 12010 ms.
+Both remove their original worker, gateway, Service, and policies. Both controllers return Ready, and the twelve original offline runs remain unchanged.
+Retain the two case records in output/local-k3s/gateway/lifecycle. Continue implementation with the ECS gateway port.
 Reuse existing offline and passing gateway evidence. Build only images affected by an actual implementation change.
 See [local gateway verification](local-kubernetes-gateway.md) for exact continuation commands and remaining scope.
 Read [deployment readiness](deployment-readiness.md) before the historical Azure continuation material below.

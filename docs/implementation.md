@@ -103,7 +103,27 @@ Targeted source, registry, bundle lifecycle, and failed-worker cleanup regressio
 Only the changed service image rebuilds after concrete fixes. Runtime images and existing offline checks remain reused.
 See [local gateway verification](local-kubernetes-gateway.md), output/local-k3s/gateway, and [deployment readiness](deployment-readiness.md).
 This advances **41, 51, 56, and 57**. The total remains **50 verified, 7 open**.
-Gateway cancellation and interrupted-run recovery remain the next targeted local scenarios. Azure stays deferred.
+Azure stays deferred.
+
+### Actual gateway cancellation and interrupted-run recovery
+
+Both targeted local gateway lifecycle cases now pass once each without rebuilding an image.
+One new suite first reaches the existing authenticated target, then writes a marker in its private output volume.
+The verifier checks that marker and both workload identities before cancellation or the owning controller's SIGKILL.
+
+Cancellation run 20261105T190905.111792480-6395b63f6393d2b50ee25bda keeps an unknown interrupted attempt and unavailable duration.
+It reaches cancelled and cleaned. Five available private diagnostic artifacts pass checksum and credential-absence checks.
+
+Recovery run 20261105T191000.981246578-8b2e6eef59d96658294be7ea retains its original execution and passing observation measured at 12010 ms.
+Its run remains incomplete with unknown outcome. Its execution evidence is complete, and cleanup reaches cleaned.
+Five private diagnostic artifacts pass verification. The original controller Pod restarts, and both execution controllers return Ready.
+
+Each case keeps one execution identifier. Both worker Pods, gateway Pods, Services, and execution policies are absent after cleanup.
+CRI reports no running worker or gateway container. The twelve offline runs remain unchanged.
+No host browser, cloud call, broad suite, calibration run, or image rebuild occurs.
+See output/local-k3s/gateway/lifecycle and [local gateway lifecycle](local-kubernetes-gateway.md#verify-gateway-lifecycle-boundaries).
+This advances **51, 56, and 57**. The total remains **50 verified, 7 open**.
+Continue with ECS gateway implementation and targeted local checks. Azure remains deferred.
 
 ## Active application navigation correction — 2026-11-04
 
