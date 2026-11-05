@@ -122,7 +122,44 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: observer federated-credential absence
+## Current delivery: reported observer identity write protection
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+ReadIdentitySettings now requires protectionAssignment at the exact selected identity resource scope.
+The reader adds a selected GET through the existing authorization SDK and pinned preview API, with no list, mutation, alternate-scope, or optional fallback.
+The shared resource-deny verifier requires explicit enforcement, Azure system protection, child coverage, one all-principal entry, and no excluded principals or conditions.
+One permission denies the literal star action with exactly read and lock-delete exceptions.
+Assignment, credential-write, deletion, and extra DNS-association exceptions reject the identity profile.
+The existing network and zone profile keeps its three fixed exceptions through the same verifier.
+
+The five identity observations run concurrently after the existing network protection chain.
+Failed identity protection blocks credential construction and completed bound checks. Selected state refreshes after the subscription scan's earlier observation.
+The subscription read-deny scan now requires six selected assignments, including identity protection.
+Its DNS-association conflict check now respects operation scope. An identity-resource deny cannot block a VNet operation through that scope relationship.
+Other inherited, subscription, resource-group, and VNet conflicts retain their existing checks.
+
+One added GET increases identity and bootstrap ceilings to 2198, read-deny sessions to 2214, and host checks to 2218 requests.
+Contexts remain 125, 130, and 135 seconds respectively. The host session retains 22 readers.
+No parent scan, role grant, dependency, or packaging build is added.
+The optional core identity package still declares no protection arrangement and cannot supply an automatic protectionAssignment.
+
+Three new focused race checks, eight changed identity and scan checks, and one shared network-protection regression pass in 4.240 seconds.
+They cover exact scope, enforcement, system protection, child scopes, exclusions, conditions, forbidden exceptions, SDK restrictions, factory gating, fresh selected state, and required scan coverage.
+The bound host rejects changed protection, accepts a restored response, and blocks when the subscription list omits the sixth assignment.
+The scan accepts an unrelated read-preserving identity deny and still rejects a VNet DNS-association deny.
+Only affected read counts and contracts change in existing checks. No broad suite repeats.
+Fixtures use fake credentials and in-memory SDK transports. They open no network connection or service listener and request no real token.
+No cloud operation, UI build, browser, image build, container, registry push, deployment, or demo restart runs.
+External requests read only public Microsoft documentation.
+Evidence is output/azure-observer-protection/summary.json and the targeted command results.
+See [identity write protection](azure-read-identity.md#identity-write-protection).
+
+The read-only inspector creates no assignment and tests no prohibited mutation. Actual enforcement, resource-type support, preview compatibility, and owning protection-management authority remain unproven.
+Existing foreign consumers, creation provenance, trusted host configuration, effective coverage, execution isolation, and native command wiring remain required.
+All nine broad acceptance items remain open under their original scope.
+
+## Previous delivery: observer federated-credential absence
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 

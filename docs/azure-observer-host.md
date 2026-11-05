@@ -6,6 +6,7 @@ ObserverHostGuard checks the selected controller app's reported observer attachm
 It follows the [reported subscription read-deny check](azure-read-deny.md) through the same bound observer credential.
 Its existing [workload inventory](azure-worker-workloads.md#observer-identity-placement) now rejects reported sharing on another Container App or job without another scan.
 Its identity reader also requires [federated-credential absence](azure-read-identity.md#federated-credential-absence) during bootstrap and each bound inspection.
+It now requires [reported identity write protection](azure-read-identity.md#identity-write-protection) on that exact identity and its child scopes.
 It does not establish exclusive identity use, complete trusted API configuration, actual host token issuance, or complete effective authorization.
 Those requirements remain part of native admission and separate hosted verification.
 No Network is implemented. Azure coded jobs remain disabled.
@@ -70,8 +71,8 @@ The shared service reader supplies bounded revision paging. Its environment, rou
 Each operation has a five-second context and four-megabyte response limit. Revisions permit at most four records across three pages.
 Retries and provider registration remain disabled. Unsafe pages, redirects, and incomplete revisions remain blocking errors.
 
-The composed host check has a 135-second context and at most 2217 requests, including the identity reader's federation-absence GET.
-The host-specific additional cost remains two GETs. Initial binding retains its separate 125-second bootstrap context and 2197-request ceiling.
+The composed host check has a 135-second context and at most 2218 requests, including federation absence and identity protection.
+The host-specific additional cost remains two GETs. Initial binding retains its separate 125-second bootstrap context and 2198-request ceiling.
 Successful observations are not cached. Closing the session releases all 22 readers and prevents later checks.
 Returned errors omit provider messages and private app configuration.
 
@@ -88,6 +89,7 @@ The observerBinding output contains resource identifiers, client, principal, ten
 It contains no secret value or token. Combine those values with the complete installation network settings for the Go observer configuration.
 The output is not a complete execution profile or admission certificate.
 Enabling the option prepares identity resources only. Native observer startup and coded job dispatch remain unwired.
+The package declares no identity protection arrangement. Supply the verified resource-scoped protectionAssignment through complete installation configuration before using the observer guard.
 Provisioning requires subscription-level role-definition and role-assignment authority in addition to the existing core deployment permissions.
 These templates are compiled locally only. No resource, role, or deployment is created in this work session.
 

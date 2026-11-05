@@ -33,7 +33,7 @@ Deployed enforcement, existing cross-scope links, clean provenance, read coverag
 The [observer identity stage](azure-read-identity.md) now binds the reported client, principal, tenant, and selected subscription read grant.
 Bound observer sessions now use that verified client credential throughout the rebuilt SDK inspection chain.
 Effective access, host attachment, and native command wiring remain unverified.
-The [reported read-deny scan](azure-read-deny.md) now checks subscription conflicts before the bound resource chain and requires all five selected protection assignments.
+The [reported read-deny scan](azure-read-deny.md) now checks subscription conflicts before the bound resource chain and requires all six selected protection assignments.
 Local SDK fixtures verify this gate. Hosted visibility and actual enforcement remain unproven.
 The [observer host stage](azure-observer-host.md) now checks selected controller placement, identity lifecycles, image, and healthy current revision.
 Optional core packaging declares its separate API-only identity and fixed subscription read grant. Native startup and execution admission remain incomplete.
@@ -41,6 +41,8 @@ Host-bound workload inventory now rejects reported observer sharing on other app
 Other identity consumers, complete read visibility, and future attachment authority remain unproven.
 The identity reader now rejects reported federated credentials and unknown collection state before credential construction or completed bound checks.
 Future credential writes, other consumer types, actual visibility, and identity-management authority remain separate requirements.
+The selected identity now requires reported enforced write protection with child coverage and no attachment or credential-write exception.
+The read-only checks create no protection resource and establish no deployed enforcement or control over its owning arrangement.
 The complete adapter must also prove read coverage, attachment authority, effective zone visibility, full backend authority, exchange networking, and execution placement.
 Azure coded execution remains disabled in native commands and infrastructure packaging.
 See [durable Azure execution](azure-worker-lifecycle.md), [job contracts](azure-worker-contract.md), and [independent deadlines](azure-worker-deadlines.md).

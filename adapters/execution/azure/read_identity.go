@@ -18,6 +18,7 @@ type ReadIdentityReader interface {
 	Assignment(context.Context, string) (a.RoleAssignment, error)
 	Role(context.Context, string) (a.RoleDefinition, error)
 	FederationAbsent(context.Context, string) error
+	Protection(context.Context, string) (a.DenyAssignment, error)
 }
 
 type ReadIdentityGuard struct {
@@ -64,12 +65,14 @@ func (g *ReadIdentityGuard) inspect(ctx context.Context, c Config) (identity m.I
 	}
 	var assignment a.RoleAssignment
 	var role a.RoleDefinition
-	var errs [4]error
+	var protection a.DenyAssignment
+	var errs [5]error
 	var group sync.WaitGroup
 	group.Go(func() { identity, errs[0] = g.reader.Identity(ctx, g.settings.Identity) })
 	group.Go(func() { assignment, errs[1] = g.reader.Assignment(ctx, g.settings.Assignment) })
 	group.Go(func() { role, errs[2] = g.reader.Role(ctx, g.settings.Role) })
 	group.Go(func() { errs[3] = g.reader.FederationAbsent(ctx, g.settings.Identity) })
+	group.Go(func() { protection, errs[4] = g.reader.Protection(ctx, g.settings.ProtectionAssignment) })
 	group.Wait()
 	for _, err := range errs {
 		if errors.Is(err, hostedexecution.ErrOwnership) {
@@ -82,6 +85,9 @@ func (g *ReadIdentityGuard) inspect(ctx context.Context, c Config) (identity m.I
 		}
 	}
 	if err := verifyReadIdentity(c, g.settings, identity, assignment, role); err != nil {
+		return m.Identity{}, err
+	}
+	if err := verifyReadIdentityProtection(g.settings, protection); err != nil {
 		return m.Identity{}, err
 	}
 	return identity, nil

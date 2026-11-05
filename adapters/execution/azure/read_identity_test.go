@@ -20,7 +20,7 @@ func TestAzureReadIdentityBindsFreshPrincipalAndSubscriptionGrant(t *testing.T) 
 		if i == 2 {
 			slices.Reverse(f.role.Properties.Permissions[0].Actions)
 		}
-		if err := g.Check(t.Context(), c); err != nil || f.reads != i*4 || f.protection.reads != i*5 || f.protection.inventory.reads != i*4 {
+		if err := g.Check(t.Context(), c); err != nil || f.reads != i*5 || f.protection.reads != i*5 || f.protection.inventory.reads != i*4 {
 			t.Fatal("observer grant rejected or parent repeated", err, f.reads, f.protection.reads)
 		}
 	}
@@ -29,12 +29,12 @@ func TestAzureReadIdentityBindsFreshPrincipalAndSubscriptionGrant(t *testing.T) 
 	}
 	f.assignment.Properties.PrincipalID = to.Ptr("aaaaaaaa-1111-2222-3333-444444444444")
 	requireDeadlineError(t, g.Check(t.Context(), c), hostedexecution.ErrOwnership)
-	if f.reads != 12 {
+	if f.reads != 15 {
 		t.Fatal("changed principal reused cached grant")
 	}
 	f.protection.mode = "unavailable"
 	requireDeadlineError(t, g.Check(t.Context(), c), hostedexecution.ErrUnavailable)
-	if f.reads != 12 {
+	if f.reads != 15 {
 		t.Fatal("unverified protection reached observer grant reads")
 	}
 	c.NetworkProfile = "other-profile"
@@ -89,7 +89,7 @@ func TestAzureReadIdentityCredentialFactoryPinsVerifiedClientWithoutTokenRequest
 	}
 	s.ClientID = "aaaaaaaa-1111-2222-3333-444444444444"
 	credential, err := g.Credential(t.Context(), c)
-	if err != nil || credential == nil || len(clients) != 1 || clients[0] != f.settings.ClientID || f.reads != 4 {
+	if err != nil || credential == nil || len(clients) != 1 || clients[0] != f.settings.ClientID || f.reads != 5 {
 		t.Fatal("credential did not bind verified identity in one inspection", err, clients, f.reads)
 	}
 	f.identity.Properties.PrincipalID = nil

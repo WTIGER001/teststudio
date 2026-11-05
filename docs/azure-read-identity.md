@@ -14,6 +14,7 @@ The [reported read-deny scan](azure-read-deny.md) now gates each bound inspectio
 The [host-bound observer](azure-observer-host.md) additionally checks the selected controller app's reported identity exposure and current revision.
 Its workload stage now rejects [reported app and job identity sharing](azure-worker-workloads.md#observer-identity-placement) while retaining the same collection requests.
 The identity stage now requires an explicit empty federated-credential collection before constructing a credential or completing a bound inspection.
+It also requires reported enforced protection on the selected identity and its child scopes, with no attachment or credential-write exception.
 Identity attachment, token availability, deny coverage, protection-management authority, and cross-scope visibility remain installation requirements.
 Acceptance 51 advances. The total remains 48 verified of 57, with nine open.
 
@@ -30,6 +31,7 @@ ReadIdentitySettings requires these fields:
 | tenantId | Canonical, nonzero tenant GUID. |
 | assignment | Selected subscription-root role assignment identifier with a GUID name. |
 | role | Selected subscription-root role definition identifier with a GUID name. |
+| protectionAssignment | Exact resource-scoped deny assignment on the selected identity, with a GUID name. |
 
 The identity resource must differ from the four known pull and backend identity resources.
 Its observed name, resource type, location, identifier, client, principal, and tenant must match the selected configuration.
@@ -62,17 +64,17 @@ It provides no default-credential fallback. This method does not request or rede
 SDK calls made later with that credential can request tokens. Host identity attachment and successful authentication require separate verification.
 The [managed identity credential API](https://pkg.go.dev/github.com/Azure/azure-sdk-for-go/sdk/azidentity#ManagedIdentityCredentialOptions) defines explicit user-assigned identity selection.
 
-SDKReadIdentityReader requires an explicit credential and permits only four selected GET paths.
+SDKReadIdentityReader requires an explicit credential and permits only five selected GET paths.
 The identity reader pins armmsi v1.3.0 and API 2024-11-30.
 The existing armauthorization/v3 v3.0.0-beta.3 supplies role assignment API 2022-04-01 and role definition API 2022-05-01-preview.
 The scoped role Get method preserves the exact query. GetByID adds an SDK disambiguation query outside this transport contract.
 The shared transport rejects mutations, other collections, alternate resources, extra query parameters, secret operations, and redirects.
 Provider registration and retries remain disabled. Each selected read has a five-second context and four-megabyte response limit.
 
-Four selected reads run concurrently after protection succeeds: identity, assignment, role, and federated-credential absence.
+Five selected reads run concurrently after network protection succeeds: identity, assignment, role, federated-credential absence, and identity write protection.
 Parent observations do not repeat within one inspection.
-The composed guard has a 125-second context and at most 2197 requests, including the bounded reported-subscription scan.
-Normal additional cost is exactly four GETs. Successful observations are not cached or persisted.
+The composed guard has a 125-second context and at most 2198 requests, including the bounded reported-subscription scan.
+Normal additional cost is exactly five GETs. Successful observations are not cached or persisted.
 Credential construction uses the identity from that same inspection.
 Returned errors use fixed public categories and omit provider messages, condition text, and credential factory details.
 
@@ -102,6 +104,38 @@ The reader returns no issuer, subject, audience, credential name, response body,
 Successful absence is not cached or persisted. It does not prevent a later administrative write or establish complete identity exclusivity.
 Future credential-write authority and protection of the identity resource remain separate installation requirements.
 
+## Identity write protection
+
+ProtectionAssignment must name a denyAssignments extension on the exact selected user-assigned identity.
+A subscription, resource-group, child-credential, or another identity scope cannot substitute for that binding.
+The observer reads that assignment through the existing preview authorization SDK and API 2024-07-01-preview.
+It grants no mutation or deny-management operation.
+
+The shared protection verifier requires explicit Enforced effect, Azure system protection, child-scope coverage, and one all-principal entry.
+There are no excluded principals, conditions, or conditional permission entries.
+One management permission denies the literal star action, with exactly these two exceptions:
+
+- */read
+- Microsoft.Authorization/locks/delete
+
+The identity profile needs no DNS-association exception. An additional exception rejects the selected protection contract.
+Identity assign actions, federated-credential writes, identity deletion, and other management mutations cannot appear in its exception set.
+Microsoft's [identity role reference](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles/identity#managed-identity-operator) describes the identity assignment operation.
+The [deployment-stack deny model](https://learn.microsoft.com/en-us/rest/api/resources/deployment-stacks/list-at-subscription?view=rest-resources-2025-07-01) documents read and lock-delete exceptions and child-scope settings.
+
+The selected identity assignment must also appear among the subscription scan's six required protections.
+That scan validates its fixed contract independently. The later selected GET refreshes its actual reported state before credential construction or completed inspection.
+The existing five network and zone protections keep their original three-exception profile.
+The generic scan now checks DNS-association denials at subscription, resource-group, ancestor, or VNet scopes where that operation can apply.
+An identity-resource deny does not block a VNet's DNS-association operation through this scope relationship.
+
+The inspector creates no deny assignment and attempts no forbidden mutation.
+Installation tooling must establish a supported Azure-managed protection arrangement and verify its generated resources.
+Attach the selected host before enabling its identity protection. Recheck protected state after installation or authorized maintenance.
+The optional core identity package declares no protection arrangement and supplies no automatic protectionAssignment value.
+Actual enforcement, resource-type support, preview response compatibility, and authority to alter the owning arrangement remain unproven.
+Reported protection does not remove an existing foreign consumer or establish clean creation provenance.
+
 ## Bound observer session
 
 ReadIdentityGuard.BindObserver performs one complete bootstrap inspection and obtains a credential for the verified observed client identifier.
@@ -117,8 +151,8 @@ Changed immutable runtime settings reject before an SDK request. Missing identit
 Token acquisition and transport errors remain unavailable and omit private provider details.
 There is no alternate credential or bootstrap fallback after binding.
 
-Each Check now has a 130-second context and 2213-request ceiling, including the bounded subscription read-deny scan.
-Binding adds one separate bootstrap inspection with a 125-second context and 2197-request ceiling.
+Each Check now has a 130-second context and 2214-request ceiling, including the bounded subscription read-deny scan.
+Binding adds one separate bootstrap inspection with a 125-second context and 2198-request ceiling.
 Bind once per owned session. Do not bind again before every Check.
 Close the session after its final inspection. Close waits for active checks, closes owned readers in reverse order, and releases their references.
 Repeated Close calls are safe. Checks after Close return unavailable without a credential or transport request.
@@ -197,3 +231,18 @@ go test -race ./adapters/execution/azure -run '^(TestAzureReadIdentityFederation
 
 Evidence is output/azure-observer-federation/summary.json and the targeted command results.
 Other identity consumer types, future attachment and credential-write authority, full trusted host configuration, and complete native admission remain required.
+
+## Targeted local verification of identity protection
+
+Three new focused race checks, eight changed identity and scan checks, and one shared network-protection regression pass in 4.240 seconds.
+They cover exact scope, explicit enforcement, system protection, child coverage, principal exclusions, conditions, and forbidden write exceptions.
+They also verify SDK request scope, required settings, credential-factory gating, fresh selected reads, restored protection, and missing subscription coverage.
+The scan accepts an unrelated read-preserving identity deny while still rejecting a VNet DNS-association deny.
+The existing network contract keeps its original fixed exceptions. Its selected regression passes after the shared verifier extraction.
+Each changed read counter includes the fifth selected GET. No broad suite repeats.
+No dependency, session reader, role grant, or packaging build is added.
+Fixtures use fake credentials and in-memory SDK transports. They open no network connection or service listener and request no real token.
+No cloud operation, UI build, browser, image build, container, registry push, deployment, or demo restart runs.
+External requests read only public Microsoft documentation.
+Evidence is output/azure-observer-protection/summary.json and the targeted command results.
+The host session retains 22 readers and its 135-second context. Its request ceiling increases to 2218.

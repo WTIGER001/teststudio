@@ -13,7 +13,7 @@ func verifyReadDenies(c Config, s ReadIdentitySettings, assignments []a.DenyAssi
 		return hostedexecution.ErrUnavailable
 	}
 	wanted := map[string]networkDenyBinding{}
-	for _, binding := range s.Protection.bindings() {
+	for _, binding := range append(s.Protection.bindings(), s.identityProtection()) {
 		wanted[inventoryIdentityKey(binding.assignment)] = binding
 	}
 	seen := map[string]bool{}
@@ -28,7 +28,13 @@ func verifyReadDenies(c Config, s ReadIdentitySettings, assignments []a.DenyAssi
 		}
 		seen[key] = true
 		if binding, ok := wanted[key]; ok {
-			if err := verifyNetworkDeny(binding, assignment); err != nil {
+			var err error
+			if strings.EqualFold(binding.assignment, s.ProtectionAssignment) {
+				err = verifyReadIdentityProtection(s, assignment)
+			} else {
+				err = verifyNetworkDeny(binding, assignment)
+			}
+			if err != nil {
 				return err
 			}
 			delete(wanted, key)
@@ -92,7 +98,7 @@ func readDenyBlocks(principal string, ancestor bool, p *a.DenyAssignmentProperti
 		return nil
 	}
 	for _, permission := range p.Permissions {
-		blocked, err := readDenyPermission(permission)
+		blocked, err := readDenyPermission(permission, readDenyAssociationScope(value(p.Scope)))
 		if err != nil {
 			return err
 		}
@@ -104,6 +110,15 @@ func readDenyBlocks(principal string, ancestor bool, p *a.DenyAssignmentProperti
 		}
 	}
 	return nil
+}
+
+func readDenyAssociationScope(scope string) bool {
+	id, err := arm.ParseResourceID(scope)
+	if err != nil || id.SubscriptionID == "" {
+		return true
+	}
+	resourceType := id.ResourceType.String()
+	return strings.EqualFold(resourceType, "Microsoft.Resources/subscriptions") || strings.EqualFold(resourceType, "Microsoft.Resources/resourceGroups") || strings.EqualFold(resourceType, "Microsoft.Network/virtualNetworks")
 }
 
 func readDenyPrincipals(principals []*a.DenyAssignmentPrincipal, target string, exclusions bool) (bool, error) {

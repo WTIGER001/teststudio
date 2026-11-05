@@ -25,6 +25,7 @@ func readDenyTest(t *testing.T) (Config, ReadIdentitySettings, *readDenyFixture,
 	for _, binding := range s.Protection.bindings() {
 		f.assignments = append(f.assignments, previous.protection.assignments[binding.assignment])
 	}
+	f.assignments = append(f.assignments, previous.identityProtection)
 	reader, err := NewSDKReadDenyReader(c, fixtureCredential{}, f)
 	if err != nil {
 		t.Fatal(err)

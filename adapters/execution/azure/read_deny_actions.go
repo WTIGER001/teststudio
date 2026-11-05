@@ -50,7 +50,7 @@ func readDenyIntersectsRead(pattern string) bool {
 	return strings.HasSuffix("/read", tail) || strings.HasSuffix(tail, "/read")
 }
 
-func readDenyPermission(p *a.DenyAssignmentPermission) (bool, error) {
+func readDenyPermission(p *a.DenyAssignmentPermission, associationScope bool) (bool, error) {
 	if p == nil || len(p.Actions)+len(p.DataActions) == 0 || len(p.Actions) > 256 || len(p.NotActions) > 256 {
 		return false, hostedexecution.ErrUnavailable
 	}
@@ -69,7 +69,7 @@ func readDenyPermission(p *a.DenyAssignmentPermission) (bool, error) {
 		}
 		action := value(pattern)
 		read := readDenyIntersectsRead(action) && !universalRead && !all
-		association := readDenyMatches(action, networkReadAssociationAction) && !all
+		association := associationScope && readDenyMatches(action, networkReadAssociationAction) && !all
 		for _, exception := range p.NotActions {
 			if strings.EqualFold(action, value(exception)) || !strings.Contains(action, "*") && readDenyMatches(value(exception), action) {
 				read = false

@@ -5,7 +5,7 @@
 ReadDenyGuard checks reported subscription deny assignments before the [bound observer session](azure-read-identity.md#bound-observer-session) reads its resource chain.
 The selected subscription role alone does not establish effective access. A separate deny can block an otherwise granted operation.
 This stage detects reported conflicts with the observer profile's unconditional management reads and DNS-association observation.
-It also requires the five selected network and zone protections to appear in the subscription response with their expected metadata.
+It also requires six selected protections in the subscription response: the five network and zone assignments plus the observer identity assignment.
 
 It does not establish complete effective authorization or complete cross-subscription and cross-tenant visibility.
 Hosted API coverage, actual authentication, host attachment, deployed enforcement, and native command wiring remain unverified.
@@ -41,12 +41,12 @@ Retries and provider registration remain disabled.
 
 One collection has a five-second context, at most 16 pages, and at most 1024 assignments.
 Each response retains the shared four-megabyte limit. Missing or null value arrays remain unavailable.
-Explicitly empty arrays cannot satisfy the five required selected protection assignments.
+Explicitly empty arrays cannot satisfy the six required selected protection assignments.
 The reported scan uses the same bound observer credential as the rest of the session.
 
-The composed guard has a 130-second context and at most 2213 requests, including the preceding chain's bounded inventories and federation absence check.
+The composed guard has a 130-second context and at most 2214 requests, including the preceding chain's bounded inventories, federation absence, and identity protection check.
 Normal additional cost is one GET. The scan and its successful observations are not cached.
-Binding still performs its separate 125-second bootstrap inspection with at most 2197 requests before constructing the 21-reader session.
+Binding still performs its separate 125-second bootstrap inspection with at most 2198 requests before constructing the 21-reader session.
 The bootstrap guard itself does not perform this new scan. Each bound Check performs it before refreshing the existing identity and resource chain.
 
 ## Scope and principal contract
@@ -72,8 +72,11 @@ A narrower resource placement cannot substitute for that coverage while subscrip
 
 Action matching treats the star as a case-insensitive wildcard that can cross slash boundaries.
 Patterns that can match an action ending in /read conflict unless a supported NotActions exception removes that conflict.
-The separate Microsoft.Network/virtualNetworks/listDnsResolverPolicies/action must also remain outside the denied set.
+The separate Microsoft.Network/virtualNetworks/listDnsResolverPolicies/action must also remain outside the denied set at scopes where the VNet operation can apply.
+Those scopes include its VNet, resource group, subscription, and reported ancestors. A deny scoped to an identity resource cannot block that VNet operation.
 The existing fixed protection profile preserves both operations and passes this scan.
+The [identity protection profile](azure-read-identity.md#identity-write-protection) preserves management reads with its own two fixed exceptions.
+All six required assignments must appear with their corresponding expected contracts.
 Write-only and delete-only action patterns do not conflict with these observer operations.
 Data-only denials do not block management reads in this check.
 

@@ -25,6 +25,15 @@ func TestAzureReadDenyChecksInheritedScopesPrincipalsAndReadExceptions(t *testin
 		"write-only": {change: func(d *a.DenyAssignment) {
 			d.Properties.Permissions[0].Actions = []*string{to.Ptr("Microsoft.Network/*/write")}
 		}},
+		"other-identity-read-preserving": {change: func(d *a.DenyAssignment) {
+			setReadDenyScope(d, c.resourceID("Microsoft.ManagedIdentity", "userAssignedIdentities", "other-observer"))
+			d.Properties.Permissions[0].Actions = []*string{to.Ptr("*")}
+			d.Properties.Permissions[0].NotActions = []*string{to.Ptr("*/read"), to.Ptr("Microsoft.Authorization/locks/delete")}
+		}},
+		"vnet-association-blocked": {change: func(d *a.DenyAssignment) {
+			setReadDenyScope(d, s.Protection.bindings()[0].scope)
+			d.Properties.Permissions[0].Actions = []*string{to.Ptr(networkReadAssociationAction)}
+		}, want: hostedexecution.ErrOwnership},
 		"audit":          {change: func(d *a.DenyAssignment) { d.Properties.DenyAssignmentEffect = to.Ptr(a.DenyAssignmentEffectAudit) }},
 		"missing-effect": {change: func(d *a.DenyAssignment) { d.Properties.DenyAssignmentEffect = nil }, want: hostedexecution.ErrUnavailable},
 		"condition":      {change: func(d *a.DenyAssignment) { d.Properties.Condition = to.Ptr("private-condition-canary") }, want: hostedexecution.ErrUnavailable},
@@ -93,7 +102,7 @@ func TestAzureReadDenyChecksInheritedScopesPrincipalsAndReadExceptions(t *testin
 		for _, action := range check.exceptions {
 			permission.NotActions = append(permission.NotActions, to.Ptr(action))
 		}
-		blocked, err := readDenyPermission(permission)
+		blocked, err := readDenyPermission(permission, true)
 		if err != nil || blocked != check.blocked {
 			t.Fatal("deny action or exception semantics changed", check.action, err, blocked)
 		}
@@ -105,7 +114,7 @@ func TestAzureReadDenySDKRejectsIncompleteInventoryAndUnsafePaging(t *testing.T)
 	reader := g.reader.(*SDKReadDenyReader)
 	f.mode = "paged"
 	assignments, err := reader.Assignments(t.Context())
-	if err != nil || len(assignments) != 5 || f.reads != 2 || verifyReadDenies(c, s, assignments) != nil {
+	if err != nil || len(assignments) != 6 || f.reads != 2 || verifyReadDenies(c, s, assignments) != nil {
 		t.Fatal("bounded same-scope paging rejected", err, f.reads)
 	}
 	before := f.reads
@@ -146,19 +155,19 @@ func TestAzureReadDenyGatesFreshParentAndRejectsMissingSelectedProtection(t *tes
 	c, _, f, g := readDenyTest(t)
 	for i := 1; i <= 2; i++ {
 		slices.Reverse(f.assignments)
-		if err := g.Check(t.Context(), c); err != nil || f.reads != i || g.identity.reader.(*SDKReadIdentityReader).http.base.(*readIdentityFixture).reads != i*4 {
+		if err := g.Check(t.Context(), c); err != nil || f.reads != i || g.identity.reader.(*SDKReadIdentityReader).http.base.(*readIdentityFixture).reads != i*5 {
 			t.Fatal("fresh deny inspection repeated or skipped parent", err, f.reads)
 		}
 	}
 	previous := g.identity.reader.(*SDKReadIdentityReader).http.base.(*readIdentityFixture)
 	f.assignments = append(f.assignments, f.extra(observerScope(c), "*/read"))
 	requireReadDenyError(t, g.Check(t.Context(), c), hostedexecution.ErrOwnership)
-	if previous.reads != 8 {
+	if previous.reads != 10 {
 		t.Fatal("blocked read coverage reached parent inspection")
 	}
 	f.assignments = f.assignments[:3]
 	requireReadDenyError(t, g.Check(t.Context(), c), hostedexecution.ErrUnavailable)
-	if previous.reads != 8 {
+	if previous.reads != 10 {
 		t.Fatal("incomplete deny inventory reached parent inspection")
 	}
 	before := f.reads

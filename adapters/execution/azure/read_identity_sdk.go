@@ -22,6 +22,7 @@ type SDKReadIdentityReader struct {
 	federation  *m.FederatedIdentityCredentialsClient
 	assignments *a.RoleAssignmentsClient
 	roles       *a.RoleDefinitionsClient
+	denies      *a.DenyAssignmentsClient
 	http        *armReadHTTP
 }
 
@@ -30,7 +31,7 @@ func NewSDKReadIdentityReader(c Config, s ReadIdentitySettings, credential azcor
 	if err != nil || credential == nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
-	h := newARMReadHTTP(c, map[string]string{s.Identity: readIdentityVersion, s.Identity + "/federatedIdentityCredentials": readIdentityVersion, s.Assignment: readAssignmentVersion, s.Role: readRoleVersion}, transport)
+	h := newARMReadHTTP(c, map[string]string{s.Identity: readIdentityVersion, s.Identity + "/federatedIdentityCredentials": readIdentityVersion, s.Assignment: readAssignmentVersion, s.Role: readRoleVersion, s.ProtectionAssignment: networkDenyVersion}, transport)
 	options := publicARMOptions(h)
 	identities, err := m.NewUserAssignedIdentitiesClient(c.Subscription, credential, options)
 	if err != nil {
@@ -44,7 +45,7 @@ func NewSDKReadIdentityReader(c Config, s ReadIdentitySettings, credential azcor
 	if err != nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
-	return &SDKReadIdentityReader{settings: s, identities: identities, federation: federation, assignments: factory.NewRoleAssignmentsClient(), roles: factory.NewRoleDefinitionsClient(), http: h}, nil
+	return &SDKReadIdentityReader{settings: s, identities: identities, federation: federation, assignments: factory.NewRoleAssignmentsClient(), roles: factory.NewRoleDefinitionsClient(), denies: factory.NewDenyAssignmentsClient(), http: h}, nil
 }
 
 func (c *SDKReadIdentityReader) Close() { c.http.CloseIdleConnections() }

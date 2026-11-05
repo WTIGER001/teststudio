@@ -132,6 +132,7 @@ Only the API main container receives that observer identity. The artifact role c
 The observerBinding output supplies its identity, grant, and host references without secrets or tokens.
 The optional subscription module requires role-definition and role-assignment authority at that scope.
 This option prepares identity resources. It enables neither native observer startup nor coded execution.
+The observer inspector also requires a resource-scoped Azure-managed protection assignment. The current core package does not create that protection arrangement.
 See [observer host attachment](azure-observer-host.md) for settings, reported lifecycle checks, request bounds, and remaining admission requirements.
 
 Blob configuration selects each app's exact runtime client identifier.

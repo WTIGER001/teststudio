@@ -413,7 +413,18 @@ Their contexts remain 125, 130, and 135 seconds respectively. No parent scan or 
 See [federated credential absence](azure-read-identity.md#federated-credential-absence). Acceptance 51 advances; the count remains 48 of 57.
 No cloud operation, UI build, browser, image build, container, registry push, deployment, or demo restart runs. Only public documentation requests leave the environment.
 
-Next inspect other identity consumer types, future attachment and credential-write authority, and the remaining trusted host configuration and management authority.
+The identity reader now requires a selected resource-scoped protection assignment on the observer identity and its child scopes.
+Its fixed contract requires explicit enforcement, system protection, all-principal coverage, no conditions or exclusions, and only read and lock-delete exceptions.
+The subscription scan now requires six selected protections. The existing five network and zone assignments retain their original exception contract.
+The shared read-conflict check now considers a DNS-association denial only at scopes where the VNet operation can apply.
+Three new focused race checks, eight changed identity and scan checks, and one shared network-protection regression pass in 4.240 seconds.
+The fifth concurrent selected GET increases identity and bootstrap limits to 2198, the read-deny session bound to 2214, and host checks to 2218 requests.
+Contexts remain 125, 130, and 135 seconds. The host session retains 22 readers. No extra parent scan, role grant, dependency, or packaging build is added.
+See [identity write protection](azure-read-identity.md#identity-write-protection). Acceptance 51 advances; the count remains 48 of 57.
+The inspector creates no assignment and attempts no forbidden mutation. Actual protection provisioning, enforcement, supported response shape, and owning-management authority remain unverified.
+No cloud operation, UI build, browser, image build, container, registry push, deployment, or demo restart runs. Only public documentation requests leave the environment.
+
+Next inspect the owning protection arrangement and its management authority, other identity consumer types, and remaining trusted host configuration.
 Reported app and job checks do not establish exclusive use across all Azure resources or subscriptions.
 Keep hosted read coverage, complete effective authorization, and cross-scope visibility separate until authoritative deployment evidence exists.
 Wire the bound session into native commands only after complete admission exists.

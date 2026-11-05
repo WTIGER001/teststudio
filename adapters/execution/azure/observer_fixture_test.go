@@ -56,6 +56,7 @@ func observerTest(t *testing.T) (Config, ReadIdentitySettings, *observerFixture,
 	for _, assignment := range identity.protection.assignments {
 		f.denies = append(f.denies, assignment)
 	}
+	f.denies = append(f.denies, identity.identityProtection)
 	protection := g.protection
 	inventory := protection.inventory
 	relayZones := inventory.selected

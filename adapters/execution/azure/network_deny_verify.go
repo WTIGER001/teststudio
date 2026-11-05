@@ -11,6 +11,10 @@ const allDenyPrincipals = "00000000-0000-0000-0000-000000000000"
 const networkReadAssociationAction = "Microsoft.Network/virtualNetworks/listDnsResolverPolicies/action"
 
 func verifyNetworkDeny(binding networkDenyBinding, actual a.DenyAssignment) error {
+	return verifyResourceDeny(binding, actual, "*/read", "Microsoft.Authorization/locks/delete", networkReadAssociationAction)
+}
+
+func verifyResourceDeny(binding networkDenyBinding, actual a.DenyAssignment, exceptions ...string) error {
 	parts := strings.Split(binding.assignment, "/")
 	if !strings.EqualFold(value(actual.ID), binding.assignment) || !strings.EqualFold(value(actual.Name), parts[len(parts)-1]) || !strings.EqualFold(value(actual.Type), "Microsoft.Authorization/denyAssignments") {
 		return hostedexecution.ErrOwnership
@@ -23,7 +27,7 @@ func verifyNetworkDeny(binding networkDenyBinding, actual a.DenyAssignment) erro
 		return hostedexecution.ErrOwnership
 	}
 	permission := p.Permissions[0]
-	if !networkDenyActions(permission.Actions, "*") || !networkDenyActions(permission.NotActions, "*/read", "Microsoft.Authorization/locks/delete", networkReadAssociationAction) || len(permission.DataActions)+len(permission.NotDataActions) != 0 || value(permission.Condition) != "" || value(permission.ConditionVersion) != "" {
+	if !networkDenyActions(permission.Actions, "*") || !networkDenyActions(permission.NotActions, exceptions...) || len(permission.DataActions)+len(permission.NotDataActions) != 0 || value(permission.Condition) != "" || value(permission.ConditionVersion) != "" {
 		return hostedexecution.ErrOwnership
 	}
 	return nil
