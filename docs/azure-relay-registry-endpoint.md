@@ -10,7 +10,8 @@ The endpoint addresses must equal the relay source NSG's selected private regist
 The observer reuses the current registry service checks and validated relay VNet observation.
 It adds four selected resource reads without another registry collection, registry resource, or VNet read.
 It implements no Network, authorizes no dispatch, and enables no Azure coded execution.
-Private records, effective zone visibility, identity and attachment authority, preparation networking, and complete native wiring remain required.
+The [relay private DNS observer](azure-relay-private-dns.md) now checks records derived from these member addresses and an exclusive completed relay link.
+Effective zone visibility, identity and attachment authority, preparation networking, and complete native wiring remain required.
 Acceptance 51 advances. The verified total remains 48 of 57, with nine open.
 
 ## Explicit registry consumer contract
@@ -102,4 +103,4 @@ go test -race ./adapters/execution/azure -run '^(TestAzureRelayRegistryEndpoint.
 ```
 
 Evidence is output/azure-relay-registry-endpoint/summary.json and targeted command results.
-Continue relay private registry records and effective VNet-wide zone visibility before native admission and image-pull wiring.
+Continue effective VNet-wide zone visibility, attachment authority, and trusted preparation networking before native admission and image-pull wiring.

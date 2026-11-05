@@ -48,13 +48,16 @@ func (g *PrivateDNSGuard) Check(ctx context.Context, c Config) (resultErr error)
 	if err := g.dns.Check(ctx, c); err != nil {
 		return err
 	}
-	zones := []string{g.settings.ExchangeZone, g.settings.RegistryZone}
+	return checkPrivateZones(ctx, g.reader, []privateZoneBinding{g.settings.binding(c, g.settings.ExchangeZone), g.settings.binding(c, g.settings.RegistryZone)})
+}
+
+func checkPrivateZones(ctx context.Context, reader PrivateDNSReader, zones []privateZoneBinding) error {
 	observed := make([]privateZoneObservation, len(zones))
 	var group sync.WaitGroup
-	for i, id := range zones {
-		group.Go(func() { observed[i].zone, observed[i].errors[0] = g.reader.Zone(ctx, id) })
-		group.Go(func() { observed[i].records, observed[i].errors[1] = g.reader.Records(ctx, id) })
-		group.Go(func() { observed[i].links, observed[i].errors[2] = g.reader.Links(ctx, id) })
+	for i, zone := range zones {
+		group.Go(func() { observed[i].zone, observed[i].errors[0] = reader.Zone(ctx, zone.ID) })
+		group.Go(func() { observed[i].records, observed[i].errors[1] = reader.Records(ctx, zone.ID) })
+		group.Go(func() { observed[i].links, observed[i].errors[2] = reader.Links(ctx, zone.ID) })
 	}
 	group.Wait()
 	for _, entry := range observed {
@@ -71,8 +74,8 @@ func (g *PrivateDNSGuard) Check(ctx context.Context, c Config) (resultErr error)
 			}
 		}
 	}
-	for i, id := range zones {
-		if err := g.verifyZone(id, observed[i]); err != nil {
+	for i, zone := range zones {
+		if err := zone.verify(observed[i]); err != nil {
 			return err
 		}
 	}

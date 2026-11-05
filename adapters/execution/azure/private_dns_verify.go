@@ -7,7 +7,8 @@ import (
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
 )
 
-func (g *PrivateDNSGuard) verifyZone(id string, observed privateZoneObservation) error {
+func (s privateZoneBinding) verify(observed privateZoneObservation) error {
+	id := s.ID
 	zone := observed.zone
 	if !dnsIdentity(value(zone.ID), value(zone.Name), value(zone.Type), id, "Microsoft.Network/privateDnsZones", value(zone.Location), "global") || zone.Properties == nil {
 		return hostedexecution.ErrOwnership
@@ -23,7 +24,7 @@ func (g *PrivateDNSGuard) verifyZone(id string, observed privateZoneObservation)
 		return hostedexecution.ErrOwnership
 	}
 	link := observed.links[0]
-	if !dnsIdentity(value(link.ID), value(link.Name), value(link.Type), id+"/virtualNetworkLinks/worker-network", "Microsoft.Network/privateDnsZones/virtualNetworkLinks", value(link.Location), "global") || link.Properties == nil {
+	if !dnsIdentity(value(link.ID), value(link.Name), value(link.Type), id+"/virtualNetworkLinks/"+s.LinkName, "Microsoft.Network/privateDnsZones/virtualNetworkLinks", value(link.Location), "global") || link.Properties == nil {
 		return hostedexecution.ErrOwnership
 	}
 	l := link.Properties
@@ -33,10 +34,10 @@ func (g *PrivateDNSGuard) verifyZone(id string, observed privateZoneObservation)
 	if l.RegistrationEnabled == nil {
 		return hostedexecution.ErrUnavailable
 	}
-	if value(l.RegistrationEnabled) || l.VirtualNetwork == nil || !strings.EqualFold(value(l.VirtualNetwork.ID), g.settings.DNS.Firewall.Perimeter.Topology.WorkerVNet) || l.ResolutionPolicy != nil && value(l.ResolutionPolicy) != p.ResolutionPolicyDefault {
+	if value(l.RegistrationEnabled) || l.VirtualNetwork == nil || !strings.EqualFold(value(l.VirtualNetwork.ID), s.VirtualNetwork) || l.ResolutionPolicy != nil && value(l.ResolutionPolicy) != p.ResolutionPolicyDefault {
 		return hostedexecution.ErrOwnership
 	}
-	expected, _ := g.settings.LinkDefinition(g.worker, id)
+	expected := s.linkDefinition()
 	fields := document(l)
 	for _, key := range []string{"provisioningState", "virtualNetworkLinkState", "resolutionPolicy"} {
 		delete(fields, key)
@@ -46,7 +47,7 @@ func (g *PrivateDNSGuard) verifyZone(id string, observed privateZoneObservation)
 	if fingerprint(fields) != fingerprint(expectedFields) {
 		return hostedexecution.ErrOwnership
 	}
-	if err := g.verifyRecords(id, observed.records); err != nil {
+	if err := s.verifyRecords(observed.records); err != nil {
 		return err
 	}
 	if props.NumberOfRecordSets == nil || props.NumberOfVirtualNetworkLinks == nil || props.NumberOfVirtualNetworkLinksWithRegistration == nil || value(props.NumberOfRecordSets) != int64(len(observed.records)) || value(props.NumberOfVirtualNetworkLinks) != 1 || value(props.NumberOfVirtualNetworkLinksWithRegistration) != 0 {
@@ -55,8 +56,9 @@ func (g *PrivateDNSGuard) verifyZone(id string, observed privateZoneObservation)
 	return nil
 }
 
-func (g *PrivateDNSGuard) verifyRecords(zone string, records []p.RecordSet) error {
-	expected, _ := g.settings.RecordDefinitions(g.worker, zone)
+func (s privateZoneBinding) verifyRecords(records []p.RecordSet) error {
+	zone := s.ID
+	expected := s.recordDefinitions()
 	count := len(expected) + 1
 	if len(records) < count {
 		return hostedexecution.ErrUnavailable

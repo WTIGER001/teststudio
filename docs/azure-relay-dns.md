@@ -97,7 +97,8 @@ go test -race ./adapters/execution/azure -run '^(TestAzureRelayDNS.*|TestAzureDN
 ```
 
 Evidence is output/azure-relay-dns/summary.json and the targeted command result.
-Continue selected relay private records, effective VNet-wide zone visibility, and actual relay registry endpoint ownership.
+The [relay private DNS observer](azure-relay-private-dns.md) now checks selected private registry records and their completed exclusive VNet link.
+Continue effective VNet-wide zone visibility and attachment authority before native admission.
 The [relay registry endpoint observer](azure-relay-registry-endpoint.md) now requires an explicit third consumer in the registry service contract.
 It binds the selected endpoint, NIC, member addresses, subnet, and dedicated NSG while preserving unknown-consumer rejection.
 Independent worker, preparation, and relay networking remains required.

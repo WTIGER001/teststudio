@@ -122,7 +122,39 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: explicit relay registry consumer and endpoint ownership
+## Current delivery: selected relay private registry zone
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+The relay private DNS stage now binds its selected registry zone, complete records, and exclusive VNet link to the preceding verified endpoint settings.
+Its separate privatelink.azurecr.io resource cannot reuse the worker registry zone.
+The registry login and selected regional data records derive from the preceding member addresses. There is no DNS address or region override.
+The exact two A records and apex SOA must agree with reported resource counts.
+The sole relay-network link must report completed propagation, disabled registration, and default resolution without public fallback.
+Aliases, wildcards, IPv6, extra addresses, automatic records, unrelated links, and incompatible cache bounds reject observation.
+Incomplete records, links, propagation, and counters remain unavailable.
+
+Worker and relay profiles share the private-zone verifier, fresh definition generator, scoped SDK reader, and local fixture implementation.
+Existing public worker APIs, selected resources, link names, and inventory limits retain their behavior.
+The relay adds only its selected zone and two complete collection paths to its own reader.
+Three concurrent observations add no duplicate registry service, endpoint, VNet, or source-subnet read.
+The composed context is 85 seconds, with 78 normal and at most 140 reads for the explicit relay profile.
+It implements no Network, authorizes no dispatch, and enables no Azure coded execution.
+Selected records and a selected link do not establish the complete effective DNS view.
+
+Four new focused race checks and five selected existing checks pass locally in 4.506 seconds.
+They cover fresh derived addresses, parent reuse, dedicated settings, record and link bypasses, immutable definitions, exact SDK scope, and incomplete inventories.
+Existing checks preserve worker record and SOA behavior, unavailable-state handling, public definitions, and SDK construction.
+The relay endpoint regression verifies fresh service approval and unchanged parent read counts.
+No broad suite, cloud request, browser, UI build, image build, container, registry push, deployment, or demo restart runs.
+Fixtures use explicit fake credentials and in-memory SDK responses. They open no network connection or listener.
+Evidence is output/azure-relay-private-dns/summary.json and the targeted command result.
+See [relay private registry DNS observation](azure-relay-private-dns.md).
+
+Continue authoritative effective VNet-wide zone visibility, read coverage, identity and attachment authority, preparation networking, deployed trust, and complete native wiring.
+All nine broad acceptance items remain open under their original scope.
+
+## Previous delivery: explicit relay registry consumer and endpoint ownership
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 

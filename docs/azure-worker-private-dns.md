@@ -2,6 +2,8 @@
 
 ## Current boundary
 
+The [relay private DNS observer](azure-relay-private-dns.md) now reuses the verifier, definitions, scoped SDK reader, and fixtures with a separate registry zone.
+
 The Azure adapter now inspects the two selected private DNS zones after [resolver policy inspection](azure-worker-dns.md).
 It checks complete record and link inventories, exact role addresses, ready links, registration settings, and public fallback settings.
 The [endpoint stage](azure-worker-endpoints.md) now binds actual endpoint and NIC resources to the selected DNS addresses.

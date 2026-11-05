@@ -11,11 +11,11 @@ import (
 )
 
 type SDKPrivateDNSReader struct {
-	settings PrivateDNSSettings
-	zones    *p.PrivateZonesClient
-	records  *p.RecordSetsClient
-	links    *p.VirtualNetworkLinksClient
-	http     *armReadHTTP
+	limits  map[string]int
+	zones   *p.PrivateZonesClient
+	records *p.RecordSetsClient
+	links   *p.VirtualNetworkLinksClient
+	http    *armReadHTTP
 }
 
 func NewSDKPrivateDNSReader(c Config, s PrivateDNSSettings, credential azcore.TokenCredential, transport policy.Transporter) (*SDKPrivateDNSReader, error) {
@@ -23,9 +23,16 @@ func NewSDKPrivateDNSReader(c Config, s PrivateDNSSettings, credential azcore.To
 	if err != nil || credential == nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
+	return newSDKPrivateDNSReader(c, []privateZoneBinding{s.binding(c, s.ExchangeZone), s.binding(c, s.RegistryZone)}, credential, transport)
+}
+
+func newSDKPrivateDNSReader(c Config, bindings []privateZoneBinding, credential azcore.TokenCredential, transport policy.Transporter) (*SDKPrivateDNSReader, error) {
+	limits := map[string]int{}
 	resources := map[string]string{}
 	pages := map[string]bool{}
-	for _, id := range []string{s.ExchangeZone, s.RegistryZone} {
+	for _, zone := range bindings {
+		id := zone.ID
+		limits[id] = len(zone.Records) + 1
 		resources[id] = "2024-06-01"
 		for _, suffix := range []string{"/ALL", "/virtualNetworkLinks"} {
 			resources[id+suffix] = "2024-06-01"
@@ -47,12 +54,12 @@ func NewSDKPrivateDNSReader(c Config, s PrivateDNSSettings, credential azcore.To
 	if err != nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
-	return &SDKPrivateDNSReader{settings: s, zones: zones, records: records, links: links, http: h}, nil
+	return &SDKPrivateDNSReader{limits: limits, zones: zones, records: records, links: links, http: h}, nil
 }
 
 func (c *SDKPrivateDNSReader) Close() { c.http.CloseIdleConnections() }
 func (c *SDKPrivateDNSReader) owns(id string) bool {
-	return id == c.settings.ExchangeZone || id == c.settings.RegistryZone
+	return c.limits[id] > 0
 }
 
 func (c *SDKPrivateDNSReader) Zone(ctx context.Context, id string) (p.PrivateZone, error) {
@@ -74,10 +81,7 @@ func (c *SDKPrivateDNSReader) Records(ctx context.Context, id string) ([]p.Recor
 	defer cancel()
 	group, name := resourceParts(id)
 	pager := c.records.NewListPager(group, name, nil)
-	max := 2
-	if id == c.settings.RegistryZone {
-		max = 3
-	}
+	max := c.limits[id]
 	return armInventory(ctx, c.http, id+"/ALL", "2024-06-01", max, 3, pager.More, func(ctx context.Context) ([]*p.RecordSet, *string, error) {
 		page, err := pager.NextPage(ctx)
 		return page.Value, page.NextLink, err

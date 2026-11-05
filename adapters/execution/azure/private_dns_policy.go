@@ -20,20 +20,28 @@ func (s PrivateDNSSettings) LinkDefinition(c Config, zone string) (p.VirtualNetw
 	if _, err := s.ZoneDefinition(c, zone); err != nil {
 		return p.VirtualNetworkLink{}, err
 	}
-	props := &p.VirtualNetworkLinkProperties{VirtualNetwork: &p.SubResource{ID: to.Ptr(s.DNS.Firewall.Perimeter.Topology.WorkerVNet)}, RegistrationEnabled: to.Ptr(false)}
-	if zone == s.RegistryZone {
-		props.ResolutionPolicy = to.Ptr(p.ResolutionPolicyDefault)
-	}
-	return p.VirtualNetworkLink{Location: to.Ptr("global"), Properties: props}, nil
+	return s.binding(c, zone).linkDefinition(), nil
 }
 
 func (s PrivateDNSSettings) RecordDefinitions(c Config, zone string) (map[string]p.RecordSet, error) {
 	if _, err := s.ZoneDefinition(c, zone); err != nil {
 		return nil, err
 	}
+	return s.binding(c, zone).recordDefinitions(), nil
+}
+
+func (s privateZoneBinding) linkDefinition() p.VirtualNetworkLink {
+	props := &p.VirtualNetworkLinkProperties{VirtualNetwork: &p.SubResource{ID: to.Ptr(s.VirtualNetwork)}, RegistrationEnabled: to.Ptr(false)}
+	if s.ResolutionPolicy {
+		props.ResolutionPolicy = to.Ptr(p.ResolutionPolicyDefault)
+	}
+	return p.VirtualNetworkLink{Location: to.Ptr("global"), Properties: props}
+}
+
+func (s privateZoneBinding) recordDefinitions() map[string]p.RecordSet {
 	records := map[string]p.RecordSet{}
-	for name, ip := range s.records(c, zone) {
+	for name, ip := range s.Records {
 		records[name] = p.RecordSet{Properties: &p.RecordSetProperties{TTL: to.Ptr[int64](60), ARecords: []*p.ARecord{{IPv4Address: to.Ptr(ip)}}}}
 	}
-	return records, nil
+	return records
 }
