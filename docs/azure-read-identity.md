@@ -12,6 +12,7 @@ The initial guard requires an explicit bootstrap credential. A bound observer se
 Binding does not prove that the bootstrap credential itself uses the observer identity.
 The [reported read-deny scan](azure-read-deny.md) now gates each bound inspection before its existing resource chain.
 The [host-bound observer](azure-observer-host.md) additionally checks the selected controller app's reported identity exposure and current revision.
+Its workload stage now rejects [reported app and job identity sharing](azure-worker-workloads.md#observer-identity-placement) while retaining the same collection requests.
 Identity attachment, token availability, deny coverage, protection-management authority, and cross-scope visibility remain installation requirements.
 Acceptance 51 advances. The total remains 48 verified of 57, with nine open.
 

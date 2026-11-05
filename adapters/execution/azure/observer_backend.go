@@ -52,6 +52,9 @@ func (b *observerBuilder) backend(s BackendEndpointSettings) *BackendEndpointGua
 		return NewExchangeGuard(c, exchangeSettings, registry, reader)
 	})
 	inventory := observerStage(b, func() (*SDKWorkloadInventoryReader, error) {
+		if b.host != nil {
+			return NewSDKObserverWorkloadInventoryReader(c, *b.host, credential, transport)
+		}
 		return NewSDKWorkloadInventoryReader(c, credential, transport)
 	}, func(reader *SDKWorkloadInventoryReader) (*WorkloadInventoryGuard, error) {
 		return NewWorkloadInventoryGuard(c, exchangeSettings, exchange, reader)

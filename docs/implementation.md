@@ -122,7 +122,40 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: observer host attachment and optional core identity packaging
+## Current delivery: reported observer identity placement in existing workload scans
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+The workload SDK projection now retains reduced identity references, reported client and principal metadata, a system principal, and explicit observation state.
+It still discards application and job configuration, environment values, secrets, templates, and unrelated settings.
+Identity projection copies and sorts references. Missing or contradictory observations clear previous identity state rather than retaining stale success.
+An explicit None identity records a known empty set. Missing objects, missing types, null entries, malformed references, and invalid metadata remain unknown.
+Unrelated identity metadata can omit client and principal values. The selected observer entry requires both values and agreement with its configured binding.
+Each workload has a 64-reference bound. Case-equivalent duplicate references remain unavailable.
+
+NewSDKObserverWorkloadInventoryReader validates host-specific placement while reusing the existing subscription app and job operations.
+BindHostObserver selects that reader during construction. The selected host must appear exactly once in its controller environment with the observer identity.
+Other reported apps or jobs cannot attach that identity, even with lifecycle None. Reported client or principal aliases also reject ownership.
+Unknown identity observations reject the host-bound check as unavailable. Earlier placement-only readers keep their original scope and compatibility.
+Failed sharing or presence checks block the later host reads. Successful checks refresh the current collections without repeating bootstrap inspection.
+
+This change adds no SDK resource, API version, permission, collection request, or session reader.
+The existing 22-reader session retains its 135-second context and 2216-request ceiling.
+Three new focused race checks and two selected existing host and placement checks pass in 2.410 seconds.
+They cover complete paged SDK projection, reported sharing, aliases, unknown state, explicit empty identities, missing hosts, freshness, and bounded collection reuse.
+Configuration canaries remain outside projected records. Complete bound checks verify no second subscription scan.
+No unchanged broad suite repeats. No dependency changes or packaging rebuilds are needed.
+Fixtures use fake credentials and in-memory SDK transports. They open no network connection or service listener and request no real token.
+No cloud operation, UI build, browser, image build, container, registry push, deployment, or demo restart runs.
+External requests read only public Microsoft documentation.
+Evidence is output/azure-observer-placements/summary.json and the targeted command results.
+See [observer identity placement](azure-worker-workloads.md#observer-identity-placement).
+
+This establishes reported Container Apps and job checks only. Other resource types, cross-subscription use, credential federation, and future attachment authority remain unproven.
+Complete trusted host configuration, effective coverage, actual token behavior, deployed enforcement, execution isolation, and native command wiring remain required.
+All nine broad acceptance items remain open under their original scope.
+
+## Previous delivery: observer host attachment and optional core identity packaging
 
 Acceptances **51** and supporting packaging under **57** advance. The total remains **48 verified of 57**, with **9 open**.
 

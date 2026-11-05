@@ -23,6 +23,7 @@ type observerBuilder struct {
 	worker     Config
 	credential azcore.TokenCredential
 	transport  policy.Transporter
+	host       *ObserverHostSettings
 	readers    []observerReader
 	err        error
 }
@@ -55,7 +56,7 @@ func newSDKObserver(c Config, s ReadIdentitySettings, credential azcore.TokenCre
 	if err != nil || credential == nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
-	b := &observerBuilder{worker: c, credential: credential, transport: transport}
+	b := &observerBuilder{worker: c, credential: credential, host: host, transport: transport}
 	endpoint := b.backend(s.Protection.PrivateDNS.Endpoint.DNS.Firewall.Perimeter.Topology.BackendEndpoint)
 	identity := b.relay(s, endpoint)
 	guard := observerStage(b, func() (*SDKReadDenyReader, error) {

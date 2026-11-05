@@ -10,8 +10,17 @@ import (
 )
 
 type WorkloadPlacement struct {
-	ResourceID    string `json:"resourceId"`
-	EnvironmentID string `json:"environmentId"`
+	ResourceID        string             `json:"resourceId"`
+	EnvironmentID     string             `json:"environmentId"`
+	IdentityKnown     bool               `json:"identityKnown"`
+	Identities        []WorkloadIdentity `json:"identities"`
+	SystemPrincipalID string             `json:"systemPrincipalId,omitempty"`
+}
+
+type WorkloadIdentity struct {
+	ResourceID  string `json:"resourceId"`
+	ClientID    string `json:"clientId,omitempty"`
+	PrincipalID string `json:"principalId,omitempty"`
 }
 
 type WorkloadInventoryReader interface {

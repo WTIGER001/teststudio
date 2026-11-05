@@ -395,7 +395,16 @@ The package compiles locally without warnings. Contract checks reuse the current
 No unchanged Go suite repeats for that packaging change. No UI build, browser, image build, container, cloud operation, registry push, deployment, or demo restart runs.
 See [observer host attachment](azure-observer-host.md). Acceptances 51 and supporting packaging under 57 advance; the count remains 48 of 57.
 
-Next implement exclusive observer identity placement and inspect the remaining trusted host configuration and management authority.
+The host-bound workload reader now retains reduced identity references and checks reported observer placement during its existing subscription app and job scans.
+The selected host must appear with matching observer metadata. Other app or job attachments and reported client or principal aliases block inspection.
+Unknown identity metadata remains unavailable. Earlier placement-only readers preserve their existing behavior.
+Three new focused race checks and two selected existing checks pass in 2.410 seconds, including the complete bound host path.
+No additional collection, SDK resource, permission, reader, or request is added. Session bounds remain 135 seconds and 2216 requests.
+See [reported observer identity placement](azure-worker-workloads.md#observer-identity-placement). Acceptance 51 advances; the count remains 48 of 57.
+No cloud operation, UI build, browser, image build, container, registry push, deployment, or demo restart runs. Only public documentation requests leave the environment.
+
+Next inspect other identity consumer types, credential federation, future attachment authority, and the remaining trusted host configuration and management authority.
+Reported app and job checks do not establish exclusive use across all Azure resources or subscriptions.
 Keep hosted read coverage, complete effective authorization, and cross-scope visibility separate until authoritative deployment evidence exists.
 Wire the bound session into native commands only after complete admission exists.
 Verify actual resource-scoped assignment provisioning and enforcement, and authority to change the owning protection arrangement.

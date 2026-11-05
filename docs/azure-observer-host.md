@@ -4,6 +4,7 @@
 
 ObserverHostGuard checks the selected controller app's reported observer attachment, identity lifecycle, image, placement, and current revision.
 It follows the [reported subscription read-deny check](azure-read-deny.md) through the same bound observer credential.
+Its existing [workload inventory](azure-worker-workloads.md#observer-identity-placement) now rejects reported sharing on another Container App or job without another scan.
 It does not establish exclusive identity use, complete trusted API configuration, actual host token issuance, or complete effective authorization.
 Those requirements remain part of native admission and separate hosted verification.
 No Network is implemented. Azure coded jobs remain disabled.
@@ -58,6 +59,7 @@ Identity changes require fresh app observations; an old revision identifier alon
 ReadIdentityGuard.BindHostObserver accepts the explicit host settings and builds all 22 SDK readers with the verified observer credential.
 It retains the existing single bootstrap inspection and performs no observer request during client construction.
 Each Check refreshes the existing chain once, then reads the selected app and its revisions concurrently.
+The workload stage first requires the selected host in the application collection and blocks shared or unknown observer identity placement.
 BindObserver remains available for the preceding 21-reader diagnostic scope. It does not check host attachment.
 Use the host-bound method when this attachment observation is required. Neither method enables native dispatch.
 

@@ -18,6 +18,7 @@ type SDKWorkloadInventoryReader struct {
 	applications *a.ContainerAppsClient
 	jobs         *a.JobsClient
 	http         *armReadHTTP
+	observer     *ObserverHostSettings
 }
 
 func workloadInventoryPath(c Config, kind string) string {
@@ -40,34 +41,63 @@ func NewSDKWorkloadInventoryReader(c Config, credential azcore.TokenCredential, 
 
 func (c *SDKWorkloadInventoryReader) Close() { c.http.CloseIdleConnections() }
 
+func NewSDKObserverWorkloadInventoryReader(c Config, s ObserverHostSettings, credential azcore.TokenCredential, transport policy.Transporter) (*SDKWorkloadInventoryReader, error) {
+	s, err := s.canonical(c)
+	if err != nil {
+		return nil, hostedexecution.ErrConfiguration
+	}
+	reader, err := NewSDKWorkloadInventoryReader(c, credential, transport)
+	if err != nil {
+		return nil, err
+	}
+	reader.observer = &s
+	return reader, nil
+}
+
 func (c *SDKWorkloadInventoryReader) Applications(ctx context.Context) ([]WorkloadPlacement, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	pager := c.applications.NewListBySubscriptionPager(nil)
-	return placementInventory(ctx, c.http, workloadInventoryPath(c.worker, "containerApps"), pager.More, func(ctx context.Context) ([]*a.ContainerApp, *string, error) {
+	placements, err := placementInventory(ctx, c.http, workloadInventoryPath(c.worker, "containerApps"), pager.More, func(ctx context.Context) ([]*a.ContainerApp, *string, error) {
 		page, err := pager.NextPage(ctx)
 		return page.Value, page.NextLink, err
 	}, func(app *a.ContainerApp) (WorkloadPlacement, error) {
 		if app.Properties == nil {
 			return WorkloadPlacement{}, hostedexecution.ErrUnavailable
 		}
-		return inventoryProjection(c.worker, value(app.ID), value(app.Name), value(app.Type), "containerApps", value(app.Properties.ManagedEnvironmentID), value(app.Properties.EnvironmentID))
+		placement, err := inventoryProjection(c.worker, value(app.ID), value(app.Name), value(app.Type), "containerApps", value(app.Properties.ManagedEnvironmentID), value(app.Properties.EnvironmentID))
+		return inventoryWithIdentities(placement, app.Identity), err
 	})
+	return c.observedPlacements(placements, "containerApps", err)
 }
 
 func (c *SDKWorkloadInventoryReader) Jobs(ctx context.Context) ([]WorkloadPlacement, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	pager := c.jobs.NewListBySubscriptionPager(nil)
-	return placementInventory(ctx, c.http, workloadInventoryPath(c.worker, "jobs"), pager.More, func(ctx context.Context) ([]*a.Job, *string, error) {
+	placements, err := placementInventory(ctx, c.http, workloadInventoryPath(c.worker, "jobs"), pager.More, func(ctx context.Context) ([]*a.Job, *string, error) {
 		page, err := pager.NextPage(ctx)
 		return page.Value, page.NextLink, err
 	}, func(job *a.Job) (WorkloadPlacement, error) {
 		if job.Properties == nil {
 			return WorkloadPlacement{}, hostedexecution.ErrUnavailable
 		}
-		return inventoryProjection(c.worker, value(job.ID), value(job.Name), value(job.Type), "jobs", value(job.Properties.EnvironmentID), "")
+		placement, err := inventoryProjection(c.worker, value(job.ID), value(job.Name), value(job.Type), "jobs", value(job.Properties.EnvironmentID), "")
+		return inventoryWithIdentities(placement, job.Identity), err
 	})
+	return c.observedPlacements(placements, "jobs", err)
+}
+
+func (c *SDKWorkloadInventoryReader) observedPlacements(placements []WorkloadPlacement, kind string, err error) ([]WorkloadPlacement, error) {
+	if err != nil {
+		return nil, err
+	}
+	if c.observer != nil {
+		if err := verifyObserverPlacements(c.worker, *c.observer, placements, kind); err != nil {
+			return nil, err
+		}
+	}
+	return placements, nil
 }
 
 func placementInventory[T any](ctx context.Context, h *armReadHTTP, path string, more func() bool, fetch func(context.Context) ([]*T, *string, error), project func(*T) (WorkloadPlacement, error)) ([]WorkloadPlacement, error) {

@@ -50,6 +50,16 @@ func observerHostTest(t *testing.T) (Config, ObserverHostSettings, *observerHost
 	}
 	f.revisions = []a.Revision{{ID: to.Ptr(s.Application + "/revisions/" + name + "--current"), Name: to.Ptr(name + "--current"), Type: to.Ptr("Microsoft.App/containerApps/revisions"), Properties: &a.RevisionProperties{Active: to.Ptr(true), ProvisioningState: to.Ptr(a.RevisionProvisioningStateProvisioned), HealthState: to.Ptr(a.RevisionHealthStateHealthy), RunningState: to.Ptr(a.RevisionRunningStateRunning), Replicas: to.Ptr[int32](1), TrafficWeight: to.Ptr[int32](100), Template: clone(f.application.Properties.Template)}}}
 	parent.workloads.apps = append(parent.workloads.apps, to.Ptr(clone(f.application)))
+	for _, app := range parent.workloads.apps {
+		if app.Identity == nil {
+			app.Identity = &a.ManagedServiceIdentity{Type: to.Ptr(a.ManagedServiceIdentityTypeNone)}
+		}
+	}
+	for _, job := range parent.workloads.jobs {
+		if job.Identity == nil {
+			job.Identity = &a.ManagedServiceIdentity{Type: to.Ptr(a.ManagedServiceIdentityTypeNone)}
+		}
+	}
 	return c, s, f, g
 }
 

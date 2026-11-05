@@ -5,6 +5,8 @@
 WorkloadInventoryGuard checks reported subscription-wide application and job placement after [selected exchange binding](azure-worker-exchange.md) succeeds.
 The selected relay must appear in its exchange environment. No other observed app or job can share that environment.
 The reader uses the documented subscription collection APIs. It does not substitute resource-group discovery for subscription inventory.
+Host-bound observer sessions also check reported identity attachments within these same two collections, without another subscription scan.
+That check rejects observer sharing among reported Container Apps and jobs. It does not prove exclusive identity use across other resource types or subscriptions.
 
 This is an observed inventory stage. It does not implement Network, authorize dispatch, or release worker input.
 A completed API list does not prove the caller's full read coverage or restrictions on future attachments.
@@ -43,15 +45,67 @@ SDKWorkloadInventoryReader reduces each page immediately to WorkloadPlacement:
 | --- | --- |
 | resourceId | The observed application or job resource identifier. |
 | environmentId | Its resolved managed or connected environment identifier. |
+| identityKnown | Whether the response provides a supported, complete identity-reference shape. |
+| identities | Reduced user-assigned identity references with client and principal identifiers when reported. |
+| systemPrincipalId | The reported system-assigned principal, when applicable. |
 
-Only those two fields leave the reader.
-Application configuration, job templates, environment values, secret references, identities, and unrelated settings do not enter the returned inventory.
+Only these reduced fields leave the reader.
+Application configuration, job templates, environment values, secret references, and unrelated settings do not enter the returned inventory.
 This stage persists no subscription inventory or application configuration.
 The SDK still receives the provider's list response while decoding each page. The adapter cannot make that server response omit configuration fields.
 It calls no secret-list, token, credential, export, or mutation API.
 
 The selected application's full configuration remains the preceding exchange stage's responsibility.
 This inventory stage checks placement. It does not replace app, revision, certificate, or backend verification.
+
+## Observer identity placement
+
+NewSDKObserverWorkloadInventoryReader binds explicit ObserverHostSettings to the existing SDK reader.
+BindHostObserver uses this constructor when it builds the existing workload stage.
+The reader validates the completed application and job projections before their parent guard continues.
+The earlier diagnostic BindObserver and general placement reader retain their existing scope without the observer-host requirement.
+Neither binding implements Network or enables native coded execution.
+
+The application response must contain the selected observer host exactly once in the controller environment.
+Its selected user-assigned observer identity must report the configured client and principal identifiers.
+Any other reported app or job that attaches that identity rejects ownership, including an attachment with lifecycle None.
+Reported client or principal aliases under a different identity resource identifier also reject ownership.
+A system-assigned principal cannot substitute for the selected user-assigned observer principal.
+Other workload placements retain their existing validation rules.
+
+Identity references use case-insensitive ARM identity comparison. Supported unrelated references can name another resource group or subscription.
+The reader performs no request against those references. It checks their returned shape and selected-identity equality locally.
+Each workload permits at most 64 user-assigned identity references. Duplicate case-equivalent references leave identity observation unavailable.
+Client and principal metadata on unrelated references can be omitted. Reported nonempty values must be valid, nonzero GUIDs.
+The selected host's observer entry requires both values and exact agreement with its configured binding.
+Reduced references are copied and sorted. Later checks read fresh provider responses rather than reusing a successful identity observation.
+
+An explicit None identity with no attached user identity establishes a known empty identity set.
+SystemAssigned requires a reported valid principal and no user identity references.
+UserAssigned and combined identity types require a nonempty, valid user identity map.
+Missing identity objects, missing or unknown types, null entries, contradictory types, malformed references, and invalid GUIDs remain unknown.
+The observer-specific reader rejects unknown identity observations as unavailable. It does not silently treat omitted metadata as no attachment.
+The general placement reader can still return those records for its earlier placement-only checks.
+
+The public APIs list resources within the selected subscription. See Microsoft's [application collection](https://learn.microsoft.com/en-us/rest/api/resource-manager/containerapps/container-apps/list-by-subscription?view=rest-resource-manager-containerapps-2025-07-01) and [job collection](https://learn.microsoft.com/en-us/rest/api/resource-manager/containerapps/jobs/list-by-subscription?view=rest-resource-manager-containerapps-2025-07-01).
+These observations do not establish complete visibility, exclusive use by other Azure resource types, absence of federated credential routes, or future attachment restrictions.
+Those requirements remain part of complete identity admission and separate hosted verification.
+
+Three new focused race checks and two selected existing host and placement checks pass in 2.410 seconds.
+They verify reported sharing, aliases, unknown identity state, paged SDK projection, freshness, host presence, and the complete bound session path.
+They also verify that configuration canaries remain outside the projection and no second subscription scan occurs.
+The host fixture uses explicit None identity state for unrelated resources. Its selected host retains complete observer metadata.
+Fixtures use fake credentials and in-memory SDK transports. No real token, network connection, or service listener is used.
+No unchanged broad suite, UI build, browser, image build, container, registry push, deployment, or demo restart runs.
+No cloud operation runs. External requests read only public Microsoft documentation.
+
+```sh
+go test -race ./adapters/execution/azure -run '^(TestAzureObserverPlacements.*|TestAzureObserverHostBindsFreshMainIdentityAndHealthyRevision|TestAzureWorkloadInventoryChecksFreshPlacementAndDropsConfiguration)$' -count=1
+```
+
+Evidence is output/azure-observer-placements/summary.json and the targeted command results.
+This projection adds no SDK resource, permission, API version, collection request, or session reader.
+The existing 22-reader host session retains its 135-second context and 2216-request ceiling.
 
 ## Completeness, permissions, and attachment authority
 
@@ -98,7 +152,7 @@ Provider diagnostics become fixed control errors without response bodies.
 Each collection permits at most 512 items and sixteen pages.
 An item limit is an uncertainty bound. It never permits partial absence claims or silently removes excess resources.
 The two collection operations each have a five-second context and use the existing four-megabyte response ceiling per page.
-Only placement records accumulate across pages; full SDK models do not accumulate in the returned result.
+Only reduced placement and identity records accumulate across pages; full SDK models do not accumulate in the returned result.
 The shared pager rejects foreign origins, other collections, foreign subscriptions, repeated tokens, and unsafe queries.
 Unfinished bounded paging remains unavailable.
 
