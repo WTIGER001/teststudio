@@ -21,7 +21,7 @@ These address checks do not establish endpoint ownership, DNS resolution, or fir
 The required [private stage](azure-sandbox-private.md) now checks selected endpoint ownership, exact NIC addresses, and complete selected zone inventories.
 The remaining protection dependencies must establish those relationships before activation.
 
-The sandbox-placement/v5 profile includes these settings, private endpoint and DNS bindings, topology, resolver settings, and the existing policyProfile fingerprint.
+The sandbox-placement/v6 profile includes these settings, endpoint and DNS bindings, topology, resolver, trusted services, and the existing policyProfile fingerprint.
 Changing a firewall or endpoint address changes launch and converted-image ownership.
 Settings reject a stale profile before credentials are constructed.
 Earlier staged profiles require regeneration. No native command currently loads those profiles.
@@ -108,7 +108,8 @@ No cloud service, browser, container, UI build, demo restart, or remote push is 
 
 Bind the selected endpoint addresses to the private exchange and registry endpoints.
 The resolver stage now checks selected policy, actual association, and other reported subscription zone links.
-Observe effective DNS resolution, trusted service ownership, identity host attachment, additional grants, deny effects, and write protection.
+The service stage now checks selected relay and backend metadata, fixed definitions, identity exposure, and revisions.
+Observe backend routing and readiness, effective DNS resolution, identity host attachment, additional grants, deny effects, and write protection.
 Then wire the scoped execution and discovery commands and package their dependencies.
 Verify actual preview-service behavior, registry conversion access, timer execution, token audience, and proxy trust during separate deployment acceptance.
 

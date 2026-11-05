@@ -115,7 +115,8 @@ Verify effective assignments and exclusions, deny effects, identity host attachm
 The network and private stages now check selected rules, routes, endpoint ownership, and complete selected DNS inventories.
 The topology stage now checks selected VNet contents, firewall attachments, and the complete deny-all firewall policy.
 The resolver stage now checks selected policy, actual association, and other reported subscription zone links.
-Complete trusted exchange service ownership, effective DNS resolution, and protected network bindings, including cross-subscription and deny-effect coverage.
+The service stage now checks selected relay and backend metadata, fixed definitions, identity exposure, and revisions.
+Complete effective service grants, backend routing and readiness, effective DNS resolution, and protected network bindings, including cross-subscription and deny-effect coverage.
 Then wire the execution and discovery roles to native commands and package their resources.
 Verify custom sandbox data-action roles and the narrow timer roles with the actual service during the separate deployment phase.
 The published operation catalog supplies permission names. It does not prove preview-service compatibility or effective installation access.

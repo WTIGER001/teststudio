@@ -12,7 +12,15 @@ func (s ExchangeSettings) ApplicationDefinition(c Config) (a.ContainerApp, error
 	if err != nil {
 		return a.ContainerApp{}, err
 	}
-	origin, _ := url.Parse(c.ExchangeOrigin)
+	return RelayApplicationDefinition(RelayDefinitionBinding{Region: c.Region, Registry: c.Registry, Origin: c.ExchangeOrigin, Environment: s.environment(), PullIdentity: c.PullIdentity, Certificate: s.Certificate, Image: s.Image, BackendOrigin: s.BackendOrigin, BackendAddress: s.BackendAddress}), nil
+}
+
+type RelayDefinitionBinding struct {
+	Region, Registry, Origin, Environment, PullIdentity, Certificate, Image, BackendOrigin, BackendAddress string
+}
+
+func RelayApplicationDefinition(b RelayDefinitionBinding) a.ContainerApp {
+	origin, _ := url.Parse(b.Origin)
 	probes := []*a.ContainerAppProbe{}
 	for _, p := range []struct {
 		kind             a.Type
@@ -28,17 +36,17 @@ func (s ExchangeSettings) ApplicationDefinition(c Config) (a.ContainerApp, error
 
 	ingress := &a.Ingress{
 		External: to.Ptr(true), AllowInsecure: to.Ptr(false), TargetPort: to.Ptr[int32](8043), Transport: to.Ptr(a.IngressTransportMethodHTTP),
-		CustomDomains: []*a.CustomDomain{{Name: to.Ptr(origin.Hostname()), BindingType: to.Ptr(a.BindingTypeSniEnabled), CertificateID: to.Ptr(s.Certificate)}},
+		CustomDomains: []*a.CustomDomain{{Name: to.Ptr(origin.Hostname()), BindingType: to.Ptr(a.BindingTypeSniEnabled), CertificateID: to.Ptr(b.Certificate)}},
 		Traffic:       []*a.TrafficWeight{{LatestRevision: to.Ptr(true), Weight: to.Ptr[int32](100)}},
 	}
 	configuration := &a.Configuration{
 		ActiveRevisionsMode: to.Ptr(a.ActiveRevisionsModeSingle), MaxInactiveRevisions: to.Ptr[int32](1), Ingress: ingress,
-		IdentitySettings: []*a.IdentitySettings{{Identity: to.Ptr(c.PullIdentity), Lifecycle: to.Ptr(a.IdentitySettingsLifeCycleNone)}},
-		Registries:       []*a.RegistryCredentials{{Server: to.Ptr(c.Registry), Identity: to.Ptr(c.PullIdentity)}},
+		IdentitySettings: []*a.IdentitySettings{{Identity: to.Ptr(b.PullIdentity), Lifecycle: to.Ptr(a.IdentitySettingsLifeCycleNone)}},
+		Registries:       []*a.RegistryCredentials{{Server: to.Ptr(b.Registry), Identity: to.Ptr(b.PullIdentity)}},
 	}
 	container := &a.Container{
-		Name: to.Ptr("relay"), Image: to.Ptr(s.Image), Command: []*string{to.Ptr("/app/teststudio-exchange")}, Probes: probes,
-		Args:      []*string{to.Ptr("--addr=0.0.0.0:8043"), to.Ptr("--public-origin=" + c.ExchangeOrigin), to.Ptr("--backend-origin=" + s.BackendOrigin), to.Ptr("--backend-address=" + s.BackendAddress)},
+		Name: to.Ptr("relay"), Image: to.Ptr(b.Image), Command: []*string{to.Ptr("/app/teststudio-exchange")}, Probes: probes,
+		Args:      []*string{to.Ptr("--addr=0.0.0.0:8043"), to.Ptr("--public-origin=" + b.Origin), to.Ptr("--backend-origin=" + b.BackendOrigin), to.Ptr("--backend-address=" + b.BackendAddress)},
 		Resources: &a.ContainerResources{CPU: to.Ptr(0.5), Memory: to.Ptr("1Gi")},
 	}
 	template := &a.Template{
@@ -46,10 +54,10 @@ func (s ExchangeSettings) ApplicationDefinition(c Config) (a.ContainerApp, error
 		Scale: &a.Scale{MinReplicas: to.Ptr[int32](1), MaxReplicas: to.Ptr[int32](2), CooldownPeriod: to.Ptr[int32](300), PollingInterval: to.Ptr[int32](30)},
 	}
 	return a.ContainerApp{
-		Location:   to.Ptr(c.Region),
-		Identity:   &a.ManagedServiceIdentity{Type: to.Ptr(a.ManagedServiceIdentityTypeUserAssigned), UserAssignedIdentities: map[string]*a.UserAssignedIdentity{c.PullIdentity: {}}},
-		Properties: &a.ContainerAppProperties{ManagedEnvironmentID: to.Ptr(s.environment()), WorkloadProfileName: to.Ptr("Consumption"), Configuration: configuration, Template: template},
-	}, nil
+		Location:   to.Ptr(b.Region),
+		Identity:   &a.ManagedServiceIdentity{Type: to.Ptr(a.ManagedServiceIdentityTypeUserAssigned), UserAssignedIdentities: map[string]*a.UserAssignedIdentity{b.PullIdentity: {}}},
+		Properties: &a.ContainerAppProperties{ManagedEnvironmentID: to.Ptr(b.Environment), WorkloadProfileName: to.Ptr("Consumption"), Configuration: configuration, Template: template},
+	}
 
 }
 

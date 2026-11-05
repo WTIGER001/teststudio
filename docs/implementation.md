@@ -122,7 +122,38 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: sandbox resolver policy and reported zone inventory
+## Current delivery: sandbox relay and trusted backend service admission
+
+OpenRuntime now constructs SDKServices with the existing metadata identity.
+Creation, source import, and live admission require selected relay and backend service metadata.
+Private environments, infrastructure subnets and groups, disabled platform authentication, and complete revision inventories must match.
+The relay environment's approved worker-facing private connection and embedded connection inventory must agree.
+Private-link metadata and the selected certificate bind its expected regional service and exchange hostname.
+Certificate metadata must be valid beyond the supported execution window and contain no returned secret material.
+
+Independent builders retain fixed relay-only and worker-backend templates without requiring Jobs configuration.
+Immutable service images stay outside the uploaded-source namespace.
+Relay and backend commands, arguments, origins, resources, probes, database secret reference, and Blob configuration must match exactly.
+Four service identity resource, client, and principal pins remain distinct from one another and existing native control identities.
+Pull and startup identities retain lifecycle None. Only the backend runtime identity receives Main exposure.
+Actual application identities, lifecycle settings, and templates must match their intended bindings.
+Exactly one healthy active revision serves each app. Inactive revisions require zero replicas and zero traffic across complete bounded pagination.
+
+The sandbox-placement/v6 profile binds service configuration. Invalid scopes, aliases, images, dependencies, identities, and stale profiles reject before credentials.
+ServiceDefinitions supplies four reviewable app and authentication resource bodies without mutation.
+Fresh initial and import checks and bounded shared live evidence preserve uncached protection and current authorization.
+Six new focused checks and thirteen affected native checks pass with race detection in 2.865 seconds.
+Six affected shared relay and backend checks pass with race detection in 4.057 seconds.
+Evidence is output/azure-sandbox-services/summary.json, native.log, and shared-services.log.
+No cloud service, credential endpoint, browser, container, UI build, demo restart, resource mutation, or remote push is involved.
+The plan and affected operator guides match the change. No user page behavior changes.
+
+Backend endpoint routing, readiness, workload placement, identity host attachment, effective grants, deny effects, and write protection remain unfinished.
+Native command wiring and packaging remain unfinished. Actual TLS, dependency access, and preview compatibility remain separate deployment verification.
+No native command or deployment template enables this runtime.
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+## Previous delivery: sandbox resolver policy and reported zone inventory
 
 OpenRuntime now constructs SDKResolver with the existing metadata identity.
 Creation, source import, and live admission require selected resolver policy, complete rules and links, and the actual VNet association.

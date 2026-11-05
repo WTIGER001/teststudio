@@ -41,7 +41,10 @@ func (s Settings) Validate() error {
 	if err != nil || profile != s.Worker.NetworkProfile || Validate(s.Worker) != nil || s.Mode != "execution" && s.Mode != "discovery" || !nonzeroGUID(s.Worker.Subscription) || !nonzeroGUID(s.TenantID) || !nonzeroGUID(s.ControlClientID) || !nonzeroGUID(s.RegistryClientID) || !nonzeroGUID(s.MetadataClientID) || s.ControlClientID == s.RegistryClientID || s.ControlClientID == s.MetadataClientID || s.RegistryClientID == s.MetadataClientID || s.Placement.PullClientID == s.ControlClientID || s.Placement.PullClientID == s.RegistryClientID || s.Placement.PullClientID == s.MetadataClientID || !s.Worker.validPullIdentity(s.PullIdentity) || strings.EqualFold(s.PullIdentity, s.Timer.StopIdentity) || s.deadlineConfig().validate() != nil || acr.ValidateRegistry(s.Worker.Registry, s.TenantID, s.Worker.RepositoryPrefix, s.BlobRedirectOrigins) != nil {
 		return hostedexecution.ErrConfiguration
 	}
-	return s.Authority.validate(s)
+	if err := s.Authority.validate(s); err != nil {
+		return err
+	}
+	return s.Placement.Services.validateIdentities(s)
 }
 
 func LoadSettings(file, variable string, lookup func(string) (string, bool)) (*Settings, error) {

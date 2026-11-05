@@ -16,6 +16,10 @@ func (s BackendSettings) ApplicationDefinition(c Config) (a.ContainerApp, error)
 	if err != nil {
 		return a.ContainerApp{}, err
 	}
+	return BackendApplicationDefinition(c.Region, c.Registry, s), nil
+}
+
+func BackendApplicationDefinition(region, registry string, s BackendSettings) a.ContainerApp {
 	artifact, _ := json.Marshal(s.artifactConfiguration())
 	probes := []*a.ContainerAppProbe{}
 	for _, p := range []struct {
@@ -30,13 +34,13 @@ func (s BackendSettings) ApplicationDefinition(c Config) (a.ContainerApp, error)
 		probes = append(probes, probe)
 	}
 	return a.ContainerApp{
-		Location: to.Ptr(c.Region),
+		Location: to.Ptr(region),
 		Identity: &a.ManagedServiceIdentity{Type: to.Ptr(a.ManagedServiceIdentityTypeUserAssigned), UserAssignedIdentities: map[string]*a.UserAssignedIdentity{s.PullIdentity: {}, s.StartupIdentity: {}, s.RuntimeIdentity: {}}},
 		Properties: &a.ContainerAppProperties{ManagedEnvironmentID: to.Ptr(s.Environment), WorkloadProfileName: to.Ptr("Consumption"),
 			Configuration: &a.Configuration{
 				ActiveRevisionsMode: to.Ptr(a.ActiveRevisionsModeSingle), MaxInactiveRevisions: to.Ptr[int32](1),
 				IdentitySettings: []*a.IdentitySettings{{Identity: to.Ptr(s.PullIdentity), Lifecycle: to.Ptr(a.IdentitySettingsLifeCycleNone)}, {Identity: to.Ptr(s.StartupIdentity), Lifecycle: to.Ptr(a.IdentitySettingsLifeCycleNone)}, {Identity: to.Ptr(s.RuntimeIdentity), Lifecycle: to.Ptr(a.IdentitySettingsLifeCycleMain)}},
-				Registries:       []*a.RegistryCredentials{{Server: to.Ptr(c.Registry), Identity: to.Ptr(s.PullIdentity)}},
+				Registries:       []*a.RegistryCredentials{{Server: to.Ptr(registry), Identity: to.Ptr(s.PullIdentity)}},
 				Secrets:          []*a.Secret{{Name: to.Ptr("database"), KeyVaultURL: to.Ptr(s.DatabaseSecretURL), Identity: to.Ptr(s.StartupIdentity)}},
 				Ingress:          &a.Ingress{External: to.Ptr(true), AllowInsecure: to.Ptr(false), TargetPort: to.Ptr[int32](8042), Transport: to.Ptr(a.IngressTransportMethodHTTP), Traffic: []*a.TrafficWeight{{LatestRevision: to.Ptr(true), Weight: to.Ptr[int32](100)}}},
 			},
@@ -48,5 +52,5 @@ func (s BackendSettings) ApplicationDefinition(c Config) (a.ContainerApp, error)
 				}}, Scale: &a.Scale{MinReplicas: to.Ptr(s.Replicas), MaxReplicas: to.Ptr(s.Replicas)},
 			},
 		},
-	}, nil
+	}
 }

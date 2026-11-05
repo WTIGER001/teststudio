@@ -21,6 +21,7 @@ The [network stage](azure-sandbox-network.md) now verifies selected security rul
 The [private stage](azure-sandbox-private.md) now checks selected endpoints, NIC addresses, endpoint subnet rules, and complete private DNS inventories.
 The [topology stage](azure-sandbox-topology.md) now checks selected VNet contents, firewall and public IP attachments, and complete firewall policy groups.
 The [resolver stage](azure-sandbox-resolver.md) now checks selected policy rules, actual association, and reported subscription private-zone links.
+The [service stage](azure-sandbox-services.md) now checks relay and backend definitions, private environments, identity exposure, certificate metadata, and complete revisions.
 Native activation still requires complete authority and protected network admission, timer authority, source-queue command wiring, and packaging.
 Local contract checks do not establish deployed isolation, service availability, identity authority, certificate trust, or complete product operation.
 

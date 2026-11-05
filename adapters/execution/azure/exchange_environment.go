@@ -112,7 +112,11 @@ func (g *ExchangeGuard) verifyExchangeLinks(links []a.PrivateLinkResource) error
 }
 
 func (g *ExchangeGuard) verifyCertificate(actual a.Certificate, now time.Time) error {
-	if !dnsIdentity(value(actual.ID), value(actual.Name), value(actual.Type), g.settings.Certificate, "Microsoft.App/managedEnvironments/certificates", value(actual.Location), g.worker.Region) || actual.Properties == nil {
+	return VerifyServiceCertificate(actual, g.settings.Certificate, g.worker.Region, g.worker.ExchangeOrigin, now)
+}
+
+func VerifyServiceCertificate(actual a.Certificate, certificateID, region, exchangeOrigin string, now time.Time) error {
+	if !dnsIdentity(value(actual.ID), value(actual.Name), value(actual.Type), certificateID, "Microsoft.App/managedEnvironments/certificates", value(actual.Location), region) || actual.Properties == nil {
 		return hostedexecution.ErrOwnership
 	}
 	p := actual.Properties
@@ -129,7 +133,7 @@ func (g *ExchangeGuard) verifyCertificate(actual a.Certificate, now time.Time) e
 		}
 		names = append(names, *entry)
 	}
-	origin, _ := url.Parse(g.worker.ExchangeOrigin)
+	origin, _ := url.Parse(exchangeOrigin)
 	certificate := x509.Certificate{DNSNames: names}
 	if certificate.VerifyHostname(origin.Hostname()) != nil {
 		return hostedexecution.ErrOwnership

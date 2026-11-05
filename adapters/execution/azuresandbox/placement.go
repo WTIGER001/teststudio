@@ -16,6 +16,8 @@ type placementResource struct {
 	Name             string          `json:"name"`
 	Type             string          `json:"type"`
 	Location         string          `json:"location"`
+	Kind             string          `json:"kind,omitempty"`
+	ManagedBy        string          `json:"managedBy,omitempty"`
 	Identity         json.RawMessage `json:"identity"`
 	ExtendedLocation json.RawMessage `json:"extendedLocation,omitempty"`
 	Properties       json.RawMessage `json:"properties"`
@@ -107,6 +109,7 @@ type placementAdmission struct {
 	private          *SDKPrivate
 	topology         *SDKTopology
 	resolver         *SDKResolver
+	services         *SDKServices
 	protection       Admission
 	importProtection ImageAdmission
 }
@@ -125,6 +128,9 @@ func (a *placementAdmission) BeforeCreate(ctx context.Context, c Config) error {
 		return err
 	}
 	if err := a.resolver.Check(ctx, c); err != nil {
+		return err
+	}
+	if err := a.services.Check(ctx, c); err != nil {
 		return err
 	}
 	if err := a.authority.Check(ctx, c); err != nil {
@@ -152,6 +158,9 @@ func (a *placementAdmission) VerifyInstance(ctx context.Context, c Config, actua
 	if err := a.resolver.CheckRunning(ctx, c); err != nil {
 		return err
 	}
+	if err := a.services.CheckRunning(ctx, c); err != nil {
+		return err
+	}
 	if err := a.authority.Check(ctx, c); err != nil {
 		return err
 	}
@@ -175,6 +184,9 @@ func (a *placementAdmission) BeforeImport(ctx context.Context, c Config, identit
 		return err
 	}
 	if err := a.resolver.Check(ctx, c); err != nil {
+		return err
+	}
+	if err := a.services.Check(ctx, c); err != nil {
 		return err
 	}
 	if err := a.authority.Check(ctx, c); err != nil {

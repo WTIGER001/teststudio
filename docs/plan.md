@@ -142,13 +142,25 @@ Azure domain hierarchy includes descendants. Keep selected private zones, fixed 
 One exact empty POST read action observes the actual association. The metadata transport otherwise remains scoped to selected GET paths.
 Reported subscription inventory now checks every returned private zone and its links, rejecting additional links to the sandbox VNet.
 Unrelated zones and VNets remain permitted. Inventory limits, missing pages, count gaps, and failures retain uncertainty.
-The sandbox-placement/v5 profile binds resolver settings. Six reviewable resource bodies support later packaging without mutation.
+The placement profile binds resolver settings. Six reviewable resource bodies support later packaging without mutation.
 Fresh initial and import observations and bounded live evidence include these DNS checks.
 Six new local checks and affected native, shared DNS, and inventory checks pass with race detection.
 See [sandbox resolver admission](azure-sandbox-resolver.md). This does not prove effective resolution, visibility across subscriptions, or absence of deny-hidden resources.
 
+The runtime now verifies the selected relay and trusted backend applications, private environments, authentication configuration, and complete revisions.
+The relay's worker-facing endpoint approval and embedded connection inventory must agree. Certificate metadata binds its custom exchange hostname.
+Fixed templates retain relay-only and worker-backend commands, immutable trusted images, probes, resources, origins, database references, and Blob configuration.
+Four distinct identity pins retain pull and startup lifecycle None, with only the backend runtime identity exposed to main containers.
+The service identities cannot reuse the import, timer, control, registry inspection, or metadata identity bindings.
+Exactly one active healthy revision must match each trusted template. Inactive revisions must have zero replicas and traffic.
+The sandbox-placement/v6 profile binds service images, identities, origins, and dependencies. Four bodies support later packaging without mutation.
+Fresh initial and import checks and bounded live evidence now include these service observations.
+Six new local checks and affected native and shared service checks pass with race detection.
+See [trusted service admission](azure-sandbox-services.md). Metadata checks do not establish backend routing, readiness, dependency access, or effective permissions.
+
 Complete remaining effective-authority and protected network admission, native command role wiring, and deployment packaging next.
-Verify identity host attachment, additional grants and deny effects, trusted exchange service ownership, and protected write boundaries.
+Connect native relay-to-backend endpoint ownership and end-to-end readiness next.
+Verify workload placement, identity host attachment, additional grants and deny effects, and protected write boundaries.
 Keep cross-subscription link visibility and actual DNS hierarchy behavior explicit in separate deployment acceptance.
 Verify actual service acceptance of custom data-action roles and narrow timer grants during the separate deployment phase.
 Keep private registry conversion access and proxy trust as explicit deployment compatibility questions.
