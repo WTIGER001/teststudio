@@ -1,0 +1,6 @@
+controller:
+  enabled: true
+  replicas: 2
+persistence:
+  existingClaim: teststudio-shared-evidence
+  accessMode: ReadWriteMany

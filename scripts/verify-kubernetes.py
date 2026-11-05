@@ -8,6 +8,7 @@ import tempfile
 
 import yaml
 from lib.kubernetes_preparation import check_preparation
+from lib.kubernetes_controller import check_controller
 
 
 def main():
@@ -19,6 +20,7 @@ def main():
     selection.add_argument('--workers-only', action='store_true')
     selection.add_argument('--preparation-only', action='store_true')
     selection.add_argument('--routing-only', action='store_true')
+    selection.add_argument('--controller-only', action='store_true')
     parser.add_argument('--pod', type=Path)
     arguments = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
@@ -65,7 +67,7 @@ def main():
             assert 'Secret' not in by_kind
             if not enabled:
                 assert not any(kind in by_kind for kind in ['Role', 'RoleBinding', 'ClusterRole', 'ClusterRoleBinding'])
-            deployment = by_kind['Deployment'][0]
+            deployment = next(item for item in by_kind['Deployment'] if item['metadata']['name'] == 'fixture')
             pod = deployment['spec']['template']['spec']
             assert pod['automountServiceAccountToken'] is False
             assert pod['securityContext']['runAsNonRoot']
@@ -82,7 +84,7 @@ def main():
             assert '--oidc-secret-refs=' + references in container['args']
             assert container['startupProbe']['httpGet']['path'] == container['readinessProbe']['httpGet']['path'] == '/healthz'
             assert container['livenessProbe']['httpGet']['path'] == '/livez'
-            config = by_kind['ConfigMap'][0]['data']
+            config = next(item for item in by_kind['ConfigMap'] if item['metadata']['name'] == 'fixture-config')['data']
             providers = json.loads(config['providers.json'])
             store = json.loads(config['artifact-store.json'])
             assert providers == values['oidc']['providers']
@@ -141,6 +143,8 @@ def main():
                 assert account['automountServiceAccountToken'] is False and not account['metadata'].get('annotations', {})
                 bindings = by_kind['RoleBinding'] + by_kind['ClusterRoleBinding']
                 subjects = [{'kind': 'ServiceAccount', 'name': 'fixture', 'namespace': 'teststudio-fixture'}]
+                if values.get('controller', {}).get('enabled'):
+                    subjects.append({'kind': 'ServiceAccount', 'name': 'fixture-controller', 'namespace': 'teststudio-fixture'})
                 if values.get('preparation', {}).get('enabled'):
                     subjects.append({'kind': 'ServiceAccount', 'name': 'fixture-prepare', 'namespace': 'teststudio-fixture'})
                 assert all(item['subjects'] == subjects for item in bindings)
@@ -171,6 +175,7 @@ def main():
                 assert 'kubernetes-workers.json' not in config
                 assert not any(item['name'] == 'controller-identity' for item in pod['volumes'])
                 assert not any(item.startswith('--kubernetes-workers') for item in container['args'])
+            check_controller(objects, values)
             preparation_settings = check_preparation(objects, values)
             if preparation_settings is not None:
                 (output / (name + '-preparation-settings.json')).write_text(json.dumps(preparation_settings, indent=2) + '\n')
@@ -184,7 +189,28 @@ def main():
         lint = execute([arguments.helm, 'lint', str(chart), '--strict', '--values', str(values_file)])
         (output / 'lint.log').write_text(lint.stdout)
         original_checksum = render('filesystem-single', base)
-        if arguments.routing_only:
+        if arguments.controller_only:
+            enabled = copy.deepcopy(base)
+            enabled.update(yaml.safe_load((chart / 'workers.example.yaml').read_text()))
+            defaults = yaml.safe_load((chart / 'values.yaml').read_text())['controller']
+            enabled['controller'] = defaults
+            enabled['controller'].update(enabled=True, replicas=2)
+            enabled['persistence'] = {'existingClaim': 'shared-evidence', 'accessMode': 'ReadWriteMany'}
+            render('controller-filesystem-shared', enabled)
+            object_store = copy.deepcopy(enabled)
+            object_store['controller']['replicas'] = 1
+            object_store['controller']['serviceAccount']['annotations'] = {'example.test/workload': 'controller'}
+            object_store['controller']['podLabels'] = {'example.test/workload': 'enabled'}
+            object_store['artifactStore'] = {'driver': 's3', 's3': {'region': 'us-east-1', 'bucket': 'teststudio-fixture-evidence', 'prefix': 'installation'}}
+            render('controller-object-store', object_store)
+            invalid = {}
+            value = copy.deepcopy(enabled); value['persistence']['accessMode'] = 'ReadWriteOnce'; invalid['controller-rwo-evidence'] = value
+            value = copy.deepcopy(enabled); value['workers']['enabled'] = False; invalid['controller-without-workers'] = value
+            value = copy.deepcopy(enabled); value['controller']['podLabels'] = {'app.kubernetes.io/component': 'api'}; invalid['controller-selector-override'] = value
+            value = copy.deepcopy(enabled); value['controller']['replicas'] = 0; invalid['controller-zero-replicas'] = value
+            for name, selected in invalid.items():
+                render(name, selected, expected=False)
+        elif arguments.routing_only:
             enabled = copy.deepcopy(base)
             enabled.update(yaml.safe_load((chart / 'workers.example.yaml').read_text()))
             render('managed-private-routing', enabled)

@@ -44,6 +44,11 @@ subjects:
   - kind: ServiceAccount
     name: {{ include "teststudio.name" . }}
     namespace: {{ .Release.Namespace | quote }}
+  {{- if .Values.controller.enabled }}
+  - kind: ServiceAccount
+    name: {{ include "teststudio.controllerName" . }}
+    namespace: {{ .Release.Namespace | quote }}
+  {{- end }}
   {{- if .Values.preparation.enabled }}
   - kind: ServiceAccount
     name: {{ include "teststudio.preparationName" . }}
@@ -76,6 +81,11 @@ subjects:
   - kind: ServiceAccount
     name: {{ include "teststudio.name" . }}
     namespace: {{ .Release.Namespace | quote }}
+  {{- if .Values.controller.enabled }}
+  - kind: ServiceAccount
+    name: {{ include "teststudio.controllerName" . }}
+    namespace: {{ .Release.Namespace | quote }}
+  {{- end }}
   {{- if .Values.preparation.enabled }}
   - kind: ServiceAccount
     name: {{ include "teststudio.preparationName" . }}

@@ -10,7 +10,7 @@ Core application installation, OIDC sign-in, and a newly authored HTTPS probe no
 Actual local gVisor execution and selective worker network denial also pass.
 Fresh Go and Playwright suites now pass actual preparation, publication, execution, timing, and private evidence checks.
 See [local source execution](local-kubernetes-source-execution.md). Actual cancellation, test timeout, and interrupted-controller recovery now pass.
-See [local lifecycle](local-kubernetes-lifecycle.md). Independent deadline and replica-failover verification remain open.
+See [local lifecycle](local-kubernetes-lifecycle.md). Independent Pod deadline enforcement now passes while guest processes and the controller are stopped. Replica failover remains open.
 Acceptance 51 remains open across providers. The total stays 48 verified items out of 57.
 
 The separate preparation command now connects registry assembly, immutable publication, and hosted discovery to the existing source queue.

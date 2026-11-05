@@ -76,6 +76,9 @@ spec:
             - {{ printf "--local-accounts=%t" .Values.localAccounts | quote }}
             - --artifact-store-config=/etc/teststudio/artifact-store.json
             - --execution-location=kubernetes
+            {{- if .Values.controller.enabled }}
+            - --execution-worker=false
+            {{- end }}
             {{- if .Values.workers.enabled }}
             - --worker-addr=0.0.0.0:8042
             - --kubernetes-workers-config=/etc/teststudio/kubernetes-workers.json

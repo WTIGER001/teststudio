@@ -43,7 +43,7 @@ Deliver observable milestones in this order:
 | Chart installation with local PostgreSQL and private evidence | Verified startup. Helm release teststudio is deployed. PostgreSQL and service Pods are Ready; both persistent claims are Bound. |
 | Newly authored HTTPS probe through the installation | Verified. Normal OIDC sign-in, catalog publication, execution, measured TLS, logs, and checksum-verified private evidence download pass. |
 | Isolated Go and Playwright workers | Verified basic workflows. Fresh Go and Playwright bundles pass actual registry assembly, isolated discovery, publication, timed execution, private evidence, and cleanup. |
-| Cancellation, independent deadlines, and interrupted-worker recovery | Cancellation, test timeout, and abrupt controller restart pass. Independent deadlines and concurrent replica failover remain next. |
+| Cancellation, independent deadlines, and interrupted-worker recovery | Cancellation, test timeout, and abrupt controller restart pass. Independent deadline enforcement also passes. Separate-controller deployment and concurrent replica failover remain next. |
 
 The private kubeconfig uses the observed loopback API mapping and mode 0600. Helm host connectivity passes.
 CoreDNS, storage provisioning, metrics, and Traefik report Running. The default Docker context remains unchanged.
@@ -69,7 +69,11 @@ New bounded lifecycle checks now pass cancellation, a distinct timeout, and reco
 The same execution identities reach cleaned. The interrupted run remains incomplete while its recovered observation and evidence survive.
 Acknowledged asynchronous deletion now waits within the existing cleanup deadline and retains ownership checks.
 The deployed fix passes an actual timeout rerun with its parent link, one selected test, complete evidence, and first-attempt cleanup.
-See [local lifecycle](local-kubernetes-lifecycle.md). Advance 41, 51, 52, and 56 without closing their full scope.
+The actual independent deadline case stops guest processes and the controller while Kubernetes terminates the original Pod with DeadlineExceeded.
+Its original 15-second Pod deadline remains unchanged. Termination includes the configured grace period; no test duration is inferred.
+The optional separate-controller Helm package now supplies dedicated identity, reader-only configuration, health, storage checks, and replica settings.
+Three targeted package profiles and four rejected configurations pass. Actual separate-controller deployment and concurrent failover remain next.
+See [controller packaging](kubernetes-controllers.md) and [local lifecycle](local-kubernetes-lifecycle.md). Advance 41, 51, 52, and 56 without closing their full scope.
 See [local Kubernetes](local-kubernetes.md) and output/local-k3s/cluster-summary.json for evidence and continuation instructions.
 
 Report which milestone runs on a real cluster and which checks remain simulated.

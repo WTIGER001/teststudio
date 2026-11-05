@@ -152,7 +152,7 @@ After service Pod replacement, fresh OIDC sign-in reads the same single run and 
 This verifies core persistence across that restart. It does not establish replica failover or coded-worker recovery.
 Evidence is output/local-k3s/probe/summary.json and the adjacent retained run, event, attempt, artifact, and log records.
 No browser, AWS, or Azure test runs. This advances the Kubernetes portions of 51, 55, and 56 without closing their full scope.
-The next measurable result is independent deadline enforcement and concurrent replica failover.
+The next measurable result is separate-controller deployment and concurrent replica failover.
 The local cluster now runs the verified gVisor 20261005.0 package through RuntimeClass teststudio-isolated.
 An actual non-root diagnostic Pod reports the gVisor kernel and exits zero.
 The chart can use external private TLS routing while preserving the worker Service, controller permissions, and exact policy peers.
@@ -201,6 +201,24 @@ Its child run 20261105T154833.201607664-fc55cd1fb3946ebffd6803ef has one timeout
 No host browser, live AWS, or Azure verification runs. Independent deadlines and concurrent replica failover remain open.
 See [local lifecycle](local-kubernetes-lifecycle.md) for exact identifiers, evidence, and continuation instructions.
 This advances the Kubernetes portions of 41, 51, 52, and 56. The total remains **48 verified, 9 open**.
+
+## Independent deadline and controller packaging — 2026-11-05
+
+Actual run 20261105T155703.162689682-275ad94081254ddd2cb5b4a4 proves independent Kubernetes Pod deadline enforcement.
+The guest supervisor and controller both remain stopped while Kubernetes records DeadlineExceeded and terminated exit code 137.
+The original Pod UID and 15-second active deadline remain unchanged. Runtime control stays available.
+Termination includes the configured ten-second grace and kubelet scheduling delay. Provider elapsed time does not become test duration.
+The verifier restores the controller. The same run retains its timeout, explicit evidence gap, and cleaned execution.
+Earlier fixture errors remain preserved. No failed observation is rewritten, and observation expiry never authorizes another execution.
+
+The optional Helm controller package now separates execution replicas from the API and private worker backend.
+It disables API execution and supplies dedicated controller identity, projected tokens, reader references, configuration, probes, and a disruption budget.
+Filesystem profiles require actual shared ReadWriteMany evidence. The chart rejects a ReadWriteOnce configuration even for one separate controller.
+Controllers receive no OIDC credential, writer reference, preparation journal, public Service, or Ingress.
+Three focused package profiles and four rejected configurations pass. One targeted existing concurrent-claim check covers the added claim log.
+The current cluster remains on combined Helm revision 8. Separate-controller deployment and concurrent failover remain unverified.
+See [local lifecycle](local-kubernetes-lifecycle.md) and [controller packaging](kubernetes-controllers.md) for evidence and continuation steps.
+This advances 41, 51, 52, and 56. The acceptance total remains **48 verified, 9 open**. Azure remains deferred.
 
 ## Current direction: Azure deferred; local Kubernetes integration
 

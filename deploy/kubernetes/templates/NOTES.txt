@@ -25,3 +25,10 @@ Use preparation.acceptNewWork=false to drain without enabling new source staging
 {{ range .Values.oidc.providers }}
 OIDC callback for {{ .id }}: {{ $.Values.origins.ui }}/auth/callback/{{ .id }}
 {{ end }}
+
+{{- if .Values.controller.enabled }}
+
+Separate execution controller: {{ include "teststudio.controllerName" . }}
+Controller replicas: {{ .Values.controller.replicas }}
+The API execution worker is disabled. Keep shared evidence, database, registry reader access, and private worker exchange available.
+{{- end }}

@@ -10,11 +10,7 @@ data:
   providers.json: |-
     {{- .Values.oidc.providers | toPrettyJson | nindent 4 }}
   artifact-store.json: |-
-    {{- if eq .Values.artifactStore.driver "filesystem" }}
-    {{- dict "driver" "filesystem" "directory" "/data/artifacts" | toPrettyJson | nindent 4 }}
-    {{- else }}
-    {{- .Values.artifactStore | toPrettyJson | nindent 4 }}
-    {{- end }}
+    {{- include "teststudio.artifactConfiguration" . | nindent 4 }}
 
   {{- if .Values.workers.enabled }}
   kubernetes-workers.json: |-

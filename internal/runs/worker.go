@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -54,6 +55,7 @@ func (s *Service) loop(ctx context.Context, worker string) {
 				}
 				v, claimed, err := s.claim(ctx, entry, worker)
 				if err == nil && claimed {
+					slog.Info("Execution run claimed", "project", v.Project, "run", v.ID, "worker", worker)
 					s.execute(ctx, v, worker)
 				}
 			}

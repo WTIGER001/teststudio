@@ -6,7 +6,7 @@ Fresh Go and Playwright suites now pass through the actual local Kubernetes inst
 The workflow uses normal OIDC sign-in, ZIP upload, registry assembly, isolated discovery, reviewed publication, execution, timing, and private evidence.
 It copies no existing application tests, data, or infrastructure configuration.
 Cancellation, test timeouts, and interrupted-controller recovery now pass actual local verification.
-Independent deadlines and concurrent replica failover remain separate steps. See [local lifecycle](local-kubernetes-lifecycle.md).
+Independent Pod deadline enforcement also passes. Concurrent replica failover remains a separate step. See [local lifecycle](local-kubernetes-lifecycle.md).
 The overall acceptance count remains 48 of 57. Azure implementation remains deferred.
 
 ## Concepts
@@ -124,7 +124,8 @@ Retain registry storage while published releases or retained observations requir
 ### Continue provider lifecycle verification
 
 Cancellation, timeout, and interrupted-controller cases now have saved references in output/local-k3s/lifecycle.
-Continue with independent deadline enforcement and concurrent replica failover without repeating those passing cases.
+Independent deadline evidence now lives in output/local-k3s/deadline.
+Continue with separate-controller deployment and concurrent replica failover without repeating those passing cases.
 Keep all worker execution on the dedicated local cluster and retain actual provider status and cleanup evidence.
 Environment-backed remote gateway delivery and cloud-target verification remain open.
 

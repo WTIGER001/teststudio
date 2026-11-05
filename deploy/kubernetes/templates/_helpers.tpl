@@ -30,6 +30,13 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end -}}
 {{- if not $configured -}}{{ fail "Bootstrap issuer must match an initially configured OIDC provider" }}{{- end -}}
 {{- if and (eq .Values.artifactStore.driver "filesystem") (gt (int .Values.replicas) 1) (ne .Values.persistence.accessMode "ReadWriteMany") -}}{{ fail "Multiple filesystem replicas require a shared ReadWriteMany artifact claim" }}{{- end -}}
+{{- if .Values.controller.enabled -}}
+{{- if not .Values.workers.enabled -}}{{ fail "Separate execution controllers require the Kubernetes worker profile" }}{{- end -}}
+{{- if and (eq .Values.artifactStore.driver "filesystem") (ne .Values.persistence.accessMode "ReadWriteMany") -}}{{ fail "Separate execution controllers require shared ReadWriteMany evidence or an object store" }}{{- end -}}
+{{- range $name, $_ := .Values.controller.podLabels -}}
+{{- if has $name (list "app.kubernetes.io/name" "app.kubernetes.io/instance" "app.kubernetes.io/component") -}}{{ fail "Controller labels cannot replace its selector" }}{{- end -}}
+{{- end -}}
+{{- end -}}
 {{- if .Values.workers.enabled -}}
 {{- if or (eq .Values.workers.namespace .Release.Namespace) (eq .Values.workers.namespace "") -}}{{ fail "Workers require a separate dedicated namespace" }}{{- end -}}
 {{- if or (eq .Values.workers.origin .Values.origins.ui) (eq .Values.workers.origin .Values.origins.artifacts) -}}{{ fail "Workers require a separate private HTTPS origin" }}{{- end -}}
@@ -103,4 +110,27 @@ app.kubernetes.io/component: preparation
 {{- else -}}
 {{- printf "%s-prepare" .Release.Name -}}
 {{- end -}}
+{{- end -}}
+
+{{- define "teststudio.controllerName" -}}
+{{- if gt (len .Release.Name) 41 -}}
+{{- printf "%s-%s-controller" (.Release.Name | trunc 30 | trimSuffix "-") (.Release.Name | sha256sum | trunc 8) -}}
+{{- else -}}
+{{- printf "%s-controller" .Release.Name -}}
+{{- end -}}
+{{- end -}}
+{{- define "teststudio.controllerSelector" -}}
+app.kubernetes.io/name: teststudio
+app.kubernetes.io/instance: {{ .Release.Name | quote }}
+app.kubernetes.io/component: controller
+{{- end -}}
+{{- define "teststudio.artifactConfiguration" -}}
+{{- if eq .Values.artifactStore.driver "filesystem" -}}
+{{- dict "driver" "filesystem" "directory" "/data/artifacts" | toPrettyJson -}}
+{{- else -}}
+{{- .Values.artifactStore | toPrettyJson -}}
+{{- end -}}
+{{- end -}}
+{{- define "teststudio.controllerConfiguration" -}}
+{{- dict "artifact-store.json" (include "teststudio.artifactConfiguration" .) "kubernetes-workers.json" (include "teststudio.workerConfiguration" .) | toPrettyJson -}}
 {{- end -}}

@@ -978,6 +978,150 @@
       "required": [
         "existingSecret"
       ]
+    },
+    "controller": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "replicas": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "serviceAccount": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "annotations": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "annotations"
+          ]
+        },
+        "podLabels": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "resources": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "requests": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cpu": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  ]
+                },
+                "memory": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  ]
+                },
+                "ephemeral-storage": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ]
+            },
+            "limits": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "cpu": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  ]
+                },
+                "memory": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  ]
+                },
+                "ephemeral-storage": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ]
+            }
+          },
+          "required": [
+            "requests",
+            "limits"
+          ]
+        }
+      },
+      "required": [
+        "enabled",
+        "replicas",
+        "serviceAccount",
+        "podLabels",
+        "resources"
+      ]
     }
   },
   "required": [
@@ -997,7 +1141,8 @@
     "podAnnotations",
     "podLabels",
     "workers",
-    "preparation"
+    "preparation",
+    "controller"
   ],
   "$schema": "http://json-schema.org/draft-07/schema#",
   "allOf": [

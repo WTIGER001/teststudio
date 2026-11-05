@@ -3,49 +3,16 @@ import hashlib
 import io
 import json
 from pathlib import Path
-import subprocess
 import time
 import urllib.error
 import uuid
 import zipfile
 
 from lib.local_kubernetes import LocalAPI
+from lib.local_kubernetes_cluster import LocalCluster
 
 
 TERMINAL = {'completed', 'failed', 'cancelled', 'incomplete', 'timed-out', 'blocked'}
-
-
-class LocalCluster:
-    def __init__(self):
-        self.command = ['docker', '--host', 'unix:///Users/johnbauer/.colima/teststudio-k3s/docker.sock', 'exec', 'k3d-teststudio-local-server-0']
-
-    def execute(self, *args):
-        return subprocess.check_output(self.command + list(args), timeout=20, text=True)
-
-    def pods(self, namespace, *args):
-        return json.loads(self.execute('kubectl', '--kubeconfig', '/etc/rancher/k3s/k3s.yaml', 'get', 'pods', '-n', namespace, *args, '-o', 'json'))['items']
-
-    def interrupt_api(self):
-        pods = self.pods('teststudio-local', '-l', 'app.kubernetes.io/name=teststudio')
-        candidates = [(pod, row) for pod in pods for row in pod['status'].get('containerStatuses', []) if row['name'] == 'api' and row.get('state', {}).get('running')]
-        assert len(candidates) == 1, 'Exactly one owned controller must be running'
-        pod, container = candidates[0]
-        identifier = container['containerID'].split('://', 1)[1]
-        details = json.loads(self.execute('crictl', 'inspect', identifier))
-        labels = details['status']['labels']
-        assert labels['io.kubernetes.pod.namespace'] == 'teststudio-local' and labels['io.kubernetes.pod.uid'] == pod['metadata']['uid'] and labels['io.kubernetes.container.name'] == 'api'
-        pid = details['info']['pid']
-        assert isinstance(pid, int) and pid > 1
-        self.execute('kill', '-KILL', str(pid))
-        return {'pod': pod['metadata']['name'], 'uid': pod['metadata']['uid'], 'containerId': identifier, 'previousRestarts': container['restartCount'], 'signal': 'SIGKILL'}
-
-    def worker_status(self, container):
-        found = [pod for pod in self.pods('teststudio-workers') if pod['metadata']['name'] == container]
-        assert len(found) <= 1
-        if not found:
-            return {'name': container, 'absent': True}
-        pod = found[0]
-        return {'name': container, 'uid': pod['metadata']['uid'], 'activeDeadlineSeconds': pod['spec']['activeDeadlineSeconds'], 'phase': pod['status']['phase'], 'containers': pod['status'].get('containerStatuses', []), 'conditions': pod['status'].get('conditions', [])}
 
 
 def main():

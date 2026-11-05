@@ -67,6 +67,7 @@ The default image entrypoint supplies UI and artifact flags that the controller 
 The role uses only execution registration. It registers no discovery inspector or recovery inspector.
 Workers use the profile's existing private exchange origin, served by the installation's worker backend.
 The controller starts no second exchange listener.
+The optional [Kubernetes controller package](kubernetes-controllers.md) supplies its dedicated deployment, configuration, identity, probes, and replica settings.
 Keep provider credentials, identity permissions, network controls, and durable storage aligned with the selected deployment profile.
 The staged [Azure host contract](azure-sandbox-host.md) now binds this role and its reported identity attachment.
 Native Azure sandbox command selection, controller network admission, effective authority, and deployment packaging remain unfinished.

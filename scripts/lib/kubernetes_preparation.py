@@ -14,7 +14,7 @@ def check_preparation(objects, values):
     upload_profiles = [runner for runner, key in [('go', 'goRuntime'), ('playwright', 'playwrightRuntime')] if preparation.get(key)]
     assert [arg for arg in api_container['args'] if arg.startswith('--source-bundle-runners=')] == (['--source-bundle-runners=' + ','.join(upload_profiles)] if expected else [])
     if not enabled:
-        assert len(deployments) == 1
+        assert len(deployments) == 1 + int(values.get('controller', {}).get('enabled', False))
         assert not any(item['metadata']['name'].startswith('fixture-prepare') for item in objects)
         return
     deployment = next(item for item in deployments if item['metadata']['name'] == 'fixture-prepare')

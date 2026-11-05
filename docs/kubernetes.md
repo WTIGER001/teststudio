@@ -5,6 +5,7 @@ It uses the portable service image and installation-specific PostgreSQL and OIDC
 The current chart runs the API, UI, schedules, notifications, and native HTTP checks.
 Optional offline coded execution uses the [Kubernetes worker profile](kubernetes-workers.md).
 Native remote preparation and its optional Helm package are implemented. Kubernetes deployment acceptance remains open.
+Optional [separate execution controllers](kubernetes-controllers.md) provide independent controller replicas while the API retains sign-in and worker transport.
 
 ## Installation inputs
 

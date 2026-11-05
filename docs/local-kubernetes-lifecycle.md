@@ -32,7 +32,7 @@ The attempt and final result both record timed-out with failure kind timeout.
 The observed duration is 2008 ms. The run counts one timeout and zero failed tests.
 Evidence is complete. Its single execution reaches cleaned and its worker Pod disappears.
 
-This proves actual runner timeout handling. Independent Kubernetes deadline enforcement remains a separate verification step.
+This proves actual runner timeout handling. The independent Kubernetes deadline has separate evidence below.
 
 ### Rerun timed-out tests
 
@@ -57,6 +57,30 @@ The logical run remains incomplete with unknown outcome and a visible interrupti
 Recovery does not invent a completed run or create another execution.
 This proves restart recovery for one controller. Concurrent replica failover remains unverified.
 
+### Independent Kubernetes deadline
+
+Run 20261105T155703.162689682-275ad94081254ddd2cb5b4a4 verifies the Pod deadline independently of application timers.
+The verifier stops guest processes with runsc kill STOP after the selected check starts.
+The guest supervisor reports state T. The runtime remains running and available to Kubernetes.
+The verifier then stops the exact controller process shortly before the original absolute deadline.
+Kubernetes reports DeadlineExceeded and a terminated worker container with exit code 137.
+The Pod UID and its original activeDeadlineSeconds=15 remain unchanged.
+The controller still reports state T when worker termination is confirmed.
+
+The container starts at 15:57:04 UTC and terminates at 15:57:29 UTC.
+The observed interval includes the configured ten-second termination grace and kubelet scheduling delay.
+This proves independent termination with grace. It does not promise exact-second process death.
+The verifier restores the controller. The original run records one timeout with unavailable test duration and an explicit evidence gap.
+Its original execution reaches cleaned and the worker Pod disappears. No duration is inferred from provider elapsed time.
+Evidence is output/local-k3s/deadline/summary.json with original Pod state, guest state, run, attempts, events, logs, and execution records.
+
+Two preliminary observations remain retained rather than rewritten.
+The first exposes Python 3.9 timestamp parsing before any process pause.
+The next pauses the whole runtime, which prevents CRI from signaling that paused container.
+Both original runs reach their normal timeout and cleanup. The verifier restores all paused processes.
+The corrected check stops guest processes while keeping runtime controls available.
+It submits a new case only after the prior run is terminal and its concrete fixture error is corrected.
+
 ### Asynchronous deletion
 
 The actual cluster acknowledges Pod deletion before every read reports absence.
@@ -78,8 +102,8 @@ Recovery provider history preserves observed identity and state changes without 
 The private registry and local PostgreSQL remain available for later cases.
 No host browser or automation daemon starts. The existing user demo remains on port 8040.
 
-Independent deadlines, concurrent replica failover, and cloud profiles remain open.
-Do not infer those properties from runner timeouts or this single-controller restart.
+Concurrent replica failover and cloud profiles remain open.
+Do not infer those properties from the independent deadline or this single-controller restart.
 
 ## Tutorials
 
@@ -93,6 +117,8 @@ python3 scripts/verify-kubernetes-lifecycle.py --case=rerun-timeout
 ```
 
 The verifier reuses the saved preparation and run identifiers.
+Use python3 scripts/verify-kubernetes-deadline.py to inspect its saved successful deadline case.
+The deadline fixture requires the single combined-controller installation and rejects separate-controller Pods.
 A recorded interruption action does not execute again during a later inspection.
 An armed interruption without a recorded outcome stops for inspection before another signal.
 Saved restart proof remains valid after a later deliberate deployment replaces the controller Pod.
@@ -103,8 +129,8 @@ All Kubernetes operations use the owned node and its explicit local kubeconfig.
 
 ### Continue implementation
 
-Verify independent deadlines while controller observation cannot enforce termination.
-Preserve exact provider ownership, the original absolute deadline, and actual container termination evidence.
+Independent deadlines now have actual termination evidence. Reuse those records rather than repeating the pause experiment.
+Deploy the optional [separate controllers](kubernetes-controllers.md) with shared evidence storage.
 Then verify concurrent replica failover without duplicate logical runs or replacement executions.
 Keep Azure implementation and live cloud verification deferred.
 

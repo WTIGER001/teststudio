@@ -1,0 +1,217 @@
+{{- if .Values.controller.enabled }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "teststudio.controllerName" . }}
+  namespace: {{ .Release.Namespace | quote }}
+  {{- with .Values.controller.serviceAccount.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "teststudio.controllerName" . }}-config
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  {{- include "teststudio.controllerConfiguration" . | fromJson | toYaml | nindent 2 }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "teststudio.controllerName" . }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  replicas: {{ .Values.controller.replicas }}
+  revisionHistoryLimit: 3
+  progressDeadlineSeconds: 300
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      {{- include "teststudio.controllerSelector" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "teststudio.controllerSelector" . | nindent 8 }}
+        {{- with .Values.controller.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      annotations:
+        checksum/config: {{ include "teststudio.controllerConfiguration" . | sha256sum | quote }}
+    spec:
+      serviceAccountName: {{ include "teststudio.controllerName" . }}
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 90
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      nodeSelector:
+        kubernetes.io/os: linux
+        kubernetes.io/arch: {{ .Values.image.architecture }}
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- range . }}
+        - name: {{ . | quote }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: controller
+          image: {{ printf "%s@%s" .Values.image.repository .Values.image.digest | quote }}
+          imagePullPolicy: IfNotPresent
+          command: [/app/teststudio]
+          args:
+            - --serve-role=controller
+            - --addr=0.0.0.0:8043
+            - --execution-location=kubernetes
+            - --database-env=TESTSTUDIO_DATABASE
+            - --require-postgres=true
+            - --kubernetes-workers-config=/etc/teststudio/kubernetes-workers.json
+            - --artifact-store-config=/etc/teststudio/artifact-store.json
+            - {{ printf "--public-url=%s" .Values.origins.ui | quote }}
+            {{- if .Values.httpTrust.existingSecret }}
+            - --http-trust-bundles=/etc/teststudio-http-trust/bindings.json
+            {{- end }}
+          env:
+            - name: TESTSTUDIO_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.existingSecret | quote }}
+                  key: {{ .Values.database.key | quote }}
+            {{- range $name, $reference := .Values.workers.registry.credentials }}
+            - name: {{ $name }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $reference.existingSecret | quote }}
+                  key: {{ $reference.key | quote }}
+            {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          ports:
+            - name: health
+              containerPort: 8043
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 36
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            periodSeconds: 5
+            timeoutSeconds: 2
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: health
+            periodSeconds: 10
+            timeoutSeconds: 2
+          resources:
+            {{- toYaml .Values.controller.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/teststudio
+              readOnly: true
+            - name: data
+              mountPath: /data
+            - name: temporary
+              mountPath: /tmp
+            - name: controller-identity
+              mountPath: /var/run/teststudio-controller
+              readOnly: true
+            {{- if .Values.workers.registry.caSecret }}
+            - name: registry-ca
+              mountPath: /etc/teststudio-registry
+              readOnly: true
+            {{- end }}
+            {{- if .Values.httpTrust.existingSecret }}
+            - name: http-trust
+              mountPath: /etc/teststudio-http-trust
+              readOnly: true
+            {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "teststudio.controllerName" . }}-config
+            defaultMode: 0444
+        - name: data
+          {{- if eq .Values.artifactStore.driver "filesystem" }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.persistence.existingClaim | default (printf "%s-artifacts" (include "teststudio.name" .)) | quote }}
+          {{- else }}
+          emptyDir:
+            sizeLimit: 256Mi
+          {{- end }}
+        - name: temporary
+          emptyDir:
+            medium: Memory
+            sizeLimit: 64Mi
+        - name: controller-identity
+          projected:
+            defaultMode: 0440
+            sources:
+              - serviceAccountToken:
+                  path: token
+                  expirationSeconds: 3600
+              - configMap:
+                  name: kube-root-ca.crt
+                  items:
+                    - key: ca.crt
+                      path: ca.crt
+        {{- if .Values.workers.registry.caSecret }}
+        - name: registry-ca
+          secret:
+            secretName: {{ .Values.workers.registry.caSecret | quote }}
+            defaultMode: 0440
+            items:
+              - key: ca.crt
+                path: ca.crt
+        {{- end }}
+        {{- if .Values.httpTrust.existingSecret }}
+        - name: http-trust
+          secret:
+            secretName: {{ .Values.httpTrust.existingSecret | quote }}
+            defaultMode: 0444
+        {{- end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "teststudio.controllerName" . }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "teststudio.controllerSelector" . | nindent 6 }}
+  policyTypes: [Ingress]
+  ingress: []
+{{- if gt (int .Values.controller.replicas) 1 }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "teststudio.controllerName" . }}
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      {{- include "teststudio.controllerSelector" . | nindent 6 }}
+{{- end }}
+{{- end }}

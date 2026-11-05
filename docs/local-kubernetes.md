@@ -51,7 +51,8 @@ Fresh Go and Playwright suites now pass actual registry preparation, isolated di
 See [local source execution](local-kubernetes-source-execution.md) for their retained results and verified cleanup.
 Cancellation, separate timeout status, timeout reruns, and abrupt controller restart now pass on this cluster.
 See [local lifecycle](local-kubernetes-lifecycle.md) for retained evidence and first-attempt cleanup after asynchronous deletion.
-Independent deadlines and concurrent replica failover remain unverified.
+An independent Pod deadline now passes while guest processes and the controller are stopped.
+Concurrent replica failover remains unverified. The separate-controller package is implemented but not yet installed here.
 Actual gVisor runtime execution and selective worker network denial now pass. See [worker isolation](local-kubernetes-isolation.md).
 The single-Pod restart does not establish replica failover or cross-provider parity.
 The 57-item ledger remains at 48 verified and nine open items.
