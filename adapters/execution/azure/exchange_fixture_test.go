@@ -35,7 +35,7 @@ func exchangeServiceTest(t *testing.T) (Config, ExchangeSettings, *exchangeFixtu
 	c, registry, _, guard := registryServiceTest(t)
 	env := registry.Endpoints.ExchangeEnvironment
 	vnet := c.resourceID("Microsoft.Network", "virtualNetworks", "exchange-network")
-	s := ExchangeSettings{Registry: registry, Application: c.resourceID("Microsoft.App", "containerApps", "worker-exchange-relay"), Certificate: env + "/certificates/worker-https", VirtualNetwork: vnet, Subnet: vnet + "/subnets/infrastructure", InfrastructureGroup: "studio-exchange-infra", Image: c.Registry + "/services/worker-relay@sha256:" + strings.Repeat("d", 64), BackendOrigin: "https://studio-worker-backend.backendzone." + c.Region + ".azurecontainerapps.io"}
+	s := ExchangeSettings{Registry: registry, Application: c.resourceID("Microsoft.App", "containerApps", "worker-exchange-relay"), Certificate: env + "/certificates/worker-https", VirtualNetwork: vnet, Subnet: vnet + "/subnets/infrastructure", InfrastructureGroup: "studio-exchange-infra", Image: c.Registry + "/services/worker-relay@sha256:" + strings.Repeat("d", 64), BackendOrigin: "https://studio-worker-backend.backendzone." + c.Region + ".azurecontainerapps.io", BackendAddress: "10.40.2.4"}
 	f := &exchangeFixture{t: t, settings: s, pages: map[string]int{}, routes: []*a.HTTPRouteConfig{}}
 	_, envName := resourceParts(env)
 	domain := "exchangezone." + c.Region + ".azurecontainerapps.io"

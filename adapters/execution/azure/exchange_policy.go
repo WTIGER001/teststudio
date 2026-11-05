@@ -18,8 +18,12 @@ func (s ExchangeSettings) ApplicationDefinition(c Config) (a.ContainerApp, error
 		kind             a.Type
 		path             string
 		period, failures int32
-	}{{a.TypeStartup, "/healthz", 3, 30}, {a.TypeReadiness, "/healthz", 10, 3}, {a.TypeLiveness, "/livez", 30, 3}} {
-		probes = append(probes, &a.ContainerAppProbe{Type: to.Ptr(p.kind), HTTPGet: &a.ContainerAppProbeHTTPGet{Path: to.Ptr(p.path), Port: to.Ptr[int32](8043), Scheme: to.Ptr(a.SchemeHTTP)}, InitialDelaySeconds: to.Ptr[int32](1), PeriodSeconds: to.Ptr(p.period), TimeoutSeconds: to.Ptr[int32](2), SuccessThreshold: to.Ptr[int32](1), FailureThreshold: to.Ptr(p.failures)})
+	}{{a.TypeStartup, "/healthz", 3, 30}, {a.TypeReadiness, "/readyz", 10, 3}, {a.TypeLiveness, "/livez", 30, 3}} {
+		timeout := int32(2)
+		if p.kind == a.TypeReadiness {
+			timeout = 4
+		}
+		probes = append(probes, &a.ContainerAppProbe{Type: to.Ptr(p.kind), HTTPGet: &a.ContainerAppProbeHTTPGet{Path: to.Ptr(p.path), Port: to.Ptr[int32](8043), Scheme: to.Ptr(a.SchemeHTTP)}, InitialDelaySeconds: to.Ptr[int32](1), PeriodSeconds: to.Ptr(p.period), TimeoutSeconds: to.Ptr(timeout), SuccessThreshold: to.Ptr[int32](1), FailureThreshold: to.Ptr(p.failures)})
 	}
 
 	ingress := &a.Ingress{
@@ -34,7 +38,7 @@ func (s ExchangeSettings) ApplicationDefinition(c Config) (a.ContainerApp, error
 	}
 	container := &a.Container{
 		Name: to.Ptr("relay"), Image: to.Ptr(s.Image), Command: []*string{to.Ptr("/app/teststudio-exchange")}, Probes: probes,
-		Args:      []*string{to.Ptr("--addr=0.0.0.0:8043"), to.Ptr("--public-origin=" + c.ExchangeOrigin), to.Ptr("--backend-origin=" + s.BackendOrigin)},
+		Args:      []*string{to.Ptr("--addr=0.0.0.0:8043"), to.Ptr("--public-origin=" + c.ExchangeOrigin), to.Ptr("--backend-origin=" + s.BackendOrigin), to.Ptr("--backend-address=" + s.BackendAddress)},
 		Resources: &a.ContainerResources{CPU: to.Ptr(0.5), Memory: to.Ptr("1Gi")},
 	}
 	template := &a.Template{

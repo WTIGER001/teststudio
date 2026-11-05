@@ -138,8 +138,14 @@ func TestAzureBackendEndpointSettingsRejectAliasesAndReservedAddresses(t *testin
 	} {
 		changed := s
 		mutate(&changed)
-		_, err := NewBackendEndpointGuard(c, changed, g.backend, g.reader)
+		changed.Backend.Exchange.BackendAddress = changed.Address
+		_, err := changed.canonical(c)
 		requireDeadlineError(t, err, hostedexecution.ErrConfiguration)
+	}
+	mismatch := s
+	mismatch.Address = "10.40.2.9"
+	if _, err := mismatch.canonical(c); err != hostedexecution.ErrConfiguration {
+		t.Fatal("relay and endpoint address mismatch accepted")
 	}
 	if _, err := NewSDKBackendEndpointReader(c, s, nil, nil); err != hostedexecution.ErrConfiguration {
 		t.Fatal("implicit endpoint credential discovery accepted")

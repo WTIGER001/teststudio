@@ -3,11 +3,9 @@ package relay
 import (
 	"bytes"
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"io"
-	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -16,34 +14,64 @@ import (
 	"github.com/wtiger001/teststudio/internal/workerwire"
 )
 
-var errConfiguration = errors.New("worker relay requires explicit HTTPS public and backend origins")
+var errConfiguration = errors.New("worker relay requires explicit HTTPS public and backend origins with a valid optional private address")
 
 type Relay struct {
 	public, backend *url.URL
 	client          *http.Client
+	readinessClient *http.Client
 	slots           chan struct{}
+	probeSlot       chan struct{}
 }
 
 func New(publicOrigin, backendOrigin string, transport http.RoundTripper) (*Relay, error) {
+	return newRelay(publicOrigin, backendOrigin, "", transport)
+}
+
+func NewPinned(publicOrigin, backendOrigin, address string, transport http.RoundTripper) (*Relay, error) {
+	if !validBackendAddress(address) {
+		return nil, errConfiguration
+	}
+	return newRelay(publicOrigin, backendOrigin, address, transport)
+}
+
+func newRelay(publicOrigin, backendOrigin, address string, transport http.RoundTripper) (*Relay, error) {
 	public, backend, err := parsedOrigins(publicOrigin, backendOrigin)
 	if err != nil {
 		return nil, err
 	}
 	if transport == nil {
-		transport = &http.Transport{Proxy: nil, DialContext: (&net.Dialer{Timeout: 5 * time.Second, KeepAlive: 30 * time.Second}).DialContext, TLSClientConfig: &tls.Config{MinVersion: tls.VersionTLS12}, TLSHandshakeTimeout: 5 * time.Second, ResponseHeaderTimeout: 15 * time.Second, IdleConnTimeout: 30 * time.Second, MaxConnsPerHost: 8, MaxIdleConnsPerHost: 8, MaxIdleConns: 8, DisableCompression: true}
+		transport = newRelayTransport(backend, address, nil)
 	}
-	return &Relay{public: public, backend: backend, slots: make(chan struct{}, 8), client: &http.Client{Transport: transport, Timeout: 45 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}, nil
+	probeTransport := transport
+	if source, ok := transport.(*http.Transport); ok {
+		probe := source.Clone()
+		probe.MaxConnsPerHost, probe.MaxIdleConnsPerHost, probe.MaxIdleConns = 1, 1, 1
+		probe.DisableKeepAlives = true
+		probe.Protocols = new(http.Protocols)
+		probe.Protocols.SetHTTP1(true)
+		probeTransport = probe
+	}
+	noRedirect := func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
+	return &Relay{public: public, backend: backend, slots: make(chan struct{}, 8), probeSlot: make(chan struct{}, 1), client: &http.Client{Transport: transport, Timeout: 45 * time.Second, CheckRedirect: noRedirect}, readinessClient: &http.Client{Transport: probeTransport, Timeout: 3 * time.Second, CheckRedirect: noRedirect}}, nil
 }
 
-func (g *Relay) Close() { g.client.CloseIdleConnections() }
+func (g *Relay) Close() {
+	g.client.CloseIdleConnections()
+	g.readinessClient.CloseIdleConnections()
+}
 
 func (g *Relay) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("Referrer-Policy", "no-referrer")
-	if r.Method == http.MethodGet && (r.URL.Path == "/healthz" || r.URL.Path == "/livez") && r.URL.RawQuery == "" && !r.URL.ForceQuery && !r.URL.IsAbs() && r.URL.RawPath == "" && r.ContentLength == 0 {
+	if probeRequest(r) && (r.URL.Path == "/healthz" || r.URL.Path == "/livez") {
 		json.NewEncoder(w).Encode(map[string]string{"status": "up", "service": "teststudio"})
+		return
+	}
+	if probeRequest(r) && r.URL.Path == "/readyz" {
+		g.serveReadiness(w, r)
 		return
 	}
 	if !strings.EqualFold(r.Host, g.public.Host) {

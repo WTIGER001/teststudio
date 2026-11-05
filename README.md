@@ -10,7 +10,7 @@ Use the [workflow completion checklist](docs/plan.md#workflow-completion-checkli
 The [AWS core profile](docs/aws.md) documents ECS, separate CloudFront origins, private storage, and local packaging checks.
 The [Azure core profile](docs/azure.md) documents separate Container Apps, managed identities, Key Vault references, and private Blob evidence.
 The [Azure worker admission guide](docs/azure-worker-network.md) links the network, endpoint, and registry service checks under development.
-The [standalone worker relay](docs/worker-relay.md) supplies a bounded frontend without installation credentials and a UI-independent image builder. Provider service wiring remains unfinished.
+The [standalone worker relay](docs/worker-relay.md) supplies a bounded frontend without installation credentials, [pinned backend readiness](docs/worker-relay-readiness.md), and a UI-independent image builder. Provider service wiring remains unfinished.
 The [staged Azure worker backend](docs/azure-worker-backend.md) defines a dedicated private environment, worker-only app, and scoped installation identities. Admission and deployment remain separate.
 The [backend observation stage](docs/azure-worker-backend-admission.md) checks actual app configuration, reported placement, identities, and revisions through scoped reads. Complete admission remains unfinished.
 The [backend private endpoint observer](docs/azure-worker-backend-endpoint.md) binds service approval, NIC and address ownership, and the dedicated endpoint subnet policy. Effective routing and TLS remain unfinished.

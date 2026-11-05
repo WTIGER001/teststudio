@@ -40,6 +40,7 @@ go run ./cmd/teststudio-exchange \
 | addr | Private HTTP listen address. The default is 127.0.0.1:8043. |
 | public-origin | Exact worker-facing HTTPS origin. Worker requests must retain its Host value. |
 | backend-origin | One fixed, trusted HTTPS worker-listener origin. An explicit TLS port is supported. |
+| backend-address | Optional canonical private IPv4 address for both readiness and worker traffic. Normal HTTPS hostname verification remains required. |
 
 Both origins are required. Paths, queries, credentials, fragments, invalid ports, and equivalent frontend/backend authorities reject startup.
 The process reads no TestStudio credential environment variable or cloud identity configuration.
@@ -111,8 +112,12 @@ Normal controller recovery and exact product retries remain responsible for unce
 
 GET /healthz and GET /livez return local process health without requiring the public Host.
 They forward nothing and remain available during saturation.
-These probes establish process availability only. They do not prove backend, database, storage, certificate, or network readiness.
-Deployment admission must inspect and verify that separate path before enabling execution.
+These two probes establish process availability only.
+GET /readyz now checks the dedicated worker backend over normally verified HTTPS without caller credentials.
+It uses a separate bounded probe connection and requires the backend worker-role health reply.
+Optional backend-address pins both worker traffic and readiness to one private address while retaining Host and TLS verification.
+See [backend readiness and address binding](worker-relay-readiness.md) for limits, upgrade requirements, and Azure configuration.
+Deployment admission must still inspect the installed route and effective network controls before enabling execution.
 
 The command uses bounded HTTP headers and request timeouts.
 SIGINT or SIGTERM starts graceful shutdown with a ten-second bound.
@@ -192,7 +197,7 @@ Acceptance 51 advances. The count remains 48 verified items out of 57.
 
 ## Next implementation
 
-Use the verified relay image package and the dedicated worker backend role for the next private service configuration batch.
+Rebuild approved relay and backend images with the current address and readiness contract before the next private service configuration batch.
 Compose the selected Azure exchange checks. Establish complete workload occupancy, effective networking, and trusted backend authority.
 Verify that its backend reaches only the trusted worker listener and carries no installation credentials.
 Complete effective DNS visibility, trusted preparation networking, cross-job isolation, execution placement, and role binding before native Azure enablement.

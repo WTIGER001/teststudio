@@ -16,6 +16,7 @@ type ExchangeSettings struct {
 	InfrastructureGroup string           `json:"infrastructureGroup"`
 	Image               string           `json:"image"`
 	BackendOrigin       string           `json:"backendOrigin"`
+	BackendAddress      string           `json:"backendAddress"`
 }
 
 func (s ExchangeSettings) environment() string { return s.Registry.Endpoints.ExchangeEnvironment }
@@ -35,7 +36,9 @@ func (s ExchangeSettings) canonical(c Config) (ExchangeSettings, error) {
 	}
 	topology := s.Registry.Endpoints.PrivateDNS.DNS.Firewall.Perimeter.Topology
 	cert := strings.TrimPrefix(s.Certificate, s.environment()+"/certificates/")
+	_, backendPrivate := privateHost(s.BackendAddress)
 	if !c.ownsResource(s.Application, "Microsoft.App", "containerApps") ||
+		!backendPrivate ||
 		!resourceName.MatchString(cert) ||
 		s.Certificate != s.environment()+"/certificates/"+cert ||
 		!c.ownsResource(s.VirtualNetwork, "Microsoft.Network", "virtualNetworks") ||

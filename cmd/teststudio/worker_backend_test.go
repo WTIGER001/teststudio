@@ -215,6 +215,12 @@ func TestWorkerBackendReadinessFailsWithDatabaseWhileLivenessRemains(t *testing.
 		t.Helper()
 		response := httptest.NewRecorder()
 		handler.ServeHTTP(response, httptest.NewRequest("GET", path, nil))
+		if want == 200 {
+			var state map[string]string
+			if err := json.Unmarshal(response.Body.Bytes(), &state); err != nil || state["role"] != "worker" {
+				t.Fatal("worker probe lost its dedicated role", err)
+			}
+		}
 		if response.Code != want || response.Header().Get("Cache-Control") != "no-store" {
 			t.Fatal(path, response.Code)
 		}
@@ -259,7 +265,7 @@ func TestWorkerBackendStartupPreservesSignInStateAndStopsItsListener(t *testing.
 			var state map[string]string
 			err = json.NewDecoder(io.LimitReader(response.Body, 1024)).Decode(&state)
 			response.Body.Close()
-			ready = err == nil && response.StatusCode == 200 && state["service"] == "teststudio"
+			ready = err == nil && response.StatusCode == 200 && state["service"] == "teststudio" && state["role"] == "worker"
 		}
 		if ready {
 			break

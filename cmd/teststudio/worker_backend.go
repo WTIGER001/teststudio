@@ -110,7 +110,7 @@ func workerBackendServer(address string, db *storage.Store, exchange *workerexch
 					return
 				}
 			}
-			json.NewEncoder(w).Encode(map[string]string{"status": "up", "service": "teststudio"})
+			json.NewEncoder(w).Encode(map[string]string{"status": "up", "service": "teststudio", "role": "worker"})
 		}
 	}
 	mux.HandleFunc("GET /healthz", health(true))

@@ -13,7 +13,7 @@ import (
 )
 
 func TestExchangeCommandRejectsUnconfiguredOrCredentialBearingOptions(t *testing.T) {
-	for _, args := range [][]string{nil, {"--database=private-canary"}, {"--public-origin=https://workers.example.test", "--backend-origin=https://user:private-canary@backend.example.test"}, {"--public-origin=https://workers.example.test", "--backend-origin=http://backend.example.test"}, {"--public-origin=https://workers.example.test", "--backend-origin=https://backend.example.test", "extra"}} {
+	for _, args := range [][]string{nil, {"--database=private-canary"}, {"--public-origin=https://workers.example.test", "--backend-origin=https://backend.example.test", "--backend-address=private-canary"}, {"--public-origin=https://workers.example.test", "--backend-origin=https://user:private-canary@backend.example.test"}, {"--public-origin=https://workers.example.test", "--backend-origin=http://backend.example.test"}, {"--public-origin=https://workers.example.test", "--backend-origin=https://backend.example.test", "extra"}} {
 		if err := run(t.Context(), args); err == nil || strings.Contains(err.Error(), "canary") {
 			t.Fatal("relay command accepted invalid options or exposed their values", err)
 		}

@@ -26,6 +26,7 @@ ExchangeSettings requires these values:
 | infrastructureGroup | The selected separate platform infrastructure group. |
 | image | One immutable relay image in the configured registry, outside the test repository prefix. |
 | backendOrigin | The exact HTTPS origin selected for the trusted worker backend. |
+| backendAddress | The exact canonical private IPv4 address selected for the backend endpoint. |
 
 The application name follows the Container Apps length and naming profile.
 The image requires an explicit repository and SHA-256 registry manifest digest.
@@ -75,13 +76,13 @@ That definition uses these controls:
 | Area | Required behavior |
 | --- | --- |
 | Container | One relay container with the exact immutable service image. |
-| Command | /app/teststudio-exchange with fixed listen, public-origin, and backend-origin arguments. |
+| Command | /app/teststudio-exchange with fixed listen, public-origin, backend-origin, and backend-address arguments. |
 | Runtime authority | No app secrets, environment values, volumes, init containers, sidecars, service binds, or runtime identity. |
 | Image pull | Only the selected pull identity, with lifecycle None. No registry username or password reference. |
 | Ingress | HTTPS edge access to target port 8043, one SNI hostname, one selected certificate, and no extra ports. |
 | Revisions | Single mode with one active latest revision receiving all traffic. |
 | Scale | One through two replicas, fixed resources, and explicit bounded scale settings. |
-| Probes | Local process health, readiness, and liveness endpoints from the relay package. |
+| Probes | Startup uses /healthz, liveness uses /livez, and backend readiness uses /readyz with a four-second timeout. |
 
 External app ingress here publishes through the environment edge. Disabled environment public access keeps the selected path private.
 The app's Easy Auth resource must explicitly report platform authentication disabled.
@@ -99,7 +100,10 @@ It must be provisioned, healthy, running, have a replica, receive all traffic, a
 Inactive revisions must explicitly report zero replicas and zero traffic. Unknown counts remain unavailable.
 Revision identifiers that differ only by letter case cannot count as separate observations.
 Unsettled rollout or inactive replica state remains unavailable.
-Revision readiness does not prove backend availability. The relay's probes check its own process only.
+The relay readiness probe now checks its dedicated worker backend from the relay network.
+It verifies normal TLS trust and the worker-role health reply through the selected pinned address.
+An observed healthy revision remains a platform observation. Actual installed routing and complete native admission still require separate proof.
+See [relay backend readiness](worker-relay-readiness.md).
 
 ## HTTPS certificate metadata
 

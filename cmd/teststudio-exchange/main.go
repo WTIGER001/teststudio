@@ -32,10 +32,17 @@ func run(ctx context.Context, arguments []string) error {
 	address := flags.String("addr", "127.0.0.1:8043", "Private relay listen address behind trusted HTTPS ingress")
 	public := flags.String("public-origin", "", "Exact worker-facing HTTPS origin")
 	backend := flags.String("backend-origin", "", "Fixed trusted HTTPS worker-listener origin")
+	backendAddress := flags.String("backend-address", "", "Optional exact private IPv4 backend address; preserves HTTPS hostname verification")
 	if flags.Parse(arguments) != nil || flags.NArg() != 0 {
 		return errors.New("invalid worker relay options")
 	}
-	handler, err := relay.New(*public, *backend, nil)
+	var handler *relay.Relay
+	var err error
+	if *backendAddress == "" {
+		handler, err = relay.New(*public, *backend, nil)
+	} else {
+		handler, err = relay.NewPinned(*public, *backend, *backendAddress, nil)
+	}
 	if err != nil {
 		return err
 	}

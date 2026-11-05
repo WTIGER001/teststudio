@@ -85,7 +85,9 @@ Deployment setup must prove the backend route, certificate authority, placement,
 
 GET /livez checks process availability.
 GET /healthz checks database connectivity with a two-second bound.
-Both use the standard teststudio health response and no-store caching policy.
+Both use the standard teststudio health response, the explicit role worker field, and no-store caching policy.
+The [relay readiness check](worker-relay-readiness.md) requires that worker field to distinguish this backend from a normal API health reply.
+The generic teststudio-health command accepts the additional role field.
 Readiness does not prove artifact availability, relay reachability, TLS validity, or complete provider admission.
 The existing teststudio-health command accepts an explicit worker health URL.
 

@@ -31,9 +31,11 @@ func TestAzureExchangeBindsSettingsAndReturnsCredentialFreeDefinitions(t *testin
 		"shared-infrastructure": func(s *ExchangeSettings) {
 			s.InfrastructureGroup = s.Registry.Endpoints.PrivateDNS.DNS.Firewall.Perimeter.Topology.InfrastructureGroup
 		},
-		"backend-credentials":  func(s *ExchangeSettings) { s.BackendOrigin = "https://user:private-canary@backend.invalid" },
-		"recursive-backend":    func(s *ExchangeSettings) { s.BackendOrigin = c.ExchangeOrigin + ":443" },
-		"prior-stage-mismatch": func(s *ExchangeSettings) { s.Registry.PreparationEndpoint += "-changed" },
+		"public-backend-address":  func(s *ExchangeSettings) { s.BackendAddress = "8.8.8.8" },
+		"missing-backend-address": func(s *ExchangeSettings) { s.BackendAddress = "" },
+		"backend-credentials":     func(s *ExchangeSettings) { s.BackendOrigin = "https://user:private-canary@backend.invalid" },
+		"recursive-backend":       func(s *ExchangeSettings) { s.BackendOrigin = c.ExchangeOrigin + ":443" },
+		"prior-stage-mismatch":    func(s *ExchangeSettings) { s.Registry.PreparationEndpoint += "-changed" },
 	} {
 		t.Run(name, func(t *testing.T) {
 			changed := s
@@ -49,6 +51,9 @@ func TestAzureExchangeBindsSettingsAndReturnsCredentialFreeDefinitions(t *testin
 	config, template := definition.Properties.Configuration, definition.Properties.Template
 	if len(config.Secrets) != 0 || len(template.Volumes) != 0 || len(template.InitContainers) != 0 || len(template.Containers) != 1 || len(template.Containers[0].Env) != 0 || value(template.Containers[0].Image) != s.Image || value(template.Containers[0].Command[0]) != "/app/teststudio-exchange" || value(config.IdentitySettings[0].Lifecycle) != "None" {
 		t.Fatal("definition gained runtime credential or executable authority")
+	}
+	if value(template.Containers[0].Args[3]) != "--backend-address="+s.BackendAddress || value(template.Containers[0].Probes[1].HTTPGet.Path) != "/readyz" || value(template.Containers[0].Probes[1].TimeoutSeconds) != 4 {
+		t.Fatal("relay definition lost backend reachability admission")
 	}
 	template.Containers[0].Args[1] = to.Ptr("--public-origin=https://foreign.invalid")
 	config.Ingress.CustomDomains[0].CertificateID = to.Ptr("foreign")

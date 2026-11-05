@@ -289,13 +289,24 @@ The composed observation still implements no Network and enables no coded job.
 See [private backend endpoint observation](azure-worker-backend-endpoint.md). Acceptance 51 advances; the count remains 48 of 57.
 No cloud request, browser, UI build, image build, container, live service listener, registry push, or deployment runs.
 
+The relay now checks backend readiness from its own network through GET /readyz and a dedicated three-second HTTPS request.
+The backend health reply identifies the worker role. Readiness verifies normal certificate trust, hostname, minimum lifetime, and a bounded exact health schema without caller credentials.
+The new optional private backend address pins readiness and worker transport while preserving Host and TLS verification. It bypasses the backend DNS lookup.
+The Azure relay definition requires that address and the backend-dependent readiness probe. Endpoint observation must select the same address.
+Five new focused race checks and ten selected existing relay, command, backend, and Azure definition or endpoint checks pass locally.
+Only changed certificate and configuration cases repeat. The relay production dependency audit remains unchanged.
+See [relay backend readiness](worker-relay-readiness.md). Acceptance 51 advances; the count remains 48 of 57.
+All owned TLS listeners, request goroutines, and the command-check subprocess close. No browser, container, UI build, image build, cloud request, registry push, or deployment runs.
+
 Next verify effective read coverage, environment attachment authority, and actual exchange networking.
 A completed list response does not prove authorization coverage or prevent later attachments. Keep those native installation controls mandatory.
 Use the worker backend role to verify its restricted route, TLS authority, and placement before completing service admission.
 The staged Azure backend selects platform HTTPS termination. Other approved profiles can select direct TLS.
 Selected origin, app, environment, command, identity metadata, and revision observation now pass local fixtures.
 The selected backend endpoint, NIC, address, approval, source prefix, and endpoint subnet policy now pass local fixtures.
-Bind the actual relay VNet, effective routing and DNS, and normally trusted chain next. Inspect effective identity grants and backend infrastructure subnet controls.
+Pinned relay backend routing, TLS trust, and worker-role readiness now pass local checks from owned TLS fixtures.
+Verify the installed relay VNet and route, global DNS isolation, and deployed certificate trust next. Inspect effective identity grants and backend infrastructure subnet controls.
+Backend hostname lookup is unnecessary in pinned mode. Preserve worker, exchange, registry, and platform DNS controls.
 Keep the staged backend separate from core deployment and coded worker packaging until admission and private relay access are complete.
 Resolve effective VNet-wide private-zone visibility and attachment controls. Selected-zone inspection cannot rule out other shadowing zones.
 Keep that proof separate from configured record correctness and private endpoint ownership.

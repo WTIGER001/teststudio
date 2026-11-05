@@ -25,7 +25,7 @@ BackendEndpointSettings requires these values:
 | subnetPrefix | Canonical private IPv4 prefix with at least eight addresses. |
 | relaySubnetPrefix | Canonical private IPv4 prefix for the selected relay infrastructure subnet, with at least 32 addresses. |
 | securityGroup | Dedicated endpoint NSG identifier. |
-| address | Exact private IPv4 address assigned to the backend endpoint NIC. |
+| address | Exact private IPv4 address assigned to the backend endpoint NIC. It must equal the relay backendAddress. |
 
 The endpoint subnet differs from the relay infrastructure subnet and overlaps neither its prefix nor the configured worker VNet.
 The relay prefix also differs from the worker address space.
@@ -104,4 +104,6 @@ go test -race ./adapters/execution/azure -run '^(TestAzureBackendEndpoint.*|Test
 ```
 
 Evidence is output/azure-worker-backend-endpoint/summary.json and targeted command results.
-Acceptance 51 advances. Continue actual relay routing, effective DNS, and normal backend TLS verification before native dispatch wiring.
+The [relay readiness implementation](worker-relay-readiness.md) now verifies backend TLS and worker-role health through that pinned address.
+Local checks do not establish the installed route. Continue effective relay networking, DNS isolation, and deployed trust verification before native dispatch wiring.
+Acceptance 51 advances.

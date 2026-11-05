@@ -29,7 +29,7 @@ func (s BackendEndpointSettings) canonical(c Config) (BackendEndpointSettings, e
 	exchange := s.Backend.Exchange
 	worker, _ := netip.ParsePrefix(exchange.Registry.Endpoints.PrivateDNS.DNS.Firewall.Perimeter.Topology.WorkerVNetPrefix)
 	if !ok || !sourceOK || prefix.Bits() > 29 || source.Bits() > 27 || prefix.Overlaps(source) || prefix.Overlaps(worker) || source.Overlaps(worker) ||
-		!usableEndpointAddress(prefix, s.Address) || !subnetResource(c, s.Subnet, exchange.VirtualNetwork) || strings.EqualFold(s.Subnet, exchange.Subnet) ||
+		!usableEndpointAddress(prefix, s.Address) || s.Address != exchange.BackendAddress || !subnetResource(c, s.Subnet, exchange.VirtualNetwork) || strings.EqualFold(s.Subnet, exchange.Subnet) ||
 		!c.ownsResource(s.Endpoint, "Microsoft.Network", "privateEndpoints") || !c.ownsResource(s.Interface, "Microsoft.Network", "networkInterfaces") ||
 		!c.ownsResource(s.SecurityGroup, "Microsoft.Network", "networkSecurityGroups") ||
 		strings.EqualFold(s.SecurityGroup, exchange.Registry.Endpoints.SecurityGroup) || strings.EqualFold(s.SecurityGroup, exchange.Registry.Endpoints.PrivateDNS.DNS.Firewall.Perimeter.Topology.SecurityGroup) {

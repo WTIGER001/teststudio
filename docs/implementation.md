@@ -122,7 +122,41 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: Azure private backend endpoint observation
+## Current delivery: pinned relay backend readiness
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+The private backend endpoint observation batch commits as d953360.
+
+The relay now exposes GET /readyz and checks the dedicated worker backend from its own network context.
+The probe sends only a fixed GET /healthz through normal TLS verification. It carries no ticket, cookie, user identity, or forwarded caller header.
+The backend health and liveness replies now identify role worker. A normal API health reply cannot establish private backend readiness.
+The response must retain the exact bounded health schema, valid chain and hostname, and more than two hours and five minutes of certificate life.
+Readiness uses HTTP/1.1 on a fresh TLS connection, one probe slot, a separate transport, and a three-second deadline.
+Local health and liveness remain independent. Readiness failure exposes only a fixed unavailable response.
+
+The optional backend-address pins both worker operations and readiness to one canonical private IPv4 address.
+It preserves the original Host, TLS server name, and explicit backend port without a backend DNS lookup.
+Production disables environment proxies, redirects, insecure TLS, and foreign dial targets.
+The Azure relay definition now requires backendAddress, the matching command argument, and a four-second /readyz platform probe.
+Backend endpoint observation rejects an address that differs from that relay pin.
+
+Five new focused local race checks pass. Ten selected existing relay, command, backend, and Azure definition or endpoint checks pass for the changed contracts.
+Only changed certificate, worker health, transport, and configuration cases repeat after review. No unchanged broad suite or fixture build repeats.
+Owned TLS fixtures verify normal trust, certificate lifetime, fixed dial scope, worker forwarding, response bounds, cancellation, and concurrency separation.
+The actual backend command check confirms the worker-role health reply and graceful process or listener cleanup.
+The production dependency audit still reports only standard-library packages plus the existing relay, wire, identifier, and command packages.
+Evidence is output/worker-relay-readiness/summary.json and targeted command results.
+No cloud credential, cloud request, browser, UI build, image build, container, registry push, or deployment runs.
+All owned listeners, request goroutines, idle transports, and the command-check subprocess close.
+
+Both relay and service images require a later rebuild and approval for this new private readiness contract.
+The local demonstration's ordinary API role and data remain unchanged.
+Pinned backend transport avoids its hostname lookup. It does not establish full DNS isolation or remove worker, exchange, registry, or platform DNS requirements.
+Deployed relay routing, VNet controls, certificate trust, effective authority, preparation networking, and execution isolation remain required before native enablement.
+The complete goal and all nine broad acceptance items remain open under their stable scope.
+See [relay backend readiness and address binding](worker-relay-readiness.md).
+
+## Previous delivery: Azure private backend endpoint observation
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 The backend service observation batch commits as 21c2372.
