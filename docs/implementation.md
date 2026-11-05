@@ -122,7 +122,35 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: pinned relay backend readiness
+## Current delivery: selected relay VNet observation
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+The relay topology stage now observes the selected VNet address space, DNS settings, peering, and bounded embedded subnet inventory.
+Its canonical private IPv4 prefix must contain the selected relay and backend endpoint subnets without overlapping the configured worker VNet.
+Custom DNS, peering, default public NAT, BGP communities, external IP allocations, and extended locations reject observation.
+Subnet identifiers must name unique children. Their private prefixes must lie within the VNet and must not overlap.
+Both selected embedded subnets must agree with the current endpoint stage's direct observations.
+Additional bounded subnets remain possible for later platform and registry paths. Their workloads and traffic paths receive no approval.
+
+The endpoint guard now returns a transient validated subnet observation to its caller. Public Check behavior remains unchanged.
+The composed relay stage adds one selected VNet GET without repeating subnet or backend environment reads.
+The read-only SDK accepts an explicit credential and only the selected network resource and API version.
+It permits no writes, secret reads, expansions, paging, foreign resources, or redirects.
+The composed guard has a 55-second context, 58 normal reads, and a maximum of 111 reads with bounded parent paging.
+It stores no successful admission cache and still implements no Network or native execution enablement.
+
+Four new focused race checks and two selected existing endpoint checks pass locally in 3.376 seconds.
+They cover fresh observations, parent reuse, alternate paths, prefix and inventory conflicts, incomplete state, exact SDK scope, and parent binding.
+No unchanged broad suite, browser, UI build, image build, container, cloud request, registry push, deployment, or demo restart runs.
+Fixtures use explicit fake credentials and in-memory SDK responses. They open no network connection or listener.
+Evidence is output/azure-relay-topology/summary.json and the targeted command result.
+See [relay VNet observation](azure-relay-topology.md).
+
+Continue relay source NSG, route and firewall controls, effective DNS visibility, identity and attachment authority, and execution isolation.
+All nine broad acceptance items remain open under their original scope.
+
+## Previous delivery: pinned relay backend readiness
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 The private backend endpoint observation batch commits as d953360.

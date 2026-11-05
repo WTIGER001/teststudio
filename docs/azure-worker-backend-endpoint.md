@@ -105,5 +105,6 @@ go test -race ./adapters/execution/azure -run '^(TestAzureBackendEndpoint.*|Test
 
 Evidence is output/azure-worker-backend-endpoint/summary.json and targeted command results.
 The [relay readiness implementation](worker-relay-readiness.md) now verifies backend TLS and worker-role health through that pinned address.
-Local checks do not establish the installed route. Continue effective relay networking, DNS isolation, and deployed trust verification before native dispatch wiring.
+The [relay VNet observer](azure-relay-topology.md) now reuses this stage's validated subnet observations for one additional VNet read.
+Local checks do not establish the installed route. Continue source perimeter controls, DNS isolation, and deployed trust verification before native dispatch wiring.
 Acceptance 51 advances.

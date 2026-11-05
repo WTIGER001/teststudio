@@ -298,14 +298,21 @@ Only changed certificate and configuration cases repeat. The relay production de
 See [relay backend readiness](worker-relay-readiness.md). Acceptance 51 advances; the count remains 48 of 57.
 All owned TLS listeners, request goroutines, and the command-check subprocess close. No browser, container, UI build, image build, cloud request, registry push, or deployment runs.
 
-Next verify effective read coverage, environment attachment authority, and actual exchange networking.
+The relay VNet stage now checks the selected address space, DNS settings, peering, and bounded embedded subnet inventory.
+It reuses the endpoint stage's current direct subnet observations and adds one VNet GET without duplicate subnet reads.
+Four new focused race checks and two existing endpoint checks pass locally. No cloud operation, image build, UI build, or demo restart runs.
+See [relay VNet observation](azure-relay-topology.md). Acceptance 51 advances; the count remains 48 of 57.
+
+Next verify effective read coverage, environment attachment authority, and relay source perimeter controls.
 A completed list response does not prove authorization coverage or prevent later attachments. Keep those native installation controls mandatory.
 Use the worker backend role to verify its restricted route, TLS authority, and placement before completing service admission.
 The staged Azure backend selects platform HTTPS termination. Other approved profiles can select direct TLS.
 Selected origin, app, environment, command, identity metadata, and revision observation now pass local fixtures.
 The selected backend endpoint, NIC, address, approval, source prefix, and endpoint subnet policy now pass local fixtures.
 Pinned relay backend routing, TLS trust, and worker-role readiness now pass local checks from owned TLS fixtures.
-Verify the installed relay VNet and route, global DNS isolation, and deployed certificate trust next. Inspect effective identity grants and backend infrastructure subnet controls.
+The selected relay VNet now passes local address-space, DNS-setting, peering, and subnet-consistency checks.
+Verify relay source NSG, route and firewall controls, global DNS isolation, and deployed certificate trust next.
+Inspect effective identity grants and backend infrastructure subnet controls.
 Backend hostname lookup is unnecessary in pinned mode. Preserve worker, exchange, registry, and platform DNS controls.
 Keep the staged backend separate from core deployment and coded worker packaging until admission and private relay access are complete.
 Resolve effective VNet-wide private-zone visibility and attachment controls. Selected-zone inspection cannot rule out other shadowing zones.

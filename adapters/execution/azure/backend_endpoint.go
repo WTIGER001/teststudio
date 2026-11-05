@@ -33,16 +33,26 @@ func NewBackendEndpointGuard(c Config, s BackendEndpointSettings, backend *Backe
 	return &BackendEndpointGuard{worker: c, settings: s, backend: backend, reader: reader}, nil
 }
 
-func (g *BackendEndpointGuard) Check(ctx context.Context, c Config) (resultErr error) {
+type backendEndpointObservation struct {
+	subnet n.Subnet
+	relay  n.Subnet
+}
+
+func (g *BackendEndpointGuard) Check(ctx context.Context, c Config) error {
+	_, err := g.inspect(ctx, c)
+	return err
+}
+
+func (g *BackendEndpointGuard) inspect(ctx context.Context, c Config) (observation backendEndpointObservation, resultErr error) {
 	defer func() { resultErr = controlError(resultErr) }()
 	if fingerprint(c) != fingerprint(g.worker) {
-		return hostedexecution.ErrOwnership
+		return backendEndpointObservation{}, hostedexecution.ErrOwnership
 	}
 	ctx, cancel := context.WithTimeout(ctx, 50*time.Second)
 	defer cancel()
 	environment, err := g.backend.inspect(ctx, c)
 	if err != nil {
-		return err
+		return backendEndpointObservation{}, err
 	}
 	s := g.settings
 	var endpoint n.PrivateEndpoint
@@ -63,72 +73,72 @@ func (g *BackendEndpointGuard) Check(ctx context.Context, c Config) (resultErr e
 	group.Wait()
 	for _, err := range errs {
 		if errors.Is(err, hostedexecution.ErrOwnership) {
-			return hostedexecution.ErrOwnership
+			return backendEndpointObservation{}, hostedexecution.ErrOwnership
 		}
 	}
 	for _, err := range errs {
 		if err != nil {
-			return hostedexecution.ErrUnavailable
+			return backendEndpointObservation{}, hostedexecution.ErrUnavailable
 		}
 	}
 	observed, err := verifyEnvironmentEndpointConnections(connections, s.Backend.Environment, s.Endpoint)
 	if err != nil {
-		return err
+		return backendEndpointObservation{}, err
 	}
 	embedded := []a.PrivateEndpointConnection{}
 	for _, connection := range environment.Properties.PrivateEndpointConnections {
 		if connection == nil {
-			return hostedexecution.ErrOwnership
+			return backendEndpointObservation{}, hostedexecution.ErrOwnership
 		}
 		embedded = append(embedded, *connection)
 	}
 	declared, err := verifyEnvironmentEndpointConnections(embedded, s.Backend.Environment, s.Endpoint)
 	if err != nil {
-		return err
+		return backendEndpointObservation{}, err
 	}
 	if observed != declared {
-		return hostedexecution.ErrUnavailable
+		return backendEndpointObservation{}, hostedexecution.ErrUnavailable
 	}
 	member, err := verifyBackendEndpointLink(links, s.Backend.Environment, c.Region)
 	if err != nil {
-		return err
+		return backendEndpointObservation{}, err
 	}
 	role := s.role()
 	if err := verifyPrivateEndpoint(role, endpoint, s.Subnet, c.Region); err != nil {
-		return err
+		return backendEndpointObservation{}, err
 	}
 	if err := verifyPrivateInterface(role, nic, s.Subnet, c.Region); err != nil {
-		return err
+		return backendEndpointObservation{}, err
 	}
 	if value(nic.Properties.IPConfigurations[0].Properties.PrivateLinkConnectionProperties.RequiredMemberName) != member {
-		return hostedexecution.ErrOwnership
+		return backendEndpointObservation{}, hostedexecution.ErrOwnership
 	}
 	for _, configuration := range endpoint.Properties.IPConfigurations {
 		if value(configuration.Properties.MemberName) != member {
-			return hostedexecution.ErrOwnership
+			return backendEndpointObservation{}, hostedexecution.ErrOwnership
 		}
 	}
 	if err := verifyEndpointSubnet(subnet, []n.Interface{nic}, s.Subnet, s.SubnetPrefix, s.SecurityGroup, []string{s.Endpoint}); err != nil {
-		return err
+		return backendEndpointObservation{}, err
 	}
 	if err := verifyEndpointSecurityGroup(security, s.SecurityGroup, s.Subnet, c.Region, s.rules()); err != nil {
-		return err
+		return backendEndpointObservation{}, err
 	}
 	if err := subnetMatches(relay, s.Backend.Exchange.Subnet); err != nil {
-		return err
+		return backendEndpointObservation{}, err
 	}
 	prefixes := subnetPrefixes(relay)
 	if len(prefixes) != 1 || prefixes[0] != s.RelaySubnetPrefix || len(relay.Properties.Delegations) != 1 || relay.Properties.Delegations[0] == nil || relay.Properties.Delegations[0].Properties == nil {
-		return hostedexecution.ErrOwnership
+		return backendEndpointObservation{}, hostedexecution.ErrOwnership
 	}
 	delegation := relay.Properties.Delegations[0].Properties
 	if value(delegation.ServiceName) != "Microsoft.App/environments" {
-		return hostedexecution.ErrOwnership
+		return backendEndpointObservation{}, hostedexecution.ErrOwnership
 	}
 	if value(delegation.ProvisioningState) != n.ProvisioningStateSucceeded {
-		return hostedexecution.ErrUnavailable
+		return backendEndpointObservation{}, hostedexecution.ErrUnavailable
 	}
-	return nil
+	return backendEndpointObservation{subnet: subnet, relay: relay}, nil
 }
 
 func verifyBackendEndpointLink(links []a.PrivateLinkResource, environment, region string) (string, error) {
