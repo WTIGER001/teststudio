@@ -95,6 +95,25 @@ No cloud, cluster, image build, or browser operation occurs in this packaging ba
 The next verification uses the dedicated local Kubernetes installation and one changed service image.
 This advances 57; the verified count remains 50 of 57.
 
+### Actual Kubernetes recorder handoff
+
+Helm revision 15 now runs the updated service image with recordingCompanion enabled only on the API.
+Both controllers and preparation report Ready and receive no recording flag. The selected gateway and worker runtimes remain unchanged.
+Normal OIDC authoring creates a private recording through the installed API.
+The production companion client and runner use the owned HTTPS ingress with the existing development certificate and verified hostname.
+Only test-local address routing and certificate trust differ from ordinary desktop transport. No host DNS or system trust changes occur.
+Real native Chromium records the independent local target's initial navigation.
+The owner requests stop. The companion closes its browser, acknowledges final source, and the API retains ready.
+Reviewed source includes the permanent tag, visible environment binding, and needs-review safety label.
+Saving creates PostgreSQL draft 20261105T220101.897259977-94680fe9e468d63c7a720d59 at revision 1.
+
+The native check passes first attempt in 6.46 seconds. The recording is desktop-8bdd35ed-8b4b-410c-a7c7-dd2c4365924e.
+All 23 owned verification processes exit. The local target closes, the managed session signs out, and private connection files are removed.
+The twelve original offline runs and seven application-networking runs keep their original identifiers. The new project has no target test run.
+Checkpoint reinspection passes in about 0.2 seconds without another browser, target, or recording.
+Evidence is output/local-k3s/recording. No AWS or Azure operation occurs. The user demo remains running.
+See [local Kubernetes recording](local-kubernetes-recording.md). This advances 57; the verified count remains 50 of 57.
+
 ## Remote gateway transport milestone — 2026-11-05
 
 The trusted gateway now supports execution-scoped TLS forwarding through a supervisor-owned Unix socket bridge.

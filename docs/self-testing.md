@@ -38,6 +38,18 @@ go test ./cmd/teststudio -run '^TestServiceCommandExposesCompanionOnlyWhenExplic
 These checks cover default-disabled configuration, API-only enablement, malformed values, native process wiring, HTTPS routing, and authorization forwarding.
 They read no kubeconfig and perform no cloud or cluster operation. They open no browser.
 
+The separate actual recorder check uses the owned local Kubernetes installation:
+
+```sh
+python3 scripts/verify-kubernetes-recording.py
+```
+
+Its first native capture takes 6.46 seconds and closes all 23 owned verification processes.
+It uses normal OIDC authoring, the installed HTTPS API, and the real native companion components.
+The saved checkpoint makes later invocations inspect the same recording and draft without opening another browser.
+The original nineteen local Kubernetes runs remain unchanged. No cloud operation or recorded target test run occurs.
+See [local Kubernetes recording](local-kubernetes-recording.md) for current deployment and evidence.
+
 ## Kubernetes packaging checks
 
 The Helm chart has strict installation values and local rendering checks in scripts/verify-kubernetes.py.

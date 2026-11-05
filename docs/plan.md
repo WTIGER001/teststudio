@@ -27,7 +27,7 @@ Do not add new dashboard pages or repeat completed demonstration setup before cl
 
 Critical work fixes a blocker in the local create, run, or result inspection workflows. No such blocker is currently identified by retained verification.
 Important recorder authoring, desktop setup, help, local browser verification, and opt-in packaging now have evidence.
-The next Important milestone verifies the deployed recorder handoff on the dedicated local Kubernetes installation.
+The deployed recorder handoff now also passes on the dedicated local Kubernetes installation.
 Required AWS and Azure deployment gates remain Important, with their existing authorization and Azure deferral boundaries.
 Nice to Have covers optional one-click desktop installation, automatic updates, and later convenience polish. These additions do not replace required acceptance scope.
 
@@ -142,7 +142,12 @@ The installation option remains disabled by default. Kubernetes chart 0.1.1 and 
 Three local Kubernetes profiles validate API-only enablement, including separate controller and preparation roles. Two malformed settings are rejected.
 Four local ECS task previews preserve the original task except for one API argument. Three malformed settings are rejected.
 The existing HTTPS route forwards authorization without caching. Native service checks confirm default-disabled and explicit companion modes without opening a browser.
-Next verify the opt-in recorder on the dedicated local Kubernetes installation. Build only the changed service image and reuse retained worker evidence.
+The opt-in recorder now passes on the dedicated local Kubernetes installation at Helm revision 15.
+One changed service image preserves the previous gateway and runtime settings. OIDC, HTTPS, native capture, owner stop, and PostgreSQL draft saving pass.
+The native check takes 6.46 seconds. All 23 owned verification processes exit; pairing and device files are removed.
+No target test run starts. Twelve offline runs and seven application-networking runs remain unchanged.
+The checkpoint reinspection takes about 0.2 seconds and opens no browser. See [local Kubernetes recording](local-kubernetes-recording.md).
+Retain this evidence. Continue the remaining deployment audit without repeating completed local execution or browser suites.
 See [desktop companion](recorder-companion.md). Keep the existing recording, review, draft, publication, and execution boundaries.
 Use a third VPC for trusted gateways and separate environment worker resources. Preserve the retained offline worker pool.
 See [native gateway networking](ecs-gateway-network.md) for exact resource and continuation requirements.
@@ -153,7 +158,7 @@ Require the address, certificate, and native task identity capabilities before e
 1. Keep the completed Kubernetes gateway and its two passing application workflows as retained evidence.
 2. Retain the passing gateway cancellation and interrupted-run recovery cases. Both use their original execution identities and clean both workloads.
 3. Retain the completed ECS gateway adapters and optional package with their passing local contract checks. Keep actual AWS verification separate.
-4. Retain the completed companion, wizard, macOS package, and opt-in settings. Verify the recorder handoff once on the dedicated local Kubernetes installation.
+4. Retain the completed companion, wizard, macOS package, opt-in settings, and actual local Kubernetes handoff.
 5. Complete target verification only in separately authorized deployment work. Keep Azure implementation deferred.
 
 Keep all seven remaining acceptance items open: 41, 46, 51, 53, 54, 56, and 57.

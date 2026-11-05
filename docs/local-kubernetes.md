@@ -58,6 +58,9 @@ See [local controller failover](local-kubernetes-controllers.md) for evidence an
 Actual gVisor runtime execution and selective worker network denial now pass. See [worker isolation](local-kubernetes-isolation.md).
 The single-Pod restart does not establish replica failover or cross-provider parity.
 The 57-item ledger now has 50 verified and seven open items.
+Helm revision 15 now enables the desktop recorder on the API with the updated service image.
+An actual native handoff passes HTTPS, OIDC authoring, captured source, owner stop, and PostgreSQL draft saving.
+See [local Kubernetes recording](local-kubernetes-recording.md) for the current image, values, retained identifiers, and cleanup proof.
 
 ### Evidence and ownership
 
@@ -68,7 +71,8 @@ Current service output is service.log. The initial database startup race is reco
 The successful probe records and summary are in output/local-k3s/probe.
 The service replacement records are before-evidence-restart.json, after-evidence-restart.json, and evidence-restart-summary.json.
 Current coded and lifecycle summaries are output/local-k3s/coded/summary.json and output/local-k3s/lifecycle/summary.json.
-The latest service image and upgrade log are service-cleanup-image.json and service-cleanup-deploy.log.
+The latest service image and upgrade log are recorded in recording/installation.json and recording/helm-upgrade.log.
+The earlier lifecycle image and upgrade log remain service-cleanup-image.json and service-cleanup-deploy.log.
 The private kubeconfig contains credentials. Do not commit, print, or copy it into application settings.
 Private dependency settings and TLS keys remain under .data/local-k3s with restricted file permissions.
 The local PostgreSQL connection uses cluster-internal plaintext transport for this dedicated development cluster.

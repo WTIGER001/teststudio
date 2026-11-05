@@ -66,7 +66,9 @@ Set recordingCompanion back to false to stop accepting companion authority. Desk
 
 Three focused local rendering profiles validate 41 resources. Two malformed settings are rejected.
 The enabled base profile differs only by its API argument. Separate-role checks exclude the flag from controllers and preparation.
-Evidence is output/kubernetes-recording-package. This verifies packaging, not a deployed recorder session.
+Package evidence is output/kubernetes-recording-package.
+The dedicated local installation now also passes an actual native recorder session through HTTPS, normal OIDC authoring, PostgreSQL, and owner stop.
+The resulting source saves as a draft without a target test run. See [local Kubernetes recording](local-kubernetes-recording.md).
 
 ### Private certificate authorities
 

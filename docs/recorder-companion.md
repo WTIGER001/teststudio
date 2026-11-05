@@ -140,4 +140,7 @@ The opt-in Kubernetes and AWS settings now pass focused local packaging checks.
 Kubernetes validates three profiles, including separate controller and preparation roles, and rejects two malformed settings.
 AWS validates four task profiles and rejects three malformed settings. HTTPS authorization forwarding and disabled caching remain required.
 A native service subprocess check confirms default-disabled and explicitly enabled API modes. Enabled recording waits for pairing without opening a browser.
-These settings have no new deployed-profile evidence. See [Kubernetes](kubernetes.md) and [AWS](aws.md) for operator configuration.
+The Kubernetes setting now also passes an actual native handoff through the owned local installation's HTTPS ingress and normal OIDC session.
+Captured source saves as a PostgreSQL draft without starting a target test run. All 23 owned verification processes exit.
+See [local Kubernetes recording](local-kubernetes-recording.md). Actual AWS and Azure behavior remains unverified.
+See [Kubernetes](kubernetes.md) and [AWS](aws.md) for operator configuration.
