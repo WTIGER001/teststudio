@@ -87,5 +87,5 @@ func ExecutionProfile(c Config) (string, error) {
 	if err := Validate(c); err != nil {
 		return "", err
 	}
-	return "aca-sandbox-v1-" + hash([]any{c, APIVersion, TokenScope, "linux-amd64-cpu2-memory4Gi-disk40Gi"})[:20], nil
+	return "aca-sandbox-v1-" + hash([]any{c, APIVersion, TokenScope, hostedexecution.SandboxSupervisor, "linux-amd64-cpu2-memory4Gi-disk40Gi-uid1000"})[:20], nil
 }

@@ -11,7 +11,8 @@ Sandboxes and the selected API are preview services. Hosted acceptance remains o
 No native command selects this package yet. No deployment template enables sandbox execution yet.
 The [durable controller](azure-sandbox-controller.md) now supplies dispatch reservation, lost-receipt recovery, cancellation, and checkpointed cleanup.
 The [independent deadline SDK](azure-sandbox-deadlines.md) now supplies owned timer creation, verification, and checkpointed removal.
-The client and controller do not yet compose the complete hosted Provider. Effective timer authority, admission, command completion, and source integration remain required.
+The [command bridge](azure-sandbox-commands.md) now supplies independent exit receipts and common hosted status mapping.
+The complete native Provider still requires effective timer authority, admission, source resolution, and configuration.
 Local contract checks do not establish deployed isolation, service availability, identity authority, certificate trust, or complete product operation.
 
 ## Concepts
@@ -57,8 +58,8 @@ Each launch selects one private disk image and one VNet connection.
 Configuration also requires an explicit virtualization selection through the SDK's vmmType string field.
 It supplies no guessed virtualization default. Separate deployment verification must confirm the supported value and effective runtime boundary.
 The fixed resource class uses two CPU cores, 4 GiB memory, and 40 GiB disk.
-The entrypoint invokes /runner/teststudio-job with fixed runner and exchange arguments.
-Discovery adds its explicit operation argument.
+The entrypoint invokes trusted idle mode until the absolute deadline.
+The command API later invokes the fixed supervisor with runner and exchange arguments. Discovery adds its explicit operation argument.
 No snapshot, preset, shared volume, exposed port, application secret, or runtime identity enters the request.
 
 The environment contains only the execution identifier and its short-lived worker ticket.
@@ -76,7 +77,7 @@ The existing Job timer targets the ARM Job API. The [sandbox timer](azure-sandbo
 ### Recovery and ownership
 
 The immutable proof binds configuration, API version, audience, source image, canonical source digest, disk image, reference, operation, deadline, and launch definition.
-The v2 proof requires the OCI inspector's sha256:HEX digest format.
+The v3 proof requires the canonical sha256:HEX digest and versioned sandbox command capability.
 It retains ticket and environment hashes. It retains no usable ticket.
 A restored proof can verify readback but cannot create another execution.
 Expired tickets and cancellation during credential acquisition prevent dispatch.
@@ -140,7 +141,7 @@ Implement durable image import and Ready-image resolution before connecting nati
 Reuse the existing source queue, database, approved OCI inspector, worker exchange, and preparation authorization.
 Reconcile returned identifiers under complete ownership proofs. Never retry an ambiguous create as new work.
 Bind the independent sandbox deadline SDK to verified native identity grants and workflow protection.
-Connect independent command completion, terminal runner reports, deletion checkpoints, and orphan recovery through the shared Provider contract.
+Connect the implemented command completion and status bridge, terminal runner reports, deletion checkpoints, and orphan recovery through the complete native Provider.
 Add explicit managed identity, group, VNet, source-import, and deadline packaging before native command selection.
 Keep all installation credentials in trusted processes.
 Keep actual Azure verification separate from this local implementation session.

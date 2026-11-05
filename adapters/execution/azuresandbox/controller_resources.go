@@ -10,9 +10,13 @@ import (
 
 func (c *Controller) Stop(ctx context.Context, ref execution.Reference) (resultErr error) {
 	defer func() { resultErr = controlError(resultErr) }()
-	d, err := c.update(ctx, ref, false, func(d *dispatch) error { d.Stopping = true; return nil })
-	if err != nil || d.Removed || !d.CreateAttempted || d.CreateRejected {
+	d, err := c.update(ctx, ref, false, cancelDispatch)
+	if err != nil {
 		return err
+	}
+	defer c.cancelCommand(ref.ID)
+	if d.Removed || !d.CreateAttempted || d.CreateRejected {
+		return nil
 	}
 	_, _, plan, err := c.load(ctx, ref)
 	if err != nil {
@@ -101,10 +105,11 @@ func (c *Controller) Remove(ctx context.Context, ref execution.Reference) (resul
 	if err := c.authorizeCleanup(ctx, d); err != nil {
 		return err
 	}
-	d, err = c.update(ctx, ref, false, func(current *dispatch) error { current.Stopping = true; return nil })
+	d, err = c.update(ctx, ref, false, cancelDispatch)
 	if err != nil {
 		return err
 	}
+	defer c.cancelCommand(ref.ID)
 	if !settled(d) {
 		if err := c.removeInstance(ctx, d, plan); err != nil {
 			return err
@@ -139,4 +144,12 @@ func (c *Controller) Remove(ctx context.Context, ref execution.Reference) (resul
 		return nil
 	})
 	return err
+}
+
+func cancelDispatch(d *dispatch) error {
+	d.Stopping = true
+	if d.CommandAttempted && d.CommandExitCode == nil {
+		d.CommandSuppressed = true
+	}
+	return nil
 }

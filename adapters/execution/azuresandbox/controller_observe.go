@@ -84,6 +84,8 @@ func (c *Controller) Observe(ctx context.Context, ref execution.Reference) (stat
 		return state, err
 	}
 	state = DispatchState{Reference: ref, AdmissionPending: true, CreateAttempted: d.CreateAttempted, Rejected: d.CreateRejected || d.CreationBlocked, Quiesced: d.Quiesced, Removed: d.Removed}
+	state.CommandAttempted, state.CommandUnknown, state.CommandRejected = d.CommandAttempted, d.CommandUnknown, d.CommandRejected
+	state.CommandExitCode, state.CommandSuppressed = d.CommandExitCode, d.CommandSuppressed
 	if d.Removed || state.Rejected || !d.CreateAttempted {
 		return state, nil
 	}

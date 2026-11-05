@@ -17,6 +17,7 @@ var ErrOwnership = errors.New("hosted worker ownership or immutable execution se
 var ErrConfiguration = errors.New("hosted execution requires an approved supervised image, private exchange, and durable lifecycle hooks")
 
 const NonRootTaskStorage = "task-volumes/v1"
+const SandboxSupervisor = "azure-sandbox-command/v1"
 
 type Image struct {
 	TaskStorage      string
@@ -27,6 +28,7 @@ type Image struct {
 	OS               string
 	Architecture     string
 	Supervisor       string
+	Sandbox          string
 	Project          string
 	SourceDigest     string
 	ExecutionProfile string

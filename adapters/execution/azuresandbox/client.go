@@ -17,10 +17,12 @@ import (
 )
 
 type Client struct {
-	config     Config
-	credential azcore.TokenCredential
-	http       *http.Client
-	owned      *http.Transport
+	config       Config
+	credential   azcore.TokenCredential
+	http         *http.Client
+	owned        *http.Transport
+	commandHTTP  *http.Client
+	ownedCommand *http.Transport
 }
 
 func NewClient(c Config, credential azcore.TokenCredential, transport http.RoundTripper) (*Client, error) {
@@ -28,22 +30,37 @@ func NewClient(c Config, credential azcore.TokenCredential, transport http.Round
 		return nil, hostedexecution.ErrConfiguration
 	}
 	var owned *http.Transport
+	var ownedCommand *http.Transport
+	commandTransport := transport
 	if transport == nil {
 		owned = &http.Transport{Proxy: nil, DialContext: (&net.Dialer{Timeout: 3 * time.Second, KeepAlive: 30 * time.Second}).DialContext, TLSClientConfig: &tls.Config{MinVersion: tls.VersionTLS12}, TLSHandshakeTimeout: 3 * time.Second, ResponseHeaderTimeout: 4 * time.Second, IdleConnTimeout: 30 * time.Second}
 		transport = owned
+		ownedCommand = owned.Clone()
+		ownedCommand.ResponseHeaderTimeout = 0
+		commandTransport = ownedCommand
 	}
-	return &Client{config: c, credential: credential, owned: owned, http: &http.Client{Transport: transport, Timeout: 5 * time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}, nil
+	noRedirect := func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
+	return &Client{config: c, credential: credential, owned: owned, ownedCommand: ownedCommand,
+		http:        &http.Client{Transport: transport, Timeout: 5 * time.Second, CheckRedirect: noRedirect},
+		commandHTTP: &http.Client{Transport: commandTransport, CheckRedirect: noRedirect}}, nil
 }
 
 func (c *Client) Close() {
 	if c.owned != nil {
 		c.owned.CloseIdleConnections()
 	}
+	if c.ownedCommand != nil {
+		c.ownedCommand.CloseIdleConnections()
+	}
 }
 
 func (c *Client) request(ctx context.Context, method, target string, input any) ([]byte, error) {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
+	return c.send(ctx, c.http, method, target, input)
+}
+
+func (c *Client) send(ctx context.Context, client *http.Client, method, target string, input any) ([]byte, error) {
 	if ctx.Err() != nil {
 		return nil, hostedexecution.ErrUnavailable
 	}
@@ -55,8 +72,11 @@ func (c *Client) request(ctx context.Context, method, target string, input any) 
 			return nil, hostedexecution.ErrConfiguration
 		}
 	}
-	token, err := c.credential.GetToken(ctx, policy.TokenRequestOptions{Scopes: []string{TokenScope}})
-	if err != nil || ctx.Err() != nil || len(token.Token) == 0 || len(token.Token) > 64<<10 || strings.ContainsAny(token.Token, "\x00\r\n") || !token.ExpiresOn.After(time.Now()) {
+	credentialContext, credentialCancel := context.WithTimeout(ctx, 5*time.Second)
+	token, err := c.credential.GetToken(credentialContext, policy.TokenRequestOptions{Scopes: []string{TokenScope}})
+	credentialErr := credentialContext.Err()
+	credentialCancel()
+	if err != nil || credentialErr != nil || ctx.Err() != nil || len(token.Token) == 0 || len(token.Token) > 64<<10 || strings.ContainsAny(token.Token, "\x00\r\n") || !token.ExpiresOn.After(time.Now()) {
 		return nil, hostedexecution.ErrUnavailable
 	}
 	r, err := http.NewRequestWithContext(ctx, method, target, bytes.NewReader(data))
@@ -68,7 +88,8 @@ func (c *Client) request(ctx context.Context, method, target string, input any) 
 	if input != nil {
 		r.Header.Set("Content-Type", "application/json")
 	}
-	response, err := c.http.Do(r)
+	r.GetBody = nil
+	response, err := client.Do(r)
 	if err != nil {
 		if response != nil && response.Body != nil {
 			response.Body.Close()
@@ -76,6 +97,9 @@ func (c *Client) request(ctx context.Context, method, target string, input any) 
 		return nil, hostedexecution.ErrUnavailable
 	}
 	defer response.Body.Close()
+	if ctx.Err() != nil {
+		return nil, hostedexecution.ErrUnavailable
+	}
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
 		if method == http.MethodGet && response.StatusCode == http.StatusNotFound {
 			return nil, hostedexecution.ErrNotFound

@@ -3,12 +3,11 @@ package main
 import (
 	"context"
 	"errors"
-	"flag"
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	workerclient "github.com/wtiger001/teststudio/adapters/workerexchange/client"
 	"github.com/wtiger001/teststudio/internal/domain"
@@ -23,13 +22,20 @@ func main() {
 }
 
 func run(arguments []string, lookup func(string) (string, bool)) error {
-	flags := flag.NewFlagSet("teststudio-job", flag.ContinueOnError)
-	flags.SetOutput(io.Discard)
-	origin := flags.String("exchange-origin", "", "Private HTTPS worker exchange origin")
-	operation := flags.String("operation", "", "Worker operation: empty for execution or discover")
-	runner := flags.String("runner", "", "Immutable image runner: go or playwright")
-	if flags.Parse(arguments) != nil || flags.NArg() != 0 || (*runner != "go" && *runner != "playwright") || *operation != "" && *operation != "discover" {
-		return errors.New("job supervisor requires a private HTTPS origin and a go or playwright runner")
+	options, err := parseOptions(arguments, time.Now())
+	if err != nil {
+		return err
+	}
+	if options.sandbox || !options.idleUntil.IsZero() {
+		if err := sandboxIdentity(); err != nil {
+			return err
+		}
+	}
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	if !options.idleUntil.IsZero() {
+		idleSandbox(ctx, options.idleUntil)
+		return nil
 	}
 	execution, found := lookup("TESTSTUDIO_JOB_EXECUTION")
 	if !found || !domain.ValidID(execution) {
@@ -46,19 +52,17 @@ func run(arguments []string, lookup func(string) (string, bool)) error {
 	if !domain.ValidID(instance) {
 		return errors.New("job instance identity is invalid")
 	}
-	client, err := workerclient.New(*origin, execution, instance, token, nil)
+	client, err := workerclient.New(options.origin, execution, instance, token, nil)
 	if err != nil {
 		return errors.New("job exchange configuration is invalid")
 	}
 	defer client.Close()
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
-	supervisor := &jobsupervisor.Supervisor{Operation: *operation, Transport: client, Runner: &jobsupervisor.Process{Runner: *runner, Directory: "/suite", Output: "/output", PrivateValues: []string{token}}}
+	supervisor := &jobsupervisor.Supervisor{Operation: options.operation, Transport: client, Runner: &jobsupervisor.Process{Runner: options.runner, Directory: "/suite", Output: "/output", PrivateValues: []string{token}}}
 	outcome, err := supervisor.Run(ctx)
 	if err != nil {
 		return err
 	}
-	if *operation == "discover" {
+	if options.operation == "discover" {
 		fmt.Println("Preparation discovery report accepted.")
 	} else if outcome.EvidenceIncomplete {
 		fmt.Println("Test report accepted; private evidence is incomplete.")

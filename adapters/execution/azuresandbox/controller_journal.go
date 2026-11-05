@@ -52,6 +52,12 @@ func (c *Controller) load(ctx context.Context, ref execution.Reference) (dispatc
 	if d.TimerCreateAttempted && (!d.DeadlineAttempted || !checksum.MatchString(d.TimerProfile)) || d.TimerCreateRejected && !d.TimerCreateAttempted || d.TimerSeen && (!d.TimerCreateAttempted || d.TimerCreateRejected) || !d.TimerCheckAfter.IsZero() && (!d.TimerSeen || !d.DeadlineRemoving) {
 		return d, row, nil, hostedexecution.ErrOwnership
 	}
+	if d.CommandAttempted && (!d.CreateAttempted || d.Receipt == "" || d.CommandHash != plan.commandHash()) || !d.CommandAttempted && (d.CommandHash != "" || d.CommandUnknown || d.CommandRejected || d.CommandExitCode != nil || d.CommandObservedAt != nil || d.CommandSuppressed) {
+		return d, row, nil, hostedexecution.ErrOwnership
+	}
+	if d.CommandExitCode != nil && (*d.CommandExitCode < 0 || *d.CommandExitCode > 255 || d.CommandObservedAt == nil || d.CommandUnknown || d.CommandRejected) || d.CommandObservedAt != nil && (d.CommandExitCode == nil || d.CommandObservedAt.IsZero() || d.CommandObservedAt.After(d.Proof.Deadline)) || d.CommandUnknown && d.CommandRejected {
+		return d, row, nil, hostedexecution.ErrOwnership
+	}
 	return d, row, plan, nil
 }
 

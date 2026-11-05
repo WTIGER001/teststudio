@@ -262,10 +262,12 @@ func (f *controllerFixture) openController() {
 	if err != nil {
 		f.t.Fatal(err)
 	}
+	f.t.Cleanup(func() { f.controller.Close() })
 }
 
 func (f *controllerFixture) reopen() {
 	f.t.Helper()
+	f.controller.Close()
 	if err := f.store.Close(); err != nil {
 		f.t.Fatal(err)
 	}

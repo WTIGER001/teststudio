@@ -122,7 +122,53 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: independent sandbox deadline SDK and workflow
+## Current delivery: independent sandbox command completion and guarded supervision
+
+Sandbox plans now start a trusted idle supervisor and invoke executable work only through the fixed command API.
+The v3 proof binds the image capability, command body, UID class, deadline, source, and immutable execution settings.
+The runtime overlay advertises azure-sandbox-command/v1. OCI inspection retains it, and older images fail sandbox admission.
+The overlay builder verifies the capability during image creation and cache reuse.
+Existing ordinary supervisor invocation remains compatible.
+
+Idle mode reads no work credentials or executable input. Its absolute UTC deadline is bounded to two hours.
+Idle and command modes enforce Linux UID and GID 1000, restricted supplementary groups, no new privileges, empty capabilities, and protected process state.
+Root startup drops its identities before input retrieval. Other identities reject execution.
+The existing x/sys version becomes a direct dependency without an upgrade or new checksum.
+
+The command client sends only the fixed quoted supervisor command and working directory to the selected instance endpoint.
+Credential acquisition stays bounded while command response lifetime follows the original absolute deadline.
+Redirect following and request replay remain disabled. Missing or malformed exit codes remain unavailable.
+Only an explicit service-returned exit code enters control state. Raw stdout, stderr, and tickets do not enter that receipt.
+
+Command reservation atomically asserts activated exchange work, the frozen input, dispatch ownership, and fresh authorization records.
+Only one competing controller starts the command. Restart never replays an uncertain or acknowledged mutation.
+Owned background contexts persist completion or uncertainty, request instance stop, and join before shared resources close.
+Controller.Status maps an explicit zero exit and confirmed quiescence to successful hosted completion.
+Known nonzero exits become failed after quiescence. Idle, unknown, and canceled completion cannot fabricate a passing result or test duration.
+Cancellation suppresses late success and checks project ownership before interrupting an active connection.
+
+Eleven new focused checks cover command protocol and lifecycle, image capability, OCI inspection, and supervisor modes.
+The final eight command checks and two affected lifecycle regressions pass with race detection in 1.968 seconds.
+The supervisor checks, including the existing error-redaction case, pass in 1.286 seconds. The new OCI check passes in 1.350 seconds.
+Six selected earlier proof, transport, timer, and lifecycle checks also pass. Node syntax and generated workflow schema and references pass.
+A final review finds a cancellation-scope bug and a concurrent stop acknowledgment assumption. Targeted checks verify the corrections and retained retry behavior.
+Unrelated product suites, browser workflows, UI builds, and image matrices do not repeat.
+
+The changed supervisor cross-compiles for Linux AMD64 and ARM64.
+Three local ARM64 Linux probes verify root-to-1000 transition, restricted UID 1000 operation, and UID 1001 rejection.
+All capability sets are empty and no-new-privileges is enabled in the running probes.
+The probes use a cached TestStudio source base, a read-only binary mount, and no network. They build or pull no image.
+Owned containers stop with PID zero and are removed. The corrected missing-object check also confirms the first probe's removal.
+Owned local OCI TLS listeners close through normal test cleanup.
+
+The [command guide](azure-sandbox-commands.md), supervisor guide, Azure guides, and active plan match the new contract.
+Native source-image resolution, actual admission, full Provider configuration, and deployment packaging remain unfinished.
+Actual Azure execution, command limits, converted runtime behavior, and permissions remain separate deployment evidence.
+The user demo and page-help behavior remain unchanged. No cloud account, external registry, identity endpoint, or deployment is used.
+This advances **51** and supporting recovery under **52**. The total remains **48 verified of 57**, with **9 open**.
+Evidence is output/azure-sandbox-commands/summary.json and the retained targeted results, builds, identity observations, and cleanup records.
+
+## Previous delivery: independent sandbox deadline SDK and workflow
 
 The sandbox deadline interface now has a concrete Azure Logic Apps SDK implementation.
 It reserves one workflow create call in the existing dispatch journal and verifies the exact owned definition before allowing sandbox creation.

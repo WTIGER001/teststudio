@@ -43,7 +43,7 @@ const sourceKey = hash(JSON.stringify([base.Id, architecture, backend.version, c
 const save = () => { const temporary = cachePath + '.' + process.pid + '.tmp'; fs.writeFileSync(temporary, JSON.stringify(cache, null, 2), { mode: 0o600 }); fs.renameSync(temporary, cachePath) }
 save()
 if (cache.sourceKey === sourceKey && cache.image) {
-  try { const image = inspect(cache.image); if (image.Id === cache.image && image.Architecture === architecture && image.Config.User === '1000:1000' && image.Config.Labels?.['teststudio.task-storage'] === 'task-volumes/v1' && Object.keys(image.Config.Volumes ?? {}).sort().join(',') === '/output,/tmp') { console.error('Reusing the unchanged hosted source runtime.'); console.log(JSON.stringify({ image: cache.image, base: base.Id, runner, architecture, sourceKey })); process.exit(0) } } catch {}
+  try { const image = inspect(cache.image); if (image.Id === cache.image && image.Architecture === architecture && image.Config.User === '1000:1000' && image.Config.Labels?.['teststudio.task-storage'] === 'task-volumes/v1' && image.Config.Labels?.['teststudio.sandbox-supervisor'] === 'azure-sandbox-command/v1' && Object.keys(image.Config.Volumes ?? {}).sort().join(',') === '/output,/tmp') { console.error('Reusing the unchanged hosted source runtime.'); console.log(JSON.stringify({ image: cache.image, base: base.Id, runner, architecture, sourceKey })); process.exit(0) } } catch {}
 }
 const baseTag = 'teststudio/job-runtime-base:' + base.Id.slice(7)
 execFileSync('docker', ['tag', base.Id, baseTag], { stdio: ['ignore', 'ignore', 2] })
@@ -52,7 +52,7 @@ try {
   fs.copyFileSync(binary, path.join(context, 'teststudio-job'))
   execFileSync(backend.command, [...backend.prefix, '--network=none', '--pull=false', '--platform=linux/' + architecture, '--build-arg', 'RUNTIME_IMAGE=' + baseTag, '--build-arg', 'RUNTIME_DIGEST=' + base.Id, '--build-arg', 'SOURCE_KEY=' + sourceKey, '-q', '-f', dockerfile, '-t', 'teststudio/job-runtime:' + runner + '-' + architecture + '-local', context], { stdio: ['ignore', 2, 2] })
   const image = inspect('teststudio/job-runtime:' + runner + '-' + architecture + '-local')
-  if (image.Architecture !== architecture || image.Config.User !== '1000:1000' || image.Config.Labels?.['teststudio.job-supervisor'] !== 'worker-exchange/v1' || image.Config.Labels?.['teststudio.discovery-supervisor'] !== 'worker-exchange/v1' || image.Config.Labels?.['teststudio.job-runtime-base'] !== base.Id || image.Config.Labels?.['teststudio.task-storage'] !== 'task-volumes/v1' || Object.keys(image.Config.Volumes ?? {}).sort().join(',') !== '/output,/tmp') throw new Error('The hosted runtime metadata does not match its source package')
+  if (image.Architecture !== architecture || image.Config.User !== '1000:1000' || image.Config.Labels?.['teststudio.job-supervisor'] !== 'worker-exchange/v1' || image.Config.Labels?.['teststudio.discovery-supervisor'] !== 'worker-exchange/v1' || image.Config.Labels?.['teststudio.job-runtime-base'] !== base.Id || image.Config.Labels?.['teststudio.task-storage'] !== 'task-volumes/v1' || image.Config.Labels?.['teststudio.sandbox-supervisor'] !== 'azure-sandbox-command/v1' || Object.keys(image.Config.Volumes ?? {}).sort().join(',') !== '/output,/tmp') throw new Error('The hosted runtime metadata does not match its source package')
   cache.image = image.Id; cache.sourceKey = sourceKey; save()
   console.log(JSON.stringify({ image: image.Id, base: base.Id, runner, architecture, sourceKey }))
 } finally { fs.rmSync(context, { recursive: true, force: true }) }

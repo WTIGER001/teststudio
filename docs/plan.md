@@ -64,15 +64,22 @@ It finds matching owned instances through the data-plane API, including late cre
 Known timer rejection remains distinct from uncertainty. Confirmed instance absence and retained result checkpoints control timer removal.
 Local SDK, database-reopen, cleanup, public-schema, and static-reference checks pass. Actual workflow execution and authority remain unverified.
 
-Implement independent command completion next, then durable image import, actual admission, and the complete native Provider bridge.
-Use a trusted idle launch and fixed supervised command invocation. Preserve the inspected non-root runtime identity and version its image capability.
-Use the pinned command API's service-returned completion result. Preserve explicit gaps after a lost acknowledgment and never replay the logical attempt.
+Independent command completion now uses a trusted idle launch, fixed supervised invocation, and the service's explicit exit result.
+The v3 proof binds a versioned image capability. Linux modes enforce UID and GID 1000, no new privileges, empty capabilities, and protected process state.
+Atomic command reservation asserts active exchange work and fresh authorization. Restart never replays a reserved command.
+Controller.Status requires both a valid exit receipt and quiescence before successful native completion.
+Cancellation suppresses late success and checks resource ownership before interrupting a connection.
+Targeted protocol, restart, scope, cancellation, OCI, and supervisor checks pass. Local Linux identity probes pass and their containers are removed.
+
+Implement durable image import and Ready-image resolution next, then actual admission and the complete native Provider factory.
+Reuse the new command and status bridge. Preserve explicit gaps after a lost acknowledgment and never replay the logical attempt.
 Preserve source-queue authorization and the existing worker exchange. Keep controller credentials outside sandboxes.
 Bind actual source-import identity, group authority, VNet routing, proxy trust, and effective outbound enforcement before enabling native execution.
 Confirm the pinned SDK token audience during the separate deployment verification phase.
 Idle suspension and accepted stop responses cannot replace the absolute deadline contract.
 See [Azure isolated sandbox execution](azure-sandboxes.md) and [durable sandbox control](azure-sandbox-controller.md).
 See [independent sandbox deadlines](azure-sandbox-deadlines.md) for timer construction, verification, cleanup, and remaining deployment evidence.
+See [supervised sandbox commands](azure-sandbox-commands.md) for command reservation, identity enforcement, completion, and remaining native integration.
 Acceptance 51 and supporting recovery under 52 advance; the total remains 48 verified of 57.
 
 ### Active application navigation correction

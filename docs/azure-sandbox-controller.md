@@ -17,6 +17,7 @@ The exchange supplies the shared database, fresh dispatch authorization, activat
 The constructor accepts no substitute authorization callback or separate dispatch database.
 After reopening the database, recreate the controller with the exchange's new Store.
 The caller owns its client and database lifetimes.
+Supply Commands for executable work. Without it, the controller provides resource control but cannot start a test command.
 
 Instances is implemented by the production sandbox client.
 Its inventory must return a complete bounded result or an error. A partial list is not authoritative.
@@ -115,12 +116,12 @@ Reopened completed cleanup performs no further instance operation.
 
 ### Outcome boundary
 
-DispatchState contains resource and admission facts. It has no passing test result, process exit code, or measured test duration.
-A suspended sandbox is not a successful test run.
-An accepted report does not independently prove native command completion.
-The complete Provider still needs a trusted command-completion observation, authenticated reports, and retained evidence.
-The pinned SDK's executeShellCommand result includes an exit code. A native command bridge and durable result handling remain required.
-Lost command acknowledgments must retain explicit observation gaps and must not restart the same logical attempt.
+DispatchState now includes independent [command completion facts](azure-sandbox-commands.md).
+Controller.Status combines explicit service-returned exit codes with confirmed instance quiescence through the shared hosted status contract.
+It does not infer measured test duration or derive command success from a test report.
+The complete native Provider still needs source resolution, actual admission, and configuration.
+Lost command acknowledgments retain explicit observation gaps and never restart the same logical attempt.
+Close joins owned command routines before SDK clients or the shared database close.
 
 ### Inventory and errors
 
@@ -154,7 +155,7 @@ No actual registry, identity endpoint, cloud service, listener, browser, contain
 
 Bind the sandbox deadline SDK and actual admission composition before selecting the controller in native commands.
 Connect durable image import and Ready-image resolution to the existing trusted preparation queue.
-Implement command execution and service-returned completion receipt handling without replay after an uncertain start.
+Use the implemented command execution and service-returned completion receipt handling without replay after an uncertain start.
 Connect the shared hosted Provider, source discovery, evidence, cancellation, and cleanup contracts.
 Package installation-specific identities, sandbox group, VNet connection, import authority, and independent deadline resources.
 Confirm actual service audience, virtualization selection, source conversion, certificate trust, and effective policy in the separate deployment phase.

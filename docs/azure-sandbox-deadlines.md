@@ -130,7 +130,8 @@ The current workflow has 37 actions, six initialized variables, and 23 expressio
 Bind actual read and stop grants, protected identity attachment, and workflow management before native selection.
 Package the timer group, identity, capacity controls, and failure monitoring.
 Confirm audience, filtering, pagination, scheduling, history protection, redirect behavior, and effective stop during separate Azure verification.
-Independent command completion, durable source import, actual admission, and the complete Provider bridge remain required.
+The [independent command bridge](azure-sandbox-commands.md) now supplies explicit exit receipts and hosted status mapping.
+Durable source import, actual admission, and the complete native Provider factory remain required.
 
 ## Primary references
 

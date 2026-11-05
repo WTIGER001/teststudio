@@ -10,6 +10,10 @@ Native remote preparation and discovery now connect to the existing source queue
 The optional Helm preparation package is implemented. Trusted remote gateway delivery, other providers, and hosted acceptance remain unfinished.
 Keep acceptance 51 and the related hosted acceptance items open.
 
+The overlay also advertises the [versioned sandbox command capability](azure-sandbox-commands.md).
+Sandbox idle and command modes enforce the unprivileged Linux identity before accessing work credentials.
+Ordinary job invocation retains the contract below. Rebuild the changed overlay before selecting the new sandbox capability.
+
 ## Job contract
 
 The provider starts /runner/teststudio-job with these arguments:

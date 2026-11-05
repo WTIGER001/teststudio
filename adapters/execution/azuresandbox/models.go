@@ -25,6 +25,7 @@ type Proof struct {
 	Reference       execution.Reference `json:"reference"`
 	Image           string              `json:"image"`
 	SourceDigest    string              `json:"sourceDigest"`
+	Sandbox         string              `json:"sandbox"`
 	DiskImage       string              `json:"diskImage"`
 	Runner          string              `json:"runner"`
 	Operation       string              `json:"operation,omitempty"`
