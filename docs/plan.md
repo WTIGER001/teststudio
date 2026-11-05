@@ -443,7 +443,27 @@ See [reported protection stacks](azure-protection-stacks.md). Acceptance 51 adva
 No cloud operation, UI build, browser, image build, container, registry push, deployment, or demo restart runs.
 External requests retrieve only public documentation and the public SDK module.
 
-Next resolve authoritative assignment ownership and protection-management authority, other identity consumer types, and remaining trusted host configuration.
+The observer host now requires explicit runtime settings and an independently constructed expected core API definition.
+App and active revision must match that definition, even when both report the same changed arguments or environment.
+The contract binds API role, PostgreSQL, separate origins, Azure Blob runtime client, Key Vault and OIDC references, bootstrap identity, and local-account policy.
+It rejects command overrides, additional arguments or variables, alternate storage, inline credentials, extra mounts, substituted ingress, probe drift, and replica changes.
+The existing image, identity exposure, lifecycle, placement, and healthy revision checks remain required.
+Optional OIDC client references follow the two existing package slots. Public clients need no secret.
+
+The optional observerBinding package output now includes matching non-secret runtime settings from the API deployment parameters.
+It exposes references and bootstrap identifiers, not secret values or tokens. The observer remains disabled by default, with no native worker startup.
+Four new focused race checks and three changed host regressions pass in 2.918 seconds.
+Four directly affected federation, protection, and identity-placement host checks pass in two targeted selections, taking 2.172 and 2.039 seconds.
+The first dependent selection matches two tests; the two other intended checks run afterward under their exact current names.
+The changed output compiles once with pinned Bicep 0.48.1 and passes local package contracts without warnings or registry restore.
+No unchanged Go suite, UI build, browser, image, container, provider operation, registry push, deployment, or demo restart runs.
+
+The guard reuses the existing two host GETs, 22-reader session, 135-second context, and 2220-request ceiling.
+No new dependency, grant, scan, credential, or observation cache is added.
+Reported configuration does not prove secret contents, actual image behavior, platform authentication settings, effective authorization, or management authority.
+See [fixed host runtime contract](azure-observer-host-runtime.md). Acceptances 51 and supporting packaging under 57 advance; the count remains 48 verified, nine open.
+
+Next resolve authoritative assignment ownership and protection-management authority, other identity consumer types, platform authentication, and complete native admission wiring.
 Reported app and job checks do not establish exclusive use across all Azure resources or subscriptions.
 Keep hosted read coverage, complete effective authorization, and cross-scope visibility separate until authoritative deployment evidence exists.
 Wire the bound session into native commands only after complete admission exists.

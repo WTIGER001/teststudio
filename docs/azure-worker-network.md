@@ -181,3 +181,6 @@ Acceptance 51 advances. The verified total remains 48 of 57, with nine open item
 
 The [reported protection-stack checks](azure-protection-stacks.md) require two explicit stack references and fixed managed-resource sets.
 The core package creates no such arrangement. Direct assignment ownership and protection-management authority remain unproven.
+
+The host stage now compares the [fixed reported API runtime](azure-observer-host-runtime.md) with app and revision configuration.
+Native wiring, effective authorization, platform authentication, and actual execution isolation remain required.

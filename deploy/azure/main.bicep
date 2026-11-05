@@ -240,4 +240,19 @@ output observerBinding object = observerIdentityEnabled ? {
   pullIdentity: imagePull.id
   startupIdentity: apiStartup.id
   runtimeIdentity: apiRuntime.id
+  runtime: {
+    runtimeClientId: apiRuntime.properties.clientId
+    databaseSecretUrl: '${vault.properties.vaultUri}secrets/${databaseSecretName}'
+    oidcConfigurationSecretUrl: '${vault.properties.vaultUri}secrets/${oidcConfigurationSecretName}'
+    oidcClientOneSecretUrl: empty(oidcClientOneSecretName) ? '' : '${vault.properties.vaultUri}secrets/${oidcClientOneSecretName}'
+    oidcClientTwoSecretUrl: empty(oidcClientTwoSecretName) ? '' : '${vault.properties.vaultUri}secrets/${oidcClientTwoSecretName}'
+    blobServiceUrl: storage.properties.primaryEndpoints.blob
+    evidenceContainer: evidence.name
+    uiOrigin: uiOrigin
+    artifactOrigin: artifactOrigin
+    bootstrapIssuer: bootstrapIssuer
+    bootstrapSubject: bootstrapSubject
+    localAccounts: localAccounts
+    replicas: apiReplicas
+  }
 } : {}

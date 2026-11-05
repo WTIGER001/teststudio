@@ -26,18 +26,20 @@ func observerHostTest(t *testing.T) (Config, ObserverHostSettings, *observerHost
 	t.Helper()
 	c, identity, parent, g := observerTest(t)
 	s := ObserverHostSettings{Identity: identity, Application: c.resourceID("Microsoft.App", "containerApps", "studio-api"), Image: c.Registry + "/services/teststudio@sha256:" + strings.Repeat("e", 64), PullIdentity: c.resourceID("Microsoft.ManagedIdentity", "userAssignedIdentities", "api-pull"), StartupIdentity: c.resourceID("Microsoft.ManagedIdentity", "userAssignedIdentities", "api-startup"), RuntimeIdentity: c.resourceID("Microsoft.ManagedIdentity", "userAssignedIdentities", "api-runtime")}
+	s.Runtime = ObserverHostRuntime{RuntimeClientID: "66666666-aaaa-bbbb-cccc-111111111112", DatabaseSecretURL: "https://studiovault.vault.azure.net/secrets/api-database", OIDCConfigurationSecretURL: "https://studiovault.vault.azure.net/secrets/oidc-configuration", OIDCClientOneSecretURL: "https://studiovault.vault.azure.net/secrets/oidc-client-one", OIDCClientTwoSecretURL: "https://studiovault.vault.azure.net/secrets/oidc-client-two", BlobServiceURL: "https://studioevidence.blob.core.windows.net/", EvidenceContainer: "evidence", UIOrigin: "https://studio-api.controllerzone.eastus.azurecontainerapps.io", ArtifactOrigin: "https://studio-artifacts.controllerzone.eastus.azurecontainerapps.io", BootstrapIssuer: "https://login.example.test/tenant", BootstrapSubject: "teststudio-owner", Replicas: 1}
 	f := &observerHostFixture{t: t, parent: parent, settings: s}
 	_, name := resourceParts(s.Application)
-	f.application = a.ContainerApp{
-		ID: to.Ptr(s.Application), Name: to.Ptr(name), Type: to.Ptr("Microsoft.App/containerApps"), Location: to.Ptr(c.Region),
-		Identity: &a.ManagedServiceIdentity{Type: to.Ptr(a.ManagedServiceIdentityTypeUserAssigned), UserAssignedIdentities: map[string]*a.UserAssignedIdentity{}},
-		Properties: &a.ContainerAppProperties{
-			ManagedEnvironmentID: to.Ptr(c.ControllerEnvironment), ProvisioningState: to.Ptr(a.ContainerAppProvisioningStateSucceeded), RunningStatus: to.Ptr(a.ContainerAppRunningStatusRunning),
-			LatestRevisionName: to.Ptr(name + "--current"), LatestReadyRevisionName: to.Ptr(name + "--current"),
-			Configuration: &a.Configuration{ActiveRevisionsMode: to.Ptr(a.ActiveRevisionsModeSingle)},
-			Template:      &a.Template{Containers: []*a.Container{{Name: to.Ptr("service"), Image: to.Ptr(s.Image), Args: []*string{to.Ptr("--serve-role=api")}}}},
-		},
+	var err error
+	f.application, err = s.ApplicationDefinition(c)
+	if err != nil {
+		t.Fatal(err)
 	}
+	f.application.ID, f.application.Name, f.application.Type = to.Ptr(s.Application), to.Ptr(name), to.Ptr("Microsoft.App/containerApps")
+	f.application.Properties.ProvisioningState = to.Ptr(a.ContainerAppProvisioningStateSucceeded)
+	f.application.Properties.RunningStatus = to.Ptr(a.ContainerAppRunningStatusRunning)
+	f.application.Properties.LatestRevisionName, f.application.Properties.LatestReadyRevisionName = to.Ptr(name+"--current"), to.Ptr(name+"--current")
+	f.application.Properties.Configuration.Ingress.Fqdn = to.Ptr(strings.TrimPrefix(s.Runtime.UIOrigin, "https://"))
+
 	for i, id := range []string{s.PullIdentity, s.StartupIdentity, s.RuntimeIdentity, s.Identity.Identity} {
 		client := fmt.Sprintf("66666666-aaaa-bbbb-cccc-11111111111%d", i)
 		principal := fmt.Sprintf("77777777-aaaa-bbbb-cccc-11111111111%d", i)
@@ -45,8 +47,6 @@ func observerHostTest(t *testing.T) (Config, ObserverHostSettings, *observerHost
 			client, principal = s.Identity.ClientID, s.Identity.PrincipalID
 		}
 		f.application.Identity.UserAssignedIdentities[id] = &a.UserAssignedIdentity{ClientID: &client, PrincipalID: &principal}
-		lifecycle := a.IdentitySettingsLifeCycle(s.lifecycles()[inventoryIdentityKey(id)])
-		f.application.Properties.Configuration.IdentitySettings = append(f.application.Properties.Configuration.IdentitySettings, &a.IdentitySettings{Identity: to.Ptr(id), Lifecycle: &lifecycle})
 	}
 	f.revisions = []a.Revision{{ID: to.Ptr(s.Application + "/revisions/" + name + "--current"), Name: to.Ptr(name + "--current"), Type: to.Ptr("Microsoft.App/containerApps/revisions"), Properties: &a.RevisionProperties{Active: to.Ptr(true), ProvisioningState: to.Ptr(a.RevisionProvisioningStateProvisioned), HealthState: to.Ptr(a.RevisionHealthStateHealthy), RunningState: to.Ptr(a.RevisionRunningStateRunning), Replicas: to.Ptr[int32](1), TrafficWeight: to.Ptr[int32](100), Template: clone(f.application.Properties.Template)}}}
 	parent.workloads.apps = append(parent.workloads.apps, to.Ptr(clone(f.application)))

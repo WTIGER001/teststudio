@@ -94,6 +94,15 @@ def main():
     assert observer_grant['properties']['principalType'] == 'ServicePrincipal'
     assert 'observerBinding' in template['outputs'] and 'observerIdentityEnabled' in template['outputs']['observerBinding']['value']
     checks.append('Optional observer identity and fixed subscription read role attach only to the API main container; disabled remains the default')
+    observer_binding = template['outputs']['observerBinding']['value']
+    runtime_fields = ['runtimeClientId', 'databaseSecretUrl', 'oidcConfigurationSecretUrl', 'oidcClientOneSecretUrl', 'oidcClientTwoSecretUrl', 'blobServiceUrl', 'evidenceContainer', 'uiOrigin', 'artifactOrigin', 'bootstrapIssuer', 'bootstrapSubject', 'localAccounts', 'replicas']
+    assert "'runtime', createObject(" in observer_binding
+    assert all("'" + field + "'," in observer_binding for field in runtime_fields)
+    assert "'replicas', parameters('apiReplicas')" in observer_binding
+    assert "'localAccounts', parameters('localAccounts')" in observer_binding
+    assert "'runtimeClientId', reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('{0}-api-runtime', parameters('installationName'))), '2023-01-31').clientId" in observer_binding
+    assert "'databaseSecretUrl', format('{0}secrets/{1}', reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('keyVaultResourceGroup')), 'Microsoft.KeyVault/vaults', parameters('keyVaultName')), '2023-07-01').vaultUri, parameters('databaseSecretName'))" in observer_binding
+    checks.append('Observer output carries the fixed API runtime, origins, identity client, replica limit, and Key Vault references without secret retrieval')
     assert api_parameters['runtimeIdentityId'] != artifact_parameters['runtimeIdentityId']
     assert api_parameters['startupIdentityId'] != artifact_parameters['startupIdentityId']
     storage = next(resource for resource in resources if resource['type'] == 'Microsoft.Storage/storageAccounts')

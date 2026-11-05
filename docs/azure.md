@@ -228,3 +228,6 @@ Keep coded Azure execution disabled. Backend infrastructure intent does not comp
 
 The [reported protection-stack checks](azure-protection-stacks.md) require two explicit stack references and fixed managed-resource sets.
 The core package creates no such arrangement. Direct assignment ownership and protection-management authority remain unproven.
+
+The observerBinding output includes non-secret [API runtime settings](azure-observer-host-runtime.md) derived from the same installation parameters as the API app.
+It supplies references rather than secret values. It enables no coded execution or automatic admission.

@@ -122,7 +122,31 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: reported protection-stack policy and membership
+## Current delivery: fixed reported API host runtime
+
+The observer host now requires explicit runtime settings and an independently constructed expected core API definition.
+App and active revision must match that definition, even when both report the same changed arguments or environment.
+The contract binds API role, PostgreSQL, separate origins, Azure Blob runtime client, Key Vault and OIDC references, bootstrap identity, and local-account policy.
+It rejects command overrides, additional arguments or variables, alternate storage, inline credentials, extra mounts, substituted ingress, probe drift, and replica changes.
+The existing image, identity exposure, lifecycle, placement, and healthy revision checks remain required.
+Optional OIDC client references follow the two existing package slots. Public clients need no secret.
+
+The optional observerBinding package output now includes matching non-secret runtime settings from the API deployment parameters.
+It exposes references and bootstrap identifiers, not secret values or tokens. The observer remains disabled by default, with no native worker startup.
+Four new focused race checks and three changed host regressions pass in 2.918 seconds.
+Four directly affected federation, protection, and identity-placement host checks pass in two targeted selections, taking 2.172 and 2.039 seconds.
+The first dependent selection matches two tests; the two other intended checks run afterward under their exact current names.
+The changed output compiles once with pinned Bicep 0.48.1 and passes local package contracts without warnings or registry restore.
+No unchanged Go suite, UI build, browser, image, container, provider operation, registry push, deployment, or demo restart runs.
+
+The guard reuses the existing two host GETs, 22-reader session, 135-second context, and 2220-request ceiling.
+No new dependency, grant, scan, credential, or observation cache is added.
+Reported configuration does not prove secret contents, actual image behavior, platform authentication settings, effective authorization, or management authority.
+See [fixed host runtime contract](azure-observer-host-runtime.md). Acceptances 51 and supporting packaging under 57 advance; the count remains 48 verified, nine open.
+
+Evidence is output/azure-observer-host-runtime/summary.json and package/summary.json.
+
+## Previous delivery: reported protection-stack policy and membership
 
 The identity stage now requires two selected deployment stacks with fixed policy and exact protected-root membership.
 The network stack reports the five existing VNet and DNS roots. The distinct identity stack reports only the observer identity.

@@ -7,7 +7,8 @@ It follows the [reported subscription read-deny check](azure-read-deny.md) throu
 Its existing [workload inventory](azure-worker-workloads.md#observer-identity-placement) now rejects reported sharing on another Container App or job without another scan.
 Its identity reader also requires [federated-credential absence](azure-read-identity.md#federated-credential-absence) during bootstrap and each bound inspection.
 It now requires [reported identity write protection](azure-read-identity.md#identity-write-protection) on that exact identity and its child scopes.
-It does not establish exclusive identity use, complete trusted API configuration, actual host token issuance, or complete effective authorization.
+It now checks the [fixed reported API runtime](azure-observer-host-runtime.md), including arguments, environment, secret references, ingress, probes, and scaling.
+It does not establish exclusive identity use, secret contents, actual host token issuance, platform authentication overrides, or complete effective authorization.
 Those requirements remain part of native admission and separate hosted verification.
 No Network is implemented. Azure coded jobs remain disabled.
 Acceptance 51 and supporting packaging under 57 advance. The total remains 48 verified of 57, with nine open.
@@ -19,6 +20,7 @@ ObserverHostSettings requires these fields:
 | Field | Requirement |
 | --- | --- |
 | identity | Complete preceding ReadIdentitySettings. |
+| runtime | Required [fixed runtime settings](azure-observer-host-runtime.md#required-runtime-settings) for the core API profile. |
 | application | Selected API Container App resource identifier in the configured subscription. |
 | image | Exact trusted service image with an immutable registry digest. It cannot use the untrusted test repository prefix. |
 | pullIdentity | Separate core service image-pull identity resource identifier. |
@@ -53,7 +55,8 @@ The host uses one main container, no init containers, and the selected service i
 It uses Single revision mode. The shared revision verifier checks the latest ready revision, health, activity, replicas, traffic, and template agreement.
 Inactive revisions require explicit zero traffic and zero replicas.
 Sidecars, extra identities, substituted metadata, missing lifecycle state, stale image references, and conflicting environments block the check.
-These observations do not certify every app argument, environment value, grant, or administrative authority.
+The runtime check now compares arguments, environment, secret references, registry, ingress, and template with a fixed expected definition.
+Reported configuration does not establish secret contents, effective grants, actual image behavior, or administrative authority.
 Identity changes require fresh app observations; an old revision identifier alone is insufficient.
 
 ## Bound session and request cost
@@ -85,7 +88,7 @@ The API main container receives the observer identity. Its pull, startup, and Bl
 The shared app module also gates the attachment on the API role. An artifact-role caller cannot expose it through that parameter.
 The artifact app receives no observer identity, subscription read grant, or new application setting from the top-level package.
 
-The observerBinding output contains resource identifiers, client, principal, tenant, role, assignment, selected host, image, and core identity references.
+The observerBinding output contains resource identifiers, client, principal, tenant, role, assignment, selected host, image, core identity references, and the non-secret runtime settings.
 It contains no secret value or token. Combine those values with the complete installation network settings for the Go observer configuration.
 The output is not a complete execution profile or admission certificate.
 Enabling the option prepares identity resources only. Native observer startup and coded job dispatch remain unwired.
@@ -113,7 +116,9 @@ Evidence is output/azure-observer-host/summary.json, final-package/service.json,
 No cloud operation, UI build, browser, image build, container, registry push, deployment, or demo restart runs.
 External requests read only public Microsoft documentation.
 
-Continue exclusive identity placement, complete trusted host configuration, resource-management authority, and full native admission wiring.
+Continue exclusive identity placement, platform authentication controls, resource-management authority, and full native admission wiring.
 Keep deployed token behavior, effective coverage, protection enforcement, and cross-scope visibility in the separate hosted verification phase.
 
 The [reported protection-stack checks](azure-protection-stacks.md) add two selected GETs within the existing contexts and reader count.
+
+The [fixed runtime contract](azure-observer-host-runtime.md) adds no GET, context allowance, or reader. Four new checks and seven affected regressions pass locally.

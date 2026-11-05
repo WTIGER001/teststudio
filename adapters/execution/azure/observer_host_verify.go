@@ -28,7 +28,11 @@ func verifyObserverHost(c Config, s ObserverHostSettings, app a.ContainerApp, re
 	if err := verifyObserverHostIdentities(s, app); err != nil {
 		return err
 	}
-	return verifyServiceRevisions(app, revisions, s.Application, p.Template, exchangeTemplateDocument)
+	expected, err := verifyObserverHostRuntime(c, s, app)
+	if err != nil {
+		return err
+	}
+	return verifyServiceRevisions(app, revisions, s.Application, expected.Properties.Template, backendTemplateDocument)
 }
 
 func verifyObserverHostIdentities(s ObserverHostSettings, app a.ContainerApp) error {
@@ -46,7 +50,7 @@ func verifyObserverHostIdentities(s ObserverHostSettings, app a.ContainerApp) er
 			return hostedexecution.ErrUnavailable
 		}
 		client, principal := strings.ToLower(value(identity.ClientID)), strings.ToLower(value(identity.PrincipalID))
-		if clients[client] || principals[principal] || client == principal || key == inventoryIdentityKey(s.Identity.Identity) && (client != s.Identity.ClientID || principal != s.Identity.PrincipalID) {
+		if clients[client] || principals[principal] || client == principal || key == inventoryIdentityKey(s.Identity.Identity) && (client != s.Identity.ClientID || principal != s.Identity.PrincipalID) || key == inventoryIdentityKey(s.RuntimeIdentity) && client != s.Runtime.RuntimeClientID {
 			return hostedexecution.ErrOwnership
 		}
 		clients[client], principals[principal], identities[key] = true, true, true

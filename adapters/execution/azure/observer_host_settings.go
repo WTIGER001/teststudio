@@ -8,6 +8,7 @@ import (
 
 type ObserverHostSettings struct {
 	Identity        ReadIdentitySettings `json:"identity"`
+	Runtime         ObserverHostRuntime  `json:"runtime"`
 	Application     string               `json:"application"`
 	Image           string               `json:"image"`
 	PullIdentity    string               `json:"pullIdentity"`
@@ -36,7 +37,8 @@ func (s ObserverHostSettings) canonical(c Config) (ObserverHostSettings, error) 
 		}
 		seen[key] = true
 	}
-	return s, nil
+	s.Runtime, err = s.Runtime.canonical(c, s)
+	return s, err
 }
 
 func (s ObserverHostSettings) lifecycles() map[string]string {
