@@ -95,7 +95,7 @@ func (s *Service) SubmitCompanion(ctx context.Context, id, instance, token strin
 			message = "The desktop recorder stopped. Review captured steps or reconnect with a new recording session."
 		}
 		code := input.Code
-		if state == "failed" && code == "" {
+		if code == "" && (state == "failed" || state == "recording") {
 			code = value.Code
 		}
 		if state == "ready" && code == "" {

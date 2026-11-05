@@ -23,6 +23,22 @@ The desktop executable, wizard connection flow, and complete browser verificatio
 The option stays disabled by default. No cloud, cluster, image build, browser process, or demo restart occurs.
 This advances hosted authoring under 57. The count remains 50 verified of 57.
 
+### Desktop connection and recovery command
+
+The new teststudio-recorder command reuses the trusted native driver and fixed recording helper.
+It accepts a connection code at its prompt and keeps that credential out of command arguments and ordinary output.
+HTTPS is required except for numeric loopback verification. Redirects do not forward device credentials.
+Private journals preserve device identity, launch intent, pending sequence, and final source before their dependent actions.
+An operating-system lock excludes concurrent companions in the same directory.
+Resume recovers retained source without replaying an uncertain browser launch.
+Transport failure, revoked authority, deadline, and interrupted commands stop the owned recorder and retain local source.
+Exact retries recover lost pairing, snapshot, and final acknowledgements.
+
+Targeted local client and command checks pass, including a real native process driver with an authored helper fixture.
+The helper exits and the directory lock releases after owner stop. No Chromium session, cloud call, cluster operation, or demo restart occurs.
+The guided wizard, first-time setup, contextual help, and complete browser workflow remain unfinished.
+See [desktop companion](recorder-companion.md). This advances 57; the verified count remains 50 of 57.
+
 ## Remote gateway transport milestone — 2026-11-05
 
 The trusted gateway now supports execution-scoped TLS forwarding through a supervisor-owned Unix socket bridge.

@@ -258,3 +258,22 @@ func TestCompanionRejectsUnsafeSnapshotsAndExpiredPairing(t *testing.T) {
 		t.Fatal("pairing expiry revoked an already paired device", err)
 	}
 }
+
+func TestCompanionTransientEmptyCaptureDoesNotDiscardRetainedSource(t *testing.T) {
+	s := companionFixture(t)
+	input := pairCompanion(t, s)
+	for i, snapshot := range []CompanionSnapshot{{State: "recording", Code: "previously captured source"}, {State: "recording"}, {State: "failed", Failure: "capture"}} {
+		snapshot.Sequence = uint64(i + 1)
+		if _, err := s.SubmitCompanion(t.Context(), "session", input.Instance, input.DeviceToken, snapshot); err != nil {
+			t.Fatal(err)
+		}
+	}
+	row, err := s.Read(t.Context(), "writer", "recording", "browser", "session")
+	if err != nil {
+		t.Fatal(err)
+	}
+	value, _ := storage.Decode[Session](row)
+	if value.Code != "previously captured source" || value.State != "failed" {
+		t.Fatal("partial file write discarded the last captured source")
+	}
+}

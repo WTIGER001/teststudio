@@ -76,7 +76,8 @@ The [service command](../cmd/teststudio/main.go) requires explicit loopback-only
 The hosted packages cannot turn that process into the tester's desktop browser.
 The current browser-recording guide correctly reports this limit.
 
-Implement a local companion for hosted TestStudio, reusing the existing trusted recording helper and source conversion.
+The local companion now has a scoped pairing API and desktop command that reuse the trusted recording helper and source conversion.
+Targeted local lifecycle and authored native helper checks pass. The guided connection workflow and actual hosted Chromium verification remain unfinished.
 Bind pairing, recording, stopping, code submission, permissions, and expiry to the requesting user, project, suite, and recording session.
 Keep that authorization narrower than the user's application session.
 Preserve the existing separation between recording, draft saving, publication, and execution.

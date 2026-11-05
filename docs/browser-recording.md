@@ -25,13 +25,14 @@ Recorded drafts use the separate [local website execution profile](browser-execu
 Review and save the source, prepare it, publish a release, then select a registered environment for execution.
 The offline starter retains its existing isolated profile. It cannot reach a website.
 The current native recorder requires a local desktop.
-Hosted recording requires a local companion or streamed browser, which remains pending.
+Hosted recording requires the [desktop companion](recorder-companion.md). Its guided connection workflow remains pending.
 
 ## Hosted companion API milestone
 
 The API now supports scoped desktop pairing behind the explicit --recording-companion option.
 Keep this option disabled until the desktop client and guided authoring flow are installed and verified.
-The desktop executable and connection wizard remain unfinished. This API milestone does not enable hosted recording for testers.
+The desktop command now has focused local lifecycle and native helper evidence. The connection wizard remains unfinished.
+This API milestone does not yet enable the full hosted recording workflow for testers.
 
 A hosted session starts in pairing state. Its owner requests a five-minute connection token.
 The desktop supplies a separate random device token before pairing. The server stores only credential hashes.
@@ -45,7 +46,7 @@ Each request checks current source authority and project and suite archive state
 Stop and cancel requests survive server restart. An exact snapshot retry is idempotent.
 Maintenance fails expired, disconnected, or revoked sessions while retaining previously captured private source.
 The desktop must independently stop its owned browser when control requests fail or its deadline expires.
-The planned client uses outbound HTTPS. No local HTTP listener or browser connection bridge is required.
+The client uses outbound HTTPS. No local HTTP listener or browser connection bridge is required.
 
 ## Ownership and recovery
 
