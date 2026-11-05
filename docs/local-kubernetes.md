@@ -28,7 +28,7 @@ The selected cluster API uses loopback only. Its ingress maps to loopback port 1
 No user kubeconfig is merged or selected. Every cluster command must use the private kubeconfig or dedicated Docker socket.
 The official [k3d release](https://github.com/k3d-io/k3d/releases/tag/v5.9.0) supplies the verified tool and its release checksums.
 
-TestStudio is installed through the actual Helm chart in namespace teststudio-local, release teststudio, revision 3.
+TestStudio is installed through the actual Helm chart in namespace teststudio-local, release teststudio, revision 7.
 The service and fresh PostgreSQL Pods are Ready. Separate database and evidence claims are Bound with 2 GiB each.
 The service uses the locally imported immutable ARM64 manifest. No registry push or cloud account is required.
 The UI, API health, and artifact health return 200 through TLS ingress with certificate verification.
@@ -47,7 +47,9 @@ The probe records HTTP 200, a 2.293329 ms duration, a 1.418414 ms TLS handshake,
 Four events, one attempt, four logs, and four artifacts remain available. A private download passes its SHA-256 check.
 The service Pod is then replaced. A fresh sign-in reads the same run and downloads its retained evidence without rerunning the test.
 
-Coded workers, cancellation, deadlines, and worker recovery remain unverified on this cluster.
+Fresh Go and Playwright suites now pass actual registry preparation, isolated discovery, publication, execution, timing, and private evidence checks.
+See [local source execution](local-kubernetes-source-execution.md) for their retained results and verified cleanup.
+Cancellation, deadlines, and interrupted worker recovery remain unverified on this cluster.
 Actual gVisor runtime execution and selective worker network denial now pass. See [worker isolation](local-kubernetes-isolation.md).
 The single-Pod restart does not establish replica failover or cross-provider parity.
 The 57-item ledger remains at 48 verified and nine open items.
@@ -96,7 +98,8 @@ HELM_DRIVER=secret .data/kubernetes-tools/helm list \
   --kube-context=k3d-teststudio-local --namespace=default
 ```
 
-The installed chart now uses .data/local-k3s/worker-values.json. The earlier core values remain in values.json.
+The installed chart now uses .data/local-k3s/preparation-values.json.
+The earlier core and isolation values remain in values.json and worker-values.json.
 Its dependency manifest is dependencies.private.json in that directory.
 Do not reapply that manifest with a new password against the existing database volume.
 The UI host is studio.teststudio.test. The separate evidence host is evidence.teststudio.test.
@@ -132,7 +135,7 @@ It retains Secret-backed TLS, separate OIDC and probe trust, an internal Service
 Import the fixture into the owned cluster and select its observed containerd manifest digest before starting its Pod.
 Do not change the default Docker context or reuse another application's records.
 
-The next application step runs actual isolated Go and Playwright workers.
+The next application step verifies cancellation, independent deadlines, and interrupted coded-worker recovery.
 Isolated Go and Playwright workers require an enforced RuntimeClass and network policy before execution.
 Check cancellation, deadlines, artifacts, and restart recovery through those actual workers after basic installation works.
 

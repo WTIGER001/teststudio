@@ -17,6 +17,8 @@ See [hosted preparation](hosted-discovery.md) for native setup, cleanup ordering
 Do not use the local image inspector for registry references.
 Published registry content alone is not an approved TestStudio artifact or executable catalog release.
 The normal discovery, source review, approval, and publication steps remain required before dispatch.
+Fresh Go and Playwright workflows now pass against the actual dedicated local registry and k3s installation.
+See [local source execution](local-kubernetes-source-execution.md) for the actual records and remaining provider lifecycle scope.
 
 See [Registry inspection](registry-inspection.md), [Prepared suites](prepared-suites.md), and [Kubernetes workers](kubernetes-workers.md).
 

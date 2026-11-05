@@ -7,7 +7,9 @@ It uses the same immutable service image as the API and overrides its command wi
 The API presents the existing source review, publication, and activation workflow.
 During preparation, source discovery runs only in isolated Pods. The trusted preparation process assembles source layers without Docker.
 
-This package passes local manifest, configuration, and startup checks. It has no verified cluster deployment yet.
+This package passes local manifest, configuration, and startup checks.
+Its actual local k3s deployment now assembles, discovers, publishes, and executes fresh Go and Playwright suites with complete private evidence.
+See [local source execution](local-kubernetes-source-execution.md) for the measured runs, cleanup, integration fixes, and remaining provider scope.
 The current chart enables ZIP source staging and prebuilt image discovery. It does not configure GitHub repository synchronization.
 Native [repository synchronization](repository-sources.md) remains available through explicit separate-process configuration.
 Environment-backed browser and API artifacts require remote gateway delivery. Those hosted profiles remain unavailable.
@@ -118,4 +120,5 @@ Both rendered process configurations match the provider's protected admission po
 Native and packaged startup checks cover the selected source profile and fail before SQLite initialization or provider contact.
 Evidence remains in output/kubernetes-preparation. Owned startup probe containers are removed and their absence is verified.
 The UI, private trace viewer, health binary, and source runtime images are reused.
-No browser, registry push, cluster, AWS, or Azure operation runs.
+Those packaging checks run no browser, registry push, cluster, AWS, or Azure operation.
+The separate actual local cluster workflows are documented in [local source execution](local-kubernetes-source-execution.md).

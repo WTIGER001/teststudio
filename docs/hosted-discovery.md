@@ -14,6 +14,8 @@ Its [discovery-only mode](source-assembly-handoff.md#dedicated-discovery-process
 Native configuration, local TLS protocol checks, and package checks pass without registry or cluster access.
 The optional [Helm preparation package](kubernetes-preparation.md) now supplies a separate deployment, durable journal claim, and scoped writer references.
 Complete hosted source operation still requires deployment verification.
+The dedicated local Kubernetes installation now passes fresh Go and Playwright source workflows through actual registry assembly and isolated execution.
+See [local source execution](local-kubernetes-source-execution.md). Cloud profiles and provider lifecycle scenarios remain open.
 Environment-backed browser and API profiles require remote gateway delivery.
 AWS dispatch is implemented with separate deployment verification pending.
 Azure now has a [durable job provider](azure-worker-lifecycle.md) and [job ownership contract](azure-worker-contract.md).

@@ -1,0 +1,1 @@
+{"schemaVersion":1,"suiteId":"go-local","type":"unit","runner":"go","applications":["workers"],"moduleRoot":"module","tests":{"packages":["."]},"catalog":"catalog.json","buildProfile":"go-module"}

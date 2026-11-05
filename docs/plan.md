@@ -42,8 +42,8 @@ Deliver observable milestones in this order:
 | Dedicated cluster with Ready nodes | Verified. k3d v5.9.0 runs k3s v1.35.5+k3s1 in the separate teststudio-k3s Colima profile. |
 | Chart installation with local PostgreSQL and private evidence | Verified startup. Helm release teststudio is deployed. PostgreSQL and service Pods are Ready; both persistent claims are Bound. |
 | Newly authored HTTPS probe through the installation | Verified. Normal OIDC sign-in, catalog publication, execution, measured TLS, logs, and checksum-verified private evidence download pass. |
-| Isolated Go and Playwright workers | Actual gVisor and selective network denial now pass. Local registry, preparation, and actual coded suite runs are next. |
-| Cancellation, deadlines, artifacts, and restart recovery | Pending actual worker execution. |
+| Isolated Go and Playwright workers | Verified basic workflows. Fresh Go and Playwright bundles pass actual registry assembly, isolated discovery, publication, timed execution, private evidence, and cleanup. |
+| Cancellation, independent deadlines, and interrupted-worker recovery | Next. Basic execution, private artifacts, and cleanup pass. |
 
 The private kubeconfig uses the observed loopback API mapping and mode 0600. Helm host connectivity passes.
 CoreDNS, storage provisioning, metrics, and Traefik report Running. The default Docker context remains unchanged.
@@ -58,6 +58,13 @@ The local cluster now has a verified gVisor 20261005.0 systrap runtime and an ex
 A diagnostic Pod reaches the exchange while its API, artifact, database, and probe-target connections are denied.
 Node-side checks confirm that those four services are available. Temporary diagnostics are removed.
 Three focused routing profiles and four invalid configuration checks pass. See [local isolation](local-kubernetes-isolation.md).
+The local registry and separate preparation process now support actual Go and Playwright suite workflows.
+Go run 20261105T151433.206691439-698ad6db3525513bd828fd49 passes with a measured 0.604332 ms test duration.
+Playwright run 20261105T151447.417956930-cfc4c366f3c9ee354dd21551 passes in 263 ms with screenshots and a trace.
+Both retain complete private evidence. Execution and preparation cleanup complete, and no worker container remains running.
+Integration fixes remove the incorrect local-only admission guard, preserve precise fast Go timing, and supply writable Playwright output and capture defaults.
+New runtime identities isolate the corrected behavior from the original retained observations.
+See [local source execution](local-kubernetes-source-execution.md). Advance 41, 51, 55, and 56 without closing their cross-profile scope.
 See [local Kubernetes](local-kubernetes.md) and output/local-k3s/cluster-summary.json for evidence and continuation instructions.
 
 Report which milestone runs on a real cluster and which checks remain simulated.
@@ -80,7 +87,7 @@ Cloud-wide acceptance remains separate. Continue independent remaining product w
 | Persistence | SQLite is the single-instance local default. PostgreSQL is the hosted and multi-instance default. Installation export and import preserve identifiers and access across both databases. Shared storage parity is verified under 06. Hosted profile acceptance remains separate. |
 | Charts | Keep the existing accessible SVG stacked-area implementation. A chart-library migration is not required. |
 | Local verification | Use local fixtures, cached builds, and targeted checks. Public customer websites are manual user targets, not verification dependencies. |
-| Deployment | Retain local server, AWS ECS with CloudFront, Kubernetes, and Azure Container Apps as required profiles. Develop isolated sandbox execution for Azure. Hosted parity remains unverified. |
+| Deployment | Retain local server, AWS ECS with CloudFront, Kubernetes, and Azure as required profiles. Preserve staged Azure code and defer its implementation. Hosted parity remains unverified. |
 
 ### Azure isolated execution direction
 

@@ -7,7 +7,9 @@ Both offline Go and Playwright execution use the shared hosted lifecycle and pri
 The Helm profile supplies the private listener route, worker namespace, service account, controller permissions, and worker network policy.
 Local protocol and packaging checks pass. A dedicated [local k3s cluster](local-kubernetes.md) now has a Ready node.
 Core application installation, OIDC sign-in, and a newly authored HTTPS probe now pass.
-Actual local gVisor execution and selective worker network denial also pass. Actual coded suite runs remain pending.
+Actual local gVisor execution and selective worker network denial also pass.
+Fresh Go and Playwright suites now pass actual preparation, publication, execution, timing, and private evidence checks.
+See [local source execution](local-kubernetes-source-execution.md). Cancellation, deadlines, and interrupted worker recovery remain pending on this cluster.
 Acceptance 51 remains open across providers. The total stays 48 verified items out of 57.
 
 The separate preparation command now connects registry assembly, immutable publication, and hosted discovery to the existing source queue.

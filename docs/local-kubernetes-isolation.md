@@ -3,7 +3,8 @@
 ## Introduction
 
 The dedicated local k3s cluster now runs an actual gVisor diagnostic Pod and enforces selective worker network policy.
-This verifies worker prerequisites. Actual Go and Playwright suite execution, cancellation, deadlines, and recovery remain pending.
+This verifies worker prerequisites. Fresh Go and Playwright suites now also pass [actual source execution](local-kubernetes-source-execution.md).
+Cancellation, deadlines, and recovery remain pending.
 The verified acceptance total remains 48 of 57. Azure implementation remains deferred.
 
 ## Concepts
@@ -29,7 +30,8 @@ See [containerd configuration](https://gvisor.dev/docs/user_guide/containerd/con
 
 ### Private routing and policy
 
-Helm release teststudio now uses revision 3 and .data/local-k3s/worker-values.json.
+The isolation phase uses Helm revision 3 and .data/local-k3s/worker-values.json.
+The current source-enabled installation uses revision 7 and .data/local-k3s/preparation-values.json.
 The worker namespace is teststudio-workers. Its RuntimeClass, restricted service account, projected controller identity, and network policy are installed.
 The chart uses workers.privateIngress.enabled=false with an externally supplied local TLS proxy.
 The proxy runs in teststudio-private-routing, accepts the worker hostname, and exposes only the private execution path prefix.
@@ -92,7 +94,10 @@ The current diagnostic binary is .data/local-k3s/isolation-check.
 The verifier stages that binary under a unique temporary node path for the positive connectivity baseline, then removes it.
 It uses the dedicated Docker socket and owned node, never an inherited Kubernetes context.
 
-### Continue actual coded execution
+### Recreate the source workflow
+
+This setup now passes in the current installation. Reuse its [source execution records](local-kubernetes-source-execution.md) instead of recreating it during ordinary continuation.
+Use these steps only for a fresh installation:
 
 Create a local HTTPS OCI registry with separate controller reader and preparation writer credentials.
 Publish the approved supervised Go and Playwright runtime images there, with trust for the private exchange authority.
@@ -100,6 +105,6 @@ Keep registry credentials outside worker input and execution containers.
 Enable the existing preparation worker and its private journal claim through installation configuration.
 Publish fresh independent source bundles through the normal API, then execute one Go test and one Playwright test.
 Retain timing, result, logs, and browser evidence before testing cancellation, deadlines, and recovery.
-Do not mark actual coded execution complete from these diagnostic prerequisites.
+The source execution guide records actual coded runs separately from these diagnostic prerequisites.
 
 See [local cluster operation](local-kubernetes.md) and [worker configuration](kubernetes-workers.md).

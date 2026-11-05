@@ -152,7 +152,7 @@ After service Pod replacement, fresh OIDC sign-in reads the same single run and 
 This verifies core persistence across that restart. It does not establish replica failover or coded-worker recovery.
 Evidence is output/local-k3s/probe/summary.json and the adjacent retained run, event, attempt, artifact, and log records.
 No browser, AWS, or Azure test runs. This advances the Kubernetes portions of 51, 55, and 56 without closing their full scope.
-The next measurable result is actual isolated Go and Playwright execution with enforced runtime and network boundaries.
+The next measurable result is actual cancellation, independent deadlines, and interrupted coded-worker recovery.
 The local cluster now runs the verified gVisor 20261005.0 package through RuntimeClass teststudio-isolated.
 An actual non-root diagnostic Pod reports the gVisor kernel and exits zero.
 The chart can use external private TLS routing while preserving the worker Service, controller permissions, and exact policy peers.
@@ -163,12 +163,27 @@ The positive node-side baseline confirms that those four destination services ac
 Four readiness retries allow policy convergence without relaxing the network policy.
 The diagnostic Pod, public-CA ConfigMap, and temporary node helper are removed after the check.
 Three focused routing profiles and four invalid configurations pass local rendering and schema validation.
-Actual Go and Playwright suite runs still require the local registry and preparation workflow.
-This advances the Kubernetes portion of 51. The total remains 48 verified, 9 open.
+The local TLS registry and separate preparation workload now run with different reader and writer credentials.
+The reader cannot upload. Worker credentials contain no registry, database, or Kubernetes API credential.
+Fresh Go and Playwright ZIPs use normal OIDC, source assembly, isolated discovery, reviewed publication, execution, and private evidence APIs.
+Run creation now admits the configured Kubernetes driver while rejecting location mismatches.
+The source-v2 Go runner preserves event-timestamp precision when framework elapsed time rounds to zero.
+The source-v2 Playwright runner supplies writable output and the frozen capture policy across projects without source configuration workarounds.
+Its trusted wrapper preserves suite-relative setup, teardown, server, snapshot, and TypeScript paths through a focused compatibility check.
+Three targeted Go admission or existing behavior checks, three Go event checks, and four browser configuration checks pass.
+The prior Go and incomplete browser observations remain immutable in history under their original runtime identities.
+Go run 20261105T151433.206691439-698ad6db3525513bd828fd49 passes in 0.604332 ms with seven artifacts and seven log segments.
+Playwright run 20261105T151447.417956930-cfc4c366f3c9ee354dd21551 passes in 263 ms with nine artifacts and six log segments.
+Both evidence states are complete. Private downloads pass size and SHA-256 checks. Screenshots and a trace are retained.
+Both execution ledgers are cleaned, both preparations have no pending cleanup, and Kubernetes and CRI show no remaining worker container.
+Visual inspection confirms the browser's captured card shows Reviewed. No host browser or broad browser suite runs.
+Evidence is output/local-k3s/coded/summary.json and adjacent run, preparation, log, artifact, execution, download, and cleanup records.
+See [local source execution](local-kubernetes-source-execution.md) for installation details and continuation instructions.
+This advances the Kubernetes portions of 41, 51, 55, and 56. The total remains 48 verified, 9 open.
 See [local Kubernetes](local-kubernetes.md) for scoped commands and stop instructions.
 No numbered acceptance item closes. The total remains **48 verified, 9 open**.
 
-## Current direction: Azure deferred; local Kubernetes integration next
+## Current direction: Azure deferred; local Kubernetes integration
 
 The user defers Azure implementation and verification until a later deployment script and account setup.
 The staged Azure changes are preserved. No Azure resource or account has been tested.
