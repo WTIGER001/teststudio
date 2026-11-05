@@ -20,6 +20,7 @@ The [relay firewall observer](docs/azure-relay-firewall.md) binds the routed app
 The [relay DNS policy observer](docs/azure-relay-dns.md) checks exact lists, enabled rules, exclusive links, and actual VNet association. Effective private-zone visibility remains required.
 The [relay registry endpoint observer](docs/azure-relay-registry-endpoint.md) binds an explicit approved consumer to its NIC, member addresses, subnet, and security rules. Private records remain required.
 The [relay private DNS observer](docs/azure-relay-private-dns.md) binds selected registry records to those member addresses and one relay-only link. Effective VNet-wide visibility remains required.
+The [reported private DNS inventory](docs/azure-private-dns-inventory.md) detects additional subscription-visible links into worker and relay VNets. Cross-scope coverage and attachment authority remain required.
 The [trusted worker backend role](docs/worker-backend.md) serves private transport without UI, sign-in, or background workers. It supports optional direct TLS; private routing, certificate trust, and provider wiring remain required.
 The [private worker exchange](docs/worker-exchange.md) and [hosted supervisor](docs/job-supervisor.md) supply scoped transport and runner supervision for the provider adapters under development.
 

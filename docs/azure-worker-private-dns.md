@@ -72,6 +72,9 @@ DNS propagation and existing caches still require separate hosted verification.
 
 ## Remaining effective-view and endpoint checks
 
+The [reported subscription inventory](azure-private-dns-inventory.md) now checks direct zone and link lists for additional worker or relay links.
+That scan does not establish cross-subscription or cross-tenant coverage, effective read authority, or protection against later attachments.
+
 This reader requests only the selected zones and their children.
 It does not enumerate all zones in every resource group, subscription, or tenant that could be linked to the worker VNet.
 Resolve effective linked-zone visibility and the authority to attach or change zones before composing complete network admission.

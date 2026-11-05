@@ -337,7 +337,19 @@ Four new focused race checks and five selected existing checks pass locally.
 See [relay private registry DNS observation](azure-relay-private-dns.md). Acceptance 51 advances; the count remains 48 of 57.
 No cloud operation, UI build, image build, browser, container, registry push, deployment, or demo restart runs.
 
-Next verify effective read coverage, environment attachment authority, authoritative VNet-wide zone visibility, and trusted preparation networking.
+The reported private DNS inventory now lists zones across the configured subscription and validates complete reported child link inventories.
+It detects additional reported links into worker or relay VNets while permitting unrelated valid zones and links.
+The SDK uses a per-call discovered path allowlist, bounded parallel reads, inventory limits, and an atomic request budget.
+Four new focused race checks and two selected existing checks pass locally. No cloud operation, UI build, image build, browser, or deployment runs.
+See [reported private DNS inventory](azure-private-dns-inventory.md). Acceptance 51 advances; the count remains 48 of 57.
+
+The Azure Private DNS FAQ confirms cross-subscription and cross-tenant zone links.
+The reviewed zone-list and link-list APIs cover one subscription and one zone respectively.
+This scan is therefore reported-subscription inspection. It cannot replace proof of effective cross-scope visibility or attachment authority.
+Inspect actual enforcement and scope coverage before relying on policy or deployment-stack protection settings.
+Keep those controls mandatory and native coded execution disabled while they remain unproven.
+
+Next verify effective read coverage, actual network and environment attachment authority, authoritative cross-scope zone coverage, and trusted preparation networking.
 A completed list response does not prove authorization coverage or prevent later attachments. Keep those native installation controls mandatory.
 Use the worker backend role to verify its restricted route, TLS authority, and placement before completing service admission.
 The staged Azure backend selects platform HTTPS termination. Other approved profiles can select direct TLS.
@@ -351,6 +363,7 @@ The selected relay resolver policy, exact lists, enabled rules, exclusive link, 
 The selected relay registry endpoint now passes local approval, NIC ownership, member-address, dedicated subnet, and security-rule checks.
 The selected relay registry records, complete inventory counts, completed exclusive link, disabled registration, and no-fallback settings now pass local checks.
 Verify authoritative effective VNet-wide DNS visibility, trusted preparation networking, and deployed certificate trust next.
+The direct subscription inventory now detects reported unexpected zone links. It does not establish the complete effective view or prevent later changes.
 The registry service guard now permits the explicit relay consumer alongside worker and preparation endpoints while rejecting unknown consumers.
 Inspect effective identity grants and backend infrastructure subnet controls.
 Backend hostname lookup is unnecessary in pinned mode. Preserve worker, exchange, registry, and platform DNS controls.

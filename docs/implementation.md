@@ -122,7 +122,40 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: selected relay private registry zone
+## Current delivery: reported subscription private DNS links
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+The private DNS inventory stage now lists reported zones across the configured subscription and validates their complete reported link inventories.
+It detects additional reported links into the selected worker or relay VNet and requires the three existing selected links.
+Unrelated valid zones and links remain permitted. Missing selected links, incomplete arrays, pending state, and inconsistent counters remain unavailable.
+Duplicate identities, malformed references, foreign-subscription zones, and unexpected selected-VNet links reject ownership.
+The observer compares case-insensitive identities and normalizes request paths without changing zone or resource-group names.
+
+The SDK first permits only the subscription zone-list path, then adds only child link collections returned by that validated list.
+It projects reduced zone and link references and reads no record values, tags, credentials, or unrelated service configuration.
+It lists links even for reported zero-link zones. No dynamically discovered allowlist or successful observation persists between calls.
+The bounds are 1024 zones, 4096 total links, sixteen pages per collection, eight concurrent zone reads, and 2048 requests per scan.
+The SDK scan has a thirty-second context and five-second operation contexts. The composed guard has a 115-second context and 2188-read maximum.
+The normal additional cost is one subscription list plus one link collection per reported zone, before paging.
+
+Public Microsoft documentation confirms that private zones can link across subscriptions and tenants.
+This reported single-subscription scan therefore cannot establish complete effective DNS coverage or authority to prevent later attachments.
+It implements no Network, authorizes no dispatch, and enables no Azure coded execution.
+The plan retains cross-scope coverage, effective read authority, attachment controls, and execution isolation as separate mandatory requirements.
+
+Four new focused race checks and two selected existing checks pass locally in 3.379 seconds.
+They cover fresh observations, parent gating, unexpected and unrelated links, zero-link zones, mixed-case identities, incomplete state, paging, request exhaustion, and SDK scope.
+No broad suite, cloud request, browser, UI build, image build, container, registry push, deployment, or demo restart runs.
+Only public Microsoft documentation requests leave the local environment during this batch.
+Fixtures use explicit fake credentials and in-memory SDK responses. They open no network connection or listener.
+Evidence is output/azure-private-dns-inventory/summary.json and the targeted command result.
+See [reported private DNS inventory and its limits](azure-private-dns-inventory.md).
+
+Continue effective read coverage, actual attachment and protection authority, trusted preparation networking, deployed trust, and complete native wiring.
+All nine broad acceptance items remain open under their original scope.
+
+## Previous delivery: selected relay private registry zone
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 

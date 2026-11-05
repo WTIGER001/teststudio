@@ -85,6 +85,7 @@ go test -race ./adapters/execution/azure -run '^(TestAzureRelayPrivateDNS.*|Test
 ```
 
 Evidence is output/azure-relay-private-dns/summary.json and the targeted command result.
+The [reported subscription inventory](azure-private-dns-inventory.md) now detects additional reported links into worker and relay VNets.
 Continue authoritative effective VNet-wide zone visibility and attachment controls for worker and relay networks.
 A selected-zone record list or Resource Graph snapshot cannot establish that complete view or its authorization coverage.
 Keep live propagation, registry CNAME behavior, image pulls, and packet isolation in the separate hosted verification phase.
