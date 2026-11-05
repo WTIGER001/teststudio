@@ -114,13 +114,13 @@ func TestAzureReadIdentityProtectionGatesFactoryAndBoundHostWithSixRequiredAssig
 		t.Fatal("changed identity protection reached host reads or repeated bootstrap")
 	}
 	identity.identityProtection = clone(baseline)
-	if err := observer.Check(t.Context(), c); err != nil || f.reads != 2 {
+	if err := observer.Check(t.Context(), c); err != nil || f.reads != 3 {
 		t.Fatal("fresh restored protection rejected", err, f.reads)
 	}
 	before := identity.reads
 	f.parent.denies = f.parent.denies[:len(f.parent.denies)-1]
 	requireReadDenyError(t, observer.Check(t.Context(), c), hostedexecution.ErrUnavailable)
-	if identity.reads != before || f.reads != 2 || len(f.parent.factoryClients) != 1 {
+	if identity.reads != before || f.reads != 3 || len(f.parent.factoryClients) != 1 {
 		t.Fatal("subscription scan without identity protection reached later reads")
 	}
 }

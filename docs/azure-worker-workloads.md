@@ -106,7 +106,7 @@ go test -race ./adapters/execution/azure -run '^(TestAzureObserverPlacements.*|T
 
 Evidence is output/azure-observer-placements/summary.json and the targeted command results.
 This projection adds no SDK resource, permission, API version, collection request, or session reader.
-The 22-reader host session retains its 135-second context. Separate federation and identity-protection GETs increase its ceiling to 2220 requests.
+The 22-reader host session retains its 135-second context. Federation, identity protection, reported stacks, and host authentication bring its ceiling to 2221 requests.
 
 ## Completeness, permissions, and attachment authority
 
@@ -203,3 +203,5 @@ The snapshot belongs to one composed check. It adds no persisted inventory, succ
 Existing standalone inventory behavior remains unchanged and retains targeted passing evidence.
 
 The [reported protection-stack checks](azure-protection-stacks.md) add two selected GETs within the existing contexts and reader count.
+
+The [host authentication check](azure-observer-host-auth.md) requires reported platform authentication to be explicitly disabled on the API app.

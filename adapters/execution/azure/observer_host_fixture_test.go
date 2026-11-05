@@ -17,6 +17,8 @@ type observerHostFixture struct {
 	parent      *observerFixture
 	settings    ObserverHostSettings
 	application a.ContainerApp
+	auth        a.AuthConfig
+	authMode    string
 	revisions   []a.Revision
 	reads       int
 	mode        string
@@ -49,6 +51,11 @@ func observerHostTest(t *testing.T) (Config, ObserverHostSettings, *observerHost
 		f.application.Identity.UserAssignedIdentities[id] = &a.UserAssignedIdentity{ClientID: &client, PrincipalID: &principal}
 	}
 	f.revisions = []a.Revision{{ID: to.Ptr(s.Application + "/revisions/" + name + "--current"), Name: to.Ptr(name + "--current"), Type: to.Ptr("Microsoft.App/containerApps/revisions"), Properties: &a.RevisionProperties{Active: to.Ptr(true), ProvisioningState: to.Ptr(a.RevisionProvisioningStateProvisioned), HealthState: to.Ptr(a.RevisionHealthStateHealthy), RunningState: to.Ptr(a.RevisionRunningStateRunning), Replicas: to.Ptr[int32](1), TrafficWeight: to.Ptr[int32](100), Template: clone(f.application.Properties.Template)}}}
+	f.auth, err = s.AuthDefinition(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.auth.ID, f.auth.Name, f.auth.Type = to.Ptr(s.Application+"/authConfigs/current"), to.Ptr("current"), to.Ptr("Microsoft.App/containerApps/authConfigs")
 	parent.workloads.apps = append(parent.workloads.apps, to.Ptr(clone(f.application)))
 	for _, app := range parent.workloads.apps {
 		if app.Identity == nil {
@@ -64,7 +71,7 @@ func observerHostTest(t *testing.T) (Config, ObserverHostSettings, *observerHost
 }
 
 func (f *observerHostFixture) Do(r *http.Request) (*http.Response, error) {
-	if r.URL.Path != f.settings.Application && r.URL.Path != f.settings.Application+"/revisions" {
+	if r.URL.Path != f.settings.Application && r.URL.Path != f.settings.Application+"/revisions" && r.URL.Path != f.settings.Application+"/authConfigs/current" {
 		return f.parent.Do(r)
 	}
 	f.mu.Lock()
@@ -83,6 +90,19 @@ func (f *observerHostFixture) Do(r *http.Request) (*http.Response, error) {
 		response := deadlineResponse(r, 302, nil)
 		response.Header.Set("Location", "https://foreign.invalid/private")
 		return response, nil
+	}
+	if r.URL.Path == f.settings.Application+"/authConfigs/current" {
+		switch f.authMode {
+		case "unavailable":
+			return deadlineResponse(r, 503, map[string]any{"error": map[string]any{"message": "private-auth-configuration-canary"}}), nil
+		case "missing":
+			return deadlineResponse(r, 404, nil), nil
+		case "redirect":
+			response := deadlineResponse(r, 302, nil)
+			response.Header.Set("Location", "https://foreign.invalid/private-auth-canary")
+			return response, nil
+		}
+		return deadlineResponse(r, 200, f.auth), nil
 	}
 	var body any = f.application
 	if r.URL.Path == f.settings.Application+"/revisions" {

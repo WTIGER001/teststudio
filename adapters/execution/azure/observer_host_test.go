@@ -23,7 +23,7 @@ func TestAzureObserverHostBindsFreshMainIdentityAndHealthyRevision(t *testing.T)
 	}
 	for i := 1; i <= 2; i++ {
 		slices.Reverse(f.application.Properties.Configuration.IdentitySettings)
-		if err := observer.Check(t.Context(), c); err != nil || f.reads != i*2 || f.parent.bootstrapReads != bootstrap || len(f.parent.factoryClients) != 1 {
+		if err := observer.Check(t.Context(), c); err != nil || f.reads != i*3 || f.parent.bootstrapReads != bootstrap || len(f.parent.factoryClients) != 1 {
 			t.Fatal("fresh host attachment rejected or bootstrap repeated", err, f.reads)
 		}
 	}
@@ -138,7 +138,7 @@ func TestAzureObserverHostSDKRejectsUnselectedReadsAndMissingRevisions(t *testin
 		func(r *http.Request) { r.Method = "POST" },
 		func(r *http.Request) { r.URL.Path += "/listSecrets" },
 		func(r *http.Request) { r.URL.Path = c.ControllerEnvironment },
-		func(r *http.Request) { r.URL.Path = s.Application + "/authConfigs/current" },
+		func(r *http.Request) { r.URL.Path = s.Application + "/authConfigs/foreign" },
 		func(r *http.Request) { r.URL.Host = "foreign.invalid" },
 	} {
 		request, _ := http.NewRequestWithContext(t.Context(), "GET", "https://management.azure.com"+s.Application+"?api-version="+exchangeVersion, nil)

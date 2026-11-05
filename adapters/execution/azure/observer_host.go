@@ -12,6 +12,7 @@ import (
 
 type ObserverHostReader interface {
 	Application(context.Context, string) (a.ContainerApp, error)
+	Auth(context.Context, string) (a.AuthConfig, error)
 	Revisions(context.Context, string) ([]a.Revision, error)
 }
 
@@ -42,10 +43,12 @@ func (g *ObserverHostGuard) Check(ctx context.Context, c Config) (resultErr erro
 	}
 	var app a.ContainerApp
 	var revisions []a.Revision
-	var errs [2]error
+	var auth a.AuthConfig
+	var errs [3]error
 	var group sync.WaitGroup
 	group.Go(func() { app, errs[0] = g.reader.Application(ctx, g.settings.Application) })
 	group.Go(func() { revisions, errs[1] = g.reader.Revisions(ctx, g.settings.Application) })
+	group.Go(func() { auth, errs[2] = g.reader.Auth(ctx, g.settings.Application) })
 	group.Wait()
 	for _, err := range errs {
 		if errors.Is(err, hostedexecution.ErrOwnership) {
@@ -56,6 +59,9 @@ func (g *ObserverHostGuard) Check(ctx context.Context, c Config) (resultErr erro
 		if err != nil {
 			return hostedexecution.ErrUnavailable
 		}
+	}
+	if err := verifyObserverHostAuthentication(g.settings, auth); err != nil {
+		return err
 	}
 	return verifyObserverHost(c, g.settings, app, revisions)
 }

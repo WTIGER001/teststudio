@@ -183,4 +183,5 @@ The [reported protection-stack checks](azure-protection-stacks.md) require two e
 The core package creates no such arrangement. Direct assignment ownership and protection-management authority remain unproven.
 
 The host stage now compares the [fixed reported API runtime](azure-observer-host-runtime.md) with app and revision configuration.
-Native wiring, effective authorization, platform authentication, and actual execution isolation remain required.
+The [host authentication check](azure-observer-host-auth.md) now observes explicit disabled platform authentication.
+Native wiring, effective authorization, deployed authentication behavior, and actual execution isolation remain required.

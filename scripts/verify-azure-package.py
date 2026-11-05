@@ -48,6 +48,11 @@ def main():
         assert configuration['ingress']['targetPort'] == "[variables('port')]"
         assert nested['variables']['port'] == "[if(variables('api'), 8040, 8041)]"
         assert configuration['activeRevisionsMode'] == 'Single'
+        authentication = next(resource for resource in nested['resources'] if resource['type'] == 'Microsoft.App/containerApps/authConfigs')
+        assert authentication['apiVersion'] == '2025-07-01'
+        assert authentication['properties'] == {'platform': {'enabled': False}}
+        assert authentication['name'] == "[format('{0}/{1}', parameters('name'), 'current')]"
+        assert authentication['dependsOn'] == ["[resourceId('Microsoft.App/containerApps', parameters('name'))]"]
         assert configuration['identitySettings'] == "[variables('identitySettings')]"
         identity_settings = nested['variables']['identitySettings']
         assert re.findall(r"createObject\('identity', parameters\('([^']+)'\), 'lifecycle', '([^']+)'\)", identity_settings) == [('pullIdentityId', 'None'), ('startupIdentityId', 'None'), ('runtimeIdentityId', 'Main'), ('observerIdentityId', 'Main')]
@@ -71,6 +76,7 @@ def main():
         assert app['properties']['template']['scale'] == {'minReplicas': "[parameters('replicas')]", 'maxReplicas': "[parameters('replicas')]"}
         assert nested['parameters']['replicas']['minValue'] == 1
     checks.append('Each HTTPS ingress targets its own listener with independent readiness, liveness, and always-on replica settings')
+    checks.append('Both core apps explicitly disable platform authentication so TestStudio owns sessions and private report authorization')
     checks.append('Platform-only registry and startup identities are withheld from runtime while Blob access selects the exact runtime client')
     identities = [resource for resource in resources if resource['type'] == 'Microsoft.ManagedIdentity/userAssignedIdentities']
     assert len(identities) == 6

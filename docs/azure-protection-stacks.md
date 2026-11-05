@@ -59,7 +59,7 @@ Successful observations are not cached or persisted.
 
 Seven identity-stage operations now run concurrently after the preceding protection chain.
 The identity and bootstrap ceiling becomes 2200 requests within the existing 125-second context.
-Read-deny sessions allow 2216 requests in 130 seconds. Host sessions allow 2220 requests in 135 seconds.
+Read-deny sessions allow 2216 requests in 130 seconds. Host sessions allow 2221 requests in 135 seconds.
 These are maximum bounds across the composed inventories. This change adds two normal GETs and no repeated parent scan.
 The host session retains 22 readers. Binding still performs one separate bootstrap inspection.
 Failed stack checks block credential construction and later host reads. Bound checks refresh state through the selected observer credential.
@@ -75,3 +75,5 @@ It does not remove existing foreign consumers or prevent an authorized administr
 Direct assignment ownership and authority over stack management require separate authoritative evidence.
 Complete trusted host configuration, execution isolation, preparation networking, and native command wiring remain open.
 See [Azure worker admission](azure-worker-network.md) for the broader boundary.
+
+The [host authentication check](azure-observer-host-auth.md) accounts for the host session's additional selected GET.

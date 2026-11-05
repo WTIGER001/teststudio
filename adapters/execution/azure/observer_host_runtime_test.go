@@ -182,7 +182,7 @@ func TestAzureObserverHostRuntimeRefreshesConsistentAppAndRevisionDrift(t *testi
 	if err := observer.Check(t.Context(), c); err != nil {
 		t.Fatal("restored runtime rejected", err)
 	}
-	if f.reads != 6 || f.parent.bootstrapReads != bootstrap || len(f.parent.factoryClients) != 1 {
+	if f.reads != 9 || f.parent.bootstrapReads != bootstrap || len(f.parent.factoryClients) != 1 {
 		t.Fatal("runtime checks repeated bootstrap, constructed another credential, or widened host requests")
 	}
 }

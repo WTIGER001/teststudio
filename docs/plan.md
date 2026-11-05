@@ -463,7 +463,22 @@ No new dependency, grant, scan, credential, or observation cache is added.
 Reported configuration does not prove secret contents, actual image behavior, platform authentication settings, effective authorization, or management authority.
 See [fixed host runtime contract](azure-observer-host-runtime.md). Acceptances 51 and supporting packaging under 57 advance; the count remains 48 verified, nine open.
 
-Next resolve authoritative assignment ownership and protection-management authority, other identity consumer types, platform authentication, and complete native admission wiring.
+The host reader now requires the selected API app's authConfigs/current with an explicit false platform enabled flag.
+It uses the existing SDK and returns only resource identity and that flag. Provider, registration, encryption, and login metadata do not reach callers.
+Missing resources and unknown state remain unavailable. A changed enabled setting rejects the next bound inspection, while restored disabled state can pass.
+The core app module now declares disabled platform authentication for both API and artifact roles, regardless of the optional observer setting.
+TestStudio retains its own OIDC, local-account, session, and private-report authorization contracts.
+
+Three new focused race checks and seven affected regressions run locally. Nine pass initially; one exposes a reader's missing-resource error category.
+After that normalization is corrected, only the SDK privacy check and bound authentication check repeat and pass in 1.972 seconds.
+The initial targeted selection takes 3.503 seconds. The changed Bicep module compiles once with pinned 0.48.1 and passes package contracts without warnings.
+Three concurrent host reads replace two, increasing only the host ceiling to 2221 requests. Its context remains 135 seconds with 22 readers.
+Bootstrap remains 125 seconds and 2200 requests; diagnostic read-deny sessions remain 130 seconds and 2216 requests.
+No role grant, dependency, repeated parent scan, observation cache, UI build, browser, image, container, provider operation, deployment, registry push, or demo restart is added.
+See [reported host platform authentication](azure-observer-host-auth.md). Acceptance 51 and supporting packaging under 57 advance; the total remains 48 verified, nine open.
+Reported state does not establish deployed authentication behavior, other identity consumers, protection-management authority, execution isolation, or complete native admission.
+
+Next resolve authoritative assignment ownership and protection-management authority, other identity consumer types, controller route configuration, and complete native admission wiring.
 Reported app and job checks do not establish exclusive use across all Azure resources or subscriptions.
 Keep hosted read coverage, complete effective authorization, and cross-scope visibility separate until authoritative deployment evidence exists.
 Wire the bound session into native commands only after complete admission exists.

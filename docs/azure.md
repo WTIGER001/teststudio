@@ -231,3 +231,6 @@ The core package creates no such arrangement. Direct assignment ownership and pr
 
 The observerBinding output includes non-secret [API runtime settings](azure-observer-host-runtime.md) derived from the same installation parameters as the API app.
 It supplies references rather than secret values. It enables no coded execution or automatic admission.
+
+Both core apps explicitly disable [Container Apps platform authentication](azure-observer-host-auth.md) so TestStudio handles sessions and private report authorization.
+The observer requires fresh reported disabled state on the selected API app. This enables no native coded execution.

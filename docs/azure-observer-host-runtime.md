@@ -71,13 +71,13 @@ The observer option remains disabled by default. The output remains incomplete u
 
 Each bound Check reads fresh app and revision state through the selected observer credential.
 Changed app and revision settings reject even when they agree with each other. Restored valid state can pass the next inspection.
-The host session still uses 22 readers, a 135-second context, and at most 2220 requests.
-Its ordinary host-specific cost remains two GETs. Initial binding retains one separate bootstrap inspection.
+The host session still uses 22 readers, a 135-second context, and at most 2221 requests.
+Its ordinary host-specific cost is now three GETs, including the [platform authentication check](azure-observer-host-auth.md). Initial binding retains one separate bootstrap inspection.
 
 ## Remaining installation evidence
 
 These checks inspect reported configuration. They do not retrieve or verify database or OIDC secret contents.
-They do not establish actual image behavior, token issuance, platform authentication overrides, effective grants, or authority to alter the app.
+They do not establish actual image behavior, token issuance, deployed platform authentication behavior, effective grants, or authority to alter the app.
 Public hostname ownership and certificate behavior require separate deployment verification.
 Complete isolation, other identity consumers, protection ownership and management authority, preparation networking, and native command wiring remain open.
 No provider service or deployment is contacted during the local fixture and package checks.

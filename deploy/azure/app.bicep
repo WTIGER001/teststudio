@@ -172,4 +172,12 @@ resource app 'Microsoft.App/containerApps@2025-07-01' = {
   }
 }
 
+resource authentication 'Microsoft.App/containerApps/authConfigs@2025-07-01' = {
+  parent: app
+  name: 'current'
+  properties: {
+    platform: { enabled: false }
+  }
+}
+
 output appName string = app.name

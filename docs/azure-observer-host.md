@@ -8,7 +8,8 @@ Its existing [workload inventory](azure-worker-workloads.md#observer-identity-pl
 Its identity reader also requires [federated-credential absence](azure-read-identity.md#federated-credential-absence) during bootstrap and each bound inspection.
 It now requires [reported identity write protection](azure-read-identity.md#identity-write-protection) on that exact identity and its child scopes.
 It now checks the [fixed reported API runtime](azure-observer-host-runtime.md), including arguments, environment, secret references, ingress, probes, and scaling.
-It does not establish exclusive identity use, secret contents, actual host token issuance, platform authentication overrides, or complete effective authorization.
+The [platform authentication check](azure-observer-host-auth.md) now requires an explicit disabled current configuration on the selected API app.
+It does not establish exclusive identity use, secret contents, actual host token issuance, deployed authentication behavior, or complete effective authorization.
 Those requirements remain part of native admission and separate hosted verification.
 No Network is implemented. Azure coded jobs remain disabled.
 Acceptance 51 and supporting packaging under 57 advance. The total remains 48 verified of 57, with nine open.
@@ -63,19 +64,19 @@ Identity changes require fresh app observations; an old revision identifier alon
 
 ReadIdentityGuard.BindHostObserver accepts the explicit host settings and builds all 22 SDK readers with the verified observer credential.
 It retains the existing single bootstrap inspection and performs no observer request during client construction.
-Each Check refreshes the existing chain once, then reads the selected app and its revisions concurrently.
+Each Check refreshes the existing chain once, then reads the selected app, revisions, and current authentication configuration concurrently.
 The workload stage first requires the selected host in the application collection and blocks shared or unknown observer identity placement.
 BindObserver remains available for the preceding 21-reader diagnostic scope. It does not check host attachment.
 Use the host-bound method when this attachment observation is required. Neither method enables native dispatch.
 
-SDKObserverHostReader permits GET on only the selected app and its revisions collection.
+SDKObserverHostReader permits GET on only the selected app, its revisions collection, and authConfigs/current.
 It reuses the existing Container Apps SDK and API 2025-07-01 with no new dependency.
-The shared service reader supplies bounded revision paging. Its environment, route, auth, and secret paths are outside this reader's allowlist.
+The shared service reader supplies bounded revision paging. Its environment, route, other auth, and secret paths are outside this reader's allowlist.
 Each operation has a five-second context and four-megabyte response limit. Revisions permit at most four records across three pages.
 Retries and provider registration remain disabled. Unsafe pages, redirects, and incomplete revisions remain blocking errors.
 
-The composed host check has a 135-second context and at most 2220 requests, including federation absence and identity protection.
-The host-specific additional cost remains two GETs. Initial binding retains its separate 125-second bootstrap context and 2200-request ceiling.
+The composed host check has a 135-second context and at most 2221 requests, including federation absence and identity protection.
+The host-specific additional cost is three GETs. Initial binding retains its separate 125-second bootstrap context and 2200-request ceiling.
 Successful observations are not cached. Closing the session releases all 22 readers and prevents later checks.
 Returned errors omit provider messages and private app configuration.
 
@@ -87,6 +88,7 @@ The role permits exactly management reads and the existing DNS-association obser
 The API main container receives the observer identity. Its pull, startup, and Blob runtime identities retain their existing roles and lifecycle controls.
 The shared app module also gates the attachment on the API role. An artifact-role caller cannot expose it through that parameter.
 The artifact app receives no observer identity, subscription read grant, or new application setting from the top-level package.
+Both core apps now declare authConfigs/current with platform authentication explicitly disabled. TestStudio retains session and report authorization.
 
 The observerBinding output contains resource identifiers, client, principal, tenant, role, assignment, selected host, image, core identity references, and the non-secret runtime settings.
 It contains no secret value or token. Combine those values with the complete installation network settings for the Go observer configuration.
@@ -116,9 +118,11 @@ Evidence is output/azure-observer-host/summary.json, final-package/service.json,
 No cloud operation, UI build, browser, image build, container, registry push, deployment, or demo restart runs.
 External requests read only public Microsoft documentation.
 
-Continue exclusive identity placement, platform authentication controls, resource-management authority, and full native admission wiring.
+Continue exclusive identity placement, deployed authentication behavior, resource-management authority, and full native admission wiring.
 Keep deployed token behavior, effective coverage, protection enforcement, and cross-scope visibility in the separate hosted verification phase.
 
 The [reported protection-stack checks](azure-protection-stacks.md) add two selected GETs within the existing contexts and reader count.
 
 The [fixed runtime contract](azure-observer-host-runtime.md) adds no GET, context allowance, or reader. Four new checks and seven affected regressions pass locally.
+
+The [current platform authentication contract](azure-observer-host-auth.md) adds one selected concurrent GET and no reader or role grant.
