@@ -90,7 +90,7 @@ func (p *Provider) Observe(ctx context.Context, ref execution.Reference) (result
 		status.AdmissionPending = true
 		return status, nil
 	}
-	if err := p.network.VerifyTask(ctx, canonical(p.config), task); err != nil {
+	if err := p.verifyTaskNetwork(ctx, plan, task); err != nil {
 		if errors.Is(err, hostedexecution.ErrOwnership) {
 			return status, err
 		}

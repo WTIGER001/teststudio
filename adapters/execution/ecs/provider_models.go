@@ -61,6 +61,7 @@ type Provider struct {
 	network          Network
 	discoveryCleanup func(context.Context, execution.Reference) error
 	now              func() time.Time
+	gateway          *gatewayControl
 }
 
 type dispatch struct {
@@ -83,7 +84,14 @@ type dispatch struct {
 }
 
 func New(options Options) (*Provider, error) {
-	if Validate(options.Config) != nil || options.Store == nil || options.ECS == nil || options.Scheduler == nil || options.Inspector == nil || options.Network == nil {
+	if options.Network == nil {
+		return nil, hostedexecution.ErrConfiguration
+	}
+	return newProvider(options)
+}
+
+func newProvider(options Options) (*Provider, error) {
+	if Validate(options.Config) != nil || options.Store == nil || options.ECS == nil || options.Scheduler == nil || options.Inspector == nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
 	now := options.Now
@@ -94,6 +102,9 @@ func New(options Options) (*Provider, error) {
 }
 
 func (p *Provider) InspectImage(ctx context.Context, image string) (hostedexecution.Image, error) {
+	if p.gateway != nil {
+		return hostedexecution.Image{}, hostedexecution.ErrConfiguration
+	}
 	result, err := p.inspector.InspectImage(ctx, image)
 	if err != nil {
 		return result, hostedexecution.ErrUnavailable

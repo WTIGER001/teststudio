@@ -6,6 +6,7 @@ ECS environment-backed browser and coded API execution remains disabled.
 The existing offline ECS lifecycle stays separate.
 The shared transport supports a verified task address and private certificate environment delivery.
 Native gateway task construction, ownership, deadline, recovery proof, and metadata bootstrap components now pass targeted local checks.
+The gateway child provider now reuses the durable SDK lifecycle with a separate role journal and verified address binding.
 These components do not yet provide the complete native ECS dispatch lifecycle or deployment acceptance.
 Azure remains deferred, and this work makes no live cloud call.
 
@@ -96,6 +97,30 @@ An explicitly supplied gateway instance variable is rejected in this mode.
 The native controller must independently verify the complete observed task ARN, cluster, account, region, and network before binding the same identifier.
 Task metadata alone does not prove controller-side ownership.
 
+### Durable gateway child lifecycle
+
+NewGateway uses the existing task registration, launch, observation, shutdown, and guarded removal state machine.
+Its ecs-gateway-dispatches journal remains separate from the uploaded worker journal.
+Both roles retain the original execution reference and private exchange authority.
+The frozen gateway configuration includes the public certificate authority. It contains no certificate key or raw initialization ticket.
+Configuration changes cannot acquire an existing gateway row.
+
+Before native creation, image inspection requires the remote transport, private certificate, and ECS task identity capabilities.
+The configured network guard must admit the separate gateway network.
+Observation verifies the task definition, launch authority, independent deadline, native task network, and reported private IPv4 address.
+Only then does it bind the immutable task identifier and address to the private exchange.
+Unknown health still allows this binding so the task can fetch initialization. It keeps worker admission pending.
+Withdrawn run authority prevents binding. Replacing an existing address fails ownership verification.
+
+Lost registration, launch, and deadline acknowledgements recover through the original SDK receipts without another creation attempt.
+Gateway removal requires ticket revocation, confirmed termination, saved results, and complete or abandoned evidence.
+Local checks use the real private exchange with authored AWS protocol fixtures.
+They cover initialization order, unsupported capabilities, address mismatch, authority withdrawal, restart recovery, and checkpointed cleanup.
+Selected existing offline worker lifecycle checks still pass.
+
+This child provider has no normal executor registration. It cannot enable environment execution by itself.
+The concrete native gateway network guard and parent two-task orchestration remain required.
+
 ### Remaining native integration
 
 Wire the implemented task contract into an owned gateway lifecycle beside each uploaded worker task.
@@ -106,8 +131,8 @@ Confirm readiness, inspected images, network policy, and independent deadlines b
 The hosted task health command must use --ready-remote instead of the image's local socket health command.
 Track both tasks, definitions, and deadline resources through the durable dispatch journal and cleanup checkpoints.
 Preserve original identities across lost acknowledgements and recovery. Never invent a passing observation or duration.
-Reuse the existing provider lifecycle with role-specific plans and separate journal rows instead of duplicating its SDK state machine.
-Gateway and worker rows must share the original execution authority while retaining distinct task, definition, and schedule identities.
+Use the implemented gateway child provider beside the worker lifecycle.
+Gateway and worker rows share execution authority while retaining distinct task, definition, and schedule identities.
 Stop both workloads even when one observation fails. Cleanup requires the existing result and evidence checkpoint.
 
 Create the worker only after the gateway's identity, initialization, readiness, network, and deadline are verified.

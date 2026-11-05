@@ -150,7 +150,11 @@ func (f *cloudFixture) ListTaskDefinitions(_ context.Context, input *ecs.ListTas
 	return result, nil
 }
 func (f *cloudFixture) makeTask() {
-	f.task = &ecstypes.Task{TaskArn: aws.String(taskARN(f.plan)), ClusterArn: aws.String(f.plan.config.Cluster), TaskDefinitionArn: f.definition.TaskDefinition.TaskDefinitionArn, StartedBy: f.launch.StartedBy, Group: f.launch.Group, Cpu: aws.String("2048"), Memory: aws.String("4096"), PlatformVersion: aws.String("1.4.0"), PlatformFamily: aws.String("Linux"), LaunchType: ecstypes.LaunchTypeFargate, LastStatus: aws.String("RUNNING"), Overrides: copyValue(f.launch.Overrides), Tags: copyValue(f.launch.Tags), Containers: []ecstypes.Container{{Name: aws.String("runner"), Image: aws.String(f.plan.job.Image)}}}
+	cpu, memory := f.plan.taskResources()
+	f.task = &ecstypes.Task{TaskArn: aws.String(taskARN(f.plan)), ClusterArn: aws.String(f.plan.config.Cluster), TaskDefinitionArn: f.definition.TaskDefinition.TaskDefinitionArn, StartedBy: f.launch.StartedBy, Group: f.launch.Group, Cpu: aws.String(cpu), Memory: aws.String(memory), PlatformVersion: aws.String("1.4.0"), PlatformFamily: aws.String("Linux"), LaunchType: ecstypes.LaunchTypeFargate, LastStatus: aws.String("RUNNING"), Overrides: copyValue(f.launch.Overrides), Tags: copyValue(f.launch.Tags), Containers: []ecstypes.Container{{Name: aws.String(f.plan.containerName()), Image: aws.String(f.plan.job.Image)}}}
+	if f.plan.gateway != nil {
+		f.task.Containers[0].NetworkInterfaces = []ecstypes.NetworkInterface{{PrivateIpv4Address: aws.String("10.20.1.7")}}
+	}
 }
 func (f *cloudFixture) RunTask(_ context.Context, input *ecs.RunTaskInput, _ ...func(*ecs.Options)) (*ecs.RunTaskOutput, error) {
 	f.mu.Lock()
@@ -219,7 +223,7 @@ func (f *cloudFixture) CreateSchedule(_ context.Context, input *scheduler.Create
 	f.schedules++
 	data, _ := json.Marshal(input)
 	json.Unmarshal(data, &f.schedule)
-	f.schedule.Arn = aws.String("arn:aws:scheduler:" + f.plan.config.Region + ":" + f.plan.config.Account + ":schedule/" + f.plan.config.ScheduleGroup + "/" + f.plan.job.Reference.Container)
+	f.schedule.Arn = aws.String("arn:aws:scheduler:" + f.plan.config.Region + ":" + f.plan.config.Account + ":schedule/" + f.plan.config.ScheduleGroup + "/" + f.plan.resourceName())
 	if f.mode == "lost-deadline" {
 		return nil, errors.New("private-deadline-canary")
 	}

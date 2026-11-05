@@ -167,6 +167,24 @@ The existing provider still rejects environment-backed ECS dispatch before creat
 Continue with role-specific provider journals and the existing cleanup state machine. Keep worker creation behind gateway readiness and activation.
 This advances **51, 56, and 57**; the verified total remains **50 of 57**.
 
+### Durable ECS gateway child lifecycle
+
+The separate gateway provider now reuses the existing SDK registration, launch, deadline, observation, shutdown, and cleanup state machine.
+Gateway rows use ecs-gateway-dispatches. Worker rows retain their original bucket and execution authority.
+Frozen public trust and approved secret references remain part of the ownership proof. Raw tickets and certificate keys remain absent.
+Native creation requires inspected transport, certificate, and task identity capabilities, plus the configured gateway network guard.
+Verified task ownership, deadline, native network, and private IPv4 binding precede private initialization.
+Unknown health permits initialization binding while retaining pending admission. Withdrawn authority and replacement addresses cannot acquire gateway authority.
+Removal still requires revoked dispatch, confirmed termination, saved results, and complete or abandoned evidence.
+
+Targeted local checks compose the real private exchange with authored AWS protocol fixtures.
+Initialization order, capability rejection, address mismatch, deadline drift, authority withdrawal, restart, and checkpointed cleanup pass.
+Lost registration, launch, and deadline acknowledgements recover without a second native creation attempt.
+Selected existing offline worker lifecycle checks also pass after the shared state-machine extraction.
+No cloud call, image build, Kubernetes redeployment, browser, or catalog execution occurs.
+Parent orchestration, the concrete native gateway network guard, and installation wiring remain unfinished.
+Environment-backed ECS executor registration remains disabled. This advances **51, 56, and 57**; the total remains **50 of 57**.
+
 ## Active application navigation correction — 2026-11-04
 
 The sidebar now has one project selector and an explicit application selector.

@@ -44,6 +44,9 @@ Their evidence does not close these separate cross-profile criteria.
 
 The [shared hosted admission](../internal/hostedexecution/admission.go) now permits environment-backed artifacts only through a configured gateway provider and inspected capable runtime.
 Kubernetes implements that provider contract. ECS and Azure still reject these artifacts.
+The [ECS gateway child provider](ecs-gateway.md) now has a durable role journal, capability admission, verified address binding, and guarded cleanup.
+Its targeted local checks use the real private exchange and authored AWS protocol fixtures.
+Parent orchestration, the concrete native gateway network guard, and installation wiring remain unfinished.
 The [Kubernetes gateway component](kubernetes-gateway.md) now supports separate environment references and provider-owned gateway bundles.
 Its normal executor registration, image approval, source discovery, and Helm path now pass targeted local checks.
 The deployed offline worker policy still permits only the private exchange and DNS.

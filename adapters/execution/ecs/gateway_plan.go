@@ -1,6 +1,8 @@
 package ecsworker
 
 import (
+	"bytes"
+	"crypto/x509"
 	"encoding/base64"
 	"net"
 	"net/url"
@@ -20,13 +22,14 @@ import (
 )
 
 type GatewayConfig struct {
-	Image             string   `json:"image"`
-	Origin            string   `json:"origin"`
-	ExecutionRole     string   `json:"executionRole"`
-	Subnets           []string `json:"subnets"`
-	SecurityGroup     string   `json:"securityGroup"`
-	CertificateSecret string   `json:"certificateSecret"`
-	KeySecret         string   `json:"keySecret"`
+	CertificateAuthority []byte   `json:"certificateAuthority,omitempty"`
+	Image                string   `json:"image"`
+	Origin               string   `json:"origin"`
+	ExecutionRole        string   `json:"executionRole"`
+	Subnets              []string `json:"subnets"`
+	SecurityGroup        string   `json:"securityGroup"`
+	CertificateSecret    string   `json:"certificateSecret"`
+	KeySecret            string   `json:"keySecret"`
 }
 
 var secretName = regexp.MustCompile(`^[A-Za-z0-9/_+=.@-]{1,512}-[A-Za-z0-9]{6}$`)
@@ -52,10 +55,14 @@ func validateGateway(config Config, gateway GatewayConfig) error {
 	if gateway.CertificateSecret == gateway.KeySecret {
 		return hostedexecution.ErrConfiguration
 	}
+	if len(gateway.CertificateAuthority) > 64<<10 || len(gateway.CertificateAuthority) > 0 && !x509.NewCertPool().AppendCertsFromPEM(gateway.CertificateAuthority) {
+		return hostedexecution.ErrConfiguration
+	}
 	return nil
 }
 
 func canonicalGateway(config GatewayConfig) GatewayConfig {
+	config.CertificateAuthority = bytes.Clone(config.CertificateAuthority)
 	config.Subnets = slices.Clone(config.Subnets)
 	slices.Sort(config.Subnets)
 	return config

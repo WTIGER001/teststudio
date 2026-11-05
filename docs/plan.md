@@ -100,8 +100,11 @@ Targeted local checks pass. No image rebuild or Kubernetes redeployment occurs f
 Native ECS gateway task construction, ownership, readiness interpretation, independent deadline plans, recovery proofs, and metadata bootstrap now pass targeted local checks.
 The task uses a separate execution role, subnets, security group, certificate references, and initialization ticket, without source or output mounts.
 Its metadata helper derives the task identifier without forwarding secrets or following another endpoint.
-Next wire these task contracts into role-specific durable provider rows, address binding, and network admission.
-Reuse the existing SDK state machine and cleanup checkpoints. Delay worker creation until the gateway can release activated input.
+The gateway child provider now uses a separate durable role journal and the existing SDK state machine and cleanup checkpoints.
+Real private-exchange checks cover verified address binding, initialization order, withdrawn authority, lost acknowledgements, restart, and guarded removal.
+Image capabilities are required before native creation. Native network admission remains an explicit dependency, without a concrete gateway guard yet.
+Next add parent two-task orchestration, the concrete native network guard, and installation wiring.
+Delay worker creation until the gateway can release activated input.
 Preserve the worker DNS firewall and target-egress restrictions while providing trusted gateway target resolution.
 Require the address, certificate, and native task identity capabilities before enabling ECS environment profiles. See [ECS gateway integration](ecs-gateway.md).
 

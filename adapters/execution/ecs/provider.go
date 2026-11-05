@@ -37,6 +37,11 @@ func (p *Provider) Ensure(ctx context.Context, job hostedexecution.Job) (resultE
 	if err != nil {
 		return err
 	}
+	return p.ensurePlan(ctx, plan)
+}
+
+func (p *Provider) ensurePlan(ctx context.Context, plan *Plan) error {
+	job := plan.job
 	value, winning, err := p.reserve(ctx, plan)
 	if err != nil {
 		return err
@@ -48,7 +53,7 @@ func (p *Provider) Ensure(ctx context.Context, job hostedexecution.Job) (resultE
 		_, err := p.Observe(ctx, job.Reference)
 		return err
 	}
-	if err := p.network.Admit(ctx, canonical(p.config)); err != nil {
+	if err := p.admitTask(ctx); err != nil {
 		_, saveErr := p.update(ctx, job.Reference, false, func(value *dispatch) error { value.RegisterRejected = true; return nil })
 		if saveErr != nil {
 			return hostedexecution.ErrUnavailable

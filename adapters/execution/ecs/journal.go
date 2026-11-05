@@ -13,12 +13,15 @@ import (
 )
 
 func (p *Provider) load(ctx context.Context, ref execution.Reference) (dispatch, storage.Record, *Plan, error) {
-	row, err := p.store.Get(ctx, Bucket, ref.ID)
+	row, err := p.store.Get(ctx, p.bucket(), ref.ID)
 	if err != nil {
 		return dispatch{}, row, nil, err
 	}
 	value, err := storage.Decode[dispatch](row)
 	if err != nil || value.Proof.Reference != ref || row.Project != ref.Project {
+		return value, row, nil, hostedexecution.ErrOwnership
+	}
+	if !p.ownsRole(value.Proof) {
 		return value, row, nil, hostedexecution.ErrOwnership
 	}
 	plan, err := Restore(p.config, value.Proof)
@@ -46,6 +49,9 @@ func (p *Provider) exchange(ctx context.Context, value dispatch) (workerexchange
 	if err != nil || record.Reference != value.Proof.Reference || record.Operation != value.Proof.Operation || !record.DispatchGated || !record.Deadline.Equal(value.Proof.Deadline) {
 		return record, row, hostedexecution.ErrOwnership
 	}
+	if p.gateway != nil && (record.Gateway == nil || !record.Gateway.Settings.RequireAddress || record.Gateway.Settings.Origin != p.gateway.config.Origin || !sameGatewayAuthority(record.Gateway.Settings, p.gateway.config)) {
+		return record, row, hostedexecution.ErrOwnership
+	}
 	return record, row, nil
 }
 
@@ -65,7 +71,7 @@ func (p *Provider) reserve(ctx context.Context, plan *Plan) (dispatch, bool, err
 	if err != nil || transport.Revoked {
 		return value, false, hostedexecution.ErrUnavailable
 	}
-	change, err := storage.Put(Bucket, value.Proof.Reference.ID, value.Proof.Reference.Project, 0, value)
+	change, err := storage.Put(p.bucket(), value.Proof.Reference.ID, value.Proof.Reference.Project, 0, value)
 	if err != nil {
 		return value, false, hostedexecution.ErrUnavailable
 	}
@@ -118,13 +124,17 @@ func (p *Provider) update(ctx context.Context, ref execution.Reference, dispatch
 
 func (p *Provider) Inventory(ctx context.Context, installation, profile string) (result []execution.Reference, resultErr error) {
 	defer func() { resultErr = controlError(resultErr) }()
-	if !domain.ValidID(installation) || profile != "go-ecs-isolated-v1" && profile != "playwright-ecs-isolated-v1" && profile != "go-ecs-discovery-v1" && profile != "playwright-ecs-discovery-v1" {
+	validProfile := profile == "go-ecs-isolated-v1" || profile == "playwright-ecs-isolated-v1" || profile == "go-ecs-discovery-v1" || profile == "playwright-ecs-discovery-v1"
+	if p.gateway != nil {
+		validProfile = profile == "go-ecs-environment-v1" || profile == "playwright-ecs-environment-v1"
+	}
+	if !domain.ValidID(installation) || !validProfile {
 		return nil, hostedexecution.ErrConfiguration
 	}
 	refs := []execution.Reference{}
 	cursor := ""
 	for {
-		page, err := p.store.List(ctx, Bucket, "", cursor, 100)
+		page, err := p.store.List(ctx, p.bucket(), "", cursor, 100)
 		if err != nil {
 			return nil, hostedexecution.ErrUnavailable
 		}
@@ -136,6 +146,9 @@ func (p *Provider) Inventory(ctx context.Context, installation, profile string) 
 			ref := value.Proof.Reference
 			if ref.Installation != installation || ref.Profile != profile || value.Removed {
 				continue
+			}
+			if !p.ownsRole(value.Proof) {
+				return nil, hostedexecution.ErrOwnership
 			}
 			if _, err := Restore(p.config, value.Proof); err != nil {
 				continue
