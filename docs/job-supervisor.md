@@ -154,6 +154,7 @@ Both directories belong to 1000:1000. Their modes are 1777 and 0700.
 The source-v2 Playwright runtime supplies a trusted execution configuration for offline and environment-backed suites.
 It writes framework output under /output/playwright-results and applies the frozen screenshot, trace, and video policy across projects.
 Uploaded configurations need no writable directory beneath /suite and no TestStudio-specific capture settings.
+Relative setup, teardown, TypeScript configuration, snapshot directories, and web-server working directories retain their original source location.
 Registered environment profiles still reject uploaded web servers. Restricted API execution still disables opaque media and suite proxy overrides.
 These declarations initialize non-root task-local storage under the [ECS worker contract](ecs-worker-contract.md).
 The remaining runtime and prepared suite stay on the read-only root filesystem.

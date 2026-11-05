@@ -37,3 +37,16 @@ test('registered environment execution cannot start an uploaded web server', asy
   const { config } = await prepared(t, { webServer: { command: 'untrusted-command' } }, { screenshots: 'off', trace: 'off', video: 'off' }, {}, { environment: true })
   await assert.rejects(import(pathToFileURL(config)), /cannot start a suite web server/)
 })
+
+test('relocated configuration preserves source hooks and server working directories', async t => {
+  const { directory, config } = await prepared(t, { globalSetup: './setup.mjs', globalTeardown: ['./teardown.mjs'], tsconfig: './tsconfig.json', snapshotDir: 'snapshots', webServer: { command: 'not-executed', cwd: 'tools' }, projects: [{ name: 'chromium', snapshotDir: 'browser-snapshots' }] }, { screenshots: 'off', trace: 'off', video: 'off' })
+  await fs.writeFile(path.join(directory, 'setup.mjs'), 'export default () => "source-hook"')
+  const suite = (await import(pathToFileURL(config))).default
+  assert.equal(suite.globalSetup, path.join(directory, 'setup.mjs'))
+  assert.deepEqual(suite.globalTeardown, [path.join(directory, 'teardown.mjs')])
+  assert.equal(suite.tsconfig, path.join(directory, 'tsconfig.json'))
+  assert.equal(suite.snapshotDir, path.join(directory, 'snapshots'))
+  assert.equal(suite.projects[0].snapshotDir, path.join(directory, 'browser-snapshots'))
+  assert.equal(suite.webServer.cwd, path.join(directory, 'tools'))
+  assert.equal((await import(pathToFileURL(suite.globalSetup))).default(), 'source-hook')
+})
