@@ -41,7 +41,8 @@ def main():
     template = load('workers.yaml')
     core = load('service.yaml')
     checks = ['Both CloudFormation templates pass local schemas and dependency checks in two regions']
-    assert not any(resource['Type'] in ['AWS::EC2::InternetGateway', 'AWS::EC2::NatGateway', 'AWS::EC2::Route', 'AWS::EC2::VPCPeeringConnection', 'AWS::Lambda::Function'] for resource in template['Resources'].values())
+    default = preview(template)
+    assert not any(resource['Type'] in ['AWS::EC2::InternetGateway', 'AWS::EC2::NatGateway', 'AWS::EC2::Route', 'AWS::EC2::VPCPeeringConnection', 'AWS::Lambda::Function'] and default.properties(name) is not None for name, resource in template['Resources'].items())
     snapshots = []
     for region in ['us-east-1', 'us-west-2']:
         for stage in ['prepare', 'connect', 'ready']:
@@ -149,7 +150,7 @@ def main():
             raise AssertionError('Partial core worker configuration accepted')
     checks.append('Three incomplete core configurations fail before deployment')
     (args.output / 'profiles.json').write_text(json.dumps(snapshots, indent=2) + '\n')
-    summary = {'passed': True, 'cloudOperations': False, 'credentials': False, 'workerResources': len(template['Resources']), 'coreResources': len(core['Resources']), 'profiles': len(snapshots) + 3, 'rejectedConfigurations': 11, 'checks': checks}
+    summary = {'passed': True, 'cloudOperations': False, 'credentials': False, 'workerResources': sum(ready.properties(name) is not None for name in template['Resources']), 'templateResources': len(template['Resources']), 'coreResources': len(core['Resources']), 'profiles': len(snapshots) + 3, 'rejectedConfigurations': 11, 'checks': checks}
     (args.output / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
     print(json.dumps(summary, indent=2))
 

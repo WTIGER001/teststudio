@@ -102,6 +102,74 @@ Parameters:
     Default: 1
     MinValue: 1
     MaxValue: 10
+  EnableEnvironment:
+    Type: String
+    Default: 'false'
+    AllowedValues:
+    - 'false'
+    - 'true'
+  EnvironmentReady:
+    Type: String
+    Default: 'false'
+    AllowedValues: ['false', 'true']
+  EnvironmentWorkerVpcCidr:
+    Type: String
+    Default: 10.71.0.0/16
+    AllowedPattern: ^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/(?:1[6-9]|2[0-8])$
+  EnvironmentWorkerSubnetOneCidr:
+    Type: String
+    Default: 10.71.1.0/24
+    AllowedPattern: ^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/(?:1[6-9]|2[0-8])$
+  EnvironmentWorkerSubnetTwoCidr:
+    Type: String
+    Default: 10.71.2.0/24
+    AllowedPattern: ^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/(?:1[6-9]|2[0-8])$
+  GatewayVpcCidr:
+    Type: String
+    Default: 10.72.0.0/16
+    AllowedPattern: ^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/(?:1[6-9]|2[0-8])$
+  GatewaySubnetOneCidr:
+    Type: String
+    Default: 10.72.1.0/24
+    AllowedPattern: ^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/(?:1[6-9]|2[0-8])$
+  GatewaySubnetTwoCidr:
+    Type: String
+    Default: 10.72.2.0/24
+    AllowedPattern: ^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/(?:1[6-9]|2[0-8])$
+  GatewayPublicSubnetOneCidr:
+    Type: String
+    Default: 10.72.101.0/24
+    AllowedPattern: ^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/(?:1[6-9]|2[0-8])$
+  GatewayPublicSubnetTwoCidr:
+    Type: String
+    Default: 10.72.102.0/24
+    AllowedPattern: ^(?:[0-9]{1,3}\.){3}[0-9]{1,3}/(?:1[6-9]|2[0-8])$
+  GatewayImageDigest:
+    Type: String
+    Default: ''
+    AllowedPattern: ^$|^sha256:[a-f0-9]{64}$
+  GatewayHostname:
+    Type: String
+    Default: gateway.studio.internal.example.test
+    AllowedPattern: ^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$
+    MaxLength: 253
+  GatewayCertificateSecretArn:
+    Type: String
+    Default: ''
+    AllowedPattern: ^$|^arn:aws:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[A-Za-z0-9/_+=.@-]+-[A-Za-z0-9]{6}$
+  GatewayKeySecretArn:
+    Type: String
+    Default: ''
+    AllowedPattern: ^$|^arn:aws:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[A-Za-z0-9/_+=.@-]+-[A-Za-z0-9]{6}$
+  GatewayCertificateAuthority:
+    Type: String
+    Default: ''
+    AllowedPattern: ^[A-Za-z0-9+/]*={0,2}$
+    MaxLength: 4096
+  GatewaySecretKmsKeyArn:
+    Type: String
+    Default: ''
+    AllowedPattern: ^$|^arn:aws:kms:[a-z0-9-]+:[0-9]{12}:key/[a-f0-9-]+$
 Rules:
   SeparateSubnets:
     Assertions:
@@ -121,6 +189,53 @@ Rules:
         AssertDescription: New builds require the separate preparation service
       - Assert: !Or [!Not [!Equals [!Ref GoRuntimeDigest, '']], !Not [!Equals [!Ref PlaywrightRuntimeDigest, '']]]
         AssertDescription: New builds require at least one immutable supervised runtime
+  EnvironmentCertificates:
+    RuleCondition:
+      Fn::Equals:
+      - Ref: EnableEnvironment
+      - 'true'
+    Assertions:
+    - Assert:
+        Fn::Not:
+        - Fn::Equals:
+          - Ref: GatewayCertificateSecretArn
+          - ''
+      AssertDescription: Environment gateways require a certificate secret reference
+    - Assert:
+        Fn::Not:
+        - Fn::Equals:
+          - Ref: GatewayKeySecretArn
+          - ''
+      AssertDescription: Environment gateways require a private key secret reference
+    - Assert:
+        Fn::Not:
+        - Fn::Equals:
+          - Ref: GatewayCertificateSecretArn
+          - Ref: GatewayKeySecretArn
+      AssertDescription: Gateway certificate and key references must be distinct
+  EnvironmentReadyImage:
+    RuleCondition:
+      Fn::And:
+      - Fn::Equals:
+        - Ref: EnableEnvironment
+        - 'true'
+      - Fn::Equals:
+        - Ref: EnvironmentReady
+        - 'true'
+    Assertions:
+    - Assert:
+        Fn::Not:
+        - Fn::Equals:
+          - Ref: GatewayImageDigest
+          - ''
+      AssertDescription: Ready environment settings require an immutable approved gateway image
+  EnvironmentActivation:
+    RuleCondition: !Equals [!Ref EnvironmentReady, 'true']
+    Assertions:
+      - Assert: !Equals [!Ref EnableEnvironment, 'true']
+        AssertDescription: Environment activation requires the separate environment resources
+      - Assert: !Equals [!Ref Stage, ready]
+        AssertDescription: Environment activation requires the sealed ready worker profile
 Conditions:
   Connected: !Not [!Equals [!Ref Stage, prepare]]
   Ready: !Equals [!Ref Stage, ready]
@@ -128,6 +243,38 @@ Conditions:
   NewGo: !And [!Equals [!Ref EnableNewBuilds, 'true'], !Not [!Equals [!Ref GoRuntimeDigest, '']]]
   NewPlaywright: !And [!Equals [!Ref EnableNewBuilds, 'true'], !Not [!Equals [!Ref PlaywrightRuntimeDigest, '']]]
   SecretKms: !Not [!Equals [!Ref SecretKmsKeyArn, '']]
+  Environment:
+    Fn::Equals:
+    - Ref: EnableEnvironment
+    - 'true'
+  EnvironmentActive:
+    Fn::And:
+      - Fn::Equals: [{Ref: EnableEnvironment}, 'true']
+      - Fn::Equals: [{Ref: EnvironmentReady}, 'true']
+  EnvironmentConnected:
+    Fn::And:
+    - Fn::Equals:
+      - Ref: EnableEnvironment
+      - 'true'
+    - Fn::Not:
+      - Fn::Equals:
+        - Ref: Stage
+        - prepare
+  GatewaySecretKms:
+    Fn::Not:
+    - Fn::Equals:
+      - Ref: GatewaySecretKmsKeyArn
+      - ''
+  GatewayCertificateConfigured:
+    Fn::Not:
+    - Fn::Equals:
+      - Ref: GatewayCertificateSecretArn
+      - ''
+  GatewayKeyConfigured:
+    Fn::Not:
+    - Fn::Equals:
+      - Ref: GatewayKeySecretArn
+      - ''
 Resources:
   WorkerVpc:
     Type: AWS::EC2::VPC
@@ -590,8 +737,13 @@ Resources:
       Description: Private installation-specific TestStudio worker references without credentials
       SecretString: !Sub
         - >-
-          {"worker":{"region":"${AWS::Region}","account":"${AWS::AccountId}","cluster":"${WorkerCluster.Arn}","executionRole":"${WorkerPullRole.Arn}","deadlineRole":"${DeadlineRole.Arn}","scheduleGroup":"${Deadlines}","familyPrefix":"${WorkerFamilyPrefix}","architecture":"${WorkerArchitecture}","platformVersion":"1.4.0","subnets":["${WorkerSubnetOne}","${WorkerSubnetTwo}"],"securityGroups":["${WorkerGroup}"],"exchangeOrigin":"https://${ExchangeHostname}"},"network":{"vpc":"${WorkerVpc}","controllerVpc":"${ControllerVpcId}","exchangeGroup":"${ExchangeGroup}","registryGroup":"${RegistryGroup}","loadBalancerGroup":"${ExchangeLoadBalancerGroup}","controllerGroup":"${ControllerSecurityGroupId}","exchangeEndpoint":"${ExchangeEndpoint}","exchangeService":"com.amazonaws.vpce.${AWS::Region}.${ExchangeService}","apiEndpoint":"${EcrApi}","dkrEndpoint":"${EcrDocker}","s3Endpoint":"${ImageLayers}","s3PrefixList":"${S3PrefixListId}","repositoryPrefix":"${RuntimeRepositoryPrefix}","loadBalancer":"${ExchangeLoadBalancer}","targetGroup":"${ExchangeTarget}","firewallGroup":"${FirewallGroupId}","firewallAssociation":"${FirewallAssociationId}","allowList":"${AllowListId}","blockList":"${BlockListId}"}}
-        - FirewallGroupId: !GetAtt DnsRules.Id
+          {"worker":{"region":"${AWS::Region}","account":"${AWS::AccountId}","cluster":"${WorkerCluster.Arn}","executionRole":"${WorkerPullRole.Arn}","deadlineRole":"${DeadlineRole.Arn}","scheduleGroup":"${Deadlines}","familyPrefix":"${WorkerFamilyPrefix}","architecture":"${WorkerArchitecture}","platformVersion":"1.4.0","subnets":["${WorkerSubnetOne}","${WorkerSubnetTwo}"],"securityGroups":["${WorkerGroup}"],"exchangeOrigin":"https://${ExchangeHostname}"},"network":{"vpc":"${WorkerVpc}","controllerVpc":"${ControllerVpcId}","exchangeGroup":"${ExchangeGroup}","registryGroup":"${RegistryGroup}","loadBalancerGroup":"${ExchangeLoadBalancerGroup}","controllerGroup":"${ControllerSecurityGroupId}","exchangeEndpoint":"${ExchangeEndpoint}","exchangeService":"com.amazonaws.vpce.${AWS::Region}.${ExchangeService}","apiEndpoint":"${EcrApi}","dkrEndpoint":"${EcrDocker}","s3Endpoint":"${ImageLayers}","s3PrefixList":"${S3PrefixListId}","repositoryPrefix":"${RuntimeRepositoryPrefix}","loadBalancer":"${ExchangeLoadBalancer}","targetGroup":"${ExchangeTarget}","firewallGroup":"${FirewallGroupId}","firewallAssociation":"${FirewallAssociationId}","allowList":"${AllowListId}","blockList":"${BlockListId}"},"environment":${EnvironmentValue}}
+        - EnvironmentValue:
+            Fn::If:
+              - EnvironmentActive
+              - Fn::Sub: "{\"worker\":{\"region\":\"${AWS::Region}\",\"account\":\"${AWS::AccountId}\",\"cluster\":\"${WorkerCluster.Arn}\",\"executionRole\":\"${WorkerPullRole.Arn}\",\"deadlineRole\":\"${DeadlineRole.Arn}\",\"scheduleGroup\":\"${Deadlines}\",\"familyPrefix\":\"${WorkerFamilyPrefix}\",\"architecture\":\"${WorkerArchitecture}\",\"platformVersion\":\"1.4.0\",\"subnets\":[\"${EnvironmentWorkerSubnetOne}\",\"${EnvironmentWorkerSubnetTwo}\"],\"securityGroups\":[\"${EnvironmentWorkerGroup}\"],\"exchangeOrigin\":\"https://${ExchangeHostname}\"},\"network\":{\"vpc\":\"${EnvironmentWorkerVpc}\",\"controllerVpc\":\"${ControllerVpcId}\",\"exchangeGroup\":\"${EnvironmentExchangeGroup}\",\"registryGroup\":\"${EnvironmentRegistryGroup}\",\"loadBalancerGroup\":\"${ExchangeLoadBalancerGroup}\",\"controllerGroup\":\"${ControllerSecurityGroupId}\",\"exchangeEndpoint\":\"${EnvironmentExchangeEndpoint}\",\"exchangeService\":\"com.amazonaws.vpce.${AWS::Region}.${ExchangeService}\",\"apiEndpoint\":\"${EnvironmentEcrApi}\",\"dkrEndpoint\":\"${EnvironmentEcrDocker}\",\"s3Endpoint\":\"${EnvironmentImageLayers}\",\"s3PrefixList\":\"${S3PrefixListId}\",\"repositoryPrefix\":\"${RuntimeRepositoryPrefix}\",\"loadBalancer\":\"${ExchangeLoadBalancer}\",\"targetGroup\":\"${ExchangeTarget}\",\"firewallGroup\":\"${EnvironmentDnsRules.Id}\",\"firewallAssociation\":\"${EnvironmentDnsAssociation.Id}\",\"allowList\":\"${EnvironmentAllowedDomains.Id}\",\"blockList\":\"${EnvironmentBlockedDomains.Id}\",\"gateway\":{\"vpc\":\"${GatewayVpc}\",\"subnets\":[\"${GatewaySubnetOne}\",\"${GatewaySubnetTwo}\"],\"securityGroup\":\"${GatewayGroup}\",\"peeringConnection\":\"${EnvironmentGatewayPeering}\",\"exchangeEndpoint\":\"${GatewayExchangeEndpoint}\",\"exchangeGroup\":\"${GatewayExchangeGroup}\",\"natGateways\":[\"${GatewayNatOne}\",\"${GatewayNatTwo}\"]}},\"gateway\":{\"image\":\"${GatewayRepository.RepositoryUri}@${GatewayImageDigest}\",\"origin\":\"https://${GatewayHostname}:8044\",\"executionRole\":\"${GatewayPullRole.Arn}\",\"subnets\":[\"${GatewaySubnetOne}\",\"${GatewaySubnetTwo}\"],\"securityGroup\":\"${GatewayGroup}\",\"certificateSecret\":\"${GatewayCertificateSecretArn}\",\"keySecret\":\"${GatewayKeySecretArn}\",\"certificateAuthority\":\"${GatewayCertificateAuthority}\"}}"
+              - 'null'
+          FirewallGroupId: !GetAtt DnsRules.Id
           FirewallAssociationId: !GetAtt DnsAssociation.Id
           AllowListId: !GetAtt AllowedDomains.Id
           BlockListId: !GetAtt BlockedDomains.Id
@@ -806,6 +958,797 @@ Resources:
           AssignPublicIp: DISABLED
           Subnets: [!Ref ControllerSubnetOne, !Ref ControllerSubnetTwo]
           SecurityGroups: [!Ref PreparationGroup]
+  EnvironmentWorkerVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock:
+        Ref: EnvironmentWorkerVpcCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: ${AWS::StackName}-environment-workers
+    Condition: Environment
+  EnvironmentWorkerDhcp:
+    Type: AWS::EC2::DHCPOptions
+    Properties:
+      DomainNameServers:
+      - AmazonProvidedDNS
+    Condition: Environment
+  EnvironmentWorkerDhcpAssociation:
+    Type: AWS::EC2::VPCDHCPOptionsAssociation
+    Properties:
+      VpcId:
+        Ref: EnvironmentWorkerVpc
+      DhcpOptionsId:
+        Ref: EnvironmentWorkerDhcp
+    Condition: Environment
+  EnvironmentWorkerSubnetOne:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: EnvironmentWorkerVpc
+      AvailabilityZone:
+        Ref: AvailabilityZoneOne
+      CidrBlock:
+        Ref: EnvironmentWorkerSubnetOneCidr
+      MapPublicIpOnLaunch: false
+      AssignIpv6AddressOnCreation: false
+      EnableDns64: false
+    Condition: Environment
+  EnvironmentWorkerSubnetTwo:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: EnvironmentWorkerVpc
+      AvailabilityZone:
+        Ref: AvailabilityZoneTwo
+      CidrBlock:
+        Ref: EnvironmentWorkerSubnetTwoCidr
+      MapPublicIpOnLaunch: false
+      AssignIpv6AddressOnCreation: false
+      EnableDns64: false
+    Condition: Environment
+  EnvironmentWorkerRoutes:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId:
+        Ref: EnvironmentWorkerVpc
+    Condition: Environment
+  EnvironmentWorkerRouteOne:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: EnvironmentWorkerSubnetOne
+      RouteTableId:
+        Ref: EnvironmentWorkerRoutes
+    Condition: Environment
+  EnvironmentWorkerRouteTwo:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: EnvironmentWorkerSubnetTwo
+      RouteTableId:
+        Ref: EnvironmentWorkerRoutes
+    Condition: Environment
+  EnvironmentWorkerGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Isolated test workers with no inbound access
+      VpcId:
+        Ref: EnvironmentWorkerVpc
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        DestinationPrefixListId:
+          Ref: S3PrefixListId
+    Condition: Environment
+  EnvironmentExchangeGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Private exchange endpoint accepts only isolated workers
+      VpcId:
+        Ref: EnvironmentWorkerVpc
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        SourceSecurityGroupId:
+          Ref: EnvironmentWorkerGroup
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        DestinationSecurityGroupId:
+          Ref: EnvironmentWorkerGroup
+    Condition: Environment
+  EnvironmentRegistryGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Private ECR endpoints accept only isolated workers
+      VpcId:
+        Ref: EnvironmentWorkerVpc
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        SourceSecurityGroupId:
+          Ref: EnvironmentWorkerGroup
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        DestinationSecurityGroupId:
+          Ref: EnvironmentWorkerGroup
+    Condition: Environment
+  EnvironmentWorkerExchangeEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId:
+        Ref: EnvironmentWorkerGroup
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      DestinationSecurityGroupId:
+        Ref: EnvironmentExchangeGroup
+    Condition: Environment
+  EnvironmentWorkerRegistryEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId:
+        Ref: EnvironmentWorkerGroup
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      DestinationSecurityGroupId:
+        Ref: EnvironmentRegistryGroup
+    Condition: Environment
+  EnvironmentEcrApi:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Interface
+      VpcId:
+        Ref: EnvironmentWorkerVpc
+      ServiceName:
+        Fn::Sub: com.amazonaws.${AWS::Region}.ecr.api
+      IpAddressType: ipv4
+      PrivateDnsEnabled: true
+      SubnetIds:
+      - Ref: EnvironmentWorkerSubnetOne
+      - Ref: EnvironmentWorkerSubnetTwo
+      SecurityGroupIds:
+      - Ref: EnvironmentRegistryGroup
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: RuntimePull
+          Effect: Allow
+          Principal: '*'
+          Action:
+          - ecr:BatchCheckLayerAvailability
+          - ecr:BatchGetImage
+          - ecr:GetDownloadUrlForLayer
+          Resource:
+          - Fn::Sub: arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${RuntimeRepositoryPrefix}
+          - Fn::Sub: arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${RuntimeRepositoryPrefix}/*
+          Condition:
+            ArnEquals:
+              aws:PrincipalArn:
+                Fn::GetAtt:
+                - WorkerPullRole
+                - Arn
+        - Sid: RuntimeAuthorization
+          Effect: Allow
+          Principal: '*'
+          Action: ecr:GetAuthorizationToken
+          Resource: '*'
+          Condition:
+            ArnEquals:
+              aws:PrincipalArn:
+                Fn::GetAtt:
+                - WorkerPullRole
+                - Arn
+    Condition: Environment
+  EnvironmentEcrDocker:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Interface
+      VpcId:
+        Ref: EnvironmentWorkerVpc
+      ServiceName:
+        Fn::Sub: com.amazonaws.${AWS::Region}.ecr.dkr
+      IpAddressType: ipv4
+      PrivateDnsEnabled: true
+      SubnetIds:
+      - Ref: EnvironmentWorkerSubnetOne
+      - Ref: EnvironmentWorkerSubnetTwo
+      SecurityGroupIds:
+      - Ref: EnvironmentRegistryGroup
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: RuntimePull
+          Effect: Allow
+          Principal: '*'
+          Action:
+          - ecr:BatchCheckLayerAvailability
+          - ecr:BatchGetImage
+          - ecr:GetDownloadUrlForLayer
+          Resource:
+          - Fn::Sub: arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${RuntimeRepositoryPrefix}
+          - Fn::Sub: arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${RuntimeRepositoryPrefix}/*
+          Condition:
+            ArnEquals:
+              aws:PrincipalArn:
+                Fn::GetAtt:
+                - WorkerPullRole
+                - Arn
+        - Sid: RuntimeAuthorization
+          Effect: Allow
+          Principal: '*'
+          Action: ecr:GetAuthorizationToken
+          Resource: '*'
+          Condition:
+            ArnEquals:
+              aws:PrincipalArn:
+                Fn::GetAtt:
+                - WorkerPullRole
+                - Arn
+    Condition: Environment
+  EnvironmentImageLayers:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      VpcEndpointType: Gateway
+      VpcId:
+        Ref: EnvironmentWorkerVpc
+      ServiceName:
+        Fn::Sub: com.amazonaws.${AWS::Region}.s3
+      IpAddressType: ipv4
+      RouteTableIds:
+      - Ref: EnvironmentWorkerRoutes
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: RuntimeLayers
+          Effect: Allow
+          Principal: '*'
+          Action: s3:GetObject
+          Resource:
+            Fn::Sub: arn:aws:s3:::prod-${AWS::Region}-starport-layer-bucket/*
+    Condition: Environment
+  EnvironmentExchangeEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Condition: EnvironmentConnected
+    DependsOn: ExchangePermissions
+    Properties:
+      VpcEndpointType: Interface
+      VpcId:
+        Ref: EnvironmentWorkerVpc
+      ServiceName:
+        Fn::Sub: com.amazonaws.vpce.${AWS::Region}.${ExchangeService}
+      IpAddressType: ipv4
+      PrivateDnsEnabled: true
+      SubnetIds:
+      - Ref: EnvironmentWorkerSubnetOne
+      - Ref: EnvironmentWorkerSubnetTwo
+      SecurityGroupIds:
+      - Ref: EnvironmentExchangeGroup
+  EnvironmentAllowedDomains:
+    Type: AWS::Route53Resolver::FirewallDomainList
+    Properties:
+      Domains:
+      - Ref: ExchangeHostname
+      - Fn::Sub: ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com
+      - Fn::Sub: api.ecr.${AWS::Region}.amazonaws.com
+      - Fn::Sub: prod-${AWS::Region}-starport-layer-bucket.s3.${AWS::Region}.amazonaws.com
+      - Fn::Sub: prod-${AWS::Region}-starport-layer-bucket.s3.amazonaws.com
+    Condition: Environment
+  EnvironmentBlockedDomains:
+    Type: AWS::Route53Resolver::FirewallDomainList
+    Properties:
+      Domains:
+      - '*'
+    Condition: Environment
+  EnvironmentDnsRules:
+    Type: AWS::Route53Resolver::FirewallRuleGroup
+    Properties:
+      FirewallRules:
+      - Action: ALLOW
+        Priority: 100
+        FirewallDomainListId:
+          Ref: EnvironmentAllowedDomains
+        FirewallDomainRedirectionAction: TRUST_REDIRECTION_DOMAIN
+      - Action: BLOCK
+        Priority: 200
+        FirewallDomainListId:
+          Ref: EnvironmentBlockedDomains
+        FirewallDomainRedirectionAction: TRUST_REDIRECTION_DOMAIN
+        BlockResponse: NXDOMAIN
+    Condition: Environment
+  EnvironmentDnsAssociation:
+    Type: AWS::Route53Resolver::FirewallRuleGroupAssociation
+    Properties:
+      VpcId:
+        Ref: EnvironmentWorkerVpc
+      FirewallRuleGroupId:
+        Ref: EnvironmentDnsRules
+      Priority: 100
+      MutationProtection: ENABLED
+    Condition: Environment
+  GatewayVpc:
+    Type: AWS::EC2::VPC
+    Condition: Environment
+    Properties:
+      CidrBlock:
+        Ref: GatewayVpcCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: ${AWS::StackName}-trusted-gateways
+  GatewayDhcp:
+    Type: AWS::EC2::DHCPOptions
+    Condition: Environment
+    Properties:
+      DomainNameServers:
+      - AmazonProvidedDNS
+  GatewayDhcpAssociation:
+    Type: AWS::EC2::VPCDHCPOptionsAssociation
+    Condition: Environment
+    Properties:
+      VpcId:
+        Ref: GatewayVpc
+      DhcpOptionsId:
+        Ref: GatewayDhcp
+  GatewayInternet:
+    Type: AWS::EC2::InternetGateway
+    Condition: Environment
+    Properties: {}
+  GatewayInternetAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Condition: Environment
+    Properties:
+      VpcId:
+        Ref: GatewayVpc
+      InternetGatewayId:
+        Ref: GatewayInternet
+  GatewayPublicRoutes:
+    Type: AWS::EC2::RouteTable
+    Condition: Environment
+    Properties:
+      VpcId:
+        Ref: GatewayVpc
+  GatewayInternetRoute:
+    Type: AWS::EC2::Route
+    Condition: Environment
+    Properties:
+      RouteTableId:
+        Ref: GatewayPublicRoutes
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId:
+        Ref: GatewayInternet
+    DependsOn: GatewayInternetAttachment
+  EnvironmentGatewayPeering:
+    Type: AWS::EC2::VPCPeeringConnection
+    Condition: Environment
+    Properties:
+      VpcId:
+        Ref: EnvironmentWorkerVpc
+      PeerVpcId:
+        Ref: GatewayVpc
+  GatewaySubnetOne:
+    Type: AWS::EC2::Subnet
+    Condition: Environment
+    Properties:
+      VpcId:
+        Ref: GatewayVpc
+      AvailabilityZone:
+        Ref: AvailabilityZoneOne
+      CidrBlock:
+        Ref: GatewaySubnetOneCidr
+      MapPublicIpOnLaunch: false
+      AssignIpv6AddressOnCreation: false
+      EnableDns64: false
+  GatewayPublicSubnetOne:
+    Type: AWS::EC2::Subnet
+    Condition: Environment
+    Properties:
+      VpcId:
+        Ref: GatewayVpc
+      AvailabilityZone:
+        Ref: AvailabilityZoneOne
+      CidrBlock:
+        Ref: GatewayPublicSubnetOneCidr
+      MapPublicIpOnLaunch: true
+      AssignIpv6AddressOnCreation: false
+      EnableDns64: false
+  GatewayPublicRouteOne:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: Environment
+    Properties:
+      SubnetId:
+        Ref: GatewayPublicSubnetOne
+      RouteTableId:
+        Ref: GatewayPublicRoutes
+  GatewayAddressOne:
+    Type: AWS::EC2::EIP
+    Condition: Environment
+    Properties:
+      Domain: vpc
+    DependsOn: GatewayInternetAttachment
+  GatewayNatOne:
+    Type: AWS::EC2::NatGateway
+    Condition: Environment
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - GatewayAddressOne
+        - AllocationId
+      SubnetId:
+        Ref: GatewayPublicSubnetOne
+      ConnectivityType: public
+    DependsOn: GatewayInternetAttachment
+  GatewayPrivateRoutesOne:
+    Type: AWS::EC2::RouteTable
+    Condition: Environment
+    Properties:
+      VpcId:
+        Ref: GatewayVpc
+  GatewayPrivateRouteOne:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: Environment
+    Properties:
+      SubnetId:
+        Ref: GatewaySubnetOne
+      RouteTableId:
+        Ref: GatewayPrivateRoutesOne
+  GatewayNatRouteOne:
+    Type: AWS::EC2::Route
+    Condition: Environment
+    Properties:
+      RouteTableId:
+        Ref: GatewayPrivateRoutesOne
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: GatewayNatOne
+  EnvironmentGatewayRouteOne:
+    Type: AWS::EC2::Route
+    Condition: Environment
+    Properties:
+      RouteTableId:
+        Ref: EnvironmentWorkerRoutes
+      DestinationCidrBlock:
+        Ref: GatewaySubnetOneCidr
+      VpcPeeringConnectionId:
+        Ref: EnvironmentGatewayPeering
+  GatewayWorkerRouteOneOne:
+    Type: AWS::EC2::Route
+    Condition: Environment
+    Properties:
+      RouteTableId:
+        Ref: GatewayPrivateRoutesOne
+      DestinationCidrBlock:
+        Ref: EnvironmentWorkerSubnetOneCidr
+      VpcPeeringConnectionId:
+        Ref: EnvironmentGatewayPeering
+  GatewayWorkerRouteOneTwo:
+    Type: AWS::EC2::Route
+    Condition: Environment
+    Properties:
+      RouteTableId:
+        Ref: GatewayPrivateRoutesOne
+      DestinationCidrBlock:
+        Ref: EnvironmentWorkerSubnetTwoCidr
+      VpcPeeringConnectionId:
+        Ref: EnvironmentGatewayPeering
+  GatewaySubnetTwo:
+    Type: AWS::EC2::Subnet
+    Condition: Environment
+    Properties:
+      VpcId:
+        Ref: GatewayVpc
+      AvailabilityZone:
+        Ref: AvailabilityZoneTwo
+      CidrBlock:
+        Ref: GatewaySubnetTwoCidr
+      MapPublicIpOnLaunch: false
+      AssignIpv6AddressOnCreation: false
+      EnableDns64: false
+  GatewayPublicSubnetTwo:
+    Type: AWS::EC2::Subnet
+    Condition: Environment
+    Properties:
+      VpcId:
+        Ref: GatewayVpc
+      AvailabilityZone:
+        Ref: AvailabilityZoneTwo
+      CidrBlock:
+        Ref: GatewayPublicSubnetTwoCidr
+      MapPublicIpOnLaunch: true
+      AssignIpv6AddressOnCreation: false
+      EnableDns64: false
+  GatewayPublicRouteTwo:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: Environment
+    Properties:
+      SubnetId:
+        Ref: GatewayPublicSubnetTwo
+      RouteTableId:
+        Ref: GatewayPublicRoutes
+  GatewayAddressTwo:
+    Type: AWS::EC2::EIP
+    Condition: Environment
+    Properties:
+      Domain: vpc
+    DependsOn: GatewayInternetAttachment
+  GatewayNatTwo:
+    Type: AWS::EC2::NatGateway
+    Condition: Environment
+    Properties:
+      AllocationId:
+        Fn::GetAtt:
+        - GatewayAddressTwo
+        - AllocationId
+      SubnetId:
+        Ref: GatewayPublicSubnetTwo
+      ConnectivityType: public
+    DependsOn: GatewayInternetAttachment
+  GatewayPrivateRoutesTwo:
+    Type: AWS::EC2::RouteTable
+    Condition: Environment
+    Properties:
+      VpcId:
+        Ref: GatewayVpc
+  GatewayPrivateRouteTwo:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: Environment
+    Properties:
+      SubnetId:
+        Ref: GatewaySubnetTwo
+      RouteTableId:
+        Ref: GatewayPrivateRoutesTwo
+  GatewayNatRouteTwo:
+    Type: AWS::EC2::Route
+    Condition: Environment
+    Properties:
+      RouteTableId:
+        Ref: GatewayPrivateRoutesTwo
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId:
+        Ref: GatewayNatTwo
+  EnvironmentGatewayRouteTwo:
+    Type: AWS::EC2::Route
+    Condition: Environment
+    Properties:
+      RouteTableId:
+        Ref: EnvironmentWorkerRoutes
+      DestinationCidrBlock:
+        Ref: GatewaySubnetTwoCidr
+      VpcPeeringConnectionId:
+        Ref: EnvironmentGatewayPeering
+  GatewayWorkerRouteTwoOne:
+    Type: AWS::EC2::Route
+    Condition: Environment
+    Properties:
+      RouteTableId:
+        Ref: GatewayPrivateRoutesTwo
+      DestinationCidrBlock:
+        Ref: EnvironmentWorkerSubnetOneCidr
+      VpcPeeringConnectionId:
+        Ref: EnvironmentGatewayPeering
+  GatewayWorkerRouteTwoTwo:
+    Type: AWS::EC2::Route
+    Condition: Environment
+    Properties:
+      RouteTableId:
+        Ref: GatewayPrivateRoutesTwo
+      DestinationCidrBlock:
+        Ref: EnvironmentWorkerSubnetTwoCidr
+      VpcPeeringConnectionId:
+        Ref: EnvironmentGatewayPeering
+  GatewayGroup:
+    Type: AWS::EC2::SecurityGroup
+    Condition: Environment
+    Properties:
+      GroupDescription: Trusted gateway transport and reviewed target delivery
+      VpcId:
+        Ref: GatewayVpc
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 1
+        ToPort: 65535
+        CidrIp: 0.0.0.0/0
+  GatewayWorkerIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Condition: Environment
+    Properties:
+      GroupId:
+        Ref: GatewayGroup
+      IpProtocol: tcp
+      FromPort: 8044
+      ToPort: 8044
+      SourceSecurityGroupId:
+        Ref: EnvironmentWorkerGroup
+    DependsOn: EnvironmentGatewayPeering
+  EnvironmentGatewayEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Condition: Environment
+    Properties:
+      GroupId:
+        Ref: EnvironmentWorkerGroup
+      IpProtocol: tcp
+      FromPort: 8044
+      ToPort: 8044
+      DestinationSecurityGroupId:
+        Ref: GatewayGroup
+    DependsOn: EnvironmentGatewayPeering
+  GatewayExchangeGroup:
+    Type: AWS::EC2::SecurityGroup
+    Condition: Environment
+    Properties:
+      GroupDescription: Private initialization exchange for trusted gateways
+      VpcId:
+        Ref: GatewayVpc
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        SourceSecurityGroupId:
+          Ref: GatewayGroup
+      SecurityGroupEgress:
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        DestinationSecurityGroupId:
+          Ref: GatewayGroup
+  GatewayExchangeEndpoint:
+    Type: AWS::EC2::VPCEndpoint
+    Condition: EnvironmentConnected
+    Properties:
+      VpcEndpointType: Interface
+      VpcId:
+        Ref: GatewayVpc
+      ServiceName:
+        Fn::Sub: com.amazonaws.vpce.${AWS::Region}.${ExchangeService}
+      IpAddressType: ipv4
+      PrivateDnsEnabled: true
+      SubnetIds:
+      - Ref: GatewaySubnetOne
+      - Ref: GatewaySubnetTwo
+      SecurityGroupIds:
+      - Ref: GatewayExchangeGroup
+    DependsOn: ExchangePermissions
+  GatewayRepository:
+    Type: AWS::ECR::Repository
+    Condition: Environment
+    Properties:
+      RepositoryName:
+        Fn::Sub: ${RuntimeRepositoryPrefix}/gateway
+      ImageTagMutability: IMMUTABLE
+      ImageScanningConfiguration:
+        ScanOnPush: true
+      EncryptionConfiguration:
+        EncryptionType: AES256
+      EmptyOnDelete: false
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+  GatewayPullRole:
+    Type: AWS::IAM::Role
+    Condition: Environment
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: ecs-tasks.amazonaws.com
+          Action: sts:AssumeRole
+          Condition:
+            StringEquals:
+              aws:SourceAccount:
+                Ref: AWS::AccountId
+            ArnLike:
+              aws:SourceArn:
+                Fn::Sub: arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:*
+      Policies:
+      - PolicyName: gateway-image-and-private-tls
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action: ecr:GetAuthorizationToken
+            Resource: '*'
+          - Effect: Allow
+            Action:
+            - ecr:BatchCheckLayerAvailability
+            - ecr:BatchGetImage
+            - ecr:GetDownloadUrlForLayer
+            Resource:
+              Fn::GetAtt:
+              - GatewayRepository
+              - Arn
+          - Effect: Allow
+            Action: secretsmanager:GetSecretValue
+            Resource:
+            - Fn::If:
+              - GatewayCertificateConfigured
+              - Ref: GatewayCertificateSecretArn
+              - Ref: AWS::NoValue
+            - Fn::If:
+              - GatewayKeyConfigured
+              - Ref: GatewayKeySecretArn
+              - Ref: AWS::NoValue
+          - Fn::If:
+            - GatewaySecretKms
+            - Effect: Allow
+              Action: kms:Decrypt
+              Resource:
+                Ref: GatewaySecretKmsKeyArn
+              Condition:
+                StringEquals:
+                  kms:ViaService:
+                    Fn::Sub: secretsmanager.${AWS::Region}.amazonaws.com
+                  kms:EncryptionContext:SecretARN:
+                  - Ref: GatewayCertificateSecretArn
+                  - Ref: GatewayKeySecretArn
+            - Ref: AWS::NoValue
+  GatewayControllerPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Condition: Environment
+    Properties:
+      Roles:
+      - Ref: ControllerTaskRoleName
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: RegisterOwnedGateways
+          Effect: Allow
+          Action: ecs:RegisterTaskDefinition
+          Resource:
+            Fn::Sub: arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${WorkerFamilyPrefix}-gateway-*:*
+          Condition:
+            StringEquals:
+              aws:RequestTag/teststudio:worker: gateway-v1
+              aws:RequestedRegion:
+                Ref: AWS::Region
+        - Sid: LaunchOwnedGateways
+          Effect: Allow
+          Action: ecs:RunTask
+          Resource:
+            Fn::Sub: arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${WorkerFamilyPrefix}-gateway-*:*
+          Condition:
+            ArnEquals:
+              ecs:cluster:
+                Fn::GetAtt:
+                - WorkerCluster
+                - Arn
+            StringEquals:
+              aws:RequestTag/teststudio:worker: gateway-v1
+        - Sid: TagCreatedGateways
+          Effect: Allow
+          Action: ecs:TagResource
+          Resource:
+          - Fn::Sub: arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task-definition/${WorkerFamilyPrefix}-gateway-*:*
+          - Fn::Sub: arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:task/${WorkerCluster}/*
+          Condition:
+            StringEquals:
+              ecs:CreateAction:
+              - RegisterTaskDefinition
+              - RunTask
+              aws:RequestTag/teststudio:worker: gateway-v1
+        - Sid: PassGatewayPullRole
+          Effect: Allow
+          Action: iam:PassRole
+          Resource:
+            Fn::GetAtt:
+            - GatewayPullRole
+            - Arn
+          Condition:
+            StringEquals:
+              iam:PassedToService: ecs-tasks.amazonaws.com
 Outputs:
   Stage:
     Value: !Ref Stage
@@ -835,3 +1778,15 @@ Outputs:
     Value: !GetAtt JournalAccessPoint.Arn
   PreparationRoleArn:
     Value: !GetAtt PreparationRole.Arn
+  GatewayRepositoryUri:
+    Condition: Environment
+    Value: !GetAtt GatewayRepository.RepositoryUri
+  EnvironmentExchangeEndpointId:
+    Condition: EnvironmentConnected
+    Value: !Ref EnvironmentExchangeEndpoint
+  GatewayExchangeEndpointId:
+    Condition: EnvironmentConnected
+    Value: !Ref GatewayExchangeEndpoint
+  EnvironmentWorkerVpcId:
+    Condition: Environment
+    Value: !Ref EnvironmentWorkerVpc

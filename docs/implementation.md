@@ -251,6 +251,28 @@ Selected existing factory and registration checks also pass. No image build, bro
 Dedicated ECS environment network, gateway roles and certificate delivery, repository, and combined service settings remain to be packaged.
 This advances **41, 51, 56, and 57**; the total remains **50 verified of 57**.
 
+### Optional ECS environment deployment package
+
+The worker template now includes 59 optional resources for separate environment worker and trusted gateway networks.
+The existing offline worker resources retain their properties. EnableEnvironment and EnvironmentReady default to false.
+Provisioning creates the repository, private subnets, narrow peering routes, scoped groups, two NAT paths, registry endpoints, exchange endpoints, and worker DNS controls.
+Activation requires the sealed ready stage and an immutable gateway image digest.
+This separation supports repository creation and endpoint acceptance before active configuration, including sealed installation upgrades.
+
+The gateway execution role reads only its image repository and the two declared certificate secrets.
+Optional key decryption requires the selected Region's Secrets Manager service and certificate secret encryption contexts.
+Gateway creation and pull-role passing attach only to the controller. Preparation retains its source publication and offline discovery scope.
+The retained gateway repository uses immutable tags and image scanning.
+The generated settings preserve the offline objects and add the environment object only after activation.
+Normal API and controller configuration consume that same secret. Existing tasks must roll to load a changed secret version.
+
+Local schema, six configuration profiles, six rejected configurations, permission boundaries, default-resource preservation, and private range checks pass.
+Resource-derived metadata passes the production settings loader, native network guard, and gateway task address verifier.
+No cloud deployment, image build, browser, Kubernetes redeployment, or catalog execution occurs.
+Retain the preview under output/ecs-environment-package. See [operator instructions](aws-environment-package.md).
+Continue the hosted recorder companion next. Actual AWS verification remains separate, and Azure remains deferred.
+This advances **51, 56, and 57**; the total remains **50 verified of 57**.
+
 ## Active application navigation correction — 2026-11-04
 
 The sidebar now has one project selector and an explicit application selector.

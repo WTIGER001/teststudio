@@ -7,7 +7,7 @@ They construct scoped SDK clients, verify the calling account, authenticate to E
 The supported runners include offline Go and Playwright, plus optional separate environment execution providers.
 Discovery uses the offline gated provider with a separate preparation identity.
 The SDK, command registration, source capability checks, and environment lifecycle pass targeted local protocol verification.
-Dedicated environment deployment packaging and actual AWS verification remain unfinished. Hosted browser recording also remains unfinished.
+Dedicated environment deployment packaging now passes local contract checks. Actual AWS verification and hosted browser recording remain unfinished.
 Native HTTP checks retain their existing controller execution.
 
 This implementation has local protocol and native startup evidence only.
@@ -53,8 +53,8 @@ The preparation command supplies no environment execution authority. Its factory
 The SDK registry client and HTTP pools close once with the runtime.
 
 These settings permit manually provisioned native resources after normal network and image admission.
-The existing worker template still generates only the offline configuration.
-Dedicated environment network, gateway role, certificate, image repository, and service packaging remain required.
+The [worker template](aws-environment-package.md) generates combined settings after separate environment provisioning and activation.
+Its defaults keep the environment pool disabled. Supply complete certificate references and an approved immutable image before activation.
 
 Select exactly one input source:
 

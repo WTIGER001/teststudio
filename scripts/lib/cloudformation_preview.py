@@ -101,6 +101,10 @@ def identifiers(template, region='us-east-1'):
                 value = 'fsap-' + suffix
             elif kind == 'AWS::EC2::SecurityGroup':
                 value = 'sg-' + suffix
+            elif kind in {'AWS::EC2::VPC', 'AWS::EC2::Subnet', 'AWS::EC2::RouteTable', 'AWS::EC2::NatGateway', 'AWS::EC2::VPCPeeringConnection', 'AWS::EC2::VPCEndpoint', 'AWS::EC2::InternetGateway', 'AWS::EC2::DHCPOptions'}:
+                value = {'AWS::EC2::VPC': 'vpc-', 'AWS::EC2::Subnet': 'subnet-', 'AWS::EC2::RouteTable': 'rtb-', 'AWS::EC2::NatGateway': 'nat-', 'AWS::EC2::VPCPeeringConnection': 'pcx-', 'AWS::EC2::VPCEndpoint': 'vpce-', 'AWS::EC2::InternetGateway': 'igw-', 'AWS::EC2::DHCPOptions': 'dopt-'}[kind] + suffix
+            elif kind.startswith('AWS::Route53Resolver::'):
+                value = {'AWS::Route53Resolver::FirewallDomainList': 'rslvr-fdl-', 'AWS::Route53Resolver::FirewallRuleGroup': 'rslvr-frg-', 'AWS::Route53Resolver::FirewallRuleGroupAssociation': 'rslvr-frgassoc-'}[kind] + suffix
         references[name] = value
         attributes[name + '.Id'] = value
         if kind == 'AWS::IAM::Role':
@@ -119,8 +123,10 @@ def identifiers(template, region='us-east-1'):
         elif kind == 'AWS::EFS::AccessPoint':
             attributes[name + '.Arn'] = f'arn:aws:elasticfilesystem:{region}:{account}:access-point/{value}'
         elif kind == 'AWS::ECR::Repository':
-            repository = 'teststudio/' + ('go' if name == 'GoRepository' else 'playwright')
+            repository = 'teststudio/' + {'GoRepository': 'go', 'GatewayRepository': 'gateway'}.get(name, 'playwright')
             references[name] = repository
             attributes[name + '.Arn'] = f'arn:aws:ecr:{region}:{account}:repository/{repository}'
             attributes[name + '.RepositoryUri'] = f'{account}.dkr.ecr.{region}.amazonaws.com/{repository}'
+        elif kind == 'AWS::EC2::EIP':
+            attributes[name + '.AllocationId'] = 'eipalloc-' + suffix
     return references, attributes

@@ -7,13 +7,16 @@ The independent AWS package now has two CloudFormation templates:
 | Template | Responsibility |
 | --- | --- |
 | deploy/aws/service.yaml | Core API, UI, identity, evidence origins, and optional private worker settings and target registration. |
-| deploy/aws/workers.yaml | Isolated worker VPC, registry endpoints, PrivateLink exchange, deadlines, controller permissions, repositories, and separate preparation service. |
+| deploy/aws/workers.yaml | Offline workers and preparation, plus optional separate environment workers, trusted gateways, and combined settings. |
 
 The default core profile keeps coded workers disabled. The default worker stage creates no exchange endpoint, settings secret, or preparation service.
 Local schemas, configuration previews, production admission fixtures, and image probes pass.
 No AWS deployment, DNS mutation, registry publication, or live EFS check runs in this session.
 Keep acceptance 51–57 and the related timing and storage criteria open for complete profile verification.
-Environment-backed coded tests, hosted recording, and preparation repository synchronization are not enabled by this package.
+Environment-backed coded tests now have an [optional package](aws-environment-package.md) with separate provisioning and activation.
+Hosted recording and preparation repository synchronization remain separate work.
+EnableEnvironment and EnvironmentReady default to false. The existing offline resources remain unchanged when the option is enabled.
+The expanded template requires a private packaging bucket through aws cloudformation deploy --s3-bucket.
 
 The package targets the standard aws partition and a dedicated installation in the authorized MMDev account.
 It imports no existing application's tests or infrastructure configuration.
@@ -207,7 +210,8 @@ TESTSTUDIO_AWS_PACKAGE_FIXTURE="$PWD/output/aws-workers-package/check/admission-
   go test -race ./adapters/execution/ecs -run 'TestPackagedECSNetwork|TestECSNetwork' -count=1
 ```
 
-The checker covers 50 worker resources, 31 core resources, nine stage or service configurations, and eleven rejected configurations.
+The baseline checker covers 50 active worker resources, 31 core resources, nine stage or service configurations, and eleven rejected configurations.
+The [environment checker](aws-environment-package.md#verify-the-package-locally) covers the additional 59 optional resources and native network contract.
 Both templates pass pinned local schemas in two commercial regions. IAM policy size and scoped relationships are checked locally.
 The generated fixture feeds actual policies, groups, endpoints, DNS rules, and settings into production admission code.
 It simulates AWS metadata after the documented DNS setup. It proves contract alignment, not deployed isolation or policy enforcement.

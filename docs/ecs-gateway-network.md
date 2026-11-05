@@ -6,7 +6,8 @@ The native ECS network guard now supports a separate trusted gateway VPC.
 Targeted local AWS protocol checks pass. This does not prove a deployed AWS network.
 Production SDK selection now accepts a complete optional environment pool beside the unchanged offline pool.
 Partial, shared, or mismatched pool configuration fails before any SDK request.
-Dedicated deployment resources and actual AWS verification remain unfinished.
+The [optional deployment package](aws-environment-package.md) now passes local schema and native network contract checks.
+Actual AWS verification remains unfinished.
 Azure remains deferred. Retain the working local Kubernetes installation and its existing evidence.
 
 ## Concepts
@@ -81,8 +82,8 @@ Pool observations retain the existing two-second cache. Task interface checks re
 Use the optional environment settings described in [ECS workers](ecs-workers.md#optional-environment-pool).
 The API and controller create the environment provider with current private exchange authority.
 Preparation retains only offline discovery and registry publication authority.
-Add dedicated environment worker and gateway network resources without changing the existing offline pool.
-Package peering, narrow routes, security groups, NAT, the private exchange endpoint, and certificate delivery together.
+The optional package adds dedicated environment worker and gateway resources without changing the existing offline pool.
+It packages peering, narrow routes, security groups, NAT, the private exchange endpoint, and certificate delivery together.
 Use separate pull roles and retain the reviewed runtime and gateway image capabilities.
 Source preparation requires the ECS address capability. Discovery receives no application target or credential.
 The worker package now includes the three additional read operations for peer, NAT, and internet gateway observations.

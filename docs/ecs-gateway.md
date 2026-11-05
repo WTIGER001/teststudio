@@ -10,7 +10,7 @@ Native gateway task construction, ownership, deadline, recovery proof, and metad
 The gateway child provider now reuses the durable SDK lifecycle with a separate role journal and verified address binding.
 The composed environment provider now sequences gateway initialization before worker creation and manages both task lifecycles.
 The native network guard now verifies a separate gateway VPC, narrow peer routes, native task interfaces, NAT, and private exchange delivery.
-Dedicated environment deployment packaging and actual AWS verification remain unfinished.
+Dedicated environment deployment packaging now passes local schema and native contract checks. Actual AWS verification remains unfinished.
 Azure remains deferred, and this work makes no live cloud call.
 
 ## Concepts
@@ -123,7 +123,7 @@ Selected existing offline worker lifecycle checks still pass.
 
 This child provider has no normal executor registration. It cannot enable environment execution by itself.
 The optional environment SDK provider composes this child with the uploaded worker lifecycle.
-Dedicated installation packaging remains required.
+The [optional environment package](aws-environment-package.md) now supplies the installation resources and combined settings.
 
 ### Environment task orchestration
 
@@ -158,12 +158,13 @@ API and controller commands register its Go API and browser drivers alongside of
 Preparation constructs only the offline provider. Source assembly and discovery require the ECS address capability for environment metadata.
 The [gateway network guard](ecs-gateway-network.md) now supplies the concrete native observation contract.
 
-### Remaining native integration
+### Installation and remaining verification
 
-Package the separate environment network, gateway role, certificate references, image repository, and complete service settings.
+The optional worker package now provisions the separate environment network, gateway role, certificate references, image repository, and complete service settings.
+Provisioning precedes activation so operators can publish the trusted image before it enters active configuration.
 Verify the gateway execution role, certificate references, image-pull path, private exchange path, and separate native network.
 Preserve uploaded source isolation and current run authority during this wiring.
-Build only affected runtime images after the native path is complete.
+Build only affected current platform images for the separately authorized deployment. Reuse unchanged bases and retained local application evidence.
 
 The network guard requires a dedicated gateway VPC with narrowly routed same-account and same-Region peering.
 The worker DNS firewall remains restricted. Only gateway TCP 8044 is added to the environment worker egress rules.
