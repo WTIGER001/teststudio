@@ -22,6 +22,7 @@ type Settings struct {
 	RegistryClientID    string            `json:"registryClientId"`
 	MetadataClientID    string            `json:"metadataClientId"`
 	Placement           PlacementSettings `json:"placement"`
+	Authority           AuthoritySettings `json:"authority"`
 	PullIdentity        string            `json:"pullIdentity"`
 	BlobRedirectOrigins []string          `json:"blobRedirectOrigins,omitempty"`
 	Timer               TimerSettings     `json:"timer"`
@@ -40,7 +41,7 @@ func (s Settings) Validate() error {
 	if err != nil || profile != s.Worker.NetworkProfile || Validate(s.Worker) != nil || s.Mode != "execution" && s.Mode != "discovery" || !nonzeroGUID(s.Worker.Subscription) || !nonzeroGUID(s.TenantID) || !nonzeroGUID(s.ControlClientID) || !nonzeroGUID(s.RegistryClientID) || !nonzeroGUID(s.MetadataClientID) || s.ControlClientID == s.RegistryClientID || s.ControlClientID == s.MetadataClientID || s.RegistryClientID == s.MetadataClientID || s.Placement.PullClientID == s.ControlClientID || s.Placement.PullClientID == s.RegistryClientID || s.Placement.PullClientID == s.MetadataClientID || !s.Worker.validPullIdentity(s.PullIdentity) || strings.EqualFold(s.PullIdentity, s.Timer.StopIdentity) || s.deadlineConfig().validate() != nil || acr.ValidateRegistry(s.Worker.Registry, s.TenantID, s.Worker.RepositoryPrefix, s.BlobRedirectOrigins) != nil {
 		return hostedexecution.ErrConfiguration
 	}
-	return nil
+	return s.Authority.validate(s)
 }
 
 func LoadSettings(file, variable string, lookup func(string) (string, bool)) (*Settings, error) {

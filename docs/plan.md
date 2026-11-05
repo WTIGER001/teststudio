@@ -98,8 +98,18 @@ Sandbox-definition, permission, revocation, and additional protection checks rem
 Targeted local SDK, drift, grant, cancellation, bounds, caching, and affected lifecycle checks pass.
 See [sandbox placement admission](azure-sandbox-placement.md). Reported metadata does not prove complete effective authority or private routing.
 
-Complete remaining authority and protected network admission, native command role wiring, and deployment packaging next.
-Verify metadata-reader placement and grants, control and timer authority, actual security rules and routes, private exchange ownership, and DNS.
+The runtime now includes a selected-authority stage for control, registry inspection, metadata, and independent timer identities.
+Fifteen selected reads compare four identities, five custom role definitions, and six exact assignments.
+Execution and discovery control profiles differ. The timer identity receives read and stop data actions only.
+Workflow administration stays in the separate timer group. Identity assignment targets only the selected timer identity.
+Canonical definitions provide reviewable packaging inputs without changing Azure resources.
+Authority observations share bounded positive metadata evidence. Domain authorization and remaining protection callbacks stay uncached.
+Targeted local profiles, drift, scope, identity separation, cancellation, caching, composition, and affected lifecycle checks pass.
+See [sandbox selected authority](azure-sandbox-authority.md). This does not establish complete effective access or host attachment.
+
+Complete effective-authority and protected network admission, native command role wiring, and deployment packaging next.
+Verify identity host attachment, additional grants and deny effects, actual security rules and routes, private exchange ownership, and DNS.
+Verify actual service acceptance of custom data-action roles and narrow timer grants during the separate deployment phase.
 Keep private registry conversion access and proxy trust as explicit deployment compatibility questions.
 Pin the group reader and template to an explicit service contract. Current preview guidance and the versioned ARM reference describe different shapes.
 Do not silently combine the pinned preview SDK with the 2026-07-01 environment-linked resource shape.

@@ -28,13 +28,26 @@ type placementHTTP struct {
 	closed  atomic.Bool
 }
 
+type metadataReader struct {
+	client *arm.Client
+	http   *placementHTTP
+}
+
 func placementVersions(s Settings) map[string]string {
 	c, p := s.Worker, s.Placement
 	return map[string]string{c.groupID(): APIVersion, c.connectionID(): APIVersion, p.Subnet: "2025-03-01", s.PullIdentity: "2024-11-30", p.Registry: "2025-11-01", p.PullAssignment: "2022-04-01", "/subscriptions/" + c.Subscription + pullRole: "2022-05-01-preview"}
 }
 
 func newPlacementHTTP(s Settings, base policy.Transporter) *placementHTTP {
-	h := &placementHTTP{allowed: placementVersions(s), base: base}
+	return newMetadataHTTP(placementVersions(s), base)
+}
+
+func newMetadataHTTP(versions map[string]string, base policy.Transporter) *placementHTTP {
+	allowed := map[string]string{}
+	for id, version := range versions {
+		allowed[id] = version
+	}
+	h := &placementHTTP{allowed: allowed, base: base}
 	if base == nil {
 		h.owned = &http.Transport{Proxy: nil, DialContext: (&net.Dialer{Timeout: 3 * time.Second, KeepAlive: 30 * time.Second}).DialContext, TLSClientConfig: &tls.Config{MinVersion: tls.VersionTLS12}, TLSHandshakeTimeout: 3 * time.Second, ResponseHeaderTimeout: 4 * time.Second, IdleConnTimeout: 30 * time.Second}
 		h.base = &http.Client{Timeout: 5 * time.Second, Transport: h.owned, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
@@ -85,12 +98,18 @@ func (h *placementHTTP) Close() {
 	}
 }
 
-func placementClient(s Settings, credential azcore.TokenCredential, h *placementHTTP) (*arm.Client, error) {
+func newMetadataReader(versions map[string]string, credential azcore.TokenCredential, base policy.Transporter) (*metadataReader, error) {
+	h := newMetadataHTTP(versions, base)
 	options := &arm.ClientOptions{DisableRPRegistration: true, ClientOptions: policy.ClientOptions{Transport: h, Retry: policy.RetryOptions{MaxRetries: -1}, Cloud: cloud.Configuration{ActiveDirectoryAuthorityHost: "https://login.microsoftonline.com/", Services: map[cloud.ServiceName]cloud.ServiceConfiguration{cloud.ResourceManager: {Endpoint: "https://management.azure.com/", Audience: "https://management.core.windows.net/"}}}}}
-	return arm.NewClient("github.com/wtiger001/teststudio/azuresandbox", "v1.0.0", credential, options)
+	client, err := arm.NewClient("github.com/wtiger001/teststudio/azuresandbox", "v1.0.0", credential, options)
+	if err != nil {
+		h.Close()
+		return nil, hostedexecution.ErrConfiguration
+	}
+	return &metadataReader{client: client, http: h}, nil
 }
 
-func (c *SDKPlacement) get(ctx context.Context, id string) (placementResource, error) {
+func (c *metadataReader) get(ctx context.Context, id string) (placementResource, error) {
 	version := c.http.allowed[id]
 	if version == "" {
 		return placementResource{}, hostedexecution.ErrOwnership

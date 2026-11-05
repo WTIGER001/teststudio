@@ -41,12 +41,18 @@ func TestSandboxPlacementReadsSelectedResourcesAndComposesBothAdmissionGates(t *
 	if err := r.Provider.images.admission.BeforeImport(t.Context(), s.Worker, s.PullIdentity); err != nil {
 		t.Fatal(err)
 	}
-	if protection.creates.Load() != 1 || protection.imports.Load() != 1 || len(w.calls) != 7 {
+	if protection.creates.Load() != 1 || protection.imports.Load() != 1 || len(w.calls) != 22 {
 		t.Fatal("native assembly omitted a selected observation or protection gate")
 	}
-	for _, count := range w.calls {
+	for id := range placementVersions(s) {
+		count := w.calls[id]
 		if count != 2 {
 			t.Fatal("placement observations were cached or retried", count)
+		}
+	}
+	for id := range authorityVersions(s) {
+		if w.calls[id] != 1 {
+			t.Fatal("authority observations were not shared")
 		}
 	}
 	actual := Snapshot{ID: "owned-instance", State: "Running", DefinitionHash: hash("verified by controller before admission")}
@@ -60,9 +66,14 @@ func TestSandboxPlacementReadsSelectedResourcesAndComposesBothAdmissionGates(t *
 		t.Fatal("placement cache hid protection loss", err)
 	}
 	protection.denied.Store(false)
-	for _, count := range w.calls {
-		if count != 2 {
-			t.Fatal("cached live checks repeated ARM metadata")
+	for id := range placementVersions(s) {
+		if w.calls[id] != 2 {
+			t.Fatal("cached placement repeated ARM reads")
+		}
+	}
+	for id := range authorityVersions(s) {
+		if w.calls[id] != 1 {
+			t.Fatal("cached authority repeated ARM reads")
 		}
 	}
 	props := w.resources[s.Worker.connectionID()]["properties"].(map[string]any)

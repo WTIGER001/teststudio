@@ -24,7 +24,19 @@ func runtimeSettings() Settings {
 	registry := "/subscriptions/" + c.Subscription + "/resourceGroups/studio-images/providers/Microsoft.ContainerRegistry/registries/studiotest"
 	pl := PlacementSettings{Subnet: prefix + "virtualNetworks/studio-network/subnets/sandbox", SubnetPrefix: "10.48.0.0/23", SecurityGroup: prefix + "networkSecurityGroups/studio-workers", RouteTable: prefix + "routeTables/studio-workers", Registry: registry, PullAssignment: registry + "/providers/Microsoft.Authorization/roleAssignments/77777777-7777-7777-7777-777777777777", PullClientID: "55555555-5555-5555-5555-555555555555", PullPrincipalID: "66666666-6666-6666-6666-666666666666", PolicyProfile: c.NetworkProfile}
 	c.NetworkProfile, _ = pl.NetworkProfile(c)
-	return Settings{Worker: c, Mode: "execution", TenantID: "33333333-3333-3333-3333-333333333333", ControlClientID: "11111111-1111-1111-1111-111111111111", RegistryClientID: "22222222-2222-2222-2222-222222222222", MetadataClientID: "44444444-4444-4444-4444-444444444444", Placement: pl, PullIdentity: identity + "studio-pull", Timer: TimerSettings{ResourceGroup: "studio-timers", NamePrefix: "studio", StopIdentity: identity + "studio-stop"}}
+	s := Settings{Worker: c, Mode: "execution", TenantID: "33333333-3333-3333-3333-333333333333", ControlClientID: "11111111-1111-1111-1111-111111111111", RegistryClientID: "22222222-2222-2222-2222-222222222222", MetadataClientID: "44444444-4444-4444-4444-444444444444", Placement: pl, PullIdentity: identity + "studio-pull", Timer: TimerSettings{ResourceGroup: "studio-timers", NamePrefix: "studio", StopIdentity: identity + "studio-stop"}}
+	s.Authority = AuthoritySettings{Control: AuthorityIdentity{identity + "studio-control", "a1111111-1111-1111-1111-111111111111"}, Registry: AuthorityIdentity{identity + "studio-registry", "a2222222-2222-2222-2222-222222222222"}, Metadata: AuthorityIdentity{identity + "studio-metadata", "a4444444-4444-4444-4444-444444444444"}, StopClientID: "88888888-8888-8888-8888-888888888888", StopPrincipalID: "99999999-9999-9999-9999-999999999999"}
+	rolePrefix := "/subscriptions/" + c.Subscription + "/providers/Microsoft.Authorization/roleDefinitions/"
+	grant := func(scope, n string) AuthorityGrant {
+		return AuthorityGrant{Assignment: scope + "/providers/Microsoft.Authorization/roleAssignments/ccccccc" + n + "-cccc-cccc-cccc-ccccccccccc" + n, Role: rolePrefix + "bbbbbbb" + n + "-bbbb-bbbb-bbbb-bbbbbbbbbbb" + n}
+	}
+	s.Authority.ControlGrant = grant(c.groupID(), "1")
+	s.Authority.StopGrant = grant(c.groupID(), "2")
+	s.Authority.WorkflowGrant = grant("/subscriptions/"+c.Subscription+"/resourceGroups/"+s.Timer.ResourceGroup, "3")
+	s.Authority.AssignGrant = grant(s.Timer.StopIdentity, "4")
+	s.Authority.MetadataGrant = grant("/subscriptions/"+c.Subscription, "5")
+	s.Authority.RegistryAssignment = registry + "/providers/Microsoft.Authorization/roleAssignments/ccccccc6-cccc-cccc-cccc-ccccccccccc6"
+	return s
 }
 
 type runtimeCredential struct {

@@ -10,6 +10,7 @@ Discovery can wait for conversion before a sandbox exists.
 No native command or deployment template enables this provider yet.
 The [runtime factory](azure-sandbox-runtime.md) now supplies independent settings and concrete SDK assembly.
 The [placement stage](azure-sandbox-placement.md) now checks reported group, subnet, import identity, and selected pull authority.
+The [authority stage](azure-sandbox-authority.md) now checks selected control, registry inspection, metadata, and timer identity grants.
 Remaining authority and protected network admission, effective timer authority, command wiring, and native packaging remain unfinished.
 Local protocol verification does not establish deployed Azure behavior.
 

@@ -28,6 +28,7 @@ type Runtime struct {
 	client    *Client
 	deadlines *SDKDeadlines
 	placement *SDKPlacement
+	authority *SDKAuthority
 	once      sync.Once
 }
 
@@ -76,7 +77,11 @@ func OpenRuntime(o RuntimeOptions) (result *Runtime, resultErr error) {
 	if err != nil {
 		return nil, err
 	}
-	admission := &placementAdmission{placement: r.placement, protection: o.Admission, importProtection: o.ImageAdmission}
+	r.authority, err = NewSDKAuthority(s, metadata, o.ARMTransport)
+	if err != nil {
+		return nil, err
+	}
+	admission := &placementAdmission{placement: r.placement, authority: r.authority, protection: o.Admission, importProtection: o.ImageAdmission}
 	controller, err := NewController(ControllerOptions{Config: s.Worker, Instances: r.client, Deadlines: r.deadlines, Admission: admission, Exchange: o.Exchange, Commands: r.client})
 	if err != nil {
 		return nil, err
@@ -110,6 +115,9 @@ func (r *Runtime) Close() {
 		}
 		if r.placement != nil {
 			r.placement.Close()
+		}
+		if r.authority != nil {
+			r.authority.Close()
 		}
 		if r.client != nil {
 			r.client.Close()

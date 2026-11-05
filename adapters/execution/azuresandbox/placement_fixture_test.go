@@ -40,6 +40,17 @@ func newPlacementWorld(t *testing.T, s Settings) *placementWorld {
 	reg["sku"] = map[string]string{"name": "Premium"}
 	put(p.PullAssignment, "Microsoft.Authorization/roleAssignments", "", map[string]any{"principalId": p.PullPrincipalID, "principalType": "ServicePrincipal", "scope": p.Registry, "roleDefinitionId": "/subscriptions/" + c.Subscription + pullRole})
 	put("/subscriptions/"+c.Subscription+pullRole, "Microsoft.Authorization/roleDefinitions", "", map[string]any{"roleName": "AcrPull", "type": "BuiltInRole", "assignableScopes": []string{"/"}, "permissions": []any{map[string]any{"actions": []string{"Microsoft.ContainerRegistry/registries/pull/read"}}}})
+	identities := []struct{ resource, client, principal string }{{s.Authority.Control.Resource, s.ControlClientID, s.Authority.Control.PrincipalID}, {s.Authority.Registry.Resource, s.RegistryClientID, s.Authority.Registry.PrincipalID}, {s.Authority.Metadata.Resource, s.MetadataClientID, s.Authority.Metadata.PrincipalID}, {s.Timer.StopIdentity, s.Authority.StopClientID, s.Authority.StopPrincipalID}}
+	for _, identity := range identities {
+		put(identity.resource, "Microsoft.ManagedIdentity/userAssignedIdentities", c.Region, map[string]any{"clientId": identity.client, "principalId": identity.principal, "tenantId": s.TenantID})
+	}
+	definitions, err := s.AuthorityDefinitions()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for id, value := range definitions {
+		w.resources[id] = value.(map[string]any)
+	}
 	return w
 }
 
@@ -47,6 +58,9 @@ func (w *placementWorld) Do(r *http.Request) (*http.Response, error) {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	version := placementVersions(w.s)[r.URL.Path]
+	if version == "" {
+		version = authorityVersions(w.s)[r.URL.Path]
+	}
 	if r.Method != "GET" || r.URL.Scheme != "https" || r.URL.Host != "management.azure.com" || version == "" || r.URL.RawQuery != "api-version="+version || r.Header.Get("Authorization") != "Bearer placement-metadata-canary" {
 		w.t.Error("placement request escaped its selected identity or resource")
 		return response(403, `{}`), nil

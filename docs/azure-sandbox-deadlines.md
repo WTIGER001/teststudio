@@ -2,6 +2,9 @@
 
 ## Introduction
 
+The [selected authority stage](azure-sandbox-authority.md) now checks the intended controller workflow grant, timer identity attachment, and stop-only data grant.
+This does not establish complete effective authority or actual service acceptance.
+
 SDKDeadlines supplies the independent deadline interface used by the [sandbox controller](azure-sandbox-controller.md).
 It manages one Azure Logic Apps workflow for each logical execution attempt.
 The workflow starts at the absolute ticket deadline and repeats stop requests independently of TestStudio's API process.

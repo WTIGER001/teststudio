@@ -9,6 +9,7 @@ Execution and discovery use explicit runtime modes.
 
 This is a library integration. The teststudio commands do not load these settings yet.
 The [placement stage](azure-sandbox-placement.md) now verifies reported group, subnet, import identity, and selected pull-grant metadata.
+The [authority stage](azure-sandbox-authority.md) now checks selected identity and permission bindings for control, metadata, registry inspection, and timers.
 Remaining authority and protected network admission, effective timer authority, command role wiring, and deployment packaging remain unfinished.
 The factory requires admission dependencies. It supplies no permissive default.
 Do not treat client construction or local protocol checks as deployment acceptance.
@@ -31,6 +32,7 @@ The loader validates all fields before credential construction.
 | registryClientId | Separate explicit nonzero client identifier for read-only registry inspection. It differs from controlClientId. |
 | metadataClientId | Third explicit nonzero client identifier for selected ARM metadata reads. It differs from control, registry, and import clients. |
 | placement | Required group-network and selected import-grant bindings described in the placement guide. |
+| authority | Required distinct identity resources and principals, five custom role bindings, and the registry inspection grant described in the authority guide. |
 | pullIdentity | Exact user-assigned identity resource used by the sandbox service for source conversion. |
 | blobRedirectOrigins | Optional exact HTTPS registry-data or Azure Blob origins accepted by the existing registry policy. |
 | timer.resourceGroup | Separate resource group for independent stop workflows. It differs from the sandbox group resource group. |
@@ -53,6 +55,7 @@ It constructs an ACR inspection client with publishing disabled.
 It constructs the sandbox client for image, instance, and command operations.
 It constructs SDKDeadlines with the same control credential and the selected independent workflow scope.
 It constructs SDKPlacement with the explicit metadata credential and composes it before the additional protection checks.
+It constructs SDKAuthority with that metadata credential and compares selected identity, role, and assignment metadata.
 The resulting image manager and provider share the controller's exact configuration and exchange.
 
 Default credential construction uses ManagedIdentityCredential with each exact configured client identifier.
@@ -63,7 +66,8 @@ Injected credentials and transports remain the caller's responsibility. The runt
 Credential-construction failures return a fixed unavailable error without underlying diagnostics.
 
 The factory now checks selected reported group placement, import identity tenant metadata, and the chosen pull grant during admission.
-Complete effective identity authority, credential host placement, actual network enforcement, and timer authority remain required separate checks.
+Selected controller and timer roles now have explicit checked profiles.
+Complete effective authority, credential host placement, actual network enforcement, and live timer access remain separate checks.
 Configuration syntax and distinct identifiers cannot replace that observation.
 
 ### Runtime modes
@@ -84,7 +88,8 @@ That command integration remains unfinished.
 
 Admission is mandatory for every runtime. ImageAdmission is also mandatory for discovery mode.
 The existing controller calls the placement stage and these dependencies before creation, during live admission observation, and before import.
-Live shared ARM placement evidence has a 15-second bound. The additional protection and per-sandbox checks remain uncached.
+Live placement and selected authority evidence have a 15-second bound. Initial placement checks remain fresh.
+The additional protection, per-sandbox, and worker authorization checks remain uncached.
 OpenRuntime does not substitute a successful construction result for those checks.
 Native commands must compose actual group, VNet, private exchange, source identity, and timer authority checks before enabling dispatch.
 

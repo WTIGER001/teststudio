@@ -17,7 +17,7 @@ Native commands and deployment templates still do not enable sandbox execution.
 Sandbox Settings now requires metadataClientId and placement.
 The metadata client differs from the control, registry inspection, and import client identifiers.
 Its client sends only selected GET requests. This restriction does not prove the identity has no other effective privileges.
-Actual identity grants and host attachment remain part of the required authority checks.
+The [authority stage](azure-sandbox-authority.md) now verifies selected identity grants. Effective additional access and host attachment remain separate checks.
 
 | placement field | Required binding |
 | --- | --- |
@@ -113,6 +113,7 @@ No cloud account, identity endpoint, registry service, browser, container, demo 
 
 Implement the remaining authority and protected network checks behind the mandatory admission dependencies.
 Verify actual metadata-reader attachment and grants, control authority, timer authority, route and rule contents, private exchange ownership, and DNS.
+The selected authority stage now covers the intended role and identity bindings. Verify effective access and attachment in addition to those reports.
 Bind those checks to placement.policyProfile before command activation.
 Then wire execution and discovery roles and package their resources.
 Verify service conversion access to the private registry, token audience, VNet routing, and proxy certificate trust in the separate deployment phase.

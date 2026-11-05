@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
 )
@@ -25,27 +24,21 @@ type placementResource struct {
 }
 
 type SDKPlacement struct {
-	settings   Settings
-	client     *arm.Client
-	http       *placementHTTP
-	now        func() time.Time
-	cacheMutex sync.Mutex
-	cacheUntil time.Time
-	cacheEpoch uint64
-	cacheRead  chan struct{}
+	*metadataReader
+	settings Settings
+	now      func() time.Time
+	cache    metadataCache
 }
 
 func NewSDKPlacement(s Settings, credential azcore.TokenCredential, transport policy.Transporter) (*SDKPlacement, error) {
 	if s.Validate() != nil || credential == nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
-	h := newPlacementHTTP(s, transport)
-	client, err := placementClient(s, credential, h)
+	reader, err := newMetadataReader(placementVersions(s), credential, transport)
 	if err != nil {
-		h.Close()
 		return nil, hostedexecution.ErrConfiguration
 	}
-	return &SDKPlacement{settings: s, client: client, http: h, now: time.Now}, nil
+	return &SDKPlacement{settings: s, metadataReader: reader, now: time.Now}, nil
 }
 
 func (c *SDKPlacement) Close() { c.http.Close() }
@@ -78,6 +71,13 @@ func (c *SDKPlacement) observe(ctx context.Context, config Config, ids []string)
 	if ctx.Err() != nil || c.http.closed.Load() {
 		return nil, hostedexecution.ErrUnavailable
 	}
+	return c.metadataReader.observe(ctx, ids)
+}
+
+func (c *metadataReader) observe(ctx context.Context, ids []string) ([]placementResource, error) {
+	if ctx.Err() != nil || c.http.closed.Load() {
+		return nil, hostedexecution.ErrUnavailable
+	}
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	values := make([]placementResource, len(ids))
@@ -100,12 +100,16 @@ func (c *SDKPlacement) observe(ctx context.Context, config Config, ids []string)
 
 type placementAdmission struct {
 	placement        *SDKPlacement
+	authority        *SDKAuthority
 	protection       Admission
 	importProtection ImageAdmission
 }
 
 func (a *placementAdmission) BeforeCreate(ctx context.Context, c Config) error {
 	if err := a.placement.Check(ctx, c); err != nil {
+		return err
+	}
+	if err := a.authority.Check(ctx, c); err != nil {
 		return err
 	}
 	return a.protection.BeforeCreate(ctx, c)
@@ -118,6 +122,9 @@ func (a *placementAdmission) VerifyInstance(ctx context.Context, c Config, actua
 	if err := a.placement.CheckRunning(ctx, c); err != nil {
 		return err
 	}
+	if err := a.authority.Check(ctx, c); err != nil {
+		return err
+	}
 	return a.protection.VerifyInstance(ctx, c, actual)
 }
 
@@ -126,6 +133,9 @@ func (a *placementAdmission) BeforeImport(ctx context.Context, c Config, identit
 		return hostedexecution.ErrOwnership
 	}
 	if err := a.placement.Check(ctx, c); err != nil {
+		return err
+	}
+	if err := a.authority.Check(ctx, c); err != nil {
 		return err
 	}
 	return a.importProtection.BeforeImport(ctx, c, identity)

@@ -122,7 +122,35 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: reported sandbox placement and selected import authority
+## Current delivery: selected sandbox and timer authority
+
+OpenRuntime now requires identity and selected-grant settings for controller, registry inspection, metadata, and independent timer authority.
+Identity resources, client identifiers, and principal identifiers remain distinct from one another and the import identity.
+The concrete authority stage reads four identities, five custom roles, and six selected assignments through the shared bounded ARM reader.
+Incorrect tenant, client, principal, scope, role, conditions, or permission sets reject admission.
+
+The execution controller receives fixed sandbox data actions without image import. Discovery adds import only.
+The timer identity receives read and stop only. It receives no command, create, import, resume, policy, secret, or file authority.
+Workflow administration is limited to read, write, and delete in the separate timer group.
+Controller identity attachment targets only the timer identity. Registry inspection retains a separate AcrPull assignment.
+Canonical role and assignment objects support reviewable packaging inputs without any resource mutation.
+
+Placement and authority now share the scoped ARM reader and bounded positive-cache implementation.
+Selected authority evidence has a 15-second bound and coalesces successful concurrent observations.
+Directory and worker permissions, command reservation, revocation, per-sandbox definition checks, and the remaining protection callback stay uncached.
+The authority stage cannot be omitted from the runtime factory or substitute for the remaining protection checks.
+
+Five new focused checks cover permissions, mode separation, role broadening, identity and scope changes, invalid settings, caching, and factory integration.
+The five new checks and thirteen affected placement, runtime, shared execution, and authorization checks pass with race detection in 2.037 seconds.
+Evidence is output/azure-sandbox-authority/summary.json and targeted.log.
+No cloud account, identity endpoint, registry service, role mutation, browser, container, UI build, demo restart, or remote push is involved.
+The authority, placement, runtime, provider, Azure, and plan guides match the change. No user page behavior changes.
+
+Effective additional authority, deny effects, identity host attachment, protected network content, private exchange and DNS, command wiring, and packaging remain unfinished.
+Actual custom-role acceptance, timer execution, private conversion routing, token audience, and proxy trust remain deployment verification work.
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+## Previous delivery: reported sandbox placement and selected import authority
 
 OpenRuntime now constructs a concrete ARM placement reader with a separate explicit metadata identity.
 The stage runs before the remaining mandatory protection dependencies for creation, import, and live instance admission.
