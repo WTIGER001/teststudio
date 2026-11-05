@@ -23,6 +23,7 @@ The [resolver stage](azure-sandbox-resolver.md) now checks selected policy rules
 The [service stage](azure-sandbox-services.md) now checks fixed relay and backend definitions, private environments, identity exposure, certificate metadata, and complete revisions.
 The [backend endpoint stage](azure-sandbox-backend-endpoint.md) now joins approval, NIC address, network policy, and the existing relay readiness address.
 The [relay network stage](azure-sandbox-relay-network.md) now checks the trusted VNet, egress policy, DNS, private registry endpoint, and selected pull grant.
+The [registry service stage](azure-sandbox-registry-service.md) now checks access policies and complete reported consumer, member, and replication inventories.
 Effective routing, resolution, deployed readiness, and effective service authority remain unverified.
 Sandboxes and the selected API remain preview. Complete authority and network admission, timer authority, command wiring, and packaging remain unfinished.
 Ordinary Jobs stay disabled. Their contracts below remain reference material and do not establish sandbox isolation.

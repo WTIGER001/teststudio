@@ -64,29 +64,5 @@ func (g *RegistryGuard) Check(ctx context.Context, c Config) (resultErr error) {
 			return hostedexecution.ErrUnavailable
 		}
 	}
-	if err := g.verifyRegistry(registry); err != nil {
-		return err
-	}
-	observed, err := g.verifyConnections(connections)
-	if err != nil {
-		return err
-	}
-	embedded := make([]a.PrivateEndpointConnection, 0, len(registry.Properties.PrivateEndpointConnections))
-	for _, connection := range registry.Properties.PrivateEndpointConnections {
-		if connection == nil {
-			return hostedexecution.ErrOwnership
-		}
-		embedded = append(embedded, *connection)
-	}
-	declared, err := g.verifyConnections(embedded)
-	if err != nil {
-		return err
-	}
-	if fingerprint(observed) != fingerprint(declared) {
-		return hostedexecution.ErrUnavailable
-	}
-	if err := g.verifyLinks(links); err != nil {
-		return err
-	}
-	return g.verifyReplicas(replicas)
+	return g.binding().Verify(RegistryServiceObservation{Registry: registry, Connections: connections, Links: links, Replicas: replicas})
 }

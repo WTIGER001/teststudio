@@ -118,7 +118,8 @@ The resolver stage now checks selected policy, actual association, and other rep
 The service stage now checks selected relay and backend metadata, fixed definitions, identity exposure, and revisions.
 The backend endpoint stage now binds selected approval, NIC address, network policy, and the relay's configured readiness address.
 The [relay network stage](azure-sandbox-relay-network.md) now verifies selected registry endpoint, DNS, and pull-grant metadata.
-Complete registry inventory, effective service grants, protected network bindings, cross-subscription visibility, and deny-effect coverage.
+The [registry service stage](azure-sandbox-registry-service.md) now verifies access policies and complete reported consumer, member, and replication inventories.
+Complete trusted consumer network ownership, effective service grants, protected network bindings, cross-subscription visibility, and deny-effect coverage.
 Then wire the execution and discovery roles to native commands and package their resources.
 Verify custom sandbox data-action roles and the narrow timer roles with the actual service during the separate deployment phase.
 The published operation catalog supplies permission names. It does not prove preview-service compatibility or effective installation access.

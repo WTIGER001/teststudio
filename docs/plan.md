@@ -178,8 +178,19 @@ Fresh creation and import observations and bounded live evidence include this st
 Six new checks and fourteen affected checks pass locally with race detection. No cloud service is contacted.
 See [relay network and registry binding](azure-sandbox-relay-network.md). Acceptance 51 advances; the count remains 48 verified, nine open.
 
+The runtime now verifies registry access policies and complete reported consumer, private-link member, and replication inventories.
+Expected consumers include the sandbox and relay endpoints plus up to six explicitly declared trusted endpoints.
+The registry's embedded approvals and separate connection inventory must agree on endpoint-to-connection ownership.
+The shared pure RegistryServiceBinding retains the existing registry guard's contract without ordinary Jobs configuration.
+The sandbox-placement/v9 profile binds the added consumers. Invalid or aliased endpoints reject before credential construction.
+SDK model conversion now preserves an absent optional SKU tier and rejects an explicitly incompatible tier.
+Fresh creation and import checks and bounded live evidence include this stage. Remaining protection and authorization stay uncached.
+Six new checks and eleven affected checks pass locally with race detection. No cloud service is contacted.
+See [registry service admission](azure-sandbox-registry-service.md). Acceptance 51 advances; the total remains 48 verified, nine open.
+
 Complete remaining effective-authority and protected network admission, native command role wiring, and deployment packaging next.
-Complete registry consumer, replication, and member inventory, workload placement, identity host attachment, additional grants and deny effects, and protected write boundaries.
+Bind additional declared registry consumers to trusted workload and network ownership.
+Complete workload placement, identity host attachment, additional grants and deny effects, and protected write boundaries.
 Keep cross-subscription link visibility and actual DNS hierarchy behavior explicit in separate deployment acceptance.
 Verify actual service acceptance of custom data-action roles and narrow timer grants during the separate deployment phase.
 Keep private registry conversion access and proxy trust as explicit deployment compatibility questions.

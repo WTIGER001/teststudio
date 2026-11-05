@@ -18,7 +18,7 @@ placement.network.resolver requires policy, allowList, and blockList.
 Each field identifies the matching resource type in the selected subscription.
 The two domain lists must differ.
 Invalid scope, type, missing settings, or stale ownership profiles reject before credential construction.
-The sandbox-placement/v8 profile binds resolver settings with required trusted services, topology, both endpoint paths, DNS, and placement bindings.
+The sandbox-placement/v9 profile binds resolver settings with required trusted services, topology, both endpoint paths, DNS, and placement bindings.
 Older staged profiles require regeneration. No native command currently loads them.
 
 ResolverDefinitions returns six reviewable bodies: policy, two domain lists, two security rules, and one VNet link.
@@ -127,7 +127,8 @@ No cloud service, browser, container, UI build, demo restart, resource mutation,
 The service stage now checks selected relay and backend metadata, fixed definitions, identity exposure, and revisions.
 The backend endpoint stage now binds selected approval, NIC address, network policy, and the relay's configured readiness address.
 The [relay network stage](azure-sandbox-relay-network.md) now verifies the selected VNet, egress policy, registry endpoint, DNS, and pull grant.
-Complete registry inventory, additional grants, deny effects, credential host attachment, and protection bindings.
+The [registry service stage](azure-sandbox-registry-service.md) now verifies access policies and complete reported consumer, member, and replication inventories.
+Complete trusted consumer network ownership, additional grants, deny effects, credential host attachment, and protection bindings.
 Then wire scoped execution and discovery commands and package their dependencies.
 Verify actual resolution, routing, preview compatibility, private conversion, role acceptance, timer execution, token audience, and proxy trust during separate deployment acceptance.
 

@@ -22,8 +22,8 @@ type placementResource struct {
 	ExtendedLocation json.RawMessage `json:"extendedLocation,omitempty"`
 	Properties       json.RawMessage `json:"properties"`
 	SKU              struct {
-		Name string `json:"name"`
-		Tier string `json:"tier"`
+		Name string  `json:"name"`
+		Tier *string `json:"tier,omitempty"`
 	} `json:"sku"`
 }
 
@@ -112,6 +112,7 @@ type placementAdmission struct {
 	services         *SDKServices
 	backendEndpoint  *SDKBackendEndpoint
 	relayNetwork     *SDKRelayNetwork
+	registryService  *SDKRegistryService
 	protection       Admission
 	importProtection ImageAdmission
 }
@@ -139,6 +140,9 @@ func (a *placementAdmission) BeforeCreate(ctx context.Context, c Config) error {
 		return err
 	}
 	if err := a.relayNetwork.Check(ctx, c); err != nil {
+		return err
+	}
+	if err := a.registryService.Check(ctx, c); err != nil {
 		return err
 	}
 	if err := a.authority.Check(ctx, c); err != nil {
@@ -175,6 +179,9 @@ func (a *placementAdmission) VerifyInstance(ctx context.Context, c Config, actua
 	if err := a.relayNetwork.CheckRunning(ctx, c); err != nil {
 		return err
 	}
+	if err := a.registryService.CheckRunning(ctx, c); err != nil {
+		return err
+	}
 	if err := a.authority.Check(ctx, c); err != nil {
 		return err
 	}
@@ -207,6 +214,9 @@ func (a *placementAdmission) BeforeImport(ctx context.Context, c Config, identit
 		return err
 	}
 	if err := a.relayNetwork.Check(ctx, c); err != nil {
+		return err
+	}
+	if err := a.registryService.Check(ctx, c); err != nil {
 		return err
 	}
 	if err := a.authority.Check(ctx, c); err != nil {

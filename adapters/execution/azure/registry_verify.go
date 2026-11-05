@@ -25,9 +25,8 @@ func registryStrings(actual []*string, expected ...string) bool {
 	return slices.Equal(values, expected)
 }
 
-func (g *RegistryGuard) verifyRegistry(actual a.Registry) error {
-	s := g.settings
-	if !perimeterIdentity(value(actual.ID), value(actual.Name), value(actual.Type), s.registry(), "Microsoft.ContainerRegistry/registries", value(actual.Location), s.region()) ||
+func (s RegistryServiceBinding) verifyRegistry(actual a.Registry) error {
+	if !perimeterIdentity(value(actual.ID), value(actual.Name), value(actual.Type), s.Registry, "Microsoft.ContainerRegistry/registries", value(actual.Location), s.Region) ||
 		actual.Properties == nil ||
 		actual.SKU == nil ||
 		value(actual.SKU.Name) != a.SKUNamePremium ||
@@ -65,20 +64,16 @@ func (g *RegistryGuard) verifyRegistry(actual a.Registry) error {
 		len(p.NetworkRuleSet.IPRules) != 0 ||
 		value(p.Policies.ExportPolicy.Status) != a.ExportPolicyStatusDisabled ||
 		value(p.Policies.AzureADAuthenticationAsArmPolicy.Status) != a.AzureADAuthenticationAsArmPolicyStatusEnabled ||
-		value(p.LoginServer) != g.worker.Registry {
+		value(p.LoginServer) != s.Login {
 		return hostedexecution.ErrOwnership
 	}
 	if len(p.DataEndpointHostNames) == 0 {
 		return hostedexecution.ErrUnavailable
 	}
-	if !registryStrings(p.DataEndpointHostNames, s.dataHost(g.worker)) {
+	if !registryStrings(p.DataEndpointHostNames, strings.TrimSuffix(s.Login, ".azurecr.io")+"."+s.Region+".data.azurecr.io") {
 		return hostedexecution.ErrOwnership
 	}
 	return nil
-}
-
-func (g *RegistryGuard) verifyConnections(connections []a.PrivateEndpointConnection) (map[string]string, error) {
-	return VerifyRegistryEndpointConnections(g.settings.registry(), g.settings.consumers(), connections)
 }
 
 func VerifyRegistryEndpointConnections(registry string, endpoints []string, connections []a.PrivateEndpointConnection) (map[string]string, error) {
@@ -124,7 +119,7 @@ func VerifyRegistryEndpointConnections(registry string, endpoints []string, conn
 	return observed, nil
 }
 
-func (g *RegistryGuard) verifyLinks(links []a.PrivateLinkResource) error {
+func (s RegistryServiceBinding) verifyLinks(links []a.PrivateLinkResource) error {
 	if len(links) == 0 {
 		return hostedexecution.ErrUnavailable
 	}
@@ -132,25 +127,25 @@ func (g *RegistryGuard) verifyLinks(links []a.PrivateLinkResource) error {
 		return hostedexecution.ErrOwnership
 	}
 	link := links[0]
-	if !strings.EqualFold(value(link.ID), g.settings.links()+"/registry") || value(link.Name) != "registry" || !strings.EqualFold(value(link.Type), "Microsoft.ContainerRegistry/registries/privateLinkResources") || link.Properties == nil {
+	if !strings.EqualFold(value(link.ID), s.Registry+"/privateLinkResources/registry") || value(link.Name) != "registry" || !strings.EqualFold(value(link.Type), "Microsoft.ContainerRegistry/registries/privateLinkResources") || link.Properties == nil {
 		return hostedexecution.ErrOwnership
 	}
 	p := link.Properties
 	if p.GroupID == nil || len(p.RequiredMembers) == 0 || len(p.RequiredZoneNames) == 0 {
 		return hostedexecution.ErrUnavailable
 	}
-	if value(p.GroupID) != "registry" || !registryStrings(p.RequiredMembers, "registry", "registry_data_"+g.settings.region()) || !registryStrings(p.RequiredZoneNames, "privatelink.azurecr.io") {
+	if value(p.GroupID) != "registry" || !registryStrings(p.RequiredMembers, "registry", "registry_data_"+s.Region) || !registryStrings(p.RequiredZoneNames, "privatelink.azurecr.io") {
 		return hostedexecution.ErrOwnership
 	}
 	return nil
 }
 
-func (g *RegistryGuard) verifyReplicas(replicas []a.Replication) error {
+func (s RegistryServiceBinding) verifyReplicas(replicas []a.Replication) error {
 	if len(replicas) > 1 {
 		return hostedexecution.ErrOwnership
 	}
 	for _, replica := range replicas {
-		if !endpointChild(value(replica.ID), value(replica.Name), g.settings.registry(), "replications") || !strings.EqualFold(value(replica.Type), "Microsoft.ContainerRegistry/registries/replications") || value(replica.Location) != g.settings.region() || replica.Properties == nil {
+		if !endpointChild(value(replica.ID), value(replica.Name), s.Registry, "replications") || !strings.EqualFold(value(replica.Type), "Microsoft.ContainerRegistry/registries/replications") || value(replica.Location) != s.Region || replica.Properties == nil {
 			return hostedexecution.ErrOwnership
 		}
 		if value(replica.Properties.ProvisioningState) != a.ProvisioningStateSucceeded || replica.Properties.RegionEndpointEnabled == nil {

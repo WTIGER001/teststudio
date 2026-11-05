@@ -40,7 +40,7 @@ The Blob URL, container name, and replica count follow the existing backend poli
 
 Four service identities differ from one another and the import, timer, controller, registry inspection, and metadata identities.
 Resources, client identifiers, and principal identifiers cannot reuse those bindings.
-The sandbox-placement/v8 profile includes these settings, required backend endpoint settings, and the existing admission bindings.
+The sandbox-placement/v9 profile includes these settings, required backend endpoint settings, and the existing admission bindings.
 Changing service images, identities, origins, or dependencies changes launch and source-cache ownership.
 Older staged profiles require regeneration. No native command currently loads them.
 
@@ -125,7 +125,8 @@ No cloud service, browser, container, UI build, demo restart, resource mutation,
 The backend endpoint stage now binds the selected environment and NIC to the address used by relay forwarding and readiness.
 Readiness runs in the relay network. Native admission checks its exact probe and reported healthy active revision.
 The [relay network stage](azure-sandbox-relay-network.md) now verifies the selected VNet, egress policy, registry endpoint, DNS, and pull grant.
-Complete registry inventory, workload placement, identity host attachment, effective grants, deny effects, and protected write boundaries.
+The [registry service stage](azure-sandbox-registry-service.md) now verifies access policies and complete reported consumer, member, and replication inventories.
+Complete trusted consumer network ownership, workload placement, identity host attachment, effective grants, deny effects, and protected write boundaries.
 Then wire scoped execution and discovery commands and complete deployment packaging.
 Verify actual private routing, TLS, service identity lifecycle behavior, dependency access, preview compatibility, and independent deadlines during separate deployment acceptance.
 

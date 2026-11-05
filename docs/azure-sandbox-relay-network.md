@@ -39,7 +39,7 @@ Resolver resources and the registry zone differ from their execution-network equ
 The selected pull assignment differs from the source import assignment.
 Invalid scopes, aliases, reserved addresses, overlaps, and stale profiles reject before credential construction.
 
-The sandbox-placement/v8 profile binds these settings with all existing placement and service settings.
+The sandbox-placement/v9 profile binds these settings with all existing placement and service settings.
 Earlier staged profiles require regeneration. No native command currently loads them.
 RelayNetworkDefinitions returns 21 reviewable resource bodies without mutating resources.
 They include rules, routes, subnets, firewall resources, resolver resources, private records, the zone link, and the pull assignment.
@@ -76,7 +76,9 @@ The registry must match the existing Premium, region, private access, data endpo
 The selected registry-side connection must approve the relay endpoint.
 The registry's embedded connection with that identifier must also approve the same endpoint.
 Missing or pending approval remains unavailable. Rejected or mismatched approval rejects admission.
-This stage checks the selected connection. Complete registry consumer, replication, and private-link member inventory remains required.
+This stage checks the selected connection.
+The [registry service stage](azure-sandbox-registry-service.md) now verifies complete reported consumers, private-link members, replication, and access policies.
+Additional trusted consumer network ownership remains separate work.
 
 The private zone has exact login and regional data A records, one SOA record, and one completed relay-network link.
 Aliases, wildcard records, registration, extra records, extra links, and public fallback reject.
@@ -121,7 +123,8 @@ No cloud service, browser, container, UI build, demo restart, resource mutation,
 
 ### Continue native activation
 
-Complete registry inventory, workload placement, identity host attachment, effective grants, deny effects, and protected write boundaries.
+The [registry service stage](azure-sandbox-registry-service.md) now verifies access policies and complete reported consumer, member, and replication inventories.
+Complete trusted consumer network ownership, workload placement, identity host attachment, effective grants, deny effects, and protected write boundaries.
 Then wire separate execution and discovery commands and package their dependencies.
 Keep preview compatibility, private conversion, actual resolution, routing, platform readiness, token audience, and independent timer execution in deployment acceptance.
 

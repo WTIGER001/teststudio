@@ -25,6 +25,7 @@ The [authority stage](azure-sandbox-authority.md) now verifies selected identity
 | subnet and subnetPrefix | Exact delegated subnet resource in the selected subscription and one canonical private IPv4 prefix. |
 | securityGroup and routeTable | Exact subnet attachments in the selected subscription. The network stage checks their contents; effective routing remains separate. |
 | registry | Exact ARM registry resource matching worker.registry. |
+| registryConsumers | Up to six additional trusted private endpoints. Sandbox and relay registry endpoints are derived separately. |
 | pullAssignment | Exact registry-scoped role assignment resource. A subscription-scoped assignment does not qualify. |
 | pullClientId and pullPrincipalId | Explicit nonzero client and principal identifiers for pullIdentity. They differ from each other and the runtime client identifiers. |
 | policyProfile | Existing protected network-policy fingerprint. This is an expected binding, not evidence that policy is effective. |
@@ -38,7 +39,7 @@ The [authority stage](azure-sandbox-authority.md) now verifies selected identity
 
 PlacementSettings.NetworkProfile computes the combined profile from placement and the worker configuration with its networkProfile field cleared.
 Set worker.networkProfile to that result. Settings validation rejects a mismatched profile before constructing credentials.
-The sandbox-placement/v8 profile includes trusted services, backend endpoint and relay network bindings, and the existing resolver, topology, firewall, subnet, and DNS bindings.
+The sandbox-placement/v9 profile includes trusted services, backend endpoint and relay network bindings, and the existing resolver, topology, firewall, subnet, and DNS bindings.
 Changes to these addresses, subnet, import identity metadata, selected grant, or expected policy change launch and source-cache ownership.
 The factory adds one explicit managed identity credential for metadata reads. Construction still acquires no token and calls no service.
 Earlier staged settings without placement reject. No native command has installed those earlier sandbox settings.
@@ -130,7 +131,8 @@ No cloud account, identity endpoint, registry service, browser, container, demo 
 
 Implement the remaining authority and protected network checks behind the mandatory admission dependencies.
 The [relay network stage](azure-sandbox-relay-network.md) now verifies the selected relay VNet and private registry path.
-Complete registry inventory, metadata-reader attachment, effective grants, write protection, and deployed routing and readiness.
+The [registry service stage](azure-sandbox-registry-service.md) now verifies access policies and complete reported consumer, member, and replication inventories.
+Complete trusted consumer network ownership, metadata-reader attachment, effective grants, write protection, and deployed routing and readiness.
 The selected authority stage now covers the intended role and identity bindings. Verify effective access and attachment in addition to those reports.
 Bind those checks to placement.policyProfile before command activation.
 Then wire execution and discovery roles and package their resources.

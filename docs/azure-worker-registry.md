@@ -5,6 +5,7 @@
 RegistryGuard inspects the actual registry after [endpoint ownership checks](azure-worker-endpoints.md) succeed.
 It checks private access settings, regional data authority, required endpoint members, and complete service-side connection inventories.
 Its production SDK reader performs bounded management reads. Local fixtures supply responses during current verification.
+RegistryServiceBinding now exposes the same pure checks for the independent [sandbox registry stage](azure-sandbox-registry-service.md).
 
 This stage does not implement Network, dispatch work, or release worker input.
 Azure coded execution stays disabled in native commands and infrastructure packaging.

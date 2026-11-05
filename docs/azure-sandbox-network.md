@@ -21,7 +21,7 @@ These address checks do not establish endpoint ownership, DNS resolution, or fir
 The required [private stage](azure-sandbox-private.md) now checks selected endpoint ownership, exact NIC addresses, and complete selected zone inventories.
 The remaining protection dependencies must establish those relationships before activation.
 
-The sandbox-placement/v8 profile includes these settings, both endpoint paths, DNS, topology, resolver, trusted services, and the existing policyProfile fingerprint.
+The sandbox-placement/v9 profile includes these settings, both endpoint paths, DNS, topology, resolver, trusted services, and the existing policyProfile fingerprint.
 Changing a firewall or endpoint address changes launch and converted-image ownership.
 Settings reject a stale profile before credentials are constructed.
 Earlier staged profiles require regeneration. No native command currently loads those profiles.
@@ -111,7 +111,8 @@ The resolver stage now checks selected policy, actual association, and other rep
 The service stage now checks selected relay and backend metadata, fixed definitions, identity exposure, and revisions.
 The backend endpoint stage now binds selected approval, NIC address, network policy, and the relay's configured readiness address.
 The [relay network stage](azure-sandbox-relay-network.md) now verifies the selected VNet, egress policy, registry endpoint, DNS, and pull grant.
-Complete registry inventory, identity host attachment, additional grants, deny effects, and write protection.
+The [registry service stage](azure-sandbox-registry-service.md) now verifies access policies and complete reported consumer, member, and replication inventories.
+Complete trusted consumer network ownership, identity host attachment, additional grants, deny effects, and write protection.
 Then wire the scoped execution and discovery commands and package their dependencies.
 Verify actual preview-service behavior, registry conversion access, timer execution, token audience, and proxy trust during separate deployment acceptance.
 

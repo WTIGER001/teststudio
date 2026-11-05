@@ -28,7 +28,7 @@ The endpoint and relay prefixes cannot overlap each other or the execution VNet.
 The endpoint subnet has a size of /29 or larger. The relay subnet has a size of /27 or larger.
 The existing backend.address must be usable in the endpoint subnet, outside Azure's reserved addresses.
 Foreign resources, reused resources, mismatched addresses, overlaps, and stale profiles reject before credential construction.
-The sandbox-placement/v8 profile binds these settings with the existing service and network configuration.
+The sandbox-placement/v9 profile binds these settings with the existing service and network configuration.
 Older staged profiles require regeneration. No native command currently loads them.
 
 BackendEndpointDefinitions returns two reviewable bodies: endpoint subnet and endpoint security group.
@@ -122,7 +122,8 @@ Owned TLS listeners close through test cleanup. No cloud service, browser, conta
 ### Complete native activation
 
 The [relay network stage](azure-sandbox-relay-network.md) now binds the selected VNet and private registry path.
-Complete registry inventory, workload placement, identity host attachment, effective grants, deny effects, and protected writes.
+The [registry service stage](azure-sandbox-registry-service.md) now verifies access policies and complete reported consumer, member, and replication inventories.
+Complete trusted consumer network ownership, workload placement, identity host attachment, effective grants, deny effects, and protected writes.
 Then wire scoped execution and discovery commands and complete deployment packaging.
 Verify actual private routing, platform readiness, TLS trust, dependency access, preview compatibility, and independent deadlines during separate deployment acceptance.
 

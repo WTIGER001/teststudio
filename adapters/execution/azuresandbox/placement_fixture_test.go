@@ -73,6 +73,7 @@ func newPlacementWorld(t *testing.T, s Settings) *placementWorld {
 	w.addServices()
 	w.addBackendEndpoint()
 	w.addRelayNetwork()
+	w.addRegistryService()
 	return w
 }
 
@@ -103,6 +104,9 @@ func (w *placementWorld) Do(r *http.Request) (*http.Response, error) {
 	}
 	if version == "" {
 		version = relayNetworkVersions(w.s)[r.URL.Path]
+	}
+	if version == "" {
+		version = registryServiceVersions(w.s)[r.URL.Path]
 	}
 	if version == "" && r.URL.Path == "/subscriptions/"+w.s.Worker.Subscription+"/providers/Microsoft.Network/privateDnsZones" {
 		version = "2024-06-01"

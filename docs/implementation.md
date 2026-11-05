@@ -122,6 +122,37 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: sandbox complete reported registry service inventory
+
+OpenRuntime now constructs SDKRegistryService with the existing metadata identity.
+Creation, source import, and live admission verify private access policies and complete reported approvals, private-link members, and replications.
+The expected consumer set includes the sandbox and relay registry endpoints plus up to six explicitly configured trusted private endpoints.
+The complete embedded and separately listed approvals must agree on each endpoint's connection identifier.
+Missing or pending approval stays unavailable. Extra, duplicate, foreign, rejected, or disconnected consumers reject.
+The selected region, data hostname, Premium SKU, registry group, required members, private zone, and home-region replica contract must match.
+Registry policies require disabled public, administrator, anonymous, task-bypass, and export access, with fixed role and authentication modes.
+The shared pure RegistryServiceBinding retains the existing guard's behavior without ordinary Jobs configuration.
+
+The sandbox-placement/v9 profile binds additional consumers.
+Invalid scopes, aliases, duplicate consumers, and stale profiles reject before credentials.
+The reader copies the consumer list. Later caller edits cannot change its admitted expectations.
+SDK metadata conversion preserves absence of the optional SKU tier while retaining an explicitly incompatible value for rejection.
+Four selected GET paths use bounded complete pagination, joined reads, existing response guards, and redacted failures.
+Fresh creation and import observations and bounded shared live evidence preserve uncached protection and authorization.
+Runtime shutdown closes the new reader.
+
+Six new checks and seven affected native checks pass with race detection in 3.117 seconds.
+Four existing shared registry checks pass with race detection in 3.068 seconds.
+Evidence is output/azure-sandbox-registry-service/summary.json, native.log, and shared.log.
+Checks use local SQLite, fake credentials, and in-memory ARM responses.
+No cloud service, browser, container, UI build, demo restart, resource mutation, or remote push is involved.
+The active plan and affected operator guides match the change. User pages do not change.
+
+Additional declared consumer endpoints still require actual network and workload ownership binding.
+Effective grants, identity host attachment, deny effects, protected writes, command wiring, and deployment packaging remain unfinished.
+Reported inventory does not prove private image pulls, publication, conversion, routing, or preview compatibility.
+Acceptance **51** advances. No acceptance item closes. The total remains **48 verified, 9 open**.
+
 ## Current delivery: sandbox relay network and private registry binding
 
 OpenRuntime now constructs SDKRelayNetwork with the existing metadata identity.

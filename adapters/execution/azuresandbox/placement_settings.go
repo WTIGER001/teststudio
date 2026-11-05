@@ -10,18 +10,19 @@ import (
 const pullRole = "/providers/Microsoft.Authorization/roleDefinitions/7f951dda-4ed3-4680-a7ca-43fe172d538d"
 
 type PlacementSettings struct {
-	Subnet          string           `json:"subnet"`
-	SubnetPrefix    string           `json:"subnetPrefix"`
-	SecurityGroup   string           `json:"securityGroup"`
-	RouteTable      string           `json:"routeTable"`
-	Registry        string           `json:"registry"`
-	PullAssignment  string           `json:"pullAssignment"`
-	PullClientID    string           `json:"pullClientId"`
-	PullPrincipalID string           `json:"pullPrincipalId"`
-	PolicyProfile   string           `json:"policyProfile"`
-	Network         NetworkSettings  `json:"network"`
-	Private         PrivateSettings  `json:"private"`
-	Services        ServicesSettings `json:"services"`
+	RegistryConsumers []string         `json:"registryConsumers"`
+	Subnet            string           `json:"subnet"`
+	SubnetPrefix      string           `json:"subnetPrefix"`
+	SecurityGroup     string           `json:"securityGroup"`
+	RouteTable        string           `json:"routeTable"`
+	Registry          string           `json:"registry"`
+	PullAssignment    string           `json:"pullAssignment"`
+	PullClientID      string           `json:"pullClientId"`
+	PullPrincipalID   string           `json:"pullPrincipalId"`
+	PolicyProfile     string           `json:"policyProfile"`
+	Network           NetworkSettings  `json:"network"`
+	Private           PrivateSettings  `json:"private"`
+	Services          ServicesSettings `json:"services"`
 }
 
 func resourceID(c Config, id, provider, kind string) bool {
@@ -59,7 +60,10 @@ func (p PlacementSettings) validate(c Config) error {
 	if err := p.Network.Resolver.validate(c); err != nil {
 		return err
 	}
-	return p.Services.validate(c, p)
+	if err := p.Services.validate(c, p); err != nil {
+		return err
+	}
+	return p.validateRegistryConsumers(c)
 }
 
 func (p PlacementSettings) NetworkProfile(c Config) (string, error) {
@@ -69,7 +73,7 @@ func (p PlacementSettings) NetworkProfile(c Config) (string, error) {
 		return "", hostedexecution.ErrConfiguration
 	}
 	c.NetworkProfile = ""
-	return hash([]any{"sandbox-placement/v8", c, p}), nil
+	return hash([]any{"sandbox-placement/v9", c, p}), nil
 }
 
 func (c Config) groupID() string {
