@@ -122,7 +122,39 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: selected VNet and private-zone deny observation
+## Current delivery: observer identity and selected subscription read grant
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+ReadIdentityGuard now binds a separate user-assigned identity to its reported client, principal, tenant, exact subscription assignment, and custom role.
+It rejects reuse of the known worker pull and backend identities, delegated grants, conditions, different scopes, or substituted principals.
+The fixed selected role permits only management reads and the existing bodyless DNS-association observation.
+It permits no write, join, data action, permission exclusion, broader management action, or role-management action.
+Returned installation definitions are fresh SDK values. They issue no cloud mutation.
+
+Three concurrent selected GETs follow one fresh complete protection inspection. No parent observation repeats.
+The composed context is 125 seconds, with at most 2196 requests including bounded reported-subscription inventory.
+The reader requires an explicit credential, exact resource paths, and exact API versions. It disables retries and provider registration.
+The dependency change adds stable armmsi v1.3.0 and its two checksum entries. Existing dependency versions remain unchanged.
+The existing authorization SDK supplies the selected assignment and role reads.
+Credential constructs an explicit ManagedIdentityCredential using the verified observed client identifier, with no default fallback.
+It performs no token request. It does not prove host attachment, actual bootstrap credential identity, or effective read access.
+
+Five new focused race checks and one selected existing protection regression pass in 4.003 seconds.
+The initial observed command fails on the SDK GetByID disambiguation query. Scoped Get corrects the request without widening the transport boundary.
+The same six targeted checks then pass. No broad suite repeats.
+Coverage includes freshness, parent gating, principal changes, scope changes, extra authority, conditions, missing metadata, SDK scope, and frozen settings.
+A private credential factory spy verifies client selection without a real managed identity credential or token request.
+Fixtures use explicit fake credentials and in-memory SDK responses. They open no network connection or listener.
+No cloud operation, browser, UI build, image build, container, registry push, deployment, or demo restart runs.
+Evidence is output/azure-read-identity/summary.json and the targeted command results.
+See [observer identity and selected read grant](azure-read-identity.md).
+
+Continue native observer credential wiring and effective read coverage. One selected matching grant does not prove absence of other grants or effective denies.
+Deployed protection, clean provenance or authoritative existing cross-scope visibility, protection-management authority, attachment controls, and native isolation remain required.
+This stage implements no Network and enables no Azure coded execution. All nine broad acceptance items remain open.
+
+## Previous delivery: selected VNet and private-zone deny observation
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 

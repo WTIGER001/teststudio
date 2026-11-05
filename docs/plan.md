@@ -357,7 +357,17 @@ Four new focused race checks pass for the five-resource contract. Two selected e
 See [selected network and DNS deny observation](azure-network-deny.md). Acceptance 51 advances; the count remains 48 of 57.
 No cloud operation, UI build, image build, browser, container, registry push, deployment, or demo restart runs.
 
-Next verify actual resource-scoped assignment provisioning and enforcement, effective read coverage, and authority to change the owning protection arrangement.
+The observer identity stage now binds a separate user-assigned identity to its reported client, principal, tenant, and selected subscription-root grant.
+The fixed custom role permits only management reads and the existing bodyless DNS-association observation, without exclusions, data access, or conditions.
+An explicit credential factory selects the verified observed client identifier without a default-credential fallback or token request during construction.
+Three concurrent selected GETs add no duplicate parent observation. Complete native credential wiring and effective authorization remain unproven.
+The SDK uses the scoped role lookup. Its GetByID disambiguation query exceeds the exact transport boundary and is rejected.
+Five new focused race checks and one selected existing protection regression pass locally in 4.003 seconds.
+See [observer identity and selected read grant](azure-read-identity.md). Acceptance 51 advances; the count remains 48 of 57.
+No cloud operation, browser, UI build, image build, container, registry push, deployment, or demo restart runs.
+
+Next bind the verified observer credential to actual inspection clients and verify effective read coverage.
+Verify actual resource-scoped assignment provisioning and enforcement, and authority to change the owning protection arrangement.
 Establish authoritative existing cross-scope visibility or clean installation provenance. Observed deny assignments do not remove pre-existing foreign links.
 Continue environment attachment control, remaining perimeter protection, and trusted preparation networking.
 A completed list response does not prove authorization coverage or prevent later attachments. Keep those native installation controls mandatory.

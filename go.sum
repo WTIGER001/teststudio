@@ -20,6 +20,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dnsresolver/armdnsresolver
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dnsresolver/armdnsresolver v1.3.0/go.mod h1:Rwggm+UIAtUyKV+chyaPaUeiVeP7Y+XtXH7/BSI2J8A=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/logic/armlogic v1.2.0 h1:EMNgS+pCj2/2LL7+nWG8zPf9sp4u8icP5FNwoBhyc8M=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/logic/armlogic v1.2.0/go.mod h1:TsM36SmGxYC24DiOTR9wPuBj5HYphihMC6xlnX536bE=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/msi/armmsi v1.3.0 h1:L7G3dExHBgUxsO3qpTGhk/P2dgnYyW48yn7AO33Tbek=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/msi/armmsi v1.3.0/go.mod h1:Ms6gYEy0+A2knfKrwdatsggTXYA2+ICKug8w7STorFw=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v8 v8.0.0 h1:7QO7GhGat25QEYL4h607O9zNNTUlAv8PbSesW6Ol5Gg=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v8 v8.0.0/go.mod h1:mCqeYzwyjn/pw0JVqHJMIzfUQJrlcV0YjTg5b0NK+F0=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/privatedns/armprivatedns v1.3.0 h1:yzrctSl9GMIQ5lHu7jc8olOsGjWDCsBpJhWqfGa/YIM=
