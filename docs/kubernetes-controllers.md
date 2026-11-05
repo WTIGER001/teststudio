@@ -9,9 +9,9 @@ This package supports independent replica counts and restarts without making eac
 The default remains the combined single-instance profile.
 
 Three targeted local profiles and four rejected configurations pass Helm rendering and pinned schema checks.
-Actual separate-controller deployment and concurrent replica failover remain the next local milestone.
-The existing cluster still runs Helm revision 8 with the combined profile.
-The acceptance count remains 48 of 57. Azure implementation remains deferred.
+Actual separate-controller deployment and peer failover now pass on the dedicated local cluster through Helm revision 9.
+See [local controller failover](local-kubernetes-controllers.md) for preserved evidence and the acceptance 52 audit.
+The acceptance count is 49 of 57. Azure implementation remains deferred.
 
 ## Concepts
 
@@ -81,9 +81,10 @@ It verifies command roles, configuration separation, service accounts, secret re
 It rejects missing workers, ReadWriteOnce evidence, selector overrides, and zero replicas.
 It contacts no Kubernetes cluster or cloud account.
 
-### Continue local failover verification
+### Recreate local failover verification
 
-Preserve the current installation's artifact claim and retained run identifiers before changing storage.
+The current local installation already passes this workflow. Reuse its saved records during ordinary continuation.
+Preserve the installation's artifact claim and retained run identifiers before changing storage.
 Prepare local shared storage and copy only this installation's evidence during a controlled writer stop.
 Keep the previous claim for rollback. Do not rerun tests to recreate their history.
 Deploy two controllers with the API execution worker disabled.

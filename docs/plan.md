@@ -16,7 +16,7 @@ The full product scope remains required. This direction supersedes the testing s
 ## Active delivery plan after the tester walkthrough
 
 This section is the current implementation order. Historical continuation commands below do not override it.
-The local demonstration is usable and verified. The complete product remains unfinished at 48 verified items out of 57.
+The local demonstration is usable and verified. The complete product remains unfinished at 49 verified items out of 57.
 Ordinary project creator access and the first environment-backed local recorded website flow pass targeted verification.
 Tester investigation, failure recovery, and local manual/scheduled runner parity pass targeted verification.
 Continue source-workflow, access, storage, and hosted packaging gaps. Reuse passing runner evidence.
@@ -43,7 +43,7 @@ Deliver observable milestones in this order:
 | Chart installation with local PostgreSQL and private evidence | Verified startup. Helm release teststudio is deployed. PostgreSQL and service Pods are Ready; both persistent claims are Bound. |
 | Newly authored HTTPS probe through the installation | Verified. Normal OIDC sign-in, catalog publication, execution, measured TLS, logs, and checksum-verified private evidence download pass. |
 | Isolated Go and Playwright workers | Verified basic workflows. Fresh Go and Playwright bundles pass actual registry assembly, isolated discovery, publication, timed execution, private evidence, and cleanup. |
-| Cancellation, independent deadlines, and interrupted-worker recovery | Cancellation, test timeout, and abrupt controller restart pass. Independent deadline enforcement also passes. Separate-controller deployment and concurrent replica failover remain next. |
+| Cancellation, independent deadlines, and interrupted-worker recovery | Cancellation, test timeout, and abrupt controller restart pass. Independent deadline enforcement also passes. Separate-controller deployment and actual peer failover now pass. Acceptance 52 is complete. |
 
 The private kubeconfig uses the observed loopback API mapping and mode 0600. Helm host connectivity passes.
 CoreDNS, storage provisioning, metrics, and Traefik report Running. The default Docker context remains unchanged.
@@ -72,8 +72,10 @@ The deployed fix passes an actual timeout rerun with its parent link, one select
 The actual independent deadline case stops guest processes and the controller while Kubernetes terminates the original Pod with DeadlineExceeded.
 Its original 15-second Pod deadline remains unchanged. Termination includes the configured grace period; no test duration is inferred.
 The optional separate-controller Helm package now supplies dedicated identity, reader-only configuration, health, storage checks, and replica settings.
-Three targeted package profiles and four rejected configurations pass. Actual separate-controller deployment and concurrent failover remain next.
-See [controller packaging](kubernetes-controllers.md) and [local lifecycle](local-kubernetes-lifecycle.md). Advance 41, 51, 52, and 56 without closing their full scope.
+Three targeted package profiles and four rejected configurations pass. Helm revision 9 now runs two controllers with shared evidence. Actual peer failover and notification acceptance uncertainty close 52.
+The current total is 49 verified, eight open. The next local milestone is a second installation-specific OIDC provider and scoped directory behavior.
+See [actual controller failover](local-kubernetes-controllers.md), [controller packaging](kubernetes-controllers.md), and [local lifecycle](local-kubernetes-lifecycle.md).
+Acceptance 52 is complete. Advance 41, 51, and 56 while retaining their remaining profile scope.
 See [local Kubernetes](local-kubernetes.md) and output/local-k3s/cluster-summary.json for evidence and continuation instructions.
 
 Report which milestone runs on a real cluster and which checks remain simulated.

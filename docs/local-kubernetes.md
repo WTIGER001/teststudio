@@ -28,7 +28,7 @@ The selected cluster API uses loopback only. Its ingress maps to loopback port 1
 No user kubeconfig is merged or selected. Every cluster command must use the private kubeconfig or dedicated Docker socket.
 The official [k3d release](https://github.com/k3d-io/k3d/releases/tag/v5.9.0) supplies the verified tool and its release checksums.
 
-TestStudio is installed through the actual Helm chart in namespace teststudio-local, release teststudio, revision 8.
+TestStudio is installed through the actual Helm chart in namespace teststudio-local, release teststudio, revision 9.
 The service and fresh PostgreSQL Pods are Ready. Separate database and evidence claims are Bound with 2 GiB each.
 The service uses the locally imported immutable ARM64 manifest. No registry push or cloud account is required.
 The UI, API health, and artifact health return 200 through TLS ingress with certificate verification.
@@ -52,10 +52,12 @@ See [local source execution](local-kubernetes-source-execution.md) for their ret
 Cancellation, separate timeout status, timeout reruns, and abrupt controller restart now pass on this cluster.
 See [local lifecycle](local-kubernetes-lifecycle.md) for retained evidence and first-attempt cleanup after asynchronous deletion.
 An independent Pod deadline now passes while guest processes and the controller are stopped.
-Concurrent replica failover remains unverified. The separate-controller package is implemented but not yet installed here.
+Two separate controllers now pass actual peer failover and close acceptance 52.
+The API execution worker is disabled. Shared NFS storage retains the original artifact bytes.
+See [local controller failover](local-kubernetes-controllers.md) for evidence and the current values file.
 Actual gVisor runtime execution and selective worker network denial now pass. See [worker isolation](local-kubernetes-isolation.md).
 The single-Pod restart does not establish replica failover or cross-provider parity.
-The 57-item ledger remains at 48 verified and nine open items.
+The 57-item ledger now has 49 verified and eight open items.
 
 ### Evidence and ownership
 
@@ -103,7 +105,8 @@ HELM_DRIVER=secret .data/kubernetes-tools/helm list \
   --kube-context=k3d-teststudio-local --namespace=default
 ```
 
-The installed chart now uses .data/local-k3s/preparation-values.json.
+The installed chart now uses .data/local-k3s/controller-values.json.
+The earlier preparation-values.json and before-controller-values.json preserve the combined-profile configuration.
 The earlier core and isolation values remain in values.json and worker-values.json.
 Its dependency manifest is dependencies.private.json in that directory.
 Do not reapply that manifest with a new password against the existing database volume.

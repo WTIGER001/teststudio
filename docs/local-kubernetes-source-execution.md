@@ -6,14 +6,15 @@ Fresh Go and Playwright suites now pass through the actual local Kubernetes inst
 The workflow uses normal OIDC sign-in, ZIP upload, registry assembly, isolated discovery, reviewed publication, execution, timing, and private evidence.
 It copies no existing application tests, data, or infrastructure configuration.
 Cancellation, test timeouts, and interrupted-controller recovery now pass actual local verification.
-Independent Pod deadline enforcement also passes. Concurrent replica failover remains a separate step. See [local lifecycle](local-kubernetes-lifecycle.md).
-The overall acceptance count remains 48 of 57. Azure implementation remains deferred.
+Independent Pod deadline enforcement also passes. Controller peer failover now passes through a separate recorded case. See [local lifecycle](local-kubernetes-lifecycle.md).
+The overall acceptance count is 49 of 57. Azure implementation remains deferred.
 
 ## Concepts
 
 ### Current installation
 
-Helm release teststudio now uses revision 8 and .data/local-k3s/preparation-values.json.
+Helm release teststudio now uses revision 9 and .data/local-k3s/controller-values.json.
+The API execution worker is disabled and two separate controllers share retained evidence through NFS.
 The API and preparation workload run separately against the dedicated PostgreSQL database.
 Preparation uses its own service account, projected Kubernetes identity, registry writer references, and retained private journal claim.
 The API receives only the registry reader references.
@@ -125,7 +126,8 @@ Retain registry storage while published releases or retained observations requir
 
 Cancellation, timeout, and interrupted-controller cases now have saved references in output/local-k3s/lifecycle.
 Independent deadline evidence now lives in output/local-k3s/deadline.
-Continue with separate-controller deployment and concurrent replica failover without repeating those passing cases.
+Separate controllers now pass peer failover. See [local controller failover](local-kubernetes-controllers.md).
+Continue with the second installation-specific OIDC provider without repeating those passing cases.
 Keep all worker execution on the dedicated local cluster and retain actual provider status and cleanup evidence.
 Environment-backed remote gateway delivery and cloud-target verification remain open.
 

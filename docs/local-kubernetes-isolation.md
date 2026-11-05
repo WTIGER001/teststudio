@@ -5,7 +5,7 @@
 The dedicated local k3s cluster now runs an actual gVisor diagnostic Pod and enforces selective worker network policy.
 This verifies worker prerequisites. Fresh Go and Playwright suites now also pass [actual source execution](local-kubernetes-source-execution.md).
 Cancellation, deadlines, and recovery remain pending.
-The verified acceptance total remains 48 of 57. Azure implementation remains deferred.
+The verified acceptance total is 49 of 57. Azure implementation remains deferred.
 
 ## Concepts
 
@@ -31,7 +31,8 @@ See [containerd configuration](https://gvisor.dev/docs/user_guide/containerd/con
 ### Private routing and policy
 
 The isolation phase uses Helm revision 3 and .data/local-k3s/worker-values.json.
-The current source-enabled installation uses revision 8 and .data/local-k3s/preparation-values.json.
+The current source-enabled installation uses revision 9 and .data/local-k3s/controller-values.json.
+Its separate controllers and retained evidence storage pass actual peer failover. See [local controllers](local-kubernetes-controllers.md).
 The worker namespace is teststudio-workers. Its RuntimeClass, restricted service account, projected controller identity, and network policy are installed.
 The chart uses workers.privateIngress.enabled=false with an externally supplied local TLS proxy.
 The proxy runs in teststudio-private-routing, accepts the worker hostname, and exposes only the private execution path prefix.

@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 48 verified of 57.
+The acceptance count is 49 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Active application navigation correction — 2026-11-04
@@ -115,7 +115,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **49.** Light, dark, and system modes pass browser workflow and keyboard checks.
 - [x] **50.** Every current page provides a contextual help drawer with Introduction, Concepts, Tutorials, and verified keyboard and mobile behavior.
 - [ ] **51.** Provider adapters support execution status, cancellation, deadlines, artifacts, and recovery consistently.
-- [ ] **52.** Replica failover creates no duplicate logical run. Notification retries retain their documented at-least-once behavior.
+- [x] **52.** Replica failover creates no duplicate logical run. Notification retries retain their documented at-least-once behavior.
 - [ ] **53.** Local, Kubernetes, and Azure installations operate without AWS services or credentials.
 - [ ] **54.** Two newly configured OIDC providers work with the same internal directory and project-scoped permissions across deployment profiles.
 - [ ] **55.** Hosted identity and private report access work through installation-specific configuration.
@@ -152,7 +152,7 @@ After service Pod replacement, fresh OIDC sign-in reads the same single run and 
 This verifies core persistence across that restart. It does not establish replica failover or coded-worker recovery.
 Evidence is output/local-k3s/probe/summary.json and the adjacent retained run, event, attempt, artifact, and log records.
 No browser, AWS, or Azure test runs. This advances the Kubernetes portions of 51, 55, and 56 without closing their full scope.
-The next measurable result is separate-controller deployment and concurrent replica failover.
+The next measurable result is a second installation-specific OIDC provider on Kubernetes.
 The local cluster now runs the verified gVisor 20261005.0 package through RuntimeClass teststudio-isolated.
 An actual non-root diagnostic Pod reports the gVisor kernel and exits zero.
 The chart can use external private TLS routing while preserving the worker Service, controller permissions, and exact policy peers.
@@ -219,6 +219,27 @@ Three focused package profiles and four rejected configurations pass. One target
 The current cluster remains on combined Helm revision 8. Separate-controller deployment and concurrent failover remain unverified.
 See [local lifecycle](local-kubernetes-lifecycle.md) and [controller packaging](kubernetes-controllers.md) for evidence and continuation steps.
 This advances 41, 51, 52, and 56. The acceptance total remains **48 verified, 9 open**. Azure remains deferred.
+
+## Acceptance 52 complete: actual controller peer failover — 2026-11-05
+
+Helm revision 9 runs one API and two separate controllers on the dedicated local cluster.
+The API execution worker is disabled. Shared NFS evidence uses the original artifact claim without copying bytes or recreating history.
+An earlier browser screenshot remains downloadable with its stored size and checksum.
+Run 20261105T161905.063920611-46e31390481d4b43ad92cdba records one winning controller claim.
+The verifier stops that exact owner before SIGKILL and excludes replacement controllers while the original peer remains Ready.
+The peer retains its Pod UID, container identity, process, and restart count through recovery and cleanup.
+The original execution recovers a passing 20000 ms observation with complete private evidence. Its private download passes checksum verification.
+The interrupted logical run remains incomplete with unknown outcome. There is one attempt and one execution, with no duplicate logical run.
+Both controller replicas are restored and no test worker remains. This proves controller failure on one node, not node or storage fault tolerance.
+
+The criterion's notification half passes one focused local check with an actual HTTP receiver and a second database connection.
+It retries uncheckpointed acceptance with the same delivery and run identities, retains unknown acceptance, and executes the test exactly once.
+This preserves the documented at-least-once behavior without repeating tests.
+Evidence is output/local-k3s/controllers/summary.json and notification-recovery-check.log.
+The complete saved lifecycle run set contains eight intended observations, including the two retained deadline-fixture errors.
+See [local controller failover](local-kubernetes-controllers.md) for exact identities, storage, cleanup, rollback, and continuation instructions.
+Acceptance **52 is complete**. The total is **49 verified, 8 open**: 41, 46, 51, 53, 54, 55, 56, and 57.
+Other deployment profiles remain unverified. Azure implementation stays deferred.
 
 ## Current direction: Azure deferred; local Kubernetes integration
 

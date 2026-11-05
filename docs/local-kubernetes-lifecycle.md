@@ -5,7 +5,7 @@
 New bounded Go checks exercise cancellation, test timeouts, and an abrupt controller interruption on the dedicated local cluster.
 They use the normal source preparation, publication, run, evidence, and cleanup contracts.
 They use no cloud account or external application. Azure work remains deferred.
-The acceptance total remains 48 of 57. These results advance the Kubernetes portions of 41, 51, 52, and 56.
+The acceptance total is 49 of 57. These results advance the Kubernetes portions of 41, 51, 52, and 56.
 
 ## Concepts
 
@@ -55,7 +55,7 @@ A private go-events.jsonl download passes size and SHA-256 checks after the subs
 The execution records recovered=true and reaches cleaned. The original worker Pod disappears.
 The logical run remains incomplete with unknown outcome and a visible interruption notice.
 Recovery does not invent a completed run or create another execution.
-This proves restart recovery for one controller. Concurrent replica failover remains unverified.
+This proves restart recovery for one controller. A separate [peer failover case](local-kubernetes-controllers.md) now passes with two controllers.
 
 ### Independent Kubernetes deadline
 
@@ -102,8 +102,8 @@ Recovery provider history preserves observed identity and state changes without 
 The private registry and local PostgreSQL remain available for later cases.
 No host browser or automation daemon starts. The existing user demo remains on port 8040.
 
-Concurrent replica failover and cloud profiles remain open.
-Do not infer those properties from the independent deadline or this single-controller restart.
+Controller peer failover now passes through a separate recorded case and closes acceptance 52.
+Cloud deployment profiles remain open. Do not infer node or storage fault tolerance from these local cases.
 
 ## Tutorials
 
@@ -130,8 +130,8 @@ All Kubernetes operations use the owned node and its explicit local kubeconfig.
 ### Continue implementation
 
 Independent deadlines now have actual termination evidence. Reuse those records rather than repeating the pause experiment.
-Deploy the optional [separate controllers](kubernetes-controllers.md) with shared evidence storage.
-Then verify concurrent replica failover without duplicate logical runs or replacement executions.
+The optional [separate controllers](kubernetes-controllers.md) now run with shared evidence storage and pass peer failover.
+Continue with a second installation-specific OIDC provider and project-scoped directory verification on this profile.
 Keep Azure implementation and live cloud verification deferred.
 
 Related guides: [source execution](local-kubernetes-source-execution.md), [worker contract](kubernetes-workers.md), and [implementation ledger](implementation.md).
