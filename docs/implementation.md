@@ -152,7 +152,7 @@ After service Pod replacement, fresh OIDC sign-in reads the same single run and 
 This verifies core persistence across that restart. It does not establish replica failover or coded-worker recovery.
 Evidence is output/local-k3s/probe/summary.json and the adjacent retained run, event, attempt, artifact, and log records.
 No browser, AWS, or Azure test runs. This advances the Kubernetes portions of 51, 55, and 56 without closing their full scope.
-The next step is to audit the seven remaining deployment-specific criteria before adding more checks.
+The next step is Kubernetes trusted gateway implementation for environment-backed browser and coded API suites.
 The local cluster now runs the verified gVisor 20261005.0 package through RuntimeClass teststudio-isolated.
 An actual non-root diagnostic Pod reports the gVisor kernel and exits zero.
 The chart can use external private TLS routing while preserving the worker Service, controller permissions, and exact policy peers.
@@ -258,6 +258,23 @@ Evidence is output/local-k3s/identity/summary.json with issuer links, directory 
 See [local hosted identity](local-kubernetes-identity.md) for the complete acceptance audit and continuation instructions.
 Acceptance **55 is complete**. The total is **50 verified, 7 open**: 41, 46, 51, 53, 54, 56, and 57.
 Acceptance 54 keeps its cross-profile requirement. AWS and Azure deployment verification remain separate, and Azure implementation stays deferred.
+
+## Remaining deployment audit — 2026-11-05
+
+The seven remaining criteria are audited against current source, deployment packages, and retained local evidence.
+Hosted admission explicitly rejects browser-target artifacts and required credential bindings.
+The Kubernetes provider currently requires an empty gateway reference. Its worker policy allows only private exchange and DNS traffic.
+Environment-backed browser and coded API execution therefore still require trusted gateway implementation.
+The working local gateway uses a Docker lifecycle and Unix transport. It is not a remote Kubernetes or ECS gateway.
+Native recording also requires the server's local desktop. Hosted authoring still needs a scoped local companion or streamed browser.
+Azure native coded execution and discovery wiring remain unfinished and deferred.
+Shared timing, evidence, and identity engines have implementation and local evidence. Their cross-profile verification gates remain open.
+
+The active queue now prioritizes a complete Kubernetes gateway, its shared ECS contract, and the hosted recorder companion.
+Reuse existing policy, credential, redaction, timing, source, and lifecycle contracts. Keep current admission barriers until the replacement boundary works.
+No tests, cloud connections, application restarts, or new test runs occur for this documentation audit.
+See [deployment readiness](deployment-readiness.md) for each criterion's implementation gap, verification gate, and continuation sequence.
+The count remains **50 verified, 7 open**. No additional acceptance closes.
 
 ## Current direction: Azure deferred; local Kubernetes integration
 

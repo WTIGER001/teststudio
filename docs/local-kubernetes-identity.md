@@ -99,8 +99,8 @@ No UI build, browser automation, cloud connection, or test execution is required
 
 ### Continue the plan
 
-Audit the remaining seven deployment-specific criteria against implementation files and retained evidence before adding more checks.
-Separate missing implementation from verification that requires deferred cloud targets.
+The [deployment readiness audit](deployment-readiness.md) now maps each of the seven open criteria to its implementation and verification gaps.
+Continue with the Kubernetes trusted gateway for environment-backed browser and coded API suites.
 Keep the full 57-item scope and Azure deferral intact.
 
 Related guides: [provider management](providers.md), [local controller failover](local-kubernetes-controllers.md), and [acceptance ledger](implementation.md).

@@ -2,6 +2,11 @@
 
 ## Current scope
 
+The [deployment readiness audit](deployment-readiness.md) is the active delivery queue. Azure implementation remains deferred.
+Actual local Kubernetes offline execution, independent deadlines, and controller peer recovery now pass.
+Trusted gateways for environment-backed browser and API work remain the next implementation gap.
+The Azure stage descriptions below record preserved work and do not authorize its continuation.
+
 The [Azure provider](azure-worker-lifecycle.md) now implements asynchronous dispatch, ownership checks, cancellation, and durable recovery.
 The [ACR authentication adapter](azure-registry-authentication.md) now supports trusted immutable-image inspection.
 The [independent deadline adapter](azure-worker-deadlines.md) now provides durable timer resources.

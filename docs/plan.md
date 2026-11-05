@@ -19,7 +19,8 @@ This section is the current implementation order. Historical continuation comman
 The local demonstration is usable and verified. The complete product remains unfinished at 50 verified items out of 57.
 Ordinary project creator access and the first environment-backed local recorded website flow pass targeted verification.
 Tester investigation, failure recovery, and local manual/scheduled runner parity pass targeted verification.
-Continue source-workflow, access, storage, and hosted packaging gaps. Reuse passing runner evidence.
+Implement the trusted hosted browser/API gateway, then the hosted recorder companion. Reuse passing runner evidence.
+The current [deployment readiness audit](deployment-readiness.md) separates implementation gaps from deferred verification gates.
 Do not add new dashboard pages or repeat completed demonstration setup before closing the remaining workflow gaps.
 
 ### Latest user direction: defer Azure and exercise local Kubernetes
@@ -77,7 +78,7 @@ Three targeted package profiles and four rejected configurations pass. Helm revi
 A second independent issuer now passes normal sign-in, issuer separation, provider-owned project access, and private report authorization.
 Existing-session and existing-artifact-grant access reject immediately while the project role is revoked. The role is restored without another test run.
 This actual hosted configuration closes acceptance 55. The total is 50 verified, seven open.
-See [local hosted identity](local-kubernetes-identity.md). Audit the remaining deployment-specific gaps before adding checks or resuming deferred cloud work.
+See [local hosted identity](local-kubernetes-identity.md). The [deployment audit](deployment-readiness.md) now records the seven remaining criteria and their exact gaps.
 See [actual controller failover](local-kubernetes-controllers.md), [controller packaging](kubernetes-controllers.md), and [local lifecycle](local-kubernetes-lifecycle.md).
 Acceptance 52 is complete. Advance 41, 51, and 56 while retaining their remaining profile scope.
 See [local Kubernetes](local-kubernetes.md) and output/local-k3s/cluster-summary.json for evidence and continuation instructions.
@@ -86,6 +87,22 @@ Report which milestone runs on a real cluster and which checks remain simulated.
 Use targeted checks and fix concrete integration failures. Do not substitute more generated-resource fixtures for running the application.
 Keep all 57 acceptance items and the verified count unchanged until their full evidence exists.
 Cloud-wide acceptance remains separate. Continue independent remaining product work without waiting for Azure.
+
+### Current queue after the deployment audit
+
+The current code still rejects environment-backed hosted browser and API artifacts because no trusted remote gateway is wired.
+The local Docker gateway and desktop recorder do not provide that hosted path.
+This is implementation work, not a reason to repeat offline runner checks or wait for an Azure account.
+
+1. Implement the Kubernetes trusted gateway using the current target, request-policy, credential, redaction, and durable execution contracts.
+2. Verify one new environment-backed browser and coded API flow on the dedicated local cluster, with targeted boundary and lifecycle checks.
+3. Port the completed shared gateway contract to ECS packaging and adapters using local contract checks.
+4. Add a scoped local recorder companion for hosted authoring, preserving the existing wizard and source workflow.
+5. Complete target verification only in separately authorized deployment work. Keep Azure implementation deferred.
+
+Keep all seven remaining acceptance items open: 41, 46, 51, 53, 54, 56, and 57.
+Read [deployment readiness](deployment-readiness.md) before the historical Azure continuation material below.
+Do not remove admission barriers or grant uploaded code direct target egress to bypass the missing gateway.
 
 ### Current decisions
 
