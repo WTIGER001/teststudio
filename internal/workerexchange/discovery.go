@@ -9,6 +9,7 @@ import (
 
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/execution"
+	"github.com/wtiger001/teststudio/internal/preparation"
 	"github.com/wtiger001/teststudio/internal/suitespec"
 	"github.com/wtiger001/teststudio/internal/workerprotocol"
 )
@@ -40,7 +41,7 @@ func validateDiscoverySubmission(payload []byte, submission Submission) error {
 		return ErrInvalid
 	}
 	discovery, err := suitespec.DecodeDiscovery(report.Raw, input.Runner)
-	if err != nil || discovery.Manifest.Runner != input.Runner || discovery.Manifest.Suite != input.Suite || discovery.Origin.SnapshotDigest != input.SourceDigest || discovery.Manifest.Browser != nil || discovery.Manifest.RequestPolicy != "" || len(discovery.Manifest.RequiredBindings) != 0 || input.Runner == "go" && discovery.Manifest.BuildProfile != "go-module" || input.Runner == "playwright" && discovery.Manifest.BuildProfile != "playwright-node" || suitespec.ValidateDiscovery(discovery, input.Image) != nil {
+	if err != nil || discovery.Manifest.Runner != input.Runner || discovery.Manifest.Suite != input.Suite || discovery.Origin.SnapshotDigest != input.SourceDigest || !preparation.LocalSourceProfile(input.Runner, discovery.Manifest.BuildProfile) || discovery.Manifest.RequestPolicy != "" || discovery.Manifest.Browser == nil && len(discovery.Manifest.RequiredBindings) != 0 || discovery.Manifest.Browser != nil && (!input.Environment || discovery.Manifest.Browser.Requests != nil && !input.RequestPolicy) || suitespec.ValidateDiscovery(discovery, input.Image) != nil {
 		return ErrInvalid
 	}
 	return nil

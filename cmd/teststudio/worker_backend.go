@@ -12,6 +12,7 @@ import (
 	"time"
 
 	artifactconfig "github.com/wtiger001/teststudio/adapters/artifacts/config"
+	localsecrets "github.com/wtiger001/teststudio/adapters/secrets/local"
 	workerhttp "github.com/wtiger001/teststudio/adapters/workerexchange/http"
 	"github.com/wtiger001/teststudio/internal/artifacts"
 	"github.com/wtiger001/teststudio/internal/authorization"
@@ -29,13 +30,13 @@ func validateWorkerBackendFlags(flags *flag.FlagSet, address, location string) e
 	invalid := flags.NArg() != 0
 	flags.Visit(func(value *flag.Flag) {
 		switch value.Name {
-		case "serve-role", "worker-addr", "execution-location", "database", "database-env", "database-host", "require-postgres", "artifact-directory", "artifact-store-config", "artifact-store-env", "worker-origin", "worker-tls-certificate", "worker-tls-key":
+		case "serve-role", "worker-addr", "execution-location", "database", "database-env", "database-host", "require-postgres", "artifact-directory", "artifact-store-config", "artifact-store-env", "worker-origin", "worker-tls-certificate", "worker-tls-key", "secret-bindings":
 		default:
 			invalid = true
 		}
 	})
 	if invalid {
-		return errors.New("the worker service role accepts only worker address, execution location, database, artifact storage, and direct worker TLS settings")
+		return errors.New("the worker service role accepts only worker address, execution location, database, artifacts, direct TLS, and private gateway secret binding settings")
 	}
 	_, port, err := net.SplitHostPort(address)
 	number, numberErr := strconv.Atoi(port)
@@ -48,8 +49,12 @@ func validateWorkerBackendFlags(flags *flag.FlagSet, address, location string) e
 	return nil
 }
 
-func runWorkerBackend(ctx context.Context, address, location, connection, databaseEnvironment, artifactConfiguration, artifactEnvironment, artifactDirectory string, options workerTLSOptions) error {
+func runWorkerBackend(ctx context.Context, address, location, connection, databaseEnvironment, artifactConfiguration, artifactEnvironment, artifactDirectory, secretBindings string, options workerTLSOptions) error {
 	tlsConfig, authority, err := options.load(time.Now())
+	if err != nil {
+		return err
+	}
+	secretProvider, err := localsecrets.Load(secretBindings)
 	if err != nil {
 		return err
 	}
@@ -68,6 +73,7 @@ func runWorkerBackend(ctx context.Context, address, location, connection, databa
 	}
 	defer closeArtifacts()
 	exchange := workerBackendExchange(db, auth, blobs, location)
+	exchange.Secrets = secretProvider
 	server := workerBackendServer(address, db, exchange)
 	server.TLSConfig = tlsConfig
 	server.Handler = workerAuthorityHandler(server.Handler, authority)

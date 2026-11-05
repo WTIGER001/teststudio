@@ -2,13 +2,17 @@
 
 ## Service boundary
 
-The worker service role exposes the four [private worker exchange](worker-exchange.md) operations on one listener.
+The worker service role exposes the [private worker exchange](worker-exchange.md) operations on one listener.
+It also supports the separate gateway initialization and bridge connection operations.
 It also provides local readiness and liveness probes.
 It starts no UI, user API, sign-in flow, artifact viewer, scheduler, notification worker, preparation worker, or test executor.
 It creates no users or external providers and preserves the stored password sign-in mode.
 
 The [standalone relay](worker-relay.md) forwards worker requests to this trusted backend through a fixed HTTPS origin.
 The backend holds database and private artifact access. The relay holds neither.
+An optional --secret-bindings file lets the trusted backend resolve project-scoped gateway credentials.
+Only the gateway initialization ticket and bound gateway instance can fetch that private configuration.
+The standalone relay currently forwards the original worker operations. Its gateway routes remain separate ECS integration work.
 The backend checks the existing attempt ticket and current execution or discovery authority for every operation.
 Disabled users, cancellation, expired leases, changed ownership, and archived resources retain their existing rejection behavior.
 The preparation execution location selects the discovery lease registry.
@@ -47,8 +51,9 @@ This example uses a separate private TLS ingress:
 ```
 
 Database connection values and artifact settings remain in private configuration.
-Workers and the relay receive no installation database, artifact, OIDC, registry, or target credential.
-The backend does not load target secret bindings, HTTP trust bindings, OIDC configuration, execution providers, or source builders.
+Uploaded runners and the relay receive no installation database, artifact, OIDC, registry, or target credential.
+The backend can load optional target secret bindings for private gateway initialization.
+It does not load HTTP trust bindings, OIDC configuration, execution providers, or source builders.
 
 The role accepts only these explicit options:
 
@@ -64,6 +69,7 @@ The role accepts only these explicit options:
 | worker-origin | Exact HTTPS origin for optional direct TLS. |
 | worker-tls-certificate | Mounted PEM certificate chain for direct TLS. |
 | worker-tls-key | Mounted PEM private key for direct TLS. |
+| secret-bindings | Optional project-scoped binding catalog for trusted gateway initialization. |
 
 Other explicit flags reject startup before storage opens. This includes scheduler=false and notification-worker=false.
 Those services never start in this role, so their flags are unnecessary.

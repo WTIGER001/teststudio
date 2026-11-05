@@ -39,25 +39,25 @@ func (c *Client) Inspect(ctx context.Context, reference string) (Metadata, error
 	return c.inspect(ctx, reference, true)
 }
 
-func (c *Client) inspect(ctx context.Context, reference string, requireOwnership bool) (Metadata, error) {
+func (c *Client) readImage(ctx context.Context, reference string) (imageDocument, error) {
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 	repo, hash, err := c.selected(reference)
 	if err != nil {
-		return Metadata{}, err
+		return imageDocument{}, err
 	}
 	auth, err := credential(ctx, c.credentials)
 	if err != nil {
-		return Metadata{}, err
+		return imageDocument{}, err
 	}
 	session := &authorization{base: auth, current: auth}
 	value, _, err := c.manifest(ctx, repo, hash, session)
 	if err != nil {
-		return Metadata{}, err
+		return imageDocument{}, err
 	}
 	if indexType(value.MediaType) {
 		if len(value.Manifests) < 1 || len(value.Manifests) > 64 {
-			return Metadata{}, ErrInvalid
+			return imageDocument{}, ErrInvalid
 		}
 		var selected *descriptor
 		for _, item := range value.Manifests {
@@ -66,54 +66,69 @@ func (c *Client) inspect(ctx context.Context, reference string, requireOwnership
 				continue
 			}
 			if selected != nil || !manifestType(item.MediaType) || !validDescriptor(item, metadataLimit) || len(p.Features) > 0 || (p.Variant != "" && (c.architecture != "arm64" || p.Variant != "v8")) {
-				return Metadata{}, ErrInvalid
+				return imageDocument{}, ErrInvalid
 			}
 			copy := item
 			selected = &copy
 		}
 		if selected == nil {
-			return Metadata{}, ErrInvalid
+			return imageDocument{}, ErrInvalid
 		}
 		hash = selected.Digest
 		var size int
 		value, size, err = c.manifest(ctx, repo, hash, session)
 		if err != nil {
-			return Metadata{}, err
+			return imageDocument{}, err
 		}
 		if int64(size) != selected.Size || value.MediaType != selected.MediaType {
-			return Metadata{}, ErrInvalid
+			return imageDocument{}, ErrInvalid
 		}
 	}
 	if !manifestType(value.MediaType) || !validDescriptor(value.Config, metadataLimit) || !slices.Contains([]string{"application/vnd.oci.image.config.v1+json", "application/vnd.docker.container.image.v1+json"}, value.Config.MediaType) || len(value.Layers) < 1 || len(value.Layers) > 128 || len(value.Manifests) > 0 {
-		return Metadata{}, ErrInvalid
+		return imageDocument{}, ErrInvalid
 	}
 	var total int64
 	for _, layer := range value.Layers {
 		if !validDescriptor(layer, 8<<30) || !slices.Contains([]string{"application/vnd.oci.image.layer.v1.tar", "application/vnd.oci.image.layer.v1.tar+gzip", "application/vnd.oci.image.layer.v1.tar+zstd", "application/vnd.docker.image.rootfs.diff.tar.gzip"}, layer.MediaType) {
-			return Metadata{}, ErrInvalid
+			return imageDocument{}, ErrInvalid
 		}
 		total += layer.Size
 		if total > 16<<30 {
-			return Metadata{}, ErrInvalid
+			return imageDocument{}, ErrInvalid
 		}
 	}
 	data, _, err := c.fetch(ctx, repo, "blobs", value.Config.Digest, "application/octet-stream", session)
 	if err != nil {
-		return Metadata{}, err
+		return imageDocument{}, err
 	}
 	if int64(len(data)) != value.Config.Size {
-		return Metadata{}, ErrInvalid
+		return imageDocument{}, ErrInvalid
 	}
 	var config configuration
-	if decode(data, &config) != nil || config.OS != "linux" || config.Architecture != c.architecture || (config.Variant != "" && (c.architecture != "arm64" || config.Variant != "v8")) || config.Config.User != "1000:1000" || config.Config.WorkingDir != "/suite" || len(config.Config.OnBuild) > 0 || config.RootFS.Type != "layers" || len(config.RootFS.DiffIDs) != len(value.Layers) {
-		return Metadata{}, ErrInvalid
+	if decode(data, &config) != nil || config.OS != "linux" || config.Architecture != c.architecture || (config.Variant != "" && (c.architecture != "arm64" || config.Variant != "v8")) || config.Config.User != "1000:1000" || len(config.Config.OnBuild) > 0 || config.RootFS.Type != "layers" || len(config.RootFS.DiffIDs) != len(value.Layers) {
+		return imageDocument{}, ErrInvalid
 	}
 	for _, id := range config.RootFS.DiffIDs {
 		if !digest.MatchString(id) {
-			return Metadata{}, ErrInvalid
+			return imageDocument{}, ErrInvalid
 		}
 	}
+	return imageDocument{repository: repo, hash: hash, manifest: value, configuration: config, data: data}, nil
+}
+
+func (c *Client) inspect(ctx context.Context, reference string, requireOwnership bool) (Metadata, error) {
+	document, err := c.readImage(ctx, reference)
+	if err != nil {
+		return Metadata{}, err
+	}
+	repo, hash, value, config, data := document.repository, document.hash, document.manifest, document.configuration, document.data
+	if config.Config.WorkingDir != "/suite" {
+		return Metadata{}, ErrInvalid
+	}
 	labels := config.Config.Labels
+	if revision := labels["teststudio.job-source-key"]; revision != "" && !digest.MatchString("sha256:"+revision) {
+		return Metadata{}, ErrInvalid
+	}
 	storage := labels["teststudio.task-storage"]
 	if storage != "" {
 		if storage != hostedexecution.NonRootTaskStorage || len(config.Config.Volumes) != 2 {
@@ -143,5 +158,5 @@ func (c *Client) inspect(ctx context.Context, reference string, requireOwnership
 	if requireOwnership && (!domain.ValidID(labels["teststudio.project"]) || !domain.ValidID(labels["teststudio.installation"]) || !domain.ValidID(labels["teststudio.preparation"]) || !digest.MatchString(labels["teststudio.source"])) {
 		return Metadata{}, ErrInvalid
 	}
-	return Metadata{template: &runtimeTemplate{client: c, repository: repo, manifest: value, configuration: data, labels: labels}, Image: hostedexecution.Image{GatewayTransport: labels["teststudio.job-gateway"], TaskStorage: storage, Discovery: labels["teststudio.discovery-supervisor"], Reference: reference, Runner: runner, Runtime: labels["teststudio.runtime"], OS: config.OS, Architecture: config.Architecture, Supervisor: labels["teststudio.job-supervisor"], Sandbox: labels["teststudio.sandbox-supervisor"], Project: labels["teststudio.project"], SourceDigest: labels["teststudio.source"]}, Manifest: strings.TrimPrefix(c.origin, "https://") + "/" + repo + "@" + hash, Configuration: value.Config.Digest, Project: labels["teststudio.project"], Installation: labels["teststudio.installation"], Preparation: labels["teststudio.preparation"], Source: labels["teststudio.source"]}, nil
+	return Metadata{template: &runtimeTemplate{client: c, repository: repo, manifest: value, configuration: data, labels: labels}, Image: hostedexecution.Image{SupervisorRevision: labels["teststudio.job-source-key"], GatewayTransport: labels["teststudio.job-gateway"], APIPolicy: labels["teststudio.api-policy"], TaskStorage: storage, Discovery: labels["teststudio.discovery-supervisor"], Reference: reference, Runner: runner, Runtime: labels["teststudio.runtime"], OS: config.OS, Architecture: config.Architecture, Supervisor: labels["teststudio.job-supervisor"], Sandbox: labels["teststudio.sandbox-supervisor"], Project: labels["teststudio.project"], SourceDigest: labels["teststudio.source"]}, Manifest: strings.TrimPrefix(c.origin, "https://") + "/" + repo + "@" + hash, Configuration: value.Config.Digest, Project: labels["teststudio.project"], Installation: labels["teststudio.installation"], Preparation: labels["teststudio.preparation"], Source: labels["teststudio.source"]}, nil
 }

@@ -9,11 +9,13 @@ import (
 )
 
 type DiscoveryInput struct {
-	Project      string `json:"projectId"`
-	Suite        string `json:"suiteId"`
-	Runner       string `json:"runner"`
-	Image        string `json:"image"`
-	SourceDigest string `json:"sourceDigest"`
+	Environment   bool   `json:"environmentProfile,omitempty"`
+	RequestPolicy bool   `json:"requestPolicyCapable,omitempty"`
+	Project       string `json:"projectId"`
+	Suite         string `json:"suiteId"`
+	Runner        string `json:"runner"`
+	Image         string `json:"image"`
+	SourceDigest  string `json:"sourceDigest"`
 }
 
 type DiscoveryReport struct {

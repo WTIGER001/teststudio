@@ -64,6 +64,9 @@ spec:
             - --database-env=TESTSTUDIO_DATABASE
             - --require-postgres=true
             - --oidc-config=/etc/teststudio/providers.json
+            {{- if .Values.secretBindings.existingSecret }}
+            - --secret-bindings=/etc/teststudio-secrets/bindings.json
+            {{- end }}
             - {{ printf "--oidc-secret-refs=%s" (include "teststudio.oidcReferences" .) | quote }}
             {{- if .Values.oidc.caSecret }}
             - --oidc-ca-file=/etc/teststudio-oidc/ca.crt
@@ -151,6 +154,16 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
+            {{- if .Values.secretBindings.existingSecret }}
+            - name: secret-bindings
+              mountPath: /etc/teststudio-secrets
+              readOnly: true
+            {{- end }}
+            {{- if and .Values.workers.gateway.enabled .Values.workers.gateway.caSecret }}
+            - name: gateway-ca
+              mountPath: /etc/teststudio-gateway
+              readOnly: true
+            {{- end }}
             - name: config
               mountPath: /etc/teststudio
               readOnly: true
@@ -179,6 +192,21 @@ spec:
             {{- end }}
             {{- end }}
       volumes:
+        {{- if .Values.secretBindings.existingSecret }}
+        - name: secret-bindings
+          secret:
+            secretName: {{ .Values.secretBindings.existingSecret | quote }}
+            defaultMode: 0440
+        {{- end }}
+        {{- if and .Values.workers.gateway.enabled .Values.workers.gateway.caSecret }}
+        - name: gateway-ca
+          secret:
+            secretName: {{ .Values.workers.gateway.caSecret | quote }}
+            defaultMode: 0444
+            items:
+              - key: ca.crt
+                path: ca.crt
+        {{- end }}
         - name: config
           configMap:
             name: {{ include "teststudio.name" . }}-config

@@ -30,7 +30,7 @@ func TestWorkerSettingsUseMountedTrustAndRotatingControllerTokens(t *testing.T) 
 	if err != nil {
 		t.Fatal(err)
 	}
-	provider, err := loaded.Open(f.store, func(string) (string, bool) { return "", false }, nil)
+	provider, err := loaded.Open(f.store, func(string) (string, bool) { return "", false }, nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func TestWorkerSettingsUseMountedTrustAndRotatingControllerTokens(t *testing.T) 
 	if _, err := LoadSettings("", "TESTSTUDIO_WORKERS", lookup); err == nil || strings.Contains(err.Error(), "rotated-controller-token") {
 		t.Fatal("unsafe credential environment reference was admitted", err)
 	}
-	if _, err := settings.Open(f.store, func(string) (string, bool) { return "private-canary", true }, nil); err == nil {
+	if _, err := settings.Open(f.store, func(string) (string, bool) { return "private-canary", true }, nil, nil); err == nil {
 		t.Fatal("direct settings bypassed credential validation")
 	}
 	if _, err := LoadSettings("", "", func(string) (string, bool) { t.Fatal("disabled workers read environment"); return "", false }); err != nil {

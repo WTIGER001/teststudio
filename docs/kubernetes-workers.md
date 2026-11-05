@@ -18,9 +18,9 @@ Native setup is documented in [Hosted preparation](hosted-discovery.md).
 The optional [preparation package](kubernetes-preparation.md) adds its Helm deployment, private durable journals, separate service account, and registry writer references.
 The catalog still requires a prepared and approved immutable artifact.
 Source import does not automatically approve a new registry image.
-Environment-backed browser and API artifacts remain blocked until trusted remote gateway delivery exists.
+Environment-backed browser and API artifacts require the explicitly configured trusted gateway profile.
 The [gateway bundle component](kubernetes-gateway.md) now implements provider lifecycle controls and passes targeted local checks.
-Its normal admission, discovery, image approval, installation wiring, and actual network execution remain unfinished.
+Normal admission, discovery, image approval, and installation wiring now pass targeted local checks. Actual network execution remains unverified.
 Live AWS verification remains separate. Azure implementation and verification remain deferred.
 
 See [Shared hosted execution](hosted-execution.md), [Registry inspection](registry-inspection.md), and [Private worker exchange](worker-exchange.md).

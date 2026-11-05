@@ -5,8 +5,9 @@
 The provider now implements an owned resource bundle for environment-backed Go and Playwright work.
 It connects to the [private initialization authority](remote-gateway.md) and existing dispatch journal.
 Targeted local HTTP protocol checks pass. The changed lifecycle checks also pass with the race detector.
-Shared execution admission, source discovery admission, installation packaging, and image capability approval remain unfinished.
-Environment-backed hosted work remains disabled through the normal application.
+Normal executor admission, source assembly, discovery admission, registry capability inspection, and opt-in Helm configuration are now implemented.
+Targeted local checks cover the managed result lifecycle and reject unsupported runtime capabilities.
+The dedicated local cluster still needs the changed images, installation upgrade, and actual browser and coded API scenarios.
 This component does not prove actual Kubernetes execution or close deployment acceptance.
 Azure remains deferred.
 
@@ -86,6 +87,37 @@ Normal controller restart and peer recovery retain the shared database journal.
 
 ## Verification and continuation
 
+### Enable the profile
+
+Apply gateway.example.yaml after the core, worker, and optional controller values.
+Replace its gateway image with the installation-approved immutable registry digest.
+The registry must contain the inspected TLS, API-policy, credential-injection, and private-configuration capabilities.
+Environment source runtimes must advertise gateway transport, API-policy support when required, and the supervisor build revision.
+
+workers.gateway.tlsSecret and workers.gateway.exchangeTrustSecret name Secrets in the worker namespace.
+The server certificate must cover the generated gateway Service host under the worker namespace's .svc domain.
+The optional workers.gateway.caSecret names the public gateway CA Secret in the application namespace.
+It supplies ca.crt to the API and controller. Those processes receive no gateway server private key.
+The chart creates the separate gateway service account. It creates no certificate material.
+
+secretBindings.existingSecret names an application-namespace Secret containing bindings.json and its referenced credential files.
+Use absolute file references under /etc/teststudio-secrets in that project-scoped binding catalog.
+The API mounts that Secret. Execution controllers, preparation workers, and uploaded runners do not mount it.
+The trusted standalone worker backend also accepts --secret-bindings when it provides the private exchange.
+Catalog changes require a process restart. Credential file reads retain the existing rotation behavior.
+
+Only the API and execution controller receive the additional Service and execution-policy write permissions.
+Preparation retains discovery control and policy inspection without the gateway resource write role.
+All resource permissions remain inside the dedicated worker namespace.
+
+Timing keys include the inspected supervisor build revision and gateway image and resource identity.
+Offline and environment profiles remain separate. Existing observations stay retained under their original keys.
+
+The opt-in chart renders 24 valid resources in the local package check.
+Missing TLS material, a shared runner account, disabled worker protection, and an unapproved image registry are rejected.
+The rendered settings load through the actual Go parser and match the protected base network policy.
+See output/kubernetes-gateway/package/summary.json and schema.log.
+
 New local checks cover readiness before activation, full bundle shutdown, checkpoint enforcement, and guarded deletion.
 They also cover a lost gateway creation acknowledgement, service restart, partial creation recovery, and foreign gateway rejection.
 A stalled runner observation cannot consume the gateway's shutdown opportunity.
@@ -94,11 +126,9 @@ Selected existing offline provider checks still pass.
 Shared lifecycle checks reject a failed boundary before activation and retain an explicit unknown result after a reported pass.
 No image rebuild, cluster deployment, cloud connection, browser process, or new catalog run occurs for this component.
 
-Next connect the normal environment executor to this provider without weakening admission.
-Require the supervisor transport capability and inspect the installation-approved gateway image's platform and protocol capabilities.
-Keep the new runtime measurement profile distinct from offline observations.
-Extend hosted source discovery for the reviewed environment build profiles while retaining isolated discovery.
-Inject gateway authority and the secret provider through supported service roles.
-Add Helm values, schema, dedicated gateway account, TLS and trust references, and narrowly scoped controller resource permissions.
-Then build changed runtime inputs once and verify the complete browser and coded API scenarios on the dedicated local cluster.
+Normal execution and preparation now use the approved environment profiles through the supported service roles.
+Build changed runtime inputs once and verify the complete browser and coded API scenarios on the dedicated local cluster.
+Use the existing source queue, immutable publication, run API, private evidence, timing, and cleanup workflow.
+Keep the retained offline runs and existing installation data.
+Do not generate repeated runs for calibration.
 Reuse the retained offline execution evidence. Keep AWS and Azure verification outside this local phase.

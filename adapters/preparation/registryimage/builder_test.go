@@ -22,7 +22,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/suitespec"
 )
 
-func buildInput(t *testing.T, runner string) preparation.BuildRequest {
+func buildInput(t *testing.T, runner string, changes ...func(*suitespec.Manifest, *catalog.Test)) preparation.BuildRequest {
 	t.Helper()
 	manifest := suitespec.Manifest{Schema: 1, Suite: "invoices", Type: "unit", Runner: runner, ModuleRoot: "checks", Tests: suitespec.Tests{Packages: []string{"./invoice"}}, Catalog: "catalog.json", BuildProfile: "go-module"}
 	test := catalog.Test{ID: "INVOICE-7", Title: "Invoice arithmetic", Type: "unit", Runner: runner, State: "enabled", Safety: "safe", Rationale: "Uses in-memory values only.", TimeoutSeconds: 10, Source: "checks/invoice/invoice_test.go", Selector: "./invoice::TestInvoice"}
@@ -38,6 +38,9 @@ func buildInput(t *testing.T, runner string) preparation.BuildRequest {
 			packages["node_modules/"+name] = map[string]any{"version": "1.64.1"}
 		}
 		files["checks/package-lock.json"], _ = json.Marshal(map[string]any{"lockfileVersion": 3, "packages": packages})
+	}
+	for _, change := range changes {
+		change(&manifest, &test)
 	}
 	files["suite.json"], _ = json.Marshal(manifest)
 	files["catalog.json"], _ = json.Marshal(catalog.Document{Schema: catalog.SchemaVersion, Suite: "invoices", Tests: []catalog.Test{test}})

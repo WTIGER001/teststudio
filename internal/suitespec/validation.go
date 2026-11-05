@@ -198,7 +198,7 @@ func ValidateDiscovery(discovery Discovery, image string) error {
 		}
 
 	}
-	issues := catalog.Validate(catalog.Draft{Tests: discovery.Catalog.Tests, Artifact: catalog.Artifact{Image: image, Discovered: selectors}, Capture: catalog.DefaultCapture()})
+	issues := catalog.Validate(catalog.Draft{Tests: discovery.Catalog.Tests, Artifact: catalog.Artifact{Image: image, Discovered: selectors, Browser: discovery.Manifest.Browser}, Capture: catalog.DefaultCapture()})
 	if len(issues) > 0 {
 		return fmt.Errorf("discovered catalog is invalid: %s: %s", issues[0].Field, issues[0].Message)
 	}

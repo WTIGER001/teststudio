@@ -97,7 +97,7 @@ func runController(ctx context.Context, o controllerOptions) error {
 		configureHostedWorkers(run, source, exchange, runtime.Provider, nil, "ecs", ecsSettings.Worker.ExchangeOrigin, false)
 	}
 	if kubeSettings != nil {
-		provider, err := kubeSettings.Open(db, os.LookupEnv, source.AuthorizeDiscoveryCleanup)
+		provider, err := kubeSettings.Open(db, os.LookupEnv, source.AuthorizeDiscoveryCleanup, exchange)
 		if err != nil {
 			return err
 		}

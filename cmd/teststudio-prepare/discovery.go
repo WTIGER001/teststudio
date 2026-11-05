@@ -44,7 +44,7 @@ func attachHostedDiscovery(service *sources.Service, provider hostedexecution.Pr
 }
 
 func configureKubernetesDiscovery(service *sources.Service, settings kubernetes.Settings, lookup func(string) (string, bool)) (func(), error) {
-	provider, err := settings.Open(service.Store, lookup, service.AuthorizeDiscoveryCleanup)
+	provider, err := settings.Open(service.Store, lookup, service.AuthorizeDiscoveryCleanup, nil)
 	if err != nil {
 		return nil, err
 	}

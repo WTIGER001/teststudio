@@ -14,6 +14,12 @@ Provider dispatch uses the Kubernetes adapter. Remote assembly now has a separat
 The preparation worker now connects this adapter to [hosted discovery](hosted-discovery.md) through explicit native configuration.
 No provider is enabled by this adapter alone.
 
+InspectGateway separately checks the installation-approved gateway image's immutable platform and private delivery capabilities.
+It requires the fixed gateway entrypoint and rejects source ownership, extra arguments, and image environment values.
+Prepared source inspection retains its separate ownership checks.
+Source runtime metadata also carries the gateway transport marker, API-policy capability, and validated supervisor build revision.
+Those values control environment admission, isolated discovery, and runtime timing keys.
+
 ## Installation inputs
 
 Create the client with these operator-controlled settings:

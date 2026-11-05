@@ -13,7 +13,7 @@ Azure implementation and verification remain deferred. A later Azure deployment 
 | Profile | Authoritative current evidence | Remaining limits |
 | --- | --- | --- |
 | Local server | SQLite durability, managed identity, environment-backed browser and API execution, desktop recording, source publication, timing, evidence, and UI workflows. | This does not establish cloud deployment behavior. |
-| Kubernetes | Actual local k3s installation, PostgreSQL, private evidence, two OIDC providers, source preparation, isolated offline Go and Playwright, native HTTPS, deadlines, and controller failover. | Environment-backed coded suites and hosted recording remain unimplemented. Full common-scenario coverage remains incomplete. |
+| Kubernetes | Actual local k3s installation, PostgreSQL, private evidence, two OIDC providers, source preparation, isolated offline Go and Playwright, native HTTPS, deadlines, and controller failover. | Environment-backed coded suites now have implementation and local protocol evidence. Actual network execution and hosted recording remain unverified or unfinished. |
 | AWS ECS and CloudFront | Service and worker templates, private exchange, native SDK adapters, offline execution contracts, preparation packaging, and local protocol checks. | No live target verification. Environment-backed coded execution and hosted recording remain unfinished. |
 | Azure | Core service and assembly packages, staged execution and sandbox adapters, and previously retained local protocol evidence. | Native coded execution and discovery wiring remain unfinished. The user defers this work and account verification. |
 
@@ -28,11 +28,11 @@ Packaging and SDK protocol checks do not prove target deployment acceptance.
 | --- | --- | --- | --- |
 | 41 | Shared timing assessment, measured runner reports, immutable runtime profiles, and actual local and Kubernetes observations. | New hosted gateway profiles must retain the same measured-time and baseline contracts. Deferred Azure execution remains unwired. | Common timing behavior on actual ECS and Azure execution profiles. |
 | 46 | Filesystem, S3, and Azure Blob adapters exist. Shared quotas, pins, retention, and local SDK protocol checks exist. | No additional shared evidence-engine gap is identified in this audit. | Actual provider identity, encryption, lifecycle, retention, quota, and pin behavior on S3 and Azure storage. |
-| 51 | Kubernetes offline lifecycle has actual status, cancellation, deadline, artifact, and recovery evidence. ECS has native adapters and local contract evidence. | Trusted gateways for environment-backed hosted browser and API suites. Deferred Azure native execution and discovery wiring. | Actual ECS and Azure lifecycle scenarios, including independent termination and cleanup. |
+| 51 | Kubernetes offline lifecycle has actual status, cancellation, deadline, artifact, and recovery evidence. ECS has native adapters and local contract evidence. | The ECS trusted gateway still needs implementation. Kubernetes network execution needs actual verification. Deferred Azure native execution and discovery wiring. | Actual ECS and Azure lifecycle scenarios, including independent termination and cleanup. |
 | 53 | The local and Kubernetes installations work without AWS services or credentials. Azure has an independent Blob and identity configuration. | Deferred Azure installation and coded-execution wiring remain incomplete. | An actual independent Azure installation. |
 | 54 | Two OIDC providers work through the shared directory locally and on Kubernetes. Project authorization and private evidence withdrawal pass. | No additional shared identity-engine gap is identified in this audit. | Equivalent configured-provider and project-scope scenarios on ECS and Azure. |
-| 56 | Newly authored local suites and Kubernetes offline suites retain measured results, progress, history, and evidence. | Environment-backed hosted coded suites need trusted gateway delivery. Azure discovery and execution remain deferred. | Generic suites, reports, and trends on every required target. |
-| 57 | All four deployment packages have implementation material. Local operation and substantial actual Kubernetes scenarios pass. | Hosted network execution, hosted recording, and deferred Azure wiring. | The complete common scenarios, installation behavior, and operational checks on each target. |
+| 56 | Newly authored local suites and Kubernetes offline suites retain measured results, progress, history, and evidence. | Kubernetes environment-backed suites need actual verification. ECS trusted gateway delivery remains unfinished. Azure discovery and execution remain deferred. | Generic suites, reports, and trends on every required target. |
+| 57 | All four deployment packages have implementation material. Local operation and substantial actual Kubernetes scenarios pass. | ECS gateway delivery, hosted recording, actual Kubernetes network verification, and deferred Azure wiring. | The complete common scenarios, installation behavior, and operational checks on each target. |
 
 Keep each broad item unchecked until its complete requirement passes.
 The completed generic failover and hosted-private-access contracts remain 52 and 55.
@@ -42,10 +42,10 @@ Their evidence does not close these separate cross-profile criteria.
 
 ### Hosted browser and API networking
 
-The [shared hosted admission](../internal/hostedexecution/admission.go) explicitly rejects artifacts with a browser target and tests with required credential bindings.
-Its image and runtime checks also reject environment-backed artifacts.
+The [shared hosted admission](../internal/hostedexecution/admission.go) now permits environment-backed artifacts only through a configured gateway provider and inspected capable runtime.
+Kubernetes implements that provider contract. ECS and Azure still reject these artifacts.
 The [Kubernetes gateway component](kubernetes-gateway.md) now supports separate environment references and provider-owned gateway bundles.
-Its normal executor registration, image approval, source discovery, and installation path remain unwired.
+Its normal executor registration, image approval, source discovery, and Helm path now pass targeted local checks.
 The deployed offline worker policy still permits only the private exchange and DNS.
 These are deliberate safety boundaries. Removing the checks does not implement hosted networking.
 
@@ -93,7 +93,7 @@ Bind gateway initialization and transport to the frozen execution, current dispa
 The [remote transport component](remote-gateway.md) now provides an authenticated TLS gateway and a supervisor-owned Unix socket bridge.
 Shared private initialization, instance binding, frozen credential references, and supervisor delivery now pass targeted local checks.
 The Kubernetes bundle provider now verifies resource identity and implements scoped policies, inventory, shutdown, and guarded cleanup.
-Normal admission, source discovery admission, image capability approval, installation wiring, and actual network execution remain unfinished.
+Normal admission, source discovery, image capability approval, and installation wiring are implemented. Actual network execution remains unverified.
 Resolve application credential references only inside the trusted delivery boundary.
 Credential values must not enter uploaded source, runner input, diagnostics, or durable execution metadata.
 Keep gateway configuration distinct from the ordinary worker packet and activation authority.

@@ -20,6 +20,8 @@ bootstrap:
 localAccounts: false
 httpTrust:
   existingSecret: ""
+secretBindings:
+  existingSecret: ""
 artifactStore:
   driver: filesystem
 persistence:
@@ -77,6 +79,13 @@ preparation:
       ephemeral-storage: 256Mi
 workers:
   enabled: false
+  gateway:
+    enabled: false
+    image: ""
+    serviceAccount: teststudio-gateway
+    tlsSecret: ""
+    exchangeTrustSecret: ""
+    caSecret: ""
   namespace: ""
   apiOrigin: https://kubernetes.default.svc
   serviceAccount: teststudio-runner

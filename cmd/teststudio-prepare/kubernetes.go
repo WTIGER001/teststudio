@@ -20,7 +20,7 @@ func configureRegistryPreparation(service *sources.Service, settings kubernetes.
 			return nil, hostedexecution.ErrConfiguration
 		}
 	}
-	provider, err := settings.Open(service.Store, lookup, service.AuthorizeDiscoveryCleanup)
+	provider, err := settings.Open(service.Store, lookup, service.AuthorizeDiscoveryCleanup, nil)
 	if err != nil {
 		registry.Close()
 		return nil, err

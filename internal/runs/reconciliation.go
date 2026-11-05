@@ -226,6 +226,16 @@ func recoveryInput(run Run, ref execution.Reference) (execution.CodedInput, erro
 	for _, test := range run.Tests {
 		if test.ID == ref.Test {
 			input := execution.CodedInput{Reference: &ref, RunID: run.ID, Test: test, Artifact: run.Release.Draft.Artifact, Capture: run.TestCapture[test.ID], TimeoutMs: test.TimeoutSeconds * 1000, FailedBefore: ref.Attempt > 1}
+			if input.Artifact.Browser != nil {
+				target, err := browserTarget(run.Environment, input.Artifact, test)
+				if err != nil {
+					return execution.CodedInput{}, err
+				}
+				input.Browser = target
+				if target.Authenticated {
+					input.CredentialReference = run.Environment.Credentials[target.Requests.Authentication.Binding]
+				}
+			}
 			if p, ok := run.Timing.Tests[test.ID]; ok {
 				input.TimeoutMs = p.EffectiveTimeoutMs
 				input.SlowThresholdMs = p.ThresholdMs

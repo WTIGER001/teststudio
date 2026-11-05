@@ -15,6 +15,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/browserpolicy"
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
 	"github.com/wtiger001/teststudio/internal/storage"
+	"github.com/wtiger001/teststudio/internal/workerexchange"
 	"github.com/wtiger001/teststudio/internal/workerstate"
 )
 
@@ -29,7 +30,7 @@ type networkFixture struct {
 	job                    hostedexecution.Job
 }
 
-func newNetworkFixture(t *testing.T) *networkFixture {
+func newNetworkFixture(t *testing.T, prepare ...bool) *networkFixture {
 	t.Helper()
 	n := &networkFixture{objects: map[string]networkObject{}, posts: map[string]int{}}
 	f := fresh(t, "playwright", func(next http.Handler) http.Handler {
@@ -41,14 +42,15 @@ func newNetworkFixture(t *testing.T) *networkFixture {
 	config.Gateway = &GatewayConfig{Image: "registry.example.test/teststudio/gateway@sha256:" + strings.Repeat("b", 64), ServiceAccount: "gateway", TLSSecret: "gateway-tls", ExchangeTrustSecret: "exchange-ca"}
 	f.provider.Close()
 	var err error
-	f.provider, err = New(Options{Config: config, Store: f.store, Inspector: imageInspector{"playwright"}, Transport: f.server.Client().Transport, Token: f.provider.token, GatewayAuthority: f.exchange})
+	f.provider, err = New(Options{Config: config, Store: f.store, Inspector: networkImageInspector{imageInspector{"playwright"}}, Transport: f.server.Client().Transport, Token: f.provider.token, GatewayAuthority: f.exchange})
 	if err != nil {
 		t.Fatal(err)
 	}
 	ref := *f.input.Reference
 	ref.Profile = "playwright-kubernetes-environment-v1"
 	ref.Gateway = "teststudio-gateway-" + strings.TrimPrefix(ref.Container, "teststudio-job-")
-	f.input.Reference = &ref
+	*f.input.Reference = ref
+	f.input.Test.Type = "browser"
 	f.input.Browser = &browserpolicy.Target{Origin: "https://application.test"}
 	f.input.Artifact.Browser = &browserpolicy.Spec{Endpoint: "api"}
 	f.input.AwaitDispatch = true
@@ -64,9 +66,12 @@ func newNetworkFixture(t *testing.T) *networkFixture {
 	if err := f.store.Commit(t.Context(), change); err != nil {
 		t.Fatal(err)
 	}
-	ticket, err := f.exchange.Prepare(t.Context(), ref, f.input, time.Now().Add(time.Minute))
-	if err != nil {
-		t.Fatal(err)
+	var ticket workerexchange.Ticket
+	if len(prepare) == 0 || prepare[0] {
+		ticket, err = f.exchange.Prepare(t.Context(), ref, f.input, time.Now().Add(time.Minute))
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
 	n.job = hostedexecution.Job{Reference: ref, Image: f.input.Artifact.Image, Runner: "playwright", ExchangeOrigin: config.ExchangeOrigin, Ticket: ticket}
 	return n

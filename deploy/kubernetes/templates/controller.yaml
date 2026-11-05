@@ -125,6 +125,11 @@ spec:
           resources:
             {{- toYaml .Values.controller.resources | nindent 12 }}
           volumeMounts:
+            {{- if and .Values.workers.gateway.enabled .Values.workers.gateway.caSecret }}
+            - name: gateway-ca
+              mountPath: /etc/teststudio-gateway
+              readOnly: true
+            {{- end }}
             - name: config
               mountPath: /etc/teststudio
               readOnly: true
@@ -146,6 +151,15 @@ spec:
               readOnly: true
             {{- end }}
       volumes:
+        {{- if and .Values.workers.gateway.enabled .Values.workers.gateway.caSecret }}
+        - name: gateway-ca
+          secret:
+            secretName: {{ .Values.workers.gateway.caSecret | quote }}
+            defaultMode: 0444
+            items:
+              - key: ca.crt
+                path: ca.crt
+        {{- end }}
         - name: config
           configMap:
             name: {{ include "teststudio.controllerName" . }}-config

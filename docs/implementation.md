@@ -52,6 +52,29 @@ Normal environment executor registration, source discovery admission, image capa
 See [Kubernetes gateway lifecycle](kubernetes-gateway.md) for current boundaries and exact continuation work.
 The verified total remains 50 of 57. This advances implementation under 51, 56, and 57. Azure remains deferred.
 
+### Normal environment admission and installation configuration
+
+The normal hosted executor now enables environment work only through a configured gateway provider.
+Registry checks verify the gateway platform, fixed entrypoint, and private delivery capabilities.
+Source runtime checks require the gateway transport marker, supervisor build revision, and API-policy capability when needed.
+Source assembly and isolated discovery support the existing reviewed environment profiles.
+Discovery freezes its inspected capabilities and rejects missing support. Discovery receives no target or credential.
+Recovery restores the frozen target policy and credential reference from the saved run.
+Timing keys include the supervisor revision and gateway identity, keeping old and new runtime observations separate.
+
+The API and trusted worker backend can resolve scoped private gateway credentials.
+The controller receives gateway initialization authority without mounting application credential material.
+Opt-in Helm values supply the separate gateway account, TLS and trust references, and bounded namespace resource permissions.
+The additional write role excludes preparation. Application credentials mount only in the API deployment.
+
+Targeted local checks pass for managed environment execution, capability rejection, source publication, frozen discovery, profile registration, and recovery input.
+The managed lifecycle passes the race detector.
+The enabled chart renders 24 schema-valid resources. Four unsafe configurations are rejected.
+Rendered settings pass the real Go parser and match the protected base policy.
+No image rebuild, cluster deployment, cloud test, browser session, or catalog run occurs during this integration batch.
+The next step is the first actual browser and coded API flows on the dedicated local cluster.
+The count remains 50 of 57. This advances 41, 51, 56, and 57 without closing their full deployment scope.
+
 ## Active application navigation correction — 2026-11-04
 
 The sidebar now has one project selector and an explicit application selector.

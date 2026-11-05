@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/wtiger001/teststudio/adapters/registry/oci"
+	"github.com/wtiger001/teststudio/internal/browsergateway"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/preparation"
@@ -31,8 +32,8 @@ func (b *Builder) Build(ctx context.Context, input preparation.BuildRequest) (re
 		return result, errors.New("registry source assembly requires current ownership and matching source provenance")
 	}
 	manifest := input.Snapshot.Manifest
-	if suitespec.Validate(manifest) != nil || suitespec.ValidateCatalog(manifest, input.Snapshot.Catalog) != nil || manifest.Browser != nil || manifest.RequestPolicy != "" || len(manifest.RequiredBindings) != 0 || !(manifest.Runner == "go" && manifest.BuildProfile == "go-module" || manifest.Runner == "playwright" && manifest.BuildProfile == "playwright-node") {
-		return result, errors.New("registry source assembly requires a validated offline Go or Playwright profile")
+	if suitespec.Validate(manifest) != nil || suitespec.ValidateCatalog(manifest, input.Snapshot.Catalog) != nil || manifest.RequestPolicy != "" || manifest.Browser == nil && len(manifest.RequiredBindings) != 0 || !preparation.LocalSourceProfile(manifest.Runner, manifest.BuildProfile) {
+		return result, errors.New("registry source assembly requires a validated Go or Playwright source profile")
 	}
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	defer cancel()
@@ -57,6 +58,9 @@ func (b *Builder) Build(ctx context.Context, input preparation.BuildRequest) (re
 	}
 	if runtime.Runner != manifest.Runner {
 		return result, errors.New("source runner differs from the trusted registry runtime")
+	}
+	if manifest.Browser != nil && (runtime.GatewayTransport != browsergateway.RemoteProtocol || runtime.SupervisorRevision == "" || manifest.Browser.Requests != nil && runtime.APIPolicy != "request-policy/v1") {
+		return result, errors.New("environment source assembly requires an approved gateway-capable runtime and matching request-policy support")
 	}
 	if runtime.Runner == "playwright" {
 		if err := preparation.ValidateBrowserDependencies(input.Snapshot, runtime.PlaywrightVersion); err != nil {

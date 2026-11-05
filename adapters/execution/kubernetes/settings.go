@@ -38,6 +38,9 @@ type Settings struct {
 var registryEnvironment = regexp.MustCompile(`^TESTSTUDIO_REGISTRY_[A-Z0-9_]{1,96}$`)
 
 func (s Settings) validate() error {
+	if g := s.Worker.Gateway; g != nil && g.CAFile != "" && !filepath.IsAbs(g.CAFile) {
+		return hostedexecution.ErrConfiguration
+	}
 	r := s.Registry
 	if Validate(s.Worker) != nil || !filepath.IsAbs(s.Worker.CAFile) || !filepath.IsAbs(s.Worker.TokenFile) || r.CAFile != "" && !filepath.IsAbs(r.CAFile) {
 		return hostedexecution.ErrConfiguration
@@ -71,7 +74,7 @@ func LoadSettings(file, variable string, lookup func(string) (string, bool)) (*S
 	return &settings, nil
 }
 
-func (s Settings) Open(store *storage.Store, lookup func(string) (string, bool), discoveryCleanup func(context.Context, execution.Reference) error) (*Provider, error) {
+func (s Settings) Open(store *storage.Store, lookup func(string) (string, bool), discoveryCleanup func(context.Context, execution.Reference) error, gatewayAuthority GatewayAuthority) (*Provider, error) {
 	if err := s.validate(); err != nil {
 		return nil, err
 	}
@@ -86,7 +89,7 @@ func (s Settings) Open(store *storage.Store, lookup func(string) (string, bool),
 	if err != nil {
 		return nil, err
 	}
-	provider, err := New(Options{Config: s.Worker, Store: store, Inspector: registry, DiscoveryCleanup: discoveryCleanup})
+	provider, err := New(Options{Config: s.Worker, Store: store, Inspector: registry, DiscoveryCleanup: discoveryCleanup, GatewayAuthority: gatewayAuthority})
 	if err != nil {
 		registry.Close()
 		return nil, err

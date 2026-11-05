@@ -1,0 +1,10 @@
+workers:
+  gateway:
+    enabled: true
+    image: registry.example.test/teststudio/gateway@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+    serviceAccount: teststudio-gateway
+    tlsSecret: teststudio-gateway-tls
+    exchangeTrustSecret: teststudio-exchange-ca
+    caSecret: teststudio-gateway-ca
+secretBindings:
+  existingSecret: teststudio-api-credentials

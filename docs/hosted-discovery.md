@@ -5,7 +5,8 @@
 The preparation command connects registry source assembly to the durable source queue and isolated provider discovery.
 Kubernetes uses Pods. Optional [ECS settings](ecs-workers.md) now use the same queue with Fargate tasks and ECR authentication.
 ECS now has a [staged infrastructure and preparation package](aws-workers-package.md). Deployed acceptance remains required.
-It supports the offline Go and Playwright profiles. Local preparation retains its existing behavior.
+It supports offline Go and Playwright profiles and reviewed environment profiles on capable inspected runtimes.
+Environment discovery remains isolated and receives no target or application credential. Local preparation retains its existing behavior.
 The API accepts source uploads and presents the normal source review. It does not assemble uploaded source in its process.
 Queued execution can now use a separate [headless controller](execution-controller.md), alongside the standalone discovery process.
 The portable service image now includes /app/teststudio-prepare for a separate preparation process.
@@ -16,7 +17,8 @@ The optional [Helm preparation package](kubernetes-preparation.md) now supplies 
 Complete hosted source operation still requires deployment verification.
 The dedicated local Kubernetes installation now passes fresh Go and Playwright source workflows through actual registry assembly and isolated execution.
 See [local source execution](local-kubernetes-source-execution.md). Cloud profiles and provider lifecycle scenarios remain open.
-Environment-backed browser and API profiles require remote gateway delivery.
+Environment-backed browser and API execution requires the [configured trusted gateway](kubernetes-gateway.md).
+Kubernetes opt-in admission and packaging now pass targeted local checks. Actual cluster network execution remains unverified.
 AWS dispatch is implemented with separate deployment verification pending.
 Azure now has a [durable job provider](azure-worker-lifecycle.md) and [job ownership contract](azure-worker-contract.md).
 Those ordinary Job contracts remain staged. The active [sandbox execution client](azure-sandboxes.md) now has a [durable controller](azure-sandbox-controller.md).
@@ -106,7 +108,7 @@ Current source, access, review, and approval checks remain required. The default
 4. The worker creates a gated discovery exchange and one owned discovery worker.
 5. The controller verifies provider creation before releasing input to that exact worker.
 6. The supervisor invokes only the selected runner's fixed --discover operation with no test work item on standard input.
-7. The exchange validates the discovery schema, suite, runner, source digest, and offline profile.
+7. The exchange validates the discovery schema, suite, runner, source digest, approved profile, and frozen inspected capabilities.
 8. A successful provider termination and accepted discovery produce the existing source review.
 9. The tester reviews and publishes the source. Publication records exact artifact approval. Activation remains a separate choice.
 

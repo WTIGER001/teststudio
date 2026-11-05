@@ -12,8 +12,10 @@ import (
 )
 
 type Runtime struct {
-	Runner, PlaywrightVersion string
-	template                  *runtimeTemplate
+	Runner, PlaywrightVersion   string
+	GatewayTransport, APIPolicy string
+	SupervisorRevision          string
+	template                    *runtimeTemplate
 }
 
 type runtimeTemplate struct {
@@ -52,7 +54,7 @@ func (c *Client) SourceRuntime(ctx context.Context, reference string) (Runtime, 
 			return Runtime{}, ErrInvalid
 		}
 	}
-	return Runtime{Runner: metadata.Image.Runner, PlaywrightVersion: metadata.template.labels["teststudio.playwright-version"], template: metadata.template}, nil
+	return Runtime{SupervisorRevision: metadata.Image.SupervisorRevision, Runner: metadata.Image.Runner, PlaywrightVersion: metadata.template.labels["teststudio.playwright-version"], GatewayTransport: metadata.Image.GatewayTransport, APIPolicy: metadata.Image.APIPolicy, template: metadata.template}, nil
 }
 
 func (c *Client) PublishSource(ctx context.Context, runtime Runtime, layer SourceLayer, journal UploadJournal) (Metadata, error) {

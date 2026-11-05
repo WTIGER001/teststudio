@@ -108,7 +108,7 @@ func TestDirectWorkerTLSRejectsInvalidMaterialBeforeOpeningStorage(t *testing.T)
 	}
 	root := t.TempDir()
 	database := filepath.Join(root, "not-created", "backend.db")
-	err := runWorkerBackend(t.Context(), "127.0.0.1:0", "azure", database, "", "", "", filepath.Join(root, "artifacts"), workerTLSOptions{Origin: valid.Origin})
+	err := runWorkerBackend(t.Context(), "127.0.0.1:0", "azure", database, "", "", "", filepath.Join(root, "artifacts"), "", workerTLSOptions{Origin: valid.Origin})
 	if err != errWorkerTLS {
 		t.Fatal("incomplete TLS settings entered service startup", err)
 	}

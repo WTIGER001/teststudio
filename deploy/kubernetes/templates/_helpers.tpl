@@ -12,6 +12,12 @@ app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end -}}
 {{- define "teststudio.validate" -}}
+{{- if .Values.workers.gateway.enabled -}}
+{{- if not .Values.workers.enabled -}}{{ fail "Gateway execution requires the protected worker profile" }}{{- end -}}
+{{- if eq .Values.workers.gateway.serviceAccount .Values.workers.serviceAccount -}}{{ fail "The trusted gateway requires a separate service account" }}{{- end -}}
+{{- $prefix := printf "%s/%s/" (trimPrefix "https://" .Values.workers.registry.origin) .Values.workers.registry.repositoryPrefix -}}
+{{- if not (hasPrefix $prefix .Values.workers.gateway.image) -}}{{ fail "The trusted gateway image must use the approved registry namespace" }}{{- end -}}
+{{- end -}}
 {{- range $name, $_ := .Values.podLabels -}}
 {{- if has $name (list "app.kubernetes.io/name" "app.kubernetes.io/instance" "app.kubernetes.io/component") -}}{{ fail "Pod labels cannot replace the service selector" }}{{- end -}}
 {{- end -}}
@@ -88,6 +94,11 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- define "teststudio.workerSettings" -}}
 {{- $w := .root.Values.workers -}}
 {{- $worker := dict "apiOrigin" $w.apiOrigin "namespace" $w.namespace "serviceAccount" $w.serviceAccount "tokenFile" "/var/run/teststudio-controller/token" "caFile" "/var/run/teststudio-controller/ca.crt" "architecture" .root.Values.image.architecture "runtimeClass" $w.runtimeClass "policyName" $w.policyName "exchangeOrigin" $w.origin "exchangePeer" (dict "namespace" $w.privateIngress.namespace "labels" $w.privateIngress.podLabels) "exchangePort" $w.privateIngress.port "dnsPeer" (dict "namespace" $w.dns.namespace "labels" $w.dns.podLabels) "imagePullSecrets" $w.imagePullSecrets "nodeSelector" $w.nodeSelector -}}
+{{- if $w.gateway.enabled -}}
+{{- $gateway := dict "image" $w.gateway.image "serviceAccount" $w.gateway.serviceAccount "tlsSecret" $w.gateway.tlsSecret "exchangeTrustSecret" $w.gateway.exchangeTrustSecret -}}
+{{- if $w.gateway.caSecret -}}{{- $_ := set $gateway "caFile" "/etc/teststudio-gateway/ca.crt" -}}{{- end -}}
+{{- $_ := set $worker "gateway" $gateway -}}
+{{- end -}}
 {{- $r := .registry -}}
 {{- $registry := dict "origin" $r.origin "repositoryPrefix" $r.repositoryPrefix "tokenURL" $r.tokenURL "tokenService" $r.tokenService "blobRedirectOrigins" $r.blobRedirectOrigins "usernameEnvironment" $r.usernameEnvironment "passwordEnvironment" $r.passwordEnvironment "bearerEnvironment" $r.bearerEnvironment -}}
 {{- if $r.caSecret -}}{{- $_ := set $registry "caFile" "/etc/teststudio-registry/ca.crt" -}}{{- end -}}

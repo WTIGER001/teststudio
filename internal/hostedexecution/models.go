@@ -20,19 +20,30 @@ const NonRootTaskStorage = "task-volumes/v1"
 const SandboxSupervisor = "azure-sandbox-command/v1"
 
 type Image struct {
-	GatewayTransport string
-	TaskStorage      string
-	Discovery        string
-	Reference        string
-	Runner           string
-	Runtime          string
-	OS               string
-	Architecture     string
-	Supervisor       string
-	Sandbox          string
-	Project          string
-	SourceDigest     string
-	ExecutionProfile string
+	SupervisorRevision string
+	APIPolicy          string
+	GatewayTransport   string
+	TaskStorage        string
+	Discovery          string
+	Reference          string
+	Runner             string
+	Runtime            string
+	OS                 string
+	Architecture       string
+	Supervisor         string
+	Sandbox            string
+	Project            string
+	SourceDigest       string
+	ExecutionProfile   string
+}
+
+type GatewayImage struct {
+	Reference, OS, Architecture, Protocol string
+}
+
+type GatewayProvider interface {
+	SupportsGateway() bool
+	GatewayProfile(context.Context) (string, error)
 }
 
 type Job struct {
@@ -75,6 +86,7 @@ type Exchange interface {
 }
 
 type Executor struct {
+	Environment     bool
 	Provider        Provider
 	Exchange        Exchange
 	Name            string

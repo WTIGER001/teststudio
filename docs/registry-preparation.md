@@ -3,7 +3,9 @@
 ## Current scope
 
 The registry source builder implements the existing ArtifactBuilder contract.
-It assembles validated offline Go and Playwright snapshots outside the API.
+It assembles validated Go and Playwright snapshots outside the API.
+Reviewed environment profiles require the gateway transport marker, supervisor build revision, and API-policy capability when needed.
+Discovery remains isolated. Actual environment execution requires the configured trusted gateway.
 It publishes an immutable OCI image through the registry HTTPS protocol.
 The [trusted ACR adapter](azure-registry-authentication.md) now supplies separate publication token scope for this same upload and journal flow.
 The [Azure preparation path observer](azure-preparation-registry.md) adds selected endpoint, subnet, NIC, security, and DNS checks.

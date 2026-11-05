@@ -107,8 +107,10 @@ Separate private initialization, frozen application credential references, bound
 New runtime overlays advertise the optional gateway transport capability. No images are rebuilt for these shared components.
 The [Kubernetes gateway bundle](kubernetes-gateway.md) now owns both workloads, the Service, and per-execution policies.
 Its local checks cover identity, readiness, lost acknowledgements, partial creation, shutdown, inventory, and guarded cleanup.
-Next connect normal executor and discovery admission, gateway image capability inspection, service-role secrets and authority, and Helm installation configuration.
-Then verify the complete browser and coded API paths on the dedicated local cluster.
+Normal executor and discovery admission, gateway image capability inspection, service-role secrets and authority, and opt-in Helm configuration are now implemented.
+New timing profiles include the supervisor build revision and gateway identity.
+Next build each changed image once, upgrade the dedicated local installation, and verify one browser and one coded API flow.
+Include only changed-boundary policy, credential, cancellation, recovery, and cleanup checks. Reuse existing offline evidence.
 Do not rebuild runtime images or deploy the gateway before that dispatch path exists.
 Read [deployment readiness](deployment-readiness.md) before the historical Azure continuation material below.
 Do not remove admission barriers or grant uploaded code direct target egress to bypass the missing gateway.

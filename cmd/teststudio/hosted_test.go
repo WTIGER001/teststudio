@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"testing"
 
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
@@ -10,6 +11,38 @@ import (
 )
 
 type registrationProvider struct{ hostedexecution.Provider }
+
+type gatewayRegistrationProvider struct{ registrationProvider }
+
+func (p *gatewayRegistrationProvider) SupportsGateway() bool { return true }
+func (p *gatewayRegistrationProvider) GatewayProfile(context.Context) (string, error) {
+	return "gateway-v1-fixture", nil
+}
+
+func TestHostedRegistrationEnablesEnvironmentProfilesOnlyWithGatewaySupport(t *testing.T) {
+	for _, enabled := range []bool{false, true} {
+		var provider hostedexecution.Provider = &registrationProvider{}
+		if enabled {
+			provider = &gatewayRegistrationProvider{}
+		}
+		run, source, exchange := &runs.Service{}, &sources.Service{}, &workerexchange.Service{}
+		configureHostedWorkers(run, source, exchange, provider, nil, "kubernetes", "https://exchange.test", false)
+		if !enabled {
+			if run.GoAPI != nil || run.Browser != nil || len(run.RecoveryDrivers) != 2 {
+				t.Fatal("offline provider enabled gateway execution")
+			}
+			continue
+		}
+		goAPI, ok := run.GoAPI.(*hostedexecution.Executor)
+		if !ok || !goAPI.Environment || goAPI.Profile() != "go-kubernetes-environment-v1" || len(run.RecoveryDrivers) != 4 {
+			t.Fatal("gateway provider did not register separate execution and recovery profiles")
+		}
+		browser, ok := run.Browser.(*hostedexecution.Executor)
+		if !ok || !browser.Environment || browser.Provider != provider {
+			t.Fatal("browser registration lost its trusted gateway provider")
+		}
+	}
+}
 
 func TestHostedRegistrationKeepsExecutionAndDiscoveryProvidersSeparate(t *testing.T) {
 	execution, discovery := &registrationProvider{}, &registrationProvider{}

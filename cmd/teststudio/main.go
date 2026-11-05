@@ -152,7 +152,7 @@ func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if role.Worker {
-		return runWorkerBackend(ctx, *workerAddr, *location, connection, *databaseEnvironment, *artifactConfiguration, *artifactEnvironment, *artifactDirectory, workerTLSOptions{Origin: *workerOrigin, Certificate: *workerCertificate, Key: *workerKey})
+		return runWorkerBackend(ctx, *workerAddr, *location, connection, *databaseEnvironment, *artifactConfiguration, *artifactEnvironment, *artifactDirectory, *secretBindings, workerTLSOptions{Origin: *workerOrigin, Certificate: *workerCertificate, Key: *workerKey})
 	}
 	if role.Controller {
 		return runController(ctx, controllerOptions{Address: *addr, Location: *location, Connection: connection, DatabaseEnvironment: *databaseEnvironment, ArtifactConfiguration: *artifactConfiguration, ArtifactEnvironment: *artifactEnvironment, ArtifactDirectory: *artifactDirectory, PublicOrigin: *public, TrustBundles: *httpTrustBundles, ECSConfiguration: *ecsConfiguration, ECSEnvironment: *ecsEnvironment, KubernetesConfiguration: *kubernetesConfiguration, KubernetesEnvironment: *kubernetesEnvironment})
@@ -308,7 +308,7 @@ func run() error {
 	oidc := &authoidc.Service{Store: db, Directory: directory, Sessions: sessionService, Origin: *public, SecretRefs: approvedOIDCSecrets, Client: oidcClient}
 	catalogService := &catalog.Service{Store: db, Auth: auth}
 	runService := &runs.Service{Store: db, Auth: auth, Catalog: catalogService, Evidence: evidenceService, HTTP: &execution.HTTP{Trust: httpTrust}, Location: *location}
-	workerExchange := &workerexchange.Service{Store: db, Blobs: blobs, Authorize: runService.AuthorizeWorkerAttempt}
+	workerExchange := &workerexchange.Service{Store: db, Blobs: blobs, Authorize: runService.AuthorizeWorkerAttempt, Secrets: secretProvider}
 	sourceService := &sources.Service{Store: db, Auth: auth, Location: *location, RecoveryInspectors: map[string]preparation.ArtifactInspector{
 		"go": &localcontainer.Executor{Runner: "go"}, "playwright": &localcontainer.Executor{Runner: "playwright"},
 	}}
@@ -361,7 +361,7 @@ func run() error {
 		configureHostedWorkers(runService, sourceService, workerExchange, runtime.Provider, runtime.Provider, "ecs", ecsSettings.Worker.ExchangeOrigin, *preparedSources)
 	}
 	if kubernetesSettings != nil {
-		provider, err := kubernetesSettings.Open(db, os.LookupEnv, sourceService.AuthorizeDiscoveryCleanup)
+		provider, err := kubernetesSettings.Open(db, os.LookupEnv, sourceService.AuthorizeDiscoveryCleanup, workerExchange)
 		if err != nil {
 			return err
 		}

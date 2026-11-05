@@ -83,7 +83,7 @@ func New(options Options) (*Provider, error) {
 		return nil, hostedexecution.ErrConfiguration
 	}
 	var gatewayCA []byte
-	if options.Config.Gateway != nil && options.Config.Gateway.CAFile != "" {
+	if options.GatewayAuthority != nil && options.Config.Gateway != nil && options.Config.Gateway.CAFile != "" {
 		var err error
 		gatewayCA, err = readPrivate(options.Config.Gateway.CAFile, 64<<10)
 		if err != nil || !x509.NewCertPool().AppendCertsFromPEM(gatewayCA) {

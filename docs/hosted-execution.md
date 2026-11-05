@@ -4,10 +4,10 @@
 
 The [deployment readiness audit](deployment-readiness.md) is the active delivery queue. Azure implementation remains deferred.
 Actual local Kubernetes offline execution, independent deadlines, and controller peer recovery now pass.
-Trusted gateways for environment-backed browser and API work remain the next implementation gap.
+The Kubernetes trusted gateway is implemented. Its first actual local cluster browser and coded API scenarios remain unverified.
 The [remote transport component](remote-gateway.md), private initialization, and supervisor bridge pass targeted local checks.
 The [Kubernetes bundle lifecycle](kubernetes-gateway.md) passes local resource and recovery checks.
-Normal network executor admission, source discovery, image approval, and installation wiring remain unfinished.
+Kubernetes network admission, source discovery, immutable image capability checks, and Helm configuration now pass targeted local checks.
 The Azure stage descriptions below record preserved work and do not authorize its continuation.
 
 The [Azure provider](azure-worker-lifecycle.md) now implements asynchronous dispatch, ownership checks, cancellation, and durable recovery.
@@ -29,8 +29,9 @@ ECS private worker infrastructure now has [staged packaging](aws-workers-package
 The default local API keeps its existing local runners.
 Complete hosted execution and deployment acceptance remain incomplete.
 Native [hosted preparation](hosted-discovery.md) and its Helm deployment are implemented. Trusted gateways, remaining adapters, and deployment verification remain required.
-The shared driver currently admits offline Go and Playwright work only.
-It rejects environment-backed artifacts and credential bindings until trusted gateway delivery exists.
+The shared driver retains offline Go and Playwright execution.
+An explicitly configured Kubernetes gateway provider also enables separate environment profiles for browser and coded API execution.
+Other providers retain their rejection of environment-backed artifacts until their trusted gateway delivery is implemented.
 
 See [Hosted runner supervisor](job-supervisor.md) for worker packaging.
 See [Private worker exchange](worker-exchange.md) for frozen work, tickets, reports, and staging limits.

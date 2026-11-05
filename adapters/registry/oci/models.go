@@ -92,6 +92,8 @@ type configuration struct {
 	Architecture string `json:"architecture"`
 	Variant      string `json:"variant,omitempty"`
 	Config       struct {
+		Cmd        []string                   `json:"Cmd"`
+		Env        []string                   `json:"Env"`
 		Labels     map[string]string          `json:"Labels"`
 		Volumes    map[string]json.RawMessage `json:"Volumes"`
 		User       string                     `json:"User"`

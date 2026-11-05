@@ -728,6 +728,69 @@
             "namespace",
             "podLabels"
           ]
+        },
+        "gateway": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "image": {
+              "type": "string",
+              "pattern": "^$|^[A-Za-z0-9][A-Za-z0-9._:/-]*@sha256:[a-f0-9]{64}$",
+              "maxLength": 1024
+            },
+            "serviceAccount": {
+              "type": "string",
+              "pattern": "^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+              "maxLength": 63
+            },
+            "tlsSecret": {
+              "type": "string",
+              "pattern": "^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+              "maxLength": 63
+            },
+            "exchangeTrustSecret": {
+              "type": "string",
+              "pattern": "^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+              "maxLength": 63
+            },
+            "caSecret": {
+              "type": "string",
+              "pattern": "^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+              "maxLength": 63
+            }
+          },
+          "required": [
+            "enabled",
+            "image",
+            "serviceAccount",
+            "tlsSecret",
+            "exchangeTrustSecret",
+            "caSecret"
+          ],
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "enabled": {
+                    "const": true
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "image": {
+                    "minLength": 1
+                  },
+                  "tlsSecret": {
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          ]
         }
       },
       "required": [
@@ -1122,6 +1185,20 @@
         "podLabels",
         "resources"
       ]
+    },
+    "secretBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "existingSecret": {
+          "type": "string",
+          "pattern": "^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+          "maxLength": 63
+        }
+      },
+      "required": [
+        "existingSecret"
+      ]
     }
   },
   "required": [
@@ -1316,6 +1393,40 @@
                 "const": true
               }
             }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "workers": {
+            "properties": {
+              "enabled": {
+                "const": true
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "workers": {
+            "properties": {
+              "gateway": {
+                "properties": {
+                  "enabled": {
+                    "const": true
+                  }
+                },
+                "required": [
+                  "enabled"
+                ]
+              }
+            },
+            "required": [
+              "gateway"
+            ]
           }
         }
       },

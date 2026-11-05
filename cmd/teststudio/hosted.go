@@ -21,6 +21,12 @@ func configureHostedWorkers(run *runs.Service, source *sources.Service, exchange
 		run.RecoveryDrivers = []execution.ManagedExecutor{goDriver, playwright}
 	}
 	run.GoAPI, run.Browser = nil, nil
+	if gateway, ok := executionProvider.(hostedexecution.GatewayProvider); ok && gateway.SupportsGateway() {
+		goAPI, browser := makeDriver("go"), makeDriver("playwright")
+		goAPI.Environment, browser.Environment = true, true
+		run.GoAPI, run.Browser = goAPI, browser
+		run.RecoveryDrivers = append(run.RecoveryDrivers, goAPI, browser)
+	}
 	run.RecoveryDriver = nil
 	source.RecoveryInspectors = map[string]preparation.ArtifactInspector{}
 	source.Inspectors = map[string]preparation.ArtifactInspector{}

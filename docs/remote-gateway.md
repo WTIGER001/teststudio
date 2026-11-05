@@ -4,10 +4,12 @@
 
 The remote transport connects a trusted worker supervisor to the existing browser and API gateway engine.
 It implements the first component of the [hosted networking plan](deployment-readiness.md).
-Hosted dispatch remains disabled for environment-backed coded tests and credential bindings.
+Kubernetes now has opt-in environment executor admission and installation packaging. Actual network execution on the dedicated cluster remains unverified.
+ECS and Azure environment-backed coded execution remain disabled.
 Shared private initialization and supervisor bridge delivery are implemented.
 The [Kubernetes resource lifecycle](kubernetes-gateway.md) now implements bundle ownership, instance binding, network policies, stop, inventory, and cleanup.
-Normal executor admission, discovery admission, image approval, installation wiring, and actual network execution remain unfinished.
+Normal Kubernetes admission, discovery, image approval, and installation wiring now pass targeted local checks.
+Actual network execution remains unverified.
 This component does not establish Kubernetes, ECS, or Azure deployment acceptance.
 Azure implementation remains deferred.
 
@@ -96,7 +98,7 @@ The supervisor closes owned connections and removes the socket when delivery fin
 
 New runtime overlays advertise `teststudio.job-gateway=tls-execution/v1`.
 Registry inspection exposes this optional capability. Existing offline runtime images remain valid for offline work.
-Future hosted network admission must require the capability and a distinct timing profile.
+Hosted network admission requires this capability, the supervisor build revision, and a distinct timing profile.
 No runtime image is rebuilt for this shared-component milestone.
 
 ## Targeted local verification
@@ -122,6 +124,6 @@ Use the implemented Kubernetes bundle lifecycle for admission and installation w
 Verify both workload identities and the enforced network boundary before releasing the activation gate.
 Require the inspected supervisor gateway capability for environment-backed images.
 Extend hosted source-discovery validation for the reviewed environment build profiles while keeping discovery network-isolated.
-Keep the current hosted rejection guards until that complete path works.
+Keep unsupported runtime and provider profiles rejected. Kubernetes opt-in admission now connects the complete shared contract.
 Use the dedicated local cluster for the first environment-backed browser and API scenarios.
 Port the shared contract to ECS afterward. Keep Azure deferred.

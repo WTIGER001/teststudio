@@ -134,7 +134,7 @@ func (e *Executor) Recover(ctx context.Context, ref execution.Reference, input e
 		report.RecoveryError = err
 		return report
 	}
-	if !e.configured() || !e.validReference(ref) || input.RunID != ref.Run || input.Test.ID != ref.Test || !distribution.MatchString(input.Artifact.Image) || input.Artifact.Browser != nil {
+	if !e.configured() || !e.validReference(ref) || input.RunID != ref.Run || input.Test.ID != ref.Test || !distribution.MatchString(input.Artifact.Image) || (input.Artifact.Browser != nil) != e.Environment || (input.Browser != nil) != e.Environment {
 		return fail(ErrOwnership)
 	}
 	if err := e.revoke(ctx, ref); err != nil {

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/wtiger001/teststudio/internal/browsergateway"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/preparation"
@@ -66,6 +67,8 @@ func (i *DiscoveryInspector) Inspect(ctx context.Context, request preparation.In
 		return result, ErrUnavailable
 	}
 	input := workerprotocol.DiscoveryInput{Project: request.Reference.Project, Suite: request.Suite, Runner: i.Runner, Image: request.Image, SourceDigest: image.SourceDigest}
+	input.Environment = image.GatewayTransport == browsergateway.RemoteProtocol && supervisorRevision.MatchString(image.SupervisorRevision)
+	input.RequestPolicy = image.APIPolicy == "request-policy/v1"
 	if image.Reference != request.Image || image.Project != input.Project || image.Runner != i.Runner || !runtime.MatchString(image.Runtime) || image.Supervisor != "worker-exchange/v1" || image.Discovery != "worker-exchange/v1" || image.OS != "linux" || image.Architecture != "arm64" && image.Architecture != "amd64" || workerprotocol.ValidateDiscoveryInput(input) != nil {
 		return result, ErrOwnership
 	}

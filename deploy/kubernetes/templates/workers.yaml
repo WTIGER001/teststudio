@@ -17,6 +17,15 @@ metadata:
   name: {{ .Values.workers.serviceAccount | quote }}
   namespace: {{ .Values.workers.namespace | quote }}
 automountServiceAccountToken: false
+{{- if .Values.workers.gateway.enabled }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.workers.gateway.serviceAccount | quote }}
+  namespace: {{ .Values.workers.namespace | quote }}
+automountServiceAccountToken: false
+{{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -29,7 +38,11 @@ rules:
     verbs: [get, list, create, patch, delete]
   - apiGroups: [""]
     resources: [serviceaccounts]
-    resourceNames: [{{ .Values.workers.serviceAccount | quote }}]
+    resourceNames:
+      - {{ .Values.workers.serviceAccount | quote }}
+      {{- if .Values.workers.gateway.enabled }}
+      - {{ .Values.workers.gateway.serviceAccount | quote }}
+      {{- end }}
     verbs: [get]
   - apiGroups: [networking.k8s.io]
     resources: [networkpolicies]
@@ -59,6 +72,40 @@ roleRef:
   kind: Role
   name: {{ .Release.Name }}-workers
 ---
+{{- if .Values.workers.gateway.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Release.Name }}-gateways
+  namespace: {{ .Values.workers.namespace | quote }}
+rules:
+  - apiGroups: [""]
+    resources: [services]
+    verbs: [get, list, create, delete]
+  - apiGroups: [networking.k8s.io]
+    resources: [networkpolicies]
+    verbs: [get, list, create, delete]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Release.Name }}-gateways
+  namespace: {{ .Values.workers.namespace | quote }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "teststudio.name" . }}
+    namespace: {{ .Release.Namespace | quote }}
+  {{- if .Values.controller.enabled }}
+  - kind: ServiceAccount
+    name: {{ include "teststudio.controllerName" . }}
+    namespace: {{ .Release.Namespace | quote }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ .Release.Name }}-gateways
+---
+{{- end }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
