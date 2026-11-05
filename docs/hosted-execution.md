@@ -5,7 +5,8 @@
 The [deployment readiness audit](deployment-readiness.md) is the active delivery queue. Azure implementation remains deferred.
 Actual local Kubernetes offline execution, independent deadlines, and controller peer recovery now pass.
 Trusted gateways for environment-backed browser and API work remain the next implementation gap.
-The [remote transport component](remote-gateway.md) passes targeted local checks. Hosted dispatch and gateway lifecycle remain unwired.
+The [remote transport component](remote-gateway.md), private initialization, and supervisor bridge pass targeted local checks.
+Hosted dispatch and provider-owned gateway lifecycle remain unwired.
 The Azure stage descriptions below record preserved work and do not authorize its continuation.
 
 The [Azure provider](azure-worker-lifecycle.md) now implements asynchronous dispatch, ownership checks, cancellation, and durable recovery.

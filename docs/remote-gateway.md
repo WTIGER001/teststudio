@@ -5,7 +5,8 @@
 The remote transport connects a trusted worker supervisor to the existing browser and API gateway engine.
 It implements the first component of the [hosted networking plan](deployment-readiness.md).
 Hosted dispatch remains disabled for environment-backed coded tests and credential bindings.
-Provider resources, initialization authority, supervisor wiring, network policies, and durable cleanup remain unfinished.
+Shared private initialization and supervisor bridge delivery are implemented.
+Provider resources, controller identity binding, installation configuration, network policies, and durable cleanup remain unfinished.
 This component does not establish Kubernetes, ECS, or Azure deployment acceptance.
 Azure implementation remains deferred.
 
@@ -22,7 +23,8 @@ Duplicate authorization headers, a wrong execution, plaintext requests, and expi
 
 Application credentials belong only in the gateway's private `Configuration`.
 The bridge connection contains no application credential.
-Future supervisor integration must keep the transport capability outside child input, environment variables, source, reports, and durable metadata.
+The supervisor keeps the transport capability outside child input and environment variables.
+Source, reports, and durable metadata must also exclude that capability.
 Connection, session, and configuration diagnostic strings omit private values. JSON serialization remains private transport data.
 
 ## Policy and lifecycle
@@ -50,6 +52,52 @@ Default local mode rejects a remote session. Unrecognized command arguments fail
 The gateway image declares `teststudio.gateway-remote=tls-execution/v1`.
 The existing image health command remains local. Future hosted packaging must select `--ready-remote` explicitly.
 
+The process also accepts `--remote-exchange=HTTPS_ORIGIN` for private initialization through the exchange.
+Supply `TESTSTUDIO_GATEWAY_EXECUTION`, `TESTSTUDIO_GATEWAY_TOKEN`, and `TESTSTUDIO_GATEWAY_INSTANCE` only to the trusted gateway workload.
+The instance must match the provider-confirmed workload identity.
+Initialization retries temporary unavailability for at most 30 seconds. Authorization denial stops initialization immediately.
+The exchange certificate uses normal system trust. A private installation must mount its approved CA bundle.
+This process mode is implemented and compiles. The provider installation path remains unverified.
+
+## Separate initialization authority
+
+The controller calls `PrepareGateway` after preparing the gated execution.
+This freezes the gateway HTTPS origin and optional certificate authority.
+The application credential reference is already frozen separately by execution preparation.
+Neither this reference nor its resolved value enters the runner packet.
+Preparation retries cannot replace the gateway origin, CA, or application credential reference.
+
+The provider must confirm the actual gateway workload before calling `BindGateway` with its immutable instance identifier.
+Binding another instance fails. Configuration delivery waits until this identity is bound.
+The private `gateway-input` route accepts only the separate initialization ticket and that bound instance.
+It checks current execution authority before resolving the frozen application credential.
+The initialization ticket cannot fetch uploaded code or the runner bridge connection.
+
+The `gateway-connection` route accepts only the normal worker ticket after activation and input claim.
+It returns the credential-free TLS connection to that same worker instance.
+The proxy transport capability uses another HMAC purpose. It cannot fetch private initialization or uploaded code.
+All three capabilities remain distinct and reconstruct consistently after service restart.
+Resolved application credentials and raw capabilities are absent from durable exchange records.
+Revocation, completed submissions, expired deadlines, or withdrawn run authority deny new gateway configuration and bridge access.
+
+Activation remains closed until a gateway identity is bound and private configuration is delivered.
+That exchange check does not prove Pod readiness or network isolation.
+The provider must independently verify both workload identities, readiness, and network policies before activation.
+
+## Supervisor delivery
+
+For target-backed work, the supervisor fetches the separate bridge connection after it receives the activated frozen packet.
+It verifies the execution identifier and exact packet deadline before launching the child.
+It creates the private socket at `/output/.browser-egress.sock`.
+The child receives the existing canonical work item and fixed runtime environment.
+It receives no gateway ticket or proxy capability from that input or environment.
+The supervisor closes owned connections and removes the socket when delivery finishes or fails.
+
+New runtime overlays advertise `teststudio.job-gateway=tls-execution/v1`.
+Registry inspection exposes this optional capability. Existing offline runtime images remain valid for offline work.
+Future hosted network admission must require the capability and a distinct timing profile.
+No runtime image is rebuilt for this shared-component milestone.
+
 ## Targeted local verification
 
 New protocol checks use loopback TLS fixtures and an owned Unix socket.
@@ -58,16 +106,21 @@ They also verify scoped authorization, duplicate-header rejection, plaintext rej
 Active browser tunnels close after gateway cancellation, bridge cancellation, and the session deadline.
 The selected gateway checks pass with Go's race detector.
 Existing command configuration checks and selected canonical browser and API policy checks also pass.
+Private exchange checks verify separate roles, instance binding, closed activation, frozen references, restart, and authority withdrawal.
+Those exchange checks pass with the race detector.
+A new child-process check verifies supervisor socket use, stripped gateway environment, prelaunch scope rejection, and socket removal.
+The child-process check also passes with the race detector.
 No cloud account, cluster deployment, browser process, image rebuild, or new catalog run is required for these transport checks.
 
 ## Continuation
 
-Add a separate private gateway initialization authority to the worker exchange.
-Bind it to the frozen execution, dispatch authority, gateway resource identity, and deadline.
-Keep it separate from the ordinary runner packet and activation token.
-Wire the supervisor-owned bridge before launching uploaded code.
+Use the implemented private initialization and supervisor contracts when wiring the provider.
+Configure the trusted private exchange's secret provider before admitting authenticated suites.
+Mount the gateway server certificate and approved exchange trust through installation configuration.
 Extend Kubernetes admission, durable references, inventory, observation, stop, and cleanup to own both workloads.
 Verify both workload identities and the enforced network boundary before releasing the activation gate.
+Require the inspected supervisor gateway capability for environment-backed images.
+Extend hosted source-discovery validation for the reviewed environment build profiles while keeping discovery network-isolated.
 Keep the current hosted rejection guards until that complete path works.
 Use the dedicated local cluster for the first environment-backed browser and API scenarios.
 Port the shared contract to ECS afterward. Keep Azure deferred.

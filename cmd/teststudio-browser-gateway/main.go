@@ -7,6 +7,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -28,7 +29,7 @@ func run() error {
 		mode = os.Args[1]
 	}
 	if len(os.Args) > 2 || len(os.Args) == 2 && mode == "" {
-		return errors.New("gateway accepts --configure, --ready, --ready-remote, or --remote")
+		return errors.New("gateway accepts --configure, --ready, --ready-remote, --remote, or --remote-exchange=HTTPS_ORIGIN")
 	}
 	switch mode {
 	case "--configure":
@@ -49,7 +50,14 @@ func run() error {
 		return connection.Close()
 	case "", "--remote":
 	default:
-		return errors.New("gateway accepts --configure, --ready, --ready-remote, or --remote")
+		if strings.HasPrefix(mode, "--remote-exchange=") {
+			configuration, err := fetchRemoteConfiguration(ctx, strings.TrimPrefix(mode, "--remote-exchange="), os.LookupEnv)
+			if err != nil {
+				return err
+			}
+			return serveRemote(ctx, configuration)
+		}
+		return errors.New("gateway accepts --configure, --ready, --ready-remote, --remote, or --remote-exchange=HTTPS_ORIGIN")
 	}
 	deadline, cancel := context.WithTimeout(ctx, 10*time.Second)
 	configuration, err := receiveCredential(deadline, credentialSocket)

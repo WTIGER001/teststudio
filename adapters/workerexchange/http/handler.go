@@ -13,6 +13,22 @@ import (
 
 func Handler(service *workerexchange.Service) http.Handler {
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /internal/worker/v1/executions/{execution}/gateway-input", func(w http.ResponseWriter, r *http.Request) {
+		configuration, err := service.GatewayInput(r.Context(), r.PathValue("execution"), token(r), r.Header.Get("X-TestStudio-Worker-Instance"))
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		json.NewEncoder(w).Encode(configuration)
+	})
+	mux.HandleFunc("GET /internal/worker/v1/executions/{execution}/gateway-connection", func(w http.ResponseWriter, r *http.Request) {
+		connection, err := service.GatewayConnection(r.Context(), r.PathValue("execution"), token(r), r.Header.Get("X-TestStudio-Worker-Instance"))
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		json.NewEncoder(w).Encode(connection)
+	})
 	mux.HandleFunc("GET /internal/worker/v1/executions/{execution}/input", func(w http.ResponseWriter, r *http.Request) {
 		packet, err := service.Input(r.Context(), r.PathValue("execution"), token(r), r.Header.Get("X-TestStudio-Worker-Instance"))
 		if err != nil {

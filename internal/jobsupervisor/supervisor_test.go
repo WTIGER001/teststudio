@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"os/exec"
@@ -72,12 +74,28 @@ func TestJobFixtureProcess(t *testing.T) {
 	if json.Unmarshal(data, &input) != nil {
 		os.Exit(23)
 	}
-	for _, key := range []string{"TESTSTUDIO_JOB_TOKEN", "TESTSTUDIO_DATABASE", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AZURE_CLIENT_SECRET", "IDENTITY_HEADER", "HTTPS_PROXY"} {
+	for _, key := range []string{"TESTSTUDIO_JOB_TOKEN", "TESTSTUDIO_GATEWAY_TOKEN", "TESTSTUDIO_DATABASE", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AZURE_CLIENT_SECRET", "IDENTITY_HEADER", "HTTPS_PROXY"} {
 		if os.Getenv(key) != "" {
 			os.Exit(24)
 		}
 	}
 	os.WriteFile(filepath.Join(root, "executed"), []byte("once"), 0600)
+	if path, ok := strings.CutPrefix(mode, "gateway:"); ok {
+		transport := &http.Transport{DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
+			return (&net.Dialer{}).DialContext(ctx, "unix", path)
+		}}
+		client := &http.Client{Transport: transport, Timeout: 3 * time.Second}
+		response, err := client.Get("http://bridge/approved")
+		if err != nil {
+			os.Exit(27)
+		}
+		body, err := io.ReadAll(response.Body)
+		response.Body.Close()
+		client.CloseIdleConnections()
+		if err != nil || response.StatusCode != 200 || string(body) != "reviewed gateway response" {
+			os.Exit(28)
+		}
+	}
 	now := time.Now().UTC()
 	event, _ := json.Marshal(map[string]any{"event": "test.started", "testId": input.Test.ID, "selector": input.Test.Selector, "at": now})
 	fmt.Println("TESTSTUDIO_EVENT " + string(event))

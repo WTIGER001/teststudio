@@ -43,6 +43,13 @@ func (s *Supervisor) Run(ctx context.Context) (Outcome, error) {
 	if err != nil {
 		return Outcome{}, ErrWork
 	}
+	if input.Browser != nil {
+		stop, err := s.startGateway(ctx, packet, input)
+		if err != nil {
+			return Outcome{}, ErrWork
+		}
+		defer stop()
+	}
 	return s.execute(ctx, func(progress func(time.Time)) (Prepared, error) { return s.Runner.Run(ctx, input, wire, progress) })
 }
 

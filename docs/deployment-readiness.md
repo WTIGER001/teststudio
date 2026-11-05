@@ -90,7 +90,8 @@ Do not grant direct target egress to the runner as a shortcut.
 
 Bind gateway initialization and transport to the frozen execution, current dispatch authority, and deadline.
 The [remote transport component](remote-gateway.md) now provides an authenticated TLS gateway and a supervisor-owned Unix socket bridge.
-Targeted local protocol checks pass. Hosted dispatch, private initialization authority, resource identity, and provider cleanup remain unwired.
+Shared private initialization, instance binding, frozen credential references, and supervisor delivery now pass targeted local checks.
+Hosted dispatch, provider identity confirmation, installation configuration, network policies, and provider cleanup remain unwired.
 Resolve application credential references only inside the trusted delivery boundary.
 Credential values must not enter uploaded source, runner input, diagnostics, or durable execution metadata.
 Keep gateway configuration distinct from the ordinary worker packet and activation authority.

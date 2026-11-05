@@ -41,11 +41,12 @@ type DiscoveryRunner interface {
 }
 
 type Supervisor struct {
-	Operation  string
-	Transport  Transport
-	Runner     Runner
-	Attempts   int
-	RetryDelay time.Duration
+	GatewaySocket string
+	Operation     string
+	Transport     Transport
+	Runner        Runner
+	Attempts      int
+	RetryDelay    time.Duration
 }
 
 type Outcome struct {

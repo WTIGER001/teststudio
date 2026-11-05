@@ -14,9 +14,24 @@ Cancellation and deadlines close hijacked browser tunnels as well as ordinary re
 Targeted local checks cover HTTPS delivery, credential injection and redaction, denied routes, authorization, certificate validation, and tunnel shutdown.
 The selected gateway checks pass with the race detector. Existing private command configuration checks also pass.
 No cloud, cluster, image rebuild, browser session, or catalog test execution occurs for this transport milestone.
-Hosted admission remains disabled until private initialization, supervisor dispatch, workload identity, network policy, and durable cleanup are wired.
+Hosted admission remains disabled until provider initialization, workload identity, network policy, and durable cleanup are wired.
 This advances implementation under 51, 56, and 57. All seven remaining broad criteria stay open; the verified count remains 50 of 57.
 See [remote transport](remote-gateway.md) for the component boundary and exact continuation instructions. Azure remains deferred.
+
+### Private initialization and supervisor delivery
+
+The exchange now separates gateway initialization, runner execution, and proxy transport authority.
+It freezes the application credential reference outside runner input and binds one provider-confirmed gateway instance.
+Activation waits for bound identity and private configuration delivery. Current execution authority still applies.
+New local HTTPS checks verify role separation, preactivation denial, frozen references, restart, revocation, and authority withdrawal.
+The supervisor creates its bridge before the child starts and removes the socket after delivery.
+A new child-process check verifies actual socket use, stripped gateway environment, and prelaunch rejection of another execution.
+These changed exchange and supervisor checks pass with the race detector.
+Targeted command configuration and pinned-registry inspection checks pass. Runtime build-script syntax passes.
+New runtime overlays advertise the gateway capability. No image rebuild, cluster deployment, cloud test, or browser process occurs.
+The shared gateway process can fetch private configuration. Its complete provider installation path remains unverified.
+Continue Kubernetes workload ownership, instance confirmation, installation trust and secrets, network policy, and durable cleanup.
+The total remains 50 of 57. This advances 51, 56, and 57 without closing their broader requirements.
 
 ## Active application navigation correction — 2026-11-04
 

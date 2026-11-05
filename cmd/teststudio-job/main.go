@@ -57,7 +57,7 @@ func run(arguments []string, lookup func(string) (string, bool)) error {
 		return errors.New("job exchange configuration is invalid")
 	}
 	defer client.Close()
-	supervisor := &jobsupervisor.Supervisor{Operation: options.operation, Transport: client, Runner: &jobsupervisor.Process{Runner: options.runner, Directory: "/suite", Output: "/output", PrivateValues: []string{token}}}
+	supervisor := &jobsupervisor.Supervisor{GatewaySocket: "/output/.browser-egress.sock", Operation: options.operation, Transport: client, Runner: &jobsupervisor.Process{Runner: options.runner, Directory: "/suite", Output: "/output", PrivateValues: []string{token}}}
 	outcome, err := supervisor.Run(ctx)
 	if err != nil {
 		return err

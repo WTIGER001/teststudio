@@ -49,7 +49,12 @@ The child receives an explicit runtime environment for its toolchain, writable t
 The supervisor does not forward the job ticket, database settings, identity endpoint credentials, cloud keys, or personal proxy settings.
 Target-backed runners continue to require the trusted gateway socket at /output/.browser-egress.sock.
 The provider must supply that gateway and its network policy before enabling those profiles.
-The supervisor does not create a gateway or establish a sandbox by itself.
+The supervisor now creates its owned bridge socket from a separate private exchange connection.
+It validates the exact execution and deadline before launching code. Child input and environment exclude the gateway transport capability.
+It removes the socket after delivery and closes its connections on cancellation or deadline.
+New overlays advertise `teststudio.job-gateway=tls-execution/v1`. Registry inspection retains this optional capability.
+The supervisor does not create the remote gateway workload or establish a sandbox by itself.
+See [remote gateway transport](remote-gateway.md) for private initialization and remaining provider wiring.
 
 ## Progress and process ownership
 

@@ -20,6 +20,7 @@ const NonRootTaskStorage = "task-volumes/v1"
 const SandboxSupervisor = "azure-sandbox-command/v1"
 
 type Image struct {
+	GatewayTransport string
 	TaskStorage      string
 	Discovery        string
 	Reference        string

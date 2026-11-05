@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/browserpolicy"
@@ -56,9 +57,33 @@ func ServeRemoteBridge(ctx context.Context, listener net.Listener, target browse
 	if err != nil {
 		return err
 	}
-	bounded, cancel := context.WithDeadline(ctx, connection.Session.Deadline)
+	return bridge.serve(ctx, listener)
+}
+
+func (b *remoteBridge) serve(ctx context.Context, listener net.Listener) error {
+	bounded, cancel := context.WithDeadline(ctx, b.connection.Session.Deadline)
 	defer cancel()
-	return serveGateway(bounded, listener, bridge, target.Requests != nil, nil)
+	return serveGateway(bounded, listener, b, b.api, nil)
+}
+
+func StartRemoteBridge(ctx context.Context, path string, target browserpolicy.Target, connection RemoteConnection) (func() error, error) {
+	bridge, err := newRemoteBridge(target, connection)
+	if err != nil {
+		return nil, err
+	}
+	listener, err := net.Listen("unix", path)
+	if err != nil {
+		return nil, ErrRemoteConfiguration
+	}
+	if os.Chmod(path, 0600) != nil {
+		listener.Close()
+		return nil, ErrRemoteConfiguration
+	}
+	bounded, cancel := context.WithCancel(ctx)
+	done := make(chan struct{})
+	var serveError error
+	go func() { serveError = bridge.serve(bounded, listener); close(done) }()
+	return func() error { cancel(); <-done; return serveError }, nil
 }
 
 func (b *remoteBridge) ServeHTTP(w http.ResponseWriter, r *http.Request) {

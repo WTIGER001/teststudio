@@ -21,7 +21,7 @@ func (s *Service) PrepareDiscovery(ctx context.Context, ref execution.Reference,
 	if err != nil {
 		return Ticket{}, ErrInvalid
 	}
-	return s.prepare(ctx, ref, payload, deadline, "discover", true)
+	return s.prepare(ctx, ref, payload, deadline, "discover", true, "")
 }
 
 func validateDiscoverySubmission(payload []byte, submission Submission) error {

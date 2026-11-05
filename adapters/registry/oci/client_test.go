@@ -152,10 +152,21 @@ func TestRegistryInspectsPinnedSingleImagesAndPlatformIndexes(t *testing.T) {
 	for _, runner := range []string{"go", "playwright"} {
 		for _, index := range []bool{false, true} {
 			t.Run(fmt.Sprint(runner, index), func(t *testing.T) {
-				f := fresh(t, runner, index, nil)
+				f := fresh(t, runner, index, func(c *configuration, _ *manifest) {
+					if index {
+						c.Config.Labels["teststudio.job-gateway"] = "tls-execution/v1"
+					}
+				})
 				metadata, err := f.client.Inspect(t.Context(), f.reference)
 				if err != nil || metadata.Image.Reference != f.reference || metadata.Image.Runner != runner || metadata.Image.Architecture != "arm64" || metadata.Project != "project" || metadata.Image.Project != metadata.Project || metadata.Image.SourceDigest != metadata.Source || metadata.Preparation != "preparation" || metadata.Configuration != f.configHash {
 					t.Fatal(metadata, err)
+				}
+				wantGateway := ""
+				if index {
+					wantGateway = "tls-execution/v1"
+				}
+				if metadata.Image.GatewayTransport != wantGateway {
+					t.Fatal("registry lost optional gateway transport capability")
 				}
 				if f.tokens != 1 {
 					t.Fatal("repository token was fetched repeatedly", f.tokens)

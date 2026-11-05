@@ -50,16 +50,23 @@ func (s *Service) key(ctx context.Context, create bool) ([]byte, error) {
 }
 
 func (s *Service) token(ctx context.Context, record Record) (string, error) {
+	return s.scopedToken(ctx, record, "worker")
+}
+
+func (s *Service) scopedToken(ctx context.Context, record Record, role string) (string, error) {
 	key, err := s.key(ctx, false)
 	if err != nil {
 		return "", err
 	}
 	mac := hmac.New(sha256.New, key)
-	mac.Write([]byte("teststudio.worker/v1\x00" + record.Reference.Installation + "\x00" + record.Reference.ID + "\x00" + record.Nonce))
+	mac.Write([]byte("teststudio." + role + "/v1\x00" + record.Reference.Installation + "\x00" + record.Reference.ID + "\x00" + record.Nonce))
 	return base64.RawURLEncoding.EncodeToString(mac.Sum(nil)), nil
 }
 
 func (s *Service) Prepare(ctx context.Context, ref execution.Reference, input execution.CodedInput, deadline time.Time) (Ticket, error) {
+	if input.Browser != nil && (!input.AwaitDispatch || !domain.ValidID(ref.Gateway)) || input.Browser == nil && ref.Gateway != "" {
+		return Ticket{}, ErrInvalid
+	}
 	if !domain.ValidID(ref.ID) || !domain.ValidID(ref.Installation) || !domain.ValidID(ref.Project) || !domain.ValidID(ref.Run) || !domain.ValidID(ref.Test) || !domain.ValidID(ref.Worker) || ref.Attempt < 1 || ref.Profile == "" || input.RunID != ref.Run || input.Test.ID != ref.Test || input.Artifact.SourceProject != "" && input.Artifact.SourceProject != ref.Project {
 		return Ticket{}, ErrInvalid
 	}
@@ -67,10 +74,17 @@ func (s *Service) Prepare(ctx context.Context, ref execution.Reference, input ex
 	if err != nil {
 		return Ticket{}, ErrInvalid
 	}
-	return s.prepare(ctx, ref, payload, deadline, "", input.AwaitDispatch)
+	credential := ""
+	if input.Browser != nil && input.Browser.Authenticated {
+		if !domain.ValidID(input.CredentialReference) {
+			return Ticket{}, ErrInvalid
+		}
+		credential = input.CredentialReference
+	}
+	return s.prepare(ctx, ref, payload, deadline, "", input.AwaitDispatch, credential)
 }
 
-func (s *Service) prepare(ctx context.Context, ref execution.Reference, payload []byte, deadline time.Time, operation string, gated bool) (Ticket, error) {
+func (s *Service) prepare(ctx context.Context, ref execution.Reference, payload []byte, deadline time.Time, operation string, gated bool, credential string) (Ticket, error) {
 	if s.Authorize == nil {
 		return Ticket{}, ErrDenied
 	}
@@ -92,7 +106,7 @@ func (s *Service) prepare(ctx context.Context, ref execution.Reference, payload 
 			if err != nil {
 				return Ticket{}, ErrUnavailable
 			}
-			if record.Reference != ref || record.InputHash != fingerprint(payload) || !record.Deadline.Equal(deadline) || record.Revoked || record.DispatchGated != gated || record.Operation != operation {
+			if record.Reference != ref || record.InputHash != fingerprint(payload) || !record.Deadline.Equal(deadline) || record.Revoked || record.DispatchGated != gated || record.Operation != operation || record.CredentialReference != credential {
 				return Ticket{}, ErrConflict
 			}
 		} else if errors.Is(err, storage.ErrNotFound) {
@@ -104,6 +118,7 @@ func (s *Service) prepare(ctx context.Context, ref execution.Reference, payload 
 				return Ticket{}, ErrUnavailable
 			}
 			record = Record{Operation: operation, DispatchGated: gated, DispatchReady: !gated, Reference: ref, Input: payload, InputHash: fingerprint(payload), Nonce: hex.EncodeToString(nonce), CreatedAt: time.Now().UTC(), Deadline: deadline, Uploaded: map[string]bool{}}
+			record.CredentialReference = credential
 			change, err := storage.Put(Bucket, ref.ID, ref.Project, 0, record)
 			if err != nil {
 				return Ticket{}, ErrUnavailable

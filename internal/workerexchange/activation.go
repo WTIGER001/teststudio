@@ -23,6 +23,11 @@ func (s *Service) Activate(ctx context.Context, ref execution.Reference) error {
 		if !record.DispatchGated || record.DispatchReady {
 			return nil
 		}
+		if record.Reference.Gateway != "" || record.Gateway != nil {
+			if _, err := gatewayTarget(record); err != nil || record.Gateway == nil || record.Gateway.Instance == "" || !record.Gateway.Bootstrapped {
+				return ErrUnavailable
+			}
+		}
 		record.DispatchReady = true
 		if err := s.save(ctx, row, record, access.Records); err == ErrConflict {
 			continue

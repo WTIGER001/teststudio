@@ -55,6 +55,26 @@ A target policy must match the source's target-backed profile and pass the exist
 Preparation and provider admission remain responsible for immutable source approval and sandbox configuration.
 The transport does not replace those controls.
 
+## Private gateway initialization
+
+Environment-backed work requires a gateway reference and a closed dispatch gate.
+Preparation freezes the application credential reference outside the runner input.
+The controller can then freeze a private gateway origin and CA through `PrepareGateway`.
+The provider must confirm and bind one immutable gateway instance before configuration delivery.
+
+`GET /internal/worker/v1/executions/{execution}/gateway-input` uses a separate initialization ticket and the bound gateway instance.
+Only this trusted operation resolves and returns the frozen application credential.
+`GET /internal/worker/v1/executions/{execution}/gateway-connection` uses the ordinary worker ticket after activation and input claim.
+It returns a credential-free proxy connection to that worker instance.
+Both routes use the existing instance header and no-store HTTP protections.
+
+Initialization, runner, and proxy transport capabilities use distinct HMAC purposes.
+They cannot substitute for each other. Revocation, expiry, completion, and current run authorization apply.
+Activation waits for bound gateway identity and private configuration delivery.
+The provider must still verify workload readiness and enforced network isolation before activation.
+The normal input packet remains unchanged.
+See [remote gateway transport](remote-gateway.md) for the implemented supervisor path and remaining provider work.
+
 ## Listener and HTTPS client
 
 The API can expose a separate listener with --worker-addr.
