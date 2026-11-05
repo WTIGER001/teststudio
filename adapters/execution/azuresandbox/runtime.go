@@ -32,6 +32,7 @@ type Runtime struct {
 	network   *SDKNetwork
 	private   *SDKPrivate
 	topology  *SDKTopology
+	resolver  *SDKResolver
 	once      sync.Once
 }
 
@@ -96,7 +97,11 @@ func OpenRuntime(o RuntimeOptions) (result *Runtime, resultErr error) {
 	if err != nil {
 		return nil, err
 	}
-	admission := &placementAdmission{placement: r.placement, authority: r.authority, network: r.network, private: r.private, topology: r.topology, protection: o.Admission, importProtection: o.ImageAdmission}
+	r.resolver, err = NewSDKResolver(s, metadata, o.ARMTransport)
+	if err != nil {
+		return nil, err
+	}
+	admission := &placementAdmission{placement: r.placement, authority: r.authority, network: r.network, private: r.private, topology: r.topology, resolver: r.resolver, protection: o.Admission, importProtection: o.ImageAdmission}
 	controller, err := NewController(ControllerOptions{Config: s.Worker, Instances: r.client, Deadlines: r.deadlines, Admission: admission, Exchange: o.Exchange, Commands: r.client})
 	if err != nil {
 		return nil, err
@@ -142,6 +147,9 @@ func (r *Runtime) Close() {
 		}
 		if r.topology != nil {
 			r.topology.Close()
+		}
+		if r.resolver != nil {
+			r.resolver.Close()
 		}
 		if r.client != nil {
 			r.client.Close()

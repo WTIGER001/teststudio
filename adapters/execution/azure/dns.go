@@ -73,20 +73,24 @@ func (s dnsBinding) check(ctx context.Context, c Config, reader DNSReader) error
 			return hostedexecution.ErrUnavailable
 		}
 	}
-	if !dnsIdentity(value(policy.ID), value(policy.Name), value(policy.Type), s.Policy, "Microsoft.Network/dnsResolverPolicies", value(policy.Location), c.Region) || policy.Properties == nil {
+	return s.verify(c.Region, policy, allow, block, rules, links, attached)
+}
+
+func (s dnsBinding) verify(region string, policy d.Policy, allow, block d.DomainList, rules []d.DNSSecurityRule, links []d.PolicyVirtualNetworkLink, attached []d.SubResource) error {
+	if !dnsIdentity(value(policy.ID), value(policy.Name), value(policy.Type), s.Policy, "Microsoft.Network/dnsResolverPolicies", value(policy.Location), region) || policy.Properties == nil {
 		return hostedexecution.ErrOwnership
 	}
 	if policy.Properties.ProvisioningState == nil || value(policy.Properties.ProvisioningState) != d.ProvisioningStateSucceeded {
 		return hostedexecution.ErrUnavailable
 	}
-	if err := s.verifyDomainList(allow, true, c.Region); err != nil {
+	if err := s.verifyDomainList(allow, true, region); err != nil {
 		return err
 	}
-	if err := s.verifyDomainList(block, false, c.Region); err != nil {
+	if err := s.verifyDomainList(block, false, region); err != nil {
 		return err
 	}
-	if err := s.verifyRules(rules, c.Region); err != nil {
+	if err := s.verifyRules(rules, region); err != nil {
 		return err
 	}
-	return s.verifyLinks(links, attached, c.Region)
+	return s.verifyLinks(links, attached, region)
 }

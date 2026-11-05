@@ -13,6 +13,7 @@ The [authority stage](azure-sandbox-authority.md) now checks selected identity a
 The [network stage](azure-sandbox-network.md) now checks the complete selected security rules, default route, and exclusive subnet attachments.
 The [private stage](azure-sandbox-private.md) now binds endpoint NIC addresses, endpoint subnet contents, and complete selected private DNS inventories.
 The [topology stage](azure-sandbox-topology.md) now checks selected VNet contents, firewall attachments, and the complete deny-all firewall policy.
+The [resolver stage](azure-sandbox-resolver.md) now checks policy rules, actual association, and reported subscription private-zone links.
 Remaining authority and protected network admission, effective timer authority, command role wiring, and deployment packaging remain unfinished.
 The factory requires admission dependencies. It supplies no permissive default.
 Do not treat client construction or local protocol checks as deployment acceptance.
@@ -43,7 +44,7 @@ The loader validates all fields before credential construction.
 | timer.stopIdentity | User-assigned timer identity in the selected subscription. Its resource differs from pullIdentity. |
 
 PlacementSettings.NetworkProfile derives worker.networkProfile from the placement bindings and worker configuration.
-The sandbox-placement/v4 profile binds placement.network, its required topology settings, and placement.private endpoint and DNS settings.
+The sandbox-placement/v5 profile binds placement.network, required topology and resolver settings, and placement.private endpoint and DNS settings.
 The protected network fingerprint remains in placement.policyProfile. A mismatched derived worker profile rejects startup.
 
 Registry validation uses the same pure policy as the ACR client constructor.
@@ -63,6 +64,7 @@ It constructs SDKAuthority with that metadata credential and compares selected i
 It constructs SDKNetwork with the metadata credential and verifies selected security rules, route contents, and exclusive attachments.
 It constructs SDKPrivate with that credential and checks endpoints, NICs, the endpoint subnet and rules, and selected DNS inventories.
 It constructs SDKTopology with that credential and compares VNet contents, firewall and public IP attachments, and complete firewall policy groups.
+It constructs SDKResolver with that credential and compares resolver rules, actual VNet association, and reported subscription zone-link inventories.
 The resulting image manager and provider share the controller's exact configuration and exchange.
 
 Default credential construction uses ManagedIdentityCredential with each exact configured client identifier.
@@ -95,8 +97,8 @@ That command integration remains unfinished.
 
 Admission is mandatory for every runtime. ImageAdmission is also mandatory for discovery mode.
 The existing controller calls the placement stage and these dependencies before creation, during live admission observation, and before import.
-Live placement, network, private binding, topology, and selected authority evidence have a 15-second bound.
-Initial placement, network, private binding, and topology checks remain fresh, including source import.
+Live placement, network, private binding, topology, resolver, and selected authority evidence have a 15-second bound.
+Initial placement, network, private binding, topology, and resolver checks remain fresh, including source import.
 The additional protection, per-sandbox, and worker authorization checks remain uncached.
 OpenRuntime does not substitute a successful construction result for those checks.
 Native commands must compose actual group, VNet, private exchange, source identity, and timer authority checks before enabling dispatch.

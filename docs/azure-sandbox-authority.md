@@ -51,7 +51,8 @@ Sandbox operations belong in dataActions. Workflow and identity administration b
 | Metadata reader | The existing fixed metadata contract: read management metadata and observe DNS resolver policy associations. No data actions or write authority. |
 
 The metadata read profile has subscription scope because installation resources span several resource groups.
-The SDK transport still permits only its configured selected GET paths.
+The authority transport permits only its configured selected GET paths.
+The separate resolver transport permits one selected empty POST read action for VNet policy association.
 The selected registry inspection assignment uses AcrPull, not AcrPush.
 The existing registry client also keeps publication disabled and requests pull tokens only.
 These selected grants do not prove absence of other effective write privileges.
@@ -113,7 +114,8 @@ No cloud account, identity endpoint, registry service, role mutation, browser, c
 Verify effective assignments and exclusions, deny effects, identity host attachment, and protection from unintended identity reuse.
 The network and private stages now check selected rules, routes, endpoint ownership, and complete selected DNS inventories.
 The topology stage now checks selected VNet contents, firewall attachments, and the complete deny-all firewall policy.
-Complete trusted exchange service ownership, resolver policy, other linked zones, effective DNS resolution, and protected network bindings.
+The resolver stage now checks selected policy, actual association, and other reported subscription zone links.
+Complete trusted exchange service ownership, effective DNS resolution, and protected network bindings, including cross-subscription and deny-effect coverage.
 Then wire the execution and discovery roles to native commands and package their resources.
 Verify custom sandbox data-action roles and the narrow timer roles with the actual service during the separate deployment phase.
 The published operation catalog supplies permission names. It does not prove preview-service compatibility or effective installation access.

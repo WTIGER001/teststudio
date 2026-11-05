@@ -69,6 +69,7 @@ func newPlacementWorld(t *testing.T, s Settings) *placementWorld {
 	}
 	w.addPrivate()
 	w.addTopology()
+	w.addResolver()
 	return w
 }
 
@@ -88,7 +89,23 @@ func (w *placementWorld) Do(r *http.Request) (*http.Response, error) {
 	if version == "" {
 		version = topologyVersions(w.s)[r.URL.Path]
 	}
-	if r.Method != "GET" || r.URL.Scheme != "https" || r.URL.Host != "management.azure.com" || version == "" || r.URL.RawQuery != "api-version="+version || r.Header.Get("Authorization") != "Bearer placement-metadata-canary" {
+	if version == "" {
+		version = resolverVersions(w.s)[r.URL.Path]
+	}
+	if version == "" && r.URL.Path == "/subscriptions/"+w.s.Worker.Subscription+"/providers/Microsoft.Network/privateDnsZones" {
+		version = "2024-06-01"
+	}
+	if version == "" && strings.HasSuffix(r.URL.Path, "/virtualNetworkLinks") {
+		zone := w.resources[strings.TrimSuffix(r.URL.Path, "/virtualNetworkLinks")]
+		if zone != nil && zone["type"] == "Microsoft.Network/privateDnsZones" {
+			version = "2024-06-01"
+		}
+	}
+	method := "GET"
+	if r.URL.Path == w.s.Placement.virtualNetwork()+"/listDnsResolverPolicies" {
+		method = "POST"
+	}
+	if r.Method != method || r.URL.Scheme != "https" || r.URL.Host != "management.azure.com" || version == "" || r.URL.RawQuery != "api-version="+version || r.Header.Get("Authorization") != "Bearer placement-metadata-canary" {
 		w.t.Error("placement request escaped its selected identity or resource")
 		return response(403, `{}`), nil
 	}

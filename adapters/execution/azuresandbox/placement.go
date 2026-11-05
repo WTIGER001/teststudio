@@ -106,6 +106,7 @@ type placementAdmission struct {
 	network          *SDKNetwork
 	private          *SDKPrivate
 	topology         *SDKTopology
+	resolver         *SDKResolver
 	protection       Admission
 	importProtection ImageAdmission
 }
@@ -121,6 +122,9 @@ func (a *placementAdmission) BeforeCreate(ctx context.Context, c Config) error {
 		return err
 	}
 	if err := a.topology.Check(ctx, c); err != nil {
+		return err
+	}
+	if err := a.resolver.Check(ctx, c); err != nil {
 		return err
 	}
 	if err := a.authority.Check(ctx, c); err != nil {
@@ -145,6 +149,9 @@ func (a *placementAdmission) VerifyInstance(ctx context.Context, c Config, actua
 	if err := a.topology.CheckRunning(ctx, c); err != nil {
 		return err
 	}
+	if err := a.resolver.CheckRunning(ctx, c); err != nil {
+		return err
+	}
 	if err := a.authority.Check(ctx, c); err != nil {
 		return err
 	}
@@ -165,6 +172,9 @@ func (a *placementAdmission) BeforeImport(ctx context.Context, c Config, identit
 		return err
 	}
 	if err := a.topology.Check(ctx, c); err != nil {
+		return err
+	}
+	if err := a.resolver.Check(ctx, c); err != nil {
 		return err
 	}
 	if err := a.authority.Check(ctx, c); err != nil {

@@ -29,7 +29,7 @@ The firewall subnet belongs to the sandbox connection's VNet.
 It cannot overlap the execution or endpoint subnet.
 placement.network.firewallIp must be a usable address in that subnet, outside Azure's reserved addresses.
 Invalid scope, resource type, address space, overlap, subnet size, or firewall address rejects before credential construction.
-The sandbox-placement/v4 profile binds these settings with the existing network, private endpoint, DNS, and placement bindings.
+The sandbox-placement/v5 profile binds these settings with required resolver, network, private endpoint, DNS, and placement bindings.
 Older staged profiles require regeneration. No native command currently loads them.
 
 TopologyDefinitions returns five reviewable bodies: firewall, firewall policy, owned rule group, public IP, and firewall subnet.
@@ -117,7 +117,8 @@ No cloud service, browser, container, UI build, demo restart, resource mutation,
 
 ### Complete activation
 
-Complete resolver policy and other linked-zone observations, trusted exchange service ownership, additional grants, deny effects, and credential host attachment.
+The resolver stage now checks selected policy, actual association, and other reported subscription zone links.
+Complete trusted exchange service ownership, additional grants, deny effects, credential host attachment, and write protection.
 Then wire scoped execution and discovery commands and package their dependencies.
 Verify actual routing, preview compatibility, private conversion, role acceptance, timer execution, token audience, and proxy trust during separate deployment acceptance.
 

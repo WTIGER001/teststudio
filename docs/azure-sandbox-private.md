@@ -30,7 +30,7 @@ placement.private supplies these bindings:
 
 The endpoint subnet reserves Azure's first four addresses and its final address.
 Public, noncanonical, overlapping, undersized, foreign, reused, and inconsistent bindings reject before credential construction.
-The sandbox-placement/v4 profile includes these bindings, network settings, and required topology and firewall bindings.
+The sandbox-placement/v5 profile includes these bindings, network settings, and required topology, firewall, and resolver bindings.
 Changes require a new derived worker.networkProfile. Older staged profiles reject.
 No native command currently loads those profiles.
 
@@ -77,7 +77,8 @@ Registration is disabled. Public fallback resolution rejects.
 Reported zone link counts must match the complete link inventory.
 The stage does not resolve these names or inspect every other zone linked to the VNet.
 The required [topology stage](azure-sandbox-topology.md) now verifies the selected VNet contents and firewall policy without enabling native execution.
-Other linked zones, resolver policy, custom DNS servers, forwarding, and effective resolution remain protection work.
+The required [resolver stage](azure-sandbox-resolver.md) now checks selected policy, actual association, and other reported subscription zone links.
+Visibility across subscriptions, deny-hidden resources, write protection, and effective resolution remain unverified.
 
 ### Observations and pagination
 
@@ -97,7 +98,7 @@ Changed scopes, filters, repeated tokens, duplicate identifiers, missing value a
 Unsafe continuations reject before credential acquisition.
 Partial inventories are never returned as complete evidence.
 
-The shared reader permits GET only, bounds each response to 1 MiB, and closes response bodies.
+This stage's reader permits GET only, bounds each response to 1 MiB, and closes response bodies.
 It disables redirects, provider registration, and automatic retries.
 Metadata gaps remain unavailable. A metadata 404 never establishes sandbox absence or permits another launch.
 Errors omit provider bodies and credential diagnostics.
@@ -121,7 +122,7 @@ No cloud service, browser, container, UI build, demo restart, resource mutation,
 
 ### Finish activation
 
-Verify effective DNS resolution, resolver policy, other linked zones, and trusted exchange application and backend ownership.
+Verify effective DNS resolution, visibility across subscriptions, write protection, and trusted exchange application and backend ownership.
 Observe additional grants, deny effects, credential host attachment, and protection bindings.
 Then wire the scoped execution and discovery commands and package their dependencies.
 Actual preview compatibility, private source conversion, role acceptance, timer execution, token audience, and proxy trust remain separate deployment work.

@@ -11,6 +11,7 @@ type NetworkSettings struct {
 	FirewallIP         string           `json:"firewallIp"`
 	PrivateEndpointIPs []string         `json:"privateEndpointIps"`
 	Topology           TopologySettings `json:"topology"`
+	Resolver           ResolverSettings `json:"resolver"`
 }
 
 func (n NetworkSettings) validate(subnet string) error {

@@ -71,6 +71,26 @@ func verifyPrivateDNSInventory(c Config, s RelayPrivateDNSSettings, observed Pri
 		wanted[inventoryIdentityKey(zone+"/virtualNetworkLinks/worker-network")] = inventoryIdentityKey(vnet)
 	}
 	wanted[inventoryIdentityKey(s.RegistryZone+"/virtualNetworkLinks/relay-network")] = inventoryIdentityKey(relay)
+	return VerifyPrivateDNSInventoryLinks(c.Subscription, observed, wanted, []string{vnet, relay})
+}
+
+func VerifyPrivateDNSInventoryLinks(subscription string, observed PrivateDNSZoneInventory, required map[string]string, networks []string) error {
+	c := Config{Subscription: subscription}
+	if observed.Zones == nil || observed.Links == nil || len(observed.Zones) > privateDNSInventoryZones || len(observed.Links) > privateDNSInventoryLinks {
+		return hostedexecution.ErrUnavailable
+	}
+	wanted, requiredZones, guarded := map[string]string{}, map[string]bool{}, map[string]bool{}
+	for id, network := range required {
+		zone, _, found := strings.Cut(strings.ToLower(id), "/virtualnetworklinks/")
+		if !found || !privateDNSInventoryID(c, zone) || !privateDNSInventoryLinkID(zone, id) || !privateDNSVNetReference(network) {
+			return hostedexecution.ErrOwnership
+		}
+		wanted[inventoryIdentityKey(id)] = inventoryIdentityKey(network)
+		requiredZones[zone] = true
+	}
+	for _, network := range networks {
+		guarded[inventoryIdentityKey(network)] = true
+	}
 	zones, links := map[string]bool{}, map[string]bool{}
 	for _, id := range observed.Zones {
 		if !privateDNSInventoryID(c, id) || zones[inventoryIdentityKey(id)] {
@@ -78,7 +98,7 @@ func verifyPrivateDNSInventory(c Config, s RelayPrivateDNSSettings, observed Pri
 		}
 		zones[inventoryIdentityKey(id)] = true
 	}
-	for _, zone := range []string{worker.ExchangeZone, worker.RegistryZone, s.RegistryZone} {
+	for zone := range requiredZones {
 		if !zones[inventoryIdentityKey(zone)] {
 			return hostedexecution.ErrUnavailable
 		}
@@ -95,7 +115,7 @@ func verifyPrivateDNSInventory(c Config, s RelayPrivateDNSSettings, observed Pri
 				return hostedexecution.ErrOwnership
 			}
 			delete(wanted, id)
-		} else if strings.EqualFold(link.VirtualNetworkID, vnet) || strings.EqualFold(link.VirtualNetworkID, relay) {
+		} else if guarded[inventoryIdentityKey(link.VirtualNetworkID)] {
 			return hostedexecution.ErrOwnership
 		}
 	}

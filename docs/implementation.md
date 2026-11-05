@@ -122,7 +122,39 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: sandbox VNet and firewall policy admission
+## Current delivery: sandbox resolver policy and reported zone inventory
+
+OpenRuntime now constructs SDKResolver with the existing metadata identity.
+Creation, source import, and live admission require selected resolver policy, complete rules and links, and the actual VNet association.
+The fixed approved list contains five exchange and registry domains. A root-domain block list covers remaining names.
+Exactly two enabled rules retain their Allow and Block actions, list bindings, and priorities.
+The policy link and actual VNet association must both identify the selected policy and network.
+
+The metadata transport permits one exact empty POST read action for listDnsResolverPolicies.
+Other actions, mutations, payloads, positive body lengths, filters, and foreign scopes reject.
+Default metadata readers retain GET-only scopes. The metadata role gains no write action.
+The reused subscription inventory reader now has an independent subscription-only constructor.
+Complete reported zone and link observations reject extra links to the sandbox VNet while preserving unrelated networks.
+Missing pages, count gaps, inaccessible metadata, and inventory limits retain uncertainty.
+Existing DNS policy and zone-link verifiers are reused through independent bindings without Jobs configuration.
+
+The sandbox-placement/v5 profile binds resolver settings. Invalid bindings and stale profiles reject before credentials.
+ResolverDefinitions supplies six reviewable resource bodies without mutation.
+Fresh creation and import checks and bounded shared live evidence preserve uncached protection and current authorization.
+Six new focused checks and twelve affected native checks pass with race detection in 2.171 seconds.
+Seven affected shared DNS and subscription inventory checks pass with race detection in 4.645 seconds.
+Evidence is output/azure-sandbox-resolver/summary.json, native.log, and shared-dns.log.
+No cloud service, credential endpoint, browser, container, UI build, demo restart, resource mutation, or remote push is involved.
+The plan and affected operator guides match the change. No user page behavior changes.
+
+Azure domain hierarchy also permits descendants of allowed domains. Independent selected-zone restrictions remain required.
+Reported subscription inventory does not prove visibility across subscriptions or the absence of deny-hidden resources.
+Trusted exchange service ownership, additional authority, host attachment, deny effects, and write protection remain unfinished.
+Native command wiring and packaging remain unfinished. Actual resolution and preview compatibility remain separate deployment verification.
+No native command or deployment template enables this runtime.
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+## Previous delivery: sandbox VNet and firewall policy admission
 
 OpenRuntime now constructs SDKTopology with the existing metadata identity.
 Creation, image import, and live admission require selected VNet, subnet, firewall, public IP, policy, and complete rule-group observations.

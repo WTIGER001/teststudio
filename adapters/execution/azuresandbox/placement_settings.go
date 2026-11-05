@@ -52,7 +52,10 @@ func (p PlacementSettings) validate(c Config) error {
 	if err := p.Private.validate(c, p); err != nil {
 		return err
 	}
-	return p.Network.Topology.validate(c, p)
+	if err := p.Network.Topology.validate(c, p); err != nil {
+		return err
+	}
+	return p.Network.Resolver.validate(c)
 }
 
 func (p PlacementSettings) NetworkProfile(c Config) (string, error) {
@@ -62,7 +65,7 @@ func (p PlacementSettings) NetworkProfile(c Config) (string, error) {
 		return "", hostedexecution.ErrConfiguration
 	}
 	c.NetworkProfile = ""
-	return hash([]any{"sandbox-placement/v4", c, p}), nil
+	return hash([]any{"sandbox-placement/v5", c, p}), nil
 }
 
 func (c Config) groupID() string {

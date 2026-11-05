@@ -26,6 +26,7 @@ type placementHTTP struct {
 	owned   *http.Transport
 	allowed map[string]string
 	pages   map[string]bool
+	posts   map[string]bool
 	closed  atomic.Bool
 }
 
@@ -58,7 +59,11 @@ func newMetadataHTTP(versions map[string]string, base policy.Transporter) *place
 
 func (h *placementHTTP) accepts(r *http.Request) bool {
 	u := r.URL
-	if u == nil || r.Method != "GET" || r.Body != nil && r.Body != http.NoBody || u.Scheme != "https" || u.Host != "management.azure.com" || u.User != nil || u.Fragment != "" || u.Opaque != "" || r.Host != "" && r.Host != u.Host || h.allowed[u.Path] == "" || !h.queryAllowed(u) {
+	method := http.MethodGet
+	if u != nil && h.posts[u.Path] {
+		method = http.MethodPost
+	}
+	if u == nil || r.Method != method || r.ContentLength > 0 || r.Body != nil && r.Body != http.NoBody || u.Scheme != "https" || u.Host != "management.azure.com" || u.User != nil || u.Fragment != "" || u.Opaque != "" || r.Host != "" && r.Host != u.Host || h.allowed[u.Path] == "" || !h.queryAllowed(u) {
 		return false
 	}
 	parts := strings.Split(u.Path, "/")
@@ -79,6 +84,10 @@ func (h *placementHTTP) Do(r *http.Request) (*http.Response, error) {
 	if !h.accepts(r) {
 		return nil, hostedexecution.ErrOwnership
 	}
+	return h.readBounded(r)
+}
+
+func (h *placementHTTP) readBounded(r *http.Request) (*http.Response, error) {
 	response, err := h.base.Do(r)
 	if err != nil || response == nil || response.Body == nil {
 		if response != nil && response.Body != nil {
@@ -118,28 +127,40 @@ func newMetadataReader(versions map[string]string, credential azcore.TokenCreden
 }
 
 func (c *metadataReader) get(ctx context.Context, id string) (placementResource, error) {
+	var value placementResource
+	err := c.documentID(ctx, id, &value)
+	return value, err
+}
+
+func (c *metadataReader) documentID(ctx context.Context, id string, value any) error {
 	version := c.http.allowed[id]
 	if version == "" {
-		return placementResource{}, hostedexecution.ErrOwnership
+		return hostedexecution.ErrOwnership
 	}
 	if ctx.Err() != nil || c.http.closed.Load() {
-		return placementResource{}, hostedexecution.ErrUnavailable
+		return hostedexecution.ErrUnavailable
 	}
 	parts := strings.Split(id, "/")
 	escaped := id
 	if len(parts) > 4 && parts[3] == "resourceGroups" {
 		escaped = strings.Replace(id, "/resourceGroups/"+parts[4]+"/", "/resourceGroups/"+url.PathEscape(parts[4])+"/", 1)
 	}
-	var value placementResource
-	err := c.document(ctx, "https://management.azure.com"+escaped+"?api-version="+version, &value)
-	return value, err
+	return c.document(ctx, "https://management.azure.com"+escaped+"?api-version="+version, value)
 }
 
 func (c *metadataReader) document(ctx context.Context, target string, value any) error {
 	if ctx.Err() != nil || c.http.closed.Load() {
 		return hostedexecution.ErrUnavailable
 	}
-	request, err := runtime.NewRequest(ctx, http.MethodGet, target)
+	parsed, err := url.Parse(target)
+	if err != nil {
+		return hostedexecution.ErrOwnership
+	}
+	method := http.MethodGet
+	if c.http.posts[parsed.Path] {
+		method = http.MethodPost
+	}
+	request, err := runtime.NewRequest(ctx, method, target)
 	if err != nil || !c.http.accepts(request.Raw()) {
 		return hostedexecution.ErrOwnership
 	}

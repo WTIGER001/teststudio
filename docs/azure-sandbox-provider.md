@@ -14,6 +14,7 @@ The [authority stage](azure-sandbox-authority.md) now checks selected control, r
 The [network stage](azure-sandbox-network.md) now checks complete selected security rules, the default firewall route, and exclusive subnet attachments.
 The [private stage](azure-sandbox-private.md) now checks endpoint and NIC ownership, endpoint subnet rules, and complete selected DNS inventories.
 The [topology stage](azure-sandbox-topology.md) now checks selected VNet contents, firewall ownership and attachments, and the complete deny-all firewall policy.
+The [resolver stage](azure-sandbox-resolver.md) now checks selected policy rules, actual VNet association, and reported subscription private-zone links.
 Remaining authority and protected network admission, effective timer authority, command wiring, and native packaging remain unfinished.
 Local protocol verification does not establish deployed Azure behavior.
 

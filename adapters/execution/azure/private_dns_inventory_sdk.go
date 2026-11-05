@@ -16,9 +16,9 @@ import (
 )
 
 type SDKPrivateDNSInventoryReader struct {
-	worker     Config
-	credential azcore.TokenCredential
-	base       policy.Transporter
+	subscription string
+	credential   azcore.TokenCredential
+	base         policy.Transporter
 }
 
 type privateDNSInventoryBudget struct {
@@ -37,7 +37,14 @@ func NewSDKPrivateDNSInventoryReader(c Config, credential azcore.TokenCredential
 	if Validate(c) != nil || credential == nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
-	return &SDKPrivateDNSInventoryReader{worker: c, credential: credential, base: newARMReadHTTP(c, nil, transport).base}, nil
+	return NewBoundPrivateDNSInventoryReader(c.Subscription, credential, transport)
+}
+
+func NewBoundPrivateDNSInventoryReader(subscription string, credential azcore.TokenCredential, transport policy.Transporter) (*SDKPrivateDNSInventoryReader, error) {
+	if !guid.MatchString(subscription) || subscription == "00000000-0000-0000-0000-000000000000" || credential == nil {
+		return nil, hostedexecution.ErrConfiguration
+	}
+	return &SDKPrivateDNSInventoryReader{subscription: subscription, credential: credential, base: newARMReadHTTP(Config{Subscription: subscription}, nil, transport).base}, nil
 }
 
 func (c *SDKPrivateDNSInventoryReader) Close() {
@@ -50,12 +57,12 @@ func (c *SDKPrivateDNSInventoryReader) Observe(ctx context.Context) (PrivateDNSZ
 	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 	empty := PrivateDNSZoneInventory{}
-	path := "/subscriptions/" + c.worker.Subscription + "/providers/Microsoft.Network/privateDnsZones"
+	path := "/subscriptions/" + c.subscription + "/providers/Microsoft.Network/privateDnsZones"
 	budget := &privateDNSInventoryBudget{base: c.base}
 	budget.remaining.Store(privateDNSInventoryRequests)
-	h := newARMReadHTTP(c.worker, map[string]string{path: "2024-06-01"}, budget)
+	h := newARMReadHTTP(Config{Subscription: c.subscription}, map[string]string{path: "2024-06-01"}, budget)
 	h.pages = map[string]bool{path: true}
-	zonesClient, err := p.NewPrivateZonesClient(c.worker.Subscription, c.credential, publicARMOptions(h))
+	zonesClient, err := p.NewPrivateZonesClient(c.subscription, c.credential, publicARMOptions(h))
 	if err != nil {
 		return empty, hostedexecution.ErrConfiguration
 	}
@@ -76,11 +83,11 @@ func (c *SDKPrivateDNSInventoryReader) Observe(ctx context.Context) (PrivateDNSZ
 	seen := map[string]bool{}
 	var total int64
 	for i, zone := range zones {
-		if err := privateDNSInventoryZone(c.worker, zone); err != nil {
+		if err := privateDNSInventoryZone(Config{Subscription: c.subscription}, zone); err != nil {
 			return empty, err
 		}
 		parts := strings.Split(value(zone.ID), "/")
-		id := "/subscriptions/" + c.worker.Subscription + "/resourceGroups/" + parts[4] + "/providers/Microsoft.Network/privateDnsZones/" + parts[8]
+		id := "/subscriptions/" + c.subscription + "/resourceGroups/" + parts[4] + "/providers/Microsoft.Network/privateDnsZones/" + parts[8]
 		zones[i].ID = &id
 		if seen[inventoryIdentityKey(id)] {
 			return empty, hostedexecution.ErrOwnership
@@ -94,7 +101,7 @@ func (c *SDKPrivateDNSInventoryReader) Observe(ctx context.Context) (PrivateDNSZ
 		linkPath := id + "/virtualNetworkLinks"
 		h.resources[linkPath], h.pages[linkPath] = "2024-06-01", true
 	}
-	linksClient, err := p.NewVirtualNetworkLinksClient(c.worker.Subscription, c.credential, publicARMOptions(h))
+	linksClient, err := p.NewVirtualNetworkLinksClient(c.subscription, c.credential, publicARMOptions(h))
 	if err != nil {
 		return empty, hostedexecution.ErrConfiguration
 	}

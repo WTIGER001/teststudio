@@ -131,13 +131,25 @@ Peerings, custom DNS servers, extra subnets, public NAT, and mismatched embedded
 The checked firewall address binds the default route to the selected firewall, policy, subnet, and public IP attachment.
 The complete policy inventory permits one fixed deny-all network group and only empty known service default groups.
 No Jobs platform allow rules enter this sandbox policy. Existing resource and policy verifiers are reused through independent bindings.
-The sandbox-placement/v4 profile binds the added topology settings. Five resource bodies support later packaging without mutation.
+The placement profile binds the added topology settings. Five resource bodies support later packaging without mutation.
 Fresh initial and import checks and bounded live evidence now include topology and firewall contents.
 Six new local checks and affected native and shared policy checks pass with race detection.
 See [sandbox VNet and firewall admission](azure-sandbox-topology.md). Reported configuration does not prove deployed routing or traffic enforcement.
 
+The runtime now verifies selected resolver policy, complete rules and links, and the actual VNet policy association.
+Five approved exchange and registry domains and a root-domain block list use two fixed enabled rules.
+Azure domain hierarchy includes descendants. Keep selected private zones, fixed records, no wildcard or alias, and no public fallback independently required.
+One exact empty POST read action observes the actual association. The metadata transport otherwise remains scoped to selected GET paths.
+Reported subscription inventory now checks every returned private zone and its links, rejecting additional links to the sandbox VNet.
+Unrelated zones and VNets remain permitted. Inventory limits, missing pages, count gaps, and failures retain uncertainty.
+The sandbox-placement/v5 profile binds resolver settings. Six reviewable resource bodies support later packaging without mutation.
+Fresh initial and import observations and bounded live evidence include these DNS checks.
+Six new local checks and affected native, shared DNS, and inventory checks pass with race detection.
+See [sandbox resolver admission](azure-sandbox-resolver.md). This does not prove effective resolution, visibility across subscriptions, or absence of deny-hidden resources.
+
 Complete remaining effective-authority and protected network admission, native command role wiring, and deployment packaging next.
-Verify identity host attachment, additional grants and deny effects, resolver policy and linked-zone inventory, trusted exchange service ownership, and effective DNS resolution.
+Verify identity host attachment, additional grants and deny effects, trusted exchange service ownership, and protected write boundaries.
+Keep cross-subscription link visibility and actual DNS hierarchy behavior explicit in separate deployment acceptance.
 Verify actual service acceptance of custom data-action roles and narrow timer grants during the separate deployment phase.
 Keep private registry conversion access and proxy trust as explicit deployment compatibility questions.
 Pin the group reader and template to an explicit service contract. Current preview guidance and the versioned ARM reference describe different shapes.
