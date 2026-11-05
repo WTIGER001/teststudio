@@ -18,6 +18,9 @@ func (w *placementWorld) addRegistryService() {
 			connection = map[string]any{"id": id, "name": name, "type": "Microsoft.ContainerRegistry/registries/privateEndpointConnections", "properties": map[string]any{"provisioningState": "Succeeded", "privateEndpoint": map[string]string{"id": endpoint}, "privateLinkServiceConnectionState": map[string]string{"status": "Approved", "actionsRequired": "None"}}}
 			w.resources[id] = connection
 		}
+		if endpoint == s.Host.Registry.Endpoint {
+			connection = w.resources[s.Host.Registry.Connection]
+		}
 		connections = append(connections, connection)
 	}
 	props["privateEndpointConnections"] = connections

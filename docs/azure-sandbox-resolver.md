@@ -82,7 +82,8 @@ It then observes complete link inventories for every reported zone.
 Zone and link identities, successful states, reported link counts, duplicate detection, and registration counts must agree.
 The two sandbox private zones and their sandbox-network links must be present.
 The relay registry zone and its relay-network link must also be present.
-Any other reported zone or link targeting either guarded VNet rejects admission.
+The controller registry zone and its controller-network link must also be present.
+Any other reported zone or link targeting any of these three guarded VNets rejects admission.
 Unrelated zones linked to unrelated VNets remain permitted.
 
 The subscription observation retains limits of 1024 zones, 4096 links, 16 pages per collection, and 2048 HTTP requests.
@@ -92,7 +93,7 @@ Large or slow subscriptions can exceed these bounds and remain unavailable.
 Incomplete pages, count gaps, inaccessible metadata, or missing selected zones never qualify as evidence of absence.
 
 This checks the selected subscription's reported inventory.
-It does not prove that other subscriptions contain no link to either VNet, or that deny effects hide no relevant resource.
+It does not prove that other subscriptions contain no link to these VNets, or that deny effects hide no relevant resource.
 Effective observer authority, deny inspection, protected write boundaries, and deployment ownership remain required.
 No claim of complete tenant-wide DNS visibility is made.
 

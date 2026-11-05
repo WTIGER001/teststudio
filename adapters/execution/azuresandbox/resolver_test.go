@@ -118,7 +118,7 @@ func TestSandboxResolverRejectsDomainRuleAndAssociationDrift(t *testing.T) {
 }
 
 func TestSandboxResolverRejectsAdditionalReportedZoneLinksWithoutBlockingUnrelatedNetworks(t *testing.T) {
-	for _, mode := range []string{"unrelated", "unexpected-link", "relay-link", "missing-zone", "foreign-zone", "zone-count-gap", "missing-page"} {
+	for _, mode := range []string{"unrelated", "unexpected-link", "relay-link", "controller-link", "missing-zone", "foreign-zone", "zone-count-gap", "missing-page"} {
 		t.Run(mode, func(t *testing.T) {
 			s := runtimeSettings()
 			w := newPlacementWorld(t, s)
@@ -137,6 +137,9 @@ func TestSandboxResolverRejectsAdditionalReportedZoneLinksWithoutBlockingUnrelat
 				expected = hostedexecution.ErrOwnership
 			case "relay-link":
 				link["properties"].(map[string]any)["virtualNetwork"] = map[string]string{"id": s.Placement.Services.RelayNetwork.virtualNetwork(s)}
+				expected = hostedexecution.ErrOwnership
+			case "controller-link":
+				link["properties"].(map[string]any)["virtualNetwork"] = map[string]string{"id": s.Host.virtualNetwork()}
 				expected = hostedexecution.ErrOwnership
 			case "missing-zone":
 				w.pages[root]["value"] = []any{w.resources[s.Placement.Private.RegistryZone]}

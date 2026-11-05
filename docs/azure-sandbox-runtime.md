@@ -18,6 +18,7 @@ The [service stage](azure-sandbox-services.md) now checks relay and trusted back
 The [backend endpoint stage](azure-sandbox-backend-endpoint.md) now joins endpoint approval, NIC address, network policy, and the relay's existing readiness address.
 The [relay network stage](azure-sandbox-relay-network.md) now joins the trusted VNet, egress policy, resolver, private registry path, and selected pull grant.
 The [registry service stage](azure-sandbox-registry-service.md) now verifies access policies and complete reported consumer, member, and replication inventories.
+The [controller registry stage](azure-sandbox-host-registry.md) now checks its private endpoint, DNS, selected pull grant, and reported approval.
 The [controller host stage](azure-sandbox-host.md) now checks fixed execution or discovery definitions, private environments, identity lifecycles, and complete revisions.
 The [service workload stage](azure-sandbox-service-workloads.md) now verifies reported relay, backend, and controller occupancy, identity placement, identity resources, and federation absence.
 Remaining authority and protected network admission, effective timer authority, command role wiring, and deployment packaging remain unfinished.
@@ -78,6 +79,7 @@ It constructs SDKServices with that credential and compares trusted relay and ba
 It constructs SDKBackendEndpoint with that credential and compares backend endpoint ownership, NIC address, subnet policy, and relay source prefix.
 It constructs SDKRelayNetwork with that credential and checks the selected relay network, private registry path, DNS, and pull grant.
 It constructs SDKRegistryService with that credential and compares access policies and complete reported approval, member, and replication inventories.
+It constructs SDKHostRegistry with that credential and joins controller private registry networking, DNS, approval, and selected pull authority.
 It constructs SDKHost with that credential and verifies the fixed headless controller, private environment, authentication, and complete revisions.
 It constructs SDKServiceWorkloads with that credential and verifies reported subscription service placement, selected identities, and empty federation inventories.
 The resulting image manager and provider share the controller's exact configuration and exchange.
@@ -120,8 +122,8 @@ See [separate discovery command roles](source-assembly-handoff.md#dedicated-disc
 
 Admission is mandatory for every runtime. ImageAdmission is also mandatory for discovery mode.
 The existing controller calls the placement stage and these dependencies before creation, during live admission observation, and before import.
-Live placement, network, private binding, topology, resolver, services, backend endpoint, relay network, registry service, controller host, service workload, and selected authority evidence have a 15-second bound.
-Initial network, placement, private binding, topology, resolver, service, backend endpoint, relay network, registry service, controller host, and service workload checks remain fresh, including source import.
+Live placement, network, private binding, topology, resolver, services, backend endpoint, relay network, registry service, controller registry, controller host, service workload, and selected authority evidence have a 15-second bound.
+Initial network, placement, private binding, topology, resolver, service, backend endpoint, relay network, registry service, controller registry, controller host, and service workload checks remain fresh, including source import.
 The additional protection, per-sandbox, and worker authorization checks remain uncached.
 OpenRuntime does not substitute a successful construction result for those checks.
 Native commands must compose actual group, VNet, private exchange, source identity, and timer authority checks before enabling dispatch.

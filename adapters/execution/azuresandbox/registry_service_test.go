@@ -15,8 +15,9 @@ import (
 
 func TestSandboxRegistryServiceRequiresCompleteReportedInventory(t *testing.T) {
 	s := runtimeSettings()
-	s.Placement.RegistryConsumers = []string{s.Placement.Private.RegistryEndpoint + "-trusted"}
+	s.Placement.RegistryConsumers = append([]string{s.Placement.Private.RegistryEndpoint + "-trusted"}, s.Placement.RegistryConsumers...)
 	s.Worker.NetworkProfile, _ = s.Placement.NetworkProfile(s.Worker)
+	s.Host.Profile = s.HostProfile()
 	w := newPlacementWorld(t, s)
 	reader, err := NewSDKRegistryService(s, &runtimeCredential{token: "placement-metadata-canary"}, w)
 	if err != nil {
@@ -117,7 +118,7 @@ func TestSandboxRegistryServiceRejectsAccessConsumerMemberAndReplicaDrift(t *tes
 				props["privateEndpointConnections"] = []any{embedded, connections[1]}
 				expected = hostedexecution.ErrUnavailable
 			case "pending":
-				connection["privateLinkServiceConnectionState"].(map[string]string)["status"] = "Pending"
+				connection["privateLinkServiceConnectionState"] = map[string]string{"status": "Pending", "actionsRequired": "None"}
 				expected = hostedexecution.ErrUnavailable
 			case "member":
 				member["requiredMembers"] = []string{"registry", "registry_data_eastus2"}

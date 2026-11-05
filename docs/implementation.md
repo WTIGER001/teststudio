@@ -122,6 +122,28 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: native controller private registry path
+
+The runtime now joins the controller private registry endpoint, NIC members, endpoint subnet rules, private DNS, selected pull identity, and registry-scoped grant.
+The selected endpoint must appear in shared placement.registryConsumers. Host-specific facts retain the separate host profile.
+Source prefix and Container Apps delegation bind the endpoint rules to the selected controller subnet.
+Selected registry approval and its embedded entry must agree. The complete registry service inventory remains independently required.
+The reported subscription DNS inventory now guards controller, relay, and sandbox VNets against additional zone links.
+Fresh creation and import checks and bounded live evidence include this stage. Current failure invalidates prior success.
+Seven staged resource bodies support later packaging without creating resources. Native commands remain disabled for sandbox selection.
+Three new checks and eleven affected checks pass locally with race detection in 4.277 seconds.
+The reader observes 13 selected GET paths with joined five-second bounds and the existing transport restrictions.
+The central cold discovery composition observes 128 unique selected paths.
+The shared source-subnet verifier now serves relay and controller prefix and delegation checks.
+The registry inventory fixture preserves the selected controller approval. Its pending-state check handles the expanded consumer set.
+Evidence is output/azure-sandbox-host-registry/summary.json and local.log.
+Checks use local SQLite, fake credentials, and in-memory metadata. All owned readers close during cleanup.
+No cloud service, browser, container, UI build, demo restart, resource mutation, or remote push runs.
+The plan and affected operator guides match the behavior. No user page changes.
+Remaining controller networking, effective authority, remaining identity attachment, native command selection, and packaging stay unfinished.
+See [controller registry path](azure-sandbox-host-registry.md).
+Acceptance **51** advances. No acceptance item closes. The total remains **48 verified, 9 open**.
+
 ## Current delivery: native sandbox controller host and reported identity attachment
 
 The native runtime now binds a required execution or discovery controller host to its fixed headless process and private environment.

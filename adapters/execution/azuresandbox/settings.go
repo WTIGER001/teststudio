@@ -54,6 +54,9 @@ func (s Settings) Validate() error {
 	if err := s.Host.validateMode(s); err != nil {
 		return err
 	}
+	if err := s.Host.validateRegistry(s); err != nil {
+		return err
+	}
 	if s.Host.Profile != s.HostProfile() {
 		return hostedexecution.ErrConfiguration
 	}

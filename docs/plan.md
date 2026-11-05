@@ -229,9 +229,20 @@ Two staged resource bodies support later packaging. Native --azure-sandbox-env c
 Four new checks and eleven affected checks pass locally with race detection in 4.223 seconds.
 See [controller host binding](azure-sandbox-host.md). Acceptance 51 advances; the total remains 48 verified, nine open.
 
+The runtime now joins the controller private registry endpoint, NIC members, endpoint subnet rules, private DNS, selected pull identity, and registry-scoped grant.
+The selected endpoint must appear in shared placement.registryConsumers. Host-specific facts retain the separate host profile.
+Source prefix and Container Apps delegation bind the endpoint rules to the selected controller subnet.
+Selected registry approval and its embedded entry must agree. The complete registry service inventory remains independently required.
+The reported subscription DNS inventory now guards controller, relay, and sandbox VNets against additional zone links.
+Fresh creation and import checks and bounded live evidence include this stage. Current failure invalidates prior success.
+Seven staged resource bodies support later packaging without creating resources. Native commands remain disabled for sandbox selection.
+Three new checks and eleven affected checks pass locally with race detection in 4.277 seconds.
+See [controller registry path](azure-sandbox-host-registry.md). Acceptance 51 advances; the count remains 48 verified, nine open.
+
 Complete remaining effective-authority and protected network admission, native command role wiring, and deployment packaging next.
 Bind additional declared registry consumers to trusted workload and network ownership.
-Complete controller network and dependency access, remaining import and timer identity attachment, additional grants and deny effects, and protected write boundaries.
+Complete controller VNet contents, source security rules, routing, resolver association, and database, secret, storage, and control-plane access.
+Complete remaining import and timer identity attachment, additional grants and deny effects, and protected write boundaries.
 Reported service placement does not establish exclusive identity use across subscriptions, other host types, or deny-hidden resources.
 Keep cross-subscription link visibility and actual DNS hierarchy behavior explicit in separate deployment acceptance.
 Verify actual service acceptance of custom data-action roles and narrow timer grants during the separate deployment phase.

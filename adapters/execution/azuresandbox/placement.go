@@ -114,6 +114,7 @@ type placementAdmission struct {
 	relayNetwork     *SDKRelayNetwork
 	registryService  *SDKRegistryService
 	serviceWorkloads *SDKServiceWorkloads
+	hostRegistry     *SDKHostRegistry
 	host             *SDKHost
 	protection       Admission
 	importProtection ImageAdmission
@@ -145,6 +146,9 @@ func (a *placementAdmission) BeforeCreate(ctx context.Context, c Config) error {
 		return err
 	}
 	if err := a.registryService.Check(ctx, c); err != nil {
+		return err
+	}
+	if err := a.hostRegistry.Check(ctx, c); err != nil {
 		return err
 	}
 	if err := a.host.Check(ctx, c); err != nil {
@@ -190,6 +194,9 @@ func (a *placementAdmission) VerifyInstance(ctx context.Context, c Config, actua
 	if err := a.registryService.CheckRunning(ctx, c); err != nil {
 		return err
 	}
+	if err := a.hostRegistry.CheckRunning(ctx, c); err != nil {
+		return err
+	}
 	if err := a.host.CheckRunning(ctx, c); err != nil {
 		return err
 	}
@@ -231,6 +238,9 @@ func (a *placementAdmission) BeforeImport(ctx context.Context, c Config, identit
 		return err
 	}
 	if err := a.registryService.Check(ctx, c); err != nil {
+		return err
+	}
+	if err := a.hostRegistry.Check(ctx, c); err != nil {
 		return err
 	}
 	if err := a.host.Check(ctx, c); err != nil {

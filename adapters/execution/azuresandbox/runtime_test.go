@@ -46,6 +46,8 @@ func runtimeSettings(modes ...string) Settings {
 	s.Authority.MetadataGrant = grant("/subscriptions/"+c.Subscription, "5")
 	s.Authority.RegistryAssignment = registry + "/providers/Microsoft.Authorization/roleAssignments/ccccccc6-cccc-cccc-cccc-ccccccccccc6"
 	s.Host = runtimeHostSettings(s)
+	s.Placement.RegistryConsumers = []string{s.Host.Registry.Endpoint}
+	s.Worker.NetworkProfile, _ = s.Placement.NetworkProfile(s.Worker)
 	s.Host.Profile = s.HostProfile()
 	return s
 }

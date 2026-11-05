@@ -16,6 +16,7 @@ Settings.host contains these required bindings:
 | Field | Contract |
 | --- | --- |
 | application, environment | Selected controller application and private environment, separate from relay and backend services. |
+| subnetPrefix, registry | Controller source prefix and private registry path described in the [registry guide](azure-sandbox-host-registry.md). |
 | subnet, infrastructureGroup | Selected environment subnet and infrastructure group, separate from sandbox, relay, and backend networks. |
 | image | Immutable trusted service image outside the source-image namespace. |
 | pull, startup | Distinct identity resource, client, and principal pins. |
@@ -84,7 +85,8 @@ No cloud service, browser, container, UI build, demo restart, or remote push run
 
 ### Continue native activation
 
-Complete the controller VNet, private registry path, dependency access, effective grants, deny effects, and protected writes.
+The [registry stage](azure-sandbox-host-registry.md) now binds the selected private registry path and reported pull authority.
+Complete controller VNet contents, source network policy, dependency access, effective grants, deny effects, and protected writes.
 Bind remaining import and timer identities and declared registry consumers to their actual hosts and networks.
 Then add native command selection and deployment packaging.
 Actual token issuance, cross-subscription visibility, deny-hidden resources, routing, preview compatibility, and independent timer execution require separate deployment verification.

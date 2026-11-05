@@ -9,6 +9,9 @@ func runtimeHostSettings(s Settings) HostSettings {
 		return ServiceIdentitySettings{Resource: identities + name, Client: "d" + strings.Repeat(digit, 7) + "-" + strings.Repeat(digit, 4) + "-" + strings.Repeat(digit, 4) + "-" + strings.Repeat(digit, 4) + "-" + strings.Repeat(digit, 12), Principal: "e" + strings.Repeat(digit, 7) + "-" + strings.Repeat(digit, 4) + "-" + strings.Repeat(digit, 4) + "-" + strings.Repeat(digit, 4) + "-" + strings.Repeat(digit, 12)}
 	}
 	h := HostSettings{Application: base + "Microsoft.App/containerApps/studio-controller", Environment: base + "Microsoft.App/managedEnvironments/studio-control", Subnet: base + "Microsoft.Network/virtualNetworks/studio-control/subnets/services", InfrastructureGroup: "studio-control-infra", Image: s.Worker.Registry + "/studio/services/server@sha256:" + strings.Repeat("d", 64), Pull: pin("studio-controller-pull", "5"), Startup: pin("studio-controller-startup", "6"), DatabaseSecretURL: "https://studiotest.vault.azure.net/secrets/database", ConfigurationSecretURL: "https://studiotest.vault.azure.net/secrets/sandbox", Replicas: 1}
+	network := base + "Microsoft.Network/"
+	h.SubnetPrefix = "10.72.0.0/23"
+	h.Registry = RelayRegistrySettings{Endpoint: network + "privateEndpoints/controller-registry", Interface: network + "networkInterfaces/controller-registry", Subnet: strings.TrimSuffix(h.Subnet, "services") + "registry", SubnetPrefix: "10.72.3.0/24", SecurityGroup: network + "networkSecurityGroups/controller-registry", LoginIP: "10.72.3.4", DataIP: "10.72.3.5", Zone: network + "privateDnsZones/privatelink.azurecr.io", PullAssignment: s.Placement.Registry + "/providers/Microsoft.Authorization/roleAssignments/97777777-7777-7777-7777-777777777777", Connection: s.Placement.Registry + "/privateEndpointConnections/controller"}
 	if s.Mode == "execution" {
 		runtime := pin("studio-controller-runtime", "7")
 		h.Runtime = &runtime

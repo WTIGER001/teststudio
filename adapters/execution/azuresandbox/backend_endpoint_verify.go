@@ -7,7 +7,11 @@ import (
 )
 
 func (s Settings) verifyRelaySubnet(r placementResource) error {
-	if !namedResource(r, s.Placement.Services.Relay.Subnet, "Microsoft.Network/virtualNetworks/subnets") {
+	return verifyServiceSubnet(r, s.Placement.Services.Relay.Subnet, s.Placement.Services.BackendEndpoint.RelaySubnetPrefix)
+}
+
+func verifyServiceSubnet(r placementResource, subnet, prefix string) error {
+	if !namedResource(r, subnet, "Microsoft.Network/virtualNetworks/subnets") {
 		return hostedexecution.ErrOwnership
 	}
 	var props struct {
@@ -30,7 +34,7 @@ func (s Settings) verifyRelaySubnet(r placementResource) error {
 	if props.Prefix == "" && len(props.Prefixes) == 1 {
 		props.Prefix, props.Prefixes = props.Prefixes[0], nil
 	}
-	if props.Prefix != s.Placement.Services.BackendEndpoint.RelaySubnetPrefix || len(props.Prefixes) != 0 || len(props.Delegations) != 1 || !strings.EqualFold(props.Delegations[0].Properties.Service, "Microsoft.App/environments") {
+	if props.Prefix != prefix || len(props.Prefixes) != 0 || len(props.Delegations) != 1 || !strings.EqualFold(props.Delegations[0].Properties.Service, "Microsoft.App/environments") {
 		return hostedexecution.ErrOwnership
 	}
 	return provisioned(props.Delegations[0].Properties.State)

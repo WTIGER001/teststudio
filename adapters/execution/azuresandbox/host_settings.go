@@ -8,6 +8,8 @@ import (
 )
 
 type HostSettings struct {
+	SubnetPrefix           string                   `json:"subnetPrefix"`
+	Registry               RelayRegistrySettings    `json:"registry"`
 	Profile                string                   `json:"profile"`
 	Application            string                   `json:"application"`
 	Environment            string                   `json:"environment"`

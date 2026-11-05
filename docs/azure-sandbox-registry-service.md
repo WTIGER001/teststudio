@@ -9,7 +9,8 @@ Sandbox settings remain independent of ordinary Jobs settings.
 
 The existing private and relay stages verify the two selected network paths.
 This service stage verifies registry-side metadata for all declared consumers.
-Network ownership of additional trusted consumers remains separate work.
+The [controller registry stage](azure-sandbox-host-registry.md) now verifies its declared endpoint, private DNS, source prefix, and selected pull authority.
+Network ownership of remaining additional trusted consumers remains separate work.
 
 ## Concepts
 
@@ -17,7 +18,8 @@ Network ownership of additional trusted consumers remains separate work.
 
 The expected connection inventory always includes the sandbox registry endpoint and relay registry endpoint.
 placement.registryConsumers adds up to six explicit trusted private endpoint identifiers.
-Use that list for preparation, backend, and inspection paths when those roles need separate registry endpoints.
+Use that list for controller, preparation, backend, and inspection paths when those roles need separate registry endpoints.
+The selected controller registry endpoint is required in this list.
 Do not repeat either derived endpoint in this list.
 
 Each additional endpoint must belong to the configured subscription.
@@ -104,8 +106,8 @@ No cloud service, browser, container, UI build, demo restart, resource mutation,
 ### Complete native activation
 
 Bind additional declared consumers to their actual trusted workloads and network paths.
-The [service workload stage](azure-sandbox-service-workloads.md) now verifies reported relay and backend identity placement and federation absence.
-Complete controller and remaining identity host attachment, effective grants, deny effects, and protected write boundaries.
+The [service workload stage](azure-sandbox-service-workloads.md) now verifies reported relay, backend, and controller identity placement and federation absence.
+Complete controller network dependencies, remaining identity host attachment, effective grants, deny effects, and protected write boundaries.
 Then wire execution and discovery commands separately and package their dependencies.
 Verify private image conversion, publication, actual pulls, service compatibility, routing, and independent deadlines during separate deployment acceptance.
 
