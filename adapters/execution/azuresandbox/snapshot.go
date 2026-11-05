@@ -48,9 +48,7 @@ func snapshot(data []byte) (Snapshot, error) {
 	if !identifier.MatchString(id) {
 		return Snapshot{}, hostedexecution.ErrOwnership
 	}
-	switch state {
-	case "Creating", "Running", "Stopped", "Suspended", "Resuming", "Stopping", "Deleting", "Failed":
-	default:
+	if !knownState(state) {
 		return Snapshot{}, hostedexecution.ErrUnavailable
 	}
 	env, ok := document["environment"].(map[string]any)
@@ -66,3 +64,13 @@ func snapshot(data []byte) (Snapshot, error) {
 	}
 	return Snapshot{ID: id, State: state, DefinitionHash: hash(normalize(document))}, nil
 }
+
+func knownState(state string) bool {
+	switch state {
+	case "Creating", "Running", "Stopped", "Suspended", "Resuming", "Stopping", "Deleting", "Failed":
+		return true
+	}
+	return false
+}
+
+func quiescent(state string) bool { return state == "Stopped" || state == "Suspended" }

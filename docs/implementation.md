@@ -122,7 +122,47 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: isolated Azure sandbox launch and data-plane client
+## Current delivery: durable sandbox dispatch, receipt recovery, and cleanup
+
+The Azure sandbox Controller now persists dispatch reservations in the shared installation database.
+It uses the real worker exchange for fresh dispatch authorization, explicit activation gates, revocation, and result cleanup checkpoints.
+One atomic reservation binds the exact reference, project, launch proof, and frozen input hash.
+Current work-item bytes, source image, runner, run, test, project, and discovery source digest must match that reservation.
+
+The controller saves deadline intent before external timer creation and requires verified coverage before reserving a sandbox create call.
+Only the winning create reservation dispatches. A lost acknowledgment never triggers a replacement create.
+Recovery resolves one full configuration match from complete inventory, then saves the exact returned instance identifier.
+An empty inventory cannot discard an uncertain create. Duplicate matches reject ownership.
+Already known receipts use exact reads and reject changed execution settings.
+
+Cancellation saves a barrier before resource control. A concurrent initial dispatch cannot pass the same guarded revision.
+Late receipts remain recoverable while canceled work stays unadmitted.
+Stop acknowledgments remain distinct from confirmed Stopped or Suspended readback.
+Cleanup requires revoked exchange work and the canonical result and evidence checkpoint.
+It confirms quiescence, records deletion intent and backoff, verifies instance absence, and removes the independent deadline last.
+Lost deletion and timer-removal responses retain their durable checkpoints through database reopen.
+Selected inventory records validate before completed removal filtering. An invalid Removed flag cannot hide active work.
+
+The integration review finds and corrects a source contract mismatch in the earlier staged plan.
+The OCI inspector uses sha256:HEX source digests. The earlier sandbox validator and its fixture expect bare hexadecimal characters.
+The v2 proof now accepts and freezes the canonical digest. Native sandbox records do not exist from the earlier staged format.
+Wrapped dependency errors retain fixed classifications without exposing callback details or usable tickets.
+Unchanged observations assert revisions without rewriting identical dispatch state.
+
+Nine new lifecycle checks and three selected affected plan and response checks pass with race detection in 1.896 seconds.
+They use real SQLite storage and the real worker exchange with local simulated provider controls.
+Coverage includes both runners, discovery, database reopen, twelve concurrent callers, uncertain creation, in-flight cancellation, work-item changes, scope boundaries, admission loss, and cleanup checkpoints.
+A later test teardown change joins its owned in-flight routine on every exit. Only that changed check repeats and passes in 1.434 seconds.
+No unrelated product suite, UI build, image, registry operation, identity discovery, browser, listener, container, cloud test, or deployment runs.
+The user demo remains unchanged. No product route or help-page behavior changes.
+
+The controller reports resource facts. It does not implement the complete Provider or treat stopped execution as a passing test.
+Concrete sandbox deadlines and admission, durable image import, independent command completion, native composition, and deployment packaging remain required.
+The [controller guide](azure-sandbox-controller.md), Azure and discovery guides, and active plan describe these boundaries and continuation work.
+This advances **51** and supporting recovery under **52**. The total remains **48 verified of 57**, with **9 open**.
+Evidence is output/azure-sandbox-controller/summary.json and the retained focused command results.
+
+## Previous delivery: isolated Azure sandbox launch and data-plane client
 
 The active Azure coded execution path now uses Container Apps Sandboxes. The UI and API remain Container Apps.
 Ordinary Jobs remain disabled because their execution isolation boundary is unresolved.

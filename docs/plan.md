@@ -53,12 +53,20 @@ Only the exact private exchange host is allowed. Runtime environments contain on
 Recovery proofs and returned snapshots retain hashes without usable tickets. Restored proofs cannot create another execution.
 Local protocol and ownership checks pass for both runners and discovery. No native configuration or deployment enables this client yet.
 
-Implement durable mutation reservation, lost-receipt reconciliation, sandbox-specific independent deadlines, reports, cancellation, and cleanup next.
+The durable sandbox controller now reserves one create call and reconciles lost receipts against complete inventory.
+It freezes the exact exchange input hash and canonical source digest, reauthorizes initial dispatch, and asserts current exchange revisions.
+Cancellation fences initial creation. Checkpointed cleanup retains uncertain creates, confirms quiescence and deletion, and removes deadlines last.
+Local restart, twelve-replica contention, in-flight cancellation, input binding, and cleanup checks pass.
+The controller returns resource facts. It does not turn a stopped instance or accepted report into independent command completion.
+
+Implement concrete sandbox deadlines and admission, durable image import, independent command completion, and the complete Provider bridge next.
+Use the pinned command API's service-returned completion result. Preserve explicit gaps after a lost acknowledgment and never replay the logical attempt.
 Preserve source-queue authorization and the existing worker exchange. Keep controller credentials outside sandboxes.
 Bind actual source-import identity, group authority, VNet routing, proxy trust, and effective outbound enforcement before enabling native execution.
 Confirm the pinned SDK token audience during the separate deployment verification phase.
 Idle suspension and accepted stop responses cannot replace the absolute deadline contract.
-See [Azure isolated sandbox execution](azure-sandboxes.md). Acceptance 51 advances; the total remains 48 verified of 57.
+See [Azure isolated sandbox execution](azure-sandboxes.md) and [durable sandbox control](azure-sandbox-controller.md).
+Acceptance 51 and supporting recovery under 52 advance; the total remains 48 verified of 57.
 
 ### Active application navigation correction
 

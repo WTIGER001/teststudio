@@ -9,7 +9,8 @@ The existing Job contracts remain reference material. They do not establish a sa
 
 Sandboxes and the selected API are preview services. Hosted acceptance remains open.
 No native command selects this package yet. No deployment template enables sandbox execution yet.
-The client is not the durable hosted Provider. Its calls need the lifecycle and authorization controls described below.
+The [durable controller](azure-sandbox-controller.md) now supplies dispatch reservation, lost-receipt recovery, cancellation, and checkpointed cleanup.
+The client and controller do not yet compose the complete hosted Provider. Native deadline, admission, command completion, and source integration remain required.
 Local contract checks do not establish deployed isolation, service availability, identity authority, certificate trust, or complete product operation.
 
 ## Concepts
@@ -73,7 +74,8 @@ The existing Job timer targets the ARM Job API. It cannot stop these data-plane 
 
 ### Recovery and ownership
 
-The immutable proof binds configuration, API version, audience, source image, disk image, reference, operation, deadline, and launch definition.
+The immutable proof binds configuration, API version, audience, source image, canonical source digest, disk image, reference, operation, deadline, and launch definition.
+The v2 proof requires the OCI inspector's sha256:HEX digest format.
 It retains ticket and environment hashes. It retains no usable ticket.
 A restored proof can verify readback but cannot create another execution.
 Expired tickets and cancellation during credential acquisition prevent dispatch.
@@ -132,11 +134,12 @@ Current retained evidence is output/azure-sandbox-contract/summary.json, final-c
 
 ### Continue native integration
 
-Implement durable import and create reservation before calling these mutation methods.
+Use the [durable dispatch controller](azure-sandbox-controller.md) for sandbox creation and lifecycle mutations.
+Implement durable image import and Ready-image resolution before connecting native source preparation.
 Reuse the existing source queue, database, approved OCI inspector, worker exchange, and preparation authorization.
 Reconcile returned identifiers under complete ownership proofs. Never retry an ambiguous create as new work.
 Implement independent absolute deadlines for the sandbox API, including lost receipts.
-Connect cancellation, terminal runner reports, deletion checkpoints, and orphan recovery through the shared Provider contract.
+Connect independent command completion, terminal runner reports, deletion checkpoints, and orphan recovery through the shared Provider contract.
 Add explicit managed identity, group, VNet, source-import, and deadline packaging before native command selection.
 Keep all installation credentials in trusted processes.
 Keep actual Azure verification separate from this local implementation session.

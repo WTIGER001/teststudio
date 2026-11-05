@@ -21,7 +21,7 @@ func NewPlan(c Config, job hostedexecution.Job, disk DiskImage, inspected hosted
 	if !ticketToken.MatchString(job.Ticket.Token) || job.Ticket.Execution != job.Reference.ID || !job.Ticket.Deadline.After(now) || job.Ticket.Deadline.Sub(now) > 2*time.Hour || job.ExchangeOrigin != c.ExchangeOrigin {
 		return nil, hostedexecution.ErrConfiguration
 	}
-	if inspected.Reference != job.Image || inspected.Runner != job.Runner || inspected.Project != job.Reference.Project || inspected.OS != "linux" || inspected.Architecture != "amd64" || inspected.Supervisor != "worker-exchange/v1" || inspected.Runtime == "" || inspected.TaskStorage != hostedexecution.NonRootTaskStorage || !checksum.MatchString(inspected.SourceDigest) || job.Operation == "discover" && inspected.Discovery != "worker-exchange/v1" {
+	if inspected.Reference != job.Image || inspected.Runner != job.Runner || inspected.Project != job.Reference.Project || inspected.OS != "linux" || inspected.Architecture != "amd64" || inspected.Supervisor != "worker-exchange/v1" || inspected.Runtime == "" || inspected.TaskStorage != hostedexecution.NonRootTaskStorage || !validSourceDigest(inspected.SourceDigest) || job.Operation == "discover" && inspected.Discovery != "worker-exchange/v1" {
 		return nil, hostedexecution.ErrConfiguration
 	}
 	if disk.Base != job.Image || !identifier.MatchString(disk.ID) || !slices.Equal(disk.Entrypoint, []string{"/runner/teststudio-job"}) || len(disk.Command) != 0 {
@@ -30,7 +30,7 @@ func NewPlan(c Config, job hostedexecution.Job, disk DiskImage, inspected hosted
 	if disk.State != "Ready" {
 		return nil, hostedexecution.ErrUnavailable
 	}
-	proof := Proof{Reference: job.Reference, Image: job.Image, DiskImage: disk.ID, Runner: job.Runner, Operation: job.Operation, Deadline: job.Ticket.Deadline.UTC(), TicketHash: hash(job.Ticket.Token), EnvironmentHash: hash(environment(job.Reference.ID, job.Ticket.Token))}
+	proof := Proof{Reference: job.Reference, Image: job.Image, SourceDigest: inspected.SourceDigest, DiskImage: disk.ID, Runner: job.Runner, Operation: job.Operation, Deadline: job.Ticket.Deadline.UTC(), TicketHash: hash(job.Ticket.Token), EnvironmentHash: hash(environment(job.Reference.ID, job.Ticket.Token))}
 	p, err := newPlan(c, proof)
 	if err != nil {
 		return nil, err
@@ -40,14 +40,18 @@ func NewPlan(c Config, job hostedexecution.Job, disk DiskImage, inspected hosted
 }
 
 func newPlan(c Config, proof Proof) (*Plan, error) {
-	if Validate(c) != nil || !validReference(proof.Reference, proof.Runner, proof.Operation) || !c.validImage(proof.Image) || !identifier.MatchString(proof.DiskImage) || !checksum.MatchString(proof.TicketHash) || !checksum.MatchString(proof.EnvironmentHash) || proof.Deadline.IsZero() || proof.Deadline.Year() < 2000 || proof.Deadline.Year() > 2200 {
+	if Validate(c) != nil || !validReference(proof.Reference, proof.Runner, proof.Operation) || !c.validImage(proof.Image) || !validSourceDigest(proof.SourceDigest) || !identifier.MatchString(proof.DiskImage) || !checksum.MatchString(proof.TicketHash) || !checksum.MatchString(proof.EnvironmentHash) || proof.Deadline.IsZero() || proof.Deadline.Year() < 2000 || proof.Deadline.Year() > 2200 {
 		return nil, hostedexecution.ErrConfiguration
 	}
 	proof.Deadline = proof.Deadline.UTC()
 	proof.Fingerprint = ""
 	p := &Plan{config: c, proof: proof}
-	p.proof.Fingerprint = hash([]any{"azure-sandbox/v1", c, APIVersion, TokenScope, proof, p.definition()})
+	p.proof.Fingerprint = hash([]any{"azure-sandbox/v2", c, APIVersion, TokenScope, proof, p.definition()})
 	return p, nil
+}
+
+func validSourceDigest(value string) bool {
+	return strings.HasPrefix(value, "sha256:") && checksum.MatchString(strings.TrimPrefix(value, "sha256:"))
 }
 
 func Restore(c Config, proof Proof) (*Plan, error) {

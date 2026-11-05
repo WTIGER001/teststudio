@@ -36,7 +36,7 @@ func fixturePlan(t *testing.T, runner, operation string) *Plan {
 	}
 	image := c.Registry + "/" + c.RepositoryPrefix + "/catalog/source@sha256:" + strings.Repeat("b", 64)
 	disk := DiskImage{ID: "image-123", Base: image, State: "Ready", Entrypoint: []string{"/runner/teststudio-job"}}
-	inspected := hostedexecution.Image{Reference: image, Runner: runner, Runtime: "runtime-1", OS: "linux", Architecture: "amd64", Supervisor: "worker-exchange/v1", Discovery: "worker-exchange/v1", Project: ref.Project, SourceDigest: strings.Repeat("c", 64), TaskStorage: hostedexecution.NonRootTaskStorage}
+	inspected := hostedexecution.Image{Reference: image, Runner: runner, Runtime: "runtime-1", OS: "linux", Architecture: "amd64", Supervisor: "worker-exchange/v1", Discovery: "worker-exchange/v1", Project: ref.Project, SourceDigest: "sha256:" + strings.Repeat("c", 64), TaskStorage: hostedexecution.NonRootTaskStorage}
 	job := hostedexecution.Job{Reference: ref, Image: image, Runner: runner, Operation: operation, ExchangeOrigin: c.ExchangeOrigin, Ticket: workerexchange.Ticket{Execution: ref.ID, Token: secretTicket, Deadline: time.Now().UTC().Add(time.Minute)}}
 	p, err := NewPlan(c, job, disk, inspected, time.Now())
 	if err != nil {
