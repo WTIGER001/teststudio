@@ -59,6 +59,7 @@ Actual gVisor runtime execution and selective worker network denial now pass. Se
 The single-Pod restart does not establish replica failover or cross-provider parity.
 The 57-item ledger now has 50 verified and seven open items.
 Helm revision 15 now enables the desktop recorder on the API with the updated service image.
+Revision 16 retains that configuration and refreshes the UI styles while reusing all service binaries.
 An actual native handoff passes HTTPS, OIDC authoring, captured source, owner stop, and PostgreSQL draft saving.
 See [local Kubernetes recording](local-kubernetes-recording.md) for the current image, values, retained identifiers, and cleanup proof.
 

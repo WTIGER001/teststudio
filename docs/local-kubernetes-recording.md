@@ -11,13 +11,15 @@ The ledger remains 50 verified of 57. Acceptance 57 advances and stays open acro
 
 ### Installed profile
 
-Helm revision 15 runs chart 0.1.1 with recordingCompanion enabled on the API.
+The native handoff passes on Helm revision 15. Current revision 16 retains chart 0.1.1 and recordingCompanion on the API.
+Revision 16 updates only the bundled UI styles. The build reuses all three unchanged service binaries.
 The updated immutable ARM64 service image also supplies both execution controllers and preparation.
 Their commands do not enable recording. All three deployments report their expected Ready replicas.
 The gateway, worker runtime images, two identity providers, PostgreSQL, and shared evidence configuration remain selected from the previous profile.
 No coded suite executes for this recorder check.
 
-The source image is sha256:0e6a770abf0da9e7323a5608275de24ce5329e2cca84de46e7a10f064160d470.
+The current source image is sha256:e532d0f85999488ca04bf5f93e66a6a5bbddb37dcef33b51666b7531193f9b9d.
+The earlier native capture image remains sha256:0e6a770abf0da9e7323a5608275de24ce5329e2cca84de46e7a10f064160d470.
 The current private installation values remain .data/local-k3s/controller-values.json.
 The previous values remain .data/local-k3s/before-recording-values.json.
 The user demo on port 8040 remains running. No host DNS or system certificate trust changes occur.
@@ -85,5 +87,8 @@ The setup command checks the owned Ready node and idle workers, preserves privat
 It checkpoints the expected Helm revision before upgrading. An uncertain upgrade is observed instead of being replayed.
 Every cluster command uses the dedicated Docker socket or private kubeconfig and explicit context.
 The setup does not create or select another cluster. Keep its matching image and checkpoint when inspecting the completed upgrade.
+For a deliberate new service image, add --refresh-image. The command first checks the exact deployed revision and Ready owned workloads.
+It retains the previous image and revision before importing and selecting the new image.
+Revision 16 also passes checkpoint reinspection without another browser. The compiled stylesheet matches the local build through verified HTTPS.
 
 Related guides: [desktop companion](recorder-companion.md), [Kubernetes](kubernetes.md), and [deployment readiness](deployment-readiness.md).

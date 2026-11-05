@@ -50,6 +50,23 @@ The saved checkpoint makes later invocations inspect the same recording and draf
 The original nineteen local Kubernetes runs remain unchanged. No cloud operation or recorded target test run occurs.
 See [local Kubernetes recording](local-kubernetes-recording.md) for current deployment and evidence.
 
+## First-frame theme contrast
+
+The focused TestButtonThemesKeepFirstFrameContrastThroughStudioExecution check packages the product stylesheet with one new Playwright rendering test.
+It uses the cached offline runtime and normal TestStudio preparation, publication, execution, timing, and evidence.
+Primary, secondary, and destructive buttons keep contrast at least 4.5 on the first dark and light frame.
+The check also verifies keyboard focus. It uses no target server or user data.
+
+```sh
+TESTSTUDIO_BROWSER_RUNTIME_IMAGE=IMMUTABLE_CACHED_RUNTIME \
+TESTSTUDIO_THEME_UI_OUTPUT=output/playwright/button-contrast/studio \
+  go test ./internal/sources -run '^TestButtonThemesKeepFirstFrameContrastThroughStudioExecution$' -count=1 -timeout=100s -v
+```
+
+Evidence is output/playwright/button-contrast. The complete check takes 10.90 seconds and removes all owned execution and preparation resources.
+The earlier isolated observation retains the original 140-millisecond background fade and its mismatched foreground colors.
+The UI build passes. Local Kubernetes revision 16 serves the exact corrected stylesheet. Existing backend and recorder evidence is reused.
+
 ## Kubernetes packaging checks
 
 The Helm chart has strict installation values and local rendering checks in scripts/verify-kubernetes.py.

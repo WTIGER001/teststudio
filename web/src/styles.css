@@ -78,7 +78,7 @@ input, textarea { width: 100%; }
 textarea { resize: vertical; }
 input::placeholder, textarea::placeholder { color: var(--muted); opacity: .85; }
 .theme-select { font-size: 12px; min-height: 34px; padding: 6px 28px 6px 10px; background: var(--surface-muted); }
-.button { display: inline-flex; justify-content: center; align-items: center; gap: 9px; border: 1px solid transparent; border-radius: 7px; padding: 9px 15px; min-height: 39px; font-size: 12px; font-weight: 650; white-space: nowrap; transition: background-color 140ms, border-color 140ms; }
+.button { display: inline-flex; justify-content: center; align-items: center; gap: 9px; border: 1px solid transparent; border-radius: 7px; padding: 9px 15px; min-height: 39px; font-size: 12px; font-weight: 650; white-space: nowrap; transition: border-color 140ms; }
 .button:hover { text-decoration: none; }
 .button.primary { background: var(--accent); color: var(--surface); }
 .button.primary:hover:not(:disabled) { background: var(--accent-hover); }

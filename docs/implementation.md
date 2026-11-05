@@ -114,6 +114,27 @@ Checkpoint reinspection passes in about 0.2 seconds without another browser, tar
 Evidence is output/local-k3s/recording. No AWS or Azure operation occurs. The user demo remains running.
 See [local Kubernetes recording](local-kubernetes-recording.md). This advances 57; the verified count remains 50 of 57.
 
+### First-frame theme contrast
+
+Retained authoring screenshots identify a real transient contrast defect.
+The foreground changes immediately during a theme switch, while the shared button background interpolates for 140 milliseconds.
+An isolated Linux Chromium observation confirms light text over the previous light background on the first dark frame.
+The shared button style now changes text and background together. Border transitions remain available.
+
+A new focused Playwright case runs through normal TestStudio source preparation, publication, execution, timing, and evidence capture.
+It verifies primary, secondary, and destructive buttons at the first dark and light frame with contrast at least 4.5.
+It also verifies keyboard focus and retains color observations and screenshots.
+Run 20261105T221401.036801000-bad2b0258e7fdd85749b16c0 passes. The complete source and execution check takes 10.90 seconds.
+The first harness attempt uses the environment-worker slot for an offline fixture. The corrected harness selects the existing offline Playwright worker.
+The UI build passes. The separate read-only macOS browser closes, its reported process exits, and the isolated rendering container is removed.
+The TestStudio check removes its prepared image, execution containers, volumes, and private source contexts.
+
+Local Helm revision 16 serves the exact updated compiled stylesheet through verified HTTPS.
+The new image reuses the unchanged API, health, and preparation binaries. All expected replicas report Ready.
+Checkpoint reinspection retains the existing recording, revision-1 draft, and nineteen old runs without another browser or target run.
+Evidence is output/playwright/button-contrast. No cloud operation occurs.
+This strengthens verified item 49. The count remains 50 verified of 57.
+
 ## Remote gateway transport milestone — 2026-11-05
 
 The trusted gateway now supports execution-scoped TLS forwarding through a supervisor-owned Unix socket bridge.

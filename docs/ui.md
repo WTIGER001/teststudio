@@ -160,6 +160,9 @@ Light, dark, and system preferences use shared semantic CSS tokens.
 The browser stores the selected preference under `teststudio.theme`.
 An external initialization script applies the theme before the first render.
 System mode follows operating-system changes without a page reload.
+Button text and background colors change together on the first frame of a theme change.
+Do not animate button backgrounds across theme changes. Border feedback can retain its short transition.
+The focused TestStudio rendering check verifies primary, secondary, and destructive button contrast in both directions and checks keyboard focus.
 The build disables inline critical-style scripts to preserve the server content policy.
 
 ## HTML and access

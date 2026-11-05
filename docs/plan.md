@@ -148,8 +148,10 @@ The native check takes 6.46 seconds. All 23 owned verification processes exit; p
 No target test run starts. Twelve offline runs and seven application-networking runs remain unchanged.
 The checkpoint reinspection takes about 0.2 seconds and opens no browser. See [local Kubernetes recording](local-kubernetes-recording.md).
 Retain this evidence. Continue the remaining deployment audit without repeating completed local execution or browser suites.
-Retained authoring screenshots also show a possible secondary-button contrast issue. Check actual rendered styles on one read-only screen before changing shared styles.
-Resolve a confirmed accessibility issue with targeted light and dark checks. Do not reopen completed source or execution matrices for that inspection.
+The secondary-button contrast concern is resolved. Text changed immediately while button backgrounds faded for 140 milliseconds during theme switches.
+The shared button style now changes both colors together. A focused normal TestStudio run verifies first-frame contrast and keyboard focus.
+The UI-only service refresh runs on local Helm revision 16. All three service binaries are reused, and existing recorder and run evidence remains intact.
+Do not repeat completed source, recorder, or execution matrices for this style change.
 See [desktop companion](recorder-companion.md). Keep the existing recording, review, draft, publication, and execution boundaries.
 Use a third VPC for trusted gateways and separate environment worker resources. Preserve the retained offline worker pool.
 See [native gateway networking](ecs-gateway-network.md) for exact resource and continuation requirements.
