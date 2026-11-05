@@ -18,7 +18,7 @@ func TestAzureObserverBindsAllClientsWithoutBootstrapReuseAndClosesReaders(t *te
 	}
 	t.Cleanup(observer.Close)
 	bootstrapReads := f.bootstrapReads
-	if bootstrapReads == 0 || f.identity.reads != 5 || f.reads != 0 || f.credential.reads.Load() != 0 || len(f.factoryClients) != 1 || f.factoryClients[0] != s.ClientID || len(observer.readers) != f.bootstrapReaders+1 {
+	if bootstrapReads == 0 || f.identity.reads != 7 || f.reads != 0 || f.credential.reads.Load() != 0 || len(f.factoryClients) != 1 || f.factoryClients[0] != s.ClientID || len(observer.readers) != f.bootstrapReaders+1 {
 		t.Fatal("observer binding did not preserve one bootstrap inspection and a pinned credential")
 	}
 	if _, ok := any(observer).(Network); ok {

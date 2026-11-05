@@ -71,8 +71,8 @@ The shared service reader supplies bounded revision paging. Its environment, rou
 Each operation has a five-second context and four-megabyte response limit. Revisions permit at most four records across three pages.
 Retries and provider registration remain disabled. Unsafe pages, redirects, and incomplete revisions remain blocking errors.
 
-The composed host check has a 135-second context and at most 2218 requests, including federation absence and identity protection.
-The host-specific additional cost remains two GETs. Initial binding retains its separate 125-second bootstrap context and 2198-request ceiling.
+The composed host check has a 135-second context and at most 2220 requests, including federation absence and identity protection.
+The host-specific additional cost remains two GETs. Initial binding retains its separate 125-second bootstrap context and 2200-request ceiling.
 Successful observations are not cached. Closing the session releases all 22 readers and prevents later checks.
 Returned errors omit provider messages and private app configuration.
 
@@ -115,3 +115,5 @@ External requests read only public Microsoft documentation.
 
 Continue exclusive identity placement, complete trusted host configuration, resource-management authority, and full native admission wiring.
 Keep deployed token behavior, effective coverage, protection enforcement, and cross-scope visibility in the separate hosted verification phase.
+
+The [reported protection-stack checks](azure-protection-stacks.md) add two selected GETs within the existing contexts and reader count.

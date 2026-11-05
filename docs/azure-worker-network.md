@@ -178,3 +178,6 @@ Acceptance 51 advances. The verified total remains 48 of 57, with nine open item
 [Container Apps firewall rules](https://learn.microsoft.com/en-us/azure/container-apps/firewall-integration) defines platform dependencies and DNS considerations.
 [DNS resolver policies](https://learn.microsoft.com/en-us/azure/dns/dns-security-policy) defines VNet association, rule priority, hierarchy, and CNAME behavior.
 [Environment security guidance](https://learn.microsoft.com/en-us/azure/container-apps/secure-deployment) defines environment-level security boundaries.
+
+The [reported protection-stack checks](azure-protection-stacks.md) require two explicit stack references and fixed managed-resource sets.
+The core package creates no such arrangement. Direct assignment ownership and protection-management authority remain unproven.

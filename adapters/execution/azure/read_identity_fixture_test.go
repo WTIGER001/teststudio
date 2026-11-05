@@ -9,6 +9,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
 	a "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/authorization/armauthorization/v3"
 	m "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/msi/armmsi"
+	d "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armdeploymentstacks/v2"
 )
 
 type readIdentityFixture struct {
@@ -20,6 +21,7 @@ type readIdentityFixture struct {
 	assignment         a.RoleAssignment
 	role               a.RoleDefinition
 	identityProtection a.DenyAssignment
+	stacks             map[string]d.DeploymentStack
 	reads              int
 	mode               string
 	federation         string
@@ -30,12 +32,15 @@ func readIdentityTest(t *testing.T) (Config, ReadIdentitySettings, *readIdentity
 	c, protection, previous, prior := networkDenyTest(t)
 	s := ReadIdentitySettings{Protection: protection, Identity: c.resourceID("Microsoft.ManagedIdentity", "userAssignedIdentities", "worker-observer"), ClientID: "11111111-aaaa-1111-aaaa-111111111111", PrincipalID: "22222222-bbbb-2222-bbbb-222222222222", TenantID: "33333333-cccc-3333-cccc-333333333333", Assignment: observerScope(c) + "/providers/Microsoft.Authorization/roleAssignments/44444444-dddd-4444-dddd-444444444444", Role: observerScope(c) + "/providers/Microsoft.Authorization/roleDefinitions/55555555-eeee-5555-eeee-555555555555"}
 	s.ProtectionAssignment = s.Identity + "/providers/Microsoft.Authorization/denyAssignments/66666666-ffff-6666-ffff-666666666666"
+	s.NetworkProtectionStack = observerScope(c) + "/providers/Microsoft.Resources/deploymentStacks/studio-network-protection"
+	s.IdentityProtectionStack = c.resourceID("Microsoft.Resources", "deploymentStacks", "studio-observer-protection")
 	f := &readIdentityFixture{t: t, settings: s, protection: previous}
 	f.identityProtection = clone(previous.assignments[protection.WorkerAssignment])
 	f.identityProtection.ID = to.Ptr(s.ProtectionAssignment)
 	f.identityProtection.Name = to.Ptr("66666666-ffff-6666-ffff-666666666666")
 	f.identityProtection.Properties.Scope = to.Ptr(s.Identity)
 	f.identityProtection.Properties.Permissions[0].NotActions = []*string{to.Ptr("*/read"), to.Ptr("Microsoft.Authorization/locks/delete")}
+	f.stacks = protectionStackFixtures(c, s)
 	f.identity = m.Identity{ID: to.Ptr(s.Identity), Name: to.Ptr("worker-observer"), Type: to.Ptr("Microsoft.ManagedIdentity/userAssignedIdentities"), Location: to.Ptr(c.Region), Properties: &m.UserAssignedIdentityProperties{ClientID: to.Ptr(s.ClientID), PrincipalID: to.Ptr(s.PrincipalID), TenantID: to.Ptr(s.TenantID)}}
 	f.assignment, _ = s.AssignmentDefinition(c)
 	f.assignment.ID, f.assignment.Name, f.assignment.Type = to.Ptr(s.Assignment), to.Ptr("44444444-dddd-4444-dddd-444444444444"), to.Ptr("Microsoft.Authorization/roleAssignments")
@@ -71,6 +76,8 @@ func (f *readIdentityFixture) Do(r *http.Request) (*http.Response, error) {
 		version, body = readIdentityVersion, map[string]any{"value": []any{}}
 	case f.settings.ProtectionAssignment:
 		version, body = networkDenyVersion, f.identityProtection
+	case f.settings.NetworkProtectionStack, f.settings.IdentityProtectionStack:
+		version, body = protectionStackVersion, f.stacks[r.URL.Path]
 	default:
 		f.t.Error("unselected observer identity resource reached transport")
 		return deadlineResponse(r, 404, nil), nil

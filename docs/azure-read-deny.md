@@ -44,9 +44,9 @@ Each response retains the shared four-megabyte limit. Missing or null value arra
 Explicitly empty arrays cannot satisfy the six required selected protection assignments.
 The reported scan uses the same bound observer credential as the rest of the session.
 
-The composed guard has a 130-second context and at most 2214 requests, including the preceding chain's bounded inventories, federation absence, and identity protection check.
+The composed guard has a 130-second context and at most 2216 requests, including the preceding chain's bounded inventories, federation absence, and identity protection check.
 Normal additional cost is one GET. The scan and its successful observations are not cached.
-Binding still performs its separate 125-second bootstrap inspection with at most 2198 requests before constructing the 21-reader session.
+Binding still performs its separate 125-second bootstrap inspection with at most 2200 requests before constructing the 21-reader session.
 The bootstrap guard itself does not perform this new scan. Each bound Check performs it before refreshing the existing identity and resource chain.
 
 ## Scope and principal contract
@@ -108,3 +108,5 @@ go test -race ./adapters/execution/azure -run '^(TestAzureReadDeny.*|TestAzureOb
 Evidence is output/azure-read-deny/summary.json and the targeted command results.
 Continue hosted visibility and enforcement verification, observer host attachment, protection-management authority, and complete native admission.
 Keep existing cross-scope DNS visibility, clean installation provenance, environment attachment controls, preparation networking, and execution isolation in that scope.
+
+The [reported protection-stack checks](azure-protection-stacks.md) add two selected GETs within the existing contexts and reader count.

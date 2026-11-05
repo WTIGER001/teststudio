@@ -9,6 +9,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	a "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/authorization/armauthorization/v3"
 	m "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/msi/armmsi"
+	d "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armdeploymentstacks/v2"
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
 )
 
@@ -23,6 +24,7 @@ type SDKReadIdentityReader struct {
 	assignments *a.RoleAssignmentsClient
 	roles       *a.RoleDefinitionsClient
 	denies      *a.DenyAssignmentsClient
+	stacks      *d.Client
 	http        *armReadHTTP
 }
 
@@ -31,9 +33,13 @@ func NewSDKReadIdentityReader(c Config, s ReadIdentitySettings, credential azcor
 	if err != nil || credential == nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
-	h := newARMReadHTTP(c, map[string]string{s.Identity: readIdentityVersion, s.Identity + "/federatedIdentityCredentials": readIdentityVersion, s.Assignment: readAssignmentVersion, s.Role: readRoleVersion, s.ProtectionAssignment: networkDenyVersion}, transport)
+	h := newARMReadHTTP(c, map[string]string{s.Identity: readIdentityVersion, s.Identity + "/federatedIdentityCredentials": readIdentityVersion, s.Assignment: readAssignmentVersion, s.Role: readRoleVersion, s.ProtectionAssignment: networkDenyVersion, s.NetworkProtectionStack: protectionStackVersion, s.IdentityProtectionStack: protectionStackVersion}, transport)
 	options := publicARMOptions(h)
 	identities, err := m.NewUserAssignedIdentitiesClient(c.Subscription, credential, options)
+	if err != nil {
+		return nil, hostedexecution.ErrConfiguration
+	}
+	stacks, err := d.NewClient(c.Subscription, credential, options)
 	if err != nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
@@ -45,7 +51,7 @@ func NewSDKReadIdentityReader(c Config, s ReadIdentitySettings, credential azcor
 	if err != nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
-	return &SDKReadIdentityReader{settings: s, identities: identities, federation: federation, assignments: factory.NewRoleAssignmentsClient(), roles: factory.NewRoleDefinitionsClient(), denies: factory.NewDenyAssignmentsClient(), http: h}, nil
+	return &SDKReadIdentityReader{settings: s, identities: identities, federation: federation, assignments: factory.NewRoleAssignmentsClient(), roles: factory.NewRoleDefinitionsClient(), denies: factory.NewDenyAssignmentsClient(), stacks: stacks, http: h}, nil
 }
 
 func (c *SDKReadIdentityReader) Close() { c.http.CloseIdleConnections() }

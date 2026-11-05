@@ -39,7 +39,7 @@ func TestAzureReadIdentityFederationRejectsPresentAndUnknownCredentialRoutes(t *
 	before := f.reads
 	f.federation = ""
 	credential, err = g.Credential(t.Context(), c)
-	if err != nil || credential == nil || len(clients) != 1 || clients[0] != s.ClientID || f.reads != before+5 {
+	if err != nil || credential == nil || len(clients) != 1 || clients[0] != s.ClientID || f.reads != before+7 {
 		t.Fatal("explicit empty federation did not permit one fresh credential inspection", err, f.reads)
 	}
 	f.federation = "missing-value"
@@ -93,16 +93,16 @@ func TestAzureReadIdentityFederationGatesBoundHostAndRefreshesAbsence(t *testing
 	before := identity.reads
 	identity.federation = "present"
 	requireReadDenyError(t, observer.Check(t.Context(), c), hostedexecution.ErrOwnership)
-	if f.reads != 0 || identity.reads != before+5 || f.parent.bootstrapReads != bootstrap {
+	if f.reads != 0 || identity.reads != before+7 || f.parent.bootstrapReads != bootstrap {
 		t.Fatal("reported federation reached host reads or repeated bootstrap")
 	}
 	identity.federation = ""
-	if err := observer.Check(t.Context(), c); err != nil || f.reads != 2 || identity.reads != before+10 {
+	if err := observer.Check(t.Context(), c); err != nil || f.reads != 2 || identity.reads != before+14 {
 		t.Fatal("fresh empty federation did not restore bound host inspection", err, f.reads)
 	}
 	identity.federation = "incomplete"
 	requireReadDenyError(t, observer.Check(t.Context(), c), hostedexecution.ErrUnavailable)
-	if f.reads != 2 || identity.reads != before+15 || len(f.parent.factoryClients) != 1 || f.parent.bootstrapReads != bootstrap {
+	if f.reads != 2 || identity.reads != before+21 || len(f.parent.factoryClients) != 1 || f.parent.bootstrapReads != bootstrap {
 		t.Fatal("incomplete federation reused a previous successful observation")
 	}
 }

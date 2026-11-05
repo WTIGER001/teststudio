@@ -225,3 +225,6 @@ The core deployment does not include or invoke this package.
 Local compilation and six packaging checks pass without Azure account access or deployment.
 Private relay access, effective identity authority, DNS, routing, complete admission, and separate hosted verification remain unfinished.
 Keep coded Azure execution disabled. Backend infrastructure intent does not complete acceptance 51 or 57.
+
+The [reported protection-stack checks](azure-protection-stacks.md) require two explicit stack references and fixed managed-resource sets.
+The core package creates no such arrangement. Direct assignment ownership and protection-management authority remain unproven.

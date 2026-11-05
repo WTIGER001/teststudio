@@ -424,7 +424,26 @@ See [identity write protection](azure-read-identity.md#identity-write-protection
 The inspector creates no assignment and attempts no forbidden mutation. Actual protection provisioning, enforcement, supported response shape, and owning-management authority remain unverified.
 No cloud operation, UI build, browser, image build, container, registry push, deployment, or demo restart runs. Only public documentation requests leave the environment.
 
-Next inspect the owning protection arrangement and its management authority, other identity consumer types, and remaining trusted host configuration.
+The identity stage now requires two selected deployment stacks with fixed policy and exact protected-root membership.
+The network stack reports the five existing VNet and DNS roots. The distinct identity stack reports only the observer identity.
+Both require Succeeded, denyWriteAndDelete, child coverage, no excluded principal, and the fixed effective exception sets.
+The SDK reads only the two selected resources and drops templates, parameters, outputs, and deployment metadata from returned observations.
+Failed or changed protection blocks credential construction and later host reads. Successful state is never cached.
+
+Three new focused race checks and six changed identity, scan, and session checks pass in 3.668 seconds.
+After correcting missing-metadata error categories, only the two affected checks repeat and pass in 1.925 seconds.
+Local checks first exposed value-shaped SDK responses and an incompatible resource-group-only helper; both are corrected before the passing runs.
+Seven concurrent identity-stage observations now yield ceilings of 2200 bootstrap, 2216 read-deny, and 2220 host requests.
+Contexts remain 125, 130, and 135 seconds. The host session retains 22 readers and repeats no parent scan or bootstrap during a bound check.
+The stable armdeploymentstacks/v2 v2.0.0 adds one module and two hashes without upgrading other dependencies.
+
+The API exposes no exact deny-assignment link. These checks establish reported consistency, not direct ownership or stack-management authority.
+The optional core package creates no protection arrangement. Actual enforcement, provenance, other consumers, complete host admission, isolation, and native wiring remain open.
+See [reported protection stacks](azure-protection-stacks.md). Acceptance 51 advances; the total remains 48 verified of 57, with nine open.
+No cloud operation, UI build, browser, image build, container, registry push, deployment, or demo restart runs.
+External requests retrieve only public documentation and the public SDK module.
+
+Next resolve authoritative assignment ownership and protection-management authority, other identity consumer types, and remaining trusted host configuration.
 Reported app and job checks do not establish exclusive use across all Azure resources or subscriptions.
 Keep hosted read coverage, complete effective authorization, and cross-scope visibility separate until authoritative deployment evidence exists.
 Wire the bound session into native commands only after complete admission exists.

@@ -106,7 +106,7 @@ go test -race ./adapters/execution/azure -run '^(TestAzureObserverPlacements.*|T
 
 Evidence is output/azure-observer-placements/summary.json and the targeted command results.
 This projection adds no SDK resource, permission, API version, collection request, or session reader.
-The 22-reader host session retains its 135-second context. Separate federation and identity-protection GETs increase its ceiling to 2218 requests.
+The 22-reader host session retains its 135-second context. Separate federation and identity-protection GETs increase its ceiling to 2220 requests.
 
 ## Completeness, permissions, and attachment authority
 
@@ -201,3 +201,5 @@ It applies the same placement rules to the selected backend environment and reje
 It issues no second application or job subscription scan. The snapshot contains only the existing reduced placement records.
 The snapshot belongs to one composed check. It adds no persisted inventory, successful cache, or read-authority claim.
 Existing standalone inventory behavior remains unchanged and retains targeted passing evidence.
+
+The [reported protection-stack checks](azure-protection-stacks.md) add two selected GETs within the existing contexts and reader count.

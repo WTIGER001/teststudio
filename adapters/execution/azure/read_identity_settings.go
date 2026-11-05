@@ -7,14 +7,16 @@ import (
 )
 
 type ReadIdentitySettings struct {
-	Protection           NetworkDenySettings `json:"protection"`
-	Identity             string              `json:"identity"`
-	ClientID             string              `json:"clientId"`
-	PrincipalID          string              `json:"principalId"`
-	TenantID             string              `json:"tenantId"`
-	Assignment           string              `json:"assignment"`
-	Role                 string              `json:"role"`
-	ProtectionAssignment string              `json:"protectionAssignment"`
+	Protection              NetworkDenySettings `json:"protection"`
+	Identity                string              `json:"identity"`
+	ClientID                string              `json:"clientId"`
+	PrincipalID             string              `json:"principalId"`
+	TenantID                string              `json:"tenantId"`
+	Assignment              string              `json:"assignment"`
+	Role                    string              `json:"role"`
+	ProtectionAssignment    string              `json:"protectionAssignment"`
+	NetworkProtectionStack  string              `json:"networkProtectionStack"`
+	IdentityProtectionStack string              `json:"identityProtectionStack"`
 }
 
 func (s ReadIdentitySettings) canonical(c Config) (ReadIdentitySettings, error) {
@@ -27,6 +29,19 @@ func (s ReadIdentitySettings) canonical(c Config) (ReadIdentitySettings, error) 
 	for _, id := range []string{c.PullIdentity, backend.PullIdentity, backend.StartupIdentity, backend.RuntimeIdentity} {
 		if strings.EqualFold(s.Identity, id) {
 			return s, hostedexecution.ErrConfiguration
+		}
+	}
+	if strings.EqualFold(s.NetworkProtectionStack, s.IdentityProtectionStack) {
+		return s, hostedexecution.ErrConfiguration
+	}
+	for _, binding := range s.stackBindings() {
+		if !observerStackID(c, binding.id) {
+			return s, hostedexecution.ErrConfiguration
+		}
+		for _, resource := range binding.resources {
+			if !strings.HasPrefix(strings.ToLower(resource.scope), strings.ToLower(observerStackScope(binding.id))+"/") {
+				return s, hostedexecution.ErrConfiguration
+			}
 		}
 	}
 	return s, nil

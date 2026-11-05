@@ -15,6 +15,7 @@ The [host-bound observer](azure-observer-host.md) additionally checks the select
 Its workload stage now rejects [reported app and job identity sharing](azure-worker-workloads.md#observer-identity-placement) while retaining the same collection requests.
 The identity stage now requires an explicit empty federated-credential collection before constructing a credential or completing a bound inspection.
 It also requires reported enforced protection on the selected identity and its child scopes, with no attachment or credential-write exception.
+The [reported stack checks](azure-protection-stacks.md) additionally require fixed policy and exact protected-resource membership.
 Identity attachment, token availability, deny coverage, protection-management authority, and cross-scope visibility remain installation requirements.
 Acceptance 51 advances. The total remains 48 verified of 57, with nine open.
 
@@ -32,6 +33,8 @@ ReadIdentitySettings requires these fields:
 | assignment | Selected subscription-root role assignment identifier with a GUID name. |
 | role | Selected subscription-root role definition identifier with a GUID name. |
 | protectionAssignment | Exact resource-scoped deny assignment on the selected identity, with a GUID name. |
+| networkProtectionStack | Selected deployment stack managing exactly the five protected network and DNS roots. |
+| identityProtectionStack | Distinct selected deployment stack managing exactly the observer identity root. |
 
 The identity resource must differ from the four known pull and backend identity resources.
 Its observed name, resource type, location, identifier, client, principal, and tenant must match the selected configuration.
@@ -64,17 +67,17 @@ It provides no default-credential fallback. This method does not request or rede
 SDK calls made later with that credential can request tokens. Host identity attachment and successful authentication require separate verification.
 The [managed identity credential API](https://pkg.go.dev/github.com/Azure/azure-sdk-for-go/sdk/azidentity#ManagedIdentityCredentialOptions) defines explicit user-assigned identity selection.
 
-SDKReadIdentityReader requires an explicit credential and permits only five selected GET paths.
+SDKReadIdentityReader requires an explicit credential and permits only seven selected GET paths.
 The identity reader pins armmsi v1.3.0 and API 2024-11-30.
 The existing armauthorization/v3 v3.0.0-beta.3 supplies role assignment API 2022-04-01 and role definition API 2022-05-01-preview.
 The scoped role Get method preserves the exact query. GetByID adds an SDK disambiguation query outside this transport contract.
 The shared transport rejects mutations, other collections, alternate resources, extra query parameters, secret operations, and redirects.
 Provider registration and retries remain disabled. Each selected read has a five-second context and four-megabyte response limit.
 
-Five selected reads run concurrently after network protection succeeds: identity, assignment, role, federated-credential absence, and identity write protection.
+Seven selected reads run concurrently after network protection succeeds: identity, assignment, role, federated-credential absence, identity write protection, and two protection stacks.
 Parent observations do not repeat within one inspection.
-The composed guard has a 125-second context and at most 2198 requests, including the bounded reported-subscription scan.
-Normal additional cost is exactly five GETs. Successful observations are not cached or persisted.
+The composed guard has a 125-second context and at most 2200 requests, including the bounded reported-subscription scan.
+Normal additional cost is exactly seven GETs. Successful observations are not cached or persisted.
 Credential construction uses the identity from that same inspection.
 Returned errors use fixed public categories and omit provider messages, condition text, and credential factory details.
 
@@ -151,8 +154,8 @@ Changed immutable runtime settings reject before an SDK request. Missing identit
 Token acquisition and transport errors remain unavailable and omit private provider details.
 There is no alternate credential or bootstrap fallback after binding.
 
-Each Check now has a 130-second context and 2214-request ceiling, including the bounded subscription read-deny scan.
-Binding adds one separate bootstrap inspection with a 125-second context and 2198-request ceiling.
+Each Check now has a 130-second context and 2216-request ceiling, including the bounded subscription read-deny scan.
+Binding adds one separate bootstrap inspection with a 125-second context and 2200-request ceiling.
 Bind once per owned session. Do not bind again before every Check.
 Close the session after its final inspection. Close waits for active checks, closes owned readers in reverse order, and releases their references.
 Repeated Close calls are safe. Checks after Close return unavailable without a credential or transport request.

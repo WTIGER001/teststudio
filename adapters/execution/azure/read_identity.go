@@ -10,6 +10,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	a "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/authorization/armauthorization/v3"
 	m "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/msi/armmsi"
+	d "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armdeploymentstacks/v2"
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
 )
 
@@ -19,6 +20,7 @@ type ReadIdentityReader interface {
 	Role(context.Context, string) (a.RoleDefinition, error)
 	FederationAbsent(context.Context, string) error
 	Protection(context.Context, string) (a.DenyAssignment, error)
+	Stack(context.Context, string) (d.DeploymentStack, error)
 }
 
 type ReadIdentityGuard struct {
@@ -66,13 +68,18 @@ func (g *ReadIdentityGuard) inspect(ctx context.Context, c Config) (identity m.I
 	var assignment a.RoleAssignment
 	var role a.RoleDefinition
 	var protection a.DenyAssignment
-	var errs [5]error
+	var stacks [2]d.DeploymentStack
+	var errs [7]error
 	var group sync.WaitGroup
 	group.Go(func() { identity, errs[0] = g.reader.Identity(ctx, g.settings.Identity) })
 	group.Go(func() { assignment, errs[1] = g.reader.Assignment(ctx, g.settings.Assignment) })
 	group.Go(func() { role, errs[2] = g.reader.Role(ctx, g.settings.Role) })
 	group.Go(func() { errs[3] = g.reader.FederationAbsent(ctx, g.settings.Identity) })
 	group.Go(func() { protection, errs[4] = g.reader.Protection(ctx, g.settings.ProtectionAssignment) })
+	bindings := g.settings.stackBindings()
+	for i, binding := range bindings {
+		group.Go(func() { stacks[i], errs[i+5] = g.reader.Stack(ctx, binding.id) })
+	}
 	group.Wait()
 	for _, err := range errs {
 		if errors.Is(err, hostedexecution.ErrOwnership) {
@@ -89,6 +96,11 @@ func (g *ReadIdentityGuard) inspect(ctx context.Context, c Config) (identity m.I
 	}
 	if err := verifyReadIdentityProtection(g.settings, protection); err != nil {
 		return m.Identity{}, err
+	}
+	for i, binding := range bindings {
+		if err := verifyProtectionStack(c, binding, stacks[i]); err != nil {
+			return m.Identity{}, err
+		}
 	}
 	return identity, nil
 }
