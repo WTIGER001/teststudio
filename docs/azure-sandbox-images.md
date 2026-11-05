@@ -5,7 +5,8 @@
 The sandbox ImageManager stores source conversion ownership in the installation database.
 Trusted preparation can reserve an import. Execution processes can resolve an existing conversion without starting another import.
 The production data-plane client implements ImageControl. No Azure SDK process runs inside the API or test sandbox.
-Native Provider composition, actual import admission, configuration, and deployment packaging remain unfinished.
+The [provider bridge](azure-sandbox-provider.md) now connects pending conversion to the shared execution lifecycle.
+Actual import admission, concrete native SDK assembly, configuration, and deployment packaging remain unfinished.
 This library does not enable Azure execution.
 
 ## Concepts
@@ -84,7 +85,7 @@ No cloud account, registry, browser, container, demo restart, or remote push is 
 
 Keep AllowImport in the separate preparation workload. Use lookup mode in the execution provider.
 Reuse the existing OCI inspector, preparation authorization, durable source queue, and worker exchange.
-Represent pending conversion before sandbox creation through the complete native Provider.
+Use the provider's launch intents to retain pending conversion before sandbox creation.
 Then construct the sandbox Plan from a freshly resolved Ready image and the approved inspection.
 Preserve the original absolute discovery or execution deadline.
 Connect the [dispatch controller](azure-sandbox-controller.md), [independent timer](azure-sandbox-deadlines.md), and [command completion](azure-sandbox-commands.md).

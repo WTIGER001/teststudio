@@ -122,7 +122,33 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: durable sandbox source conversion and lookup
+## Current delivery: sandbox provider integration and shared execution lifecycle
+
+The sandbox Provider now implements the common hosted interface with the existing OCI inspector, image manager, dispatch controller, and command bridge.
+Durable launch intents retain pending conversions before a sandbox exists.
+Proofs bind source inspection, the selected import identity, frozen work, the full reference, and the original deadline.
+No usable ticket enters the launch journal. Normal execution cannot import a missing source.
+
+Ensure reserves the intent. Observe advances pending preparation, resolves the owned sandbox, and delegates independent command completion.
+Stop checks exact scope, records a barrier, revokes work, and resolves late controller reservations.
+Remove requires the canonical result and evidence checkpoint. It marks the launch removed after owned instance and timer cleanup.
+Recovery inventory includes pending conversions. Cleaned status survives worker-exchange deletion.
+
+Seven new focused checks cover both runners, pending restart, cancellation, an in-flight create, concurrent lost-receipt recovery, input binding, and import identity changes.
+The actual shared executor and exchange claim work, record start, accept a report, upload and collect a private log, and finish checkpointed cleanup.
+The reports retain their original test duration. These checks exercise provider protocols, not hosted test processes.
+The shared flow preserves the original prepared deadline and exposes an observation race during worker updates.
+Bounded final assertion retries fix that race and retain immediate revocation checks.
+A deterministic check distinguishes normal revision conflicts from revoked work. Concurrent stop reservations remain pending without claiming quiescence.
+The seven new checks and three affected authorization regressions pass with race detection in 2.340 seconds.
+Affected documentation links resolve. Evidence is output/azure-sandbox-provider/summary.json and targeted.log.
+
+No hosted service, cloud account, registry operation, browser, container, UI build, demo restart, or remote push is involved.
+No user page behavior changes. Provider, source, controller, discovery, Azure, and plan guides match this delivery.
+Actual admission, effective timer authority, native SDK assembly, configuration, and packaging remain unfinished.
+Acceptance **51** and supporting recovery under **52** advance. The verified total remains **48 of 57**, with **9 open**.
+
+## Previous delivery: durable sandbox source conversion and lookup
 
 The production data-plane client now requires a complete image plan for imports.
 Its proof binds configuration, pull identity, immutable OCI metadata, project, runner, and discovery generation.

@@ -115,7 +115,8 @@ Actual converted root filesystem behavior, command limits, identity enforcement,
 ### Continue native integration
 
 Connect durable image import and Ready-image lookup to trusted source preparation.
-Bind actual instance and deadline authority, admission, and the complete native Provider factory.
+Use the [provider bridge](azure-sandbox-provider.md) for shared lifecycle and report collection.
+Bind actual instance and deadline authority, admission, and the concrete native SDK factory.
 Reuse Controller.Status and the existing hosted executor, report validation, evidence, cancellation, and cleanup contracts.
 Keep explicit observation gaps after lost command acknowledgments. Do not replace them with a repeated attempt.
 

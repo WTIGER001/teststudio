@@ -19,7 +19,8 @@ Those ordinary Job contracts remain staged. The active [sandbox execution client
 The [sandbox deadline SDK](azure-sandbox-deadlines.md) now supplies independent timer control.
 The [sandbox command bridge](azure-sandbox-commands.md) now supplies independent completion and status mapping.
 The [sandbox image manager](azure-sandbox-images.md) now supplies durable import and converted-image lookup.
-Effective timer authority, actual admission, and native discovery wiring remain required.
+The [sandbox provider bridge](azure-sandbox-provider.md) now retains pending conversion and connects the shared discovery and execution lifecycle.
+Effective timer authority, actual admission, concrete SDK assembly, and native discovery configuration remain required.
 The [ACR adapter](azure-registry-authentication.md) now supports trusted source registry authentication and publication.
 The [native Azure assembly profile](azure-native-assembly.md) now wires separate reader and writer identities into trusted registry preparation.
 Complete isolated discovery, effective authorization, actual workload placement, and deployed stop-resource enforcement remain open.

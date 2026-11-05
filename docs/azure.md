@@ -12,7 +12,8 @@ The active coded execution path uses the [sandbox client and launch contract](az
 The [sandbox deadline SDK](azure-sandbox-deadlines.md) now supplies owned independent timers and checkpointed cleanup.
 The [command bridge](azure-sandbox-commands.md) now supplies independent exit receipts, guarded Linux supervision, and hosted status mapping.
 The [image manager](azure-sandbox-images.md) now supplies durable source conversion and verified image lookup.
-Sandboxes and the selected API remain preview. Native configuration, effective timer authority, actual admission, and complete provider composition remain unfinished.
+The [provider bridge](azure-sandbox-provider.md) now connects the shared execution and recovery lifecycle, including pending source conversion.
+Sandboxes and the selected API remain preview. Native configuration, effective timer authority, actual admission, and concrete SDK assembly remain unfinished.
 Ordinary Jobs stay disabled. Their contracts below remain reference material and do not establish sandbox isolation.
 The [Azure job contract](azure-worker-contract.md) now builds and verifies SDK requests for execution and discovery.
 The [durable provider](azure-worker-lifecycle.md) now passes local dispatch, status, cancellation, and checkpointed recovery checks.

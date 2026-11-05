@@ -13,7 +13,8 @@ The [durable controller](azure-sandbox-controller.md) now supplies dispatch rese
 The [independent deadline SDK](azure-sandbox-deadlines.md) now supplies owned timer creation, verification, and checkpointed removal.
 The [command bridge](azure-sandbox-commands.md) now supplies independent exit receipts and common hosted status mapping.
 The [image manager](azure-sandbox-images.md) now supplies durable import and verified converted-image lookup.
-The complete native Provider still requires effective timer authority, admission, source-queue composition, and configuration.
+The [provider bridge](azure-sandbox-provider.md) now connects pending image preparation and the shared execution lifecycle.
+Native SDK assembly still requires effective timer authority, admission, source-queue composition, and configuration.
 Local contract checks do not establish deployed isolation, service availability, identity authority, certificate trust, or complete product operation.
 
 ## Concepts
@@ -144,7 +145,8 @@ Connect the durable image manager and verified Ready-image lookup to native sour
 Reuse the existing source queue, database, approved OCI inspector, worker exchange, and preparation authorization.
 Reconcile returned identifiers under complete ownership proofs. Never retry an ambiguous create as new work.
 Bind the independent sandbox deadline SDK to verified native identity grants and workflow protection.
-Connect the implemented command completion and status bridge, terminal runner reports, deletion checkpoints, and orphan recovery through the complete native Provider.
+Use the implemented Provider for command status, terminal runner reports, deletion checkpoints, and pending-launch recovery.
+Compose its concrete SDK dependencies and actual admission through native configuration.
 Add explicit managed identity, group, VNet, source-import, and deadline packaging before native command selection.
 Keep all installation credentials in trusted processes.
 Keep actual Azure verification separate from this local implementation session.

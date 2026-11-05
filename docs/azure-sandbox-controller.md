@@ -119,7 +119,8 @@ Reopened completed cleanup performs no further instance operation.
 DispatchState now includes independent [command completion facts](azure-sandbox-commands.md).
 Controller.Status combines explicit service-returned exit codes with confirmed instance quiescence through the shared hosted status contract.
 It does not infer measured test duration or derive command success from a test report.
-The complete native Provider still needs source resolution, actual admission, and configuration.
+The [provider bridge](azure-sandbox-provider.md) now connects source resolution and the shared lifecycle.
+Actual admission, concrete native SDK assembly, and configuration remain unfinished.
 Lost command acknowledgments retain explicit observation gaps and never restart the same logical attempt.
 Close joins owned command routines before SDK clients or the shared database close.
 

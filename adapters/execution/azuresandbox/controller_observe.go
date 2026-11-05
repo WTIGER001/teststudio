@@ -2,6 +2,7 @@ package azuresandbox
 
 import (
 	"context"
+	"errors"
 
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
@@ -116,18 +117,27 @@ func (c *Controller) Observe(ctx context.Context, ref execution.Reference) (stat
 		}
 		return state, nil
 	}
-	latest, row, _, err := c.load(ctx, ref)
-	if err != nil {
-		return state, err
-	}
-	transport, guard, err := c.transport(ctx, latest)
-	if err != nil {
-		return state, err
-	}
-	if !latest.Stopping && !latest.Removed && !latest.Quiesced && latest.Receipt == actual.ID && !transport.Revoked && c.now().Before(transport.Deadline) {
-		if err := c.store.Commit(ctx, storage.Change{Record: row, Assert: true}, storage.Change{Record: guard, Assert: true}); err == nil {
-			state.AdmissionPending = false
+	for range 8 {
+		latest, row, _, err := c.load(ctx, ref)
+		if err != nil {
+			return state, err
 		}
+		transport, guard, err := c.transport(ctx, latest)
+		if err != nil {
+			return state, err
+		}
+		if latest.Stopping || latest.Removed || latest.Quiesced || latest.Receipt != actual.ID || transport.Revoked || !c.now().Before(transport.Deadline) {
+			return state, nil
+		}
+		err = c.store.Commit(ctx, storage.Change{Record: row, Assert: true}, storage.Change{Record: guard, Assert: true})
+		if errors.Is(err, storage.ErrConflict) {
+			continue
+		}
+		if err != nil {
+			return state, hostedexecution.ErrUnavailable
+		}
+		state.AdmissionPending = false
+		return state, nil
 	}
-	return state, nil
+	return state, hostedexecution.ErrUnavailable
 }

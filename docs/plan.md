@@ -78,7 +78,13 @@ Only a new authorized discovery request can replace a known failed generation. R
 Lookup processes cannot initiate conversion. Targeted local restart, contention, authorization, history, and protocol checks pass.
 See [durable sandbox images](azure-sandbox-images.md). The verified count remains 48 of 57.
 
-Connect pending image preparation and the controller through the complete native Provider next. Then complete actual admission and its native factory.
+The sandbox Provider now connects pending image preparation, controller status, command execution, cancellation, cleanup, and recovery inventory.
+Launch intents retain pending conversions before a sandbox exists. Their proofs freeze source, import identity, work input, and the original deadline.
+The actual shared executor and worker exchange pass local protocol flows for both runners with private logs, reported timing, and completed cleanup.
+Scope, restart, late creation, lost receipts, and concurrent admission updates pass targeted checks.
+See [sandbox provider integration](azure-sandbox-provider.md). This does not establish deployed Azure execution.
+
+Complete actual import and runtime admission, native configuration, and the concrete SDK factory next.
 Reuse the new command and status bridge. Preserve explicit gaps after a lost acknowledgment and never replay the logical attempt.
 Preserve source-queue authorization and the existing worker exchange. Keep controller credentials outside sandboxes.
 Bind actual source-import identity, group authority, VNet routing, proxy trust, and effective outbound enforcement before enabling native execution.

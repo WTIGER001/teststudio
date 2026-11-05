@@ -10,13 +10,17 @@ import (
 	"github.com/wtiger001/teststudio/internal/storage"
 )
 
-func (c *Controller) Inventory(ctx context.Context, installation, profile string) (refs []execution.Reference, resultErr error) {
-	defer func() { resultErr = controlError(resultErr) }()
+func validInventoryScope(installation, profile string) bool {
 	validProfile := false
 	for _, runner := range []string{"go", "playwright"} {
 		validProfile = validProfile || profile == runner+"-"+Location+"-isolated-v1" || profile == runner+"-"+Location+"-discovery-v1"
 	}
-	if !domain.ValidID(installation) || !validProfile {
+	return domain.ValidID(installation) && validProfile
+}
+
+func (c *Controller) Inventory(ctx context.Context, installation, profile string) (refs []execution.Reference, resultErr error) {
+	defer func() { resultErr = controlError(resultErr) }()
+	if !validInventoryScope(installation, profile) {
 		return nil, hostedexecution.ErrConfiguration
 	}
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
