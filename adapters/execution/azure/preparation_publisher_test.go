@@ -76,6 +76,9 @@ func TestAzurePreparationPublisherComposesOwnedReadersAndClosesWithoutPublicatio
 		selected = id
 		return fixtureCredential{}, nil
 	}
+	if err := publisher.Check(t.Context(), c); err != nil || selected != "" {
+		t.Fatal("readiness check selected a writer credential", err)
+	}
 	client, err := publisher.OpenRegistry(t.Context(), c)
 	if err != nil || client == nil || selected != writer.settings.ClientID || network.reads == 0 {
 		t.Fatal("composed publisher failed selected admission", err, selected)
@@ -89,6 +92,7 @@ func TestAzurePreparationPublisherComposesOwnedReadersAndClosesWithoutPublicatio
 	before := f.reads
 	_, err = publisher.OpenRegistry(t.Context(), c)
 	requireDeadlineError(t, err, hostedexecution.ErrUnavailable)
+	requireDeadlineError(t, publisher.Check(t.Context(), c), hostedexecution.ErrUnavailable)
 	if f.reads != before {
 		t.Fatal("closed publisher performed a provider operation")
 	}

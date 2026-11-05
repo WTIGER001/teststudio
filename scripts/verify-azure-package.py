@@ -5,6 +5,8 @@ import re
 from pathlib import Path
 import subprocess
 
+from verify_azure_preparation import verify_preparation
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -15,18 +17,25 @@ def main():
     source.add_argument('--bicep', type=Path)
     source.add_argument('--compiled-template', type=Path)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--profile', choices=['core', 'preparation'], default='core')
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    template_path = output / 'service.json'
+    template_path = output / ('preparation.json' if args.profile == 'preparation' else 'service.json')
     if args.bicep:
         environment = {key: value for key, value in os.environ.items() if not key.startswith(('AZURE_', 'ARM_', 'AWS_'))}
-        result = subprocess.run([str(args.bicep.resolve()), 'build', str(ROOT / 'deploy/azure/main.bicep'), '--no-restore', '--outfile', str(template_path)], capture_output=True, text=True, env=environment, timeout=60)
+        source_path = ROOT / 'deploy/azure' / ('preparation.bicep' if args.profile == 'preparation' else 'main.bicep')
+        result = subprocess.run([str(args.bicep.resolve()), 'build', str(source_path), '--no-restore', '--outfile', str(template_path)], capture_output=True, text=True, env=environment, timeout=60)
         (output / 'compile.log').write_text(result.stdout + result.stderr)
         assert result.returncode == 0 and 'Warning' not in result.stderr, 'Bicep compile or schema validation failed; inspect compile.log'
     elif args.compiled_template.resolve() != template_path:
         template_path.write_text(args.compiled_template.read_text())
     template = json.loads(template_path.read_text())
+    if args.profile == 'preparation':
+        summary = {'passed': True, 'scope': 'local compilation and assembly packaging contracts only; no Azure service or deployment operation', 'compiler': template['metadata']['_generator'], 'reusedCompiledTemplate': bool(args.compiled_template), 'checks': verify_preparation(template, ROOT)}
+        (output / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
+        print(json.dumps(summary, indent=2))
+        return
     resources = template['resources']
     checks = ['Bicep-generated local modules pass packaging checks without registry restoration or cloud calls']
     deployments = [resource for resource in resources if resource['type'] == 'Microsoft.Resources/deployments']

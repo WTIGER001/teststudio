@@ -4,8 +4,8 @@
 
 The preparation publisher composes the existing registry observation chain, the trusted preparation path, and a selected registry writer grant.
 It opens an ACR publishing client only after those checks succeed.
-This library boundary supports future assembly-only integration. Native commands and the Azure package still declare no preparation workload.
-It starts no queue, executes no uploaded source, and implements no execution Network.
+The [native assembly profile](azure-native-assembly.md) now uses this boundary in a separate preparation command and headless deployment template.
+The publisher itself starts no queue, executes no uploaded source, and implements no execution Network.
 Acceptance 51 advances. The verified total remains 48 of 57, with nine open.
 
 ## Configuration
@@ -13,6 +13,7 @@ Acceptance 51 advances. The verified total remains 48 of 57, with nine open.
 LoadPreparationSettings reads one JSON file or one named environment variable through the shared bounded loader.
 It rejects unsupported fields, invalid ownership, invalid identity identifiers, and incompatible registry settings.
 The document has worker and writer fields. worker contains the existing Azure Config.
+Native operation additionally requires readerClientId for a separate explicit observation credential.
 
 PreparationWriterSettings requires these writer fields:
 
@@ -60,7 +61,8 @@ Each publisher OpenRegistry call performs fresh observation before selecting the
 The caller closes each returned ACR client and the publisher after use.
 Publisher Close releases every owned reader once. Further openings return unavailable without provider calls.
 Closing the publisher does not close previously returned registry clients; their ownership remains with the caller.
-Call OpenRegistry immediately before each assembly attempt. Do not retain a client as proof of continued grant validity.
+Library callers can call OpenRegistry before each attempt or use publisher Check before reusing the selected registry client.
+The native process checks once during startup and again before every new build. A retained client alone proves no continued grant validity.
 The registry service still enforces authorization on subsequent registry operations.
 
 The writer stage has a 45-second total bound, including the preparation path's 40-second bound.
@@ -74,9 +76,9 @@ This checks one reported assignment. It does not enumerate additional, inherited
 The identity's absence from other workloads, federation state, and protection against later reassignment remain unverified.
 Only the worker pull identity is excluded by these settings. Full installation wiring must also exclude controller, startup, observer, and backend identities.
 Reported private resources do not prove effective packet routing, process placement, or complete DNS visibility.
-Actual preparation environment placement, source egress, persistent journal storage, bootstrap read authority, and native command wiring remain unfinished.
+Native command wiring and a persistent-mount template now exist. Actual placement, source egress, filesystem behavior, and effective read authority remain unverified.
 
-Use [assembly-only handoff](source-assembly-handoff.md) for the eventual trusted writer.
+The native trusted writer uses [assembly-only handoff](source-assembly-handoff.md).
 Discovery, review, approval, and complete untrusted execution admission remain separate requirements.
 The current source service still requires compatible isolated discovery before source approval.
 This publisher does not enable Azure coded execution or close deployment acceptance.

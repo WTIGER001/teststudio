@@ -8,10 +8,10 @@ It publishes an immutable OCI image through the registry HTTPS protocol.
 The [trusted ACR adapter](azure-registry-authentication.md) now supplies separate publication token scope for this same upload and journal flow.
 The [Azure preparation path observer](azure-preparation-registry.md) adds selected endpoint, subnet, NIC, security, and DNS checks.
 The [Azure publisher library](azure-preparation-writer.md) composes that path with a selected managed identity and registry-scoped push grant.
-Native Azure queue setup remains unfinished because preparation also requires admitted isolated discovery.
+The [native Azure assembly worker](azure-native-assembly.md) can now publish and queue discovery. Complete Azure source preparation still requires admitted isolated discovery.
 It needs no Docker daemon, local image cache, cloud SDK, shell, or uploaded Dockerfile execution.
 
-The preparation worker now enables this adapter through explicit Kubernetes settings and registry runtime flags.
+The preparation worker enables this adapter through explicit hosted settings and registry runtime flags.
 It connects the durable build queue to hosted discovery and the existing source review and approval workflow.
 See [hosted preparation](hosted-discovery.md) for native setup, cleanup ordering, and remaining deployment packaging.
 Do not use the local image inspector for registry references.

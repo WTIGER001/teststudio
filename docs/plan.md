@@ -523,8 +523,8 @@ Assembly-only workers run no discovery. Compatible discovery workers recheck ret
 Confirmed interrupted assembly resumes only its handoff; concurrent writers and repeated recovery create no duplicate build or discovery index.
 Waiting cancellation, expiry, revocation, and cancellation during handoff block dispatch. Old jobs and the default combined workflow remain compatible.
 
-The native preparation command adds --assembly-only for existing ECS and Kubernetes registry settings and rejects local mode before creating state.
-Azure settings remain unwired. This establishes a queue boundary for a future trusted Azure writer without enabling native coded execution.
+The native preparation command supports --assembly-only for existing ECS and Kubernetes settings and separate Azure assembly settings.
+It rejects local mode before creating state. This queue boundary permits the trusted Azure writer without enabling native coded execution.
 OpenAPI 0.34 and generated client types include the two optional assembly fields.
 Preparation and repository views show Waiting for discovery; page help explains when review becomes available.
 
@@ -541,7 +541,15 @@ Azure preparation library settings now compose private networking, a selected wr
 The factory reuses the existing registry chain and owns ten SDK readers. Each client opening refreshes the chain and selected grant.
 Four new local checks and one affected observer regression pass. See [Azure preparation writer](azure-preparation-writer.md).
 This advances 51 without closing an item; the total remains 48 verified, nine open.
-Next bind the trusted assembly workload's placement, persistent journal, bootstrap read authority, and native command configuration.
+The [native Azure assembly profile](azure-native-assembly.md) now configures explicit reader and writer credentials, PostgreSQL, registry runtimes, and fresh admission before each build.
+It registers both recovery builders without a discovery inspector. Owned cleanup and confirmed handoff do not require another control-plane observation.
+The separate headless Bicep template declares four identities, scoped grants, vault references, an always-on process, and a private persistent journal mount.
+The worker defaults to disabled so bootstrap can establish identity bindings before the private settings secret is populated.
+Four new Go checks and two affected regressions pass. The template compiles once and passes six local packaging checks after checker corrections.
+The core checker reuses its saved compiled template. No image rebuild, container, browser, provider call, or deployment runs.
+Native assembly advances 51; the verified count remains 48 of 57.
+Next inspect the selected preparation app, environment, storage binding, and reader identity at startup before claiming jobs.
+Actual source egress, filesystem behavior, effective read authority, and deployment recovery remain separate deployment evidence.
 The selected grant check does not establish absence of additional authority or reuse of the writer by other workloads.
 Keep complete Azure discovery and coded execution admission separate until implemented.
 Reported app and job checks do not establish exclusive use across all Azure resources or subscriptions.

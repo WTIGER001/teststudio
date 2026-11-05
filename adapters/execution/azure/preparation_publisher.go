@@ -56,6 +56,15 @@ func (p *PreparationPublisher) OpenRegistry(ctx context.Context, c Config) (*acr
 	return p.guard.OpenRegistry(ctx, c)
 }
 
+func (p *PreparationPublisher) Check(ctx context.Context, c Config) error {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	if p.guard == nil {
+		return hostedexecution.ErrUnavailable
+	}
+	return p.guard.Check(ctx, c)
+}
+
 func (p *PreparationPublisher) Close() {
 	p.mu.Lock()
 	defer p.mu.Unlock()

@@ -6,7 +6,8 @@ The API app owns identity initialization, schedules, execution coordination, and
 The artifact app validates existing grants against current stored sessions, credentials, permissions, and evidence manifests.
 
 The current package supports the catalog, identity, native HTTP execution, schedules, and private evidence service.
-Hosted preparation, Go execution, Playwright execution, and recording remain unfinished.
+The separate [assembly profile](azure-native-assembly.md) now supplies a trusted source preparation command and headless template.
+Complete source discovery, Go execution, Playwright execution, and recording remain unfinished.
 The [Azure job contract](azure-worker-contract.md) now builds and verifies SDK requests for execution and discovery.
 The [durable provider](azure-worker-lifecycle.md) now passes local dispatch, status, cancellation, and checkpointed recovery checks.
 The [trusted ACR adapter](azure-registry-authentication.md) now supports separate inspection and preparation credentials.
@@ -239,9 +240,9 @@ The [host observer profile](azure-observer-host-routes.md) requires an explicit 
 The core package creates no route overrides and removes none from the supplied existing environment. Select a suitable environment before admission.
 
 The [preparation registry path](azure-preparation-registry.md) now has selected resource and DNS observation through the existing SDKs.
-The core package creates none of those preparation resources and still declares no native Azure preparation workload.
+The core package creates none of those preparation resources. The separate [assembly template](azure-native-assembly.md) declares a trusted worker and persistent journal mount.
 
 The [assembly-only source mode](source-assembly-handoff.md) now provides a durable queue boundary for a future separate Azure registry writer.
-It supports existing ECS and Kubernetes native registry settings only.
+It supports existing ECS and Kubernetes native registry settings and the separate Azure assembly settings.
 The [Azure preparation publisher](azure-preparation-writer.md) now loads explicit library settings and composes selected network, identity, and push-grant checks.
-It opens a separate managed-identity ACR client without executing source. Native command wiring, effective grants, placement, and isolated discovery remain unfinished.
+It opens a separate managed-identity ACR client without executing source. Native assembly wiring now exists; effective grants, actual placement, and isolated discovery remain unfinished.

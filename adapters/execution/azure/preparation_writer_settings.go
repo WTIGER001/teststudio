@@ -21,8 +21,17 @@ type PreparationWriterSettings struct {
 }
 
 type PreparationSettings struct {
-	Worker Config                    `json:"worker"`
-	Writer PreparationWriterSettings `json:"writer"`
+	Worker         Config                    `json:"worker"`
+	Writer         PreparationWriterSettings `json:"writer"`
+	ReaderClientID string                    `json:"readerClientId,omitempty"`
+}
+
+func (s PreparationSettings) ValidateNative() error {
+	if !observerGUID(s.ReaderClientID) || s.ReaderClientID == s.Writer.ClientID {
+		return hostedexecution.ErrConfiguration
+	}
+	_, err := s.Writer.canonical(s.Worker)
+	return err
 }
 
 func (s PreparationWriterSettings) canonical(c Config) (PreparationWriterSettings, error) {

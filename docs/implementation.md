@@ -122,7 +122,36 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: Azure preparation writer composition
+## Current delivery: native Azure assembly and persistent workload template
+
+The native preparation command now selects Azure through --azure-assembly-config or --azure-assembly-env, only with assembly-only mode and the Azure location.
+It requires PostgreSQL and a separate explicit reader client identifier. Invalid modes, mixed providers, invalid runtime references, and invalid settings reject before state creation.
+Startup opens the existing publisher with the exact reader identity and selects the separately verified writer for registry authentication.
+Each new source build refreshes private-path and selected-grant observation before publication.
+Both Go and Playwright builders retain owned recovery without registering any discovery inspector.
+Cleanup and confirmed handoff preserve the existing short lease and owned journal behavior without another control-plane observation.
+
+The separate preparation.bicep template declares one optional headless worker with four dedicated identities and separate registry, metadata, and named-secret grants.
+The worker uses the current digest-addressed service image, PostgreSQL and private-settings vault references, one always-on replica, and a persistent Azure Files journal mount.
+The mount requests private modes and uid and gid 65532. The template performs no secret-value or storage-key retrieval.
+workerEnabled defaults to false so installation bindings can be established before the private configuration secret is populated.
+The existing core package remains unchanged. Actual preparation placement and mounted filesystem behavior remain unverified.
+
+Three new native command checks and the affected local-mode rejection check pass under race detection in 1.411 seconds.
+One new explicit-reader check and the affected publisher readiness and closure check pass under race detection in 1.562 seconds.
+The new Bicep template compiles once with the pinned compiler, without warnings, restoration, Azure CLI, credentials, or deployment.
+Six packaging checks pass after correcting checker assumptions about the Docker COPY form and implicit identity dependencies; the compiled template is reused for both corrections.
+The shared core checker also passes using its retained compiled template, without compilation or image builds.
+No cloud service, real registry publication, listener, container, browser, or demo restart runs. No new test session needs cleanup.
+Native and operator documentation match the available boundary. No UI, API contract, or current-page help behavior changes.
+
+Next bind reported preparation app, environment, persistent storage, and reader identity metadata before native queue admission.
+Effective authority, source egress, SMB durability, deployed recovery, and complete isolated discovery remain unfinished or unverified.
+The native assembly process runs no uploaded code and enables no Azure coded execution. It cannot complete review without compatible isolated discovery.
+Acceptance 51 advances; the verified total remains 48 of 57, with nine open.
+See [native Azure assembly](azure-native-assembly.md). Evidence is output/azure-native-assembly/summary.json and its retained package results.
+
+## Previous delivery: Azure preparation writer composition
 
 Explicit preparation library settings now compose the existing registry observation chain, trusted preparation networking, selected writer identity, and registry-scoped AcrPush grant.
 The factory reuses the existing registry builder and owns ten SDK readers. Construction makes no provider call.

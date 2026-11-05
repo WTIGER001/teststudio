@@ -16,7 +16,8 @@ Environment-backed browser and API profiles require remote gateway delivery.
 AWS dispatch is implemented with separate deployment verification pending.
 Azure now has a [durable job provider](azure-worker-lifecycle.md) and [job ownership contract](azure-worker-contract.md).
 The [ACR adapter](azure-registry-authentication.md) now supports trusted source registry authentication and publication.
-Concrete isolation controls, independent stop resources, managed identity binding, and native preparation wiring remain open.
+The [native Azure assembly profile](azure-native-assembly.md) now wires separate reader and writer identities into trusted registry preparation.
+Complete isolated discovery, effective authorization, actual workload placement, and deployed stop-resource enforcement remain open.
 
 ## Configure separate processes
 
@@ -81,6 +82,7 @@ For repository synchronization, use the existing [repository settings](repositor
 The preparation command can select [assembly-only handoff](source-assembly-handoff.md) with --assembly-only.
 It publishes registry source bundles and atomically queues discovery for the API's compatible hosted inspector.
 The API needs no source builder or upload journal to complete that queued discovery.
+Azure supports only the separate assembly role; it still needs a compatible isolated discovery implementation before complete source preparation.
 Current source, access, review, and approval checks remain required. The default combined flow remains supported.
 
 ## Queue, review, and approval

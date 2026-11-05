@@ -102,7 +102,8 @@ The complete profile must also preserve independent relay DNS and existing worke
 Protection-management authority, clean provenance, cross-scope coverage, and prevention of later attachments remain separate installation requirements.
 
 The core package declares no preparation workload or these endpoint and zone resources.
-Native commands still expose no Azure coded-worker option. The source queue remains unavailable until complete isolated discovery admission exists.
+The separate [native assembly profile](azure-native-assembly.md) now supplies a trusted worker template and command configuration.
+Native commands still expose no Azure coded-worker option. Complete source preparation requires isolated discovery admission.
 Do not substitute a fake Network, successful registry write, or configured private hostname for that admission.
 Four targeted local race checks pass after the final trusted-controller source-policy correction.
 They cover settings ownership, caller mutation, live selected metadata, CIDR containment, subnet representations, fixed policy, DNS, SDK restrictions, and uncertainty.
@@ -113,5 +114,5 @@ Local checks use fake credentials and in-memory SDK transports, with no provider
 
 The source service now supports [durable assembly-only handoff](source-assembly-handoff.md), with discovery deferred to a compatible worker.
 This separates confirmed source publication from execution-control authority without skipping discovery or approval.
-The current native mode supports existing ECS and Kubernetes registry settings.
-Azure library configuration and publisher composition now exist. Native command configuration, placement, and isolated discovery remain unfinished.
+The native mode supports existing ECS and Kubernetes registry settings and separate Azure assembly settings.
+Azure command configuration and publisher composition now exist. Actual placement and isolated discovery remain unverified or unfinished.

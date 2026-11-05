@@ -15,9 +15,9 @@ Review becomes available only after successful normal discovery.
 ## Optional operator mode
 
 The existing preparation command adds --assembly-only, which defaults to false.
-Use it with the existing ECS or Kubernetes registry settings and registry runtime flags.
+Use it with hosted registry settings and registry runtime flags. Azure requires the separate [native assembly profile](azure-native-assembly.md).
 Local image preparation is rejected before database or directory creation because its cleanup can remove the artifact.
-Azure native settings and workload packaging remain unfinished. This flag does not enable Azure coded execution or an Azure preparation profile.
+Azure native settings and a standalone workload template now exist. This flag does not enable Azure coded execution or isolated discovery.
 
 For an existing Kubernetes registry profile, the additional selection looks like this:
 
@@ -93,4 +93,4 @@ UI changes add status text and help without new controls or layout. Existing key
 The fixtures use local databases, local TLS servers, fake registry credentials, and in-process provider doubles.
 They start no Docker image, browser, cloud worker, real registry publication, or deployment.
 The [Azure publisher library](azure-preparation-writer.md) now composes selected private-path, writer identity, and registry push-grant checks.
-Private workload placement, complete effective grants, native command composition, and isolated discovery remain separate implementation work.
+Native command composition and a persistent-mount template now exist. Actual workload placement, complete effective grants, and isolated discovery remain unverified or unfinished.

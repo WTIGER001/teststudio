@@ -11,6 +11,8 @@ import (
 	"syscall"
 
 	permissions "github.com/wtiger001/go-permissions"
+
+	azureworker "github.com/wtiger001/teststudio/adapters/execution/azure"
 	ecsworker "github.com/wtiger001/teststudio/adapters/execution/ecs"
 	"github.com/wtiger001/teststudio/adapters/execution/kubernetes"
 	"github.com/wtiger001/teststudio/adapters/execution/localcontainer"
@@ -42,6 +44,8 @@ func run() error {
 	ecsEnv := flag.String("ecs-workers-env", "", "Environment variable containing private ECS preparation settings")
 	kubernetesConfig := flag.String("kubernetes-workers-config", "", "Private Kubernetes and registry preparation settings")
 	kubernetesEnv := flag.String("kubernetes-workers-env", "", "Environment variable containing private Kubernetes preparation settings")
+	azureConfig := flag.String("azure-assembly-config", "", "Private Azure assembly-only settings")
+	azureEnv := flag.String("azure-assembly-env", "", "Environment variable containing private Azure assembly-only settings")
 	assemblyOnly := flag.Bool("assembly-only", false, "Publish registry source bundles and queue isolated discovery without running it in this process")
 	registryGo := flag.String("registry-go-runtime", "", "Trusted supervised Go runtime distribution digest")
 	registryPlaywright := flag.String("registry-playwright-runtime", "", "Trusted supervised Playwright runtime distribution digest")
@@ -56,8 +60,27 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	if (*kubernetesConfig != "" || *kubernetesEnv != "") && (*ecsConfig != "" || *ecsEnv != "") {
+	providers := 0
+	for _, configured := range []bool{*ecsConfig != "" || *ecsEnv != "", *kubernetesConfig != "" || *kubernetesEnv != "", *azureConfig != "" || *azureEnv != ""} {
+		if configured {
+			providers++
+		}
+	}
+	if providers > 1 {
 		return errors.New("choose one hosted execution provider")
+	}
+	if (*azureConfig != "" || *azureEnv != "") && (!*assemblyOnly || *location != azureworker.Location || *runtime != "" || *browserRuntime != "") {
+		return errors.New("Azure preparation requires assembly-only mode and its execution location without local source runtime flags")
+	}
+	azureSettings, err := azureworker.LoadPreparationSettings(*azureConfig, *azureEnv, os.LookupEnv)
+	if err != nil {
+		return err
+	}
+	if azureSettings != nil && azureSettings.ValidateNative() != nil {
+		return errors.New("Azure assembly requires valid private settings and a separate explicit reader client identifier")
+	}
+	if azureSettings != nil && validateAzureRuntimes(*azureSettings, map[string]string{"go": *registryGo, "playwright": *registryPlaywright}) != nil {
+		return errors.New("Azure assembly runtimes require immutable distribution digests in the configured registry and repository prefix")
 	}
 	ecsSettings, err := ecsworker.LoadSettings(*ecsConfig, *ecsEnv, os.LookupEnv)
 	if err != nil {
@@ -70,13 +93,13 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	if kubernetesSettings != nil && (*location != "kubernetes" || *runtime != "" || *browserRuntime != "") || kubernetesSettings == nil && ecsSettings == nil && (*registryGo != "" || *registryPlaywright != "") {
-		return errors.New("hosted preparation requires Kubernetes settings or ECS settings and the matching location without local source runtime flags")
+	if kubernetesSettings != nil && (*location != "kubernetes" || *runtime != "" || *browserRuntime != "") || kubernetesSettings == nil && ecsSettings == nil && azureSettings == nil && (*registryGo != "" || *registryPlaywright != "") {
+		return errors.New("hosted preparation requires provider settings and the matching location without local source runtime flags")
 	}
-	if *assemblyOnly && ecsSettings == nil && kubernetesSettings == nil {
+	if *assemblyOnly && ecsSettings == nil && kubernetesSettings == nil && azureSettings == nil {
 		return errors.New("assembly-only preparation requires hosted registry settings; local image cleanup cannot preserve its artifact for handoff")
 	}
-	if err := runtimeconfig.RequirePostgres(connection, *requirePostgres || kubernetesSettings != nil || ecsSettings != nil); err != nil {
+	if err := runtimeconfig.RequirePostgres(connection, *requirePostgres || kubernetesSettings != nil || ecsSettings != nil || azureSettings != nil); err != nil {
 		return err
 	}
 	if !domain.ValidID(*location) {
@@ -117,7 +140,13 @@ func run() error {
 		return err
 	}
 	service := &sources.Service{AssemblyOnly: *assemblyOnly, Store: store, Auth: auth, Location: *location, Inspectors: map[string]preparation.ArtifactInspector{}, RecoveryInspectors: map[string]preparation.ArtifactInspector{}, Builders: map[string]preparation.ArtifactBuilder{}, RecoveryBuilders: map[string]preparation.ArtifactBuilder{}}
-	if ecsSettings != nil {
+	if azureSettings != nil {
+		close, err := configureAzurePreparation(ctx, service, *azureSettings, root, map[string]string{"go": *registryGo, "playwright": *registryPlaywright})
+		if err != nil {
+			return err
+		}
+		defer close()
+	} else if ecsSettings != nil {
 		runtime, err := ecsSettings.Open(ctx, store, service.AuthorizeDiscoveryCleanup)
 		if err != nil {
 			return err
