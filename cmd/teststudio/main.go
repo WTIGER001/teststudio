@@ -104,6 +104,7 @@ func run() error {
 	bootstrapIssuer := flag.String("bootstrap-issuer", "", "OIDC issuer for the initial installation administrator")
 	bootstrapSubject := flag.String("bootstrap-subject", "", "Exact OIDC subject for the initial installation administrator")
 	recordingCLI := flag.String("recording-cli", "", "Trusted installed Playwright CLI path; enables native desktop recording with --local")
+	recordingCompanion := flag.Bool("recording-companion", false, "Enable scoped desktop companion pairing for hosted browser recording")
 	recordingHelper := flag.String("recording-helper", "scripts/record-browser.mjs", "Trusted desktop recording helper script")
 	recordingDirectory := flag.String("recording-directory", ".data/recordings", "Private local browser recording directory")
 	flag.Parse()
@@ -117,7 +118,7 @@ func run() error {
 	if !role.Worker && (*workerOrigin != "" || *workerCertificate != "" || *workerKey != "") {
 		return errors.New("direct worker TLS settings require the worker service role")
 	}
-	if !role.API && !role.Worker && !role.Controller && (*workerAddr != "" || *local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *oidcCAFile != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *preparedSources || *sourceBundles || *githubSources || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
+	if !role.API && !role.Worker && !role.Controller && (*workerAddr != "" || *local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *oidcCAFile != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *recordingCompanion || *preparedSources || *sourceBundles || *githubSources || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
 		return errors.New("the artifact service role cannot configure identity bootstrap, sign-in, source preparation, recording, execution, or private worker transport")
 	}
 	if !role.API && !role.Worker && !role.Controller && (*kubernetesConfiguration != "" || *kubernetesEnvironment != "" || *ecsConfiguration != "" || *ecsEnvironment != "") {
@@ -145,6 +146,9 @@ func run() error {
 	}
 	if *recordingCLI != "" && !*local {
 		return errors.New("native browser recording requires explicit loopback-only local mode")
+	}
+	if *recordingCompanion && (!role.API || *recordingCLI != "") {
+		return errors.New("recording-companion requires an API role without a native desktop recorder")
 	}
 	if *recoverLocal && !*local {
 		return errors.New("recover-local-admin requires explicit loopback-only local mode")
@@ -374,7 +378,7 @@ func run() error {
 	scheduleService := &schedules.Service{Store: db, Auth: auth, Runs: runService, RepositorySources: sourceService}
 	notificationService := &notifications.Service{Store: db, Auth: auth, Secrets: secretProvider, Sender: &webhook.Sender{}, Origin: *public}
 	runService.Completion = notificationService
-	recordingService := &recording.Service{Store: db, Auth: auth}
+	recordingService := &recording.Service{Store: db, Auth: auth, CompanionEnabled: *recordingCompanion}
 	if *recordingCLI != "" {
 		node, err := exec.LookPath("node")
 		if err != nil {

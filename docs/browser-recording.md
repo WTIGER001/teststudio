@@ -27,6 +27,26 @@ The offline starter retains its existing isolated profile. It cannot reach a web
 The current native recorder requires a local desktop.
 Hosted recording requires a local companion or streamed browser, which remains pending.
 
+## Hosted companion API milestone
+
+The API now supports scoped desktop pairing behind the explicit --recording-companion option.
+Keep this option disabled until the desktop client and guided authoring flow are installed and verified.
+The desktop executable and connection wizard remain unfinished. This API milestone does not enable hosted recording for testers.
+
+A hosted session starts in pairing state. Its owner requests a five-minute connection token.
+The desktop supplies a separate random device token before pairing. The server stores only credential hashes.
+Pairing binds one desktop instance to the owner, project, suite, session, and original twenty-minute deadline.
+An identical pairing retry recovers a lost acknowledgement. Another desktop cannot take over the session.
+Rotating an unclaimed connection token invalidates the previous token. A paired session cannot issue another connection token.
+
+The device can read control requests and submit ordered source snapshots for that session only.
+Its credential cannot read catalog data, run tests, or create an application session.
+Each request checks current source authority and project and suite archive state.
+Stop and cancel requests survive server restart. An exact snapshot retry is idempotent.
+Maintenance fails expired, disconnected, or revoked sessions while retaining previously captured private source.
+The desktop must independently stop its owned browser when control requests fail or its deadline expires.
+The planned client uses outbound HTTPS. No local HTTP listener or browser connection bridge is required.
+
 ## Ownership and recovery
 
 Only the recording owner can read a session and its generated code.
@@ -77,6 +97,7 @@ Routes use /api/v1/projects/{project}/suites/{suite}/browser-recordings.
 | GET | none | Read the current actor's bounded recording history. |
 | POST | none | Start a session with id, url, testId, and title. |
 | GET | /{id} | Read current state and generated code. |
+| POST | /{id}/pairing | Issue or rotate an unclaimed hosted connection token. |
 | POST | /{id}/actions/stop | Close the recorder and retain generated source. |
 | POST | /{id}/actions/cancel | Cancel the recording and close its browser. |
 | GET | /{id}/source | Convert a finished recording into an unsaved source draft. |
@@ -84,3 +105,11 @@ Routes use /api/v1/projects/{project}/suites/{suite}/browser-recordings.
 Managed sessions protect all routes. Mutations require Origin and request-forgery protection.
 Starting and stopping require current source management permission.
 Recorded code never enters audit records.
+
+Native companion routes use /api/v1/recording-companion/sessions/{id}.
+POST /pair accepts pairingToken, instance, and deviceToken without browser cookies or an application session.
+POST /control accepts instance and requires the device bearer token.
+POST /snapshots also accepts a snapshot with sequence, state, optional code, and a bounded failure category.
+Companion routes reject Origin, Cookie, and Sec-Fetch-Site headers. Responses issue no application cookie and disable caching.
+Pairing tokens do not authorize control or source submission. Device tokens do not authorize ordinary API routes.
+See the [API contract](../contracts/openapi.yaml) for request and response shapes.

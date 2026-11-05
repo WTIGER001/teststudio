@@ -121,6 +121,10 @@ Six local profiles and six rejected configurations pass. Resource-derived metada
 Default offline resources remain unchanged. A sealed installation can provision the repository and accept new endpoints before activating its environment settings.
 See [AWS environment packaging](aws-environment-package.md) for deployment prerequisites, exact local checks, and remaining live verification.
 Next implement the scoped local recorder companion for hosted authoring. Keep actual AWS verification in separately authorized deployment work.
+The companion pairing and control API now passes targeted local authorization, expiry, snapshot-order, restart, and stop/cancel checks.
+Its installation option remains disabled by default. The desktop client and authoring wizard remain unfinished.
+Continue the outbound desktop client using the trusted native recorder, then connect the guided wizard and contextual help.
+The client must stop its owned recorder on lost server authority, transport failure, cancellation, or deadline.
 Use a third VPC for trusted gateways and separate environment worker resources. Preserve the retained offline worker pool.
 See [native gateway networking](ecs-gateway-network.md) for exact resource and continuation requirements.
 Keep default ECS configuration offline-only. Optional environment registration requires the complete separate native profile and current exchange authority.

@@ -34,7 +34,7 @@ func (s *Server) recordingRoutes(m *http.ServeMux) {
 			problem(w, err)
 			return
 		}
-		JSON(w, 200, map[string]any{"enabled": enabled, "mode": "local-desktop", "durationLimitSeconds": int(recording.Lifetime.Seconds())})
+		JSON(w, 200, map[string]any{"enabled": enabled, "mode": service.Mode(), "durationLimitSeconds": int(recording.Lifetime.Seconds())})
 	}))
 	m.HandleFunc("POST "+base, s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		var input recording.Input
@@ -56,6 +56,14 @@ func (s *Server) recordingRoutes(m *http.ServeMux) {
 			return
 		}
 		JSON(w, 200, row)
+	}))
+	m.HandleFunc("POST "+base+"/{id}/pairing", s.authorized(func(w http.ResponseWriter, r *http.Request) {
+		value, err := service.Pairing(r.Context(), actor(r), r.PathValue("project"), r.PathValue("suite"), r.PathValue("id"))
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		JSON(w, 200, value)
 	}))
 	m.HandleFunc("POST "+base+"/{id}/actions/{action}", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		action := r.PathValue("action")
@@ -88,4 +96,5 @@ func (s *Server) recordingRoutes(m *http.ServeMux) {
 		}
 		JSON(w, 200, draft)
 	}))
+	s.companionRoutes(m, service)
 }

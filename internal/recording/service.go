@@ -11,15 +11,15 @@ import (
 
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/domain"
-	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
 
 type Service struct {
-	Store     *storage.Store
-	Auth      *authorization.Service
-	Driver    Driver
-	operation sync.Mutex
+	Store            *storage.Store
+	Auth             *authorization.Service
+	Driver           Driver
+	CompanionEnabled bool
+	operation        sync.Mutex
 }
 
 func (s *Service) check(ctx context.Context, user, project, suite string, manage bool) error {
@@ -42,7 +42,17 @@ func (s *Service) Available(ctx context.Context, user, project, suite string) (b
 	if err := s.check(ctx, user, project, suite, false); err != nil {
 		return false, err
 	}
-	return s.Driver != nil, nil
+	return s.Driver != nil || s.CompanionEnabled, nil
+}
+
+func (s *Service) Mode() string {
+	if s.Driver != nil {
+		return "local-desktop"
+	}
+	if s.CompanionEnabled {
+		return "companion"
+	}
+	return "disabled"
 }
 
 func (s *Service) List(ctx context.Context, user, project, suite, cursor string, limit int) (storage.Page, error) {
@@ -75,59 +85,14 @@ func (s *Service) Start(ctx context.Context, user, project, suite string, input 
 		return storage.Record{}, errors.New("recording requires permanent identifiers, an HTTP or HTTPS address without credentials, and a title of 1 through 120 characters")
 	}
 	if s.Driver == nil {
+		if s.CompanionEnabled {
+			return s.reserve(ctx, user, project, suite, input, "companion")
+		}
 		return storage.Record{}, errors.New("browser recording requires an enabled local desktop recorder")
 	}
 	s.operation.Lock()
 	defer s.operation.Unlock()
-	var row storage.Record
-	err := s.Auth.WithAssignmentTransaction(ctx, func(auth *authorization.Service) error {
-		bound := &Service{Store: auth.Directory.Store, Auth: auth}
-		if err := bound.check(ctx, user, project, suite, true); err != nil {
-			return err
-		}
-		if existing, err := bound.Store.Get(ctx, Bucket(), input.ID); err == nil {
-			value, err := storage.Decode[Session](existing)
-			if err != nil {
-				return err
-			}
-			if value.Actor != user || value.Project != project || value.Suite != suite {
-				return authorization.ErrForbidden
-			}
-			if value.Input != input {
-				return storage.ErrConflict
-			}
-			row = existing
-			return nil
-		} else if !errors.Is(err, storage.ErrNotFound) {
-			return err
-		}
-		suiteRow, err := bound.Store.Get(ctx, projects.Bucket("suites", project), suite)
-		if err != nil {
-			return err
-		}
-		definition, err := storage.Decode[projects.Suite](suiteRow)
-		if err != nil {
-			return err
-		}
-		if definition.Archived {
-			return errors.New("restore the suite before recording browser tests")
-		}
-		now := time.Now().UTC()
-		value := Session{Input: input, Project: project, Suite: suite, Actor: user, State: "starting", CreatedAt: now, DeadlineAt: now.Add(Lifetime)}
-		change, err := storage.Put(Bucket(), input.ID, project, 0, value)
-		if err != nil {
-			return err
-		}
-		audit, err := domain.Audit(user, project, "sources.recording.start", suite+"/"+input.ID, nil, map[string]string{"testId": input.TestID})
-		if err != nil {
-			return err
-		}
-		if err := bound.Store.Commit(ctx, change, audit); err != nil {
-			return err
-		}
-		row, err = bound.Store.Get(ctx, Bucket(), input.ID)
-		return err
-	})
+	row, err := s.reserve(ctx, user, project, suite, input, "")
 	if err != nil {
 		return row, err
 	}
@@ -172,7 +137,7 @@ func (s *Service) owned(ctx context.Context, user, project, suite, id string, ma
 
 func (s *Service) Read(ctx context.Context, user, project, suite, id string) (storage.Record, error) {
 	value, row, err := s.owned(ctx, user, project, suite, id, false)
-	if err != nil || value.State != "recording" {
+	if err != nil || value.Mode == "companion" || value.State != "recording" {
 		return row, err
 	}
 	if s.Driver == nil {
@@ -191,6 +156,9 @@ func (s *Service) Stop(ctx context.Context, user, project, suite, id string, can
 	value, row, err := s.owned(ctx, user, project, suite, id, true)
 	if err != nil || !active(value.State) {
 		return row, err
+	}
+	if value.Mode == "companion" {
+		return s.stopCompanion(ctx, user, project, suite, id, cancel)
 	}
 	if s.Driver == nil {
 		return storage.Record{}, errors.New("the local recording service is unavailable")

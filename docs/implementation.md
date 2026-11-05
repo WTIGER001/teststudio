@@ -6,6 +6,23 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
+## Hosted recorder pairing API — 2026-11-05
+
+The API can reserve an owner-private companion session without starting a server-side browser.
+Five-minute pairing tokens rotate before claim. One desktop instance binds with a separate device credential.
+Only hashes enter server storage. Pairing cannot grant ordinary application authority.
+Frozen owner, project, suite, input, and deadline binding survive restart.
+Current permissions and archive state apply to control and ordered source submissions.
+Stop and cancel intent remain durable. Terminal snapshots accept exact retries and reject later replacement.
+Maintenance closes expired, revoked, disconnected, or disabled sessions while retaining captured source.
+
+Targeted local domain and HTTP checks pass. Existing native recording and maintenance checks also pass.
+HTTP checks cover browser-header rejection, CSRF, session isolation, ordinary API denial, private draft conversion, and absence of test execution.
+The OpenAPI contract and generated TypeScript client now describe the companion protocol.
+The desktop executable, wizard connection flow, and complete browser verification remain unfinished.
+The option stays disabled by default. No cloud, cluster, image build, browser process, or demo restart occurs.
+This advances hosted authoring under 57. The count remains 50 verified of 57.
+
 ## Remote gateway transport milestone — 2026-11-05
 
 The trusted gateway now supports execution-scoped TLS forwarding through a supervisor-owned Unix socket bridge.

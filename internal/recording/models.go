@@ -24,6 +24,7 @@ type Input struct {
 
 type Session struct {
 	Input
+	Mode       string    `json:"mode,omitempty"`
 	Project    string    `json:"projectId"`
 	Suite      string    `json:"suiteId"`
 	Actor      string    `json:"actor"`
@@ -53,4 +54,6 @@ func ValidURL(value string) bool {
 
 func Bucket() string { return "browser-recordings" }
 
-func active(state string) bool { return state == "starting" || state == "recording" }
+func active(state string) bool {
+	return state == "pairing" || state == "starting" || state == "recording" || state == "stopping"
+}

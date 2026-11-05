@@ -26,9 +26,6 @@ func (s *Service) StartMaintenance(ctx context.Context) <-chan struct{} {
 }
 
 func (s *Service) maintain(ctx context.Context) {
-	if s.Driver == nil {
-		return
-	}
 	cursor := ""
 	for {
 		page, err := s.Store.List(ctx, Bucket(), "", cursor, 30)
@@ -38,6 +35,13 @@ func (s *Service) maintain(ctx context.Context) {
 		for _, row := range page.Items {
 			value, err := storage.Decode[Session](row)
 			if err != nil || !active(value.State) {
+				continue
+			}
+			if value.Mode == "companion" {
+				s.maintainCompanion(ctx, row, value)
+				continue
+			}
+			if s.Driver == nil {
 				continue
 			}
 			if time.Now().Before(value.DeadlineAt) && s.check(ctx, value.Actor, value.Project, value.Suite, true) == nil {

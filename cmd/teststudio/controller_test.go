@@ -28,7 +28,7 @@ import (
 )
 
 func TestControllerRejectsApplicationAndWorkerFlagsBeforeCreatingState(t *testing.T) {
-	for _, option := range []string{"local", "local-accounts", "recover-local-admin", "oidc-config", "bootstrap-subject", "worker-addr", "prepared-sources", "source-bundles", "go-images", "recording-cli", "artifact-addr", "ui", "scheduler", "execution-worker"} {
+	for _, option := range []string{"local", "local-accounts", "recover-local-admin", "oidc-config", "bootstrap-subject", "worker-addr", "prepared-sources", "source-bundles", "go-images", "recording-cli", "recording-companion", "artifact-addr", "ui", "scheduler", "execution-worker"} {
 		t.Run(option, func(t *testing.T) {
 			originalFlags, originalArgs := flag.CommandLine, os.Args
 			t.Cleanup(func() { flag.CommandLine, os.Args = originalFlags, originalArgs })
@@ -36,7 +36,7 @@ func TestControllerRejectsApplicationAndWorkerFlagsBeforeCreatingState(t *testin
 			flag.CommandLine.SetOutput(io.Discard)
 			database := filepath.Join(t.TempDir(), "must-not-exist.db")
 			value := "private-canary"
-			if option == "local" || option == "local-accounts" || option == "recover-local-admin" || option == "prepared-sources" || option == "source-bundles" || option == "scheduler" || option == "execution-worker" {
+			if option == "recording-companion" || option == "local" || option == "local-accounts" || option == "recover-local-admin" || option == "prepared-sources" || option == "source-bundles" || option == "scheduler" || option == "execution-worker" {
 				value = "true"
 			}
 			os.Args = []string{"teststudio", "--serve-role=controller", "--addr=127.0.0.1:0", "--database=" + database, "--" + option + "=" + value}

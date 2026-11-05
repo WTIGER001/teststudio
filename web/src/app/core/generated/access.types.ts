@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.34.0"
+export const accessContractVersion = "0.35.0"
 
 export type APIAuthentication = { "binding": string; "header"?: string; "scheme": "bearer" | "basic" | "header" }
 export type APIRequestPolicy = { "authentication"?: APIAuthentication; "maxRequests": number; "maxResponseBytes": number; "redactFields"?: (string)[]; "rules": (APIRequestRule)[] }
@@ -8,10 +8,11 @@ export type AssignmentBindings = { "team"?: string }
 export type AssignmentDefinition = { "principalId": string; "principalKind": "user" | "group"; "reason": string; "roleId": string }
 export type AssignmentPage = { "cursor"?: string; "items": (AssignmentRecord)[]; "partial": boolean }
 export type AssignmentRecord = { "data": Assignment; "id": string; "projectId"?: string; "revision": number; "updatedAt"?: string }
-export type BrowserRecording = { "actor": string; "code"?: string; "createdAt": string; "deadlineAt": string; "error"?: string; "id": string; "projectId": string; "state": string; "suiteId": string; "testId": string; "title": string; "url": string }
+export type BrowserRecording = { "actor": string; "code"?: string; "createdAt": string; "deadlineAt": string; "error"?: string; "id": string; "mode"?: "companion"; "projectId": string; "state": string; "suiteId": string; "testId": string; "title": string; "url": string }
 export type BrowserRecordingInput = { "id": string; "testId": string; "title": string; "url": string }
 export type BrowserRecordingOptions = { "durationLimitSeconds": number; "enabled": boolean; "mode": string }
 export type BrowserRecordingPage = { "cursor"?: string; "items": (BrowserRecordingRecord)[] }
+export type BrowserRecordingPairing = { "expiresAt": string; "id": string; "token": string }
 export type BrowserRecordingRecord = { "data": BrowserRecording; "id": string; "revision": number; "updatedAt": string }
 export type CLIConfirmation = { "approve": boolean; "clientName": string; "code": string }
 export type CLIExchange = { "session"?: CLIGrant; "state": string }
@@ -102,6 +103,12 @@ export type PublicationReview = { "activeReleaseId"?: string; "afterSettings": P
 export type PublicationSchedule = { "enabled": boolean; "followsActive": boolean; "id": string; "name": string; "releaseId"?: string }
 export type PublicationSettings = { "artifact": SourceCatalogArtifact; "capture": SourceCapturePolicy; "timing": SourceTimingPolicy }
 export type Reason = { "reason": string }
+export type RecordingCompanionControl = { "action"?: "stop" | "cancel"; "deadlineAt": string; "sequence": number; "state": string }
+export type RecordingCompanionControlRequest = { "instance": string }
+export type RecordingCompanionPacket = { "control": RecordingCompanionControl; "input": BrowserRecordingInput; "projectId": string; "suiteId": string }
+export type RecordingCompanionPairRequest = { "deviceToken": string; "instance": string; "pairingToken": string }
+export type RecordingCompanionSnapshot = { "code"?: string; "failure"?: "recorder" | "capture" | "transport"; "sequence": number; "state": "recording" | "ready" | "failed" }
+export type RecordingCompanionSnapshotRequest = { "instance": string; "snapshot": RecordingCompanionSnapshot }
 export type ReleaseRegistry = { "activeReleaseId"?: string; "archived": boolean; "canActivate": boolean; "items": (SourceCatalogRelease)[]; "suiteId": string; "suiteName": string; "suiteRevision": number }
 export type RetainedTest = { "current": boolean; "lifecycle": string; "projectId": string; "revision": number; "suiteArchived": boolean; "suiteId": string; "suiteName": string; "test": SourceCatalogTest; "updatedAt": string }
 export type ReviewedPublicationInput = { "activate": boolean; "reviewId": string }
@@ -239,6 +246,7 @@ export interface AccessRequests {
   readBrowserRecordingOptions: { "project": string; "suite": string }
   readBrowserRecording: { "project": string; "suite": string; "id": string }
   changeBrowserRecordingState: { "project": string; "suite": string; "id": string; "action": string }
+  createBrowserRecordingPairing: { "project": string; "suite": string; "id": string }
   readBrowserRecordingSource: { "project": string; "suite": string; "id": string }
   listCatalogDrafts: { "project": string; "suite": string }
   createCatalogDraft: { "project": string; "suite": string; body: SourceCatalogArtifact }
@@ -293,6 +301,9 @@ export interface AccessRequests {
   listCatalogTestRevisions: { "project": string; "suite": string; "test": string }
   readTestRunHistory: { "project": string; "suite": string; "test": string; query?: { "application"?: string; "cursor"?: string; "limit"?: number } }
   listProjectCatalog: { "project": string; query?: { "query"?: string; "suite"?: string; "application"?: string; "category"?: string; "tag"?: string; "owner"?: string; "type"?: string; "runner"?: string; "state"?: string; "safety"?: string; "source"?: string; "sort"?: string; "cursor"?: string; "descendants"?: boolean; "uncategorized"?: boolean; "limit"?: number } }
+  readRecordingCompanionControl: { "id": string; body: RecordingCompanionControlRequest }
+  pairRecordingCompanion: { "id": string; body: RecordingCompanionPairRequest }
+  submitRecordingCompanionSnapshot: { "id": string; body: RecordingCompanionSnapshotRequest }
   listInstallationAssignments: { query?: { "limit"?: number; "cursor"?: string } }
   createInstallationAssignment: { body: AssignmentDefinition }
   revokeInstallationAssignment: { "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
@@ -389,6 +400,7 @@ export interface AccessResponses {
   readBrowserRecordingOptions: BrowserRecordingOptions
   readBrowserRecording: BrowserRecordingRecord
   changeBrowserRecordingState: BrowserRecordingRecord
+  createBrowserRecordingPairing: BrowserRecordingPairing
   readBrowserRecordingSource: PlaywrightDraft
   listCatalogDrafts: CatalogDraftPage
   createCatalogDraft: CatalogDraftRecord
@@ -443,6 +455,9 @@ export interface AccessResponses {
   listCatalogTestRevisions: CatalogRevisionPage
   readTestRunHistory: TestHistoryPage
   listProjectCatalog: CatalogListPage
+  readRecordingCompanionControl: RecordingCompanionControl
+  pairRecordingCompanion: RecordingCompanionPacket
+  submitRecordingCompanionSnapshot: RecordingCompanionControl
   listInstallationAssignments: AssignmentPage
   createInstallationAssignment: AssignmentRecord
   revokeInstallationAssignment: Revoked
@@ -539,6 +554,7 @@ export const accessOperations = {
   readBrowserRecordingOptions: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/options" },
   readBrowserRecording: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}" },
   changeBrowserRecordingState: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/actions/{action}" },
+  createBrowserRecordingPairing: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/pairing" },
   readBrowserRecordingSource: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/source" },
   listCatalogDrafts: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/catalog-drafts" },
   createCatalogDraft: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/catalog-drafts" },
@@ -593,6 +609,9 @@ export const accessOperations = {
   listCatalogTestRevisions: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/revisions" },
   readTestRunHistory: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/run-history" },
   listProjectCatalog: { method: "GET", path: "/api/v1/projects/{project}/tests" },
+  readRecordingCompanionControl: { method: "POST", path: "/api/v1/recording-companion/sessions/{id}/control" },
+  pairRecordingCompanion: { method: "POST", path: "/api/v1/recording-companion/sessions/{id}/pair" },
+  submitRecordingCompanionSnapshot: { method: "POST", path: "/api/v1/recording-companion/sessions/{id}/snapshots" },
   listInstallationAssignments: { method: "GET", path: "/api/v1/role-assignments" },
   createInstallationAssignment: { method: "POST", path: "/api/v1/role-assignments" },
   revokeInstallationAssignment: { method: "DELETE", path: "/api/v1/role-assignments/{kind}/{principal}/{role}" },
