@@ -87,6 +87,8 @@ The private listener uses --worker-addr=0.0.0.0:8042 behind the private TLS ingr
 
 Kubernetes execution requires execution-location=kubernetes and PostgreSQL.
 It cannot combine local administrator mode, local coded image lists, or local gateway images with this profile.
+Run creation checks that the configured coded driver matches the selected runner and execution location.
+A matching Kubernetes driver is admitted. A local driver cannot execute through a hosted location.
 The --prepared-sources flag selects hosted discovery when Kubernetes settings are present. The --source-bundles flag enables source staging.
 The artifact-only service role cannot enable hosted execution or its private listener.
 The normal API and artifact origins remain separate from the worker origin.

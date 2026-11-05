@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/url"
 	"slices"
+	"strings"
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/authorization"
@@ -329,15 +330,15 @@ func (s *Service) prepare(ctx context.Context, user, project string, req Request
 			return Run{}, nil, errors.New("environment-backed browser execution is disabled; the installation needs its trusted browser gateway profile")
 		}
 		if driver := s.codedDriver(test.Runner, release.Draft.Artifact); driver != nil {
-			if req.Location != "local" {
-				return Run{}, nil, errors.New("the configured coded profile runs only at the local execution location")
+			if !strings.HasPrefix(driver.Profile(), test.Runner+"-"+req.Location+"-") {
+				return Run{}, nil, errors.New("the configured coded profile is unavailable at this execution location")
 			}
 			if release.Draft.Artifact.Browser != nil {
 				if _, err := browserTarget(environment, release.Draft.Artifact, test); err != nil {
 					return Run{}, nil, err
 				}
 			} else if environment != nil || len(test.RequiredBindings) > 0 {
-				return Run{}, nil, errors.New("the isolated local coded profile requires a targetless suite without external bindings")
+				return Run{}, nil, errors.New("the isolated coded profile requires a targetless suite without external bindings")
 			}
 			if err := driver.Admit(ctx, test, release.Draft.Artifact); err != nil {
 				return Run{}, nil, err
