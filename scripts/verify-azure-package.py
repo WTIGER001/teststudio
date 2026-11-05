@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 
@@ -10,19 +11,24 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def main():
     parser = argparse.ArgumentParser(description='Compile and check Azure packaging locally without Azure CLI, account access, or deployment.')
-    parser.add_argument('--bicep', type=Path, required=True)
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument('--bicep', type=Path)
+    source.add_argument('--compiled-template', type=Path)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
     template_path = output / 'service.json'
-    environment = {key: value for key, value in os.environ.items() if not key.startswith(('AZURE_', 'ARM_', 'AWS_'))}
-    result = subprocess.run([str(args.bicep.resolve()), 'build', str(ROOT / 'deploy/azure/main.bicep'), '--no-restore', '--outfile', str(template_path)], capture_output=True, text=True, env=environment, timeout=60)
-    (output / 'compile.log').write_text(result.stdout + result.stderr)
-    assert result.returncode == 0 and 'Warning' not in result.stderr, 'Bicep compile or schema validation failed; inspect compile.log'
+    if args.bicep:
+        environment = {key: value for key, value in os.environ.items() if not key.startswith(('AZURE_', 'ARM_', 'AWS_'))}
+        result = subprocess.run([str(args.bicep.resolve()), 'build', str(ROOT / 'deploy/azure/main.bicep'), '--no-restore', '--outfile', str(template_path)], capture_output=True, text=True, env=environment, timeout=60)
+        (output / 'compile.log').write_text(result.stdout + result.stderr)
+        assert result.returncode == 0 and 'Warning' not in result.stderr, 'Bicep compile or schema validation failed; inspect compile.log'
+    elif args.compiled_template.resolve() != template_path:
+        template_path.write_text(args.compiled_template.read_text())
     template = json.loads(template_path.read_text())
     resources = template['resources']
-    checks = ['Bicep builds local modules with provider type validation and no warnings or registry restoration']
+    checks = ['Bicep-generated local modules pass packaging checks without registry restoration or cloud calls']
     deployments = [resource for resource in resources if resource['type'] == 'Microsoft.Resources/deployments']
     apps = {deployment['properties']['parameters']['role']['value']: deployment for deployment in deployments if 'role' in deployment['properties']['parameters']}
     assert set(apps) == {'api', 'artifacts'}
@@ -42,7 +48,14 @@ def main():
         assert configuration['ingress']['targetPort'] == "[variables('port')]"
         assert nested['variables']['port'] == "[if(variables('api'), 8040, 8041)]"
         assert configuration['activeRevisionsMode'] == 'Single'
-        assert configuration['identitySettings'] == [{'identity': "[parameters('pullIdentityId')]", 'lifecycle': 'None'}, {'identity': "[parameters('startupIdentityId')]", 'lifecycle': 'None'}, {'identity': "[parameters('runtimeIdentityId')]", 'lifecycle': 'Main'}]
+        assert configuration['identitySettings'] == "[variables('identitySettings')]"
+        identity_settings = nested['variables']['identitySettings']
+        assert re.findall(r"createObject\('identity', parameters\('([^']+)'\), 'lifecycle', '([^']+)'\)", identity_settings) == [('pullIdentityId', 'None'), ('startupIdentityId', 'None'), ('runtimeIdentityId', 'Main'), ('observerIdentityId', 'Main')]
+        assert "if(variables('observerEnabled')," in identity_settings
+        assert nested['variables']['observerEnabled'] == "[and(variables('api'), not(empty(parameters('observerIdentityId'))))]"
+        assert app['identity'] == {'type': 'UserAssigned', 'userAssignedIdentities': "[variables('identities')]"}
+        assert "if(variables('observerEnabled')," in nested['variables']['identities']
+        assert nested['parameters']['observerIdentityId']['defaultValue'] == ''
         container = app['properties']['template']['containers'][0]
         assert 'command' not in container and container['args'] == "[variables('args')]"
         settings = json.dumps(nested['variables'])
@@ -60,7 +73,27 @@ def main():
     checks.append('Each HTTPS ingress targets its own listener with independent readiness, liveness, and always-on replica settings')
     checks.append('Platform-only registry and startup identities are withheld from runtime while Blob access selects the exact runtime client')
     identities = [resource for resource in resources if resource['type'] == 'Microsoft.ManagedIdentity/userAssignedIdentities']
-    assert len(identities) == 5
+    assert len(identities) == 6
+    assert len([identity for identity in identities if 'condition' not in identity]) == 5
+    observer = next(identity for identity in identities if 'condition' in identity)
+    assert observer['condition'] == "[parameters('observerIdentityEnabled')]"
+    assert template['parameters']['observerIdentityEnabled']['defaultValue'] is False
+    assert 'observerIdentityEnabled' in api_parameters['observerIdentityId']
+    assert 'observerIdentityId' not in artifact_parameters
+    observer_access = next(deployment for deployment in deployments if 'installationKey' in deployment['properties']['parameters'])
+    assert observer_access['condition'] == observer['condition']
+    assert observer_access['subscriptionId'] == '[subscription().subscriptionId]'
+    observer_resources = observer_access['properties']['template']['resources']
+    assert len(observer_resources) == 2
+    observer_role = next(resource for resource in observer_resources if resource['type'] == 'Microsoft.Authorization/roleDefinitions')
+    observer_grant = next(resource for resource in observer_resources if resource['type'] == 'Microsoft.Authorization/roleAssignments')
+    assert observer_role['properties']['type'] == 'CustomRole'
+    assert observer_role['properties']['assignableScopes'] == ['[subscription().id]']
+    assert observer_role['properties']['permissions'] == [{'actions': ['*/read', 'Microsoft.Network/virtualNetworks/listDnsResolverPolicies/action'], 'notActions': [], 'dataActions': [], 'notDataActions': []}]
+    assert set(observer_grant['properties']) == {'principalId', 'principalType', 'roleDefinitionId'}
+    assert observer_grant['properties']['principalType'] == 'ServicePrincipal'
+    assert 'observerBinding' in template['outputs'] and 'observerIdentityEnabled' in template['outputs']['observerBinding']['value']
+    checks.append('Optional observer identity and fixed subscription read role attach only to the API main container; disabled remains the default')
     assert api_parameters['runtimeIdentityId'] != artifact_parameters['runtimeIdentityId']
     assert api_parameters['startupIdentityId'] != artifact_parameters['startupIdentityId']
     storage = next(resource for resource in resources if resource['type'] == 'Microsoft.Storage/storageAccounts')
@@ -96,7 +129,7 @@ def main():
     assert 'image' in api_parameters and api_parameters['image'] == artifact_parameters['image']
     assert 'imagePull' in api_parameters['pullIdentityId']['value'] or 'image-pull' in api_parameters['pullIdentityId']['value']
     checks.append('Both roles use the same digest-addressed service image and a dedicated registry pull identity')
-    summary = {'passed': True, 'scope': 'local compilation and packaging contracts only; no Azure service or deployment operation', 'compiler': template['metadata']['_generator'], 'topLevelResources': len(resources), 'checks': checks}
+    summary = {'passed': True, 'scope': 'local compilation and packaging contracts only; no Azure service or deployment operation', 'compiler': template['metadata']['_generator'], 'reusedCompiledTemplate': bool(args.compiled_template), 'topLevelResources': len(resources), 'checks': checks}
     (output / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
     print(json.dumps(summary, indent=2))
 

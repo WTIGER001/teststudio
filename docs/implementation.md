@@ -122,7 +122,46 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: reported subscription read-deny gate
+## Current delivery: observer host attachment and optional core identity packaging
+
+Acceptances **51** and supporting packaging under **57** advance. The total remains **48 verified of 57**, with **9 open**.
+
+ObserverHostGuard now checks the selected controller app's reported observer attachment, core identities, explicit lifecycle settings, image, and current revision.
+Its host settings bind the complete preceding identity configuration, selected app, pinned service image, and separate core pull, startup, and runtime identities.
+Worker, relay, backend, and observer identity substitution is rejected before bootstrap or credential selection.
+The observed host must use the controller environment, UserAssigned identity type, exactly four distinct identity records, and explicit None or Main lifecycle values.
+The observer client and principal must match the preceding verified identity. System identity, sidecars, init containers, image changes, and placement conflicts block observation.
+Single revision mode and the shared revision verifier require a healthy current revision with matching template, replicas, and traffic.
+
+BindHostObserver builds all 22 SDK readers with the same verified observer credential. The existing diagnostic binding retains its 21-reader scope.
+Two selected concurrent GETs follow one existing parent inspection. No bootstrap or successful resource observation is reused during later checks.
+The composed check has a 135-second context and at most 2216 requests, with two normal additional GETs.
+The host reader permits only app and revision paths, with existing paging, response, deadline, retry, and provider-registration controls.
+Close releases all 22 readers. This stage implements no Network and enables no native Azure coded job.
+
+The core Bicep package adds an optional observer identity, fixed subscription custom role, assignment, and metadata output.
+The option defaults to false. Only the API main container can receive this identity, including when the shared module is called directly.
+The observer role grants management reads and the existing DNS-association observation without data or management-write authority.
+Core startup, image pull, Blob runtime, and artifact identities retain their roles and lifecycle controls.
+Enabling the option prepares identity resources. It wires no native observer startup or coded job dispatch.
+The packaging checker now supports a current compiled-template input to avoid repeated compiler work for assertion-only changes.
+
+Three new focused race checks and one selected existing observer-session regression pass in 2.456 seconds.
+An initial fixture literal is corrected before the passing command.
+The pinned Bicep compiler reports no warnings. Local package contracts pass first against the current compiled artifact.
+Review then gates the optional attachment on the API role inside the shared module. That semantic change receives a final compile and package check.
+No unchanged Go suite repeats for that packaging-only change. No dependency version changes.
+Fixtures use fake credentials and in-memory SDK transports. They open no network connection or service listener and request no real token.
+No cloud operation, UI build, browser, image build, container, registry push, deployment, or demo restart runs.
+External requests read only public Microsoft documentation.
+Evidence is output/azure-observer-host/summary.json and its final-package compile, template, and summary artifacts.
+See [observer host attachment](azure-observer-host.md).
+
+Exclusive identity use, complete trusted API configuration, actual host token issuance, effective authorization, and native command wiring remain unproven.
+Keep resource-management authority, protection enforcement, provenance, existing cross-scope links, environment attachments, preparation networking, and execution isolation in full admission.
+All nine broad acceptance items remain open under their original requirements.
+
+## Previous delivery: reported subscription read-deny gate
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 

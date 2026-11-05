@@ -10,8 +10,10 @@ import (
 )
 
 type Observer struct {
-	mu      sync.RWMutex
-	guard   *ReadDenyGuard
+	mu    sync.RWMutex
+	guard interface {
+		Check(context.Context, Config) error
+	}
 	readers []observerReader
 }
 
@@ -26,6 +28,18 @@ type observerBuilder struct {
 }
 
 func (g *ReadIdentityGuard) BindObserver(ctx context.Context, c Config, transport policy.Transporter) (*Observer, error) {
+	return g.bindObserver(ctx, c, nil, transport)
+}
+
+func (g *ReadIdentityGuard) BindHostObserver(ctx context.Context, c Config, s ObserverHostSettings, transport policy.Transporter) (*Observer, error) {
+	s, err := s.canonical(c)
+	if err != nil || fingerprint(s.Identity) != fingerprint(g.settings) {
+		return nil, hostedexecution.ErrConfiguration
+	}
+	return g.bindObserver(ctx, c, &s, transport)
+}
+
+func (g *ReadIdentityGuard) bindObserver(ctx context.Context, c Config, host *ObserverHostSettings, transport policy.Transporter) (*Observer, error) {
 	credential, err := g.Credential(ctx, c)
 	if err != nil {
 		return nil, err
@@ -33,10 +47,10 @@ func (g *ReadIdentityGuard) BindObserver(ctx context.Context, c Config, transpor
 	if ctx.Err() != nil {
 		return nil, hostedexecution.ErrUnavailable
 	}
-	return newSDKObserver(c, g.settings, credential, transport)
+	return newSDKObserver(c, g.settings, credential, host, transport)
 }
 
-func newSDKObserver(c Config, s ReadIdentitySettings, credential azcore.TokenCredential, transport policy.Transporter) (*Observer, error) {
+func newSDKObserver(c Config, s ReadIdentitySettings, credential azcore.TokenCredential, host *ObserverHostSettings, transport policy.Transporter) (*Observer, error) {
 	s, err := s.canonical(c)
 	if err != nil || credential == nil {
 		return nil, hostedexecution.ErrConfiguration
@@ -49,11 +63,21 @@ func newSDKObserver(c Config, s ReadIdentitySettings, credential azcore.TokenCre
 	}, func(reader *SDKReadDenyReader) (*ReadDenyGuard, error) {
 		return NewReadDenyGuard(c, s, identity, reader)
 	})
+	var check interface {
+		Check(context.Context, Config) error
+	} = guard
+	if host != nil {
+		check = observerStage(b, func() (*SDKObserverHostReader, error) {
+			return NewSDKObserverHostReader(c, *host, credential, transport)
+		}, func(reader *SDKObserverHostReader) (*ObserverHostGuard, error) {
+			return NewObserverHostGuard(c, *host, guard, reader)
+		})
+	}
 	if b.err != nil {
 		closeObserverReaders(b.readers)
 		return nil, controlError(b.err)
 	}
-	return &Observer{guard: guard, readers: b.readers}, nil
+	return &Observer{guard: check, readers: b.readers}, nil
 }
 
 func (o *Observer) Check(ctx context.Context, c Config) error {

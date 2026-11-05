@@ -35,6 +35,8 @@ Bound observer sessions now use that verified client credential throughout the r
 Effective access, host attachment, and native command wiring remain unverified.
 The [reported read-deny scan](azure-read-deny.md) now checks subscription conflicts before the bound resource chain and requires all five selected protection assignments.
 Local SDK fixtures verify this gate. Hosted visibility and actual enforcement remain unproven.
+The [observer host stage](azure-observer-host.md) now checks selected controller placement, identity lifecycles, image, and healthy current revision.
+Optional core packaging declares its separate API-only identity and fixed subscription read grant. Native startup and execution admission remain incomplete.
 The complete adapter must also prove read coverage, attachment authority, effective zone visibility, full backend authority, exchange networking, and execution placement.
 Azure coded execution remains disabled in native commands and infrastructure packaging.
 See [durable Azure execution](azure-worker-lifecycle.md), [job contracts](azure-worker-contract.md), and [independent deadlines](azure-worker-deadlines.md).

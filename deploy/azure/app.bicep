@@ -7,6 +7,7 @@ param pullIdentityId string
 param startupIdentityId string
 param runtimeIdentityId string
 param runtimeClientId string
+param observerIdentityId string = ''
 param vaultUri string
 param databaseSecretName string
 param storageServiceUrl string
@@ -26,6 +27,21 @@ param replicas int = 1
 
 var api = role == 'api'
 var port = api ? 8040 : 8041
+var observerEnabled = api && !empty(observerIdentityId)
+var identities = union({
+  '${pullIdentityId}': {}
+  '${startupIdentityId}': {}
+  '${runtimeIdentityId}': {}
+}, observerEnabled ? {
+  '${observerIdentityId}': {}
+} : {})
+var identitySettings = concat([
+  { identity: pullIdentityId, lifecycle: 'None' }
+  { identity: startupIdentityId, lifecycle: 'None' }
+  { identity: runtimeIdentityId, lifecycle: 'Main' }
+], observerEnabled ? [
+  { identity: observerIdentityId, lifecycle: 'Main' }
+] : [])
 var secrets = concat([
   {
     name: 'database'
@@ -89,21 +105,13 @@ resource app 'Microsoft.App/containerApps@2025-07-01' = {
   location: location
   identity: {
     type: 'UserAssigned'
-    userAssignedIdentities: {
-      '${pullIdentityId}': {}
-      '${startupIdentityId}': {}
-      '${runtimeIdentityId}': {}
-    }
+    userAssignedIdentities: identities
   }
   properties: {
     managedEnvironmentId: environmentId
     configuration: {
       activeRevisionsMode: 'Single'
-      identitySettings: [
-        { identity: pullIdentityId, lifecycle: 'None' }
-        { identity: startupIdentityId, lifecycle: 'None' }
-        { identity: runtimeIdentityId, lifecycle: 'Main' }
-      ]
+      identitySettings: identitySettings
       registries: [
         { server: registryServer, identity: pullIdentityId }
       ]

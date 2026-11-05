@@ -27,6 +27,7 @@ type observerFixture struct {
 	bootstrapReaders int
 	denyPath         string
 	denies           []a.DenyAssignment
+	workloads        *workloadInventoryFixture
 }
 
 type observerCredential struct {
@@ -66,6 +67,7 @@ func observerTest(t *testing.T) (Config, ReadIdentitySettings, *observerFixture,
 	backendEndpoint := relayTopology.endpoint
 	backend := backendEndpoint.backend
 	workloads := backend.inventory
+	f.workloads = workloads.reader.(*SDKWorkloadInventoryReader).http.base.(*workloadInventoryFixture)
 	exchange := workloads.exchange
 	registry := exchange.registry
 	endpoints := registry.endpoints

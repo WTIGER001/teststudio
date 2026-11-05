@@ -11,6 +11,7 @@ It observes the selected grant. It does not prove effective authorization, compl
 The initial guard requires an explicit bootstrap credential. A bound observer session then uses the verified observer credential throughout its SDK chain.
 Binding does not prove that the bootstrap credential itself uses the observer identity.
 The [reported read-deny scan](azure-read-deny.md) now gates each bound inspection before its existing resource chain.
+The [host-bound observer](azure-observer-host.md) additionally checks the selected controller app's reported identity exposure and current revision.
 Identity attachment, token availability, deny coverage, protection-management authority, and cross-scope visibility remain installation requirements.
 Acceptance 51 advances. The total remains 48 verified of 57, with nine open.
 
@@ -107,6 +108,8 @@ return observer.Check(ctx, config)
 The optional transport parameter supports trusted installation integration and local protocol fixtures.
 Production uses nil for the existing restricted HTTPS transport. Fixture tests supply an in-memory transporter and a private credential factory spy.
 The public binding API accepts no credential override. Token requests occur only through later SDK calls.
+BindHostObserver extends the session to 22 readers and checks selected host attachment after the existing chain succeeds.
+Its bounds and explicit host configuration appear in the [host attachment guide](azure-observer-host.md).
 Observer implements no Network. Native commands still require complete admission and installation wiring before coded jobs can run.
 Passing these requests does not establish complete effective authorization or visibility across subscriptions and tenants.
 

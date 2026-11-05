@@ -127,6 +127,13 @@ The package creates five user-assigned managed identities:
 | Artifact startup | Key Vault Secrets User on the database secret only. Unavailable through the runtime identity endpoint. |
 | Image pull | AcrPull on the selected registry. Unavailable through the runtime identity endpoint. |
 
+ObserverIdentityEnabled optionally adds a sixth identity and a fixed subscription read role. It defaults to false.
+Only the API main container receives that observer identity. The artifact role cannot expose it through the shared module parameter.
+The observerBinding output supplies its identity, grant, and host references without secrets or tokens.
+The optional subscription module requires role-definition and role-assignment authority at that scope.
+This option prepares identity resources. It enables neither native observer startup nor coded execution.
+See [observer host attachment](azure-observer-host.md) for settings, reported lifecycle checks, request bounds, and remaining admission requirements.
+
 Blob configuration selects each app's exact runtime client identifier.
 The platform resolves Key Vault and registry references with their separate identities.
 Role assignments use explicit container, named-secret, or registry scopes.
@@ -178,6 +185,8 @@ python3 scripts/verify-azure-package.py --bicep .data/azure-tools/bicep --output
 The checker compiles local modules with provider type validation and no registry restore.
 It checks role separation, origins, ingress, probes, identities, permissions, private storage, and immutable image references.
 It makes no Azure account or service call. The compiled template and summary stay in the output directory.
+Use --compiled-template PATH instead of --bicep PATH to check an already-current compiled template without compiling it again.
+Recompile when the Bicep source changes. Contract checks alone do not establish that a saved template matches edited source.
 
 The current AMD64 image passes separate local role and configuration checks:
 

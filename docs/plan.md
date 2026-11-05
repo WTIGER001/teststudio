@@ -385,7 +385,17 @@ Three new focused race checks and two changed session checks pass in 2.716 secon
 See [reported subscription read-deny inspection](azure-read-deny.md). Acceptance 51 advances; the count stays 48 of 57.
 Only public documentation requests leave the environment. No real token, cloud operation, UI build, browser, container, image build, registry push, deployment, or demo restart runs.
 
-Next implement observer host-attachment bindings and verify their changed behavior with targeted local fixtures.
+The observer host stage now binds the selected controller app, four identities, explicit lifecycles, service image, and healthy current revision.
+BindHostObserver builds a 22-reader session using the same verified observer credential and no repeated bootstrap reads.
+Two concurrent host reads follow the existing chain. The composed context is 135 seconds, with at most 2216 requests.
+The core package optionally declares the observer identity and its fixed subscription read role and assignment, with API-only Main exposure.
+The option defaults to false and enables no native observer startup or coded job. Its outputs contain references rather than secrets.
+Three new focused race checks and one selected existing session regression pass in 2.456 seconds.
+The package compiles locally without warnings. Contract checks reuse the current compiled template until a real API-role hardening change requires a final compile.
+No unchanged Go suite repeats for that packaging change. No UI build, browser, image build, container, cloud operation, registry push, deployment, or demo restart runs.
+See [observer host attachment](azure-observer-host.md). Acceptances 51 and supporting packaging under 57 advance; the count remains 48 of 57.
+
+Next implement exclusive observer identity placement and inspect the remaining trusted host configuration and management authority.
 Keep hosted read coverage, complete effective authorization, and cross-scope visibility separate until authoritative deployment evidence exists.
 Wire the bound session into native commands only after complete admission exists.
 Verify actual resource-scoped assignment provisioning and enforcement, and authority to change the owning protection arrangement.

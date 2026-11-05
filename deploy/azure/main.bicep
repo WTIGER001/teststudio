@@ -29,6 +29,7 @@ param bootstrapIssuer string
 @maxLength(512)
 param bootstrapSubject string
 param localAccounts bool = false
+param observerIdentityEnabled bool = false
 @minValue(1)
 @maxValue(10)
 param apiReplicas int = 1
@@ -79,6 +80,18 @@ resource artifactStartup 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-
 resource imagePull 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: '${installationName}-image-pull'
   location: location
+}
+resource observer 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = if (observerIdentityEnabled) {
+  name: '${installationName}-observer'
+  location: location
+}
+module observerAccess './observer-access.bicep' = if (observerIdentityEnabled) {
+  name: '${installationName}-observer-access'
+  scope: subscription()
+  params: {
+    installationKey: '${resourceGroup().id}/${installationName}'
+    principalId: observer!.properties.principalId
+  }
 }
 
 resource storage 'Microsoft.Storage/storageAccounts@2023-05-01' = {
@@ -158,7 +171,7 @@ module registryAccess './registry-access.bicep' = {
 
 module api './app.bicep' = {
   name: '${installationName}-api'
-  dependsOn: [secretAccess, registryAccess, apiBlobAccess]
+  dependsOn: [secretAccess, registryAccess, apiBlobAccess, observerAccess]
   params: {
     name: apiName
     role: 'api'
@@ -170,6 +183,7 @@ module api './app.bicep' = {
     startupIdentityId: apiStartup.id
     runtimeIdentityId: apiRuntime.id
     runtimeClientId: apiRuntime.properties.clientId
+    observerIdentityId: observerIdentityEnabled ? observer!.id : ''
     vaultUri: vault.properties.vaultUri
     databaseSecretName: databaseSecretName
     oidcConfigurationSecretName: oidcConfigurationSecretName
@@ -213,3 +227,17 @@ output artifactUrl string = artifactOrigin
 output storageAccountName string = storage.name
 output apiAppName string = api.outputs.appName
 output artifactAppName string = artifacts.outputs.appName
+output observerBinding object = observerIdentityEnabled ? {
+  identity: observer!.id
+  clientId: observer!.properties.clientId
+  principalId: observer!.properties.principalId
+  tenantId: observer!.properties.tenantId
+  role: observerAccess!.outputs.roleId
+  assignment: observerAccess!.outputs.assignmentId
+  application: resourceId('Microsoft.App/containerApps', apiName)
+  environment: environment.id
+  image: image
+  pullIdentity: imagePull.id
+  startupIdentity: apiStartup.id
+  runtimeIdentity: apiRuntime.id
+} : {}
