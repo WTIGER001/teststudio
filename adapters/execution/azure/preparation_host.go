@@ -29,7 +29,7 @@ type PreparationHostGuard struct {
 }
 
 func NewPreparationHostGuard(s PreparationSettings, writer *PreparationWriterGuard, reader PreparationHostReader) (*PreparationHostGuard, error) {
-	if s.ValidateNative() != nil || writer == nil || reader == nil || fingerprint(s.Worker) != fingerprint(writer.worker) {
+	if s.validateHost() != nil || writer == nil || reader == nil || fingerprint(s.Worker) != fingerprint(writer.worker) {
 		return nil, hostedexecution.ErrConfiguration
 	}
 	var err error

@@ -247,4 +247,5 @@ It supports existing ECS and Kubernetes native registry settings and the separat
 The [Azure preparation publisher](azure-preparation-writer.md) now loads explicit library settings and composes selected network, identity, and push-grant checks.
 It opens a separate managed-identity ACR client without executing source.
 Native startup now checks selected app, environment, storage, and reader metadata against the fixed assembly profile before claiming jobs.
+The [preparation network package](azure-preparation-network.md) adds source egress, private journal resources, and required native network and mount checks.
 Complete effective grants, actual placement enforcement, and isolated discovery remain unfinished.

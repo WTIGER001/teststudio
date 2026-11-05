@@ -30,9 +30,9 @@ Do not supply both forms, another provider, local runtime flags, or a different 
 The command rejects incompatible modes and invalid settings syntax before database creation or directory creation.
 Hosted operation requires PostgreSQL. It never falls back to local image preparation or another provider.
 
-The settings document contains the existing worker Config, complete writer settings, readerClientId, and host.
+The settings document contains worker Config, complete writer settings, readerClientId, host, and the [network binding](azure-preparation-network.md).
 The reader client identifier must be explicit, nonzero, and different from the writer client identifier.
-Library callers without host observation can supply their own observation credential and omit readerClientId and host. The native command requires both.
+Library callers can use writer-only or host-only observation with their own credential. Native startup requires readerClientId, host, and network.
 The native reader uses ManagedIdentityCredential with that exact client identifier. It uses no default credential or login fallback.
 See [writer configuration](azure-preparation-writer.md#configuration) and [private path settings](azure-preparation-registry.md#explicit-settings) for the nested fields.
 
@@ -84,14 +84,16 @@ Keep preparation identities separate from the controller, backend, observer, and
 The Azure Files volume mounts /private/source-journals with directory mode 0700, file mode 0600, and uid and gid 65532.
 Those identifiers match the current service image user. The mount disables client data caching.
 The normal startup and registry builder reject a public or symbolic-link journal directory.
+Native startup also requires the configured Linux CIFS mount and a successful temporary write and synchronization probe before database access.
 The volume survives replica replacement. Do not substitute EmptyDir or delete it during source recovery.
 Microsoft documents the environment storage and volume relationship in [storage mounts](https://learn.microsoft.com/en-us/azure/container-apps/storage-mounts).
 An ingress-free worker needs an explicit nonzero minimum replica count; see [scaling](https://learn.microsoft.com/en-us/azure/container-apps/scale-app).
 
-For the separate deployment session, first provision the environment, private registry path, SMB storage binding, and current images.
+For the separate deployment session, first provision the [source and journal network](azure-preparation-network.md#deployment-package-and-sequence), private registry path, environment, SMB binding, and current images.
 Apply the reviewed template with workerEnabled=false to establish identities and grants without starting the worker.
 Merge assemblyBinding.writer into the existing writer fields while retaining its registry settings.
 Set readerClientId and host from the corresponding assemblyBinding fields, then save the complete settings as the named vault secret.
+Set network from the network template's networkBinding output. Keep its journal account and share consistent with the host binding.
 Keep worker.pullIdentity bound to the untrusted worker pull identity; do not replace it with the preparation platform pull identity.
 Confirm the PostgreSQL secret, storage mount, configured source subnet, and private registry route before enabling the worker.
 Enable workerEnabled only for the trusted assembly role. Do not advertise a complete Azure source workflow without compatible isolated discovery.
@@ -118,7 +120,7 @@ The host object uses these fields from assemblyBinding.host:
 | goRuntime and playwrightRuntime | Optional immutable source runtime references matching the command and template inputs. |
 
 The native command requires /private/source-journals. It rejects a different path or mismatched runtime flags before state creation.
-The publisher adds one owned SDK reader for the host, bringing the native reader count to eleven.
+Host-only library observation uses eleven readers. The required native network stage adds two more, bringing the native count to thirteen.
 After the existing writer chain succeeds, seven concurrent operations read app, environment, revisions, storage, reader identity, assignment, and role.
 The selected read role uses the same fixed permission contract as the existing observer. Additional actions or data grants in that role reject.
 This verifies the selected reported grant, not the absence of other effective authority.
@@ -134,7 +136,7 @@ Ingress, sidecars, init containers, additional flags, alternate volumes, and cha
 One healthy current active revision must match the fixed template and have running replicas.
 Headless revisions permit absent or zero HTTP traffic weight. HTTP services retain their existing traffic requirements.
 
-The host check has a 55-second total bound, including the existing 45-second writer chain.
+The host check has a 55-second total bound, including the existing 45-second writer chain. The full native network check has a 65-second bound.
 The added stage uses seven requests normally and at most nine with bounded revision paging. Each SDK operation has a five-second bound.
 Only seven selected GET paths are permitted. Lists beyond bounded revisions, credential operations, mutations, redirects, and unrelated queries reject.
 Native startup waits up to three minutes for unavailable platform observations, with two seconds between attempts.
@@ -156,14 +158,15 @@ Six packaging checks cover identities, grants, command, secrets, image reference
 Targeted Go checks cover native mode rejection, runner registration, fresh admission, cleanup, and explicit reader selection.
 Host fixtures cover placement, exact runtime and mount, selected read grants, synchronized revision drift, unknown metadata, sanitized storage observations, and reader closure.
 The startup wait has a focused local readiness, ownership-error, and cancellation check.
+The [network profile](azure-preparation-network.md) adds source egress, private journal account, endpoint, DNS, actual mount, and local synchronization checks.
 The existing core package checker also passes against its retained compiled template.
 These checks use local code and fake SDK transports. They make no Azure service call and rebuild no image.
 
 ## Remaining deployment evidence
 
-Actual worker placement, complete source egress, effective read authority, and protection from identity reuse still require installation verification.
+Actual worker placement, source policy enforcement, effective read authority, and protection from identity reuse still require installation verification.
 The native command now compares selected reported app, environment, storage, and reader metadata with its configuration.
-Those responses do not attest the current process's origin or prove complete effective authorization and network enforcement.
+The separate mount check inspects the actual process's journal mount. Neither check proves complete effective authorization or network enforcement.
 SMB private access, mount permissions, atomic journal operations, directory synchronization, and restart recovery need actual deployment evidence.
 The template declares the mount contract but does not prove remote filesystem behavior.
 Complete Azure isolated discovery and coded execution remain unfinished. Assembly publication alone enables neither review nor test execution.

@@ -23,7 +23,7 @@ type SDKPreparationHostReader struct {
 }
 
 func NewSDKPreparationHostReader(s PreparationSettings, credential azcore.TokenCredential, transport policy.Transporter) (*SDKPreparationHostReader, error) {
-	if s.ValidateNative() != nil || credential == nil {
+	if s.validateHost() != nil || credential == nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
 	c, h := s.Worker, *s.Host

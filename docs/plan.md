@@ -556,7 +556,16 @@ The Bicep binding now includes the complete host object. Native settings require
 Five new targeted checks and affected shared-runtime, identity, native, and publisher regressions pass locally, with one corrected error-category expectation.
 The package compiles once. Checker correction reuses its compiled output; no image build, live service call, browser, or demo restart runs.
 This advances 51 and preserves 48 verified items out of 57.
-Next complete preparation source egress and storage network bindings, then continue complete isolated discovery and native execution admission.
+The [preparation network profile](azure-preparation-network.md) now binds source egress, its selected NAT, private PostgreSQL address, and the private journal account, share, endpoint, NIC, subnet, and DNS.
+Native settings require this network binding. The full publisher owns thirteen readers and checks the host chain once before the added network observations.
+The separate network template declares those resources without fetching keys or enabling coded jobs.
+Native startup also checks its actual writable CIFS mount and probes file and directory synchronization before database access.
+Six new focused checks and affected native and publisher regressions pass locally. Network, worker, and core packaging checks pass with existing templates reused where applicable.
+The initial network compile reports a DNS suffix warning; using the environment storage suffix resolves it. The final compile has no warnings.
+Only the journal and uncertainty checks repeat after their probe-cleanup and missing-approval scenarios change. Checker refinements reuse the compiled template.
+This advances 51; the count remains 48 verified of 57. No cloud request, image build, browser, container, or demo restart runs.
+Next complete native Azure discovery and execution configuration against the existing job, supervisor, evidence, and admission contracts.
+Keep actual cloud verification separate. Do not repeat the completed local source and interface workflows for provider-only configuration work.
 Actual source egress, filesystem behavior, effective read authority, and deployment recovery remain separate deployment evidence.
 The selected grant check does not establish absence of additional authority or reuse of the writer by other workloads.
 Keep complete Azure discovery and coded execution admission separate until implemented.

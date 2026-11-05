@@ -14,6 +14,7 @@ type PreparationPublisher struct {
 	mu      sync.RWMutex
 	guard   *PreparationWriterGuard
 	host    *PreparationHostGuard
+	network *PreparationNetworkGuard
 	readers []observerReader
 }
 
@@ -22,6 +23,9 @@ func (s PreparationSettings) OpenPublisher(credential azcore.TokenCredential, tr
 	var err error
 	s.Writer, err = s.Writer.canonical(c)
 	if err != nil || credential == nil {
+		return nil, hostedexecution.ErrConfiguration
+	}
+	if s.Network != nil && s.ValidateNative() != nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
 	b := &observerBuilder{worker: c, credential: credential, transport: transport}
@@ -49,11 +53,24 @@ func (s PreparationSettings) OpenPublisher(credential azcore.TokenCredential, tr
 			return NewPreparationHostGuard(s, guard, reader)
 		})
 	}
+	var admission *PreparationNetworkGuard
+	if s.Network != nil {
+		admission = observerStage(b, func() (*SDKPreparationNetworkReader, error) {
+			return NewSDKPreparationNetworkReader(s, credential, transport)
+		}, func(reader *SDKPreparationNetworkReader) (*PreparationNetworkGuard, error) {
+			dns, err := NewSDKPreparationFileDNSReader(s, credential, transport)
+			if err != nil {
+				return nil, err
+			}
+			b.readers = append(b.readers, dns)
+			return NewPreparationNetworkGuard(s, host, reader, dns)
+		})
+	}
 	if b.err != nil {
 		closeObserverReaders(b.readers)
 		return nil, controlError(b.err)
 	}
-	return &PreparationPublisher{guard: guard, host: host, readers: b.readers}, nil
+	return &PreparationPublisher{guard: guard, host: host, network: admission, readers: b.readers}, nil
 }
 
 func (p *PreparationPublisher) OpenRegistry(ctx context.Context, c Config) (*acr.Client, error) {
@@ -78,6 +95,9 @@ func (p *PreparationPublisher) Check(ctx context.Context, c Config) error {
 }
 
 func (p *PreparationPublisher) check(ctx context.Context, c Config) error {
+	if p.network != nil {
+		return p.network.Check(ctx, c)
+	}
 	if p.host != nil {
 		return p.host.Check(ctx, c)
 	}
@@ -88,5 +108,5 @@ func (p *PreparationPublisher) Close() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	closeObserverReaders(p.readers)
-	p.guard, p.host, p.readers = nil, nil, nil
+	p.guard, p.host, p.network, p.readers = nil, nil, nil, nil
 }

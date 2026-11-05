@@ -122,7 +122,47 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: Azure assembly host and startup admission
+## Current delivery: Azure preparation egress and private journal network
+
+Native Azure assembly now requires explicit network settings after the host and writer checks.
+The source subnet selects a dedicated NSG and Standard NAT gateway, with private PostgreSQL, registry, and SMB destinations.
+The policy retains the canonical Container Apps platform rules and adds trusted metadata, vault, and monitor HTTPS service tags.
+The source has explicit disabled default outbound access, the selected NAT, successful environment delegation, and no unexpected user route or service endpoint.
+The controller VNet reports its configured address spaces, default Azure DNS, and matching direct and embedded subnet metadata.
+The NAT reports one static regional public IPv4 address, the exact source subnet, and matching bidirectional ownership.
+
+The selected journal account, SMB share, approved file endpoint, NIC, private subnet, source-only NSG, and no-fallback DNS zone now bind to the same host account and share.
+Public storage access, bypass rules, alternate consumers, wrong approvals, NFS, unexpected routes, and changed destination addresses block new publication.
+Native composition adds two owned readers, bringing its total to thirteen. Construction makes no provider call.
+The network stage refreshes its preceding host chain once and checks eleven selected resources, then the bounded private DNS inventory.
+The pinned armstorage v1.8.1 direct dependency supplies account and share GETs. Existing SDK versions and checksums remain unchanged.
+
+The separate preparation-network.bicep declares source egress resources, a private-only journal account and SMB share, its file endpoint, DNS, and account deletion protection.
+Its outputs populate the private network settings. It retrieves no storage key or secret and declares no app or test job.
+The native command also checks the current Linux mount table before database access.
+Its journal path must be one writable CIFS mount of the configured account and complete share.
+A private probe confirms file write and synchronization, directory synchronization, probe removal, and synchronization after removal.
+Ephemeral, read-only, other-account, other-share, substituted-subpath, duplicate, and incomplete mounts reject startup.
+This does not prove remote recovery or complete platform enforcement.
+
+Five new network checks and three affected native and publisher checks pass under race detection in 3.389 seconds.
+Four affected native assembly checks pass in 1.429 seconds.
+The new mount parser check first passes in 1.525 seconds. After adding the local synchronization and cleanup scenario, only that check repeats and passes in 1.421 seconds.
+The uncertainty check repeats after adding explicit missing approval-status handling. Its focused result passes in 1.709 seconds.
+Its temporary directory and probe are owned by the test and cleaned before completion. Network fixtures use fake credentials and in-memory SDK transports.
+The network package passes five local packaging checks. Its initial compile reports a hardcoded DNS suffix warning; an environment suffix resolves it.
+The final Bicep compile passes without warnings. Checker refinements reuse that compiled template.
+The worker and core package checks pass against retained compiled templates, without rebuilding either package or image.
+Operator guides document network settings, setup sequence, actual mount requirements, SDK limits, remaining evidence, and continued isolated discovery requirements.
+Documentation links and the stable 57-item ledger remain consistent. No UI, API contract, or page help behavior changes.
+No actual registry, identity endpoint, cloud service, listener, image, container, browser, or deployment runs. The user demo remains unchanged.
+
+Native Azure discovery and execution configuration remain the next implementation work.
+Actual cloud authorization, routing, remote filesystem behavior, and replica recovery remain separate deployment evidence.
+This completes no broad acceptance item. Acceptance 51 advances; the verified total remains 48 of 57, with nine open.
+Evidence is output/azure-preparation-network/summary.json and its retained packaging results.
+
+## Previous delivery: Azure assembly host and startup admission
 
 Native Azure assembly now requires a host binding and compares selected reported app, environment, persistent storage, and reader identity metadata before queue startup.
 The reader's selected subscription assignment and fixed custom read role must match its client, principal, and installation tenant.

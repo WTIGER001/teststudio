@@ -77,7 +77,7 @@ func run() error {
 		return err
 	}
 	if azureSettings != nil && azureSettings.ValidateNative() != nil {
-		return errors.New("Azure assembly requires valid private host settings and a separate explicit reader client identifier")
+		return errors.New("Azure assembly requires valid private host and network settings with a separate explicit reader client identifier")
 	}
 	if azureSettings != nil && *directory != azureworker.PreparationJournalDirectory {
 		return errors.New("Azure assembly requires the configured private journal mount directory")
@@ -121,6 +121,11 @@ func run() error {
 	}
 	if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 || info.Mode().Perm()&0077 != 0 {
 		return errors.New("build-directory must be a private directory without a symbolic link")
+	}
+	if azureSettings != nil {
+		if err := validateAzureJournal(root, azureSettings.Host.JournalAccount, azureSettings.Host.JournalShare); err != nil {
+			return err
+		}
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()

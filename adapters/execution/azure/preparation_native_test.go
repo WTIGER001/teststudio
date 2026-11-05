@@ -8,6 +8,8 @@ import (
 
 func TestAzurePreparationNativeRequiresSeparateExplicitReader(t *testing.T) {
 	s, _, _ := preparationHostTest(t)
+	network := preparationNetworkDefaults(s)
+	s.Network = &network
 	c, writer := s.Worker, s.Writer
 	if err := s.ValidateNative(); err != nil {
 		t.Fatal("separate explicit reader rejected", err)
@@ -22,6 +24,9 @@ func TestAzurePreparationNativeRequiresSeparateExplicitReader(t *testing.T) {
 	requireDeadlineError(t, changed.ValidateNative(), hostedexecution.ErrConfiguration)
 	changed = s
 	changed.Host = nil
+	requireDeadlineError(t, changed.ValidateNative(), hostedexecution.ErrConfiguration)
+	changed = s
+	changed.Network = nil
 	requireDeadlineError(t, changed.ValidateNative(), hostedexecution.ErrConfiguration)
 	for _, mutate := range []func(*PreparationHostSettings){
 		func(h *PreparationHostSettings) { h.Environment = c.WorkerEnvironment },

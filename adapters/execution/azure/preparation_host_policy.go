@@ -7,7 +7,7 @@ import (
 )
 
 func (s PreparationSettings) PreparationApplicationDefinition() (a.ContainerApp, error) {
-	if s.ValidateNative() != nil {
+	if s.validateHost() != nil {
 		return a.ContainerApp{}, hostedexecution.ErrConfiguration
 	}
 	c, h := s.Worker, *s.Host

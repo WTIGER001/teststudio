@@ -6,6 +6,7 @@ from pathlib import Path
 import subprocess
 
 from verify_azure_preparation import verify_preparation
+from verify_azure_preparation_network import verify_preparation_network
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,22 +18,25 @@ def main():
     source.add_argument('--bicep', type=Path)
     source.add_argument('--compiled-template', type=Path)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--profile', choices=['core', 'preparation'], default='core')
+    parser.add_argument('--profile', choices=['core', 'preparation', 'preparation-network'], default='core')
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    template_path = output / ('preparation.json' if args.profile == 'preparation' else 'service.json')
+    names = {'core': ('main.bicep', 'service.json'), 'preparation': ('preparation.bicep', 'preparation.json'), 'preparation-network': ('preparation-network.bicep', 'preparation-network.json')}
+    source_name, template_name = names[args.profile]
+    template_path = output / template_name
     if args.bicep:
         environment = {key: value for key, value in os.environ.items() if not key.startswith(('AZURE_', 'ARM_', 'AWS_'))}
-        source_path = ROOT / 'deploy/azure' / ('preparation.bicep' if args.profile == 'preparation' else 'main.bicep')
+        source_path = ROOT / 'deploy/azure' / source_name
         result = subprocess.run([str(args.bicep.resolve()), 'build', str(source_path), '--no-restore', '--outfile', str(template_path)], capture_output=True, text=True, env=environment, timeout=60)
         (output / 'compile.log').write_text(result.stdout + result.stderr)
         assert result.returncode == 0 and 'Warning' not in result.stderr, 'Bicep compile or schema validation failed; inspect compile.log'
     elif args.compiled_template.resolve() != template_path:
         template_path.write_text(args.compiled_template.read_text())
     template = json.loads(template_path.read_text())
-    if args.profile == 'preparation':
-        summary = {'passed': True, 'scope': 'local compilation and assembly packaging contracts only; no Azure service or deployment operation', 'compiler': template['metadata']['_generator'], 'reusedCompiledTemplate': bool(args.compiled_template), 'checks': verify_preparation(template, ROOT)}
+    if args.profile != 'core':
+        checks = verify_preparation(template, ROOT) if args.profile == 'preparation' else verify_preparation_network(template)
+        summary = {'passed': True, 'scope': 'local compilation and assembly packaging contracts only; no Azure service or deployment operation', 'compiler': template['metadata']['_generator'], 'reusedCompiledTemplate': bool(args.compiled_template), 'checks': checks}
         (output / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
         print(json.dumps(summary, indent=2))
         return

@@ -104,6 +104,7 @@ Protection-management authority, clean provenance, cross-scope coverage, and pre
 The core package declares no preparation workload or these endpoint and zone resources.
 The separate [native assembly profile](azure-native-assembly.md) now supplies a trusted worker template and command configuration.
 It also checks selected host, environment, persistent storage, and reader grant metadata before queue admission.
+The [source network stage](azure-preparation-network.md) adds the dedicated source NSG and NAT, private journal account and endpoint, DNS, and actual mount checks.
 Native commands still expose no Azure coded-worker option. Complete source preparation requires isolated discovery admission.
 Do not substitute a fake Network, successful registry write, or configured private hostname for that admission.
 Four targeted local race checks pass after the final trusted-controller source-policy correction.
