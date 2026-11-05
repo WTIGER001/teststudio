@@ -60,6 +60,9 @@ func (s Settings) Validate() error {
 	if err := s.Host.validateNetwork(s); err != nil {
 		return err
 	}
+	if err := s.Host.validateDatabase(s); err != nil {
+		return err
+	}
 	if s.Host.Profile != s.HostProfile() {
 		return hostedexecution.ErrConfiguration
 	}

@@ -74,6 +74,7 @@ func newPlacementWorld(t *testing.T, s Settings) *placementWorld {
 	w.addBackendEndpoint()
 	w.addRelayNetwork()
 	w.addHostRegistry()
+	w.addHostDatabase()
 	w.addHostNetwork()
 	w.addRegistryService()
 	w.addHost()
@@ -123,6 +124,9 @@ func (w *placementWorld) Do(r *http.Request) (*http.Response, error) {
 	}
 	if version == "" {
 		version = hostNetworkVersions(w.s)[r.URL.Path]
+	}
+	if version == "" {
+		version = hostDatabaseVersions(w.s)[r.URL.Path]
 	}
 	if version == "" && r.URL.Path == "/subscriptions/"+w.s.Worker.Subscription+"/providers/Microsoft.Network/privateDnsZones" {
 		version = "2024-06-01"

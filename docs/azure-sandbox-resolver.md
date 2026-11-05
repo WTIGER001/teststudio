@@ -83,6 +83,7 @@ Zone and link identities, successful states, reported link counts, duplicate det
 The two sandbox private zones and their sandbox-network links must be present.
 The relay registry zone and its relay-network link must also be present.
 The controller registry zone and its controller-network link must also be present.
+The controller database zone and its controller-database link must also be present.
 Any other reported zone or link targeting any of these three guarded VNets rejects admission.
 Unrelated zones linked to unrelated VNets remain permitted.
 

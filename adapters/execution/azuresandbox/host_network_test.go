@@ -38,7 +38,7 @@ func TestSandboxHostNetworkBindsTopologyAndModeSpecificDependencyPolicy(t *testi
 			t.Fatal(err)
 		}
 		defer reader.Close()
-		if err := reader.Check(t.Context(), s.Worker); err != nil || len(w.calls) != 16 {
+		if err := reader.Check(t.Context(), s.Worker); err != nil || len(w.calls) != 17 {
 			t.Fatal("fixed controller network rejected", err, len(w.calls))
 		}
 		if err := reader.CheckRunning(t.Context(), s.Worker); err != nil || w.calls[s.Host.Network.SecurityGroup] != 1 {
@@ -79,7 +79,7 @@ func TestSandboxHostNetworkBindsTopologyAndModeSpecificDependencyPolicy(t *testi
 }
 
 func TestSandboxHostNetworkRejectsTopologyRouteFirewallAndResolverDrift(t *testing.T) {
-	for _, mode := range []string{"peering", "dns-server", "extra-subnet", "embedded", "nat", "source-group", "route", "extra-rule", "source-access", "firewall-ip", "firewall-extra-interface", "firewall-policy", "firewall-domains", "extra-group", "resolver-domains", "resolver-association", "resolver-page", "pending"} {
+	for _, mode := range []string{"peering", "dns-server", "extra-subnet", "embedded", "nat", "source-group", "route", "extra-rule", "source-access", "database-access", "firewall-ip", "firewall-extra-interface", "firewall-policy", "firewall-domains", "extra-group", "resolver-domains", "resolver-association", "resolver-page", "pending"} {
 		t.Run(mode, func(t *testing.T) {
 			s := runtimeSettings()
 			w := newPlacementWorld(t, s)
@@ -107,6 +107,13 @@ func TestSandboxHostNetworkRejectsTopologyRouteFirewallAndResolverDrift(t *testi
 				props(r.SecurityGroup)["securityRules"] = append(props(r.SecurityGroup)["securityRules"].([]any), props(r.SecurityGroup)["securityRules"].([]any)[0])
 			case "source-access":
 				props(r.SecurityGroup)["securityRules"].([]any)[0].(map[string]any)["properties"].(map[string]any)["sourceAddressPrefix"] = "*"
+			case "database-access":
+				for _, raw := range props(r.SecurityGroup)["securityRules"].([]any) {
+					rule := raw.(map[string]any)
+					if rule["name"] == "controller-database" {
+						rule["properties"].(map[string]any)["destinationAddressPrefix"] = "10.72.6.9"
+					}
+				}
 			case "firewall-ip":
 				props(r.Topology.Firewall)["ipConfigurations"].([]any)[0].(map[string]any)["properties"].(map[string]any)["privateIPAddress"] = "10.72.4.5"
 			case "firewall-extra-interface":

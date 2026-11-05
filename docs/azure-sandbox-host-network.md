@@ -22,14 +22,14 @@ host.network contains these settings:
 | securityGroup, routeTable | Exclusive controller source-subnet rules and route table. |
 | resolver.policy, allowList, blockList | Selected resolver policy and distinct domain lists. |
 
-The source, registry endpoint, and firewall prefixes must fit inside the VNet without overlap.
+The source, registry endpoint, firewall, and database endpoint prefixes must fit inside the VNet without overlap.
 Missing settings, reserved addresses, foreign resources, reused protected resources, and stale host profiles reject configuration.
 Host settings remain outside the shared sandbox-placement/v9 worker profile.
 Calculate host.profile through Settings.HostProfile() after assigning the network settings.
 
 ### VNet and routing
 
-The VNet contains exactly the selected source, registry endpoint, and firewall subnets.
+The VNet contains exactly the selected source, registry endpoint, firewall, and database endpoint subnets.
 Embedded subnet observations must agree with their selected resource reads.
 Peerings, custom DNS servers, public NAT, additional subnets, and changed address spaces reject admission.
 The source subnet retains the Container Apps environment delegation and exact security-group and route-table attachments.
@@ -43,6 +43,7 @@ The firewall subnet permits only the expected firewall attachment.
 ### Trusted HTTPS access
 
 The source security group retains the existing platform rules and two explicit private registry addresses.
+It also permits TCP 5432 only to the selected private database address, verified by the [database stage](azure-sandbox-host-database.md).
 Public HTTPS uses the dedicated firewall path. Remaining outbound traffic is denied by the fixed source rules.
 The complete firewall policy permits the derived platform and dependency domains, then denies other HTTP and HTTPS application traffic.
 It permits no arbitrary extra network, application, or inherited policy rules.
@@ -61,7 +62,7 @@ Some platform rules contain their existing wildcard domains. This is a trusted c
 
 ### Resolver association
 
-The resolver approved list contains the derived dependency domains, selected database hostname, and private registry login and regional data names.
+The resolver approved list contains the derived dependency domains, selected database hostname and private-link name, and private registry login and regional data names.
 Its second list contains the root-domain block.
 Complete rules and links must match the fixed controller definitions.
 The selected VNet's listDnsResolverPolicies observation must report exactly the configured policy.
@@ -70,7 +71,7 @@ DNS domain hierarchy includes descendants. The private registry stage independen
 
 ### Bounds and staged bodies
 
-The stage observes 16 selected paths with a joined five-second bound.
+The stage observes 17 selected paths with a joined five-second bound.
 Network resources use API 2025-03-01. Resolver resources use API 2025-05-01.
 Firewall collection inventory permits four items and four pages; resolver inventories retain their existing exact bounds.
 Construction acquires no token and calls no service.
@@ -80,26 +81,26 @@ Runtime.Close closes the reader after owned work joins.
 
 HostNetworkDefinitions returns 14 staged bodies for source rules, routing, firewall configuration, and resolver policy.
 They do not create a complete deployment or establish service reachability.
-Database transport, dependency permissions, and native HTTPS-probe target routing remain unfinished.
-The staged source rules do not yet permit a PostgreSQL connection.
+Reported private database endpoint, DNS, and TCP 5432 bindings now have a separate stage.
+Actual SQL access, dependency permissions, and native HTTPS-probe target routing remain unfinished.
 Do not enable the native controller before those remaining access contracts are complete.
 
 ## Tutorials
 
 ### Local verification
 
-Three new checks and eleven affected checks pass with race detection in 4.217 seconds.
+The initial source-perimeter batch passes three new checks and eleven affected checks with race detection in 4.217 seconds.
 They cover both modes, shared worker profiles, dependency separation, invalid settings, topology, routing, firewall and resolver drift, and shutdown.
 Fresh routing failure blocks creation, image import, and live admission after an earlier successful observation.
 Affected checks retain explicit credentials, scoped runtime modes, controller and registry admission, relay networking, and resolver composition.
-The central discovery composition observes 142 unique selected paths.
+The initial perimeter batch observes 142 unique selected paths. The later database batch extends the current composition to 152 paths.
 Evidence is output/azure-sandbox-host-network/summary.json and local.log.
 Checks use local SQLite, fake credentials, and in-memory metadata. Owned readers close through cleanup.
 No cloud service, browser, container, UI build, demo restart, resource mutation, or remote push runs.
 
 ### Continue activation
 
-Complete database transport and the actual dependency permissions and network paths.
+Complete actual SQL access and dependency permissions and network paths. Reported private database transport now has a separate stage.
 Bind native HTTPS-probe target routing to the registered-target and request-policy contracts.
 Complete remaining identity attachment, effective authority, deny effects, protected writes, native command selection, and deployment packaging.
 Keep real routing, DNS behavior, token issuance, preview compatibility, and independent timer execution in separate deployment acceptance.

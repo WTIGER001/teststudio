@@ -16,7 +16,7 @@ func (h HostSettings) networkRules() []any {
 	for _, rule := range rules[:len(rules)-1] {
 		result = append(result, objectMap(rule))
 	}
-	result = append(result, networkRule("controller-firewall-https", "Outbound", "Allow", "Tcp", h.SubnetPrefix, "Internet", "443", 310), objectMap(rules[len(rules)-1]))
+	result = append(result, networkRule("controller-database", "Outbound", "Allow", "Tcp", h.SubnetPrefix, h.Database.Address, "5432", 320), networkRule("controller-firewall-https", "Outbound", "Allow", "Tcp", h.SubnetPrefix, "Internet", "443", 310), objectMap(rules[len(rules)-1]))
 	return result
 }
 

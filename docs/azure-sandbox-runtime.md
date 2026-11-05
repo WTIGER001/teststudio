@@ -19,6 +19,7 @@ The [backend endpoint stage](azure-sandbox-backend-endpoint.md) now joins endpoi
 The [relay network stage](azure-sandbox-relay-network.md) now joins the trusted VNet, egress policy, resolver, private registry path, and selected pull grant.
 The [registry service stage](azure-sandbox-registry-service.md) now verifies access policies and complete reported consumer, member, and replication inventories.
 The [controller source stage](azure-sandbox-host-network.md) now checks VNet contents, source rules, firewall routing, derived HTTPS dependencies, and resolver association.
+The [controller database stage](azure-sandbox-host-database.md) now checks private PostgreSQL endpoint ownership, DNS, source rules, and reported approvals.
 The [controller registry stage](azure-sandbox-host-registry.md) now checks its private endpoint, DNS, selected pull grant, and reported approval.
 The [controller host stage](azure-sandbox-host.md) now checks fixed execution or discovery definitions, private environments, identity lifecycles, and complete revisions.
 The [service workload stage](azure-sandbox-service-workloads.md) now verifies reported relay, backend, and controller occupancy, identity placement, identity resources, and federation absence.
@@ -81,6 +82,7 @@ It constructs SDKBackendEndpoint with that credential and compares backend endpo
 It constructs SDKRelayNetwork with that credential and checks the selected relay network, private registry path, DNS, and pull grant.
 It constructs SDKRegistryService with that credential and compares access policies and complete reported approval, member, and replication inventories.
 It constructs SDKHostNetwork with that credential and checks controller VNet contents, source rules, routing, firewall policy, and resolver association.
+It constructs SDKHostDatabase with that credential and joins the selected PostgreSQL server, private endpoint, NIC, subnet rules, DNS, and approvals.
 It constructs SDKHostRegistry with that credential and joins controller private registry networking, DNS, approval, and selected pull authority.
 It constructs SDKHost with that credential and verifies the fixed headless controller, private environment, authentication, and complete revisions.
 It constructs SDKServiceWorkloads with that credential and verifies reported subscription service placement, selected identities, and empty federation inventories.
@@ -124,8 +126,8 @@ See [separate discovery command roles](source-assembly-handoff.md#dedicated-disc
 
 Admission is mandatory for every runtime. ImageAdmission is also mandatory for discovery mode.
 The existing controller calls the placement stage and these dependencies before creation, during live admission observation, and before import.
-Live placement, network, private binding, topology, resolver, services, backend endpoint, relay network, registry service, controller source, controller registry, controller host, service workload, and selected authority evidence have a 15-second bound.
-Initial network, placement, private binding, topology, resolver, service, backend endpoint, relay network, registry service, controller source, controller registry, controller host, and service workload checks remain fresh, including source import.
+Live placement, network, private binding, topology, resolver, services, backend endpoint, relay network, registry service, controller source, controller database, controller registry, controller host, service workload, and selected authority evidence have a 15-second bound.
+Initial network, placement, private binding, topology, resolver, service, backend endpoint, relay network, registry service, controller source, controller database, controller registry, controller host, and service workload checks remain fresh, including source import.
 The additional protection, per-sandbox, and worker authorization checks remain uncached.
 OpenRuntime does not substitute a successful construction result for those checks.
 Native commands must compose actual group, VNet, private exchange, source identity, and timer authority checks before enabling dispatch.

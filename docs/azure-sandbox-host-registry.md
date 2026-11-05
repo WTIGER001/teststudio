@@ -84,7 +84,8 @@ No cloud service, browser, container, UI build, demo restart, or remote push run
 ### Continue activation
 
 The [source perimeter](azure-sandbox-host-network.md) now checks VNet contents, source rules, firewall routing, derived HTTPS dependencies, and resolver association.
-Complete database transport, native HTTPS-probe routing, and actual dependency access.
+The [database stage](azure-sandbox-host-database.md) now checks reported private PostgreSQL transport.
+Complete actual SQL access, native HTTPS-probe routing, and remaining dependency access.
 Complete effective authority, deny effects, protected writes, remaining identity attachment, native command selection, and deployment packaging.
 Keep deployed pulls, private conversion, token behavior, routing, preview compatibility, and independent timer execution in separate deployment acceptance.
 

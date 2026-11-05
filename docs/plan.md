@@ -256,10 +256,21 @@ Four new checks and ten affected checks pass locally with race detection across 
 The existing local controller still completes one queued HTTPS probe and releases its owned process and listener.
 See [PostgreSQL destination binding](database-host-binding.md). Acceptance 51 advances; the count remains 48 verified, nine open.
 
+The runtime now joins a selected PostgreSQL flexible server, controller private endpoint, NIC member, endpoint subnet rules, DNS, and reported approvals.
+The source security group permits TCP 5432 only to that private address. The controller VNet now contains four exact selected subnets.
+The server hostname must match the command's database-host binding. Public access must be disabled and password authentication enabled.
+Complete embedded and separate approval inventories must agree on the selected endpoint and up to seven declared installation consumers.
+Both documented completed connection states are accepted only with matching approval and ownership facts. Unknown and transitional states remain unavailable.
+The resolver and reported subscription DNS inventory require the private database zone and link.
+Fresh creation and import reads and bounded live evidence include the stage. Current failure invalidates earlier success.
+Five staged resource bodies support later packaging without creating a server, endpoint, or credential.
+Three new checks and eleven affected checks pass locally with race detection in 5.631 seconds.
+See [controller private database](azure-sandbox-host-database.md). Acceptance 51 advances; the count remains 48 verified, nine open.
+
 Complete remaining effective-authority and protected network admission, native command role wiring, and deployment packaging next.
 Bind additional declared registry consumers to trusted workload and network ownership.
-Complete the selected database private endpoint, DNS records, source TCP 5432 rules, and actual dependency permissions and network paths.
-The implemented hostname guard does not replace network ownership or establish connectivity.
+Complete actual database and dependency access, remaining permissions, and network paths.
+Reported database endpoint, DNS, TCP 5432, and hostname bindings now exist. They do not establish deployed SQL connectivity.
 Bind native HTTPS-probe target routing to registered-target and request-policy contracts before native controller activation.
 Complete remaining import and timer identity attachment, additional grants and deny effects, and protected write boundaries.
 Reported service placement does not establish exclusive identity use across subscriptions, other host types, or deny-hidden resources.

@@ -19,7 +19,7 @@ type SDKHostNetwork struct {
 
 func hostNetworkIDs(s Settings) []string {
 	h, r := s.Host, s.Host.Network
-	return []string{h.virtualNetwork(), h.Subnet, h.Registry.Subnet, h.firewallBinding().Subnet, r.SecurityGroup, r.RouteTable, r.Topology.Firewall, r.Topology.PublicIP, r.Topology.Policy}
+	return []string{h.virtualNetwork(), h.Subnet, h.Registry.Subnet, h.firewallBinding().Subnet, r.SecurityGroup, r.RouteTable, r.Topology.Firewall, r.Topology.PublicIP, r.Topology.Policy, h.Database.Subnet}
 }
 
 func hostNetworkVersions(s Settings) map[string]string {

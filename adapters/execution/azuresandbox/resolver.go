@@ -101,6 +101,7 @@ func (c *SDKResolver) read(ctx context.Context) error {
 		wanted[r.Registry.Zone+"/virtualNetworkLinks/relay-network"] = r.virtualNetwork(c.settings)
 		h := c.settings.Host
 		wanted[h.Registry.Zone+"/virtualNetworkLinks/controller-network"] = h.virtualNetwork()
+		wanted[h.Database.Zone+"/virtualNetworkLinks/controller-database"] = h.virtualNetwork()
 		errors[1] = azureworker.VerifyPrivateDNSInventoryLinks(c.settings.Worker.Subscription, actual, wanted, []string{p.virtualNetwork(), r.virtualNetwork(c.settings), h.virtualNetwork()})
 	})
 	group.Wait()

@@ -9,7 +9,7 @@ import (
 )
 
 func (c *SDKHostNetwork) verify(values, groups []placementResource) error {
-	if len(values) != 9 {
+	if len(values) != 10 {
 		return hostedexecution.ErrUnavailable
 	}
 	s, h, r := c.settings, c.settings.Host, c.settings.Host.Network
@@ -21,6 +21,11 @@ func (c *SDKHostNetwork) verify(values, groups []placementResource) error {
 	if err != nil {
 		return err
 	}
+	databaseSubnet, err := resourceModel[n.Subnet](values[9])
+	if err != nil {
+		return err
+	}
+	subnets = append(subnets, databaseSubnet)
 	if err := azureworker.VerifyIsolatedVirtualNetwork(vnet, h.virtualNetwork(), s.Worker.Region, r.Topology.Prefix, subnets); err != nil {
 		return err
 	}

@@ -52,7 +52,8 @@ Reported command drift rejects host admission, including replacement with anothe
 The controller resolver approved list includes the selected database name.
 The host profile binds the setting without changing the shared worker or converted-image profile.
 
-Native sandbox command selection, private database networking, and full deployment packaging remain unfinished.
+The [private database stage](azure-sandbox-host-database.md) now checks reported server, endpoint, DNS, and TCP 5432 network bindings.
+Native sandbox command selection, actual database access, and full deployment packaging remain unfinished.
 This configuration guard does not replace endpoint ownership, DNS records, source rules, routing, or effective dependency permissions.
 
 ## Tutorials

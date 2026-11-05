@@ -122,6 +122,32 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: controller private PostgreSQL network and reported service binding
+
+The runtime now joins a selected PostgreSQL flexible server, controller private endpoint, NIC member, endpoint subnet rules, DNS, and reported approvals.
+The source security group permits TCP 5432 only to that private address. The controller VNet now contains four exact selected subnets.
+The server hostname must match the command's database-host binding. Public access must be disabled and password authentication enabled.
+Complete embedded and separate approval inventories must agree on the selected endpoint and up to seven declared installation consumers.
+Both documented completed connection states are accepted only with matching approval and ownership facts. Unknown and transitional states remain unavailable.
+The resolver and reported subscription DNS inventory require the private database zone and link.
+Fresh creation and import reads and bounded live evidence include the stage. Current failure invalidates earlier success.
+Five staged resource bodies support later packaging without creating a server, endpoint, or credential.
+Three new checks and eleven affected checks pass locally with race detection in 5.631 seconds.
+The database reader observes ten selected paths. The source network reader now observes 17 paths.
+The central cold discovery composition observes 152 unique selected paths.
+The implementation pins PostgreSQL metadata to 2024-08-01 and reuses pure endpoint, subnet, rule, and private-zone verifiers.
+Public Microsoft contract examples disagree on completed connection provisioning values; the reader accepts Ready and Succeeded with all other checks required.
+Checks cover both modes, copied declared consumers, invalid settings, server, endpoint, port, source, DNS, approval and inventory drift, and reader closure.
+Affected checks retain controller source, registry, host, resolver, scoped settings, and mode admission.
+A focused settings recheck also passes in 1.594 seconds after tightening registry-consumer and zone alias rejection.
+Evidence is output/azure-sandbox-host-database/summary.json, local.log, and settings-followup.log.
+Checks use local SQLite, fake credentials, and in-memory metadata. Owned readers close through cleanup.
+No cloud service, database connection, browser, container, UI build, demo restart, resource mutation, or remote push runs.
+The plan and affected operator guides match the behavior. No user page changes.
+Actual SQL and dependency access, effective authority, remaining identity attachment, native command activation, and deployment packaging stay unfinished.
+See [controller private database](azure-sandbox-host-database.md).
+Acceptance **51** advances. No acceptance item closes. The total remains **48 verified, 9 open**.
+
 ## Current delivery: PostgreSQL destination and TLS binding
 
 The service and preparation commands now accept database-host to bind a protected PostgreSQL URL to one expected DNS hostname and verified TLS.

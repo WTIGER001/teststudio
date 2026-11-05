@@ -21,6 +21,7 @@ Settings.host contains these required bindings:
 | subnet, infrastructureGroup | Selected environment subnet and infrastructure group, separate from sandbox, relay, and backend networks. |
 | image | Immutable trusted service image outside the source-image namespace. |
 | pull, startup | Distinct identity resource, client, and principal pins. |
+| database | Required private PostgreSQL server and network bindings described in the [database guide](azure-sandbox-host-database.md). |
 | databaseHost | Required canonical database hostname, included in both commands through [--database-host](database-host-binding.md). |
 | databaseSecretUrl, configurationSecretUrl | Distinct Key Vault secret references for PostgreSQL and native runtime configuration. |
 | replicas | Fixed minimum and maximum replica count between one and ten. |
@@ -89,7 +90,8 @@ No cloud service, browser, container, UI build, demo restart, or remote push run
 
 The [registry stage](azure-sandbox-host-registry.md) now binds the selected private registry path and reported pull authority.
 The [source perimeter](azure-sandbox-host-network.md) now binds VNet contents, source rules, firewall routing, derived HTTPS dependencies, and resolver association.
-Complete database transport, native HTTPS-probe routing, actual dependency access, effective grants, deny effects, and protected writes.
+The [database stage](azure-sandbox-host-database.md) now checks private PostgreSQL endpoint ownership, DNS, and TCP 5432 policy.
+Complete actual database and dependency access, native HTTPS-probe routing, effective grants, deny effects, and protected writes.
 Bind remaining import and timer identities and declared registry consumers to their actual hosts and networks.
 Then add native command selection and deployment packaging.
 Actual token issuance, cross-subscription visibility, deny-hidden resources, routing, preview compatibility, and independent timer execution require separate deployment verification.

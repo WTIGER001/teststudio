@@ -38,6 +38,7 @@ type Runtime struct {
 	relayNetwork     *SDKRelayNetwork
 	registryService  *SDKRegistryService
 	serviceWorkloads *SDKServiceWorkloads
+	hostDatabase     *SDKHostDatabase
 	hostNetwork      *SDKHostNetwork
 	hostRegistry     *SDKHostRegistry
 	host             *SDKHost
@@ -141,7 +142,11 @@ func OpenRuntime(o RuntimeOptions) (result *Runtime, resultErr error) {
 	if err != nil {
 		return nil, err
 	}
-	admission := &placementAdmission{hostNetwork: r.hostNetwork, hostRegistry: r.hostRegistry, placement: r.placement, authority: r.authority, network: r.network, private: r.private, topology: r.topology, resolver: r.resolver, services: r.services, backendEndpoint: r.backendEndpoint, relayNetwork: r.relayNetwork, registryService: r.registryService, serviceWorkloads: r.serviceWorkloads, host: r.host, protection: o.Admission, importProtection: o.ImageAdmission}
+	r.hostDatabase, err = NewSDKHostDatabase(s, metadata, o.ARMTransport)
+	if err != nil {
+		return nil, err
+	}
+	admission := &placementAdmission{hostDatabase: r.hostDatabase, hostNetwork: r.hostNetwork, hostRegistry: r.hostRegistry, placement: r.placement, authority: r.authority, network: r.network, private: r.private, topology: r.topology, resolver: r.resolver, services: r.services, backendEndpoint: r.backendEndpoint, relayNetwork: r.relayNetwork, registryService: r.registryService, serviceWorkloads: r.serviceWorkloads, host: r.host, protection: o.Admission, importProtection: o.ImageAdmission}
 	controller, err := NewController(ControllerOptions{Config: s.Worker, Instances: r.client, Deadlines: r.deadlines, Admission: admission, Exchange: o.Exchange, Commands: r.client})
 	if err != nil {
 		return nil, err
@@ -205,6 +210,9 @@ func (r *Runtime) Close() {
 		}
 		if r.serviceWorkloads != nil {
 			r.serviceWorkloads.Close()
+		}
+		if r.hostDatabase != nil {
+			r.hostDatabase.Close()
 		}
 		if r.hostNetwork != nil {
 			r.hostNetwork.Close()

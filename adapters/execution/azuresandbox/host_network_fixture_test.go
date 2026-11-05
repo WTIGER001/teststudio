@@ -50,7 +50,7 @@ func (w *placementWorld) addHostNetwork() {
 	props(r.Topology.Policy)["ruleCollectionGroups"] = []any{map[string]string{"id": groupID}}
 	w.pages[r.Topology.Policy+"/ruleCollectionGroups"] = map[string]any{"value": []any{w.resources[groupID]}}
 	vnet := h.virtualNetwork()
-	w.resources[vnet] = map[string]any{"id": vnet, "name": "studio-control", "type": "Microsoft.Network/virtualNetworks", "location": s.Worker.Region, "properties": map[string]any{"provisioningState": "Succeeded", "addressSpace": map[string]any{"addressPrefixes": []string{r.Topology.Prefix}}, "subnets": []any{w.resources[h.Subnet], w.resources[h.Registry.Subnet], w.resources[firewallSubnet]}}}
+	w.resources[vnet] = map[string]any{"id": vnet, "name": "studio-control", "type": "Microsoft.Network/virtualNetworks", "location": s.Worker.Region, "properties": map[string]any{"provisioningState": "Succeeded", "addressSpace": map[string]any{"addressPrefixes": []string{r.Topology.Prefix}}, "subnets": []any{w.resources[h.Subnet], w.resources[h.Registry.Subnet], w.resources[firewallSubnet], w.resources[h.Database.Subnet]}}}
 	w.pages[r.Resolver.Policy+"/dnsSecurityRules"] = map[string]any{"value": []any{w.resources[r.Resolver.Policy+"/dnsSecurityRules/controller-allow-approved"], w.resources[r.Resolver.Policy+"/dnsSecurityRules/controller-default-block"]}}
 	link := w.resources[r.Resolver.Policy+"/virtualNetworkLinks/controller-network"]
 	link["properties"].(map[string]any)["virtualNetworkLinkState"] = "Completed"
