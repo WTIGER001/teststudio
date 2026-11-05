@@ -23,12 +23,12 @@ func (s Settings) hostDefinition() a.ContainerApp {
 		lifecycle = append(lifecycle, &a.IdentitySettings{Identity: to.Ptr(id), Lifecycle: to.Ptr(a.IdentitySettingsLifeCycle(pins[id].Lifecycle))})
 	}
 	command := "/app/teststudio-prepare"
-	args := []string{"--discovery-only", "--execution-location=azure-container-apps", "--database-env=TESTSTUDIO_DATABASE", "--require-postgres=true", "--azure-sandbox-env=TESTSTUDIO_SANDBOX"}
+	args := []string{"--discovery-only", "--execution-location=azure-container-apps", "--database-env=TESTSTUDIO_DATABASE", "--database-host=" + h.DatabaseHost, "--require-postgres=true", "--azure-sandbox-env=TESTSTUDIO_SANDBOX"}
 	env := []*a.EnvironmentVar{{Name: to.Ptr("TESTSTUDIO_HOST_PROFILE"), Value: to.Ptr(s.Host.Profile)}, {Name: to.Ptr("TESTSTUDIO_DATABASE"), SecretRef: to.Ptr("database")}, {Name: to.Ptr("TESTSTUDIO_SANDBOX"), SecretRef: to.Ptr("sandbox")}}
 	probes := []*a.ContainerAppProbe{}
 	if s.Mode == "execution" {
 		command = "/app/teststudio"
-		args = []string{"--serve-role=controller", "--addr=0.0.0.0:8043", "--execution-location=azure-container-apps", "--database-env=TESTSTUDIO_DATABASE", "--require-postgres=true", "--azure-sandbox-env=TESTSTUDIO_SANDBOX", "--artifact-store-env=TESTSTUDIO_ARTIFACT_CONFIGURATION", "--public-url=" + h.PublicOrigin}
+		args = []string{"--serve-role=controller", "--addr=0.0.0.0:8043", "--execution-location=azure-container-apps", "--database-env=TESTSTUDIO_DATABASE", "--database-host=" + h.DatabaseHost, "--require-postgres=true", "--azure-sandbox-env=TESTSTUDIO_SANDBOX", "--artifact-store-env=TESTSTUDIO_ARTIFACT_CONFIGURATION", "--public-url=" + h.PublicOrigin}
 		artifact, _ := json.Marshal(map[string]any{"driver": "azure", "azure": map[string]any{"serviceUrl": h.BlobServiceURL, "container": h.EvidenceContainer, "prefix": "teststudio", "managedIdentityClientId": h.Runtime.Client}})
 		env = append(env, &a.EnvironmentVar{Name: to.Ptr("TESTSTUDIO_ARTIFACT_CONFIGURATION"), Value: to.Ptr(string(artifact))})
 		for _, probe := range []struct {

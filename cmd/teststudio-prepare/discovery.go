@@ -18,7 +18,7 @@ func validateDiscoveryOnlyFlags(flags *flag.FlagSet, enabled, assembly bool, loc
 	invalid := assembly || ecs == kubernetes || ecs && location != "ecs" || kubernetes && location != "kubernetes" || flags.NArg() != 0
 	flags.Visit(func(value *flag.Flag) {
 		switch value.Name {
-		case "discovery-only", "database", "database-env", "require-postgres", "execution-location", "ecs-workers-config", "ecs-workers-env", "kubernetes-workers-config", "kubernetes-workers-env":
+		case "discovery-only", "database", "database-env", "database-host", "require-postgres", "execution-location", "ecs-workers-config", "ecs-workers-env", "kubernetes-workers-config", "kubernetes-workers-env":
 		default:
 			invalid = true
 		}

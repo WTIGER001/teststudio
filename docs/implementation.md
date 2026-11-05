@@ -122,6 +122,27 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: PostgreSQL destination and TLS binding
+
+The service and preparation commands now accept database-host to bind a protected PostgreSQL URL to one expected DNS hostname and verified TLS.
+The guard rejects changed hosts, nonstandard ports, plaintext fallbacks, duplicate or alternate routing options, and nonempty PG environment overrides before storage opens.
+Both staged controller commands require the configured host.databaseHost. Host admission rejects reported hostname argument drift.
+The controller resolver approved list includes that name. The shared worker and converted-image profiles stay unchanged.
+Four new checks and ten affected checks pass locally with race detection across configuration, service command, preparation, and sandbox packages.
+The existing local controller still completes one queued HTTPS probe and releases its owned process and listener.
+The connection URL remains in its protected reference. Validation errors exclude credentials and private parser diagnostics.
+Validation reads no certificate, password, service, or provider configuration files.
+The driver configuration retains the expected hostname, port 5432, verified TLS server name, and no plaintext or alternate-host fallbacks.
+Runtime configuration passes in 1.275 seconds, service commands in 7.627 seconds, preparation in 1.990 seconds, and sandbox contracts in 2.230 seconds.
+Checks use local SQLite, the existing owned loopback HTTPS target, pure configuration, and in-memory metadata.
+Evidence is output/database-host-binding/summary.json and local.log.
+Owned child processes, listeners, clients, and readers close through cleanup.
+No cloud service, browser, container, UI build, demo restart, resource mutation, or remote push runs.
+The plan and affected operator guides match the behavior. No user page changes.
+Private database networking, actual dependency authority, remaining identity attachment, native command activation, and deployment packaging stay unfinished.
+See [PostgreSQL destination binding](database-host-binding.md).
+Acceptance **51** advances. No acceptance item closes. The total remains **48 verified, 9 open**.
+
 ## Current delivery: controller VNet, source perimeter, and resolver association
 
 The runtime now checks controller VNet contents, source security rules, default routing, dedicated firewall policy, and actual resolver association.

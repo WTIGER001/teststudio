@@ -248,9 +248,18 @@ Fourteen staged resource bodies support later packaging. Database transport and 
 Three new checks and eleven affected checks pass locally with race detection in 4.217 seconds.
 See [controller source perimeter](azure-sandbox-host-network.md). Acceptance 51 advances; the count remains 48 verified, nine open.
 
+The service and preparation commands now accept database-host to bind a protected PostgreSQL URL to one expected DNS hostname and verified TLS.
+The guard rejects changed hosts, nonstandard ports, plaintext fallbacks, duplicate or alternate routing options, and nonempty PG environment overrides before storage opens.
+Both staged controller commands require the configured host.databaseHost. Host admission rejects reported hostname argument drift.
+The controller resolver approved list includes that name. The shared worker and converted-image profiles stay unchanged.
+Four new checks and ten affected checks pass locally with race detection across configuration, service command, preparation, and sandbox packages.
+The existing local controller still completes one queued HTTPS probe and releases its owned process and listener.
+See [PostgreSQL destination binding](database-host-binding.md). Acceptance 51 advances; the count remains 48 verified, nine open.
+
 Complete remaining effective-authority and protected network admission, native command role wiring, and deployment packaging next.
 Bind additional declared registry consumers to trusted workload and network ownership.
-Complete database transport and actual dependency permissions and network paths.
+Complete the selected database private endpoint, DNS records, source TCP 5432 rules, and actual dependency permissions and network paths.
+The implemented hostname guard does not replace network ownership or establish connectivity.
 Bind native HTTPS-probe target routing to registered-target and request-policy contracts before native controller activation.
 Complete remaining import and timer identity attachment, additional grants and deny effects, and protected write boundaries.
 Reported service placement does not establish exclusive identity use across subscriptions, other host types, or deny-hidden resources.

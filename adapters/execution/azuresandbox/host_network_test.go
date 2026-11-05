@@ -21,6 +21,9 @@ func TestSandboxHostNetworkBindsTopologyAndModeSpecificDependencyPolicy(t *testi
 		if err != nil || len(defs) != 14 {
 			t.Fatal("missing staged network definitions", err, len(defs))
 		}
+		if !slices.Contains(s.Host.resolverBinding(s).Domains, s.Host.DatabaseHost) {
+			t.Fatal("selected database host cannot resolve")
+		}
 		domains := s.Host.dependencyDomains(s)
 		if slices.Contains(domains, "studio.teststudio.example") || !slices.Contains(domains, "management.westus2.azuredevcompute.io") || !slices.Contains(domains, "studiotest.vault.azure.net") || slices.Contains(domains, "studiotest.blob.core.windows.net") != (s.Mode == "execution") {
 			t.Fatal("host dependency boundary drifted", domains)

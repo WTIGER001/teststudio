@@ -26,7 +26,13 @@ func TestSandboxHostModesKeepImagePoolAndSeparateFixedHostProfiles(t *testing.T)
 		if s.Mode == "discovery" {
 			count, command, first = 5, "/app/teststudio-prepare", "--discovery-only"
 		}
-		if app.Properties.Configuration.Ingress != nil || len(app.Identity.UserAssignedIdentities) != count || *app.Properties.Template.Containers[0].Command[0] != command || *app.Properties.Template.Containers[0].Args[0] != first {
+		databaseArgument := false
+		for _, arg := range app.Properties.Template.Containers[0].Args {
+			if *arg == "--database-host="+s.Host.DatabaseHost {
+				databaseArgument = true
+			}
+		}
+		if !databaseArgument || app.Properties.Configuration.Ingress != nil || len(app.Identity.UserAssignedIdentities) != count || *app.Properties.Template.Containers[0].Command[0] != command || *app.Properties.Template.Containers[0].Args[0] != first {
 			t.Fatal("host roles or identity sets were combined")
 		}
 		w := newPlacementWorld(t, s)
@@ -40,12 +46,14 @@ func TestSandboxHostModesKeepImagePoolAndSeparateFixedHostProfiles(t *testing.T)
 		}
 	}
 	f := newControllerFixture(t, "go", "")
-	for _, mode := range []string{"missing", "application-alias", "network-alias", "identity-alias", "configuration-secret", "discovery-runtime", "stale-profile"} {
+	for _, mode := range []string{"missing", "invalid-database-host", "application-alias", "network-alias", "identity-alias", "configuration-secret", "discovery-runtime", "stale-profile"} {
 		t.Run(mode, func(t *testing.T) {
 			s := runtimeSettings()
 			switch mode {
 			case "missing":
 				s.Host = HostSettings{}
+			case "invalid-database-host":
+				s.Host.DatabaseHost = "127.0.0.1"
 			case "application-alias":
 				s.Host.Application = s.Placement.Services.Relay.Application
 			case "network-alias":
@@ -74,7 +82,7 @@ func TestSandboxHostModesKeepImagePoolAndSeparateFixedHostProfiles(t *testing.T)
 }
 
 func TestSandboxHostRejectsTemplateIdentitySecretRevisionAndEnvironmentDrift(t *testing.T) {
-	for _, mode := range []string{"command", "role", "extra-argument", "ingress", "identity-lifecycle", "client", "secret-identity", "inline-secret", "host-profile", "extra-environment", "sidecar", "environment", "public-access", "routes", "endpoint", "revision", "pending"} {
+	for _, mode := range []string{"command", "role", "database-host", "extra-argument", "ingress", "identity-lifecycle", "client", "secret-identity", "inline-secret", "host-profile", "extra-environment", "sidecar", "environment", "public-access", "routes", "endpoint", "revision", "pending"} {
 		t.Run(mode, func(t *testing.T) {
 			s := runtimeSettings()
 			w := newPlacementWorld(t, s)
@@ -88,6 +96,12 @@ func TestSandboxHostRejectsTemplateIdentitySecretRevisionAndEnvironmentDrift(t *
 				container["command"] = []string{"/app/teststudio-job"}
 			case "role":
 				container["args"].([]any)[0] = "--serve-role=all"
+			case "database-host":
+				for i, raw := range container["args"].([]any) {
+					if strings.HasPrefix(raw.(string), "--database-host=") {
+						container["args"].([]any)[i] = "--database-host=foreign.example.test"
+					}
+				}
 			case "extra-argument":
 				container["args"] = append(container["args"].([]any), "--go-images=untrusted")
 			case "ingress":

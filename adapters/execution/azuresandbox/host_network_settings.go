@@ -74,7 +74,7 @@ func (h HostSettings) dependencyDomains(s Settings) []string {
 
 func (h HostSettings) resolverBinding(s Settings) azureworker.ResolverBinding {
 	name := strings.TrimSuffix(s.Worker.Registry, ".azurecr.io")
-	domains := append(h.dependencyDomains(s), s.Worker.Registry, name+"."+s.Worker.Region+".data.azurecr.io", name+".privatelink.azurecr.io", name+"."+s.Worker.Region+".data.privatelink.azurecr.io")
+	domains := append(h.dependencyDomains(s), h.DatabaseHost, s.Worker.Registry, name+"."+s.Worker.Region+".data.azurecr.io", name+".privatelink.azurecr.io", name+"."+s.Worker.Region+".data.privatelink.azurecr.io")
 	slices.Sort(domains)
 	return azureworker.ResolverBinding{Policy: h.Network.Resolver.Policy, AllowList: h.Network.Resolver.AllowList, BlockList: h.Network.Resolver.BlockList, VirtualNetwork: h.virtualNetwork(), Role: "controller", Domains: domains}
 }

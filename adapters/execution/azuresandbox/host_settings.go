@@ -3,11 +3,14 @@ package azuresandbox
 import (
 	"strings"
 
+	"github.com/wtiger001/teststudio/internal/runtimeconfig"
+
 	azureworker "github.com/wtiger001/teststudio/adapters/execution/azure"
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
 )
 
 type HostSettings struct {
+	DatabaseHost           string                   `json:"databaseHost"`
 	Network                HostNetworkSettings      `json:"network"`
 	SubnetPrefix           string                   `json:"subnetPrefix"`
 	Registry               RelayRegistrySettings    `json:"registry"`
@@ -37,7 +40,7 @@ func (h HostSettings) identities() []ServiceIdentitySettings {
 }
 
 func (h HostSettings) validate(c Config, p PlacementSettings) error {
-	if !resourceID(c, h.Application, "Microsoft.App", "containerApps") || !resourceID(c, h.Environment, "Microsoft.App", "managedEnvironments") || !serviceSubnet(c, h.Subnet) || !serviceGroup(h.InfrastructureGroup) || !trustedImage(c, h.Image) || !azureworker.ValidServiceSecretReference(h.DatabaseSecretURL) || !azureworker.ValidServiceSecretReference(h.ConfigurationSecretURL) || h.DatabaseSecretURL == h.ConfigurationSecretURL || h.Replicas < 1 || h.Replicas > 10 {
+	if !runtimeconfig.ValidDatabaseHost(h.DatabaseHost) || !resourceID(c, h.Application, "Microsoft.App", "containerApps") || !resourceID(c, h.Environment, "Microsoft.App", "managedEnvironments") || !serviceSubnet(c, h.Subnet) || !serviceGroup(h.InfrastructureGroup) || !trustedImage(c, h.Image) || !azureworker.ValidServiceSecretReference(h.DatabaseSecretURL) || !azureworker.ValidServiceSecretReference(h.ConfigurationSecretURL) || h.DatabaseSecretURL == h.ConfigurationSecretURL || h.Replicas < 1 || h.Replicas > 10 {
 		return hostedexecution.ErrConfiguration
 	}
 	name := h.Application[strings.LastIndex(h.Application, "/")+1:]

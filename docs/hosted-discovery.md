@@ -34,6 +34,7 @@ Complete isolated discovery, effective authorization, actual workload placement,
 Use the same PostgreSQL installation and execution-location=kubernetes in the API and preparation process.
 Use the protected worker namespace, RuntimeClass, network policy, and private HTTPS origin from [Kubernetes workers](kubernetes-workers.md).
 Both processes need their mounted Kubernetes API token and trust configuration.
+Both can use [--database-host](database-host-binding.md) to bind their protected database URL to the selected DNS hostname with verified TLS.
 The API registry identity needs read access. The separate preparation registry identity needs scoped pull,push access.
 Inject each identity's values through its own protected TESTSTUDIO_REGISTRY_ environment references.
 Never put registry credentials in test Pods, source bundles, public settings, or process arguments.

@@ -69,6 +69,7 @@ A missing or blank selected variable fails before startup. Invalid environment n
 Database initialization errors from this environment path exclude private connection values and upstream diagnostics.
 The connection value never becomes a process argument.
 Hosted API and preparation processes can add --require-postgres to reject a local SQLite fallback before opening storage.
+Use [--database-host](database-host-binding.md) to bind a protected PostgreSQL URL to one expected DNS hostname with verified TLS and no routing overrides.
 
 The packaged entrypoint includes these settings:
 

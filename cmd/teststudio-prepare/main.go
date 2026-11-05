@@ -39,6 +39,7 @@ func main() {
 func run() error {
 	database := flag.String("database", ".data/teststudio.db", "SQLite path or PostgreSQL URL shared with the API")
 	databaseEnvironment := flag.String("database-env", "", "Environment variable containing the database connection")
+	databaseHost := flag.String("database-host", "", "Bind PostgreSQL to this DNS hostname with verified TLS and no routing overrides")
 	requirePostgres := flag.Bool("require-postgres", false, "Require PostgreSQL for a hosted or multi-instance installation")
 	ecsConfig := flag.String("ecs-workers-config", "", "Private ECS worker and network preparation settings")
 	ecsEnv := flag.String("ecs-workers-env", "", "Environment variable containing private ECS preparation settings")
@@ -62,6 +63,9 @@ func run() error {
 	}
 	connection, err := runtimeconfig.DatabaseConnection(*database, *databaseEnvironment, runtimeconfig.ExplicitFlag(flag.CommandLine, "database"), os.LookupEnv)
 	if err != nil {
+		return err
+	}
+	if err := runtimeconfig.ValidateDatabaseHost(connection, *databaseHost, os.Environ()); err != nil {
 		return err
 	}
 	providers := 0

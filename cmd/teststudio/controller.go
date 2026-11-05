@@ -41,7 +41,7 @@ func validateControllerFlags(flags *flag.FlagSet, address, location string, ecs,
 		switch value.Name {
 		case "addr":
 			explicitAddress = true
-		case "serve-role", "execution-location", "database", "database-env", "require-postgres", "artifact-directory", "artifact-store-config", "artifact-store-env", "public-url", "http-trust-bundles", "ecs-workers-config", "ecs-workers-env", "kubernetes-workers-config", "kubernetes-workers-env":
+		case "serve-role", "execution-location", "database", "database-env", "database-host", "require-postgres", "artifact-directory", "artifact-store-config", "artifact-store-env", "public-url", "http-trust-bundles", "ecs-workers-config", "ecs-workers-env", "kubernetes-workers-config", "kubernetes-workers-env":
 		default:
 			invalid = true
 		}

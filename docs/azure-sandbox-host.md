@@ -21,6 +21,7 @@ Settings.host contains these required bindings:
 | subnet, infrastructureGroup | Selected environment subnet and infrastructure group, separate from sandbox, relay, and backend networks. |
 | image | Immutable trusted service image outside the source-image namespace. |
 | pull, startup | Distinct identity resource, client, and principal pins. |
+| databaseHost | Required canonical database hostname, included in both commands through [--database-host](database-host-binding.md). |
 | databaseSecretUrl, configurationSecretUrl | Distinct Key Vault secret references for PostgreSQL and native runtime configuration. |
 | replicas | Fixed minimum and maximum replica count between one and ten. |
 | profile | Settings.HostProfile(), calculated after all other settings are assigned. |

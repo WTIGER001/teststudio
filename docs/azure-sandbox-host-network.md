@@ -61,7 +61,7 @@ Some platform rules contain their existing wildcard domains. This is a trusted c
 
 ### Resolver association
 
-The resolver approved list contains the derived dependency domains and private registry login and regional data names.
+The resolver approved list contains the derived dependency domains, selected database hostname, and private registry login and regional data names.
 Its second list contains the root-domain block.
 Complete rules and links must match the fixed controller definitions.
 The selected VNet's listDnsResolverPolicies observation must report exactly the configured policy.

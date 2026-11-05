@@ -48,6 +48,7 @@ Project and exact-origin private certificate authorities use the existing --http
 
 The controller accepts one existing ECS or Kubernetes execution profile and its matching execution location.
 Hosted profiles require PostgreSQL and the installation's shared artifact adapter.
+The optional [--database-host binding](database-host-binding.md) validates the selected database destination and verified TLS before storage opens.
 For Kubernetes, the role selection looks like this:
 
 ```sh

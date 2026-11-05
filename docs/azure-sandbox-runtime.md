@@ -38,7 +38,7 @@ The loader validates all fields before credential construction.
 | Field | Contract |
 | --- | --- |
 | worker | The existing sandbox Config: subscription, resource group, region, group, registry namespace, exchange origin, VNet connection, virtualization type, and network profile. |
-| host | Required mode-specific controller application, environment, identities, dependencies, and separate host profile described in the host guide. |
+| host | Required mode-specific controller application, environment, identities, dependencies, databaseHost, and separate host profile described in the host guide. |
 | mode | Required execution or discovery. No combined native mode or implicit default. |
 | tenantId | Nonzero installation tenant identifier for the registry exchange. |
 | controlClientId | Explicit nonzero managed identity client identifier for sandbox control and timer administration. |
