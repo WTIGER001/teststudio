@@ -122,7 +122,41 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: reported subscription private DNS links
+## Current delivery: selected VNet and private-zone deny observation
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+The selected deny stage now reads actual resource-scoped assignments for the worker VNet, relay VNet, and their three selected private DNS zones.
+Protecting only VNets does not protect records in already-linked zones. Review extends the same contract to those three zones.
+Every assignment must report enforced mode, Azure system protection, child-scope coverage, all-principal coverage, no excluded principal, and no condition.
+Its single management permission denies the literal star action with only fixed read, lock-delete, and bodyless DNS-association read exceptions.
+Audit mode, join or record-write exceptions, wildcard exclusions, conditional permissions, missing protection, and substituted scopes cannot establish approval.
+The parent configuration and all five assignment identifiers remain fixed. Broader-scope assignments cannot substitute for the selected resource scopes.
+
+The SDK pins armauthorization/v3 v3.0.0-beta.3 and API 2024-07-01-preview to retain explicit effect and assignment-level condition fields.
+No fallback assumes that an omitted enforcement field means enforced. Hosted API compatibility and actual resource provisioning remain unverified.
+Only this module and its two checksum entries are added. Existing dependency versions remain unchanged.
+Five concurrent selected GETs add no duplicate parent observation. The composed context is 120 seconds, with at most 2193 reads including bounded inventory.
+The observer permits no mutation, list, credential, role-management, or alternate-version request.
+It implements no Network, authorizes no dispatch, and enables no Azure coded execution.
+
+Four new focused race checks pass for the final five-resource contract in 3.831 seconds.
+Two selected existing reported-inventory checks pass in the earlier six-check command, which takes 4.624 seconds.
+Only changed deny checks repeat after the protection scope expands to selected zones. No unchanged broad suite repeats.
+The initial compile attempt corrects value-shaped SDK response handling before checks pass.
+Coverage includes fresh state, parent gating, audit mode, principal exclusions, conditions, child scopes, join and record-write bypasses, action semantics, SDK scope, and unknown state.
+No cloud request, browser, UI build, image build, container, registry push, deployment, or demo restart runs.
+Only public documentation and SDK module metadata requests leave the local environment.
+Fixtures use explicit fake credentials and in-memory SDK responses. They open no network connection or listener.
+Evidence is output/azure-network-deny/summary.json and the targeted command results.
+See [selected network and DNS deny observation](azure-network-deny.md).
+
+Continue actual assignment provisioning and enforcement, clean installation provenance or authoritative existing cross-scope visibility, and protection-management authority.
+The observed deny contract does not remove existing foreign links or prove who can change the owning protection arrangement.
+Environment attachment, other perimeter protection, read coverage, trusted preparation networking, and complete native wiring remain required.
+All nine broad acceptance items remain open under their original scope.
+
+## Previous delivery: reported subscription private DNS links
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 

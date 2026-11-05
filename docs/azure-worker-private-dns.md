@@ -74,6 +74,8 @@ DNS propagation and existing caches still require separate hosted verification.
 
 The [reported subscription inventory](azure-private-dns-inventory.md) now checks direct zone and link lists for additional worker or relay links.
 That scan does not establish cross-subscription or cross-tenant coverage, effective read authority, or protection against later attachments.
+The [selected deny observer](azure-network-deny.md) now checks enforced, unconditional assignment metadata on both VNets and the three selected zones.
+Actual enforcement, installation provenance, existing cross-scope links, and protection-management authority remain unproven.
 
 This reader requests only the selected zones and their children.
 It does not enumerate all zones in every resource group, subscription, or tenant that could be linked to the worker VNet.

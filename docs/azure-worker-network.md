@@ -28,6 +28,8 @@ The [relay registry endpoint observer](azure-relay-registry-endpoint.md) now bin
 The [relay private DNS observer](azure-relay-private-dns.md) now checks derived registry records, a completed exclusive relay link, disabled registration, and no public fallback.
 The [reported private DNS inventory](azure-private-dns-inventory.md) now detects unexpected subscription-visible links into worker and relay VNets.
 It establishes neither cross-subscription or cross-tenant coverage nor authority to prevent later attachments.
+The [selected deny observer](azure-network-deny.md) now checks explicit enforcement, all-principal coverage, child scopes, and fixed exceptions on both VNets and three selected zones.
+Deployed enforcement, existing cross-scope links, clean provenance, read coverage, and authority to change protection remain separate requirements.
 The complete adapter must also prove read coverage, attachment authority, effective zone visibility, full backend authority, exchange networking, and execution placement.
 Azure coded execution remains disabled in native commands and infrastructure packaging.
 See [durable Azure execution](azure-worker-lifecycle.md), [job contracts](azure-worker-contract.md), and [independent deadlines](azure-worker-deadlines.md).

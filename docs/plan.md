@@ -349,7 +349,17 @@ This scan is therefore reported-subscription inspection. It cannot replace proof
 Inspect actual enforcement and scope coverage before relying on policy or deployment-stack protection settings.
 Keep those controls mandatory and native coded execution disabled while they remain unproven.
 
-Next verify effective read coverage, actual network and environment attachment authority, authoritative cross-scope zone coverage, and trusted preparation networking.
+The selected deny stage now checks actual assignments on both VNets and the three selected private DNS zones.
+It requires enforced mode, system protection, child scopes, all-principal coverage, no principal or condition bypass, and only the fixed read exceptions.
+Five selected GETs reuse the current reported-inventory chain without duplicate parent observations.
+The pinned preview authorization SDK retains enforcement and assignment-condition fields absent from the older stable model. Hosted API support remains unverified.
+Four new focused race checks pass for the five-resource contract. Two selected existing inventory checks pass; only changed deny checks repeat.
+See [selected network and DNS deny observation](azure-network-deny.md). Acceptance 51 advances; the count remains 48 of 57.
+No cloud operation, UI build, image build, browser, container, registry push, deployment, or demo restart runs.
+
+Next verify actual resource-scoped assignment provisioning and enforcement, effective read coverage, and authority to change the owning protection arrangement.
+Establish authoritative existing cross-scope visibility or clean installation provenance. Observed deny assignments do not remove pre-existing foreign links.
+Continue environment attachment control, remaining perimeter protection, and trusted preparation networking.
 A completed list response does not prove authorization coverage or prevent later attachments. Keep those native installation controls mandatory.
 Use the worker backend role to verify its restricted route, TLS authority, and placement before completing service admission.
 The staged Azure backend selects platform HTTPS termination. Other approved profiles can select direct TLS.
@@ -364,6 +374,8 @@ The selected relay registry endpoint now passes local approval, NIC ownership, m
 The selected relay registry records, complete inventory counts, completed exclusive link, disabled registration, and no-fallback settings now pass local checks.
 Verify authoritative effective VNet-wide DNS visibility, trusted preparation networking, and deployed certificate trust next.
 The direct subscription inventory now detects reported unexpected zone links. It does not establish the complete effective view or prevent later changes.
+The selected deny observer now checks enforced protection metadata for both VNets and three selected zones, with no join or record-write exception.
+Verify actual enforcement and protection-management authority. A matching response does not establish clean creation provenance or complete existing cross-scope coverage.
 The registry service guard now permits the explicit relay consumer alongside worker and preparation endpoints while rejecting unknown consumers.
 Inspect effective identity grants and backend infrastructure subnet controls.
 Backend hostname lookup is unnecessary in pinned mode. Preserve worker, exchange, registry, and platform DNS controls.

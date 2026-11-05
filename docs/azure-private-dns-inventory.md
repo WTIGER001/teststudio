@@ -95,5 +95,7 @@ go test -race ./adapters/execution/azure -run '^(TestAzurePrivateDNSInventory.*|
 
 Evidence is output/azure-private-dns-inventory/summary.json and the targeted command result.
 Continue independent effective-read coverage and controls on authority to link or change zones, VNets, and environments.
+The [selected deny observer](azure-network-deny.md) now reads actual protection metadata for the worker and relay VNets and their three selected zones.
+It does not establish deployed enforcement, remove pre-existing cross-scope links, or prove who can change protection through its owning workflow.
 Inspect actual enforcement before relying on installation protection settings. A proposed policy or deployment-stack flag alone proves no effective deny arrangement.
 Keep native coded execution disabled while cross-scope coverage, attachment authority, or execution isolation remains unproven.
