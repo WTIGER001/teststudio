@@ -103,7 +103,10 @@ Wire native execution and source discovery roles separately.
 Do not pass one execution-only runtime as both providers in a combined command registration.
 The common server registration now accepts distinct execution and discovery providers.
 The preparation command has a discovery-only path for existing ECS and Kubernetes profiles.
-Native sandbox command integration remains unfinished.
+The server now has a headless controller role for the pending execution host contract.
+That role processes runs without account setup or user listeners; the API can disable its execution worker.
+Native sandbox command integration and controller identity attachment remain unfinished.
+See [headless controller](execution-controller.md).
 See [separate discovery command roles](source-assembly-handoff.md#dedicated-discovery-process).
 
 ### Admission and shutdown

@@ -208,6 +208,17 @@ This supplies concrete discovery and execution registration boundaries for the p
 Native sandbox activation, effective deployment permissions, and separate provider packaging remain unfinished.
 See [dedicated discovery process](source-assembly-handoff.md#dedicated-discovery-process). Acceptance 51 advances; the total remains 48 verified, nine open.
 
+The server now supports a headless controller role with only health and liveness routes and the existing execution worker lifecycle.
+It skips account and provider bootstrap, user routes, source preparation, scheduling, notification sending, and recording or session maintenance.
+Completion still writes notification delivery records. The API can select execution-worker=false while retaining its other configured services.
+The controller supports native HTTP checks locally and existing ECS or Kubernetes coded profiles with execution-only registration.
+Strict role validation rejects unrelated flags before state creation. Hosted controller profiles require PostgreSQL.
+Three new checks and eight affected checks pass locally with race detection.
+The actual command completes one queued HTTPS probe, preserves sign-in configuration and completion planning, and releases its process and listener.
+This gives the pending native execution host contract a concrete role without copying API account or UI configuration.
+Native Azure sandbox selection, controller identity attachment, effective authority, and packaging remain unfinished.
+See [headless execution controller](execution-controller.md). Acceptance 51 advances; the total remains 48 verified, nine open.
+
 Complete remaining effective-authority and protected network admission, native command role wiring, and deployment packaging next.
 Bind additional declared registry consumers to trusted workload and network ownership.
 Complete controller and remaining identity host attachment, additional grants and deny effects, and protected write boundaries.

@@ -14,24 +14,27 @@ import (
 )
 
 type backgroundServices struct {
-	Runs          *runs.Service
-	Recordings    *recording.Service
-	CLI           *cliauth.Service
-	Evidence      *evidence.Service
-	Sources       *sources.Service
-	Schedules     *schedules.Service
-	Notifications *notifications.Service
+	DisableExecution bool
+	Runs             *runs.Service
+	Recordings       *recording.Service
+	CLI              *cliauth.Service
+	Evidence         *evidence.Service
+	Sources          *sources.Service
+	Schedules        *schedules.Service
+	Notifications    *notifications.Service
 }
 
 func (s backgroundServices) start(ctx context.Context) func() {
 	ctx, cancel := context.WithCancel(ctx)
 	done := []<-chan struct{}{
-		s.Runs.Start(ctx),
 		s.Recordings.StartMaintenance(ctx),
 		s.CLI.StartMaintenance(ctx),
 		s.Evidence.StartMaintenance(ctx, 5*time.Second),
 		s.Sources.StartMaintenance(ctx, 5*time.Second),
 		s.Sources.StartPreparation(ctx),
+	}
+	if !s.DisableExecution {
+		done = append(done, s.Runs.Start(ctx))
 	}
 	if s.Schedules != nil {
 		done = append(done, s.Schedules.Start(ctx))

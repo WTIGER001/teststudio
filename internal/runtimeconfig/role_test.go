@@ -8,7 +8,7 @@ import (
 
 func TestServiceRolesKeepWorkerListenerSeparateFromApplicationRoles(t *testing.T) {
 	for name, want := range map[string]runtimeconfig.ServiceRole{
-		"all": {API: true, Artifacts: true}, "api": {API: true}, "artifacts": {Artifacts: true}, "worker": {Worker: true},
+		"all": {API: true, Artifacts: true}, "api": {API: true}, "artifacts": {Artifacts: true}, "worker": {Worker: true}, "controller": {Controller: true},
 	} {
 		got, err := runtimeconfig.ParseServiceRole(name)
 		if err != nil || got != want {

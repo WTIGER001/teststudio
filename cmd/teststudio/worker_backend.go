@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"flag"
 	"net"
@@ -96,24 +95,8 @@ func configureWorkerAuthorization(run *runs.Service, source *sources.Service, ex
 func workerBackendServer(address string, db *storage.Store, exchange *workerexchange.Service) *http.Server {
 	mux := http.NewServeMux()
 	mux.Handle("/internal/worker/", workerhttp.Handler(exchange))
-	health := func(ready bool) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("Cache-Control", "no-store")
-			w.Header().Set("Content-Type", "application/json")
-			w.Header().Set("X-Content-Type-Options", "nosniff")
-			if ready {
-				ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
-				defer cancel()
-				if err := db.DB.PingContext(ctx); err != nil {
-					w.WriteHeader(http.StatusServiceUnavailable)
-					json.NewEncoder(w).Encode(map[string]string{"status": "unavailable"})
-					return
-				}
-			}
-			json.NewEncoder(w).Encode(map[string]string{"status": "up", "service": "teststudio", "role": "worker"})
-		}
-	}
-	mux.HandleFunc("GET /healthz", health(true))
-	mux.HandleFunc("GET /livez", health(false))
+	health := serviceHealthHandler(db, "worker")
+	mux.Handle("GET /healthz", health)
+	mux.Handle("GET /livez", health)
 	return &http.Server{Addr: address, Handler: mux, ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 45 * time.Second, WriteTimeout: 60 * time.Second, IdleTimeout: 90 * time.Second, MaxHeaderBytes: 16 << 10}
 }

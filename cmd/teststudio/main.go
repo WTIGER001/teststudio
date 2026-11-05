@@ -67,7 +67,7 @@ func run() error {
 	ecsEnvironment := flag.String("ecs-workers-env", "", "Environment variable containing private ECS worker settings")
 	kubernetesConfiguration := flag.String("kubernetes-workers-config", "", "Operator JSON settings for isolated Kubernetes workers")
 	kubernetesEnvironment := flag.String("kubernetes-workers-env", "", "Environment variable containing isolated Kubernetes worker settings")
-	serviceRole := flag.String("serve-role", "all", "Service listeners: all, api, artifacts, or worker; isolated roles start no background workers or identity bootstrap")
+	serviceRole := flag.String("serve-role", "all", "Service role: all, api, artifacts, worker, or controller")
 	addr := flag.String("addr", "127.0.0.1:8040", "HTTP listen address")
 	dsn := flag.String("database", ".data/teststudio.db", "SQLite path or PostgreSQL connection URL")
 	databaseEnvironment := flag.String("database-env", "", "Environment variable containing the database connection")
@@ -89,6 +89,7 @@ func run() error {
 	sourceBundleRunners := flag.String("source-bundle-runners", "go,playwright", "Available source builders: go, playwright, or both separated by a comma")
 	githubSources := flag.Bool("github-sources", false, "Enable GitHub repository registration and durable sync queues")
 	scheduler := flag.Bool("scheduler", true, "Process durable project schedules on this instance")
+	executionWorker := flag.Bool("execution-worker", true, "Process queued test runs on this API instance; disable when using a separate controller")
 	notificationWorker := flag.Bool("notification-worker", true, "Process durable notification deliveries on this instance")
 	secretBindings := flag.String("secret-bindings", "", "Project and purpose scoped environment or mounted-file secret binding configuration")
 	httpTrustBundles := flag.String("http-trust-bundles", "", "Project and exact-origin scoped private HTTPS certificate authority bindings")
@@ -108,14 +109,22 @@ func run() error {
 	if err != nil {
 		return err
 	}
+	if !role.API && runtimeconfig.ExplicitFlag(flag.CommandLine, "execution-worker") {
+		return errors.New("execution-worker applies only to the API or all service role")
+	}
 	if !role.Worker && (*workerOrigin != "" || *workerCertificate != "" || *workerKey != "") {
 		return errors.New("direct worker TLS settings require the worker service role")
 	}
-	if !role.API && !role.Worker && (*workerAddr != "" || *local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *preparedSources || *sourceBundles || *githubSources || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
+	if !role.API && !role.Worker && !role.Controller && (*workerAddr != "" || *local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *preparedSources || *sourceBundles || *githubSources || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
 		return errors.New("the artifact service role cannot configure identity bootstrap, sign-in, source preparation, recording, execution, or private worker transport")
 	}
-	if !role.API && !role.Worker && (*kubernetesConfiguration != "" || *kubernetesEnvironment != "" || *ecsConfiguration != "" || *ecsEnvironment != "") {
+	if !role.API && !role.Worker && !role.Controller && (*kubernetesConfiguration != "" || *kubernetesEnvironment != "" || *ecsConfiguration != "" || *ecsEnvironment != "") {
 		return errors.New("the artifact service role cannot configure hosted execution")
+	}
+	if role.Controller {
+		if err := validateControllerFlags(flag.CommandLine, *addr, *location, *ecsConfiguration != "" || *ecsEnvironment != "", *kubernetesConfiguration != "" || *kubernetesEnvironment != ""); err != nil {
+			return err
+		}
 	}
 	if role.Worker {
 		if err := validateWorkerBackendFlags(flag.CommandLine, *workerAddr, *location); err != nil {
@@ -139,6 +148,9 @@ func run() error {
 	defer stop()
 	if role.Worker {
 		return runWorkerBackend(ctx, *workerAddr, *location, connection, *databaseEnvironment, *artifactConfiguration, *artifactEnvironment, *artifactDirectory, workerTLSOptions{Origin: *workerOrigin, Certificate: *workerCertificate, Key: *workerKey})
+	}
+	if role.Controller {
+		return runController(ctx, controllerOptions{Address: *addr, Location: *location, Connection: connection, DatabaseEnvironment: *databaseEnvironment, ArtifactConfiguration: *artifactConfiguration, ArtifactEnvironment: *artifactEnvironment, ArtifactDirectory: *artifactDirectory, PublicOrigin: *public, TrustBundles: *httpTrustBundles, ECSConfiguration: *ecsConfiguration, ECSEnvironment: *ecsEnvironment, KubernetesConfiguration: *kubernetesConfiguration, KubernetesEnvironment: *kubernetesEnvironment})
 	}
 	parsed, err := url.Parse(*public)
 	if err != nil || parsed.Host == "" || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Path != "" || parsed.RawQuery != "" || parsed.Fragment != "" || parsed.User != nil {
@@ -388,7 +400,7 @@ func run() error {
 	if *workerAddr != "" {
 		servers = append(servers, &http.Server{Addr: *workerAddr, Handler: workerhttp.Handler(workerExchange), ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 45 * time.Second, WriteTimeout: 60 * time.Second, IdleTimeout: 90 * time.Second, MaxHeaderBytes: 16 << 10})
 	}
-	background := backgroundServices{Runs: runService, Recordings: recordingService, CLI: &cliauth.Service{Sessions: sessionService}, Evidence: evidenceService, Sources: sourceService}
+	background := backgroundServices{DisableExecution: !*executionWorker, Runs: runService, Recordings: recordingService, CLI: &cliauth.Service{Sessions: sessionService}, Evidence: evidenceService, Sources: sourceService}
 	if *scheduler {
 		background.Schedules = scheduleService
 	}

@@ -1,18 +1,14 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"flag"
 	"io"
 	"net"
 	"net/http"
 	"net/http/httptest"
-	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
-	"syscall"
 	"testing"
 	"time"
 
@@ -33,7 +29,7 @@ import (
 )
 
 func TestWorkerBackendRejectsUnrelatedConfigurationBeforeStartup(t *testing.T) {
-	for _, option := range []string{"local", "local-accounts", "oidc-config", "secret-bindings", "http-trust-bundles", "scheduler", "notification-worker", "prepared-sources", "source-bundles", "github-sources", "ecs-workers-env", "kubernetes-workers-env", "recording-cli", "go-images", "playwright-images", "addr", "ui", "artifact-addr", "public-url", "trace-viewer-directory"} {
+	for _, option := range []string{"local", "local-accounts", "oidc-config", "secret-bindings", "http-trust-bundles", "scheduler", "notification-worker", "execution-worker", "prepared-sources", "source-bundles", "github-sources", "ecs-workers-env", "kubernetes-workers-env", "recording-cli", "go-images", "playwright-images", "addr", "ui", "artifact-addr", "public-url", "trace-viewer-directory"} {
 		flags := flag.NewFlagSet("worker", flag.ContinueOnError)
 		flags.String(option, "", "")
 		if err := flags.Parse([]string{"--" + option + "=private-configuration-canary"}); err != nil {
@@ -233,19 +229,6 @@ func TestWorkerBackendReadinessFailsWithDatabaseWhileLivenessRemains(t *testing.
 }
 
 func TestWorkerBackendStartupPreservesSignInStateAndStopsItsListener(t *testing.T) {
-	if os.Getenv("TESTSTUDIO_BACKEND_COMMAND_CHECK") == "1" {
-		for index, value := range os.Args {
-			if value == "--" {
-				os.Args = append([]string{os.Args[0]}, os.Args[index+1:]...)
-				break
-			}
-		}
-		flag.CommandLine = flag.NewFlagSet("teststudio-worker", flag.ContinueOnError)
-		if err := run(); err != nil {
-			t.Fatal(err)
-		}
-		return
-	}
 	f := newBackendFixture(t)
 	f.put(t, "local-auth-mode", "installation", map[string]bool{"enabled": true})
 	before, _ := f.db.Get(t.Context(), "local-auth-mode", "installation")
@@ -255,7 +238,7 @@ func TestWorkerBackendStartupPreservesSignInStateAndStopsItsListener(t *testing.
 	}
 	address := listener.Addr().String()
 	listener.Close()
-	startWorkerBackendCommand(t, address, "--serve-role=worker", "--worker-addr="+address, "--execution-location=azure", "--database="+f.database, "--artifact-directory="+f.files)
+	startOwnedServiceCommand(t, address, "--serve-role=worker", "--worker-addr="+address, "--execution-location=azure", "--database="+f.database, "--artifact-directory="+f.files)
 	client := &http.Client{Timeout: time.Second}
 	t.Cleanup(client.CloseIdleConnections)
 	ready := false
@@ -285,41 +268,4 @@ func TestWorkerBackendStartupPreservesSignInStateAndStopsItsListener(t *testing.
 			t.Fatal("worker startup bootstrapped application state", bucket, err)
 		}
 	}
-}
-
-func startWorkerBackendCommand(t *testing.T, address string, options ...string) {
-	t.Helper()
-	executable, err := os.Executable()
-	if err != nil {
-		t.Fatal(err)
-	}
-	ctx, cancel := context.WithCancel(context.Background())
-	arguments := append([]string{"-test.run=^TestWorkerBackendStartupPreservesSignInStateAndStopsItsListener$", "--"}, options...)
-	command := exec.CommandContext(ctx, executable, arguments...)
-	command.Env = append(os.Environ(), "TESTSTUDIO_BACKEND_COMMAND_CHECK=1")
-	if err := command.Start(); err != nil {
-		cancel()
-		t.Fatal(err)
-	}
-	done := make(chan error, 1)
-	go func() { done <- command.Wait() }()
-	t.Cleanup(func() {
-		defer cancel()
-		command.Process.Signal(syscall.SIGTERM)
-		select {
-		case err := <-done:
-			if err != nil {
-				t.Error(err)
-			}
-		case <-time.After(2 * time.Second):
-			cancel()
-			<-done
-			t.Error("backend did not stop")
-		}
-		connection, err := net.DialTimeout("tcp", address, time.Second)
-		if err == nil {
-			connection.Close()
-			t.Error("backend listener remained open")
-		}
-	})
 }

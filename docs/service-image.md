@@ -142,7 +142,10 @@ The [Kubernetes service profile](kubernetes.md) supplies Helm configuration, pri
 ## Separate service roles
 
 The default --serve-role=all preserves the combined local and existing provider behavior.
-Use --serve-role=api to expose only the UI/API listener and own background workers.
+Use --serve-role=api to expose the UI/API listener and its configured background workers.
+Set --execution-worker=false on that API instance when queued execution belongs to a separate controller.
+Use --serve-role=controller for the [headless execution controller](execution-controller.md), with health probes and no account or UI bootstrap.
+Override the image entrypoint with /app/teststudio for this role, so it receives only controller flags.
 Use --serve-role=artifacts to expose only the artifact listener without user or provider bootstrap or background workers.
 The artifact role rejects identity bootstrap, initial provider, recording, source, or execution configuration flags.
 It reads current password-authentication state from the database without changing that state.

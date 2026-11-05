@@ -129,7 +129,7 @@ func TestDirectWorkerTLSCommandCarriesRelayProtocolAndRejectsForeignAuthority(t 
 	listener.Close()
 	options, roots := workerTLSFixture(t, nil)
 	options.Origin += ":" + port
-	startWorkerBackendCommand(t, address, "--serve-role=worker", "--worker-addr="+address, "--execution-location=azure", "--database="+f.database, "--artifact-directory="+f.files, "--worker-origin="+options.Origin, "--worker-tls-certificate="+options.Certificate, "--worker-tls-key="+options.Key)
+	startOwnedServiceCommand(t, address, "--serve-role=worker", "--worker-addr="+address, "--execution-location=azure", "--database="+f.database, "--artifact-directory="+f.files, "--worker-origin="+options.Origin, "--worker-tls-certificate="+options.Certificate, "--worker-tls-key="+options.Key)
 	transport := &http.Transport{TLSClientConfig: &tls.Config{RootCAs: roots, MinVersion: tls.VersionTLS12}, DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
 		return (&net.Dialer{Timeout: time.Second}).DialContext(ctx, "tcp", address)
 	}}

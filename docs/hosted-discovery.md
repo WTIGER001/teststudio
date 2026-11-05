@@ -7,6 +7,7 @@ Kubernetes uses Pods. Optional [ECS settings](ecs-workers.md) now use the same q
 ECS now has a [staged infrastructure and preparation package](aws-workers-package.md). Deployed acceptance remains required.
 It supports the offline Go and Playwright profiles. Local preparation retains its existing behavior.
 The API accepts source uploads and presents the normal source review. It does not assemble uploaded source in its process.
+Queued execution can now use a separate [headless controller](execution-controller.md), alongside the standalone discovery process.
 The portable service image now includes /app/teststudio-prepare for a separate preparation process.
 Its [discovery-only mode](source-assembly-handoff.md#dedicated-discovery-process) now consumes assembled source handoffs without builders or a build directory.
 

@@ -3,9 +3,10 @@ package runtimeconfig
 import "errors"
 
 type ServiceRole struct {
-	API       bool
-	Artifacts bool
-	Worker    bool
+	API        bool
+	Artifacts  bool
+	Worker     bool
+	Controller bool
 }
 
 func ParseServiceRole(value string) (ServiceRole, error) {
@@ -16,9 +17,11 @@ func ParseServiceRole(value string) (ServiceRole, error) {
 		return ServiceRole{API: true}, nil
 	case "artifacts":
 		return ServiceRole{Artifacts: true}, nil
+	case "controller":
+		return ServiceRole{Controller: true}, nil
 	case "worker":
 		return ServiceRole{Worker: true}, nil
 	default:
-		return ServiceRole{}, errors.New("serve-role must be all, api, artifacts, or worker")
+		return ServiceRole{}, errors.New("serve-role must be all, api, artifacts, worker, or controller")
 	}
 }

@@ -122,6 +122,33 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: headless execution controller command
+
+The server now accepts --serve-role=controller with an explicit numeric address.
+It opens the shared database and artifact adapter, retains normal authorization, executes queued runs, and performs execution recovery.
+Only health and liveness routes are exposed. Readiness checks the database; liveness remains independent.
+It skips account and OIDC bootstrap, user and artifact APIs, worker exchange transport, discovery, source assembly, scheduling, notification delivery, and recording or session maintenance.
+The existing completion hook still creates notification delivery records with the installation's UI origin.
+The API can select --execution-worker=false while retaining its other configured background services.
+Default combined local-server behavior stays unchanged.
+
+The local controller supports native HTTP checks. Existing ECS and Kubernetes profiles register execution without discovery.
+Hosted controller profiles require PostgreSQL. Native Azure sandbox selection and controller identity attachment remain unfinished.
+Controller preflight rejects unrelated service flags, ambiguous providers, mismatched locations, and implicit listeners before opening storage.
+Common worker backend and controller health use the same narrow handler.
+The shared server lifecycle starts workers after listener binding and joins them before provider and storage cleanup.
+
+Three new focused checks and eight affected checks pass with race detection.
+The command package passes in 9.993 seconds and runtime configuration in 1.282 seconds.
+The actual controller command consumes one queued HTTPS probe with the API execution worker disabled.
+It verifies one logical result, unchanged sign-in state, retained notification planning, graceful process exit, and listener closure.
+Shared checks retain worker backend health, direct TLS authority, startup, role parsing, provider separation, and server cleanup.
+Evidence is output/headless-controller/summary.json and local.log.
+Checks use SQLite, private filesystem evidence, an owned loopback TLS target, and project-scoped certificate trust.
+Owned child processes, listeners, and clients close through cleanup. No cloud service, browser, container, UI build, demo restart, or remote push is involved.
+The active plan and operator guides match the change. No user page changes.
+Acceptance **51** advances. No acceptance item closes. The total remains **48 verified, 9 open**.
+
 ## Current delivery: separate hosted execution registration and discovery command
 
 Common server registration now accepts separate execution and discovery providers.
