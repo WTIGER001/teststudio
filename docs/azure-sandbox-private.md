@@ -30,7 +30,7 @@ placement.private supplies these bindings:
 
 The endpoint subnet reserves Azure's first four addresses and its final address.
 Public, noncanonical, overlapping, undersized, foreign, reused, and inconsistent bindings reject before credential construction.
-The sandbox-placement/v3 profile includes these bindings and the existing network settings.
+The sandbox-placement/v4 profile includes these bindings, network settings, and required topology and firewall bindings.
 Changes require a new derived worker.networkProfile. Older staged profiles reject.
 No native command currently loads those profiles.
 
@@ -76,6 +76,7 @@ Each zone has exactly one completed sandbox-network link to the sandbox connecti
 Registration is disabled. Public fallback resolution rejects.
 Reported zone link counts must match the complete link inventory.
 The stage does not resolve these names or inspect every other zone linked to the VNet.
+The required [topology stage](azure-sandbox-topology.md) now verifies the selected VNet contents and firewall policy without enabling native execution.
 Other linked zones, resolver policy, custom DNS servers, forwarding, and effective resolution remain protection work.
 
 ### Observations and pagination
@@ -120,7 +121,7 @@ No cloud service, browser, container, UI build, demo restart, resource mutation,
 
 ### Finish activation
 
-Verify effective DNS resolution, VNet topology, firewall ownership and enforcement, and trusted exchange application and backend ownership.
+Verify effective DNS resolution, resolver policy, other linked zones, and trusted exchange application and backend ownership.
 Observe additional grants, deny effects, credential host attachment, and protection bindings.
 Then wire the scoped execution and discovery commands and package their dependencies.
 Actual preview compatibility, private source conversion, role acceptance, timer execution, token audience, and proxy trust remain separate deployment work.

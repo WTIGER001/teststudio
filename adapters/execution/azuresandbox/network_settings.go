@@ -8,8 +8,9 @@ import (
 )
 
 type NetworkSettings struct {
-	FirewallIP         string   `json:"firewallIp"`
-	PrivateEndpointIPs []string `json:"privateEndpointIps"`
+	FirewallIP         string           `json:"firewallIp"`
+	PrivateEndpointIPs []string         `json:"privateEndpointIps"`
+	Topology           TopologySettings `json:"topology"`
 }
 
 func (n NetworkSettings) validate(subnet string) error {

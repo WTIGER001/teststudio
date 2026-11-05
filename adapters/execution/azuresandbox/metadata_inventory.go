@@ -33,6 +33,10 @@ func (h *placementHTTP) queryAllowed(u *url.URL) bool {
 }
 
 func (c *metadataReader) inventory(ctx context.Context, path string, limit int) ([]placementResource, error) {
+	return c.inventoryPages(ctx, path, limit, 3)
+}
+
+func (c *metadataReader) inventoryPages(ctx context.Context, path string, limit, maxPages int) ([]placementResource, error) {
 	if !c.http.pages[path] || c.http.allowed[path] == "" {
 		return nil, hostedexecution.ErrOwnership
 	}
@@ -44,7 +48,7 @@ func (c *metadataReader) inventory(ctx context.Context, path string, limit int) 
 	target := "https://management.azure.com" + escaped + "?api-version=" + c.http.allowed[path]
 	result := []placementResource{}
 	seen, tokens := map[string]bool{}, map[string]bool{}
-	for count := 0; target != "" && count < 3; count++ {
+	for count := 0; target != "" && count < maxPages; count++ {
 		u, err := url.Parse(target)
 		if err != nil || len(target) > 8192 || u.Path != path {
 			return nil, hostedexecution.ErrOwnership

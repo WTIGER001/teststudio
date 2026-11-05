@@ -31,6 +31,7 @@ type Runtime struct {
 	authority *SDKAuthority
 	network   *SDKNetwork
 	private   *SDKPrivate
+	topology  *SDKTopology
 	once      sync.Once
 }
 
@@ -91,7 +92,11 @@ func OpenRuntime(o RuntimeOptions) (result *Runtime, resultErr error) {
 	if err != nil {
 		return nil, err
 	}
-	admission := &placementAdmission{placement: r.placement, authority: r.authority, network: r.network, private: r.private, protection: o.Admission, importProtection: o.ImageAdmission}
+	r.topology, err = NewSDKTopology(s, metadata, o.ARMTransport)
+	if err != nil {
+		return nil, err
+	}
+	admission := &placementAdmission{placement: r.placement, authority: r.authority, network: r.network, private: r.private, topology: r.topology, protection: o.Admission, importProtection: o.ImageAdmission}
 	controller, err := NewController(ControllerOptions{Config: s.Worker, Instances: r.client, Deadlines: r.deadlines, Admission: admission, Exchange: o.Exchange, Commands: r.client})
 	if err != nil {
 		return nil, err
@@ -134,6 +139,9 @@ func (r *Runtime) Close() {
 		}
 		if r.private != nil {
 			r.private.Close()
+		}
+		if r.topology != nil {
+			r.topology.Close()
 		}
 		if r.client != nil {
 			r.client.Close()

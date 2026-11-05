@@ -28,6 +28,10 @@ func canonicalFirewallContent(v any) any {
 }
 
 func (s firewallBinding) verifyPolicy(actual n.FirewallPolicy, groups []n.FirewallPolicyRuleCollectionGroup, region string) error {
+	return s.verifyPolicyDefinition(actual, groups, region, s.Role+"-platform", s.ruleGroupDefinition())
+}
+
+func (s firewallBinding) verifyPolicyDefinition(actual n.FirewallPolicy, groups []n.FirewallPolicyRuleCollectionGroup, region, ownedName string, wanted n.FirewallPolicyRuleCollectionGroup) error {
 	if !perimeterIdentity(value(actual.ID), value(actual.Name), value(actual.Type), s.Policy, "Microsoft.Network/firewallPolicies", value(actual.Location), region) || actual.Properties == nil || actual.Identity != nil {
 		return hostedexecution.ErrOwnership
 	}
@@ -72,12 +76,12 @@ func (s firewallBinding) verifyPolicy(actual n.FirewallPolicy, groups []n.Firewa
 		if value(group.Properties.ProvisioningState) != n.ProvisioningStateSucceeded {
 			return hostedexecution.ErrUnavailable
 		}
-		if name == s.Role+"-platform" {
-			if owned || !strings.EqualFold(id, s.group()) {
+		if name == ownedName {
+			if owned || !strings.EqualFold(id, s.Policy+"/ruleCollectionGroups/"+ownedName) {
 				return hostedexecution.ErrOwnership
 			}
 			owned = true
-			expected := s.ruleGroupDefinition()
+			expected := wanted
 			fields := document(group.Properties)
 			delete(fields, "provisioningState")
 			delete(fields, "size")

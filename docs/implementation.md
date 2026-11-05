@@ -122,7 +122,37 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: sandbox private endpoint and DNS bindings
+## Current delivery: sandbox VNet and firewall policy admission
+
+OpenRuntime now constructs SDKTopology with the existing metadata identity.
+Creation, image import, and live admission require selected VNet, subnet, firewall, public IP, policy, and complete rule-group observations.
+The VNet reports one private address space and exactly the execution, endpoint, and firewall subnets.
+Peerings, custom DNS servers, extra subnets, default public NAT, and mismatched embedded subnet contents reject.
+The selected private firewall address binds the checked default route to the reported firewall, subnet, policy, and public IP attachment.
+
+The firewall policy permits one fixed deny-all network rule group and only empty known service default groups.
+The complete inventory and reported policy references must agree, including four bounded pages when needed.
+Inherited policies, nonempty defaults, additional rules, changed actions, shared firewalls, and changed attachments reject.
+The existing worker and relay policy verifier remains in use through its extracted definition-aware implementation.
+Native sandbox verification uses independent bindings without Jobs configuration or platform allow rules.
+
+The sandbox-placement/v4 profile binds private address space and selected firewall resources.
+Invalid scope, overlap, subnet size, firewall address, and stale profiles reject before credentials.
+TopologyDefinitions supplies five reviewable resource bodies without mutation.
+Fresh creation and import checks and bounded shared live evidence preserve uncached protection and current authorization.
+
+Six new focused checks and eleven affected native checks pass with race detection in 2.208 seconds.
+Three affected shared firewall checks pass with race detection in 3.120 seconds.
+Evidence is output/azure-sandbox-topology/summary.json, native.log, and shared-firewall.log.
+No cloud service, credential endpoint, browser, container, UI build, demo restart, resource mutation, or remote push is involved.
+The plan and affected operator guides match the change. No user page behavior changes.
+
+Resolver policy, other linked zones, trusted exchange service ownership, additional authority, host attachment, and deny effects remain unfinished.
+Native command wiring and packaging remain unfinished. Actual routing and traffic enforcement remain separate deployment verification.
+No native command or deployment template enables this runtime.
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+## Previous delivery: sandbox private endpoint and DNS bindings
 
 OpenRuntime now constructs SDKPrivate with the existing metadata identity.
 Creation, source import, and live admission require selected endpoint, NIC, endpoint subnet, security group, and private DNS observations.

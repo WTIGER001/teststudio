@@ -68,6 +68,7 @@ func newPlacementWorld(t *testing.T, s Settings) *placementWorld {
 		put(id, kind, c.Region, props)
 	}
 	w.addPrivate()
+	w.addTopology()
 	return w
 }
 
@@ -83,6 +84,9 @@ func (w *placementWorld) Do(r *http.Request) (*http.Response, error) {
 	}
 	if version == "" {
 		version = privateVersions(w.s)[r.URL.Path]
+	}
+	if version == "" {
+		version = topologyVersions(w.s)[r.URL.Path]
 	}
 	if r.Method != "GET" || r.URL.Scheme != "https" || r.URL.Host != "management.azure.com" || version == "" || r.URL.RawQuery != "api-version="+version || r.Header.Get("Authorization") != "Bearer placement-metadata-canary" {
 		w.t.Error("placement request escaped its selected identity or resource")

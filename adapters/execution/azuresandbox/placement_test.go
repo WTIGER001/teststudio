@@ -41,11 +41,14 @@ func TestSandboxPlacementReadsSelectedResourcesAndComposesBothAdmissionGates(t *
 	if err := r.Provider.images.admission.BeforeImport(t.Context(), s.Worker, s.PullIdentity); err != nil {
 		t.Fatal(err)
 	}
-	if protection.creates.Load() != 1 || protection.imports.Load() != 1 || len(w.calls) != 36 {
+	if protection.creates.Load() != 1 || protection.imports.Load() != 1 || len(w.calls) != 42 {
 		t.Fatal("native assembly omitted a selected observation or protection gate")
 	}
 	for id := range placementVersions(s) {
 		count := w.calls[id]
+		if id == s.Placement.Subnet {
+			count -= 2
+		}
 		if count != 2 {
 			t.Fatal("placement observations were cached or retried", count)
 		}
@@ -67,7 +70,11 @@ func TestSandboxPlacementReadsSelectedResourcesAndComposesBothAdmissionGates(t *
 	}
 	protection.denied.Store(false)
 	for id := range placementVersions(s) {
-		if w.calls[id] != 2 {
+		count := w.calls[id]
+		if id == s.Placement.Subnet {
+			count -= 2
+		}
+		if count != 2 {
 			t.Fatal("cached placement repeated ARM reads")
 		}
 	}

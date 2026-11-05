@@ -21,7 +21,7 @@ These address checks do not establish endpoint ownership, DNS resolution, or fir
 The required [private stage](azure-sandbox-private.md) now checks selected endpoint ownership, exact NIC addresses, and complete selected zone inventories.
 The remaining protection dependencies must establish those relationships before activation.
 
-The sandbox-placement/v3 profile includes these network settings, private endpoint and DNS bindings, and the existing policyProfile fingerprint.
+The sandbox-placement/v4 profile includes these settings, private endpoint and DNS bindings, topology, and the existing policyProfile fingerprint.
 Changing a firewall or endpoint address changes launch and converted-image ownership.
 Settings reject a stale profile before credentials are constructed.
 Earlier staged profiles require regeneration. No native command currently loads those profiles.
@@ -67,7 +67,9 @@ Additional routes, Internet next hops, changed next hops, BGP overrides, and unk
 The route must report successful provisioning.
 
 This verifies configured user-defined routes. It does not establish the effective route set.
-VNet address space, local routes, peerings, effective DNS paths, firewall rules, trusted service ownership, and additional authority still require protection checks.
+These rule and route checks do not establish VNet contents, effective DNS paths, firewall enforcement, trusted service ownership, or complete authority.
+The required [topology stage](azure-sandbox-topology.md) now checks selected VNet contents, firewall ownership, attachments, and the complete firewall policy inventory.
+Actual routing and traffic enforcement remain separate deployment verification.
 The independent timer and selected identity stages remain required.
 
 ### Observation bounds and shutdown
@@ -105,7 +107,7 @@ No cloud service, browser, container, UI build, demo restart, or remote push is 
 ### Complete native activation
 
 Bind the selected endpoint addresses to the private exchange and registry endpoints.
-Observe effective DNS resolution, VNet topology, firewall enforcement, trusted service ownership, identity host attachment, additional grants, and deny effects.
+Observe resolver policy, other linked zones, effective DNS resolution, trusted service ownership, identity host attachment, additional grants, and deny effects.
 Then wire the scoped execution and discovery commands and package their dependencies.
 Verify actual preview-service behavior, registry conversion access, timer execution, token audience, and proxy trust during separate deployment acceptance.
 

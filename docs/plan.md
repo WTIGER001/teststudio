@@ -120,14 +120,24 @@ The runtime now binds the allowed addresses to two selected private endpoints an
 The registry login and regional data members target the selected registry. The exchange member targets the selected relay environment.
 The endpoint subnet has an exclusive endpoint inventory and a security group permitting HTTPS only from the execution subnet.
 Two selected private zones have complete bounded record and link inventories, exact A records, and no wildcard, alias, registration, or public fallback.
-The sandbox-placement/v3 profile binds endpoint, subnet, service, address, and zone settings.
+The placement profile binds endpoint, subnet, service, address, and zone settings.
 Fresh initial and import observations and bounded live evidence now include this private stage.
 Existing pure endpoint and DNS verifiers are reused without ordinary Jobs configuration.
 Targeted local drift, paging, settings, caching, runtime integration, and affected lifecycle checks pass.
 See [sandbox private endpoint and DNS admission](azure-sandbox-private.md). Reported records do not establish effective resolution or service ownership.
 
+The runtime now checks the selected VNet's address space and exact embedded execution, endpoint, and firewall subnets.
+Peerings, custom DNS servers, extra subnets, public NAT, and mismatched embedded subnet contents reject.
+The checked firewall address binds the default route to the selected firewall, policy, subnet, and public IP attachment.
+The complete policy inventory permits one fixed deny-all network group and only empty known service default groups.
+No Jobs platform allow rules enter this sandbox policy. Existing resource and policy verifiers are reused through independent bindings.
+The sandbox-placement/v4 profile binds the added topology settings. Five resource bodies support later packaging without mutation.
+Fresh initial and import checks and bounded live evidence now include topology and firewall contents.
+Six new local checks and affected native and shared policy checks pass with race detection.
+See [sandbox VNet and firewall admission](azure-sandbox-topology.md). Reported configuration does not prove deployed routing or traffic enforcement.
+
 Complete remaining effective-authority and protected network admission, native command role wiring, and deployment packaging next.
-Verify identity host attachment, additional grants and deny effects, VNet topology, firewall enforcement, trusted exchange service ownership, and effective DNS resolution.
+Verify identity host attachment, additional grants and deny effects, resolver policy and linked-zone inventory, trusted exchange service ownership, and effective DNS resolution.
 Verify actual service acceptance of custom data-action roles and narrow timer grants during the separate deployment phase.
 Keep private registry conversion access and proxy trust as explicit deployment compatibility questions.
 Pin the group reader and template to an explicit service contract. Current preview guidance and the versioned ARM reference describe different shapes.
