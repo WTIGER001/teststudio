@@ -39,6 +39,26 @@ The helper exits and the directory lock releases after owner stop. No Chromium s
 The guided wizard, first-time setup, contextual help, and complete browser workflow remain unfinished.
 See [desktop companion](recorder-companion.md). This advances 57; the verified count remains 50 of 57.
 
+### Guided connection and real native capture
+
+The authoring page now uses the shared stepper and focusable headings for Configure, Connect desktop, Record, and Review.
+Native desktop mode omits the connection step. Generated identifiers stay under Advanced recording details.
+Connection codes rotate before claim, disappear after pairing, and expire visibly. Reload retains status without retaining the private code.
+Unsaved configuration uses the existing navigation guard. Reset configuration permits a destination change.
+Stopping remains visible until the desktop closes and returns final source. Review opens the existing editor without starting a run.
+Current-page Introduction, Concepts, Tutorials, and the user guides now describe these controls.
+
+The UI build and focused progress and expiry utility checks pass.
+TestHostedRecorderCompanionCompletesGuidedUIAndNativeCapture runs a new Playwright UI suite through normal TestStudio preparation, publication, execution, timing, and evidence.
+The companion opens real native Chromium and records the independent local target's initial navigation.
+The check covers rotation, reload, help, focus, dark mobile layout, light desktop layout, stop, review, and durable draft saving.
+The recorded target receives no test run. The authoring run is 20261105T213644.732520000-8266daf9143ea86cc6552e14.
+The first attempt identifies an incorrect semantic selector in the new help assertion. The corrected focused case passes in 26.84 seconds.
+All sixteen owned processes exit. Owned images, execution containers, volumes, and private contexts are removed.
+Evidence is output/playwright/recorder-companion-help-fix. The initial failure remains in output/playwright/recorder-companion-first.
+The user demo, its browser, and its data remain unchanged. No cloud or cluster operation runs.
+Standalone desktop distribution remains unfinished. This advances 57; the count remains 50 verified of 57.
+
 ## Remote gateway transport milestone — 2026-11-05
 
 The trusted gateway now supports execution-scoped TLS forwarding through a supervisor-owned Unix socket bridge.

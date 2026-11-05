@@ -23,6 +23,13 @@ Implement the trusted hosted browser/API gateway, then the hosted recorder compa
 The current [deployment readiness audit](deployment-readiness.md) separates implementation gaps from deferred verification gates.
 Do not add new dashboard pages or repeat completed demonstration setup before closing the remaining workflow gaps.
 
+### User-facing priority categories
+
+Critical work fixes a blocker in the local create, run, or result inspection workflows. No such blocker is currently identified by retained verification.
+Important work completes the hosted recorder wizard, desktop setup, current-page help, and one focused local browser workflow.
+Required AWS and Azure deployment gates remain Important, with their existing authorization and Azure deferral boundaries.
+Nice to Have covers optional one-click desktop installation, automatic updates, and later convenience polish. These additions do not replace required acceptance scope.
+
 ### Latest user direction: defer Azure and exercise local Kubernetes
 
 This direction supersedes the Azure continuation steps recorded below.
@@ -124,8 +131,11 @@ Next implement the scoped local recorder companion for hosted authoring. Keep ac
 The companion pairing and control API now passes targeted local authorization, expiry, snapshot-order, restart, and stop/cancel checks.
 The outbound desktop command now reuses the trusted native recorder and retains private recovery journals.
 Lost acknowledgements, no-relaunch recovery, authority withdrawal, deadline shutdown, and process cleanup pass targeted local checks.
-The command integration uses an authored Node helper fixture, not Chromium. Full browser and wizard verification remains pending.
-Its installation option remains disabled by default. Continue the guided connection wizard, first-time setup, and contextual help.
+The command integration uses an authored Node helper fixture. A separate complete wizard run now uses real native Chromium.
+Its normal TestStudio Playwright execution verifies connection rotation, reload recovery, help, focus, themes, native capture, stop, review, and draft saving.
+Run 20261105T213644.732520000-8266daf9143ea86cc6552e14 passes in about 27 seconds including preparation and cleanup.
+Sixteen owned processes exit. Its prepared image, execution containers, volumes, and private contexts are removed.
+The installation option remains disabled by default. Continue standalone desktop packaging and operator setup. Keep actual deployment verification separate.
 See [desktop companion](recorder-companion.md). Keep the existing recording, review, draft, publication, and execution boundaries.
 Use a third VPC for trusted gateways and separate environment worker resources. Preserve the retained offline worker pool.
 See [native gateway networking](ecs-gateway-network.md) for exact resource and continuation requirements.

@@ -2,10 +2,13 @@
 
 The local recorder uses Playwright codegen to capture browser actions and assertions.
 Open Create test, select Playwright browser test, and choose a suite.
-Enter an HTTP or HTTPS start address without embedded credentials.
-Enter a permanent test identifier and title. Select Start browser recording.
+Enter a title and an HTTP or HTTPS start address without embedded credentials.
+The wizard generates a permanent test identifier. Change it under Advanced recording details when needed.
+Local desktop installations use Configure, Record, and Review steps. Select Start browser recording.
+Hosted installations add Connect desktop. Select Continue to desktop connection.
 
-The recorder opens dedicated browser and Inspector windows on the computer running TestStudio.
+The native recorder opens dedicated browser and Inspector windows on the computer running TestStudio.
+The desktop companion opens them on the recording computer after pairing.
 Use those windows to record actions and add assertions.
 Select Stop and keep recording to close the owned windows and retain generated source.
 Closing the recording browser also ends the session. The page detects that change during polling.
@@ -25,14 +28,19 @@ Recorded drafts use the separate [local website execution profile](browser-execu
 Review and save the source, prepare it, publish a release, then select a registered environment for execution.
 The offline starter retains its existing isolated profile. It cannot reach a website.
 The current native recorder requires a local desktop.
-Hosted recording requires the [desktop companion](recorder-companion.md). Its guided connection workflow remains pending.
+Hosted recording uses the [desktop companion](recorder-companion.md) through the guided connection step.
+The complete connection, native capture, stop, review, and draft workflow now passes one focused local TestStudio browser run.
+Desktop distribution remains unfinished. Live deployment verification remains separate.
 
 ## Hosted companion API milestone
 
 The API now supports scoped desktop pairing behind the explicit --recording-companion option.
-Keep this option disabled until the desktop client and guided authoring flow are installed and verified.
-The desktop command now has focused local lifecycle and native helper evidence. The connection wizard remains unfinished.
-This API milestone does not yet enable the full hosted recording workflow for testers.
+The option remains disabled by default. Enable it only where testers have the trusted desktop command and dependencies.
+The desktop command, guided wizard, and real Chromium capture now have focused local evidence.
+The wizard shows the desktop command and a temporary connection code. Its First-time desktop setup disclosure describes the current checkout-based installation.
+Get new connection code rotates an unclaimed code. The page clears the code after pairing and hides it after expiry.
+Reload restores the active recording status. It does not restore a connection code.
+The final review opens the existing source editor. Saving does not prepare, publish, activate, or execute the test.
 
 A hosted session starts in pairing state. Its owner requests a five-minute connection token.
 The desktop supplies a separate random device token before pairing. The server stores only credential hashes.

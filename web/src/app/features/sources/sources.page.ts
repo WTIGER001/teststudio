@@ -16,7 +16,7 @@ import { SourcePreviewComponent } from './source-preview.component'
     </div>
     @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }
     @if (service.message()) { <p class="notice success" role="status">{{ service.message() }}</p> }
-    <section class="panel" aria-labelledby="source-suite-title"><h2 id="source-suite-title">Destination suite</h2><fieldset [disabled]="service.saving() || service.draftDirty()"><div class="field" [formGroup]="service.form"><label for="source-suite">Suite for sources</label><select id="source-suite" formControlName="suite" [attr.aria-busy]="service.loading()"><option value="">Choose a suite</option>@for (suite of service.suites(); track suite.id) { <option [value]="suite.id">{{ suite.data.name }}</option> }</select></div></fieldset>
+    <section class="panel" aria-labelledby="source-suite-title"><h2 id="source-suite-title">Destination suite</h2><fieldset [disabled]="service.saving() || service.draftDirty() || service.creationDirty()"><div class="field" [formGroup]="service.form"><label for="source-suite">Suite for sources</label><select id="source-suite" formControlName="suite" [attr.aria-busy]="service.loading()"><option value="">Choose a suite</option>@for (suite of service.suites(); track suite.id) { <option [value]="suite.id">{{ suite.data.name }}</option> }</select></div></fieldset>
       <a class="small" [routerLink]="['/projects', service.project(), 'configuration']">Create or manage suites</a>
     </section>
     <p class="small muted">Choose a suite first. Use the Playwright editor for browser code, Upload tests for native HTTP definitions, or a source ZIP for a complete existing suite.</p>

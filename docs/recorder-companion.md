@@ -5,7 +5,8 @@
 The desktop companion connects a hosted TestStudio recording session to Playwright on the tester's computer.
 It opens only its dedicated recording browser and Inspector. It does not execute uploaded test source.
 The first command implementation targets macOS and Linux desktops.
-The guided connection wizard remains unfinished. Keep hosted recording disabled in ordinary installations until that workflow passes verification.
+The guided connection wizard and real Chromium capture now pass focused local verification.
+Desktop distribution remains unfinished. Operators currently provide a trusted checkout and its built command.
 
 ## Concepts
 
@@ -42,13 +43,16 @@ node runners/playwright/node_modules/playwright/cli.js install chromium
 
 Run the command from the checkout directory. The defaults use its trusted CLI and recording helper.
 The CLI version must match the product's locked Playwright version, currently 1.64.1.
-Separate distribution and first-time installation guidance remain part of the guided workflow work.
+The wizard includes First-time desktop setup and Advanced connection and recovery disclosures.
+A standalone distribution package remains the next setup improvement.
 
 ### Connect a hosted session
 
 An operator enables --recording-companion on the API service without configuring the server's native desktop recorder.
-The managed authoring API reserves a session and issues its owner-private pairing code.
-The normal wizard does not yet expose this step. The API routes are documented in [browser recording](browser-recording.md).
+In Create test, choose Playwright browser test and a destination suite.
+Enter a title and start address. Use Advanced recording details only to change the generated identifier.
+Select Continue to desktop connection. The wizard reserves a session and shows its owner-private pairing code.
+The API routes are documented in [browser recording](browser-recording.md).
 
 Start the command with the trusted server origin:
 
@@ -57,6 +61,7 @@ Start the command with the trusted server origin:
 ```
 
 Paste the connection code at the prompt. Use the dedicated Playwright windows to record actions and assertions.
+The wizard advances to Record when pairing succeeds. It clears the connection code at that transition.
 The companion submits bounded source updates and checks control requests every two seconds.
 An owner stop request closes the recorder and submits its final source. Cancel retains the server's cancellation intent.
 Return to TestStudio to review generated code. Saving, preparation, publication, and execution remain separate actions.
@@ -91,3 +96,11 @@ Focused local checks cover connection restrictions, redirect refusal, private fi
 The command integration uses the real native process driver with an authored Node helper fixture and loopback HTTP server.
 That check confirms private journaling, source submission, owner stop, credential-free output, helper termination, and lock release.
 It does not open Chromium or prove the full wizard workflow. Full hosted recording acceptance remains open under item 57.
+
+The separate TestHostedRecorderCompanionCompletesGuidedUIAndNativeCapture check now passes the complete guided workflow with real native Chromium.
+TestStudio prepares, publishes, and executes that newly authored Playwright UI test through its normal local runtime and trusted gateway.
+The test checks generated identifiers, code rotation, reload recovery, help, focus, both themes, and mobile overflow.
+The native recorder captures the independent local target's initial navigation. Owner stop returns the source for review and draft saving.
+No target test run starts. The check confirms that sixteen owned processes exit and all owned execution resources are removed.
+Evidence is output/playwright/recorder-companion-help-fix. The check completes in about 27 seconds.
+Standalone distribution and actual cloud profile verification remain separate work. Acceptance 57 remains open.

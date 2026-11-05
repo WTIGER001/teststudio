@@ -352,3 +352,15 @@ These flows reuse the existing services, permissions, conflict handling, preview
 A source job that completes assembly can wait for a separate discovery worker.
 Display Waiting for discovery in preparation history, details, and repository status. Explain that review follows discovery.
 Keep cancellation and retained-source access available through their existing permission checks. Assembly metadata must not imply artifact approval or a test run.
+
+### Browser recording
+
+Local recording uses Configure, Record, and Review. Hosted recording adds Connect desktop.
+Use the shared stepper and focusable heading. Progress follows server state; completed recording steps do not replay browser creation.
+Keep the title and start address visible. Generate the permanent identifier under Advanced recording details.
+Preserve configuration during help and guard unsaved edits. Reset configuration permits a destination change.
+Show the desktop command and temporary connection code in the connection step. Keep setup and uncommon recovery options in named disclosures.
+Hide expired codes and clear them after pairing or access loss. Reload restores status and requires a fresh unclaimed connection code.
+Show Closing recorder while waiting for final source. Permit cancellation during that wait.
+Review opens the existing editor. New recording creates a fresh identifier and retains the previous address and title.
+The focused TestStudio browser check uses real native recording and verifies private draft saving, focus, help, light and dark themes, and narrow layout.
