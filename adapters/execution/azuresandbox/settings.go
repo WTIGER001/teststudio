@@ -15,6 +15,7 @@ type TimerSettings struct {
 }
 
 type Settings struct {
+	Host                HostSettings      `json:"host"`
 	Worker              Config            `json:"worker"`
 	Mode                string            `json:"mode"`
 	TenantID            string            `json:"tenantId"`
@@ -44,7 +45,19 @@ func (s Settings) Validate() error {
 	if err := s.Authority.validate(s); err != nil {
 		return err
 	}
-	return s.Placement.Services.validateIdentities(s)
+	if err := s.Placement.Services.validateIdentities(s); err != nil {
+		return err
+	}
+	if err := s.Host.validate(s.Worker, s.Placement); err != nil {
+		return err
+	}
+	if err := s.Host.validateMode(s); err != nil {
+		return err
+	}
+	if s.Host.Profile != s.HostProfile() {
+		return hostedexecution.ErrConfiguration
+	}
+	return nil
 }
 
 func LoadSettings(file, variable string, lookup func(string) (string, bool)) (*Settings, error) {
@@ -64,3 +77,8 @@ func LoadSettings(file, variable string, lookup func(string) (string, bool)) (*S
 
 func (s Settings) String() string   { return "Azure sandbox runtime settings" }
 func (s Settings) GoString() string { return s.String() }
+
+func (s Settings) HostProfile() string {
+	s.Host.Profile = ""
+	return hash([]any{"sandbox-controller-host/v1", s})
+}

@@ -24,7 +24,8 @@ The [service stage](azure-sandbox-services.md) now checks fixed relay and backen
 The [backend endpoint stage](azure-sandbox-backend-endpoint.md) now joins approval, NIC address, network policy, and the existing relay readiness address.
 The [relay network stage](azure-sandbox-relay-network.md) now checks the trusted VNet, egress policy, DNS, private registry endpoint, and selected pull grant.
 The [registry service stage](azure-sandbox-registry-service.md) now checks access policies and complete reported consumer, member, and replication inventories.
-The [service workload stage](azure-sandbox-service-workloads.md) now checks reported relay and backend occupancy, service identity placement, identity resources, and federation absence.
+The [controller host stage](azure-sandbox-host.md) now checks fixed execution or discovery definitions, private environments, identity lifecycles, and complete revisions.
+The [service workload stage](azure-sandbox-service-workloads.md) now checks reported relay, backend, and controller occupancy, identity placement, identity resources, and federation absence.
 Effective routing, resolution, deployed readiness, and effective service authority remain unverified.
 Sandboxes and the selected API remain preview. Complete authority and network admission, timer authority, command wiring, and packaging remain unfinished.
 Ordinary Jobs stay disabled. Their contracts below remain reference material and do not establish sandbox isolation.

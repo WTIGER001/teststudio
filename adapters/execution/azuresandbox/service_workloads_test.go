@@ -34,7 +34,7 @@ func TestSandboxServiceWorkloadsBindReportedHostsAndFederationAbsence(t *testing
 	if err := reader.Check(t.Context(), s.Worker); err != nil {
 		t.Fatal(err)
 	}
-	if len(w.calls) != 10 {
+	if len(w.calls) != 22 {
 		t.Fatal("service workload observation scope changed", len(w.calls))
 	}
 	var group sync.WaitGroup
@@ -204,8 +204,7 @@ func TestSandboxServiceWorkloadInventoriesRequireCompleteScopedPages(t *testing.
 
 func TestSandboxRuntimeServiceWorkloadsBlockAllAdmissionPaths(t *testing.T) {
 	f := newControllerFixture(t, "go", "")
-	s := runtimeSettings()
-	s.Mode = "discovery"
+	s := runtimeSettings("discovery")
 	w := newPlacementWorld(t, s)
 	protection := &placementProtection{}
 	runtime, err := OpenRuntime(RuntimeOptions{Settings: s, Exchange: f.exchange, Admission: protection, ImageAdmission: protection, ARMTransport: w, Credentials: func(string) (azcore.TokenCredential, error) {

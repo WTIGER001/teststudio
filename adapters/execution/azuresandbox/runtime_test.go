@@ -17,7 +17,11 @@ import (
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
 )
 
-func runtimeSettings() Settings {
+func runtimeSettings(modes ...string) Settings {
+	mode := "execution"
+	if len(modes) > 0 {
+		mode = modes[0]
+	}
 	c := fixtureConfig()
 	identity := "/subscriptions/" + c.Subscription + "/resourceGroups/studio-identities/providers/Microsoft.ManagedIdentity/userAssignedIdentities/"
 	prefix := "/subscriptions/" + c.Subscription + "/resourceGroups/studio-net/providers/Microsoft.Network/"
@@ -29,7 +33,7 @@ func runtimeSettings() Settings {
 	pl.Network.Resolver = ResolverSettings{Policy: prefix + "dnsResolverPolicies/studio-sandbox", AllowList: prefix + "dnsResolverDomainLists/studio-allow", BlockList: prefix + "dnsResolverDomainLists/studio-block"}
 	pl.Services = runtimeServiceSettings(c, pl)
 	c.NetworkProfile, _ = pl.NetworkProfile(c)
-	s := Settings{Worker: c, Mode: "execution", TenantID: "33333333-3333-3333-3333-333333333333", ControlClientID: "11111111-1111-1111-1111-111111111111", RegistryClientID: "22222222-2222-2222-2222-222222222222", MetadataClientID: "44444444-4444-4444-4444-444444444444", Placement: pl, PullIdentity: identity + "studio-pull", Timer: TimerSettings{ResourceGroup: "studio-timers", NamePrefix: "studio", StopIdentity: identity + "studio-stop"}}
+	s := Settings{Worker: c, Mode: mode, TenantID: "33333333-3333-3333-3333-333333333333", ControlClientID: "11111111-1111-1111-1111-111111111111", RegistryClientID: "22222222-2222-2222-2222-222222222222", MetadataClientID: "44444444-4444-4444-4444-444444444444", Placement: pl, PullIdentity: identity + "studio-pull", Timer: TimerSettings{ResourceGroup: "studio-timers", NamePrefix: "studio", StopIdentity: identity + "studio-stop"}}
 	s.Authority = AuthoritySettings{Control: AuthorityIdentity{identity + "studio-control", "a1111111-1111-1111-1111-111111111111"}, Registry: AuthorityIdentity{identity + "studio-registry", "a2222222-2222-2222-2222-222222222222"}, Metadata: AuthorityIdentity{identity + "studio-metadata", "a4444444-4444-4444-4444-444444444444"}, StopClientID: "88888888-8888-8888-8888-888888888888", StopPrincipalID: "99999999-9999-9999-9999-999999999999"}
 	rolePrefix := "/subscriptions/" + c.Subscription + "/providers/Microsoft.Authorization/roleDefinitions/"
 	grant := func(scope, n string) AuthorityGrant {
@@ -41,6 +45,8 @@ func runtimeSettings() Settings {
 	s.Authority.AssignGrant = grant(s.Timer.StopIdentity, "4")
 	s.Authority.MetadataGrant = grant("/subscriptions/"+c.Subscription, "5")
 	s.Authority.RegistryAssignment = registry + "/providers/Microsoft.Authorization/roleAssignments/ccccccc6-cccc-cccc-cccc-ccccccccccc6"
+	s.Host = runtimeHostSettings(s)
+	s.Host.Profile = s.HostProfile()
 	return s
 }
 
@@ -122,9 +128,9 @@ func TestSandboxRuntimeRejectsInvalidBindingsBeforeCredentials(t *testing.T) {
 			case "admission":
 				options.Admission = nil
 			case "import-admission":
-				options.Settings.Mode = "discovery"
+				options.Settings = runtimeSettings("discovery")
 			case "discovery-cleanup":
-				options.Settings.Mode = "discovery"
+				options.Settings = runtimeSettings("discovery")
 				options.ImageAdmission = imageAdmission{}
 				f.exchange.AuthorizeDiscoveryCleanup = nil
 			}

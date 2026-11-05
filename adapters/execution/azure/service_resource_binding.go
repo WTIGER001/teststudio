@@ -26,7 +26,7 @@ type ServiceApplicationBinding struct {
 }
 
 func (b ServiceApplicationBinding) Verify(app a.ContainerApp, revisions []a.Revision) error {
-	if b.Expected.Identity == nil || b.Expected.Properties == nil || b.Expected.Properties.Template == nil {
+	if b.Expected.Identity == nil || b.Expected.Properties == nil || b.Expected.Properties.Template == nil || b.Expected.Properties.Configuration == nil {
 		return hostedexecution.ErrConfiguration
 	}
 	normalize := exchangeTemplateDocument
@@ -37,7 +37,7 @@ func (b ServiceApplicationBinding) Verify(app a.ContainerApp, revisions []a.Revi
 	for id := range b.Expected.Identity.UserAssignedIdentities {
 		identities = append(identities, id)
 	}
-	binding := serviceBinding{application: b.Application, environment: b.Environment, location: b.Region, domain: b.Domain, certificate: b.Certificate, identities: identities, templateDocument: normalize}
+	binding := serviceBinding{application: b.Application, environment: b.Environment, location: b.Region, domain: b.Domain, certificate: b.Certificate, identities: identities, templateDocument: normalize, headless: b.Expected.Properties.Configuration.Ingress == nil}
 	doc, err := binding.applicationDocument(app)
 	if err != nil {
 		return err
@@ -102,3 +102,5 @@ func VerifyServiceAuth(auth a.AuthConfig, application string) error {
 func ValidBackendDependencies(secret, blob, container string) bool {
 	return backendSecret.MatchString(secret) && backendBlob.MatchString(blob) && backendContainer.MatchString(container) && !strings.Contains(container, "--")
 }
+
+func ValidServiceSecretReference(secret string) bool { return backendSecret.MatchString(secret) }

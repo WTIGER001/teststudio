@@ -59,8 +59,7 @@ func TestSandboxRuntimeModesCannotControlTheOtherWorkload(t *testing.T) {
 			if err != nil || state.Revoked || a.imports != 0 || f.api.createCalls != 0 {
 				t.Fatal("wrong mode altered rightful work", err)
 			}
-			settings := runtimeSettings()
-			settings.Mode = mode
+			settings := runtimeSettings(mode)
 			credential := &runtimeCredential{token: "unused-construction-canary"}
 			runtime, err := OpenRuntime(RuntimeOptions{Settings: settings, Exchange: f.exchange, Admission: f.controls, ImageAdmission: imageAdmission{}, Credentials: func(string) (azcore.TokenCredential, error) { return credential, nil }})
 			if err != nil {

@@ -219,9 +219,19 @@ This gives the pending native execution host contract a concrete role without co
 Native Azure sandbox selection, controller identity attachment, effective authority, and packaging remain unfinished.
 See [headless execution controller](execution-controller.md). Acceptance 51 advances; the total remains 48 verified, nine open.
 
+The native runtime now binds a required execution or discovery controller host to its fixed headless process and private environment.
+Control, registry inspection, and metadata identities have Main lifecycle; pull and startup identities have None lifecycle.
+Execution adds an evidence runtime identity and health probes. Discovery has no artifact adapter or HTTP probes.
+A separate sandbox-controller-host/v1 profile binds complete mode-specific settings without fragmenting the shared converted-image pool.
+The host stage verifies selected application, environment, authentication, complete revisions, and explicit route and endpoint absence.
+The expanded subscription workload census checks reported controller occupancy, identity sharing, nine or ten identities, and empty federation inventories.
+Two staged resource bodies support later packaging. Native --azure-sandbox-env command selection remains unavailable.
+Four new checks and eleven affected checks pass locally with race detection in 4.223 seconds.
+See [controller host binding](azure-sandbox-host.md). Acceptance 51 advances; the total remains 48 verified, nine open.
+
 Complete remaining effective-authority and protected network admission, native command role wiring, and deployment packaging next.
 Bind additional declared registry consumers to trusted workload and network ownership.
-Complete controller and remaining identity host attachment, additional grants and deny effects, and protected write boundaries.
+Complete controller network and dependency access, remaining import and timer identity attachment, additional grants and deny effects, and protected write boundaries.
 Reported service placement does not establish exclusive identity use across subscriptions, other host types, or deny-hidden resources.
 Keep cross-subscription link visibility and actual DNS hierarchy behavior explicit in separate deployment acceptance.
 Verify actual service acceptance of custom data-action roles and narrow timer grants during the separate deployment phase.

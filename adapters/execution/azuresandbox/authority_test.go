@@ -18,8 +18,7 @@ func rolePermission(w *placementWorld, id string) map[string]any {
 func TestSandboxAuthorityDefinitionsSeparateDataControlFromTimerManagement(t *testing.T) {
 	for _, mode := range []string{"execution", "discovery"} {
 		t.Run(mode, func(t *testing.T) {
-			s := runtimeSettings()
-			s.Mode = mode
+			s := runtimeSettings(mode)
 			defs, err := s.AuthorityDefinitions()
 			if err != nil || len(defs) != 11 {
 				t.Fatal("missing role or grant definitions", err)
@@ -181,8 +180,7 @@ func TestSandboxAuthorityBindingsRejectBeforeCredentialConstruction(t *testing.T
 
 func TestSandboxRuntimeAuthorityGateCannotBeOmittedOrHideProtectionLoss(t *testing.T) {
 	f := newControllerFixture(t, "go", "")
-	s := runtimeSettings()
-	s.Mode = "discovery"
+	s := runtimeSettings("discovery")
 	w := newPlacementWorld(t, s)
 	protection := &placementProtection{}
 	r, err := OpenRuntime(RuntimeOptions{Settings: s, Exchange: f.exchange, Admission: protection, ImageAdmission: protection, ARMTransport: w, Credentials: func(string) (azcore.TokenCredential, error) {

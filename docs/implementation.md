@@ -122,6 +122,28 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: native sandbox controller host and reported identity attachment
+
+The native runtime now binds a required execution or discovery controller host to its fixed headless process and private environment.
+Control, registry inspection, and metadata identities have Main lifecycle; pull and startup identities have None lifecycle.
+Execution adds an evidence runtime identity and health probes. Discovery has no artifact adapter or HTTP probes.
+A separate sandbox-controller-host/v1 profile binds complete mode-specific settings without fragmenting the shared converted-image pool.
+The host stage verifies selected application, environment, authentication, complete revisions, and explicit route and endpoint absence.
+The expanded subscription workload census checks reported controller occupancy, identity sharing, nine or ten identities, and empty federation inventories.
+Two staged resource bodies support later packaging. Native --azure-sandbox-env command selection remains unavailable.
+Four new checks and eleven affected checks pass locally with race detection in 4.223 seconds.
+Fresh creation and import reads and bounded live evidence include the host stage. A current failure invalidates earlier success.
+Runtime shutdown closes the host reader after owned work joins.
+The workload reader now sizes joined results for the expanded identity set.
+The central cold discovery composition observes 118 unique selected paths.
+Checks retain scoped mode boundaries, settings, explicit credentials, selected authority, workload inventory, trusted services, and runtime shutdown.
+Evidence is output/azure-sandbox-host/summary.json and local.log.
+Checks use local SQLite, fake credentials, and in-memory metadata. No cloud service, browser, container, UI build, demo restart, or remote push runs.
+The active plan and affected operator guides match the change. No user page changes.
+Controller network and dependency admission, effective authority, remaining identity attachment, command activation, and deployment packaging remain unfinished.
+See [controller host binding](azure-sandbox-host.md).
+Acceptance **51** advances. No acceptance item closes. The total remains **48 verified, 9 open**.
+
 ## Current delivery: headless execution controller command
 
 The server now accepts --serve-role=controller with an explicit numeric address.

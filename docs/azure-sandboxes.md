@@ -25,7 +25,8 @@ The [service stage](azure-sandbox-services.md) now checks relay and backend defi
 The [backend endpoint stage](azure-sandbox-backend-endpoint.md) now joins endpoint approval, NIC address, network policy, and the existing relay readiness address.
 The [relay network stage](azure-sandbox-relay-network.md) now checks the trusted VNet, egress policy, DNS, private registry endpoint, and selected pull grant.
 The [registry service stage](azure-sandbox-registry-service.md) now checks access policies and complete reported consumer, member, and replication inventories.
-The [service workload stage](azure-sandbox-service-workloads.md) now checks reported relay and backend occupancy, service identity placement, identity resources, and federation absence.
+The [controller host stage](azure-sandbox-host.md) now checks fixed execution or discovery definitions, private environments, identity lifecycles, and complete revisions.
+The [service workload stage](azure-sandbox-service-workloads.md) now checks reported relay, backend, and controller occupancy, identity placement, identity resources, and federation absence.
 Native activation still requires complete authority and protected network admission, timer authority, source-queue command wiring, and packaging.
 Local contract checks do not establish deployed isolation, service availability, identity authority, certificate trust, or complete product operation.
 

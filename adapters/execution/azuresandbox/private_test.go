@@ -256,8 +256,7 @@ func TestSandboxPrivateRunningEvidenceIsBoundedAndFreshFailureInvalidatesIt(t *t
 
 func TestSandboxRuntimePrivateGateBindsReviewedDNSAndBlocksAllAdmissions(t *testing.T) {
 	f := newControllerFixture(t, "go", "")
-	s := runtimeSettings()
-	s.Mode = "discovery"
+	s := runtimeSettings("discovery")
 	defs, err := s.PrivateDNSDefinitions()
 	if err != nil || len(defs) != 7 {
 		t.Fatal("missing reviewable DNS definitions", err)

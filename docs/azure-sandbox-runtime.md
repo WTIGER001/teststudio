@@ -18,7 +18,8 @@ The [service stage](azure-sandbox-services.md) now checks relay and trusted back
 The [backend endpoint stage](azure-sandbox-backend-endpoint.md) now joins endpoint approval, NIC address, network policy, and the relay's existing readiness address.
 The [relay network stage](azure-sandbox-relay-network.md) now joins the trusted VNet, egress policy, resolver, private registry path, and selected pull grant.
 The [registry service stage](azure-sandbox-registry-service.md) now verifies access policies and complete reported consumer, member, and replication inventories.
-The [service workload stage](azure-sandbox-service-workloads.md) now verifies reported relay and backend occupancy, service identity placement, identity resources, and federation absence.
+The [controller host stage](azure-sandbox-host.md) now checks fixed execution or discovery definitions, private environments, identity lifecycles, and complete revisions.
+The [service workload stage](azure-sandbox-service-workloads.md) now verifies reported relay, backend, and controller occupancy, identity placement, identity resources, and federation absence.
 Remaining authority and protected network admission, effective timer authority, command role wiring, and deployment packaging remain unfinished.
 The factory requires admission dependencies. It supplies no permissive default.
 Do not treat client construction or local protocol checks as deployment acceptance.
@@ -35,6 +36,7 @@ The loader validates all fields before credential construction.
 | Field | Contract |
 | --- | --- |
 | worker | The existing sandbox Config: subscription, resource group, region, group, registry namespace, exchange origin, VNet connection, virtualization type, and network profile. |
+| host | Required mode-specific controller application, environment, identities, dependencies, and separate host profile described in the host guide. |
 | mode | Required execution or discovery. No combined native mode or implicit default. |
 | tenantId | Nonzero installation tenant identifier for the registry exchange. |
 | controlClientId | Explicit nonzero managed identity client identifier for sandbox control and timer administration. |
@@ -51,6 +53,8 @@ The loader validates all fields before credential construction.
 PlacementSettings.NetworkProfile derives worker.networkProfile from the placement bindings and worker configuration.
 The sandbox-placement/v9 profile binds backendEndpoint, relayNetwork, and additional placement.registryConsumers with all existing placement settings.
 The protected network fingerprint remains in placement.policyProfile. A mismatched derived worker profile rejects startup.
+Settings.HostProfile separately binds complete role-specific settings through sandbox-controller-host/v1.
+Host configuration does not fragment the shared converted-image pool.
 
 Registry validation uses the same pure policy as the ACR client constructor.
 Foreign origins, duplicate origins, public exchange IPs, and invalid identity resource paths reject configuration.
@@ -74,6 +78,7 @@ It constructs SDKServices with that credential and compares trusted relay and ba
 It constructs SDKBackendEndpoint with that credential and compares backend endpoint ownership, NIC address, subnet policy, and relay source prefix.
 It constructs SDKRelayNetwork with that credential and checks the selected relay network, private registry path, DNS, and pull grant.
 It constructs SDKRegistryService with that credential and compares access policies and complete reported approval, member, and replication inventories.
+It constructs SDKHost with that credential and verifies the fixed headless controller, private environment, authentication, and complete revisions.
 It constructs SDKServiceWorkloads with that credential and verifies reported subscription service placement, selected identities, and empty federation inventories.
 The resulting image manager and provider share the controller's exact configuration and exchange.
 
@@ -86,7 +91,8 @@ Credential-construction failures return a fixed unavailable error without underl
 
 The factory now checks selected reported group placement, import identity tenant metadata, and the chosen pull grant during admission.
 Selected controller and timer roles now have explicit checked profiles.
-Complete effective authority, credential host placement, actual network enforcement, and live timer access remain separate checks.
+Reported controller attachment now has a fixed host contract and subscription workload census.
+Complete effective authority, remaining identity host placement, actual network enforcement, and live timer access remain separate checks.
 Configuration syntax and distinct identifiers cannot replace that observation.
 
 ### Runtime modes
@@ -103,9 +109,10 @@ Wire native execution and source discovery roles separately.
 Do not pass one execution-only runtime as both providers in a combined command registration.
 The common server registration now accepts distinct execution and discovery providers.
 The preparation command has a discovery-only path for existing ECS and Kubernetes profiles.
-The server now has a headless controller role for the pending execution host contract.
+The server now has a headless controller role used by the staged execution host contract.
 That role processes runs without account setup or user listeners; the API can disable its execution worker.
-Native sandbox command integration and controller identity attachment remain unfinished.
+Native sandbox command integration, controller network admission, effective authority, and packaging remain unfinished.
+See [controller host binding](azure-sandbox-host.md) for the staged definitions and reported identity attachment.
 See [headless controller](execution-controller.md).
 See [separate discovery command roles](source-assembly-handoff.md#dedicated-discovery-process).
 
@@ -113,8 +120,8 @@ See [separate discovery command roles](source-assembly-handoff.md#dedicated-disc
 
 Admission is mandatory for every runtime. ImageAdmission is also mandatory for discovery mode.
 The existing controller calls the placement stage and these dependencies before creation, during live admission observation, and before import.
-Live placement, network, private binding, topology, resolver, services, backend endpoint, relay network, registry service, service workload, and selected authority evidence have a 15-second bound.
-Initial network, placement, private binding, topology, resolver, service, backend endpoint, relay network, registry service, and service workload checks remain fresh, including source import.
+Live placement, network, private binding, topology, resolver, services, backend endpoint, relay network, registry service, controller host, service workload, and selected authority evidence have a 15-second bound.
+Initial network, placement, private binding, topology, resolver, service, backend endpoint, relay network, registry service, controller host, and service workload checks remain fresh, including source import.
 The additional protection, per-sandbox, and worker authorization checks remain uncached.
 OpenRuntime does not substitute a successful construction result for those checks.
 Native commands must compose actual group, VNet, private exchange, source identity, and timer authority checks before enabling dispatch.

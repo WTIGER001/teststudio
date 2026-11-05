@@ -20,8 +20,7 @@ func (b *placementTrackedBody) Close() error { b.closed = true; return b.ReadClo
 
 func TestSandboxPlacementReadsSelectedResourcesAndComposesBothAdmissionGates(t *testing.T) {
 	f := newControllerFixture(t, "go", "")
-	s := runtimeSettings()
-	s.Mode = "discovery"
+	s := runtimeSettings("discovery")
 	w := newPlacementWorld(t, s)
 	credential := &runtimeCredential{token: "placement-metadata-canary"}
 	protection := &placementProtection{}
@@ -41,7 +40,7 @@ func TestSandboxPlacementReadsSelectedResourcesAndComposesBothAdmissionGates(t *
 	if err := r.Provider.images.admission.BeforeImport(t.Context(), s.Worker, s.PullIdentity); err != nil {
 		t.Fatal(err)
 	}
-	if protection.creates.Load() != 1 || protection.imports.Load() != 1 || len(w.calls) != 105 {
+	if protection.creates.Load() != 1 || protection.imports.Load() != 1 || len(w.calls) != 118 {
 		t.Fatal("native assembly omitted a selected observation or protection gate")
 	}
 	for id := range placementVersions(s) {
@@ -57,7 +56,11 @@ func TestSandboxPlacementReadsSelectedResourcesAndComposesBothAdmissionGates(t *
 		}
 	}
 	for id := range authorityVersions(s) {
-		if w.calls[id] != 1 {
+		count := w.calls[id]
+		if id == s.Authority.Control.Resource || id == s.Authority.Registry.Resource || id == s.Authority.Metadata.Resource {
+			count -= 2
+		}
+		if count != 1 {
 			t.Fatal("authority observations were not shared")
 		}
 	}
@@ -85,7 +88,11 @@ func TestSandboxPlacementReadsSelectedResourcesAndComposesBothAdmissionGates(t *
 		}
 	}
 	for id := range authorityVersions(s) {
-		if w.calls[id] != 1 {
+		count := w.calls[id]
+		if id == s.Authority.Control.Resource || id == s.Authority.Registry.Resource || id == s.Authority.Metadata.Resource {
+			count -= 2
+		}
+		if count != 1 {
 			t.Fatal("cached authority repeated ARM reads")
 		}
 	}

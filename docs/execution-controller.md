@@ -67,7 +67,8 @@ The role uses only execution registration. It registers no discovery inspector o
 Workers use the profile's existing private exchange origin, served by the installation's worker backend.
 The controller starts no second exchange listener.
 Keep provider credentials, identity permissions, network controls, and durable storage aligned with the selected deployment profile.
-Native Azure sandbox selection and its controller identity attachment remain unfinished.
+The staged [Azure host contract](azure-sandbox-host.md) now binds this role and its reported identity attachment.
+Native Azure sandbox command selection, controller network admission, effective authority, and deployment packaging remain unfinished.
 
 ## Startup and shutdown
 

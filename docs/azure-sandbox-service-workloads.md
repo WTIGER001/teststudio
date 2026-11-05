@@ -3,9 +3,9 @@
 ## Introduction
 
 OpenRuntime includes SDKServiceWorkloads in creation, source import, and live admission.
-It verifies reported relay and backend environment occupancy and service identity placement across Container Apps and jobs in the selected subscription.
-It also checks the four selected identity resources and requires empty federated-credential inventories.
-The stage derives its bindings from existing service settings. It adds no configuration field or deployment resource.
+It verifies reported relay, backend, and controller occupancy and identity placement across Container Apps and jobs in the selected subscription.
+It also checks nine identity resources for discovery or ten for execution and requires empty federated-credential inventories.
+The stage derives its bindings from service settings and the required [host settings](azure-sandbox-host.md). It creates no deployment resource.
 
 The shared ServiceWorkloadBinding reuses existing placement, identity projection, lifecycle, and identity-sharing checks.
 The observer's existing sharing check uses the same pure identity-host verifier.
@@ -23,6 +23,10 @@ The existing service settings define these expected bindings:
 | Backend | Backend image pull | None |
 | Backend | Backend startup | None |
 | Backend | Backend runtime | Main |
+| Controller | Controller image pull | None |
+| Controller | Controller secret startup | None |
+| Controller | Control, registry inspection, and metadata | Main |
+| Execution controller only | Evidence runtime | Main |
 
 Each identity resource must report its selected identifier, type, region, tenant, client, and principal.
 Missing identifiers remain unavailable. Mismatched identifiers or tenants reject admission.
@@ -33,14 +37,14 @@ The reader follows no continuation for these required empty collections.
 ### Reported environment occupancy
 
 The reader obtains complete subscription inventories for Container Apps and jobs.
-Both selected applications must appear in their configured private environments.
+All three selected applications must appear in their configured private environments.
 Current and legacy environment fields must agree when both are present.
-Another app or any job in either selected environment rejects admission.
+Another app or any job in any selected environment rejects admission.
 Duplicate, foreign, malformed, missing, or incomplete resource observations cannot establish occupancy.
 
 The selected applications' inventory entries must retain their exact service identity sets, pins, and lifecycle settings.
-The existing selected service stage still verifies full trusted templates, private environments, authentication, certificate metadata, and revisions.
-The two stages share the same expected identity maps.
+The service and host stages verify full trusted templates, private environments, authentication, and revisions.
+The relay retains its separate certificate checks. All stages share the same expected identity maps.
 
 ### Reported identity sharing
 
@@ -57,13 +61,14 @@ Unrelated workloads in unrelated environments remain permitted when their report
 This checks reported Container Apps and jobs in one subscription.
 It does not establish exclusive identity use across other subscriptions, other host types, or resources hidden by deny effects.
 Actual token issuance, effective permissions, identity write protection, and administrative control remain separate requirements.
-Controller, registry-inspection, metadata, source-import, and timer host attachment remain unfinished.
+Controller control, registry-inspection, and metadata identities now bind to the fixed host.
+Source-import and timer host attachment remain unfinished. Controller network and dependency admission also remain unfinished.
 
 ### Bounds, cache, and shutdown
 
 Two subscription collection GETs use API version 2025-07-01.
-Four selected identity GETs and four federated-credential collection GETs use API version 2024-11-30.
-The explicit metadata identity supplies all ten selected paths.
+Nine or ten selected identity GETs and matching federated-credential collection GETs use API version 2024-11-30.
+The explicit metadata identity supplies 20 paths for discovery or 22 for execution.
 Construction obtains no token and calls no service.
 
 Each workload collection permits at most 512 items and 16 pages.
@@ -95,7 +100,9 @@ No cloud service, browser, container, UI build, demo restart, resource mutation,
 
 ### Continue activation
 
-Bind remaining trusted registry consumers and controller identities to their actual workloads and network paths.
+The [controller host batch](azure-sandbox-host.md) extends this stage with reported controller attachment and additional local drift checks.
+Bind remaining trusted registry consumers and import or timer identities to their actual workloads and network paths.
+Complete controller network and dependency admission.
 Complete effective grants, deny effects, protected writes, native command role wiring, and deployment packaging.
 Keep deployed token behavior, routing, private conversion, preview compatibility, and independent timer execution in separate deployment acceptance.
 

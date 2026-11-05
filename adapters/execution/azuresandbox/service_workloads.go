@@ -25,7 +25,7 @@ func serviceWorkloadPath(s Settings, kind string) string {
 
 func serviceWorkloadVersions(s Settings) map[string]string {
 	versions := map[string]string{serviceWorkloadPath(s, "containerApps"): "2025-07-01", serviceWorkloadPath(s, "jobs"): "2025-07-01"}
-	for _, identity := range s.Placement.Services.identities() {
+	for _, identity := range s.workloadIdentities() {
 		versions[identity.Resource] = "2024-11-30"
 		versions[identity.Resource+"/federatedIdentityCredentials"] = "2024-11-30"
 	}
@@ -36,12 +36,16 @@ func NewSDKServiceWorkloads(s Settings, credential azcore.TokenCredential, trans
 	if s.Validate() != nil || credential == nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
+	if s.Host.Runtime != nil {
+		copy := *s.Host.Runtime
+		s.Host.Runtime = &copy
+	}
 	reader, err := newMetadataReader(serviceWorkloadVersions(s), credential, transport)
 	if err != nil {
 		return nil, err
 	}
 	reader.http.pages = map[string]bool{serviceWorkloadPath(s, "containerApps"): true, serviceWorkloadPath(s, "jobs"): true}
-	for _, identity := range s.Placement.Services.identities() {
+	for _, identity := range s.workloadIdentities() {
 		reader.http.pages[identity.Resource+"/federatedIdentityCredentials"] = true
 	}
 	return &SDKServiceWorkloads{metadataReader: reader, settings: s, now: time.Now}, nil
@@ -73,8 +77,8 @@ func (c *SDKServiceWorkloads) read(ctx context.Context) error {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	var identities, apps, jobs []placementResource
-	var errors [7]error
-	pins := c.settings.Placement.Services.identities()
+	pins := c.settings.workloadIdentities()
+	errors := make([]error, len(pins)+3)
 	ids := []string{}
 	for _, pin := range pins {
 		ids = append(ids, pin.Resource)
@@ -110,5 +114,5 @@ func (c *SDKServiceWorkloads) read(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	return azureworker.VerifyServiceWorkloadInventory(c.settings.Worker.Subscription, []azureworker.ServiceWorkloadBinding{c.settings.serviceWorkloadBinding(false), c.settings.serviceWorkloadBinding(true)}, applications, tasks)
+	return azureworker.VerifyServiceWorkloadInventory(c.settings.Worker.Subscription, []azureworker.ServiceWorkloadBinding{c.settings.serviceWorkloadBinding(false), c.settings.serviceWorkloadBinding(true), c.settings.hostWorkloadBinding()}, applications, tasks)
 }
