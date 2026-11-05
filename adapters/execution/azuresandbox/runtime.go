@@ -23,18 +23,19 @@ type RuntimeOptions struct {
 }
 
 type Runtime struct {
-	Provider  *Provider
-	registry  *acr.Client
-	client    *Client
-	deadlines *SDKDeadlines
-	placement *SDKPlacement
-	authority *SDKAuthority
-	network   *SDKNetwork
-	private   *SDKPrivate
-	topology  *SDKTopology
-	resolver  *SDKResolver
-	services  *SDKServices
-	once      sync.Once
+	Provider        *Provider
+	registry        *acr.Client
+	client          *Client
+	deadlines       *SDKDeadlines
+	placement       *SDKPlacement
+	authority       *SDKAuthority
+	network         *SDKNetwork
+	private         *SDKPrivate
+	topology        *SDKTopology
+	resolver        *SDKResolver
+	services        *SDKServices
+	backendEndpoint *SDKBackendEndpoint
+	once            sync.Once
 }
 
 func OpenRuntime(o RuntimeOptions) (result *Runtime, resultErr error) {
@@ -106,7 +107,11 @@ func OpenRuntime(o RuntimeOptions) (result *Runtime, resultErr error) {
 	if err != nil {
 		return nil, err
 	}
-	admission := &placementAdmission{placement: r.placement, authority: r.authority, network: r.network, private: r.private, topology: r.topology, resolver: r.resolver, services: r.services, protection: o.Admission, importProtection: o.ImageAdmission}
+	r.backendEndpoint, err = NewSDKBackendEndpoint(s, metadata, o.ARMTransport)
+	if err != nil {
+		return nil, err
+	}
+	admission := &placementAdmission{placement: r.placement, authority: r.authority, network: r.network, private: r.private, topology: r.topology, resolver: r.resolver, services: r.services, backendEndpoint: r.backendEndpoint, protection: o.Admission, importProtection: o.ImageAdmission}
 	controller, err := NewController(ControllerOptions{Config: s.Worker, Instances: r.client, Deadlines: r.deadlines, Admission: admission, Exchange: o.Exchange, Commands: r.client})
 	if err != nil {
 		return nil, err
@@ -158,6 +163,9 @@ func (r *Runtime) Close() {
 		}
 		if r.services != nil {
 			r.services.Close()
+		}
+		if r.backendEndpoint != nil {
+			r.backendEndpoint.Close()
 		}
 		if r.client != nil {
 			r.client.Close()

@@ -41,8 +41,9 @@ type BackendServiceSettings struct {
 }
 
 type ServicesSettings struct {
-	Relay   RelayServiceSettings   `json:"relay"`
-	Backend BackendServiceSettings `json:"backend"`
+	Relay           RelayServiceSettings    `json:"relay"`
+	Backend         BackendServiceSettings  `json:"backend"`
+	BackendEndpoint BackendEndpointSettings `json:"backendEndpoint"`
 }
 
 func serviceSubnet(c Config, id string) bool {
@@ -94,7 +95,7 @@ func (v ServicesSettings) validate(c Config, p PlacementSettings) error {
 		}
 		resources[id], clients[identity.Client], principals[identity.Principal] = true, true, true
 	}
-	return nil
+	return v.BackendEndpoint.validate(c, p, v)
 }
 
 func (v ServicesSettings) validateIdentities(s Settings) error {

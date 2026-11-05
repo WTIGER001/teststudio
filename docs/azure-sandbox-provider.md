@@ -16,6 +16,7 @@ The [private stage](azure-sandbox-private.md) now checks endpoint and NIC owners
 The [topology stage](azure-sandbox-topology.md) now checks selected VNet contents, firewall ownership and attachments, and the complete deny-all firewall policy.
 The [resolver stage](azure-sandbox-resolver.md) now checks selected policy rules, actual VNet association, and reported subscription private-zone links.
 The [service stage](azure-sandbox-services.md) now checks fixed relay and backend definitions, private environments, identity exposure, certificate metadata, and complete revisions.
+The [backend endpoint stage](azure-sandbox-backend-endpoint.md) now joins endpoint approval, NIC address, network policy, and the existing relay readiness address.
 Remaining authority and protected network admission, effective timer authority, command wiring, and native packaging remain unfinished.
 Local protocol verification does not establish deployed Azure behavior.
 

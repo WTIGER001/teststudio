@@ -7,7 +7,8 @@ The stage verifies the selected exchange relay and trusted worker backend throug
 It reuses existing private environment, identity, template, revision, endpoint approval, and certificate verifiers.
 The trusted templates have independent builders. Native settings require no ordinary Jobs configuration.
 
-This is service metadata admission. It does not establish backend endpoint routing, end-to-end readiness, or effective service permissions.
+This is service metadata admission. The [backend endpoint stage](azure-sandbox-backend-endpoint.md) now joins approval, NIC address, and endpoint network policy.
+These stages do not establish deployed routing, fresh controller-observed readiness, or effective service permissions.
 The remaining protection dependencies stay mandatory. Native commands and deployment templates still do not enable sandbox execution.
 
 ## Concepts
@@ -39,7 +40,7 @@ The Blob URL, container name, and replica count follow the existing backend poli
 
 Four service identities differ from one another and the import, timer, controller, registry inspection, and metadata identities.
 Resources, client identifiers, and principal identifiers cannot reuse those bindings.
-The sandbox-placement/v6 profile includes these settings with the existing admission bindings.
+The sandbox-placement/v7 profile includes these settings, required backend endpoint settings, and the existing admission bindings.
 Changing service images, identities, origins, or dependencies changes launch and source-cache ownership.
 Older staged profiles require regeneration. No native command currently loads them.
 
@@ -121,8 +122,9 @@ No cloud service, browser, container, UI build, demo restart, resource mutation,
 
 ### Finish activation
 
-Connect the relay-to-backend endpoint, NIC, subnet, security policy, and approval checks to the native bindings.
-Add end-to-end readiness, workload placement, identity host attachment, effective grants, deny effects, and protected write boundaries.
+The backend endpoint stage now binds the selected environment and NIC to the address used by relay forwarding and readiness.
+Readiness runs in the relay network. Native admission checks its exact probe and reported healthy active revision.
+Complete relay network and registry observations, workload placement, identity host attachment, effective grants, deny effects, and protected write boundaries.
 Then wire scoped execution and discovery commands and complete deployment packaging.
 Verify actual private routing, TLS, service identity lifecycle behavior, dependency access, preview compatibility, and independent deadlines during separate deployment acceptance.
 

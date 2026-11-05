@@ -18,7 +18,7 @@ placement.network.resolver requires policy, allowList, and blockList.
 Each field identifies the matching resource type in the selected subscription.
 The two domain lists must differ.
 Invalid scope, type, missing settings, or stale ownership profiles reject before credential construction.
-The sandbox-placement/v6 profile binds resolver settings with required trusted service, topology, endpoint, DNS, and placement bindings.
+The sandbox-placement/v7 profile binds resolver settings with required trusted services, topology, both endpoint paths, DNS, and placement bindings.
 Older staged profiles require regeneration. No native command currently loads them.
 
 ResolverDefinitions returns six reviewable bodies: policy, two domain lists, two security rules, and one VNet link.
@@ -123,7 +123,8 @@ No cloud service, browser, container, UI build, demo restart, resource mutation,
 ### Complete activation
 
 The service stage now checks selected relay and backend metadata, fixed definitions, identity exposure, and revisions.
-Complete backend routing and readiness, additional grants, deny effects, credential host attachment, and protection bindings.
+The backend endpoint stage now binds selected approval, NIC address, network policy, and the relay's configured readiness address.
+Complete relay network and registry observations, additional grants, deny effects, credential host attachment, and protection bindings.
 Then wire scoped execution and discovery commands and package their dependencies.
 Verify actual resolution, routing, preview compatibility, private conversion, role acceptance, timer execution, token audience, and proxy trust during separate deployment acceptance.
 

@@ -110,6 +110,7 @@ type placementAdmission struct {
 	topology         *SDKTopology
 	resolver         *SDKResolver
 	services         *SDKServices
+	backendEndpoint  *SDKBackendEndpoint
 	protection       Admission
 	importProtection ImageAdmission
 }
@@ -131,6 +132,9 @@ func (a *placementAdmission) BeforeCreate(ctx context.Context, c Config) error {
 		return err
 	}
 	if err := a.services.Check(ctx, c); err != nil {
+		return err
+	}
+	if err := a.backendEndpoint.Check(ctx, c); err != nil {
 		return err
 	}
 	if err := a.authority.Check(ctx, c); err != nil {
@@ -161,6 +165,9 @@ func (a *placementAdmission) VerifyInstance(ctx context.Context, c Config, actua
 	if err := a.services.CheckRunning(ctx, c); err != nil {
 		return err
 	}
+	if err := a.backendEndpoint.CheckRunning(ctx, c); err != nil {
+		return err
+	}
 	if err := a.authority.Check(ctx, c); err != nil {
 		return err
 	}
@@ -187,6 +194,9 @@ func (a *placementAdmission) BeforeImport(ctx context.Context, c Config, identit
 		return err
 	}
 	if err := a.services.Check(ctx, c); err != nil {
+		return err
+	}
+	if err := a.backendEndpoint.Check(ctx, c); err != nil {
 		return err
 	}
 	if err := a.authority.Check(ctx, c); err != nil {

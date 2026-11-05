@@ -69,7 +69,7 @@ func (p PlacementSettings) NetworkProfile(c Config) (string, error) {
 		return "", hostedexecution.ErrConfiguration
 	}
 	c.NetworkProfile = ""
-	return hash([]any{"sandbox-placement/v6", c, p}), nil
+	return hash([]any{"sandbox-placement/v7", c, p}), nil
 }
 
 func (c Config) groupID() string {

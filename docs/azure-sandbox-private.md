@@ -30,7 +30,7 @@ placement.private supplies these bindings:
 
 The endpoint subnet reserves Azure's first four addresses and its final address.
 Public, noncanonical, overlapping, undersized, foreign, reused, and inconsistent bindings reject before credential construction.
-The sandbox-placement/v6 profile includes these bindings and the required network, topology, resolver, and trusted service settings.
+The sandbox-placement/v7 profile includes these bindings and required backend endpoint, network, topology, resolver, and trusted service settings.
 Changes require a new derived worker.networkProfile. Older staged profiles reject.
 No native command currently loads those profiles.
 
@@ -123,7 +123,8 @@ No cloud service, browser, container, UI build, demo restart, resource mutation,
 ### Finish activation
 
 The service stage now checks selected relay and backend metadata, fixed definitions, identity exposure, and complete revisions.
-Verify backend endpoint routing and readiness, effective DNS resolution, visibility across subscriptions, and write protection.
+The backend endpoint stage now joins selected approval, NIC address, network policy, and the relay's existing readiness address.
+Verify deployed routing and readiness, effective DNS resolution, visibility across subscriptions, and write protection.
 Observe additional grants, deny effects, credential host attachment, and protection bindings.
 Then wire the scoped execution and discovery commands and package their dependencies.
 Actual preview compatibility, private source conversion, role acceptance, timer execution, token audience, and proxy trust remain separate deployment work.

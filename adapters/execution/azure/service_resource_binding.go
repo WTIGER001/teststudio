@@ -82,6 +82,10 @@ func VerifyServicePrivateLinks(links []a.PrivateLinkResource, environment, regio
 	return err
 }
 
+func VerifyServicePrivateLinkMember(links []a.PrivateLinkResource, environment, region string) (string, error) {
+	return verifyBackendEndpointLink(links, environment, region)
+}
+
 func VerifyServiceAuth(auth a.AuthConfig, application string) error {
 	if !strings.EqualFold(value(auth.ID), application+"/authConfigs/current") || value(auth.Name) != "current" || !strings.EqualFold(value(auth.Type), "Microsoft.App/containerApps/authConfigs") {
 		return hostedexecution.ErrOwnership

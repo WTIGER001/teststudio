@@ -122,7 +122,38 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: sandbox relay and trusted backend service admission
+## Current delivery: sandbox backend endpoint and readiness binding
+
+OpenRuntime now constructs SDKBackendEndpoint with the existing metadata identity.
+Creation, source import, and live admission join selected backend environment approval, endpoint, NIC, private address, subnet, security rules, and relay source subnet.
+The environment's embedded and separately listed connections must agree on exactly the selected approved endpoint.
+The private-link required member must match the NIC and any explicit endpoint IP configurations.
+The address must equal the relay's configured backend address, used for forwarding and its existing TLS readiness probe.
+The dedicated subnet and security rules permit only relay-subnet HTTPS to that address and reject unrelated endpoint references or broader access.
+
+The sandbox-placement/v7 profile binds backend endpoint settings.
+Invalid scopes, overlaps, reserved addresses, reused resources, and stale profiles reject before credentials.
+BackendEndpointDefinitions supplies two reviewable subnet and security-group bodies without mutation.
+Fresh creation and import observations and bounded shared live evidence preserve uncached protection and current authorization.
+
+Five new focused checks and fourteen affected native checks pass with race detection in 3.120 seconds.
+Two selected relay TLS checks pass in 1.393 seconds. The actual worker backend database-health check passes in 1.480 seconds.
+The native protocol check uses an owned loopback TLS transport and the real relay readiness handler with the configured backend hostname.
+It verifies fresh connections, credential-free requests, outage and recovery responses, and independent liveness.
+The existing relay checks retain production private-address pinning, certificate trust, and lifetime coverage.
+The worker health check uses local SQLite and confirms database loss changes readiness without changing liveness.
+Evidence is output/azure-sandbox-backend-endpoint/summary.json, native.log, relay-readiness.log, and backend-health.log.
+Owned TLS listeners close through test cleanup. No cloud service, browser, container, UI build, demo restart, resource mutation, or remote push is involved.
+The plan and affected operator guides match the change. No user page behavior changes.
+
+Readiness runs inside the relay network. Native admission verifies its configured probe and reported healthy active revision.
+It does not perform a fresh controller-side HTTPS readiness request or add a controller route to the worker-facing private endpoint.
+Relay VNet and private registry observations, workload placement, identity host attachment, effective grants, deny effects, and write protection remain unfinished.
+Native command wiring and packaging remain unfinished. Actual routing, platform readiness, and preview compatibility remain separate deployment verification.
+No native command or deployment template enables this runtime.
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+## Previous delivery: sandbox relay and trusted backend service admission
 
 OpenRuntime now constructs SDKServices with the existing metadata identity.
 Creation, source import, and live admission require selected relay and backend service metadata.

@@ -21,7 +21,8 @@ The [private stage](azure-sandbox-private.md) now checks selected endpoints, NIC
 The [topology stage](azure-sandbox-topology.md) now checks selected VNet contents, firewall and public IP attachments, and complete firewall policy groups.
 The [resolver stage](azure-sandbox-resolver.md) now checks selected policy rules, actual association, and reported subscription private-zone links.
 The [service stage](azure-sandbox-services.md) now checks fixed relay and backend definitions, private environments, identity exposure, certificate metadata, and complete revisions.
-Effective routing, effective resolution, backend endpoint routing and readiness, and effective service authority remain unfinished.
+The [backend endpoint stage](azure-sandbox-backend-endpoint.md) now joins approval, NIC address, network policy, and the existing relay readiness address.
+Effective routing, resolution, deployed readiness, and effective service authority remain unverified.
 Sandboxes and the selected API remain preview. Complete authority and network admission, timer authority, command wiring, and packaging remain unfinished.
 Ordinary Jobs stay disabled. Their contracts below remain reference material and do not establish sandbox isolation.
 The [Azure job contract](azure-worker-contract.md) now builds and verifies SDK requests for execution and discovery.

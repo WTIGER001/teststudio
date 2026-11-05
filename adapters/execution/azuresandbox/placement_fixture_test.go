@@ -71,6 +71,7 @@ func newPlacementWorld(t *testing.T, s Settings) *placementWorld {
 	w.addTopology()
 	w.addResolver()
 	w.addServices()
+	w.addBackendEndpoint()
 	return w
 }
 
@@ -95,6 +96,9 @@ func (w *placementWorld) Do(r *http.Request) (*http.Response, error) {
 	}
 	if version == "" {
 		version = serviceVersions(w.s)[r.URL.Path]
+	}
+	if version == "" {
+		version = backendEndpointVersions(w.s)[r.URL.Path]
 	}
 	if version == "" && r.URL.Path == "/subscriptions/"+w.s.Worker.Subscription+"/providers/Microsoft.Network/privateDnsZones" {
 		version = "2024-06-01"

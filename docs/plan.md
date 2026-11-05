@@ -153,14 +153,23 @@ Fixed templates retain relay-only and worker-backend commands, immutable trusted
 Four distinct identity pins retain pull and startup lifecycle None, with only the backend runtime identity exposed to main containers.
 The service identities cannot reuse the import, timer, control, registry inspection, or metadata identity bindings.
 Exactly one active healthy revision must match each trusted template. Inactive revisions must have zero replicas and traffic.
-The sandbox-placement/v6 profile binds service images, identities, origins, and dependencies. Four bodies support later packaging without mutation.
+The placement profile binds service images, identities, origins, and dependencies. Four bodies support later packaging without mutation.
 Fresh initial and import checks and bounded live evidence now include these service observations.
 Six new local checks and affected native and shared service checks pass with race detection.
 See [trusted service admission](azure-sandbox-services.md). Metadata checks do not establish backend routing, readiness, dependency access, or effective permissions.
 
+The runtime now joins backend environment approval, endpoint, NIC, private address, subnet contents, security rules, and relay source subnet.
+The selected private-link required member must match the NIC and explicit endpoint configurations.
+The backend address in the relay command must match the observed NIC. That command supplies both normal forwarding and the existing TLS readiness probe.
+The endpoint rules permit only relay-subnet HTTPS to that exact address. Configuration rejects overlaps, reserved addresses, foreign resources, and reused resources.
+The sandbox-placement/v7 profile binds these endpoint settings. Two subnet and security-group bodies support later packaging without mutation.
+Fresh initial and import observations and bounded live evidence now include this stage.
+Five new local checks and affected native, relay TLS, and worker database-health checks pass with race detection.
+Readiness runs inside the relay network. Native service admission checks the exact probe and reported healthy active revision; it adds no controller-side HTTPS probe.
+See [backend endpoint and readiness binding](azure-sandbox-backend-endpoint.md). Local TLS checks do not establish deployed routes or platform readiness.
+
 Complete remaining effective-authority and protected network admission, native command role wiring, and deployment packaging next.
-Connect native relay-to-backend endpoint ownership and end-to-end readiness next.
-Verify workload placement, identity host attachment, additional grants and deny effects, and protected write boundaries.
+Complete native relay VNet and private registry observations, workload placement, identity host attachment, additional grants and deny effects, and protected write boundaries.
 Keep cross-subscription link visibility and actual DNS hierarchy behavior explicit in separate deployment acceptance.
 Verify actual service acceptance of custom data-action roles and narrow timer grants during the separate deployment phase.
 Keep private registry conversion access and proxy trust as explicit deployment compatibility questions.

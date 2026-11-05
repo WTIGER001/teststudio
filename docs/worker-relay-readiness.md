@@ -63,6 +63,9 @@ The relay's startup probe uses /healthz. Its liveness probe uses /livez.
 Its readiness probe now uses /readyz with a four-second platform timeout around the three-second backend check.
 The selected app and healthy active revision must retain those exact command and probe settings.
 The [exchange observer](azure-worker-exchange.md) compares them through the existing full specification checks.
+The [sandbox service stage](azure-sandbox-services.md) now verifies the same fixed probe and reported healthy active revision without Jobs configuration.
+The [sandbox backend endpoint stage](azure-sandbox-backend-endpoint.md) binds the relay's backend address to the selected approved endpoint, NIC, and network policy.
+The controller adds no direct readiness request or route to the worker-facing private endpoint.
 
 This implementation makes the readiness check available from the correct network location.
 Local TLS checks do not establish an installed relay route, actual Azure readiness, effective VNet policy, or complete provider admission.
