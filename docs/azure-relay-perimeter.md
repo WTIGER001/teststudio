@@ -8,7 +8,8 @@ The worker and relay use the same platform rule generator, bounded SDK reader, s
 
 This stage does not implement Network, enable coded jobs, or authorize dispatch.
 It inspects reported configuration and sends no packet to Azure or the backend.
-Firewall ownership and policy, effective DNS, registry endpoint ownership, effective authority, and complete execution isolation remain required.
+The [relay firewall observer](azure-relay-firewall.md) now binds actual firewall ownership, policy, subnet, and public IP association.
+Effective DNS, registry endpoint ownership, effective authority, and complete execution isolation remain required.
 Acceptance 51 advances. The verified total remains 48 of 57, with nine open.
 
 ## Explicit settings
@@ -85,4 +86,4 @@ go test -race ./adapters/execution/azure -run '^(TestAzureRelayPerimeter.*|TestA
 ```
 
 Evidence is output/azure-relay-perimeter/summary.json and the targeted command result.
-Continue relay firewall resource and policy inspection, effective DNS, registry endpoint ownership, identity and attachment authority, and complete native wiring.
+Continue effective DNS, registry endpoint ownership, identity and attachment authority, and complete native wiring.

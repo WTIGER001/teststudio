@@ -14,6 +14,11 @@ type RelayTopologyReader interface {
 	VirtualNetwork(context.Context, string) (n.VirtualNetwork, error)
 }
 
+type relayTopologyObservation struct {
+	backendEndpointObservation
+	network n.VirtualNetwork
+}
+
 type RelayTopologyGuard struct {
 	worker   Config
 	settings RelayTopologySettings
@@ -34,33 +39,33 @@ func (g *RelayTopologyGuard) Check(ctx context.Context, c Config) error {
 	return err
 }
 
-func (g *RelayTopologyGuard) inspect(ctx context.Context, c Config) (observation backendEndpointObservation, resultErr error) {
+func (g *RelayTopologyGuard) inspect(ctx context.Context, c Config) (observation relayTopologyObservation, resultErr error) {
 	defer func() { resultErr = controlError(resultErr) }()
 	if fingerprint(c) != fingerprint(g.worker) {
-		return backendEndpointObservation{}, hostedexecution.ErrOwnership
+		return relayTopologyObservation{}, hostedexecution.ErrOwnership
 	}
 	ctx, cancel := context.WithTimeout(ctx, 55*time.Second)
 	defer cancel()
 	observed, err := g.endpoint.inspect(ctx, c)
 	if err != nil {
-		return backendEndpointObservation{}, err
+		return relayTopologyObservation{}, err
 	}
 	id := g.settings.BackendEndpoint.Backend.Exchange.VirtualNetwork
 	network, err := g.reader.VirtualNetwork(ctx, id)
 	if err != nil {
-		return backendEndpointObservation{}, err
+		return relayTopologyObservation{}, err
 	}
 	if err := networkMatches(network, id, c.Region); err != nil {
-		return backendEndpointObservation{}, err
+		return relayTopologyObservation{}, err
 	}
 	p := network.Properties
 	if len(p.AddressSpace.AddressPrefixes) != 1 || value(p.AddressSpace.AddressPrefixes[0]) != g.settings.VirtualNetworkPrefix || len(p.VirtualNetworkPeerings) != 0 || p.DefaultPublicNatGateway != nil || len(p.IPAllocations) != 0 || p.BgpCommunities != nil || p.DhcpOptions != nil && len(p.DhcpOptions.DNSServers) != 0 {
-		return backendEndpointObservation{}, hostedexecution.ErrOwnership
+		return relayTopologyObservation{}, hostedexecution.ErrOwnership
 	}
 	if err := verifyRelaySubnets(c, network, observed, g.settings); err != nil {
-		return backendEndpointObservation{}, err
+		return relayTopologyObservation{}, err
 	}
-	return observed, nil
+	return relayTopologyObservation{backendEndpointObservation: observed, network: network}, nil
 }
 
 func verifyRelaySubnets(c Config, network n.VirtualNetwork, observed backendEndpointObservation, s RelayTopologySettings) error {
@@ -76,7 +81,11 @@ func verifyRelaySubnets(c Config, network n.VirtualNetwork, observed backendEndp
 	seen := map[string]bool{}
 	var prefixes []netip.Prefix
 	for _, subnet := range p.Subnets {
-		if subnet == nil || !subnetResource(c, value(subnet.ID), id) || seen[strings.ToLower(value(subnet.ID))] {
+		if subnet == nil {
+			return hostedexecution.ErrOwnership
+		}
+		child := value(subnet.ID)
+		if !subnetResource(c, child, id) && child != id+"/subnets/AzureFirewallSubnet" || seen[strings.ToLower(child)] {
 			return hostedexecution.ErrOwnership
 		}
 		seen[strings.ToLower(value(subnet.ID))] = true

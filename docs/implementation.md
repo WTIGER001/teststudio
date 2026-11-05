@@ -122,7 +122,39 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: relay source security rules and routing
+## Current delivery: relay firewall ownership and policy
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+The relay firewall stage now binds its routed private address to the selected firewall, dedicated policy, public IP association, and firewall subnet.
+Worker and relay checks share one resource verifier, policy generator, bounded SDK reader, inventory routine, and local fixture implementation.
+Existing public worker APIs, rule names, and resource scope retain their behavior.
+The relay policy permits HTTPS only from its selected source prefix to the fixed platform domains and retains the final application deny.
+Inherited policy, populated default groups, classic rules, extra collections, broad destinations, alternate sources, and TLS interception reject observation.
+Relay firewall, policy, and public IP identifiers cannot reuse the selected worker resources.
+Its firewall subnet must contain the routed address, avoid both selected subnets, and exclude the selected private registry addresses.
+Reserved first-four and final subnet addresses cannot identify the firewall.
+
+The relay topology and perimeter guards now forward their transient validated VNet observation without another read.
+The firewall subnet's direct observation must agree with that embedded inventory. Missing or inconsistent observations remain unavailable.
+The VNet inventory now permits the exact required AzureFirewallSubnet name while preserving other canonical names and parent restrictions.
+The stage adds five normal selected reads. The composed context is 70 seconds, with 65 normal and at most 121 reads.
+It implements no Network, authorizes no dispatch, and enables no Azure coded execution.
+
+Four new focused race checks and seven selected existing checks pass across two targeted local commands.
+The first command exposes three failures caused by rejection of the reserved firewall subnet name.
+After the naming correction, only those failed checks and the affected topology conflict check repeat. The final command passes in 4.431 seconds.
+Coverage includes fresh ownership, parent reuse, policy bypasses, subnet consistency, canonical settings, scoped SDK requests, and bounded paging.
+Existing worker checks cover resource substitution, policy bypasses, SDK setup, and platform declarations.
+No broad suite, cloud request, browser, UI build, image build, container, registry push, deployment, or demo restart runs.
+Fixtures use explicit fake credentials and in-memory SDK responses. They open no network connection or listener.
+Evidence is output/azure-relay-firewall/summary.json and the targeted command results.
+See [relay firewall observation](azure-relay-firewall.md).
+
+Continue effective relay DNS, registry endpoint ownership, identity and attachment authority, deployed trust, execution isolation, and complete native wiring.
+All nine broad acceptance items remain open under their original scope.
+
+## Previous delivery: relay source security rules and routing
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 

@@ -65,6 +65,10 @@ func TestAzureRelayTopologyRejectsAlternatePathsAndSubnetConflicts(t *testing.T)
 		"foreign-subnet": func(f *relayTopologyFixture) {
 			f.network.Properties.Subnets[0].ID = to.Ptr(f.settings.BackendEndpoint.Backend.Exchange.Registry.Endpoints.PrivateDNS.DNS.Firewall.Perimeter.Topology.WorkerSubnet)
 		},
+		"unknown-platform-name": func(f *relayTopologyFixture) {
+			f.network.Properties.Subnets[0].ID = to.Ptr(f.settings.BackendEndpoint.Backend.Exchange.VirtualNetwork + "/subnets/ForeignSubnet")
+			f.network.Properties.Subnets[0].Name = to.Ptr("ForeignSubnet")
+		},
 		"outside-prefix": func(f *relayTopologyFixture) {
 			f.network.Properties.Subnets[0].Properties.AddressPrefix = to.Ptr("10.41.0.0/27")
 		},

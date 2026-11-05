@@ -27,9 +27,8 @@ func canonicalFirewallContent(v any) any {
 	return v
 }
 
-func (g *FirewallGuard) verifyPolicy(actual n.FirewallPolicy, groups []n.FirewallPolicyRuleCollectionGroup) error {
-	s, c := g.settings, g.worker
-	if !perimeterIdentity(value(actual.ID), value(actual.Name), value(actual.Type), s.Policy, "Microsoft.Network/firewallPolicies", value(actual.Location), c.Region) || actual.Properties == nil || actual.Identity != nil {
+func (s firewallBinding) verifyPolicy(actual n.FirewallPolicy, groups []n.FirewallPolicyRuleCollectionGroup, region string) error {
+	if !perimeterIdentity(value(actual.ID), value(actual.Name), value(actual.Type), s.Policy, "Microsoft.Network/firewallPolicies", value(actual.Location), region) || actual.Properties == nil || actual.Identity != nil {
 		return hostedexecution.ErrOwnership
 	}
 	p := actual.Properties
@@ -52,7 +51,7 @@ func (g *FirewallGuard) verifyPolicy(actual n.FirewallPolicy, groups []n.Firewal
 	if p.DNSSettings != nil && (value(p.DNSSettings.EnableProxy) || value(p.DNSSettings.RequireProxyForNetworkRules) || len(p.DNSSettings.Servers) != 0) {
 		return hostedexecution.ErrOwnership
 	}
-	expected, _ := s.PolicyDefinition(c)
+	expected := s.policyDefinition(region)
 	fields := document(p)
 	for _, key := range []string{"provisioningState", "size", "firewalls", "ruleCollectionGroups", "childPolicies"} {
 		delete(fields, key)
@@ -73,12 +72,12 @@ func (g *FirewallGuard) verifyPolicy(actual n.FirewallPolicy, groups []n.Firewal
 		if value(group.Properties.ProvisioningState) != n.ProvisioningStateSucceeded {
 			return hostedexecution.ErrUnavailable
 		}
-		if name == "worker-platform" {
+		if name == s.Role+"-platform" {
 			if owned || !strings.EqualFold(id, s.group()) {
 				return hostedexecution.ErrOwnership
 			}
 			owned = true
-			expected, _ := s.RuleGroupDefinition(c)
+			expected := s.ruleGroupDefinition()
 			fields := document(group.Properties)
 			delete(fields, "provisioningState")
 			delete(fields, "size")

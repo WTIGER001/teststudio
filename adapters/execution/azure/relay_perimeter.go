@@ -36,20 +36,25 @@ func NewSDKRelayPerimeterReader(c Config, s RelayPerimeterSettings, credential a
 	return newSDKPerimeterReader(c, s.SecurityGroup, s.RouteTable, credential, transport)
 }
 
-func (g *RelayPerimeterGuard) Check(ctx context.Context, c Config) (resultErr error) {
+func (g *RelayPerimeterGuard) Check(ctx context.Context, c Config) error {
+	_, err := g.inspect(ctx, c)
+	return err
+}
+
+func (g *RelayPerimeterGuard) inspect(ctx context.Context, c Config) (observation relayTopologyObservation, resultErr error) {
 	defer func() { resultErr = controlError(resultErr) }()
 	if fingerprint(c) != fingerprint(g.worker) {
-		return hostedexecution.ErrOwnership
+		return relayTopologyObservation{}, hostedexecution.ErrOwnership
 	}
 	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 	observed, err := g.topology.inspect(ctx, c)
 	if err != nil {
-		return err
+		return relayTopologyObservation{}, err
 	}
 	s := g.settings
 	if err := verifyRelaySourceSubnet(observed.relay, s); err != nil {
-		return err
+		return relayTopologyObservation{}, err
 	}
 	var security n.SecurityGroup
 	var routes n.RouteTable
@@ -60,20 +65,23 @@ func (g *RelayPerimeterGuard) Check(ctx context.Context, c Config) (resultErr er
 	group.Wait()
 	for _, err := range errs {
 		if errors.Is(err, hostedexecution.ErrOwnership) {
-			return hostedexecution.ErrOwnership
+			return relayTopologyObservation{}, hostedexecution.ErrOwnership
 		}
 	}
 	for _, err := range errs {
 		if err != nil {
-			return hostedexecution.ErrUnavailable
+			return relayTopologyObservation{}, hostedexecution.ErrUnavailable
 		}
 	}
 	subnet := s.Topology.BackendEndpoint.Backend.Exchange.Subnet
 	if err := verifyEndpointSecurityGroup(security, s.SecurityGroup, subnet, c.Region, s.rules()); err != nil {
-		return err
+		return relayTopologyObservation{}, err
 	}
 	expected, _ := s.RouteTableDefinition(c)
-	return verifyPerimeterRoutes(routes, s.RouteTable, subnet, c.Region, expected)
+	if err := verifyPerimeterRoutes(routes, s.RouteTable, subnet, c.Region, expected); err != nil {
+		return relayTopologyObservation{}, err
+	}
+	return observed, nil
 }
 
 func verifyRelaySourceSubnet(subnet n.Subnet, s RelayPerimeterSettings) error {

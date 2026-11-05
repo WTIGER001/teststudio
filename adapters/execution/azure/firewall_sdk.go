@@ -11,7 +11,7 @@ import (
 )
 
 type SDKFirewallReader struct {
-	settings  FirewallSettings
+	settings  firewallBinding
 	firewalls *n.AzureFirewallsClient
 	policies  *n.FirewallPoliciesClient
 	groups    *n.FirewallPolicyRuleCollectionGroupsClient
@@ -25,6 +25,10 @@ func NewSDKFirewallReader(c Config, s FirewallSettings, credential azcore.TokenC
 	if err != nil || credential == nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
+	return newSDKFirewallReader(c, s.binding(), credential, transport)
+}
+
+func newSDKFirewallReader(c Config, s firewallBinding, credential azcore.TokenCredential, transport policy.Transporter) (*SDKFirewallReader, error) {
 	path := s.Policy + "/ruleCollectionGroups"
 	h := newARMReadHTTP(c, map[string]string{s.Firewall: "2025-03-01", s.Policy: "2025-03-01", s.PublicIP: "2025-03-01", s.subnet(): "2025-03-01", path: "2025-03-01"}, transport)
 	h.pages = map[string]bool{path: true}

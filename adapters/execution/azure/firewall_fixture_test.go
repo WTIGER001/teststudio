@@ -13,7 +13,7 @@ import (
 type firewallFixture struct {
 	t            *testing.T
 	mu           sync.Mutex
-	settings     FirewallSettings
+	settings     firewallBinding
 	firewall     n.AzureFirewall
 	policy       n.FirewallPolicy
 	subnet       n.Subnet
@@ -27,30 +27,7 @@ func firewallTest(t *testing.T) (Config, FirewallSettings, *firewallFixture, *Fi
 	t.Helper()
 	c, perimeter, _, _, guard := perimeterTest(t)
 	s := FirewallSettings{Perimeter: perimeter, Firewall: c.resourceID("Microsoft.Network", "azureFirewalls", "studio-firewall"), Policy: c.resourceID("Microsoft.Network", "firewallPolicies", "studio-worker-policy"), PublicIP: c.resourceID("Microsoft.Network", "publicIPAddresses", "studio-firewall-ip"), SubnetPrefix: "10.20.1.0/26"}
-	f := &firewallFixture{t: t, settings: s}
-	f.firewall, _ = s.FirewallDefinition(c)
-	f.firewall.ID, f.firewall.Name, f.firewall.Type = to.Ptr(s.Firewall), to.Ptr("studio-firewall"), to.Ptr("Microsoft.Network/azureFirewalls")
-	f.firewall.Properties.ProvisioningState = to.Ptr(n.ProvisioningStateSucceeded)
-	ip := f.firewall.Properties.IPConfigurations[0]
-	ip.ID = to.Ptr(s.configuration())
-	ip.Properties.PrivateIPAddress = to.Ptr(s.Perimeter.FirewallIP)
-	ip.Properties.ProvisioningState = to.Ptr(n.ProvisioningStateSucceeded)
-	f.policy, _ = s.PolicyDefinition(c)
-	f.policy.ID, f.policy.Name, f.policy.Type = to.Ptr(s.Policy), to.Ptr("studio-worker-policy"), to.Ptr("Microsoft.Network/firewallPolicies")
-	f.policy.Properties.ProvisioningState = to.Ptr(n.ProvisioningStateSucceeded)
-	f.policy.Properties.Firewalls = []*n.SubResource{{ID: to.Ptr(s.Firewall)}}
-	own, _ := s.RuleGroupDefinition(c)
-	own.ID, own.Name, own.Type = to.Ptr(s.group()), to.Ptr("worker-platform"), to.Ptr("Microsoft.Network/firewallPolicies/ruleCollectionGroups")
-	own.Properties.ProvisioningState = to.Ptr(n.ProvisioningStateSucceeded)
-	f.groups = []n.FirewallPolicyRuleCollectionGroup{own}
-	for i, name := range []string{"DefaultDnatRuleCollectionGroup", "DefaultNetworkRuleCollectionGroup", "DefaultApplicationRuleCollectionGroup"} {
-		f.groups = append(f.groups, n.FirewallPolicyRuleCollectionGroup{ID: to.Ptr(s.Policy + "/ruleCollectionGroups/" + name), Name: to.Ptr(name), Type: to.Ptr("Microsoft.Network/firewallPolicies/ruleCollectionGroups"), Properties: &n.FirewallPolicyRuleCollectionGroupProperties{Priority: to.Ptr(int32((i + 1) * 100)), ProvisioningState: to.Ptr(n.ProvisioningStateSucceeded)}})
-	}
-	for _, group := range f.groups {
-		f.policy.Properties.RuleCollectionGroups = append(f.policy.Properties.RuleCollectionGroups, &n.SubResource{ID: group.ID})
-	}
-	f.subnet = n.Subnet{ID: to.Ptr(s.subnet()), Name: to.Ptr("AzureFirewallSubnet"), Type: to.Ptr("Microsoft.Network/virtualNetworks/subnets"), Properties: &n.SubnetPropertiesFormat{AddressPrefix: to.Ptr(s.SubnetPrefix), DefaultOutboundAccess: to.Ptr(false), ProvisioningState: to.Ptr(n.ProvisioningStateSucceeded)}}
-	f.public = n.PublicIPAddress{ID: to.Ptr(s.PublicIP), Name: to.Ptr("studio-firewall-ip"), Type: to.Ptr("Microsoft.Network/publicIPAddresses"), Location: to.Ptr(c.Region), SKU: &n.PublicIPAddressSKU{Name: to.Ptr(n.PublicIPAddressSKUNameStandard), Tier: to.Ptr(n.PublicIPAddressSKUTierRegional)}, Properties: &n.PublicIPAddressPropertiesFormat{IPAddress: to.Ptr("203.0.113.10"), PublicIPAllocationMethod: to.Ptr(n.IPAllocationMethodStatic), PublicIPAddressVersion: to.Ptr(n.IPVersionIPv4), IPConfiguration: &n.IPConfiguration{ID: to.Ptr(s.configuration())}, ProvisioningState: to.Ptr(n.ProvisioningStateSucceeded)}}
+	f := firewallBindingFixture(t, c, s.binding())
 	reader, err := NewSDKFirewallReader(c, s, fixtureCredential{}, f)
 	if err != nil {
 		t.Fatal(err)
@@ -61,6 +38,38 @@ func firewallTest(t *testing.T) (Config, FirewallSettings, *firewallFixture, *Fi
 		t.Fatal(err)
 	}
 	return c, s, f, firewall
+}
+
+func firewallBindingFixture(t *testing.T, c Config, s firewallBinding) *firewallFixture {
+	t.Helper()
+	_, firewallName := resourceParts(s.Firewall)
+	_, policyName := resourceParts(s.Policy)
+	_, publicName := resourceParts(s.PublicIP)
+	f := &firewallFixture{t: t, settings: s}
+	f.firewall = s.firewallDefinition(c.Region)
+	f.firewall.ID, f.firewall.Name, f.firewall.Type = to.Ptr(s.Firewall), to.Ptr(firewallName), to.Ptr("Microsoft.Network/azureFirewalls")
+	f.firewall.Properties.ProvisioningState = to.Ptr(n.ProvisioningStateSucceeded)
+	ip := f.firewall.Properties.IPConfigurations[0]
+	ip.ID = to.Ptr(s.configuration())
+	ip.Properties.PrivateIPAddress = to.Ptr(s.Address)
+	ip.Properties.ProvisioningState = to.Ptr(n.ProvisioningStateSucceeded)
+	f.policy = s.policyDefinition(c.Region)
+	f.policy.ID, f.policy.Name, f.policy.Type = to.Ptr(s.Policy), to.Ptr(policyName), to.Ptr("Microsoft.Network/firewallPolicies")
+	f.policy.Properties.ProvisioningState = to.Ptr(n.ProvisioningStateSucceeded)
+	f.policy.Properties.Firewalls = []*n.SubResource{{ID: to.Ptr(s.Firewall)}}
+	own := s.ruleGroupDefinition()
+	own.ID, own.Name, own.Type = to.Ptr(s.group()), to.Ptr(s.Role+"-platform"), to.Ptr("Microsoft.Network/firewallPolicies/ruleCollectionGroups")
+	own.Properties.ProvisioningState = to.Ptr(n.ProvisioningStateSucceeded)
+	f.groups = []n.FirewallPolicyRuleCollectionGroup{own}
+	for i, name := range []string{"DefaultDnatRuleCollectionGroup", "DefaultNetworkRuleCollectionGroup", "DefaultApplicationRuleCollectionGroup"} {
+		f.groups = append(f.groups, n.FirewallPolicyRuleCollectionGroup{ID: to.Ptr(s.Policy + "/ruleCollectionGroups/" + name), Name: to.Ptr(name), Type: to.Ptr("Microsoft.Network/firewallPolicies/ruleCollectionGroups"), Properties: &n.FirewallPolicyRuleCollectionGroupProperties{Priority: to.Ptr(int32((i + 1) * 100)), ProvisioningState: to.Ptr(n.ProvisioningStateSucceeded)}})
+	}
+	for _, group := range f.groups {
+		f.policy.Properties.RuleCollectionGroups = append(f.policy.Properties.RuleCollectionGroups, &n.SubResource{ID: group.ID})
+	}
+	f.subnet = n.Subnet{ID: to.Ptr(s.subnet()), Name: to.Ptr("AzureFirewallSubnet"), Type: to.Ptr("Microsoft.Network/virtualNetworks/subnets"), Properties: &n.SubnetPropertiesFormat{AddressPrefix: to.Ptr(s.SubnetPrefix), DefaultOutboundAccess: to.Ptr(false), ProvisioningState: to.Ptr(n.ProvisioningStateSucceeded)}}
+	f.public = n.PublicIPAddress{ID: to.Ptr(s.PublicIP), Name: to.Ptr(publicName), Type: to.Ptr("Microsoft.Network/publicIPAddresses"), Location: to.Ptr(c.Region), SKU: &n.PublicIPAddressSKU{Name: to.Ptr(n.PublicIPAddressSKUNameStandard), Tier: to.Ptr(n.PublicIPAddressSKUTierRegional)}, Properties: &n.PublicIPAddressPropertiesFormat{IPAddress: to.Ptr("203.0.113.10"), PublicIPAllocationMethod: to.Ptr(n.IPAllocationMethodStatic), PublicIPAddressVersion: to.Ptr(n.IPVersionIPv4), IPConfiguration: &n.IPConfiguration{ID: to.Ptr(s.configuration())}, ProvisioningState: to.Ptr(n.ProvisioningStateSucceeded)}}
+	return f
 }
 
 func (f *firewallFixture) Do(r *http.Request) (*http.Response, error) {

@@ -33,6 +33,7 @@ Peering, custom DHCP DNS servers, default public NAT gateways, BGP communities, 
 
 The embedded subnet array must contain between two and 256 entries.
 Each entry must identify a unique child of the selected VNet and report successful provisioning.
+The exact reserved AzureFirewallSubnet name is permitted. Other children retain the existing canonical subnet naming rules.
 Each subnet must report one canonical private IPv4 prefix within the VNet. Subnet prefixes must not overlap.
 Missing inventories and unfinished provisioning remain unavailable. Foreign or duplicate identifiers reject observation.
 

@@ -43,37 +43,45 @@ func (g *FirewallGuard) Check(ctx context.Context, c Config) (resultErr error) {
 	if err := g.perimeter.Check(ctx, c); err != nil {
 		return err
 	}
+	_, err := g.settings.binding().inspect(ctx, c, g.reader)
+	return err
+}
+
+func (s firewallBinding) inspect(ctx context.Context, c Config, reader FirewallReader) (n.Subnet, error) {
 	var firewall n.AzureFirewall
 	var policy n.FirewallPolicy
 	var subnet n.Subnet
 	var public n.PublicIPAddress
 	var errs [4]error
 	var group sync.WaitGroup
-	group.Go(func() { firewall, errs[0] = g.reader.Firewall(ctx, g.settings.Firewall) })
-	group.Go(func() { policy, errs[1] = g.reader.Policy(ctx, g.settings.Policy) })
-	group.Go(func() { subnet, errs[2] = g.reader.Subnet(ctx, g.settings.subnet()) })
-	group.Go(func() { public, errs[3] = g.reader.PublicIP(ctx, g.settings.PublicIP) })
+	group.Go(func() { firewall, errs[0] = reader.Firewall(ctx, s.Firewall) })
+	group.Go(func() { policy, errs[1] = reader.Policy(ctx, s.Policy) })
+	group.Go(func() { subnet, errs[2] = reader.Subnet(ctx, s.subnet()) })
+	group.Go(func() { public, errs[3] = reader.PublicIP(ctx, s.PublicIP) })
 	group.Wait()
 	for _, err := range errs {
 		if err != nil {
-			return hostedexecution.ErrUnavailable
+			return n.Subnet{}, hostedexecution.ErrUnavailable
 		}
 	}
-	if err := g.verifyFirewall(firewall); err != nil {
-		return err
+	if err := s.verifyFirewall(firewall, c.Region); err != nil {
+		return n.Subnet{}, err
 	}
-	if err := g.verifySubnet(subnet); err != nil {
-		return err
+	if err := s.verifySubnet(subnet); err != nil {
+		return n.Subnet{}, err
 	}
-	if err := g.verifyPublicIP(public); err != nil {
-		return err
+	if err := s.verifyPublicIP(public, c.Region); err != nil {
+		return n.Subnet{}, err
 	}
-	groups, err := g.reader.RuleGroups(ctx, g.settings.Policy)
+	groups, err := reader.RuleGroups(ctx, s.Policy)
 	if err != nil {
 		if errors.Is(err, hostedexecution.ErrOwnership) {
-			return hostedexecution.ErrOwnership
+			return n.Subnet{}, hostedexecution.ErrOwnership
 		}
-		return hostedexecution.ErrUnavailable
+		return n.Subnet{}, hostedexecution.ErrUnavailable
 	}
-	return g.verifyPolicy(policy, groups)
+	if err := s.verifyPolicy(policy, groups, c.Region); err != nil {
+		return n.Subnet{}, err
+	}
+	return subnet, nil
 }

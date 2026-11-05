@@ -8,9 +8,8 @@ import (
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
 )
 
-func (g *FirewallGuard) verifyFirewall(actual n.AzureFirewall) error {
-	s, c := g.settings, g.worker
-	if !perimeterIdentity(value(actual.ID), value(actual.Name), value(actual.Type), s.Firewall, "Microsoft.Network/azureFirewalls", value(actual.Location), c.Region) || actual.Properties == nil || actual.ExtendedLocation != nil {
+func (s firewallBinding) verifyFirewall(actual n.AzureFirewall, region string) error {
+	if !perimeterIdentity(value(actual.ID), value(actual.Name), value(actual.Type), s.Firewall, "Microsoft.Network/azureFirewalls", value(actual.Location), region) || actual.Properties == nil || actual.ExtendedLocation != nil {
 		return hostedexecution.ErrOwnership
 	}
 	p := actual.Properties
@@ -27,7 +26,7 @@ func (g *FirewallGuard) verifyFirewall(actual n.AzureFirewall) error {
 	if value(ip.Properties.ProvisioningState) != n.ProvisioningStateSucceeded || value(ip.Properties.PrivateIPAddress) == "" {
 		return hostedexecution.ErrUnavailable
 	}
-	if value(ip.Properties.PrivateIPAddress) != s.Perimeter.FirewallIP {
+	if value(ip.Properties.PrivateIPAddress) != s.Address {
 		return hostedexecution.ErrOwnership
 	}
 	doc := document(p)
@@ -42,15 +41,14 @@ func (g *FirewallGuard) verifyFirewall(actual n.AzureFirewall) error {
 	fields, _ := configuration["properties"].(map[string]any)
 	delete(fields, "privateIPAddress")
 	delete(fields, "provisioningState")
-	expected, _ := s.FirewallDefinition(c)
+	expected := s.firewallDefinition(region)
 	if fingerprint(doc) != fingerprint(document(expected.Properties)) {
 		return hostedexecution.ErrOwnership
 	}
 	return nil
 }
 
-func (g *FirewallGuard) verifySubnet(actual n.Subnet) error {
-	s := g.settings
+func (s firewallBinding) verifySubnet(actual n.Subnet) error {
 	if err := subnetMatches(actual, s.subnet()); err != nil {
 		return err
 	}
@@ -62,9 +60,8 @@ func (g *FirewallGuard) verifySubnet(actual n.Subnet) error {
 	return nil
 }
 
-func (g *FirewallGuard) verifyPublicIP(actual n.PublicIPAddress) error {
-	s, c := g.settings, g.worker
-	if !perimeterIdentity(value(actual.ID), value(actual.Name), value(actual.Type), s.PublicIP, "Microsoft.Network/publicIPAddresses", value(actual.Location), c.Region) || actual.Properties == nil || actual.SKU == nil || actual.ExtendedLocation != nil {
+func (s firewallBinding) verifyPublicIP(actual n.PublicIPAddress, region string) error {
+	if !perimeterIdentity(value(actual.ID), value(actual.Name), value(actual.Type), s.PublicIP, "Microsoft.Network/publicIPAddresses", value(actual.Location), region) || actual.Properties == nil || actual.SKU == nil || actual.ExtendedLocation != nil {
 		return hostedexecution.ErrOwnership
 	}
 	p := actual.Properties

@@ -309,7 +309,15 @@ Two concurrent selected reads reuse the topology stage's current subnet observat
 Four new focused race checks and five selected existing checks pass locally. No cloud operation, image build, UI build, or demo restart runs.
 See [relay security rules and routing](azure-relay-perimeter.md). Acceptance 51 advances; the count remains 48 of 57.
 
-Next verify effective read coverage, environment attachment authority, and actual relay firewall ownership and policy.
+The relay firewall stage now binds the routed address to the actual firewall, dedicated policy, subnet, and public IP association.
+Worker and relay profiles share the canonical verifier, definitions, SDK, bounded inventory, and local fixtures.
+The stage reuses the current validated VNet observation to compare its firewall subnet without another network GET.
+The VNet inventory permits the exact reserved AzureFirewallSubnet name and preserves all other naming and parent restrictions.
+Four new focused race checks and seven selected existing checks pass locally. Only failed or affected checks repeat after the naming correction.
+See [relay firewall observation](azure-relay-firewall.md). Acceptance 51 advances; the count remains 48 of 57.
+No cloud operation, UI build, image build, browser, container, deployment, or demo restart runs.
+
+Next verify effective read coverage, environment attachment authority, effective relay DNS, and registry endpoint ownership.
 A completed list response does not prove authorization coverage or prevent later attachments. Keep those native installation controls mandatory.
 Use the worker backend role to verify its restricted route, TLS authority, and placement before completing service admission.
 The staged Azure backend selects platform HTTPS termination. Other approved profiles can select direct TLS.
@@ -318,7 +326,8 @@ The selected backend endpoint, NIC, address, approval, source prefix, and endpoi
 Pinned relay backend routing, TLS trust, and worker-role readiness now pass local checks from owned TLS fixtures.
 The selected relay VNet now passes local address-space, DNS-setting, peering, and subnet-consistency checks.
 The selected relay source NSG and default route now pass local binding, rule, attachment, and bypass checks.
-Verify actual relay firewall resources and policy, global DNS isolation, registry endpoint ownership, and deployed certificate trust next.
+The selected relay firewall, dedicated policy, public IP backlink, and firewall subnet consistency now pass local checks.
+Verify effective relay and global DNS isolation, registry endpoint ownership, and deployed certificate trust next.
 Inspect effective identity grants and backend infrastructure subnet controls.
 Backend hostname lookup is unnecessary in pinned mode. Preserve worker, exchange, registry, and platform DNS controls.
 Keep the staged backend separate from core deployment and coded worker packaging until admission and private relay access are complete.

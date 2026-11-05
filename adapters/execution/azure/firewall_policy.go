@@ -18,25 +18,37 @@ func applicationRule(name, source string, domains []string, deny bool) *n.Applic
 }
 
 func (s FirewallSettings) RuleGroupDefinition(c Config) (n.FirewallPolicyRuleCollectionGroup, error) {
-	canonical, err := s.canonical(c)
+	s, err := s.canonical(c)
 	if err != nil {
 		return n.FirewallPolicyRuleCollectionGroup{}, err
 	}
-	allow := &n.FirewallPolicyFilterRuleCollection{Name: to.Ptr("worker-platform"), RuleCollectionType: to.Ptr(n.FirewallPolicyRuleCollectionTypeFirewallPolicyFilterRuleCollection), Priority: to.Ptr[int32](100), Action: &n.FirewallPolicyFilterRuleCollectionAction{Type: to.Ptr(n.FirewallPolicyFilterRuleCollectionActionTypeAllow)}, Rules: []n.FirewallPolicyRuleClassification{applicationRule("platform-https", canonical.Perimeter.Topology.WorkerSubnetPrefix, platformDomains(), false)}}
-	deny := &n.FirewallPolicyFilterRuleCollection{Name: to.Ptr("worker-deny-other-applications"), RuleCollectionType: to.Ptr(n.FirewallPolicyRuleCollectionTypeFirewallPolicyFilterRuleCollection), Priority: to.Ptr[int32](65000), Action: &n.FirewallPolicyFilterRuleCollectionAction{Type: to.Ptr(n.FirewallPolicyFilterRuleCollectionActionTypeDeny)}, Rules: []n.FirewallPolicyRuleClassification{applicationRule("deny-other-applications", "*", []string{"*"}, true)}}
-	return n.FirewallPolicyRuleCollectionGroup{Properties: &n.FirewallPolicyRuleCollectionGroupProperties{Priority: to.Ptr[int32](400), RuleCollections: []n.FirewallPolicyRuleCollectionClassification{allow, deny}}}, nil
+	return s.binding().ruleGroupDefinition(), nil
 }
 
 func (s FirewallSettings) PolicyDefinition(c Config) (n.FirewallPolicy, error) {
 	if _, err := s.canonical(c); err != nil {
 		return n.FirewallPolicy{}, err
 	}
-	return n.FirewallPolicy{Location: to.Ptr(c.Region), Properties: &n.FirewallPolicyPropertiesFormat{SKU: &n.FirewallPolicySKU{Tier: to.Ptr(n.FirewallPolicySKUTierStandard)}, ThreatIntelMode: to.Ptr(n.AzureFirewallThreatIntelModeDeny), DNSSettings: &n.DNSSettings{EnableProxy: to.Ptr(false), RequireProxyForNetworkRules: to.Ptr(false)}, Snat: &n.FirewallPolicySNAT{PrivateRanges: []*string{to.Ptr("IANAPrivateRanges")}, AutoLearnPrivateRanges: to.Ptr(n.AutoLearnPrivateRangesModeDisabled)}}}, nil
+	return s.binding().policyDefinition(c.Region), nil
 }
 
 func (s FirewallSettings) FirewallDefinition(c Config) (n.AzureFirewall, error) {
 	if _, err := s.canonical(c); err != nil {
 		return n.AzureFirewall{}, err
 	}
-	return n.AzureFirewall{Location: to.Ptr(c.Region), Properties: &n.AzureFirewallPropertiesFormat{SKU: &n.AzureFirewallSKU{Name: to.Ptr(n.AzureFirewallSKUNameAZFWVnet), Tier: to.Ptr(n.AzureFirewallSKUTierStandard)}, ThreatIntelMode: to.Ptr(n.AzureFirewallThreatIntelModeDeny), FirewallPolicy: &n.SubResource{ID: to.Ptr(s.Policy)}, IPConfigurations: []*n.AzureFirewallIPConfiguration{{Name: to.Ptr("egress"), Properties: &n.AzureFirewallIPConfigurationPropertiesFormat{Subnet: &n.SubResource{ID: to.Ptr(s.subnet())}, PublicIPAddress: &n.SubResource{ID: to.Ptr(s.PublicIP)}}}}}}, nil
+	return s.binding().firewallDefinition(c.Region), nil
+}
+
+func (s firewallBinding) ruleGroupDefinition() n.FirewallPolicyRuleCollectionGroup {
+	allow := &n.FirewallPolicyFilterRuleCollection{Name: to.Ptr(s.Role + "-platform"), RuleCollectionType: to.Ptr(n.FirewallPolicyRuleCollectionTypeFirewallPolicyFilterRuleCollection), Priority: to.Ptr[int32](100), Action: &n.FirewallPolicyFilterRuleCollectionAction{Type: to.Ptr(n.FirewallPolicyFilterRuleCollectionActionTypeAllow)}, Rules: []n.FirewallPolicyRuleClassification{applicationRule("platform-https", s.SourcePrefix, platformDomains(), false)}}
+	deny := &n.FirewallPolicyFilterRuleCollection{Name: to.Ptr(s.Role + "-deny-other-applications"), RuleCollectionType: to.Ptr(n.FirewallPolicyRuleCollectionTypeFirewallPolicyFilterRuleCollection), Priority: to.Ptr[int32](65000), Action: &n.FirewallPolicyFilterRuleCollectionAction{Type: to.Ptr(n.FirewallPolicyFilterRuleCollectionActionTypeDeny)}, Rules: []n.FirewallPolicyRuleClassification{applicationRule("deny-other-applications", "*", []string{"*"}, true)}}
+	return n.FirewallPolicyRuleCollectionGroup{Properties: &n.FirewallPolicyRuleCollectionGroupProperties{Priority: to.Ptr[int32](400), RuleCollections: []n.FirewallPolicyRuleCollectionClassification{allow, deny}}}
+}
+
+func (s firewallBinding) policyDefinition(region string) n.FirewallPolicy {
+	return n.FirewallPolicy{Location: to.Ptr(region), Properties: &n.FirewallPolicyPropertiesFormat{SKU: &n.FirewallPolicySKU{Tier: to.Ptr(n.FirewallPolicySKUTierStandard)}, ThreatIntelMode: to.Ptr(n.AzureFirewallThreatIntelModeDeny), DNSSettings: &n.DNSSettings{EnableProxy: to.Ptr(false), RequireProxyForNetworkRules: to.Ptr(false)}, Snat: &n.FirewallPolicySNAT{PrivateRanges: []*string{to.Ptr("IANAPrivateRanges")}, AutoLearnPrivateRanges: to.Ptr(n.AutoLearnPrivateRangesModeDisabled)}}}
+}
+
+func (s firewallBinding) firewallDefinition(region string) n.AzureFirewall {
+	return n.AzureFirewall{Location: to.Ptr(region), Properties: &n.AzureFirewallPropertiesFormat{SKU: &n.AzureFirewallSKU{Name: to.Ptr(n.AzureFirewallSKUNameAZFWVnet), Tier: to.Ptr(n.AzureFirewallSKUTierStandard)}, ThreatIntelMode: to.Ptr(n.AzureFirewallThreatIntelModeDeny), FirewallPolicy: &n.SubResource{ID: to.Ptr(s.Policy)}, IPConfigurations: []*n.AzureFirewallIPConfiguration{{Name: to.Ptr("egress"), Properties: &n.AzureFirewallIPConfigurationPropertiesFormat{Subnet: &n.SubResource{ID: to.Ptr(s.subnet())}, PublicIPAddress: &n.SubResource{ID: to.Ptr(s.PublicIP)}}}}}}
 }

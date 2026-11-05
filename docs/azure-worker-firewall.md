@@ -6,6 +6,7 @@ The Azure adapter now verifies the firewall resource reached by the inspected wo
 FirewallGuard.Check first refreshes [topology and perimeter inspection](azure-worker-perimeter.md).
 It then checks the firewall, its subnet, public IP association, firewall policy, and complete bounded rule-group inventory.
 A selected private address alone no longer substitutes for firewall resource ownership.
+The [relay firewall observer](azure-relay-firewall.md) now reuses this implementation with separate relay resources and source-prefix settings.
 
 This stage does not implement the execution Network interface or release worker input.
 The [DNS stage](azure-worker-dns.md) now checks resolver policy, complete inventories, and actual VNet association.
