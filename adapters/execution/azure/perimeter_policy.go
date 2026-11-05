@@ -10,25 +10,28 @@ func perimeterRule(name string, direction n.SecurityRuleDirection, priority int3
 }
 
 func (s PerimeterSettings) rules() []*n.SecurityRule {
-	worker := s.Topology.WorkerSubnetPrefix
+	return platformPerimeterRules("worker", s.Topology.WorkerSubnetPrefix, s.PrivateEndpointIPs)
+}
+
+func platformPerimeterRules(role, worker string, addresses []string) []*n.SecurityRule {
 	rules := []*n.SecurityRule{
-		perimeterRule("worker-platform-internal-in", n.SecurityRuleDirectionInbound, 100, n.SecurityRuleProtocolAsterisk, n.SecurityRuleAccessAllow, worker, worker, "*"),
-		perimeterRule("worker-load-balancer", n.SecurityRuleDirectionInbound, 110, n.SecurityRuleProtocolTCP, n.SecurityRuleAccessAllow, "AzureLoadBalancer", worker, "30000-32767"),
-		perimeterRule("worker-deny-in", n.SecurityRuleDirectionInbound, 4096, n.SecurityRuleProtocolAsterisk, n.SecurityRuleAccessDeny, "*", "*", "*"),
-		perimeterRule("worker-deny-metadata", n.SecurityRuleDirectionOutbound, 100, n.SecurityRuleProtocolAsterisk, n.SecurityRuleAccessDeny, "*", "AzurePlatformIMDS", "*"),
-		perimeterRule("worker-platform-internal-out", n.SecurityRuleDirectionOutbound, 110, n.SecurityRuleProtocolAsterisk, n.SecurityRuleAccessAllow, worker, worker, "*"),
-		perimeterRule("worker-platform-dns-udp", n.SecurityRuleDirectionOutbound, 120, n.SecurityRuleProtocolUDP, n.SecurityRuleAccessAllow, worker, "AzurePlatformDNS", "53"),
-		perimeterRule("worker-platform-dns-tcp", n.SecurityRuleDirectionOutbound, 121, n.SecurityRuleProtocolTCP, n.SecurityRuleAccessAllow, worker, "AzurePlatformDNS", "53"),
-		perimeterRule("worker-deny-other-platform-dns", n.SecurityRuleDirectionOutbound, 130, n.SecurityRuleProtocolAsterisk, n.SecurityRuleAccessDeny, "*", "AzurePlatformDNS", "*"),
-		perimeterRule("worker-platform-registry", n.SecurityRuleDirectionOutbound, 200, n.SecurityRuleProtocolTCP, n.SecurityRuleAccessAllow, worker, "MicrosoftContainerRegistry", "443"),
-		perimeterRule("worker-platform-registry-cdn", n.SecurityRuleDirectionOutbound, 210, n.SecurityRuleProtocolTCP, n.SecurityRuleAccessAllow, worker, "AzureFrontDoor.FirstParty", "443"),
-		perimeterRule("worker-platform-identity", n.SecurityRuleDirectionOutbound, 220, n.SecurityRuleProtocolTCP, n.SecurityRuleAccessAllow, worker, "AzureActiveDirectory", "443"),
-		perimeterRule("worker-private-endpoints", n.SecurityRuleDirectionOutbound, 300, n.SecurityRuleProtocolTCP, n.SecurityRuleAccessAllow, worker, "", "443"),
-		perimeterRule("worker-deny-out", n.SecurityRuleDirectionOutbound, 4096, n.SecurityRuleProtocolAsterisk, n.SecurityRuleAccessDeny, "*", "*", "*"),
+		perimeterRule(role+"-platform-internal-in", n.SecurityRuleDirectionInbound, 100, n.SecurityRuleProtocolAsterisk, n.SecurityRuleAccessAllow, worker, worker, "*"),
+		perimeterRule(role+"-load-balancer", n.SecurityRuleDirectionInbound, 110, n.SecurityRuleProtocolTCP, n.SecurityRuleAccessAllow, "AzureLoadBalancer", worker, "30000-32767"),
+		perimeterRule(role+"-deny-in", n.SecurityRuleDirectionInbound, 4096, n.SecurityRuleProtocolAsterisk, n.SecurityRuleAccessDeny, "*", "*", "*"),
+		perimeterRule(role+"-deny-metadata", n.SecurityRuleDirectionOutbound, 100, n.SecurityRuleProtocolAsterisk, n.SecurityRuleAccessDeny, "*", "AzurePlatformIMDS", "*"),
+		perimeterRule(role+"-platform-internal-out", n.SecurityRuleDirectionOutbound, 110, n.SecurityRuleProtocolAsterisk, n.SecurityRuleAccessAllow, worker, worker, "*"),
+		perimeterRule(role+"-platform-dns-udp", n.SecurityRuleDirectionOutbound, 120, n.SecurityRuleProtocolUDP, n.SecurityRuleAccessAllow, worker, "AzurePlatformDNS", "53"),
+		perimeterRule(role+"-platform-dns-tcp", n.SecurityRuleDirectionOutbound, 121, n.SecurityRuleProtocolTCP, n.SecurityRuleAccessAllow, worker, "AzurePlatformDNS", "53"),
+		perimeterRule(role+"-deny-other-platform-dns", n.SecurityRuleDirectionOutbound, 130, n.SecurityRuleProtocolAsterisk, n.SecurityRuleAccessDeny, "*", "AzurePlatformDNS", "*"),
+		perimeterRule(role+"-platform-registry", n.SecurityRuleDirectionOutbound, 200, n.SecurityRuleProtocolTCP, n.SecurityRuleAccessAllow, worker, "MicrosoftContainerRegistry", "443"),
+		perimeterRule(role+"-platform-registry-cdn", n.SecurityRuleDirectionOutbound, 210, n.SecurityRuleProtocolTCP, n.SecurityRuleAccessAllow, worker, "AzureFrontDoor.FirstParty", "443"),
+		perimeterRule(role+"-platform-identity", n.SecurityRuleDirectionOutbound, 220, n.SecurityRuleProtocolTCP, n.SecurityRuleAccessAllow, worker, "AzureActiveDirectory", "443"),
+		perimeterRule(role+"-private-endpoints", n.SecurityRuleDirectionOutbound, 300, n.SecurityRuleProtocolTCP, n.SecurityRuleAccessAllow, worker, "", "443"),
+		perimeterRule(role+"-deny-out", n.SecurityRuleDirectionOutbound, 4096, n.SecurityRuleProtocolAsterisk, n.SecurityRuleAccessDeny, "*", "*", "*"),
 	}
 	endpoints := rules[len(rules)-2].Properties
 	endpoints.DestinationAddressPrefix = nil
-	for _, ip := range s.PrivateEndpointIPs {
+	for _, ip := range addresses {
 		endpoints.DestinationAddressPrefixes = append(endpoints.DestinationAddressPrefixes, to.Ptr(ip))
 	}
 	return rules
@@ -47,5 +50,9 @@ func (s PerimeterSettings) RouteTableDefinition(c Config) (n.RouteTable, error) 
 	if err != nil {
 		return n.RouteTable{}, err
 	}
-	return n.RouteTable{Location: to.Ptr(c.Region), Properties: &n.RouteTablePropertiesFormat{DisableBgpRoutePropagation: to.Ptr(true), Routes: []*n.Route{{Name: to.Ptr("worker-egress"), Properties: &n.RoutePropertiesFormat{AddressPrefix: to.Ptr("0.0.0.0/0"), NextHopType: to.Ptr(n.RouteNextHopTypeVirtualAppliance), NextHopIPAddress: to.Ptr(canonical.FirewallIP)}}}}}, nil
+	return perimeterRouteDefinition(c.Region, "worker-egress", canonical.FirewallIP), nil
+}
+
+func perimeterRouteDefinition(region, name, firewall string) n.RouteTable {
+	return n.RouteTable{Location: to.Ptr(region), Properties: &n.RouteTablePropertiesFormat{DisableBgpRoutePropagation: to.Ptr(true), Routes: []*n.Route{{Name: to.Ptr(name), Properties: &n.RoutePropertiesFormat{AddressPrefix: to.Ptr("0.0.0.0/0"), NextHopType: to.Ptr(n.RouteNextHopTypeVirtualAppliance), NextHopIPAddress: to.Ptr(firewall)}}}}}
 }

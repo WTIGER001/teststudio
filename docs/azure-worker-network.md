@@ -21,6 +21,7 @@ It creates no worker job or relay path and proves no deployed isolation.
 The [backend observer](azure-worker-backend-admission.md) now checks selected service configuration, identity metadata, current revisions, and reported backend occupancy.
 The [backend endpoint observer](azure-worker-backend-endpoint.md) now binds selected approval, NIC and IP ownership, relay source prefix, and dedicated endpoint subnet policy.
 The [relay VNet observer](azure-relay-topology.md) now checks the selected address space, DNS settings, peering, and subnet consistency.
+The [relay perimeter observer](azure-relay-perimeter.md) now binds the source NSG and default firewall route through shared policy checks.
 The complete adapter must also prove read coverage, attachment authority, effective zone visibility, full backend authority, exchange networking, and execution placement.
 Azure coded execution remains disabled in native commands and infrastructure packaging.
 See [durable Azure execution](azure-worker-lifecycle.md), [job contracts](azure-worker-contract.md), and [independent deadlines](azure-worker-deadlines.md).

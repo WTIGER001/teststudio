@@ -42,7 +42,8 @@ No successful observation is cached or persisted. Every check repeats the parent
 
 Additional bounded subnets can support later platform and registry paths.
 Their presence does not approve their workloads, attachment authority, security rules, or traffic paths.
-Complete source-subnet NSG, route, firewall, effective DNS, identity grants, and workload isolation remain required before native enablement.
+The [relay perimeter observer](azure-relay-perimeter.md) now binds the source NSG and route table without repeating these subnet reads.
+Complete firewall, effective DNS, identity grants, and workload isolation remain required before native enablement.
 
 ## Read boundary and availability
 
@@ -67,4 +68,4 @@ go test -race ./adapters/execution/azure -run '^(TestAzureRelayTopology.*|TestAz
 ```
 
 Evidence is output/azure-relay-topology/summary.json and the targeted command result.
-Continue source-subnet perimeter controls, effective DNS visibility, attachment authority, and complete native admission before enabling Azure coded execution.
+Continue relay firewall controls, effective DNS visibility, attachment authority, and complete native admission before enabling Azure coded execution.

@@ -22,7 +22,10 @@ func NewSDKPerimeterReader(c Config, s PerimeterSettings, credential azcore.Toke
 	if err != nil || credential == nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
-	groupID, routeID := s.Topology.SecurityGroup, s.Topology.RouteTable
+	return newSDKPerimeterReader(c, s.Topology.SecurityGroup, s.Topology.RouteTable, credential, transport)
+}
+
+func newSDKPerimeterReader(c Config, groupID, routeID string, credential azcore.TokenCredential, transport policy.Transporter) (*SDKPerimeterReader, error) {
 	h := newARMReadHTTP(c, map[string]string{groupID: "2025-03-01", routeID: "2025-03-01"}, transport)
 	options := publicARMOptions(h)
 	groups, err := n.NewSecurityGroupsClient(c.Subscription, credential, options)

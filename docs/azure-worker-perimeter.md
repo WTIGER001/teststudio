@@ -6,6 +6,7 @@ The Azure adapter now inspects the actual worker NSG and route table after succe
 PerimeterGuard.Check performs fresh topology checks before it reads either perimeter resource.
 It checks complete custom rule content and routing against the fixed worker policy.
 The same settings can produce SDK definitions for later infrastructure packaging.
+The [relay perimeter observer](azure-relay-perimeter.md) now reuses this rule generator, route comparison, and bounded SDK reader for its dedicated resources.
 
 This stage does not implement the execution Network interface or release worker input.
 The [firewall stage](azure-worker-firewall.md) now verifies actual resource identity, attachment, policy, and complete group inventory.

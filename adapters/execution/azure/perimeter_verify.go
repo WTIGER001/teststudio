@@ -82,25 +82,29 @@ func verifySecurityRules(expectedID string, rules, wanted []*n.SecurityRule) err
 }
 
 func (g *PerimeterGuard) verifyRoutes(actual n.RouteTable) error {
-	expectedID := g.settings.Topology.RouteTable
-	if !perimeterIdentity(value(actual.ID), value(actual.Name), value(actual.Type), expectedID, "Microsoft.Network/routeTables", value(actual.Location), g.worker.Region) || actual.Properties == nil {
+	expected, _ := g.settings.RouteTableDefinition(g.worker)
+	return verifyPerimeterRoutes(actual, g.settings.Topology.RouteTable, g.settings.Topology.WorkerSubnet, g.worker.Region, expected)
+}
+
+func verifyPerimeterRoutes(actual n.RouteTable, expectedID, subnet, region string, expected n.RouteTable) error {
+	name := value(expected.Properties.Routes[0].Name)
+	if !perimeterIdentity(value(actual.ID), value(actual.Name), value(actual.Type), expectedID, "Microsoft.Network/routeTables", value(actual.Location), region) || actual.Properties == nil {
 		return hostedexecution.ErrOwnership
 	}
 	p := actual.Properties
 	if value(p.ProvisioningState) != n.ProvisioningStateSucceeded {
 		return hostedexecution.ErrUnavailable
 	}
-	if !value(p.DisableBgpRoutePropagation) || !soleSubnet(p.Subnets, g.settings.Topology.WorkerSubnet) || len(p.Routes) != 1 || p.Routes[0] == nil || p.Routes[0].Properties == nil {
+	if !value(p.DisableBgpRoutePropagation) || !soleSubnet(p.Subnets, subnet) || len(p.Routes) != 1 || p.Routes[0] == nil || p.Routes[0].Properties == nil {
 		return hostedexecution.ErrOwnership
 	}
 	route := p.Routes[0]
-	if value(route.Name) != "worker-egress" || route.ID != nil && !strings.EqualFold(value(route.ID), expectedID+"/routes/worker-egress") || route.Type != nil && !strings.EqualFold(value(route.Type), "Microsoft.Network/routeTables/routes") || value(route.Properties.HasBgpOverride) {
+	if value(route.Name) != name || route.ID != nil && !strings.EqualFold(value(route.ID), expectedID+"/routes/"+name) || route.Type != nil && !strings.EqualFold(value(route.Type), "Microsoft.Network/routeTables/routes") || value(route.Properties.HasBgpOverride) {
 		return hostedexecution.ErrOwnership
 	}
 	if value(route.Properties.ProvisioningState) != n.ProvisioningStateSucceeded {
 		return hostedexecution.ErrUnavailable
 	}
-	expected, _ := g.settings.RouteTableDefinition(g.worker)
 	fields := document(route.Properties)
 	delete(fields, "provisioningState")
 	delete(fields, "hasBgpOverride")

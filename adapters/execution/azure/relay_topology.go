@@ -29,30 +29,38 @@ func NewRelayTopologyGuard(c Config, s RelayTopologySettings, endpoint *BackendE
 	return &RelayTopologyGuard{worker: c, settings: s, endpoint: endpoint, reader: reader}, nil
 }
 
-func (g *RelayTopologyGuard) Check(ctx context.Context, c Config) (resultErr error) {
+func (g *RelayTopologyGuard) Check(ctx context.Context, c Config) error {
+	_, err := g.inspect(ctx, c)
+	return err
+}
+
+func (g *RelayTopologyGuard) inspect(ctx context.Context, c Config) (observation backendEndpointObservation, resultErr error) {
 	defer func() { resultErr = controlError(resultErr) }()
 	if fingerprint(c) != fingerprint(g.worker) {
-		return hostedexecution.ErrOwnership
+		return backendEndpointObservation{}, hostedexecution.ErrOwnership
 	}
 	ctx, cancel := context.WithTimeout(ctx, 55*time.Second)
 	defer cancel()
 	observed, err := g.endpoint.inspect(ctx, c)
 	if err != nil {
-		return err
+		return backendEndpointObservation{}, err
 	}
 	id := g.settings.BackendEndpoint.Backend.Exchange.VirtualNetwork
 	network, err := g.reader.VirtualNetwork(ctx, id)
 	if err != nil {
-		return err
+		return backendEndpointObservation{}, err
 	}
 	if err := networkMatches(network, id, c.Region); err != nil {
-		return err
+		return backendEndpointObservation{}, err
 	}
 	p := network.Properties
 	if len(p.AddressSpace.AddressPrefixes) != 1 || value(p.AddressSpace.AddressPrefixes[0]) != g.settings.VirtualNetworkPrefix || len(p.VirtualNetworkPeerings) != 0 || p.DefaultPublicNatGateway != nil || len(p.IPAllocations) != 0 || p.BgpCommunities != nil || p.DhcpOptions != nil && len(p.DhcpOptions.DNSServers) != 0 {
-		return hostedexecution.ErrOwnership
+		return backendEndpointObservation{}, hostedexecution.ErrOwnership
 	}
-	return verifyRelaySubnets(c, network, observed, g.settings)
+	if err := verifyRelaySubnets(c, network, observed, g.settings); err != nil {
+		return backendEndpointObservation{}, err
+	}
+	return observed, nil
 }
 
 func verifyRelaySubnets(c Config, network n.VirtualNetwork, observed backendEndpointObservation, s RelayTopologySettings) error {

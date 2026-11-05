@@ -303,7 +303,13 @@ It reuses the endpoint stage's current direct subnet observations and adds one V
 Four new focused race checks and two existing endpoint checks pass locally. No cloud operation, image build, UI build, or demo restart runs.
 See [relay VNet observation](azure-relay-topology.md). Acceptance 51 advances; the count remains 48 of 57.
 
-Next verify effective read coverage, environment attachment authority, and relay source perimeter controls.
+The relay perimeter stage now binds its dedicated source NSG, source subnet network settings, and sole default firewall route.
+It shares the worker policy generator, rule and route comparison, and bounded SDK reader.
+Two concurrent selected reads reuse the topology stage's current subnet observation without another VNet or subnet GET.
+Four new focused race checks and five selected existing checks pass locally. No cloud operation, image build, UI build, or demo restart runs.
+See [relay security rules and routing](azure-relay-perimeter.md). Acceptance 51 advances; the count remains 48 of 57.
+
+Next verify effective read coverage, environment attachment authority, and actual relay firewall ownership and policy.
 A completed list response does not prove authorization coverage or prevent later attachments. Keep those native installation controls mandatory.
 Use the worker backend role to verify its restricted route, TLS authority, and placement before completing service admission.
 The staged Azure backend selects platform HTTPS termination. Other approved profiles can select direct TLS.
@@ -311,7 +317,8 @@ Selected origin, app, environment, command, identity metadata, and revision obse
 The selected backend endpoint, NIC, address, approval, source prefix, and endpoint subnet policy now pass local fixtures.
 Pinned relay backend routing, TLS trust, and worker-role readiness now pass local checks from owned TLS fixtures.
 The selected relay VNet now passes local address-space, DNS-setting, peering, and subnet-consistency checks.
-Verify relay source NSG, route and firewall controls, global DNS isolation, and deployed certificate trust next.
+The selected relay source NSG and default route now pass local binding, rule, attachment, and bypass checks.
+Verify actual relay firewall resources and policy, global DNS isolation, registry endpoint ownership, and deployed certificate trust next.
 Inspect effective identity grants and backend infrastructure subnet controls.
 Backend hostname lookup is unnecessary in pinned mode. Preserve worker, exchange, registry, and platform DNS controls.
 Keep the staged backend separate from core deployment and coded worker packaging until admission and private relay access are complete.

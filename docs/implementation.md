@@ -122,7 +122,38 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: selected relay VNet observation
+## Current delivery: relay source security rules and routing
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+The relay perimeter stage now binds its dedicated source NSG, source subnet settings, and default firewall route.
+It uses the worker stage's canonical platform rule generator, security-rule comparison, route comparison, and scoped SDK reader.
+The source subnet must attach its selected NSG and route table and disable default outbound access.
+Configured NAT, service endpoints, sharing, and unrelated private endpoints reject observation.
+The dedicated NSG attaches only to that subnet, flushes changed connections, and contains the exact thirteen relay rules.
+Its private HTTPS destinations contain only the pinned backend address and selected private registry addresses.
+The route table attaches only to the source subnet and disables BGP propagation.
+Its sole relay-egress route sends 0.0.0.0/0 to the selected firewall address through VirtualAppliance.
+
+The settings freeze and sort private registry addresses. They reject shared worker resources, public addresses, duplicates, and selected-subnet addresses.
+Fresh definitions make no resource writes. Configured registry and firewall addresses still require actual ownership observation.
+The relay topology guard now returns its current validated subnet observation to this stage. Public Check behavior remains unchanged.
+Two concurrent selected reads add no duplicate subnet or VNet GET. The composed context is 60 seconds, with 60 normal and at most 113 reads.
+This observer implements no Network, authorizes no dispatch, and enables no Azure coded execution.
+
+Four new focused race checks and five selected existing checks pass locally in 3.718 seconds.
+They cover parent reuse, immutable configuration, subnet and rule bypasses, route changes, provisioning uncertainty, and exact SDK scope.
+Existing checks verify the shared traffic decisions, worker route comparison, SDK construction, definitions, and relay topology observation.
+The first attempt stops at compilation because a fixture uses the wrong SDK NAT reference type. The corrected targeted command passes.
+No broad suite, UI build, image build, browser, container, cloud request, registry push, deployment, or demo restart runs.
+Fixtures use explicit fake credentials and in-memory SDK responses. They open no network connection or listener.
+Evidence is output/azure-relay-perimeter/summary.json and the targeted command result.
+See [relay security rules and routing](azure-relay-perimeter.md).
+
+Continue actual relay firewall ownership and policy, effective DNS, registry endpoint ownership, effective identity and attachment authority, and execution isolation.
+All nine broad acceptance items remain open under their original scope.
+
+## Previous delivery: selected relay VNet observation
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 
