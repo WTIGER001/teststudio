@@ -6,7 +6,6 @@ import (
 	"crypto/subtle"
 	"crypto/x509"
 	"encoding/json"
-	"strings"
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/apicredential"
@@ -19,6 +18,8 @@ import (
 
 type GatewaySettings struct {
 	Origin               string `json:"origin"`
+	Address              string `json:"address,omitempty"`
+	RequireAddress       bool   `json:"requireAddress,omitempty"`
 	CertificateAuthority []byte `json:"certificateAuthority,omitempty"`
 }
 
@@ -46,8 +47,7 @@ func gatewayTarget(record Record) (*browserpolicy.Target, error) {
 }
 
 func (settings GatewaySettings) valid() bool {
-	origin, err := browserpolicy.Origin(settings.Origin)
-	return err == nil && origin == settings.Origin && strings.HasPrefix(origin, "https://") && len(settings.CertificateAuthority) <= 64<<10 && (len(settings.CertificateAuthority) == 0 || x509.NewCertPool().AppendCertsFromPEM(settings.CertificateAuthority))
+	return browsergateway.ValidateRemoteEndpoint(settings.Origin, settings.Address) == nil && len(settings.CertificateAuthority) <= 64<<10 && (len(settings.CertificateAuthority) == 0 || x509.NewCertPool().AppendCertsFromPEM(settings.CertificateAuthority))
 }
 
 func (s *Service) gatewayAuthority(ctx context.Context, record Record) ([]storage.Record, error) {
@@ -76,7 +76,8 @@ func (s *Service) PrepareGateway(ctx context.Context, ref execution.Reference, s
 			return GatewayTicket{}, ErrInvalid
 		}
 		if record.Gateway != nil {
-			if record.Gateway.Settings.Origin != settings.Origin || !bytes.Equal(record.Gateway.Settings.CertificateAuthority, settings.CertificateAuthority) {
+			addressMatches := record.Gateway.Settings.Address == settings.Address || settings.RequireAddress && settings.Address == ""
+			if record.Gateway.Settings.Origin != settings.Origin || record.Gateway.Settings.RequireAddress != settings.RequireAddress || !addressMatches || !bytes.Equal(record.Gateway.Settings.CertificateAuthority, settings.CertificateAuthority) {
 				return GatewayTicket{}, ErrConflict
 			}
 		} else {
@@ -100,6 +101,17 @@ func (s *Service) PrepareGateway(ctx context.Context, ref execution.Reference, s
 }
 
 func (s *Service) BindGateway(ctx context.Context, ref execution.Reference, instance string) error {
+	return s.bindGateway(ctx, ref, instance, "")
+}
+
+func (s *Service) BindGatewayAddress(ctx context.Context, ref execution.Reference, instance, address string) error {
+	if address == "" {
+		return ErrInvalid
+	}
+	return s.bindGateway(ctx, ref, instance, address)
+}
+
+func (s *Service) bindGateway(ctx context.Context, ref execution.Reference, instance, address string) error {
 	if !domain.ValidID(instance) {
 		return ErrInvalid
 	}
@@ -114,6 +126,18 @@ func (s *Service) BindGateway(ctx context.Context, ref execution.Reference, inst
 		}
 		if record.Gateway == nil || record.Gateway.Instance != "" && record.Gateway.Instance != instance {
 			return ErrConflict
+		}
+		if address != "" {
+			if browsergateway.ValidateRemoteEndpoint(record.Gateway.Settings.Origin, address) != nil {
+				return ErrInvalid
+			}
+			if !record.Gateway.Settings.RequireAddress || record.Gateway.Settings.Address != "" && record.Gateway.Settings.Address != address {
+				return ErrConflict
+			}
+			record.Gateway.Settings.Address = address
+		}
+		if record.Gateway.Settings.RequireAddress && record.Gateway.Settings.Address == "" {
+			return ErrUnavailable
 		}
 		record.Gateway.Instance = instance
 		if err := s.save(ctx, row, record, guards); err == ErrConflict {
@@ -201,5 +225,5 @@ func (s *Service) gatewayConnection(ctx context.Context, record Record) (browser
 	if err != nil {
 		return browsergateway.RemoteConnection{}, err
 	}
-	return browsergateway.RemoteConnection{Origin: record.Gateway.Settings.Origin, CertificateAuthority: record.Gateway.Settings.CertificateAuthority, Session: browsergateway.RemoteSession{Execution: record.Reference.ID, Token: token, Deadline: record.Deadline}}, nil
+	return browsergateway.RemoteConnection{Origin: record.Gateway.Settings.Origin, Address: record.Gateway.Settings.Address, CertificateAuthority: record.Gateway.Settings.CertificateAuthority, Session: browsergateway.RemoteSession{Execution: record.Reference.ID, Token: token, Deadline: record.Deadline}}, nil
 }

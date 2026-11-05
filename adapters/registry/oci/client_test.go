@@ -155,6 +155,7 @@ func TestRegistryInspectsPinnedSingleImagesAndPlatformIndexes(t *testing.T) {
 				f := fresh(t, runner, index, func(c *configuration, _ *manifest) {
 					if index {
 						c.Config.Labels["teststudio.job-gateway"] = "tls-execution/v1"
+						c.Config.Labels["teststudio.job-gateway-address"] = "verified-ip/v1"
 					}
 				})
 				metadata, err := f.client.Inspect(t.Context(), f.reference)
@@ -167,6 +168,13 @@ func TestRegistryInspectsPinnedSingleImagesAndPlatformIndexes(t *testing.T) {
 				}
 				if metadata.Image.GatewayTransport != wantGateway {
 					t.Fatal("registry lost optional gateway transport capability")
+				}
+				wantAddress := ""
+				if index {
+					wantAddress = "verified-ip/v1"
+				}
+				if metadata.Image.GatewayAddress != wantAddress {
+					t.Fatal("registry lost optional verified gateway address capability")
 				}
 				if f.tokens != 1 {
 					t.Fatal("repository token was fetched repeatedly", f.tokens)

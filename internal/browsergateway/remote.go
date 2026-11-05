@@ -5,14 +5,14 @@ import (
 	"encoding/base64"
 	"errors"
 	"net/http"
-	"strings"
 	"time"
 
-	"github.com/wtiger001/teststudio/internal/browserpolicy"
 	"github.com/wtiger001/teststudio/internal/domain"
 )
 
 const RemoteProtocol = "tls-execution/v1"
+const RemoteAddressProtocol = "verified-ip/v1"
+const RemoteCertificateProtocol = "secret-env/v1"
 const executionHeader = "X-TestStudio-Gateway-Execution"
 
 var ErrRemoteConfiguration = errors.New("remote gateway requires a valid scoped execution, private TLS connection, and unexpired deadline")
@@ -25,6 +25,7 @@ type RemoteSession struct {
 
 type RemoteConnection struct {
 	Origin               string        `json:"origin"`
+	Address              string        `json:"address,omitempty"`
 	CertificateAuthority []byte        `json:"certificateAuthority,omitempty"`
 	Session              RemoteSession `json:"session"`
 }
@@ -38,8 +39,7 @@ func (s RemoteSession) validate() error {
 }
 
 func (c RemoteConnection) validate() error {
-	origin, err := browserpolicy.Origin(c.Origin)
-	if err != nil || origin != c.Origin || !strings.HasPrefix(origin, "https://") || len(c.CertificateAuthority) > 64<<10 {
+	if ValidateRemoteEndpoint(c.Origin, c.Address) != nil || len(c.CertificateAuthority) > 64<<10 {
 		return ErrRemoteConfiguration
 	}
 	return c.Session.validate()

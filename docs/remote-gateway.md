@@ -4,12 +4,12 @@
 
 The remote transport connects a trusted worker supervisor to the existing browser and API gateway engine.
 It implements the first component of the [hosted networking plan](deployment-readiness.md).
-Kubernetes now has opt-in environment executor admission and installation packaging. Actual network execution on the dedicated cluster remains unverified.
+Kubernetes now passes actual local browser, authenticated HTTPS API, cancellation, and interrupted-controller recovery scenarios.
 ECS and Azure environment-backed coded execution remain disabled.
 Shared private initialization and supervisor bridge delivery are implemented.
 The [Kubernetes resource lifecycle](kubernetes-gateway.md) now implements bundle ownership, instance binding, network policies, stop, inventory, and cleanup.
 Normal Kubernetes admission, discovery, image approval, and installation wiring now pass targeted local checks.
-Actual network execution remains unverified.
+See [local application networking](local-kubernetes-gateway.md) for retained run identifiers and complete resource cleanup.
 This component does not establish Kubernetes, ECS, or Azure deployment acceptance.
 Azure implementation remains deferred.
 
@@ -19,6 +19,10 @@ The runner keeps its existing Unix socket protocol. The supervisor owns that soc
 `ServeRemoteBridge` accepts the frozen target and a private `RemoteConnection`.
 The connection contains one canonical HTTPS gateway origin, an optional certificate authority, and one execution session.
 The bridge verifies the gateway certificate and hostname. It permits no TLS validation bypass.
+An optional address pins the TCP connection while the HTTPS origin still selects the certificate hostname and port.
+The address must be a canonical private IPv4 address. Loopback is also permitted for local protocol fixtures.
+Public, link-local, unspecified, multicast, mapped IPv6, hostname, and address-with-port values are rejected.
+This syntax check does not prove provider ownership. The provider must verify the actual task interface and network before binding an address.
 The private session contains an execution identifier, a 32-byte capability, and a deadline within two hours.
 The capability uses unpadded base64url encoding.
 The gateway requires both the capability and execution identifier on every TLS proxy request.
@@ -53,6 +57,7 @@ The private configuration includes `target`, optional `credential`, and required
 No credentials or transport capabilities belong in process arguments or deployment annotations.
 Default local mode rejects a remote session. Unrecognized command arguments fail immediately.
 The gateway image declares `teststudio.gateway-remote=tls-execution/v1`.
+It also declares `teststudio.gateway-certificate=secret-env/v1` when private certificate environment delivery is supported.
 The existing image health command remains local. Future hosted packaging must select `--ready-remote` explicitly.
 
 The process also accepts `--remote-exchange=HTTPS_ORIGIN` for private initialization through the exchange.
@@ -60,15 +65,27 @@ Supply `TESTSTUDIO_GATEWAY_EXECUTION`, `TESTSTUDIO_GATEWAY_TOKEN`, and `TESTSTUD
 The instance must match the provider-confirmed workload identity.
 Initialization retries temporary unavailability for at most 30 seconds. Authorization denial stops initialization immediately.
 The exchange certificate uses normal system trust. A private installation must mount its approved CA bundle.
-This process mode is implemented and compiles. The provider installation path remains unverified.
+The Kubernetes process path now passes actual local verification.
+
+The trusted gateway can receive PEM values through TESTSTUDIO_GATEWAY_TLS_CERTIFICATE and TESTSTUDIO_GATEWAY_TLS_KEY.
+Both values must be present together and must stay within 64 KiB each.
+Invalid, incomplete, or oversized material produces a bounded diagnostic with no supplied value.
+When both variables are absent, the process uses the existing certificate files.
+Only the trusted gateway receives these private values. Uploaded workers receive neither variable.
 
 ## Separate initialization authority
 
 The controller calls `PrepareGateway` after preparing the gated execution.
-This freezes the gateway HTTPS origin and optional certificate authority.
+This freezes the gateway HTTPS origin, optional certificate authority, and address mode.
 The application credential reference is already frozen separately by execution preparation.
 Neither this reference nor its resolved value enters the runner packet.
 Preparation retries cannot replace the gateway origin, CA, or application credential reference.
+An address supplied during preparation is also immutable.
+
+Providers that learn a task address only after launch prepare requireAddress=true without an address.
+BindGatewayAddress atomically binds the verified address and immutable instance before private initialization.
+Ordinary instance binding remains blocked while this required address is missing.
+A retry of the original preparation retains the bound address and ticket. It cannot erase or replace that address.
 
 The provider must confirm the actual gateway workload before calling `BindGateway` with its immutable instance identifier.
 Binding another instance fails. Configuration delivery waits until this identity is bound.
@@ -97,6 +114,7 @@ It receives no gateway ticket or proxy capability from that input or environment
 The supervisor closes owned connections and removes the socket when delivery finishes or fails.
 
 New runtime overlays advertise `teststudio.job-gateway=tls-execution/v1`.
+Address-capable overlays also advertise `teststudio.job-gateway-address=verified-ip/v1`.
 Registry inspection exposes this optional capability. Existing offline runtime images remain valid for offline work.
 Hosted network admission requires this capability, the supervisor build revision, and a distinct timing profile.
 No runtime image is rebuilt for this shared-component milestone.
@@ -113,6 +131,10 @@ Private exchange checks verify separate roles, instance binding, closed activati
 Those exchange checks pass with the race detector.
 A new child-process check verifies supervisor socket use, stripped gateway environment, prelaunch scope rejection, and socket removal.
 The child-process check also passes with the race detector.
+New local checks connect to a pinned loopback address using an independently named TLS certificate.
+Wrong certificate names, authorities, and capabilities fail. Pending task addresses keep initialization and activation closed.
+Private certificate environment checks cover a valid pair and incomplete, invalid, empty, and oversized values.
+Registry inspection exposes both optional capabilities. The build script validates the supervisor's address capability.
 No cloud account, cluster deployment, browser process, image rebuild, or new catalog run is required for these transport checks.
 
 ## Continuation
@@ -125,5 +147,6 @@ Verify both workload identities and the enforced network boundary before releasi
 Require the inspected supervisor gateway capability for environment-backed images.
 Extend hosted source-discovery validation for the reviewed environment build profiles while keeping discovery network-isolated.
 Keep unsupported runtime and provider profiles rejected. Kubernetes opt-in admission now connects the complete shared contract.
-Use the dedicated local cluster for the first environment-backed browser and API scenarios.
-Port the shared contract to ECS afterward. Keep Azure deferred.
+Retain the passing local Kubernetes application and lifecycle scenarios.
+Continue the [ECS gateway integration](ecs-gateway.md) with its separate task identity, network proof, deadlines, and durable cleanup.
+Keep Azure deferred.

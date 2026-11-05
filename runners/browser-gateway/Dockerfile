@@ -5,6 +5,7 @@ LABEL teststudio.api-policy="request-policy/v1"
 LABEL teststudio.api-credentials="gateway-injection/v1"
 LABEL teststudio.gateway-config="private-config/v1"
 LABEL teststudio.gateway-remote="tls-execution/v1"
+LABEL teststudio.gateway-certificate="secret-env/v1"
 COPY teststudio-browser-gateway /gateway
 COPY --chown=1000:1000 output /output
 USER 1000:1000

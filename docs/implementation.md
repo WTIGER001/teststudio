@@ -125,6 +125,26 @@ See output/local-k3s/gateway/lifecycle and [local gateway lifecycle](local-kuber
 This advances **51, 56, and 57**. The total remains **50 verified, 7 open**.
 Continue with ECS gateway implementation and targeted local checks. Azure remains deferred.
 
+### ECS gateway transport components
+
+The shared gateway now supports a provider-bound private task address without replacing its TLS certificate identity.
+New local TLS checks verify the selected address, certificate hostname, certificate authority, and execution capability together.
+Invalid address forms fail before connection. The address remains outside the uploaded child packet.
+Task preparation can require an address that becomes known only after native launch.
+Initialization and activation stay closed until BindGatewayAddress binds the verified address and immutable instance.
+Preparation retries retain that address and original ticket. Replacement addresses fail.
+
+The trusted gateway accepts a private certificate/key pair through bounded environment values, with mounted-file fallback when both variables are absent.
+Valid material passes. Incomplete, invalid, empty, and oversized values produce sanitized errors.
+Source runtimes and gateway images declare separate optional address and certificate capabilities.
+Registry inspection exposes them, and the runtime build script validates its address marker.
+An omitted certificate capability preserves the existing gateway timing fingerprint.
+
+Selected local transport, exchange, certificate, and registry checks pass. The runtime script passes syntax validation.
+No image build, new catalog run, browser, Kubernetes redeployment, or live cloud request occurs for these shared components.
+Native ECS environment execution remains disabled until its full provider lifecycle and network integration are implemented.
+See [ECS gateway integration](ecs-gateway.md). This advances implementation under **51, 56, and 57**; the total remains **50 verified, 7 open**.
+
 ## Active application navigation correction — 2026-11-04
 
 The sidebar now has one project selector and an explicit application selector.

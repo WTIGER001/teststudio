@@ -45,9 +45,13 @@ func newRemoteBridge(target browserpolicy.Target, connection RemoteConnection) (
 		return nil, ErrRemoteConfiguration
 	}
 	selected, _ := url.Parse(target.Origin)
+	address := origin.Hostname()
+	if connection.Address != "" {
+		address = connection.Address
+	}
 	return &remoteBridge{
 		target: selected, api: target.Requests != nil, connection: connection,
-		address: net.JoinHostPort(origin.Hostname(), port), slots: make(chan struct{}, 64),
+		address: net.JoinHostPort(address, port), slots: make(chan struct{}, 64),
 		tls: &tls.Config{MinVersion: tls.VersionTLS12, ServerName: origin.Hostname(), RootCAs: roots, NextProtos: []string{"http/1.1"}},
 	}, nil
 }

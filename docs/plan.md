@@ -93,6 +93,13 @@ Cloud-wide acceptance remains separate. Continue independent remaining product w
 Kubernetes now runs environment-backed browser and coded API artifacts through its trusted gateway.
 Both actual local cluster workflows pass with measured durations, private evidence, and complete resource cleanup.
 ECS still needs the shared gateway integration. Hosted recording still needs its local companion.
+The first ECS transport components now support a frozen private task address and private server certificate environment values.
+Pending addresses keep initialization and activation closed until the provider binds the observed task identity and address.
+TLS still verifies the configured hostname and certificate authority. Optional runtime and gateway capabilities are exposed through registry inspection.
+Targeted local checks pass. No image rebuild or Kubernetes redeployment occurs for these shared components.
+Next implement native ECS gateway tasks, network admission, metadata identity, readiness, independent deadlines, and durable bundle cleanup.
+Preserve the worker DNS firewall and target-egress restrictions while providing trusted gateway target resolution.
+Require the new address and certificate capabilities before enabling ECS environment profiles. See [ECS gateway integration](ecs-gateway.md).
 
 1. Keep the completed Kubernetes gateway and its two passing application workflows as retained evidence.
 2. Retain the passing gateway cancellation and interrupted-run recovery cases. Both use their original execution identities and clean both workloads.

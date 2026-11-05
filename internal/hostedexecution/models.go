@@ -21,6 +21,7 @@ const SandboxSupervisor = "azure-sandbox-command/v1"
 
 type Image struct {
 	SupervisorRevision string
+	GatewayAddress     string
 	APIPolicy          string
 	GatewayTransport   string
 	TaskStorage        string
@@ -39,6 +40,7 @@ type Image struct {
 
 type GatewayImage struct {
 	Reference, OS, Architecture, Protocol string
+	CertificateConfiguration              string `json:"certificateConfiguration,omitempty"`
 }
 
 type GatewayProvider interface {

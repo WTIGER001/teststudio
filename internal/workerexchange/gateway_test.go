@@ -51,7 +51,7 @@ func gatewayFixture(t *testing.T) (fixture, *gatewaySecrets) {
 func TestGatewayInitializationSeparatesWorkerTransportAndApplicationAuthority(t *testing.T) {
 	f, provider := gatewayFixture(t)
 	worker := f.prepare(t)
-	settings := workerexchange.GatewaySettings{Origin: "https://owned-gateway.test:8044"}
+	settings := workerexchange.GatewaySettings{Origin: "https://owned-gateway.test:8044", Address: "10.20.1.7"}
 	gateway, err := f.service.PrepareGateway(t.Context(), f.ref, settings)
 	if err != nil {
 		t.Fatal(err)
@@ -108,10 +108,10 @@ func TestGatewayInitializationSeparatesWorkerTransportAndApplicationAuthority(t 
 		t.Fatal(err)
 	}
 	connection, err := workerClient.GatewayConnection(t.Context())
-	if err != nil || connection.Origin != settings.Origin || connection.Session.Token != configuration.Remote.Token || connection.Session.Token == worker.Token || connection.Session.Token == gateway.Token {
+	if err != nil || connection.Origin != settings.Origin || connection.Address != settings.Address || connection.Session.Token != configuration.Remote.Token || connection.Session.Token == worker.Token || connection.Session.Token == gateway.Token {
 		t.Fatal("bridge received wrong execution-scoped transport authority", err)
 	}
-	for _, private := range []string{"trusted-application-canary", "approved-reader", worker.Token, gateway.Token, connection.Session.Token} {
+	for _, private := range []string{"trusted-application-canary", "approved-reader", settings.Address, worker.Token, gateway.Token, connection.Session.Token} {
 		if strings.Contains(string(packet.Input), private) {
 			t.Fatal("private gateway data entered uploaded runner input")
 		}
@@ -161,7 +161,7 @@ func TestGatewayInitializationSeparatesWorkerTransportAndApplicationAuthority(t 
 func TestGatewayRestartPreservesFrozenBindingAndWithdrawnAuthority(t *testing.T) {
 	f, provider := gatewayFixture(t)
 	worker := f.prepare(t)
-	settings := workerexchange.GatewaySettings{Origin: "https://owned-gateway.test:8044"}
+	settings := workerexchange.GatewaySettings{Origin: "https://owned-gateway.test:8044", Address: "10.20.1.7"}
 	gateway, err := f.service.PrepareGateway(t.Context(), f.ref, settings)
 	if err != nil {
 		t.Fatal(err)
@@ -170,6 +170,11 @@ func TestGatewayRestartPreservesFrozenBindingAndWithdrawnAuthority(t *testing.T)
 	again, err := restarted.PrepareGateway(t.Context(), f.ref, settings)
 	if err != nil || again.Token != gateway.Token {
 		t.Fatal("restart changed gateway initialization authority", err)
+	}
+	changedAddress := settings
+	changedAddress.Address = "10.20.1.8"
+	if _, err := restarted.PrepareGateway(t.Context(), f.ref, changedAddress); !errors.Is(err, workerexchange.ErrConflict) {
+		t.Fatal("retry replaced the provider-verified gateway address", err)
 	}
 	changed := f.input
 	changed.CredentialReference = "different-reader"
@@ -202,5 +207,47 @@ func TestGatewayRestartPreservesFrozenBindingAndWithdrawnAuthority(t *testing.T)
 	}
 	if provider.resolutions.Load() != before {
 		t.Fatal("withdrawn authority reached credential resolver")
+	}
+}
+
+func TestGatewayTaskAddressBindsOnceBeforeInitializationAndActivation(t *testing.T) {
+	f, provider := gatewayFixture(t)
+	worker := f.prepare(t)
+	settings := workerexchange.GatewaySettings{Origin: "https://owned-gateway.test:8044", RequireAddress: true}
+	ticket, err := f.service.PrepareGateway(t.Context(), f.ref, settings)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := f.service.BindGateway(t.Context(), f.ref, "gateway-task"); !errors.Is(err, workerexchange.ErrUnavailable) {
+		t.Fatal("task identity bound before its required private address", err)
+	}
+	if _, err := f.service.GatewayInput(t.Context(), f.ref.ID, ticket.Token, "gateway-task"); !errors.Is(err, workerexchange.ErrUnavailable) || provider.resolutions.Load() != 0 {
+		t.Fatal("unbound task resolved private application credentials", err)
+	}
+	if err := f.service.BindGatewayAddress(t.Context(), f.ref, "gateway-task", "169.254.169.254"); !errors.Is(err, workerexchange.ErrInvalid) {
+		t.Fatal("metadata address became a gateway endpoint", err)
+	}
+	if err := f.service.BindGatewayAddress(t.Context(), f.ref, "gateway-task", "10.20.1.7"); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.service.BindGatewayAddress(t.Context(), f.ref, "gateway-task", "10.20.1.8"); !errors.Is(err, workerexchange.ErrConflict) {
+		t.Fatal("another task address replaced the bound endpoint", err)
+	}
+	repeated, err := f.service.PrepareGateway(t.Context(), f.ref, settings)
+	if err != nil || repeated.Token != ticket.Token {
+		t.Fatal("launch retry changed the bound gateway preparation", err)
+	}
+	if _, err := f.service.GatewayInput(t.Context(), f.ref.ID, ticket.Token, "gateway-task"); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.service.Activate(t.Context(), f.ref); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := f.service.Input(t.Context(), f.ref.ID, worker.Token, "runner"); err != nil {
+		t.Fatal(err)
+	}
+	connection, err := f.service.GatewayConnection(t.Context(), f.ref.ID, worker.Token, "runner")
+	if err != nil || connection.Address != "10.20.1.7" || connection.Origin != settings.Origin {
+		t.Fatal("supervisor lost the verified task address or certificate identity", err)
 	}
 }

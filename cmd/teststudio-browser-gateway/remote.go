@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"net"
+	"os"
 	"time"
 
 	workerclient "github.com/wtiger001/teststudio/adapters/workerexchange/client"
@@ -52,9 +53,9 @@ func serveRemote(ctx context.Context, configuration browsergateway.Configuration
 		return err
 	}
 	gateway.Close()
-	certificate, err := tls.LoadX509KeyPair("/tls/tls.crt", "/tls/tls.key")
+	certificate, err := remoteCertificate(os.LookupEnv)
 	if err != nil {
-		return errors.New("remote gateway TLS certificate is unavailable")
+		return err
 	}
 	listener, err := net.Listen("tcp", ":8044")
 	if err != nil {
