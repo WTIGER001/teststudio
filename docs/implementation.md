@@ -3,7 +3,7 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 49 verified of 57.
+The acceptance count is 50 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
 ## Active application navigation correction — 2026-11-04
@@ -118,7 +118,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **52.** Replica failover creates no duplicate logical run. Notification retries retain their documented at-least-once behavior.
 - [ ] **53.** Local, Kubernetes, and Azure installations operate without AWS services or credentials.
 - [ ] **54.** Two newly configured OIDC providers work with the same internal directory and project-scoped permissions across deployment profiles.
-- [ ] **55.** Hosted identity and private report access work through installation-specific configuration.
+- [x] **55.** Hosted identity and private report access work through installation-specific configuration.
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
@@ -152,7 +152,7 @@ After service Pod replacement, fresh OIDC sign-in reads the same single run and 
 This verifies core persistence across that restart. It does not establish replica failover or coded-worker recovery.
 Evidence is output/local-k3s/probe/summary.json and the adjacent retained run, event, attempt, artifact, and log records.
 No browser, AWS, or Azure test runs. This advances the Kubernetes portions of 51, 55, and 56 without closing their full scope.
-The next measurable result is a second installation-specific OIDC provider on Kubernetes.
+The next step is to audit the seven remaining deployment-specific criteria before adding more checks.
 The local cluster now runs the verified gVisor 20261005.0 package through RuntimeClass teststudio-isolated.
 An actual non-root diagnostic Pod reports the gVisor kernel and exits zero.
 The chart can use external private TLS routing while preserving the worker Service, controller permissions, and exact policy peers.
@@ -240,6 +240,24 @@ The complete saved lifecycle run set contains eight intended observations, inclu
 See [local controller failover](local-kubernetes-controllers.md) for exact identities, storage, cleanup, rollback, and continuation instructions.
 Acceptance **52 is complete**. The total is **49 verified, 8 open**: 41, 46, 51, 53, 54, 55, 56, and 57.
 Other deployment profiles remain unverified. Azure implementation stays deferred.
+
+## Acceptance 55 complete: hosted identity and private evidence — 2026-11-05
+
+The actual local Kubernetes installation now authenticates two independently configured OIDC issuers against its shared PostgreSQL directory.
+The second issuer uses a separate fixture process, signing key, realm, client, callback, certificate, and managed provider record.
+Both fixtures emit the same verified email and subject. Their issuer links resolve to different users without transferring administrator authority.
+A new provider-owned group maps the reviewer into only project k3s-coded through the normal Viewer assignment API.
+The reviewer can inspect an existing run and download its private screenshot with matching size and SHA-256 checksum.
+Foreign-project reads, installation user listing, and provider administration reject that reviewer.
+Removing the group role immediately blocks the existing session's project, run, grant, and previously issued artifact URL access.
+Restoring the role restores authorized reads. All verification sessions sign out. No test runs are created.
+Installation-specific origins, callbacks, clients, managed providers, mounted private CA trust, and separate evidence routing remain authoritative.
+The original issuer deployment and application image remain unchanged.
+One focused fixture protocol check covers both default and realm configurations. No UI build or browser suite runs.
+Evidence is output/local-k3s/identity/summary.json with issuer links, directory views, metadata references, and a private download.
+See [local hosted identity](local-kubernetes-identity.md) for the complete acceptance audit and continuation instructions.
+Acceptance **55 is complete**. The total is **50 verified, 7 open**: 41, 46, 51, 53, 54, 56, and 57.
+Acceptance 54 keeps its cross-profile requirement. AWS and Azure deployment verification remain separate, and Azure implementation stays deferred.
 
 ## Current direction: Azure deferred; local Kubernetes integration
 

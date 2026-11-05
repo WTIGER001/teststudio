@@ -57,7 +57,7 @@ The API execution worker is disabled. Shared NFS storage retains the original ar
 See [local controller failover](local-kubernetes-controllers.md) for evidence and the current values file.
 Actual gVisor runtime execution and selective worker network denial now pass. See [worker isolation](local-kubernetes-isolation.md).
 The single-Pod restart does not establish replica failover or cross-provider parity.
-The 57-item ledger now has 49 verified and eight open items.
+The 57-item ledger now has 50 verified and seven open items.
 
 ### Evidence and ownership
 

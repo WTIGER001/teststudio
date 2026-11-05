@@ -6,6 +6,7 @@ import subprocess
 import time
 
 from lib.local_kubernetes_cluster import LocalCluster
+from lib.local_kubernetes_images import import_image
 
 
 def main():
@@ -29,25 +30,10 @@ def main():
             rows = cluster.execute('ctr', '--namespace', 'k8s.io', 'images', 'list')
             if state[tag]['reference'] in rows:
                 return state[tag]['reference']
-        archive = installation / (tag + '-import.tar')
-        node_archive = '/tmp/teststudio-' + tag + '-import.tar'
-        local_tag = 'teststudio/' + tag + ':controllers-local'
-        subprocess.run(['docker', 'tag', source, local_tag], check=True)
-        try:
-            subprocess.run(['docker', 'save', '--output', str(archive), local_tag], check=True)
-            os.chmod(archive, 0o600)
-            subprocess.run(['docker', '--host', 'unix:///Users/johnbauer/.colima/teststudio-k3s/docker.sock', 'cp', str(archive), 'k3d-teststudio-local-server-0:' + node_archive], check=True)
-            cluster.execute('ctr', '--namespace', 'k8s.io', 'images', 'import', '--platform', 'linux/arm64', node_archive)
-            rows = [row.split() for row in cluster.execute('ctr', '--namespace', 'k8s.io', 'images', 'list').splitlines() if row.startswith('docker.io/' + local_tag + ' ')]
-            assert len(rows) == 1 and rows[0][2].startswith('sha256:')
-            reference = destination + '@' + rows[0][2]
-            cluster.execute('ctr', '--namespace', 'k8s.io', 'images', 'tag', '--force', 'docker.io/' + local_tag, reference)
-            state[tag] = {'source': source, 'reference': reference}
-            checkpoint()
-            return reference
-        finally:
-            cluster.execute('rm', '-f', node_archive)
-            archive.unlink(missing_ok=True)
+        reference = import_image(cluster, installation, tag, source, destination)
+        state[tag] = {'source': source, 'reference': reference}
+        checkpoint()
+        return reference
 
     checkpoint()
     service = json.loads((root / 'output/local-k3s/service-controller-build.json').read_text())

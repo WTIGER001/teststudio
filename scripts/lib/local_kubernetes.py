@@ -17,7 +17,7 @@ class LocalAPI:
         self.csrf = ''
         context = ssl.create_default_context(cafile=str(installation / 'tls/server.crt'))
         context.load_verify_locations(cafile=str(installation / 'fixture-tls/ca.crt'))
-        allowed = {'studio.teststudio.test', 'identity.teststudio.test', 'evidence.teststudio.test'}
+        allowed = {'studio.teststudio.test', 'identity.teststudio.test', 'identity-two.teststudio.test', 'evidence.teststudio.test'}
 
         class LocalConnection(http.client.HTTPSConnection):
             def connect(self):
@@ -35,12 +35,14 @@ class LocalAPI:
 
         self.browser = urllib.request.build_opener(urllib.request.ProxyHandler({}), LocalTLS(), urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
 
-    def login(self):
-        with self.browser.open(self.origin + '/auth/login/local-k3s?returnTo=/projects', timeout=15) as response:
+    def login(self, provider='local-k3s'):
+        assert provider in {'local-k3s', 'local-k3s-review'}
+        with self.browser.open(self.origin + '/auth/login/' + provider + '?returnTo=/projects', timeout=15) as response:
             assert response.status == 200 and response.url == self.origin + '/projects', 'OIDC did not return to the application'
         session = self.call('GET', '/auth/session')
-        assert session['user'] and session['session']['provider'] == 'local-k3s', 'A normal provider session is required'
+        assert session['user'] and session['session']['provider'] == provider, 'A normal provider session is required'
         self.csrf = session['session']['csrfToken']
+        return session
 
     def call(self, method, path, body=None, revision=None, content_type=None, key=None):
         assert path.startswith('/') and not path.startswith('//')

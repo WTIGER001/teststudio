@@ -10,20 +10,57 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"flag"
+	"io"
 	"log"
 	"math/big"
 	"net/http"
 	"net/url"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
 )
 
-const issuer = "https://identity.teststudio.test"
-const clientID = "teststudio-local-k3s"
-const callback = "https://studio.teststudio.test/auth/callback/local-k3s"
+type identityConfig struct {
+	Issuer   string   `json:"issuer"`
+	ClientID string   `json:"clientId"`
+	Callback string   `json:"callback"`
+	Subject  string   `json:"subject"`
+	Name     string   `json:"name"`
+	Email    string   `json:"email"`
+	Groups   []string `json:"groups,omitempty"`
+}
+
+func loadIdentity(path string) (identityConfig, error) {
+	value := identityConfig{Issuer: "https://identity.teststudio.test", ClientID: "teststudio-local-k3s", Callback: "https://studio.teststudio.test/auth/callback/local-k3s", Subject: "local-k3s-administrator", Name: "Kubernetes integration administrator", Email: "local-k3s@example.test"}
+	if path != "" {
+		file, err := os.Open(path)
+		if err != nil {
+			return value, err
+		}
+		defer file.Close()
+		decoder := json.NewDecoder(io.LimitReader(file, 8192))
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&value); err != nil {
+			return value, err
+		}
+		if decoder.Decode(new(any)) != io.EOF {
+			return value, errors.New("invalid identity configuration")
+		}
+	}
+	issuer, err := url.Parse(value.Issuer)
+	if err != nil || issuer.Scheme != "https" || (issuer.Host != "identity.teststudio.test" && issuer.Host != "identity-two.teststudio.test") || issuer.User != nil || issuer.RawQuery != "" || issuer.Fragment != "" || issuer.RawPath != "" || strings.HasSuffix(issuer.Path, "/") || strings.Contains(issuer.Path, "..") {
+		return value, errors.New("identity issuer must use the owned HTTPS host and a fixed optional realm path")
+	}
+	callback, err := url.Parse(value.Callback)
+	if err != nil || callback.Scheme != "https" || callback.Host != "studio.teststudio.test" || callback.User != nil || callback.RawQuery != "" || callback.Fragment != "" || !strings.HasPrefix(callback.Path, "/auth/callback/") || value.ClientID == "" || value.Subject == "" || value.Email == "" {
+		return value, errors.New("identity callback and claims are incomplete")
+	}
+	return value, nil
+}
 
 type authorization struct {
 	Nonce, Challenge string
@@ -31,9 +68,10 @@ type authorization struct {
 }
 
 type fixture struct {
-	key   *rsa.PrivateKey
-	mu    sync.Mutex
-	codes map[string]authorization
+	identity identityConfig
+	key      *rsa.PrivateKey
+	mu       sync.Mutex
+	codes    map[string]authorization
 }
 
 func writeJSON(w http.ResponseWriter, value any) {
@@ -44,18 +82,26 @@ func writeJSON(w http.ResponseWriter, value any) {
 
 func (f *fixture) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Printf("%s %s", r.Method, r.URL.Path)
-	switch r.Method + " " + r.URL.Path {
+	if r.Method == "GET" && r.URL.Path == "/health" {
+		w.Header().Set("X-TestStudio-Fixture", "local-k3s")
+		writeJSON(w, map[string]any{"status": "ready", "source": "new-local-kubernetes-fixture"})
+		return
+	}
+	origin, _ := url.Parse(f.identity.Issuer)
+	if r.Host != origin.Host || !strings.HasPrefix(r.URL.Path, origin.Path+"/") {
+		http.NotFound(w, r)
+		return
+	}
+	path := strings.TrimPrefix(r.URL.Path, origin.Path)
+	switch r.Method + " " + path {
 	case "GET /.well-known/openid-configuration":
-		writeJSON(w, map[string]any{"issuer": issuer, "authorization_endpoint": issuer + "/authorize", "token_endpoint": issuer + "/token", "jwks_uri": issuer + "/keys", "id_token_signing_alg_values_supported": []string{"RS256"}})
+		writeJSON(w, map[string]any{"issuer": f.identity.Issuer, "authorization_endpoint": f.identity.Issuer + "/authorize", "token_endpoint": f.identity.Issuer + "/token", "jwks_uri": f.identity.Issuer + "/keys", "id_token_signing_alg_values_supported": []string{"RS256"}})
 	case "GET /keys":
 		writeJSON(w, map[string]any{"keys": []any{map[string]any{"kty": "RSA", "kid": "local-k3s", "use": "sig", "alg": "RS256", "n": base64.RawURLEncoding.EncodeToString(f.key.N.Bytes()), "e": base64.RawURLEncoding.EncodeToString(big.NewInt(int64(f.key.E)).Bytes())}}})
 	case "GET /authorize":
 		f.authorize(w, r)
 	case "POST /token":
 		f.token(w, r)
-	case "GET /health":
-		w.Header().Set("X-TestStudio-Fixture", "local-k3s")
-		writeJSON(w, map[string]any{"status": "ready", "source": "new-local-kubernetes-fixture"})
 	default:
 		http.NotFound(w, r)
 	}
@@ -63,7 +109,7 @@ func (f *fixture) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (f *fixture) authorize(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
-	if q.Get("client_id") != clientID || q.Get("redirect_uri") != callback || q.Get("response_type") != "code" || q.Get("code_challenge_method") != "S256" || len(q.Get("code_challenge")) != 43 || q.Get("nonce") == "" || q.Get("state") == "" {
+	if q.Get("client_id") != f.identity.ClientID || q.Get("redirect_uri") != f.identity.Callback || q.Get("response_type") != "code" || q.Get("code_challenge_method") != "S256" || len(q.Get("code_challenge")) != 43 || q.Get("nonce") == "" || q.Get("state") == "" {
 		http.Error(w, "invalid local authorization", 400)
 		return
 	}
@@ -76,7 +122,7 @@ func (f *fixture) authorize(w http.ResponseWriter, r *http.Request) {
 	}
 	f.codes[code] = authorization{q.Get("nonce"), q.Get("code_challenge"), time.Now().Add(time.Minute)}
 	f.mu.Unlock()
-	redirect, _ := url.Parse(callback)
+	redirect, _ := url.Parse(f.identity.Callback)
 	redirect.RawQuery = url.Values{"code": {code}, "state": {q.Get("state")}}.Encode()
 	w.Header().Set("Cache-Control", "no-store")
 	http.Redirect(w, r, redirect.String(), 302)
@@ -97,13 +143,17 @@ func (f *fixture) token(w http.ResponseWriter, r *http.Request) {
 	if name, _, ok := r.BasicAuth(); ok {
 		client = name
 	}
-	if !present || time.Now().After(v.ExpiresAt) || r.PostForm.Get("grant_type") != "authorization_code" || client != clientID || r.PostForm.Get("redirect_uri") != callback || base64.RawURLEncoding.EncodeToString(challenge[:]) != v.Challenge {
+	if !present || time.Now().After(v.ExpiresAt) || r.PostForm.Get("grant_type") != "authorization_code" || client != f.identity.ClientID || r.PostForm.Get("redirect_uri") != f.identity.Callback || base64.RawURLEncoding.EncodeToString(challenge[:]) != v.Challenge {
 		http.Error(w, "invalid local token grant", 400)
 		return
 	}
 	now := time.Now().Unix()
 	header, _ := json.Marshal(map[string]string{"alg": "RS256", "kid": "local-k3s"})
-	claims, _ := json.Marshal(map[string]any{"iss": issuer, "sub": "local-k3s-administrator", "aud": clientID, "iat": now, "auth_time": now, "exp": now + 900, "nonce": v.Nonce, "name": "Kubernetes integration administrator", "email": "local-k3s@example.test", "email_verified": true})
+	values := map[string]any{"iss": f.identity.Issuer, "sub": f.identity.Subject, "aud": f.identity.ClientID, "iat": now, "auth_time": now, "exp": now + 900, "nonce": v.Nonce, "name": f.identity.Name, "email": f.identity.Email, "email_verified": true}
+	if len(f.identity.Groups) > 0 {
+		values["groups"] = f.identity.Groups
+	}
+	claims, _ := json.Marshal(values)
 	unsigned := base64.RawURLEncoding.EncodeToString(header) + "." + base64.RawURLEncoding.EncodeToString(claims)
 	digest := sha256.Sum256([]byte(unsigned))
 	signature, err := rsa.SignPKCS1v15(rand.Reader, f.key, crypto.SHA256, digest[:])
@@ -115,11 +165,17 @@ func (f *fixture) token(w http.ResponseWriter, r *http.Request) {
 }
 
 func run() error {
+	config := flag.String("identity-config", "", "Owned local identity fixture configuration")
+	flag.Parse()
+	identity, err := loadIdentity(*config)
+	if err != nil {
+		return err
+	}
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return err
 	}
-	handler := &fixture{key: key, codes: map[string]authorization{}}
+	handler := &fixture{identity: identity, key: key, codes: map[string]authorization{}}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	plain := &http.Server{Addr: ":8080", Handler: handler, ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 10 * time.Second, WriteTimeout: 10 * time.Second}

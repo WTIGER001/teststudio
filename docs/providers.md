@@ -168,3 +168,11 @@ Initial configuration approves its declared credential references. --oidc-secret
 Initial provider records are inserted only when absent. Restarting does not replace managed configuration or restore disabled providers.
 Keep each configured client callback aligned with the installation's public origin.
 See the [AWS core profile](aws.md) for ECS secret mappings and current deployment limits.
+
+## Actual local Kubernetes profile
+
+Two independent issuers now pass normal configured sign-in and project-scoped access through the deployed Kubernetes installation.
+Provider-owned group mapping permits one project's private reports. Foreign-project and installation administration remain denied.
+Existing-session and previously granted artifact access reject while the project role is removed.
+The role is restored after verification. No test runs are repeated.
+See [local hosted identity](local-kubernetes-identity.md) for evidence, issuer configuration, and remaining cross-profile scope.

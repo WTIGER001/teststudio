@@ -5,7 +5,7 @@
 New bounded Go checks exercise cancellation, test timeouts, and an abrupt controller interruption on the dedicated local cluster.
 They use the normal source preparation, publication, run, evidence, and cleanup contracts.
 They use no cloud account or external application. Azure work remains deferred.
-The acceptance total is 49 of 57. These results advance the Kubernetes portions of 41, 51, 52, and 56.
+The acceptance total is 50 of 57. These results advance the Kubernetes portions of 41, 51, 52, and 56.
 
 ## Concepts
 
@@ -131,7 +131,8 @@ All Kubernetes operations use the owned node and its explicit local kubeconfig.
 
 Independent deadlines now have actual termination evidence. Reuse those records rather than repeating the pause experiment.
 The optional [separate controllers](kubernetes-controllers.md) now run with shared evidence storage and pass peer failover.
-Continue with a second installation-specific OIDC provider and project-scoped directory verification on this profile.
+The second provider and private report access now pass. See [hosted identity](local-kubernetes-identity.md).
+Audit remaining deployment-specific gaps before adding more checks.
 Keep Azure implementation and live cloud verification deferred.
 
 Related guides: [source execution](local-kubernetes-source-execution.md), [worker contract](kubernetes-workers.md), and [implementation ledger](implementation.md).

@@ -6,7 +6,7 @@ The dedicated local installation now runs one API and two separate execution con
 The API keeps sign-in, catalog workflows, and private worker transport. Its execution worker is disabled.
 The original artifact bytes remain available through a local shared NFS claim.
 A bounded actual run proves recovery through the surviving controller without duplicate runs or executions.
-Acceptance 52 is complete. The total is 49 verified of 57, with eight open items.
+Acceptance 52 is complete. The total is 50 verified of 57, with seven open items.
 Azure implementation and live cloud verification remain deferred.
 
 ## Concepts
@@ -105,7 +105,8 @@ A pool restored before peer-only recovery is proved cannot later pass as that ob
 ### Continue the plan
 
 Keep the existing runs and infrastructure for the next local milestone.
-Verify a second installation-specific OIDC provider and project-scoped directory behavior on this Kubernetes profile.
+A second installation-specific OIDC provider and scoped private report access now pass. See [hosted identity](local-kubernetes-identity.md).
+Audit the remaining deployment-specific gaps before adding more checks.
 Do not repeat the completed source, lifecycle, deadline, and failover cases to generate more history.
 Keep provider storage acceptance, remaining cross-profile identity and timing, and cloud deployment criteria open.
 

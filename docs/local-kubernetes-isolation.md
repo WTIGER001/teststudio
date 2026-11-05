@@ -5,7 +5,7 @@
 The dedicated local k3s cluster now runs an actual gVisor diagnostic Pod and enforces selective worker network policy.
 This verifies worker prerequisites. Fresh Go and Playwright suites now also pass [actual source execution](local-kubernetes-source-execution.md).
 Cancellation, deadlines, and recovery remain pending.
-The verified acceptance total is 49 of 57. Azure implementation remains deferred.
+The verified acceptance total is 50 of 57. Azure implementation remains deferred.
 
 ## Concepts
 

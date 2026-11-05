@@ -11,7 +11,7 @@ The default remains the combined single-instance profile.
 Three targeted local profiles and four rejected configurations pass Helm rendering and pinned schema checks.
 Actual separate-controller deployment and peer failover now pass on the dedicated local cluster through Helm revision 9.
 See [local controller failover](local-kubernetes-controllers.md) for preserved evidence and the acceptance 52 audit.
-The acceptance count is 49 of 57. Azure implementation remains deferred.
+The acceptance count is 50 of 57. Azure implementation remains deferred.
 
 ## Concepts
 

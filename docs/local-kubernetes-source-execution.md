@@ -7,7 +7,7 @@ The workflow uses normal OIDC sign-in, ZIP upload, registry assembly, isolated d
 It copies no existing application tests, data, or infrastructure configuration.
 Cancellation, test timeouts, and interrupted-controller recovery now pass actual local verification.
 Independent Pod deadline enforcement also passes. Controller peer failover now passes through a separate recorded case. See [local lifecycle](local-kubernetes-lifecycle.md).
-The overall acceptance count is 49 of 57. Azure implementation remains deferred.
+The overall acceptance count is 50 of 57. Azure implementation remains deferred.
 
 ## Concepts
 
@@ -127,7 +127,8 @@ Retain registry storage while published releases or retained observations requir
 Cancellation, timeout, and interrupted-controller cases now have saved references in output/local-k3s/lifecycle.
 Independent deadline evidence now lives in output/local-k3s/deadline.
 Separate controllers now pass peer failover. See [local controller failover](local-kubernetes-controllers.md).
-Continue with the second installation-specific OIDC provider without repeating those passing cases.
+The second provider and private report access also pass. See [hosted identity](local-kubernetes-identity.md).
+Audit remaining deployment-specific gaps without repeating passing cases.
 Keep all worker execution on the dedicated local cluster and retain actual provider status and cleanup evidence.
 Environment-backed remote gateway delivery and cloud-target verification remain open.
 

@@ -1,0 +1,9 @@
+{
+  "issuer": "https://identity-two.teststudio.test/review",
+  "clientId": "teststudio-local-review",
+  "callback": "https://studio.teststudio.test/auth/callback/local-k3s-review",
+  "subject": "local-k3s-administrator",
+  "name": "Kubernetes project reviewer",
+  "email": "local-k3s@example.test",
+  "groups": ["reviewers"]
+}

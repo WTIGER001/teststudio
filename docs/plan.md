@@ -16,7 +16,7 @@ The full product scope remains required. This direction supersedes the testing s
 ## Active delivery plan after the tester walkthrough
 
 This section is the current implementation order. Historical continuation commands below do not override it.
-The local demonstration is usable and verified. The complete product remains unfinished at 49 verified items out of 57.
+The local demonstration is usable and verified. The complete product remains unfinished at 50 verified items out of 57.
 Ordinary project creator access and the first environment-backed local recorded website flow pass targeted verification.
 Tester investigation, failure recovery, and local manual/scheduled runner parity pass targeted verification.
 Continue source-workflow, access, storage, and hosted packaging gaps. Reuse passing runner evidence.
@@ -41,6 +41,7 @@ Deliver observable milestones in this order:
 | --- | --- |
 | Dedicated cluster with Ready nodes | Verified. k3d v5.9.0 runs k3s v1.35.5+k3s1 in the separate teststudio-k3s Colima profile. |
 | Chart installation with local PostgreSQL and private evidence | Verified startup. Helm release teststudio is deployed. PostgreSQL and service Pods are Ready; both persistent claims are Bound. |
+| Two OIDC providers and private project evidence | Verified. Independent issuers, mapped project access, cross-project denial, private downloads, and existing-session revocation close 55. |
 | Newly authored HTTPS probe through the installation | Verified. Normal OIDC sign-in, catalog publication, execution, measured TLS, logs, and checksum-verified private evidence download pass. |
 | Isolated Go and Playwright workers | Verified basic workflows. Fresh Go and Playwright bundles pass actual registry assembly, isolated discovery, publication, timed execution, private evidence, and cleanup. |
 | Cancellation, independent deadlines, and interrupted-worker recovery | Cancellation, test timeout, and abrupt controller restart pass. Independent deadline enforcement also passes. Separate-controller deployment and actual peer failover now pass. Acceptance 52 is complete. |
@@ -64,7 +65,7 @@ Playwright run 20261105T151447.417956930-cfc4c366f3c9ee354dd21551 passes in 263 
 Both retain complete private evidence. Execution and preparation cleanup complete, and no worker container remains running.
 Integration fixes remove the incorrect local-only admission guard, preserve precise fast Go timing, and supply writable Playwright output and capture defaults.
 New runtime identities isolate the corrected behavior from the original retained observations.
-See [local source execution](local-kubernetes-source-execution.md). Advance 41, 51, 55, and 56 without closing their cross-profile scope.
+See [local source execution](local-kubernetes-source-execution.md). Advance 41, 51, and 56 while retaining their remaining profile scope.
 New bounded lifecycle checks now pass cancellation, a distinct timeout, and recovery after controller SIGKILL.
 The same execution identities reach cleaned. The interrupted run remains incomplete while its recovered observation and evidence survive.
 Acknowledged asynchronous deletion now waits within the existing cleanup deadline and retains ownership checks.
@@ -73,7 +74,10 @@ The actual independent deadline case stops guest processes and the controller wh
 Its original 15-second Pod deadline remains unchanged. Termination includes the configured grace period; no test duration is inferred.
 The optional separate-controller Helm package now supplies dedicated identity, reader-only configuration, health, storage checks, and replica settings.
 Three targeted package profiles and four rejected configurations pass. Helm revision 9 now runs two controllers with shared evidence. Actual peer failover and notification acceptance uncertainty close 52.
-The current total is 49 verified, eight open. The next local milestone is a second installation-specific OIDC provider and scoped directory behavior.
+A second independent issuer now passes normal sign-in, issuer separation, provider-owned project access, and private report authorization.
+Existing-session and existing-artifact-grant access reject immediately while the project role is revoked. The role is restored without another test run.
+This actual hosted configuration closes acceptance 55. The total is 50 verified, seven open.
+See [local hosted identity](local-kubernetes-identity.md). Audit the remaining deployment-specific gaps before adding checks or resuming deferred cloud work.
 See [actual controller failover](local-kubernetes-controllers.md), [controller packaging](kubernetes-controllers.md), and [local lifecycle](local-kubernetes-lifecycle.md).
 Acceptance 52 is complete. Advance 41, 51, and 56 while retaining their remaining profile scope.
 See [local Kubernetes](local-kubernetes.md) and output/local-k3s/cluster-summary.json for evidence and continuation instructions.
