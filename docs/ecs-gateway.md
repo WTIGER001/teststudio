@@ -7,6 +7,7 @@ The existing offline ECS lifecycle stays separate.
 The shared transport supports a verified task address and private certificate environment delivery.
 Native gateway task construction, ownership, deadline, recovery proof, and metadata bootstrap components now pass targeted local checks.
 The gateway child provider now reuses the durable SDK lifecycle with a separate role journal and verified address binding.
+The composed environment provider now sequences gateway initialization before worker creation and manages both task lifecycles.
 These components do not yet provide the complete native ECS dispatch lifecycle or deployment acceptance.
 Azure remains deferred, and this work makes no live cloud call.
 
@@ -119,26 +120,45 @@ They cover initialization order, unsupported capabilities, address mismatch, aut
 Selected existing offline worker lifecycle checks still pass.
 
 This child provider has no normal executor registration. It cannot enable environment execution by itself.
-The concrete native gateway network guard and parent two-task orchestration remain required.
+The concrete native gateway network guard and installation wiring remain required.
+
+### Environment task orchestration
+
+NewEnvironment composes the worker and gateway child controls under one original execution reference.
+The worker proof includes the frozen gateway configuration and a distinct environment role.
+The offline provider cannot adopt that role. Restored proofs contain no worker launch ticket.
+The parent journal records gateway creation attempts and retained infrastructure failure.
+
+Ensure starts only the gateway. Observe binds its verified task address and waits for private initialization and healthy status.
+Only then does the provider recover the original worker dispatch ticket under current run authority.
+It verifies the frozen worker proof and source capabilities before starting one worker.
+A durable registration claim prevents concurrent observations from creating another task.
+Cancellation, expired authority, recorded gateway failure, and revoked exchange input prevent later dispatch steps.
+
+Source inspection requires both remote transport and verified-address capabilities, plus an immutable supervisor revision.
+Environment timing profiles include the worker boundary and frozen gateway configuration.
+Gateway image inspection supplies a separate gateway timing identity.
+
+Previously bound gateways retain their identity without requesting initialization again after a worker submits results.
+Independent native network checks still run while the execution remains active.
+Infrastructure failure remains recorded through restart and cannot confirm a passing worker outcome.
+Unknown launches remain unresolved. Empty inventory does not prove task termination or permit another launch.
+
+Shutdown attempts both tasks concurrently, even when worker observation fails.
+Cleanup applies the existing result and evidence checkpoint to both definitions and independent schedules.
+Inventory merges both role journals into one execution reference, including partial bundles.
+Local protocol checks cover cold startup, concurrent observation, permission withdrawal, partial cancellation, lost launches, successful completion, and recovery.
+Changed lifecycle checks and selected existing worker checks pass with the race detector.
+
+The production SDK factory still selects the offline provider.
+The composed provider requires a concrete native gateway network guard and installation configuration before registration.
 
 ### Remaining native integration
 
-Wire the implemented task contract into an owned gateway lifecycle beside each uploaded worker task.
-Bind the observed gateway identity and private interface before credential delivery.
-Keep uploaded source outside the gateway's filesystem, execution role, credentials, and network identity.
-Supply the private gateway certificate only to that trusted task.
-Confirm readiness, inspected images, network policy, and independent deadlines before activation.
-The hosted task health command must use --ready-remote instead of the image's local socket health command.
-Track both tasks, definitions, and deadline resources through the durable dispatch journal and cleanup checkpoints.
-Preserve original identities across lost acknowledgements and recovery. Never invent a passing observation or duration.
-Use the implemented gateway child provider beside the worker lifecycle.
-Gateway and worker rows share execution authority while retaining distinct task, definition, and schedule identities.
-Stop both workloads even when one observation fails. Cleanup requires the existing result and evidence checkpoint.
-
-Create the worker only after the gateway's identity, initialization, readiness, network, and deadline are verified.
-The current supervisor retries initial input for a short bounded period.
-Do not let a cold gateway exhaust that period before the worker can receive activated input.
-Continue only unattempted dispatch steps under current run authority. Recovery must never launch uploaded code again.
+Connect the composed provider to the production SDK factory, service roles, source preparation, and deployment settings.
+Verify the gateway execution role, certificate references, image-pull path, private exchange path, and separate native network.
+Preserve uploaded source isolation and current run authority during this wiring.
+Build only affected runtime images after the native path is complete.
 
 The existing worker VPC has a restrictive DNS firewall and no general target egress.
 Preserve those worker restrictions when implementing the gateway network.

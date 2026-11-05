@@ -103,8 +103,12 @@ Its metadata helper derives the task identifier without forwarding secrets or fo
 The gateway child provider now uses a separate durable role journal and the existing SDK state machine and cleanup checkpoints.
 Real private-exchange checks cover verified address binding, initialization order, withdrawn authority, lost acknowledgements, restart, and guarded removal.
 Image capabilities are required before native creation. Native network admission remains an explicit dependency, without a concrete gateway guard yet.
-Next add parent two-task orchestration, the concrete native network guard, and installation wiring.
-Delay worker creation until the gateway can release activated input.
+The composed environment provider now waits for verified gateway initialization and health before creating one worker.
+Concurrent observation, current-authority checks, cancellation before worker creation, lost launches, independent shutdown, and guarded cleanup pass local protocol checks.
+Gateway infrastructure failure survives restart and cannot confirm a passing worker outcome.
+Both role journals remain visible as one execution, including partial bundles. Changed lifecycle checks pass with the race detector.
+Next implement the concrete native gateway network guard, SDK factory selection, source preparation, and installation wiring.
+Keep production ECS environment registration disabled until that native path is complete.
 Preserve the worker DNS firewall and target-egress restrictions while providing trusted gateway target resolution.
 Require the address, certificate, and native task identity capabilities before enabling ECS environment profiles. See [ECS gateway integration](ecs-gateway.md).
 

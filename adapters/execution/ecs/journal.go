@@ -24,6 +24,9 @@ func (p *Provider) load(ctx context.Context, ref execution.Reference) (dispatch,
 	if !p.ownsRole(value.Proof) {
 		return value, row, nil, hostedexecution.ErrOwnership
 	}
+	if (value.Environment != nil) != (value.Proof.Environment != nil) {
+		return value, row, nil, hostedexecution.ErrOwnership
+	}
 	plan, err := Restore(p.config, value.Proof)
 	if err != nil || value.DefinitionARN != "" && !plan.validDefinitionARN(value.DefinitionARN) || value.TaskARN != "" && !plan.validTaskARN(value.TaskARN) {
 		return value, row, nil, hostedexecution.ErrOwnership
@@ -57,6 +60,9 @@ func (p *Provider) exchange(ctx context.Context, value dispatch) (workerexchange
 
 func (p *Provider) reserve(ctx context.Context, plan *Plan) (dispatch, bool, error) {
 	value := dispatch{Proof: plan.Proof(), CreatedAt: p.now().UTC()}
+	if plan.environment != nil {
+		value.Environment = &environmentDispatch{}
+	}
 	current, _, _, lookupErr := p.load(ctx, value.Proof.Reference)
 	if lookupErr == nil {
 		if current.Proof.Fingerprint != value.Proof.Fingerprint {
@@ -98,7 +104,7 @@ func (p *Provider) update(ctx context.Context, ref execution.Reference, dispatch
 		guards := []storage.Change{}
 		if dispatching {
 			record, guard, err := p.exchange(ctx, value)
-			if err != nil || record.Revoked || !p.now().Before(record.Deadline) || value.Removed || value.Stopping {
+			if err != nil || record.Revoked || !p.now().Before(record.Deadline) || value.Removed || value.Stopping || value.Environment != nil && value.Environment.Failed {
 				return value, hostedexecution.ErrUnavailable
 			}
 			guards = append(guards, storage.Change{Record: guard, Assert: true})
@@ -125,7 +131,7 @@ func (p *Provider) update(ctx context.Context, ref execution.Reference, dispatch
 func (p *Provider) Inventory(ctx context.Context, installation, profile string) (result []execution.Reference, resultErr error) {
 	defer func() { resultErr = controlError(resultErr) }()
 	validProfile := profile == "go-ecs-isolated-v1" || profile == "playwright-ecs-isolated-v1" || profile == "go-ecs-discovery-v1" || profile == "playwright-ecs-discovery-v1"
-	if p.gateway != nil {
+	if p.gateway != nil || p.environment != nil {
 		validProfile = profile == "go-ecs-environment-v1" || profile == "playwright-ecs-environment-v1"
 	}
 	if !domain.ValidID(installation) || !validProfile {

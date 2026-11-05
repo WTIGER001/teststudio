@@ -53,15 +53,34 @@ func (p *Provider) ensurePlan(ctx context.Context, plan *Plan) error {
 		_, err := p.Observe(ctx, job.Reference)
 		return err
 	}
+	return p.startTask(ctx, plan)
+}
+
+func (p *Provider) startTask(ctx context.Context, plan *Plan) error {
+	job := plan.job
+	claimed := false
+	value, err := p.update(ctx, job.Reference, true, func(value *dispatch) error {
+		claimed = false
+		if value.RegisterRejected || value.LaunchRejected {
+			return hostedexecution.ErrRejected
+		}
+		if !value.RegisterAttempted {
+			value.RegisterAttempted, claimed = true, true
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	if !claimed {
+		return hostedexecution.ErrUnavailable
+	}
 	if err := p.admitTask(ctx); err != nil {
 		_, saveErr := p.update(ctx, job.Reference, false, func(value *dispatch) error { value.RegisterRejected = true; return nil })
 		if saveErr != nil {
 			return hostedexecution.ErrUnavailable
 		}
 		return hostedexecution.ErrRejected
-	}
-	if _, err := p.update(ctx, job.Reference, true, func(value *dispatch) error { value.RegisterAttempted = true; return nil }); err != nil {
-		return err
 	}
 	registered, err := p.ecs.RegisterTaskDefinition(ctx, plan.Definition(), singleECS)
 	if err != nil {

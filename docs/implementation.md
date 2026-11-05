@@ -185,6 +185,26 @@ No cloud call, image build, Kubernetes redeployment, browser, or catalog executi
 Parent orchestration, the concrete native gateway network guard, and installation wiring remain unfinished.
 Environment-backed ECS executor registration remains disabled. This advances **51, 56, and 57**; the total remains **50 of 57**.
 
+### Composed ECS environment lifecycle
+
+NewEnvironment now composes the durable gateway and uploaded worker controls under one original execution reference.
+Ensure creates only the gateway. Observe waits for verified address binding, private initialization, and healthy status before worker creation.
+Worker dispatch recovers the original ticket under current authority and matches the frozen environment proof.
+Source admission requires verified-address transport and an immutable supervisor revision.
+Concurrent observations share one durable registration claim. Existing offline provider ownership remains separate.
+
+Both roles retain independent task definitions and stop schedules. Inventory merges their journals into one execution, including partial bundles.
+Shutdown attempts both roles even when worker observation fails. Removal retains the original result and evidence checkpoint.
+Gateway infrastructure failure survives restart and prevents a worker pass from confirming the bundle.
+Previously bound gateways do not request another private initialization after a worker submits results.
+Lost launches remain unresolved until original receipts appear. They cannot trigger another worker or gateway launch.
+
+Targeted local protocol checks cover startup order, current authority, concurrent dispatch, successful completion, partial cancellation, lost launches, independent shutdown, and cleanup.
+Changed lifecycle checks and selected existing offline worker and recovery checks pass with the race detector.
+No cloud test, image build, browser, Kubernetes redeployment, or catalog run occurs.
+The native gateway network guard, production SDK selection, source preparation, and installation wiring remain unfinished.
+Production environment-backed ECS registration remains disabled. This advances **41, 51, 56, and 57**; the total remains **50 of 57**.
+
 ## Active application navigation correction — 2026-11-04
 
 The sidebar now has one project selector and an explicit application selector.

@@ -62,9 +62,11 @@ type Provider struct {
 	discoveryCleanup func(context.Context, execution.Reference) error
 	now              func() time.Time
 	gateway          *gatewayControl
+	environment      *GatewayConfig
 }
 
 type dispatch struct {
+	Environment        *environmentDispatch    `json:"environment,omitempty"`
 	Proof              Proof                   `json:"proof"`
 	CreatedAt          time.Time               `json:"createdAt"`
 	RegisterAttempted  bool                    `json:"registerAttempted"`

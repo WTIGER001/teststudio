@@ -63,8 +63,7 @@ func NewGateway(options GatewayOptions) (*GatewayProvider, error) {
 func (p *GatewayProvider) Ensure(ctx context.Context, job hostedexecution.Job) (resultErr error) {
 	defer func() { resultErr = controlError(resultErr) }()
 	control := p.control
-	settings := workerexchange.GatewaySettings{Origin: control.gateway.config.Origin, RequireAddress: true, CertificateAuthority: bytes.Clone(control.gateway.config.CertificateAuthority)}
-	ticket, err := control.gateway.authority.PrepareGateway(ctx, job.Reference, settings)
+	ticket, err := control.gateway.authority.PrepareGateway(ctx, job.Reference, control.gatewaySettings())
 	if err != nil {
 		return hostedexecution.ErrUnavailable
 	}
@@ -73,6 +72,10 @@ func (p *GatewayProvider) Ensure(ctx context.Context, job hostedexecution.Job) (
 		return err
 	}
 	return control.ensurePlan(ctx, plan)
+}
+
+func (p *Provider) gatewaySettings() workerexchange.GatewaySettings {
+	return workerexchange.GatewaySettings{Origin: p.gateway.config.Origin, RequireAddress: true, CertificateAuthority: bytes.Clone(p.gateway.config.CertificateAuthority)}
 }
 
 func (p *GatewayProvider) Observe(ctx context.Context, ref execution.Reference) (hostedexecution.Status, error) {
@@ -99,10 +102,13 @@ func (p *Provider) bucket() string {
 }
 
 func (p *Provider) ownsRole(proof Proof) bool {
-	if p.gateway == nil {
-		return proof.Gateway == nil
+	if p.gateway != nil {
+		return proof.Environment == nil && proof.Gateway != nil && fingerprint(canonicalGateway(*proof.Gateway)) == fingerprint(p.gateway.config)
 	}
-	return proof.Gateway != nil && fingerprint(canonicalGateway(*proof.Gateway)) == fingerprint(p.gateway.config)
+	if p.environment != nil {
+		return proof.Gateway == nil && proof.Environment != nil && fingerprint(canonicalGateway(*proof.Environment)) == fingerprint(*p.environment)
+	}
+	return proof.Gateway == nil && proof.Environment == nil
 }
 
 func sameGatewayAuthority(settings workerexchange.GatewaySettings, config GatewayConfig) bool {
@@ -114,14 +120,23 @@ func (p *Provider) admitTask(ctx context.Context) error {
 		return p.network.Admit(ctx, canonical(p.config))
 	}
 	gateway := p.gateway
-	image, err := gateway.inspector.InspectGateway(ctx, gateway.config.Image)
+	_, err := p.inspectGateway(ctx)
 	if err != nil {
-		return hostedexecution.ErrUnavailable
-	}
-	if image.Reference != gateway.config.Image || image.OS != "linux" || image.Architecture != p.config.Architecture || image.Protocol != browsergateway.RemoteProtocol || image.CertificateConfiguration != browsergateway.RemoteCertificateProtocol || image.InstanceProtocol != ecsidentity.Protocol {
-		return hostedexecution.ErrConfiguration
+		return err
 	}
 	return gateway.network.AdmitGateway(ctx, canonical(p.config), canonicalGateway(gateway.config))
+}
+
+func (p *Provider) inspectGateway(ctx context.Context) (hostedexecution.GatewayImage, error) {
+	gateway := p.gateway
+	image, err := gateway.inspector.InspectGateway(ctx, gateway.config.Image)
+	if err != nil {
+		return image, hostedexecution.ErrUnavailable
+	}
+	if image.Reference != gateway.config.Image || image.OS != "linux" || image.Architecture != p.config.Architecture || image.Protocol != browsergateway.RemoteProtocol || image.CertificateConfiguration != browsergateway.RemoteCertificateProtocol || image.InstanceProtocol != ecsidentity.Protocol {
+		return image, hostedexecution.ErrConfiguration
+	}
+	return image, nil
 }
 
 func (p *Provider) verifyTaskNetwork(ctx context.Context, plan *Plan, task types.Task) error {
@@ -139,6 +154,17 @@ func (p *Provider) verifyTaskNetwork(ctx context.Context, plan *Plan, task types
 	instance, err := plan.GatewayInstance(aws.ToString(task.TaskArn))
 	if err != nil {
 		return err
+	}
+	value, _, _, err := p.load(ctx, plan.job.Reference)
+	if err != nil {
+		return err
+	}
+	record, _, err := p.exchange(ctx, value)
+	if err != nil {
+		return err
+	}
+	if record.Gateway.Instance == instance && record.Gateway.Settings.Address == address {
+		return nil
 	}
 	if err := p.gateway.authority.BindGatewayAddress(ctx, plan.job.Reference, instance, address); err != nil {
 		if errors.Is(err, workerexchange.ErrConflict) || errors.Is(err, workerexchange.ErrInvalid) {

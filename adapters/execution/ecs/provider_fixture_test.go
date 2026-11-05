@@ -27,6 +27,7 @@ type cloudFixture struct {
 	mode                                                      string
 	storage                                                   string
 	database                                                  string
+	nativeTaskID                                              string
 	definition                                                *ecs.DescribeTaskDefinitionOutput
 	task                                                      *ecstypes.Task
 	schedule                                                  *scheduler.GetScheduleOutput
@@ -152,6 +153,9 @@ func (f *cloudFixture) ListTaskDefinitions(_ context.Context, input *ecs.ListTas
 func (f *cloudFixture) makeTask() {
 	cpu, memory := f.plan.taskResources()
 	f.task = &ecstypes.Task{TaskArn: aws.String(taskARN(f.plan)), ClusterArn: aws.String(f.plan.config.Cluster), TaskDefinitionArn: f.definition.TaskDefinition.TaskDefinitionArn, StartedBy: f.launch.StartedBy, Group: f.launch.Group, Cpu: aws.String(cpu), Memory: aws.String(memory), PlatformVersion: aws.String("1.4.0"), PlatformFamily: aws.String("Linux"), LaunchType: ecstypes.LaunchTypeFargate, LastStatus: aws.String("RUNNING"), Overrides: copyValue(f.launch.Overrides), Tags: copyValue(f.launch.Tags), Containers: []ecstypes.Container{{Name: aws.String(f.plan.containerName()), Image: aws.String(f.plan.job.Image)}}}
+	if f.nativeTaskID != "" {
+		f.task.TaskArn = aws.String(f.plan.config.ecsPrefix() + "task/" + f.plan.config.clusterName() + "/" + f.nativeTaskID)
+	}
 	if f.plan.gateway != nil {
 		f.task.Containers[0].NetworkInterfaces = []ecstypes.NetworkInterface{{PrivateIpv4Address: aws.String("10.20.1.7")}}
 	}

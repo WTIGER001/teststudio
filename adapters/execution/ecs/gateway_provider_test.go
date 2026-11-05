@@ -134,6 +134,23 @@ func TestECSGatewayLifecycleBindsVerifiedAddressBeforeInitializationAndKeepsClea
 	if err := f.exchange.Activate(t.Context(), job.Reference); err != nil {
 		t.Fatal(err)
 	}
+	exchangeRow, err := p.control.store.Get(t.Context(), workerexchange.Bucket, job.Reference.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	record = gatewayRecord(t, p, job)
+	record.Submission = &workerexchange.Submission{}
+	saved, err := storage.Put(exchangeRow.Bucket, exchangeRow.ID, exchangeRow.Project, exchangeRow.Revision, record)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := p.control.store.Commit(t.Context(), saved); err != nil {
+		t.Fatal(err)
+	}
+	status, err = p.Observe(t.Context(), job.Reference)
+	if err != nil || status.AdmissionPending {
+		t.Fatal("completed worker submission forced another gateway initialization", status, err)
+	}
 	refs, err := p.Inventory(t.Context(), job.Reference.Installation, job.Reference.Profile)
 	if err != nil || len(refs) != 1 || refs[0] != job.Reference {
 		t.Fatal("gateway inventory lost its original execution", refs, err)

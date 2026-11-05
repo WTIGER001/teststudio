@@ -22,6 +22,7 @@ type Plan struct {
 	fingerprint string
 	ticketHash  string
 	gateway     *GatewayConfig
+	environment *GatewayConfig
 }
 
 func NewPlan(config Config, job hostedexecution.Job, now time.Time) (*Plan, error) {
@@ -36,8 +37,15 @@ func newPlan(config Config, job hostedexecution.Job, ticketHash string) (*Plan, 
 }
 
 func newTaskPlan(config Config, job hostedexecution.Job, ticketHash string, gateway *GatewayConfig) (*Plan, error) {
+	return newRolePlan(config, job, ticketHash, gateway, nil)
+}
+
+func newRolePlan(config Config, job hostedexecution.Job, ticketHash string, gateway, environment *GatewayConfig) (*Plan, error) {
 	ref := job.Reference
 	valid := validReference(ref, job.Runner, job.Operation)
+	if environment != nil {
+		valid = gateway == nil && validGatewayReference(ref, job.Runner, job.Operation) && validateGateway(config, *environment) == nil
+	}
 	if gateway != nil {
 		valid = validGatewayReference(ref, job.Runner, job.Operation) && validateGateway(config, *gateway) == nil && gateway.Image == job.Image
 	}
@@ -48,6 +56,12 @@ func newTaskPlan(config Config, job hostedexecution.Job, ticketHash string, gate
 	p := &Plan{config: canonical(config), job: job, owner: fingerprint(ref), scope: fingerprint(canonical(config)), ticketHash: ticketHash}
 	p.family = config.FamilyPrefix + "-" + p.owner[:40]
 	protocol := "ecs-worker/v1"
+	if environment != nil {
+		selected := canonicalGateway(*environment)
+		p.environment = &selected
+		p.scope = fingerprint([]any{canonical(config), selected})
+		protocol = "ecs-environment/v1"
+	}
 	if gateway != nil {
 		selected := canonicalGateway(*gateway)
 		p.gateway = &selected
