@@ -245,4 +245,6 @@ The core package creates none of those preparation resources. The separate [asse
 The [assembly-only source mode](source-assembly-handoff.md) now provides a durable queue boundary for a future separate Azure registry writer.
 It supports existing ECS and Kubernetes native registry settings and the separate Azure assembly settings.
 The [Azure preparation publisher](azure-preparation-writer.md) now loads explicit library settings and composes selected network, identity, and push-grant checks.
-It opens a separate managed-identity ACR client without executing source. Native assembly wiring now exists; effective grants, actual placement, and isolated discovery remain unfinished.
+It opens a separate managed-identity ACR client without executing source.
+Native startup now checks selected app, environment, storage, and reader metadata against the fixed assembly profile before claiming jobs.
+Complete effective grants, actual placement enforcement, and isolated discovery remain unfinished.

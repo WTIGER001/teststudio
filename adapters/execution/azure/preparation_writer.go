@@ -75,6 +75,11 @@ func (g *PreparationWriterGuard) OpenRegistry(ctx context.Context, c Config) (cl
 	if err := g.Check(ctx, c); err != nil {
 		return nil, err
 	}
+	return g.openRegistry(ctx, c)
+}
+
+func (g *PreparationWriterGuard) openRegistry(ctx context.Context, c Config) (client *acr.Client, resultErr error) {
+	defer func() { resultErr = controlError(resultErr) }()
 	if ctx.Err() != nil {
 		return nil, hostedexecution.ErrUnavailable
 	}

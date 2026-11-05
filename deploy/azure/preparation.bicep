@@ -6,6 +6,12 @@ param environmentName string
 param environmentResourceGroup string
 @minLength(1)
 param journalStorageName string
+@minLength(3)
+@maxLength(24)
+param journalAccount string
+@minLength(3)
+@maxLength(63)
+param journalShare string
 param registryName string
 param registryResourceGroup string
 @minLength(1)
@@ -90,6 +96,7 @@ var args = concat([
   '--azure-assembly-env=TESTSTUDIO_AZURE_ASSEMBLY'
   '--build-directory=/private/source-journals'
 ], empty(goRuntime) ? [] : ['--registry-go-runtime=${goRuntime}'], empty(playwrightRuntime) ? [] : ['--registry-playwright-runtime=${playwrightRuntime}'])
+var image = '${registry.properties.loginServer}/${imageRepository}@${imageDigest}'
 
 resource preparation 'Microsoft.App/containerApps@2025-07-01' = if (workerEnabled) {
   name: '${installationName}-preparation'
@@ -125,7 +132,7 @@ resource preparation 'Microsoft.App/containerApps@2025-07-01' = if (workerEnable
       containers: [
         {
           name: 'preparation'
-          image: '${registry.properties.loginServer}/${imageRepository}@${imageDigest}'
+          image: image
           command: ['/app/teststudio-prepare']
           args: args
           env: [
@@ -166,4 +173,22 @@ output assemblyBinding object = {
   }
   journalStorageName: journalStorageName
   journalDirectory: '/private/source-journals'
+  host: {
+    application: resourceId('Microsoft.App/containerApps', '${installationName}-preparation')
+    environment: environment.id
+    image: image
+    readerIdentity: reader.id
+    readerPrincipalId: reader.properties.principalId
+    readerAssignment: readAccess.outputs.assignmentId
+    readerRole: readAccess.outputs.roleId
+    pullIdentity: pull.id
+    startupIdentity: startup.id
+    journalStorageName: journalStorageName
+    journalAccount: journalAccount
+    journalShare: journalShare
+    databaseSecretUrl: '${vault.properties.vaultUri}secrets/${databaseSecretName}'
+    configurationSecretUrl: '${vault.properties.vaultUri}secrets/${assemblyConfigurationSecretName}'
+    goRuntime: goRuntime
+    playwrightRuntime: playwrightRuntime
+  }
 }

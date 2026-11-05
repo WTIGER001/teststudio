@@ -36,8 +36,8 @@ func (f *preparationPublisherFixture) CloseIdleConnections() {
 	f.closed++
 }
 
-func TestAzurePreparationPublisherComposesOwnedReadersAndClosesWithoutPublication(t *testing.T) {
-	c, s, writer, network, g := preparationWriterTest(t)
+func preparationPublisherTransport(t *testing.T, g *PreparationWriterGuard) *preparationPublisherFixture {
+	t.Helper()
 	registry := g.registry.registry
 	endpoints := registry.endpoints
 	zones := endpoints.dns
@@ -62,6 +62,12 @@ func TestAzurePreparationPublisherComposesOwnedReadersAndClosesWithoutPublicatio
 			f.routes[id] = h.base
 		}
 	}
+	return f
+}
+
+func TestAzurePreparationPublisherComposesOwnedReadersAndClosesWithoutPublication(t *testing.T) {
+	c, s, writer, network, g := preparationWriterTest(t)
+	f := preparationPublisherTransport(t, g)
 	settings := PreparationSettings{Worker: c, Writer: s}
 	publisher, err := settings.OpenPublisher(fixtureCredential{}, f)
 	if err != nil {

@@ -548,7 +548,15 @@ The worker defaults to disabled so bootstrap can establish identity bindings bef
 Four new Go checks and two affected regressions pass. The template compiles once and passes six local packaging checks after checker corrections.
 The core checker reuses its saved compiled template. No image rebuild, container, browser, provider call, or deployment runs.
 Native assembly advances 51; the verified count remains 48 of 57.
-Next inspect the selected preparation app, environment, storage binding, and reader identity at startup before claiming jobs.
+Native startup now checks the selected app, environment, storage binding, reader identity, and selected custom read grant before claiming jobs.
+The fixed headless runtime and independent revision comparison include command, images, source runtimes, vault references, mount options, identities, and scaling.
+The host-bound publisher owns eleven readers and refreshes its chain once before selecting the writer credential or starting a new build.
+Startup waits at most three minutes for unavailable platform state and stops on a definite mismatch or cancellation.
+The Bicep binding now includes the complete host object. Native settings require it and reject mismatched runtime flags or journal paths before state creation.
+Five new targeted checks and affected shared-runtime, identity, native, and publisher regressions pass locally, with one corrected error-category expectation.
+The package compiles once. Checker correction reuses its compiled output; no image build, live service call, browser, or demo restart runs.
+This advances 51 and preserves 48 verified items out of 57.
+Next complete preparation source egress and storage network bindings, then continue complete isolated discovery and native execution admission.
 Actual source egress, filesystem behavior, effective read authority, and deployment recovery remain separate deployment evidence.
 The selected grant check does not establish absence of additional authority or reuse of the writer by other workloads.
 Keep complete Azure discovery and coded execution admission separate until implemented.

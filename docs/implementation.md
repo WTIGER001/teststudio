@@ -122,7 +122,43 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: native Azure assembly and persistent workload template
+## Current delivery: Azure assembly host and startup admission
+
+Native Azure assembly now requires a host binding and compares selected reported app, environment, persistent storage, and reader identity metadata before queue startup.
+The reader's selected subscription assignment and fixed custom read role must match its client, principal, and installation tenant.
+The host app pins reader and writer metadata while keeping platform pull and secret-startup identities outside the main runtime.
+The environment must bind the preparation source subnet with internal networking, disabled public access, and a Consumption profile.
+The selected storage binding must name the configured read-write SMB account and share. NFS and read-only bindings reject.
+The SDK returns a reduced storage projection without storage keys or credential references.
+
+Shared service validation now supports explicit headless apps and absent or zero HTTP traffic weight on headless revisions.
+Existing HTTP app and revision behavior remains required. The host compares app and revision against an independent fixed runtime definition.
+Command, args, image, runtime digests, vault references, identities, journal mount, resources, and scaling must match.
+Consistent malicious app and revision changes do not become the expected template.
+One owned host reader extends the native publisher to eleven readers. Its preceding writer chain refreshes once per check.
+Host observation completes before writer credential selection and before each new source assembly.
+The native command rejects a missing host, mismatched runtime flags, or a different journal directory before state creation.
+
+Startup waits up to three minutes for unavailable platform observations, with two seconds between attempts.
+A definite ownership mismatch stops immediately. Cancellation stops the wait. No job is claimed during activation waiting.
+The template outputs the complete host binding, including non-secret image, identity, storage, runtime, and vault-reference values.
+The operator guide explains host settings, updated bootstrap, upgrade bindings, runtime matching, limits, and deployment evidence.
+No UI, API, or current-page help behavior changes.
+
+Four new host checks and five affected adapter regressions run under race detection in 2.576 seconds.
+One new case initially expects unavailable for a foreign revision page; the shared reader correctly reports ownership.
+Only that corrected check repeats, passing in 1.639 seconds. The remaining selected checks already pass and do not repeat.
+A focused added NFS subcase passes in 1.533 seconds after separating a definite unsupported storage type from missing metadata.
+The new startup wait check and three affected native assembly checks pass under race detection in 1.426 seconds.
+The Bicep package compiles once without warnings. Its six packaging checks pass after a checker-only correction for an inlined image expression.
+The corrected checker reuses the compiled template. No image, container, browser, listener, real registry, identity endpoint, deployment, or live provider request runs.
+
+Selected reported bindings do not prove process origin, complete effective grants, network enforcement, storage durability, or identity exclusivity.
+Source egress, storage network binding, actual SMB recovery, and complete isolated discovery remain unfinished or unverified.
+Acceptance 51 advances; the ledger remains 48 verified of 57, with nine open.
+Evidence is output/azure-preparation-host/summary.json and retained package results.
+
+## Previous delivery: native Azure assembly and persistent workload template
 
 The native preparation command now selects Azure through --azure-assembly-config or --azure-assembly-env, only with assembly-only mode and the Azure location.
 It requires PostgreSQL and a separate explicit reader client identifier. Invalid modes, mixed providers, invalid runtime references, and invalid settings reject before state creation.

@@ -13,7 +13,7 @@ Acceptance 51 advances. The verified total remains 48 of 57, with nine open.
 LoadPreparationSettings reads one JSON file or one named environment variable through the shared bounded loader.
 It rejects unsupported fields, invalid ownership, invalid identity identifiers, and incompatible registry settings.
 The document has worker and writer fields. worker contains the existing Azure Config.
-Native operation additionally requires readerClientId for a separate explicit observation credential.
+Native operation additionally requires readerClientId and [host settings](azure-native-assembly.md#host-settings-and-observation) for separate observation credentials and reported workload binding.
 
 PreparationWriterSettings requires these writer fields:
 
@@ -55,14 +55,15 @@ Opening a client requests no registry token and publishes no content.
 PreparationSettings.OpenPublisher requires an explicit observation credential and optionally accepts a restricted test transport.
 The observation credential must have permission to read the selected resources. Its authority remains the caller's installation responsibility.
 The factory reuses the existing registry chain rather than maintaining a second implementation.
-Construction creates ten owned SDK readers and makes no provider call.
+Construction creates ten owned SDK readers, or eleven with host observation, and makes no provider call.
 Each publisher OpenRegistry call performs fresh observation before selecting the separate writer credential.
 
 The caller closes each returned ACR client and the publisher after use.
 Publisher Close releases every owned reader once. Further openings return unavailable without provider calls.
 Closing the publisher does not close previously returned registry clients; their ownership remains with the caller.
 Library callers can call OpenRegistry before each attempt or use publisher Check before reusing the selected registry client.
-The native process checks once during startup and again before every new build. A retained client alone proves no continued grant validity.
+The native process checks the host and preceding writer chain during startup and before every new build.
+A retained client alone proves no continued grant validity. Host observation succeeds before selecting a publishing credential.
 The registry service still enforces authorization on subsequent registry operations.
 
 The writer stage has a 45-second total bound, including the preparation path's 40-second bound.
@@ -74,9 +75,11 @@ Provider diagnostics remain outside public errors.
 
 This checks one reported assignment. It does not enumerate additional, inherited, delegated, or effective permissions.
 The identity's absence from other workloads, federation state, and protection against later reassignment remain unverified.
-Only the worker pull identity is excluded by these settings. Full installation wiring must also exclude controller, startup, observer, and backend identities.
+Writer-only settings exclude the worker pull identity. Native host settings also separate preparation pull, startup, reader, and writer resources.
+Installation verification must still exclude unrelated controller, observer, and backend uses.
 Reported private resources do not prove effective packet routing, process placement, or complete DNS visibility.
-Native command wiring and a persistent-mount template now exist. Actual placement, source egress, filesystem behavior, and effective read authority remain unverified.
+Native wiring, a persistent-mount template, and selected reported placement checks now exist.
+Actual placement enforcement, source egress, filesystem behavior, and complete effective read authority remain unverified.
 
 The native trusted writer uses [assembly-only handoff](source-assembly-handoff.md).
 Discovery, review, approval, and complete untrusted execution admission remain separate requirements.

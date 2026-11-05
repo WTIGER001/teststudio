@@ -12,6 +12,7 @@ type serviceBinding struct {
 	application, environment, location, domain, certificate string
 	identities                                              []string
 	templateDocument                                        func(*a.Template) map[string]any
+	headless                                                bool
 }
 
 func (b serviceBinding) applicationDocument(actual a.ContainerApp) (map[string]any, error) {
@@ -26,15 +27,24 @@ func (b serviceBinding) applicationDocument(actual a.ContainerApp) (map[string]a
 	if environment == "" {
 		environment = value(p.EnvironmentID)
 	}
-	if !strings.EqualFold(environment, b.environment) || p.EnvironmentID != nil && !strings.EqualFold(value(p.EnvironmentID), b.environment) || p.Configuration == nil || p.Configuration.Ingress == nil || actual.Identity == nil || len(actual.Identity.UserAssignedIdentities) != len(b.identities) {
+	if !strings.EqualFold(environment, b.environment) || p.EnvironmentID != nil && !strings.EqualFold(value(p.EnvironmentID), b.environment) || p.Configuration == nil || actual.Identity == nil || len(actual.Identity.UserAssignedIdentities) != len(b.identities) {
 		return nil, hostedexecution.ErrOwnership
 	}
-	_, name := resourceParts(b.application)
-	if value(p.Configuration.Ingress.Fqdn) == "" {
-		return nil, hostedexecution.ErrUnavailable
-	}
-	if !strings.EqualFold(value(p.Configuration.Ingress.Fqdn), name+"."+b.domain) {
-		return nil, hostedexecution.ErrOwnership
+	if b.headless {
+		if p.Configuration.Ingress != nil {
+			return nil, hostedexecution.ErrOwnership
+		}
+	} else {
+		if p.Configuration.Ingress == nil {
+			return nil, hostedexecution.ErrOwnership
+		}
+		_, name := resourceParts(b.application)
+		if value(p.Configuration.Ingress.Fqdn) == "" {
+			return nil, hostedexecution.ErrUnavailable
+		}
+		if !strings.EqualFold(value(p.Configuration.Ingress.Fqdn), name+"."+b.domain) {
+			return nil, hostedexecution.ErrOwnership
+		}
 	}
 	doc := document(actual)
 	if doc == nil {
@@ -146,6 +156,11 @@ func verifyServiceRevisions(app a.ContainerApp, revisions []a.Revision, applicat
 		return hostedexecution.ErrUnavailable
 	}
 	active := 0
+	headless := app.Properties.Configuration != nil && app.Properties.Configuration.Ingress == nil
+	traffic := int32(100)
+	if headless {
+		traffic = 0
+	}
 	seen := map[string]bool{}
 	_, appName := resourceParts(application)
 	for _, revision := range revisions {
@@ -159,7 +174,7 @@ func verifyServiceRevisions(app a.ContainerApp, revisions []a.Revision, applicat
 			return hostedexecution.ErrUnavailable
 		}
 		if !value(p.Active) {
-			if p.TrafficWeight == nil || p.Replicas == nil || value(p.TrafficWeight) != 0 || value(p.Replicas) != 0 {
+			if !headless && p.TrafficWeight == nil || p.Replicas == nil || value(p.TrafficWeight) != 0 || value(p.Replicas) != 0 {
 				return hostedexecution.ErrUnavailable
 			}
 			continue
@@ -168,7 +183,7 @@ func verifyServiceRevisions(app a.ContainerApp, revisions []a.Revision, applicat
 		if active > 1 || name != value(app.Properties.LatestReadyRevisionName) {
 			return hostedexecution.ErrOwnership
 		}
-		if value(p.ProvisioningState) != a.RevisionProvisioningStateProvisioned || value(p.HealthState) != a.RevisionHealthStateHealthy || value(p.RunningState) != a.RevisionRunningStateRunning || value(p.Replicas) < 1 || value(p.TrafficWeight) != 100 {
+		if value(p.ProvisioningState) != a.RevisionProvisioningStateProvisioned || value(p.HealthState) != a.RevisionHealthStateHealthy || value(p.RunningState) != a.RevisionRunningStateRunning || value(p.Replicas) < 1 || value(p.TrafficWeight) != traffic {
 			return hostedexecution.ErrUnavailable
 		}
 		if fingerprint(normalize(p.Template)) != fingerprint(normalize(expected)) {

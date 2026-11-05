@@ -9,6 +9,14 @@ import (
 )
 
 func verifyReadIdentity(c Config, s ReadIdentitySettings, identity m.Identity, assignment a.RoleAssignment, role a.RoleDefinition) error {
+	return verifyReadIdentityBinding(c, readIdentityBinding{Identity: s.Identity, ClientID: s.ClientID, PrincipalID: s.PrincipalID, TenantID: s.TenantID, Assignment: s.Assignment, Role: s.Role}, identity, assignment, role)
+}
+
+type readIdentityBinding struct {
+	Identity, ClientID, PrincipalID, TenantID, Assignment, Role string
+}
+
+func verifyReadIdentityBinding(c Config, s readIdentityBinding, identity m.Identity, assignment a.RoleAssignment, role a.RoleDefinition) error {
 	if !perimeterIdentity(value(identity.ID), value(identity.Name), value(identity.Type), s.Identity, "Microsoft.ManagedIdentity/userAssignedIdentities", value(identity.Location), c.Region) {
 		return hostedexecution.ErrOwnership
 	}

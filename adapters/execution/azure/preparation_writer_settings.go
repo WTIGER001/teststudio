@@ -24,13 +24,17 @@ type PreparationSettings struct {
 	Worker         Config                    `json:"worker"`
 	Writer         PreparationWriterSettings `json:"writer"`
 	ReaderClientID string                    `json:"readerClientId,omitempty"`
+	Host           *PreparationHostSettings  `json:"host,omitempty"`
 }
 
 func (s PreparationSettings) ValidateNative() error {
-	if !observerGUID(s.ReaderClientID) || s.ReaderClientID == s.Writer.ClientID {
+	if !observerGUID(s.ReaderClientID) || s.ReaderClientID == s.Writer.ClientID || s.Host == nil {
 		return hostedexecution.ErrConfiguration
 	}
-	_, err := s.Writer.canonical(s.Worker)
+	writer, err := s.Writer.canonical(s.Worker)
+	if err == nil {
+		_, err = s.Host.canonical(s.Worker, writer, s.ReaderClientID)
+	}
 	return err
 }
 

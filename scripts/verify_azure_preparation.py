@@ -71,5 +71,12 @@ def verify_preparation(template, root):
     output = template['outputs']['assemblyBinding']['value']
     assert set(output['writer']) == {'identity', 'clientId', 'principalId', 'tenantId', 'assignment'}
     assert output['journalDirectory'] == '/private/source-journals' and 'readerClientId' in output
+    host = output['host']
+    assert host['image'] == container['image'] and host['environment'] == app['properties']['managedEnvironmentId']
+    assert host['application'] == output['application']
+    assert host['readerAssignment'] == output['readerAssignment'] and host['readerRole'] == output['readerRole']
+    assert host['journalStorageName'] == "[parameters('journalStorageName')]" and host['journalAccount'] == "[parameters('journalAccount')]" and host['journalShare'] == "[parameters('journalShare')]"
+    assert host['databaseSecretUrl'] == configuration['secrets'][0]['keyVaultUrl'] and host['configurationSecretUrl'] == configuration['secrets'][1]['keyVaultUrl']
+    assert host['goRuntime'] == "[parameters('goRuntime')]" and host['playwrightRuntime'] == "[parameters('playwrightRuntime')]"
     checks.append('Bootstrap outputs expose only installation bindings and templates retrieve no secret values, storage keys, or AWS configuration')
     return checks

@@ -7,8 +7,8 @@ import (
 )
 
 func TestAzurePreparationNativeRequiresSeparateExplicitReader(t *testing.T) {
-	c, writer, _, _, _ := preparationWriterTest(t)
-	s := PreparationSettings{Worker: c, Writer: writer, ReaderClientID: "aaaaaaaa-1111-2222-3333-444444444444"}
+	s, _, _ := preparationHostTest(t)
+	c, writer := s.Worker, s.Writer
 	if err := s.ValidateNative(); err != nil {
 		t.Fatal("separate explicit reader rejected", err)
 	}
@@ -20,4 +20,19 @@ func TestAzurePreparationNativeRequiresSeparateExplicitReader(t *testing.T) {
 	changed := s
 	changed.Writer.Identity = c.PullIdentity
 	requireDeadlineError(t, changed.ValidateNative(), hostedexecution.ErrConfiguration)
+	changed = s
+	changed.Host = nil
+	requireDeadlineError(t, changed.ValidateNative(), hostedexecution.ErrConfiguration)
+	for _, mutate := range []func(*PreparationHostSettings){
+		func(h *PreparationHostSettings) { h.Environment = c.WorkerEnvironment },
+		func(h *PreparationHostSettings) { h.ReaderIdentity = writer.Identity },
+		func(h *PreparationHostSettings) { h.JournalStorageName = "../foreign" },
+		func(h *PreparationHostSettings) { h.GoRuntime = "foreign.azurecr.io/runtime:latest" },
+	} {
+		host := *s.Host
+		mutate(&host)
+		changed = s
+		changed.Host = &host
+		requireDeadlineError(t, changed.ValidateNative(), hostedexecution.ErrConfiguration)
+	}
 }

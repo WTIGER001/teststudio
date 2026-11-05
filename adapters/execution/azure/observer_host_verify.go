@@ -36,35 +36,8 @@ func verifyObserverHost(c Config, s ObserverHostSettings, app a.ContainerApp, re
 }
 
 func verifyObserverHostIdentities(s ObserverHostSettings, app a.ContainerApp) error {
-	wanted := s.lifecycles()
-	if len(app.Identity.UserAssignedIdentities) != len(wanted) || len(app.Properties.Configuration.IdentitySettings) != len(wanted) {
-		return hostedexecution.ErrOwnership
-	}
-	clients, principals, identities := map[string]bool{}, map[string]bool{}, map[string]bool{}
-	for id, identity := range app.Identity.UserAssignedIdentities {
-		key := inventoryIdentityKey(id)
-		if wanted[key] == "" || identities[key] {
-			return hostedexecution.ErrOwnership
-		}
-		if identity == nil || !observerGUID(strings.ToLower(value(identity.ClientID))) || !observerGUID(strings.ToLower(value(identity.PrincipalID))) {
-			return hostedexecution.ErrUnavailable
-		}
-		client, principal := strings.ToLower(value(identity.ClientID)), strings.ToLower(value(identity.PrincipalID))
-		if clients[client] || principals[principal] || client == principal || key == inventoryIdentityKey(s.Identity.Identity) && (client != s.Identity.ClientID || principal != s.Identity.PrincipalID) || key == inventoryIdentityKey(s.RuntimeIdentity) && client != s.Runtime.RuntimeClientID {
-			return hostedexecution.ErrOwnership
-		}
-		clients[client], principals[principal], identities[key] = true, true, true
-	}
-	seen := map[string]bool{}
-	for _, setting := range app.Properties.Configuration.IdentitySettings {
-		if setting == nil || setting.Identity == nil || setting.Lifecycle == nil {
-			return hostedexecution.ErrUnavailable
-		}
-		key := inventoryIdentityKey(value(setting.Identity))
-		if wanted[key] == "" || seen[key] || string(value(setting.Lifecycle)) != wanted[key] {
-			return hostedexecution.ErrOwnership
-		}
-		seen[key] = true
-	}
-	return nil
+	return verifyServiceIdentities(app, s.lifecycles(), map[string]serviceIdentityPin{
+		inventoryIdentityKey(s.Identity.Identity): {client: s.Identity.ClientID, principal: s.Identity.PrincipalID},
+		inventoryIdentityKey(s.RuntimeIdentity):   {client: s.Runtime.RuntimeClientID},
+	})
 }

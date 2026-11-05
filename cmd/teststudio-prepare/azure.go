@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	azureworker "github.com/wtiger001/teststudio/adapters/execution/azure"
 	"github.com/wtiger001/teststudio/adapters/preparation/registryimage"
+	"github.com/wtiger001/teststudio/adapters/registry/acr"
 	"github.com/wtiger001/teststudio/adapters/registry/oci"
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
@@ -37,6 +39,9 @@ func validateAzureRuntimes(settings azureworker.PreparationSettings, runtimes ma
 	if settings.ValidateNative() != nil {
 		return hostedexecution.ErrConfiguration
 	}
+	if runtimes["go"] != settings.Host.GoRuntime || runtimes["playwright"] != settings.Host.PlaywrightRuntime {
+		return hostedexecution.ErrConfiguration
+	}
 	registry, err := oci.New(oci.Options{Origin: "https://" + settings.Worker.Registry, RepositoryPrefix: settings.Worker.RepositoryPrefix, Architecture: "amd64"})
 	if err != nil {
 		return hostedexecution.ErrConfiguration
@@ -51,7 +56,7 @@ func validateAzureRuntimes(settings azureworker.PreparationSettings, runtimes ma
 }
 
 func configureAzurePreparation(ctx context.Context, service *sources.Service, settings azureworker.PreparationSettings, directory string, runtimes map[string]string) (func(), error) {
-	if !service.AssemblyOnly || service.Location != azureworker.Location || validateAzureRuntimes(settings, runtimes) != nil {
+	if !service.AssemblyOnly || service.Location != azureworker.Location || directory != azureworker.PreparationJournalDirectory || validateAzureRuntimes(settings, runtimes) != nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
 	credential, err := azidentity.NewManagedIdentityCredential(&azidentity.ManagedIdentityCredentialOptions{ID: azidentity.ClientID(settings.ReaderClientID)})
@@ -62,7 +67,9 @@ func configureAzurePreparation(ctx context.Context, service *sources.Service, se
 	if err != nil {
 		return nil, err
 	}
-	registry, err := publisher.OpenRegistry(ctx, settings.Worker)
+	startup, stop := context.WithTimeout(ctx, 3*time.Minute)
+	defer stop()
+	registry, err := awaitAzureRegistry(startup, func(ctx context.Context) (*acr.Client, error) { return publisher.OpenRegistry(ctx, settings.Worker) }, 2*time.Second)
 	if err != nil {
 		publisher.Close()
 		return nil, err

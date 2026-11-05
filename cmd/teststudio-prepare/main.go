@@ -77,7 +77,10 @@ func run() error {
 		return err
 	}
 	if azureSettings != nil && azureSettings.ValidateNative() != nil {
-		return errors.New("Azure assembly requires valid private settings and a separate explicit reader client identifier")
+		return errors.New("Azure assembly requires valid private host settings and a separate explicit reader client identifier")
+	}
+	if azureSettings != nil && *directory != azureworker.PreparationJournalDirectory {
+		return errors.New("Azure assembly requires the configured private journal mount directory")
 	}
 	if azureSettings != nil && validateAzureRuntimes(*azureSettings, map[string]string{"go": *registryGo, "playwright": *registryPlaywright}) != nil {
 		return errors.New("Azure assembly runtimes require immutable distribution digests in the configured registry and repository prefix")

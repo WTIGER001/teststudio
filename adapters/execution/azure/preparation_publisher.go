@@ -13,6 +13,7 @@ import (
 type PreparationPublisher struct {
 	mu      sync.RWMutex
 	guard   *PreparationWriterGuard
+	host    *PreparationHostGuard
 	readers []observerReader
 }
 
@@ -40,11 +41,19 @@ func (s PreparationSettings) OpenPublisher(credential azcore.TokenCredential, tr
 	}, func(reader *SDKPreparationWriterReader) (*PreparationWriterGuard, error) {
 		return NewPreparationWriterGuard(c, s.Writer, network, reader)
 	})
+	var host *PreparationHostGuard
+	if s.Host != nil {
+		host = observerStage(b, func() (*SDKPreparationHostReader, error) {
+			return NewSDKPreparationHostReader(s, credential, transport)
+		}, func(reader *SDKPreparationHostReader) (*PreparationHostGuard, error) {
+			return NewPreparationHostGuard(s, guard, reader)
+		})
+	}
 	if b.err != nil {
 		closeObserverReaders(b.readers)
 		return nil, controlError(b.err)
 	}
-	return &PreparationPublisher{guard: guard, readers: b.readers}, nil
+	return &PreparationPublisher{guard: guard, host: host, readers: b.readers}, nil
 }
 
 func (p *PreparationPublisher) OpenRegistry(ctx context.Context, c Config) (*acr.Client, error) {
@@ -53,7 +62,10 @@ func (p *PreparationPublisher) OpenRegistry(ctx context.Context, c Config) (*acr
 	if p.guard == nil {
 		return nil, hostedexecution.ErrUnavailable
 	}
-	return p.guard.OpenRegistry(ctx, c)
+	if err := p.check(ctx, c); err != nil {
+		return nil, err
+	}
+	return p.guard.openRegistry(ctx, c)
 }
 
 func (p *PreparationPublisher) Check(ctx context.Context, c Config) error {
@@ -62,6 +74,13 @@ func (p *PreparationPublisher) Check(ctx context.Context, c Config) error {
 	if p.guard == nil {
 		return hostedexecution.ErrUnavailable
 	}
+	return p.check(ctx, c)
+}
+
+func (p *PreparationPublisher) check(ctx context.Context, c Config) error {
+	if p.host != nil {
+		return p.host.Check(ctx, c)
+	}
 	return p.guard.Check(ctx, c)
 }
 
@@ -69,5 +88,5 @@ func (p *PreparationPublisher) Close() {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	closeObserverReaders(p.readers)
-	p.guard, p.readers = nil, nil
+	p.guard, p.host, p.readers = nil, nil, nil
 }

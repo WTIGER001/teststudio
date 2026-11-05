@@ -103,6 +103,7 @@ Protection-management authority, clean provenance, cross-scope coverage, and pre
 
 The core package declares no preparation workload or these endpoint and zone resources.
 The separate [native assembly profile](azure-native-assembly.md) now supplies a trusted worker template and command configuration.
+It also checks selected host, environment, persistent storage, and reader grant metadata before queue admission.
 Native commands still expose no Azure coded-worker option. Complete source preparation requires isolated discovery admission.
 Do not substitute a fake Network, successful registry write, or configured private hostname for that admission.
 Four targeted local race checks pass after the final trusted-controller source-policy correction.
@@ -115,4 +116,5 @@ Local checks use fake credentials and in-memory SDK transports, with no provider
 The source service now supports [durable assembly-only handoff](source-assembly-handoff.md), with discovery deferred to a compatible worker.
 This separates confirmed source publication from execution-control authority without skipping discovery or approval.
 The native mode supports existing ECS and Kubernetes registry settings and separate Azure assembly settings.
-Azure command configuration and publisher composition now exist. Actual placement and isolated discovery remain unverified or unfinished.
+Azure command configuration, publisher composition, and reported placement checks now exist.
+Actual placement enforcement and isolated discovery remain unverified or unfinished.
