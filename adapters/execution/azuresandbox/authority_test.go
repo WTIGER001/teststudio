@@ -20,7 +20,11 @@ func TestSandboxAuthorityDefinitionsSeparateDataControlFromTimerManagement(t *te
 		t.Run(mode, func(t *testing.T) {
 			s := runtimeSettings(mode)
 			defs, err := s.AuthorityDefinitions()
-			if err != nil || len(defs) != 11 {
+			expectedCount := 15
+			if mode == "execution" {
+				expectedCount = 17
+			}
+			if err != nil || len(defs) != expectedCount {
 				t.Fatal("missing role or grant definitions", err)
 			}
 			perm := func(id string) map[string]any {
@@ -113,7 +117,7 @@ func TestSandboxAuthoritySharesBoundedEvidenceAndRetainsFailures(t *testing.T) {
 		})
 	}
 	group.Wait()
-	if len(w.calls) != 15 {
+	if len(w.calls) != 24 {
 		t.Fatal("selected authority scope changed", len(w.calls))
 	}
 	for _, count := range w.calls {

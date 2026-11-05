@@ -267,9 +267,19 @@ Five staged resource bodies support later packaging without creating a server, e
 Three new checks and eleven affected checks pass locally with race detection in 5.631 seconds.
 See [controller private database](azure-sandbox-host-database.md). Acceptance 51 advances; the count remains 48 verified, nine open.
 
+The existing authority reader now includes startup-secret and execution-evidence grants with selected vault, Blob account, and private container metadata.
+Two secret-only roles target the startup principal at individual database and configuration secrets.
+Execution adds container-scoped Blob read, write, and delete authority for its separate runtime principal. Discovery receives no Blob grant.
+The verifier rejects broader scopes, changed principals, secret writes, account-key access, grant delegation, public Blob access, and shared-key access.
+AuthorityDefinitions now supplies 15 discovery objects or 17 execution objects. No resource or grant is created.
+The existing authority cache retains its 15-second bound. Remaining domain authorization and effective-protection checks stay uncached.
+Three new checks and eleven affected checks pass locally with race detection in 4.191 seconds.
+See [controller dependency authority](azure-sandbox-host-access.md). Acceptance 51 advances; the count remains 48 verified, nine open.
+
 Complete remaining effective-authority and protected network admission, native command role wiring, and deployment packaging next.
 Bind additional declared registry consumers to trusted workload and network ownership.
-Complete actual database and dependency access, remaining permissions, and network paths.
+Complete actual database and dependency access, inherited authority, deny effects, and remaining protected network paths.
+Selected startup-secret and evidence grants and service metadata now have explicit authority bindings.
 Reported database endpoint, DNS, TCP 5432, and hostname bindings now exist. They do not establish deployed SQL connectivity.
 Bind native HTTPS-probe target routing to registered-target and request-policy contracts before native controller activation.
 Complete remaining import and timer identity attachment, additional grants and deny effects, and protected write boundaries.

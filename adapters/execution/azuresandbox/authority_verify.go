@@ -111,7 +111,7 @@ func (s Settings) verifyAuthority(resources map[string]placementResource) error 
 			return err
 		}
 	}
-	for _, role := range s.authorityRoles() {
+	for _, role := range s.allAuthorityRoles() {
 		if err := verifyAuthorityRole(resources[role.grant.Role], role); err != nil {
 			return err
 		}
@@ -119,5 +119,8 @@ func (s Settings) verifyAuthority(resources map[string]placementResource) error 
 			return err
 		}
 	}
-	return verifyAuthorityAssignment(resources[a.RegistryAssignment], a.RegistryAssignment, s.Placement.Registry, a.Registry.PrincipalID, "/subscriptions/"+s.Worker.Subscription+pullRole)
+	if err := verifyAuthorityAssignment(resources[a.RegistryAssignment], a.RegistryAssignment, s.Placement.Registry, a.Registry.PrincipalID, "/subscriptions/"+s.Worker.Subscription+pullRole); err != nil {
+		return err
+	}
+	return s.verifyHostAccessResources(resources)
 }

@@ -9,6 +9,7 @@ Execution and discovery use explicit runtime modes.
 
 This is a library integration. The teststudio commands do not load these settings yet.
 The [placement stage](azure-sandbox-placement.md) now verifies reported group, subnet, import identity, and selected pull-grant metadata.
+The [controller dependency binding](azure-sandbox-host-access.md) now checks selected secret and evidence grants, vault RBAC metadata, and private container access.
 The [authority stage](azure-sandbox-authority.md) now checks selected identity and permission bindings for control, metadata, registry inspection, and timers.
 The [network stage](azure-sandbox-network.md) now checks the complete selected security rules, default route, and exclusive subnet attachments.
 The [private stage](azure-sandbox-private.md) now binds endpoint NIC addresses, endpoint subnet contents, and complete selected private DNS inventories.
@@ -73,6 +74,7 @@ It constructs the sandbox client for image, instance, and command operations.
 It constructs SDKDeadlines with the same control credential and the selected independent workflow scope.
 It constructs SDKPlacement with the explicit metadata credential and composes it before the additional protection checks.
 It constructs SDKAuthority with that metadata credential and compares selected identity, role, and assignment metadata.
+That reader now includes host.access grants, named vault RBAC metadata, and the execution evidence account and private container.
 It constructs SDKNetwork with the metadata credential and verifies selected security rules, route contents, and exclusive attachments.
 It constructs SDKPrivate with that credential and checks endpoints, NICs, the endpoint subnet and rules, and selected DNS inventories.
 It constructs SDKTopology with that credential and compares VNet contents, firewall and public IP attachments, and complete firewall policy groups.

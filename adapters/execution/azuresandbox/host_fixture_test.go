@@ -21,6 +21,7 @@ func runtimeHostSettings(s Settings) HostSettings {
 		h.EvidenceContainer = "evidence"
 		h.PublicOrigin = "https://studio.teststudio.example"
 	}
+	h.Access = runtimeHostAccess(s, h)
 	return h
 }
 

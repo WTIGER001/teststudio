@@ -44,7 +44,7 @@ func (s Settings) AuthorityDefinitions() (map[string]any, error) {
 		return nil, err
 	}
 	result := map[string]any{}
-	for _, role := range s.authorityRoles() {
+	for _, role := range s.allAuthorityRoles() {
 		permission := map[string]any{"actions": nonNilStrings(role.actions), "notActions": []string{}, "dataActions": nonNilStrings(role.data), "notDataActions": []string{}}
 		properties := map[string]any{"roleName": role.name, "type": "CustomRole", "assignableScopes": []string{role.assignable}, "permissions": []any{permission}}
 		result[role.grant.Role] = map[string]any{"id": role.grant.Role, "name": role.grant.Role[strings.LastIndex(role.grant.Role, "/")+1:], "type": "Microsoft.Authorization/roleDefinitions", "properties": properties}

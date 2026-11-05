@@ -15,6 +15,7 @@ The [image manager](azure-sandbox-images.md) now supplies durable source convers
 The [provider bridge](azure-sandbox-provider.md) now connects the shared execution and recovery lifecycle, including pending source conversion.
 The [runtime factory](azure-sandbox-runtime.md) now supplies independent settings and concrete SDK assembly.
 The [placement stage](azure-sandbox-placement.md) now checks selected reported group, network, and source-pull metadata.
+The [controller dependency binding](azure-sandbox-host-access.md) now checks selected secret and evidence grants, vault RBAC metadata, and private container access.
 The [authority stage](azure-sandbox-authority.md) now checks configured identity resources, custom control and timer permissions, and selected grants.
 The [network stage](azure-sandbox-network.md) now checks complete selected security rules and route contents.
 The [private stage](azure-sandbox-private.md) now checks selected endpoints, NIC addresses, endpoint subnet rules, and complete private DNS inventories.

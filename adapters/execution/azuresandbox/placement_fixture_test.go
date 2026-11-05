@@ -23,6 +23,14 @@ type placementWorld struct {
 func newPlacementWorld(t *testing.T, s Settings) *placementWorld {
 	t.Helper()
 	w := &placementWorld{t: t, s: s, resources: map[string]map[string]any{}, calls: map[string]int{}}
+	if s.Host.Access.Blob != nil {
+		copy := *s.Host.Access.Blob
+		w.s.Host.Access.Blob = &copy
+	}
+	if s.Host.Runtime != nil {
+		copy := *s.Host.Runtime
+		w.s.Host.Runtime = &copy
+	}
 	put := func(id, kind, region string, properties map[string]any) map[string]any {
 		r := map[string]any{"id": id, "type": kind, "name": id[strings.LastIndex(id, "/")+1:], "properties": properties}
 		if region != "" {
@@ -78,6 +86,7 @@ func newPlacementWorld(t *testing.T, s Settings) *placementWorld {
 	w.addHostNetwork()
 	w.addRegistryService()
 	w.addHost()
+	w.addHostAccess()
 	w.addServiceWorkloads()
 	return w
 }

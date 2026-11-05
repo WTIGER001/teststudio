@@ -21,6 +21,7 @@ Settings.host contains these required bindings:
 | subnet, infrastructureGroup | Selected environment subnet and infrastructure group, separate from sandbox, relay, and backend networks. |
 | image | Immutable trusted service image outside the source-image namespace. |
 | pull, startup | Distinct identity resource, client, and principal pins. |
+| access | Required secret and execution-evidence grants described in the [dependency authority guide](azure-sandbox-host-access.md). |
 | database | Required private PostgreSQL server and network bindings described in the [database guide](azure-sandbox-host-database.md). |
 | databaseHost | Required canonical database hostname, included in both commands through [--database-host](database-host-binding.md). |
 | databaseSecretUrl, configurationSecretUrl | Distinct Key Vault secret references for PostgreSQL and native runtime configuration. |

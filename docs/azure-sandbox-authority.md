@@ -3,6 +3,7 @@
 ## Introduction
 
 SDKAuthority checks the configured control, registry inspection, metadata, and timer-stop identities and their selected Azure role assignments.
+It also checks [controller dependency grants and resources](azure-sandbox-host-access.md) for startup secrets and execution evidence.
 OpenRuntime now includes this stage after placement admission and before the remaining protection checks.
 The factory constructs it with the explicit metadata credential. Callers cannot omit the stage.
 
@@ -59,7 +60,9 @@ These selected grants do not prove absence of other effective write privileges.
 
 ### Reviewable definitions
 
-Settings.AuthorityDefinitions returns five canonical custom-role definitions and six expected assignment objects.
+Settings.AuthorityDefinitions includes five native control roles and six corresponding assignments.
+Controller dependencies add two roles and assignments for discovery or three for execution.
+The complete output contains 15 objects for discovery or 17 for execution.
 The same profiles drive verification and reviewable packaging inputs.
 This method changes no Azure resource and acquires no credential.
 Its objects include expected resource and readback metadata. They are not a complete deployment template.
@@ -72,12 +75,14 @@ Even that narrow grant does not prove the identity is absent from other hosts. A
 
 ### Observations and reuse
 
-One authority observation reads fifteen selected resources in parallel:
+The native control portion reads fifteen selected resources in parallel:
 
 - Four user-assigned identity resources.
 - Five custom role definitions.
 - Six exact role assignments.
 
+Dependency grants add four or six selected role and assignment reads, one or two vault reads, and two execution-only account and container reads.
+The default shared-vault observation contains 20 resources for discovery or 24 for execution.
 The import identity and built-in AcrPull definition remain in the separate placement stage.
 Identity reads use 2024-11-30. Role definitions use 2022-05-01-preview. Assignments use 2022-04-01.
 The shared bounded ARM reader permits these exact GET paths and versions only.
@@ -102,7 +107,7 @@ go test -race ./adapters/execution/azuresandbox -run '^TestSandboxAuthority|^Tes
 
 Five new checks cover canonical permissions, mode separation, changed identities and scopes, role broadening, malformed bindings, cache bounds, and factory composition.
 They verify a stop identity cannot execute commands and an execution controller cannot import images.
-Twelve concurrent callers share one fifteen-resource observation.
+The initial control-only batch shares one fifteen-resource observation across twelve callers. The dependency batch extends the default execution observation to 24 resources.
 Missing metadata, cancellation, closure, and a changed uncached protection result remain explicit failures.
 Affected placement, runtime, shared execution, and command authorization checks also pass.
 Evidence is output/azure-sandbox-authority/summary.json and targeted.log.
@@ -114,7 +119,8 @@ No cloud account, identity endpoint, registry service, role mutation, browser, c
 The [service workload stage](azure-sandbox-service-workloads.md) now verifies reported relay, backend, and controller identity placement and federation absence.
 The [host stage](azure-sandbox-host.md) binds control, registry inspection, and metadata identities to a fixed execution or discovery process.
 Verify effective assignments and exclusions, deny effects, remaining import and timer host attachment, and protected identity administration.
-Complete controller network and dependency admission before native activation.
+Reported controller network, private database, and selected dependency grants now have explicit bindings.
+Complete effective authority and actual dependency access before native activation.
 The network and private stages now check selected rules, routes, endpoint ownership, and complete selected DNS inventories.
 The topology stage now checks selected VNet contents, firewall attachments, and the complete deny-all firewall policy.
 The resolver stage now checks selected policy, actual association, and other reported subscription zone links.

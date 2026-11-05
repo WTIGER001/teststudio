@@ -10,6 +10,7 @@ import (
 )
 
 type HostSettings struct {
+	Access                 HostAccessSettings       `json:"access"`
 	Database               HostDatabaseSettings     `json:"database"`
 	DatabaseHost           string                   `json:"databaseHost"`
 	Network                HostNetworkSettings      `json:"network"`

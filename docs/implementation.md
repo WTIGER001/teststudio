@@ -122,6 +122,29 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: selected controller secret and evidence authority
+
+The existing authority reader now includes startup-secret and execution-evidence grants with selected vault, Blob account, and private container metadata.
+Two secret-only roles target the startup principal at individual database and configuration secrets.
+Execution adds container-scoped Blob read, write, and delete authority for its separate runtime principal. Discovery receives no Blob grant.
+The verifier rejects broader scopes, changed principals, secret writes, account-key access, grant delegation, public Blob access, and shared-key access.
+AuthorityDefinitions now supplies 15 discovery objects or 17 execution objects. No resource or grant is created.
+The existing authority cache retains its 15-second bound. Remaining domain authorization and effective-protection checks stay uncached.
+Three new checks and eleven affected checks pass locally with race detection in 4.191 seconds.
+For one shared vault, the reader observes 20 resources in discovery and 24 in execution. Separate vaults add one resource.
+The central cold discovery composition observes 157 unique selected paths.
+The same fixed profiles drive custom role definitions, scoped assignment objects, and metadata verification.
+The reader copies execution account and runtime-identity pins before observing resources.
+Checks retain secret-value isolation, mode separation, settings immutability, cache expiry, runtime admission fencing, and reader closure.
+Affected checks retain native roles, scoped identities, cache sharing, uncached protection, explicit credentials, mode boundaries, and database admission.
+Evidence is output/azure-sandbox-host-access/summary.json and local.log.
+Checks use local SQLite, fake credentials, and in-memory metadata. Owned readers close through cleanup.
+No cloud service, secret endpoint, Blob operation, database connection, browser, container, UI build, demo restart, resource mutation, or remote push runs.
+The plan and affected operator guides match the behavior. No user page changes.
+Effective authority, remaining import and timer identity attachment, protected writes, native command activation, and deployment packaging stay unfinished.
+See [controller dependency authority](azure-sandbox-host-access.md).
+Acceptance **51** advances. No acceptance item closes. The total remains **48 verified, 9 open**.
+
 ## Current delivery: controller private PostgreSQL network and reported service binding
 
 The runtime now joins a selected PostgreSQL flexible server, controller private endpoint, NIC member, endpoint subnet rules, DNS, and reported approvals.
