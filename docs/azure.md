@@ -240,3 +240,6 @@ The core package creates no route overrides and removes none from the supplied e
 
 The [preparation registry path](azure-preparation-registry.md) now has selected resource and DNS observation through the existing SDKs.
 The core package creates none of those preparation resources and still declares no native Azure preparation workload.
+
+The [assembly-only source mode](source-assembly-handoff.md) now provides a durable queue boundary for a future separate Azure registry writer.
+It supports existing ECS and Kubernetes native registry settings only. Azure preparation placement, identity, configuration, and runtime composition remain unfinished.

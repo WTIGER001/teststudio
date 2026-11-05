@@ -20,6 +20,7 @@ import (
 )
 
 type Service struct {
+	AssemblyOnly       bool
 	Providers          map[string]sourceprovider.Provider
 	Secrets            secrets.Provider
 	BundleRunners      []string

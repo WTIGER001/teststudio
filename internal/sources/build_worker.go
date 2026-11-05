@@ -14,7 +14,13 @@ import (
 func (s *Service) inspectJob(ctx context.Context, job Job, worker string) (preparation.Inspection, error) {
 	var buildLog string
 	var buildTruncated bool
-	if job.Bundle != "" {
+	if job.AssemblyComplete {
+		buildLog, buildTruncated = job.Log, job.LogTruncated
+		if _, err := s.loadBundle(ctx, job); err != nil {
+			return preparation.Inspection{Log: buildLog, LogTruncated: buildTruncated}, err
+		}
+	}
+	if job.Bundle != "" && !job.AssemblyComplete {
 		bundle, err := s.loadBundle(ctx, job)
 		if err != nil {
 			return preparation.Inspection{}, err
@@ -35,6 +41,9 @@ func (s *Service) inspectJob(ctx context.Context, job Job, worker string) (prepa
 		stop()
 		if buildErr != nil || err != nil {
 			return preparation.Inspection{Log: buildLog, LogTruncated: buildTruncated}, errors.Join(buildErr, err)
+		}
+		if s.AssemblyOnly {
+			return preparation.Inspection{Log: buildLog, LogTruncated: buildTruncated}, errAssemblyHandoff
 		}
 	}
 	result, err := s.Inspectors[job.Runner].Inspect(ctx, preparation.InspectionRequest{Image: job.Image, Suite: job.Suite, Reference: *job.Reference})
@@ -61,7 +70,7 @@ func (s *Service) checkpointBuild(ctx context.Context, claimed Job, worker strin
 		if err != nil {
 			return claimed, err
 		}
-		if job.Worker != worker || job.State != "preparing" {
+		if !samePreparationClaim(job, claimed, worker) || job.State != "preparing" {
 			return claimed, storage.ErrConflict
 		}
 		job.Build = &build

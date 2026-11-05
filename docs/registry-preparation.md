@@ -19,6 +19,10 @@ The normal discovery, source review, approval, and publication steps remain requ
 
 See [Registry inspection](registry-inspection.md), [Prepared suites](prepared-suites.md), and [Kubernetes workers](kubernetes-workers.md).
 
+The builder now implements AssemblyBuilder.CompleteAssembly for [separate discovery handoff](source-assembly-handoff.md).
+It releases the exact owned upload journal while preserving immutable source content. Repeated completion is safe.
+This capability lets the source service separate registry writer credentials from its discovery worker.
+
 ## Trusted inputs
 
 Construct the builder with an OCI client, an immutable supervised runtime reference, and a private recovery directory.

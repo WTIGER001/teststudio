@@ -6,6 +6,7 @@ import { PlaywrightEditorComponent } from './playwright-editor.component'
 import { PlaywrightEditorService } from './playwright-editor.service'
 import { BrowserRecorderComponent } from './browser-recorder.component'
 import { PreparationService } from './preparation.service'
+import { preparationStateLabel } from './preparation-label'
 
 @Component({
   selector: 'ts-source-preparation', standalone: true, imports: [DatePipe, ReactiveFormsModule, BundleUploadComponent, PlaywrightEditorComponent, BrowserRecorderComponent], providers: [PreparationService, PlaywrightEditorService], changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,7 +26,7 @@ import { PreparationService } from './preparation.service'
       } @else if (mode() !== 'playwright' && mode() !== 'api' && !service.runners().length) { <p class="notice">Prebuilt image preparation is unavailable on this server.</p> }
       @if (service.selected(); as row) {
         <article class="preparation-detail" aria-labelledby="preparation-detail-title"><h3 id="preparation-detail-title">Preparation details</h3>
-          <dl class="detail-grid"><dt>Identifier</dt><dd>{{ row.id }}</dd><dt>Image</dt><dd>{{ row.data.image || 'Build pending' }}</dd>@if (row.data.sourceName) { <dt>Source ZIP</dt><dd>{{ row.data.sourceName }}</dd><dt>Manifest path</dt><dd>{{ row.data.manifestPath }}</dd><dt>Source digest</dt><dd>{{ row.data.sourceDigest }}</dd> }@if (row.data.build; as build) { <dt>Assembly started</dt><dd>{{ build.startedAt | date:'medium':'UTC' }} UTC</dd><dt>Assembly finished</dt><dd>{{ build.finishedAt | date:'medium':'UTC' }} UTC</dd> }@if (row.data.runtime) { <dt>Runtime</dt><dd>{{ row.data.runtime }}</dd> }@if (row.data.sourceDraftId) { <dt>Editor draft</dt><dd>{{ row.data.sourceDraftId }} · revision {{ row.data.sourceDraftRevision }}</dd> }<dt>State</dt><dd>{{ row.data.state }} · {{ row.data.phase }}</dd><dt>Created</dt><dd>{{ row.data.createdAt | date:'medium':'UTC' }} UTC</dd>@if (row.data.releaseId) { <dt>Published release</dt><dd>{{ row.data.releaseId }}</dd> }</dl>
+          <dl class="detail-grid"><dt>Identifier</dt><dd>{{ row.id }}</dd><dt>Image</dt><dd>{{ row.data.image || 'Build pending' }}</dd>@if (row.data.sourceName) { <dt>Source ZIP</dt><dd>{{ row.data.sourceName }}</dd><dt>Manifest path</dt><dd>{{ row.data.manifestPath }}</dd><dt>Source digest</dt><dd>{{ row.data.sourceDigest }}</dd> }@if (row.data.build; as build) { <dt>Assembly started</dt><dd>{{ build.startedAt | date:'medium':'UTC' }} UTC</dd><dt>Assembly finished</dt><dd>{{ build.finishedAt | date:'medium':'UTC' }} UTC</dd> }@if (row.data.runtime) { <dt>Runtime</dt><dd>{{ row.data.runtime }}</dd> }@if (row.data.sourceDraftId) { <dt>Editor draft</dt><dd>{{ row.data.sourceDraftId }} · revision {{ row.data.sourceDraftRevision }}</dd> }<dt>State</dt><dd>{{ preparationStateLabel(row.data) }}@if (!row.data.assemblyComplete || row.data.state !== 'received') { · {{ row.data.phase }} }</dd><dt>Created</dt><dd>{{ row.data.createdAt | date:'medium':'UTC' }} UTC</dd>@if (row.data.releaseId) { <dt>Published release</dt><dd>{{ row.data.releaseId }}</dd> }</dl>
           @if (row.data.error) { <p class="notice error">{{ row.data.error }}</p> }
           @if (row.data.sourceExpired) { <p class="notice">The original source ZIP has expired. Preparation diagnostics remain available.</p> }
           @if (row.data.cleanupPending) { <p class="notice warning">Resource cleanup is pending. The server retains the reference for recovery.</p> }
@@ -37,17 +38,18 @@ import { PreparationService } from './preparation.service'
             @if (row.data.sourceBundleId && row.data.runner === 'playwright' && !row.data.sourceExpired && row.data.state !== 'expired' && service.sources.workspace.can('sources.manage')) { <button type="button" class="button secondary" [disabled]="editor.busy() || service.sources.draftDirty()" (click)="editor.importPreparation(row.id)">Edit a copy in Playwright</button> }
             @if (service.downloadURL()) { <a class="button secondary" [href]="service.downloadURL()" [download]="row.data.sourceName || 'source.zip'">Save original source ZIP</a> }
           </div>
-          @if (row.data.state === 'received' && row.data.sourceBundleId) { <p role="status" class="muted">Waiting for a preparation worker at {{ row.data.executionLocation }}.</p> }
+          @if (row.data.state === 'received' && row.data.assemblyComplete) { <p role="status" class="muted">Source assembly is complete. Waiting for test discovery at {{ row.data.executionLocation }}. Review is available after discovery.</p> } @else if (row.data.state === 'received' && row.data.sourceBundleId) { <p role="status" class="muted">Waiting for a preparation worker at {{ row.data.executionLocation }}.</p> }
           @if (row.data.log) { <details><summary>Preparation log</summary><pre>{{ row.data.log }}</pre>@if (row.data.logTruncated) { <p class="notice warning">The retained preparation log is truncated.</p> }</details> }
         </article>
       }
-      @if (service.jobs().length) { <div class="table-scroll"><table><caption class="sr-only">Source preparation history</caption><thead><tr><th>Runner and image</th><th>State</th><th>Created</th><th>Action</th></tr></thead><tbody>@for (row of service.jobs(); track row.id) { <tr><td>{{ row.data.runner }}<span class="table-subtitle image-reference">{{ row.data.sourceName || row.data.image }}</span></td><td>{{ row.data.state }}</td><td>{{ row.data.createdAt | date:'medium':'UTC' }} UTC</td><td><button type="button" class="button small secondary" [disabled]="service.busy()" (click)="service.inspect(row.id)" [attr.aria-label]="'Inspect preparation ' + row.id">Inspect</button></td></tr> }</tbody></table></div> }
+      @if (service.jobs().length) { <div class="table-scroll"><table><caption class="sr-only">Source preparation history</caption><thead><tr><th>Runner and image</th><th>State</th><th>Created</th><th>Action</th></tr></thead><tbody>@for (row of service.jobs(); track row.id) { <tr><td>{{ row.data.runner }}<span class="table-subtitle image-reference">{{ row.data.sourceName || row.data.image }}</span></td><td>{{ preparationStateLabel(row.data) }}</td><td>{{ row.data.createdAt | date:'medium':'UTC' }} UTC</td><td><button type="button" class="button small secondary" [disabled]="service.busy()" (click)="service.inspect(row.id)" [attr.aria-label]="'Inspect preparation ' + row.id">Inspect</button></td></tr> }</tbody></table></div> }
       @if (service.cursor()) { <button type="button" class="button secondary" [disabled]="service.busy()" (click)="service.load(true)">More preparations</button> }
     </section>
   `,
   styles: [`fieldset { border: 0; padding: 0; margin: 0; min-width: 0; } .preparation-detail { margin: 1.5rem 0; } .row-actions { margin: 1rem 0; } table { min-width: 42rem; } .image-reference, dd { overflow-wrap: anywhere; } pre { max-height: 22rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }`]
 })
 export class PreparationComponent {
+  readonly preparationStateLabel = preparationStateLabel
   readonly mode = input<'all' | 'playwright' | 'go' | 'api'>('all')
   readonly service = inject(PreparationService)
   readonly editor = inject(PlaywrightEditorService)

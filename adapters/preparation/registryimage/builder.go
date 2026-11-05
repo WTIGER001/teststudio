@@ -106,3 +106,9 @@ func (b *Builder) CleanupBuild(ctx context.Context, ref execution.Reference) err
 	}
 	return parent.RemoveAll(journalName(ref))
 }
+
+func (b *Builder) CompleteAssembly(ctx context.Context, ref execution.Reference) error {
+	return b.CleanupBuild(ctx, ref)
+}
+
+var _ preparation.AssemblyBuilder = (*Builder)(nil)

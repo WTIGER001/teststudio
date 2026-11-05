@@ -226,3 +226,10 @@ The worker scans one recovery page before its normal preparation work, then cont
 An explicit recovery sweep scans all pages. Cleanup preserves the original terminal failure or cancellation.
 An interrupted active preparation becomes failed. Recovery does not inspect, publish, activate, or run tests again.
 Resubmit the same preparation key to read its existing result. Use a new key for an explicit new preparation.
+
+## Waiting for discovery
+
+Some hosted installations use [separate source assembly and discovery](source-assembly-handoff.md).
+Waiting for discovery means the image is assembled and queued. It is not ready for catalog review or approval.
+Cancel preparation to withdraw it while waiting. Discovery checks current access and source expiry before starting.
+Review and publication still follow successful discovery.

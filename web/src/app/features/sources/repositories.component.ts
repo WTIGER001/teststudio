@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { ReactiveFormsModule } from '@angular/forms'
 import { RepositoryEditorComponent } from './repository-editor.component'
 import { RepositoriesService } from './repositories.service'
+import { preparationStateLabel } from './preparation-label'
 
 @Component({
   selector: 'ts-repository-sources', standalone: true, imports: [DatePipe, ReactiveFormsModule, RepositoryEditorComponent], providers: [RepositoriesService], changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,7 +21,7 @@ import { RepositoriesService } from './repositories.service'
           @if (service.sync(); as sync) { <h4>Sync details</h4><dl class="detail-grid"><dt>Identifier</dt><dd>{{ sync.id }}</dd><dt>State</dt><dd>{{ sync.data.state }}</dd><dt>Trigger</dt><dd>{{ sync.data.trigger || 'manual' }}</dd>@if (sync.data.revision) { <dt>Resolved commit</dt><dd class="commit">{{ sync.data.revision.commit }}</dd> }</dl>@if (sync.data.error) { <p class="notice error">{{ sync.data.error }}</p> }<button type="button" class="button secondary" [disabled]="service.busy()" (click)="service.refreshSync()">Refresh sync</button>
             @for (prepared of service.preparations(); track prepared.suite) { <div class="preparation-row"><span>{{ prepared.suite }}</span><button type="button" class="button small secondary" [disabled]="service.busy()" (click)="service.inspectPreparation(prepared.suite, prepared.id)">Inspect suite preparation</button></div> }
           }
-          @if (service.prepared(); as job) { <h4>Suite preparation</h4><p role="status">{{ job.data.suiteId }} · {{ job.data.state }} · {{ job.data.phase }}</p><button type="button" class="button secondary" [disabled]="service.busy() || service.preparationLoading()" (click)="service.refreshPreparation()">Refresh repository preparation</button>@if (service.preparationLoading()) { <p class="small muted" role="status">Refreshing preparation…</p> }@if (job.data.error) { <p class="notice warning">{{ job.data.error }}</p> }@if (job.data.log) { <details><summary>Repository preparation log</summary><pre>{{ job.data.log }}</pre></details> }@if (job.data.uploadId) { <button type="button" class="button primary" (click)="service.reviewPreparation()">Review repository preparation</button> } }
+          @if (service.prepared(); as job) { <h4>Suite preparation</h4><p role="status">{{ job.data.suiteId }} · {{ preparationStateLabel(job.data) }}@if (!job.data.assemblyComplete || job.data.state !== 'received') { · {{ job.data.phase }} }</p><button type="button" class="button secondary" [disabled]="service.busy() || service.preparationLoading()" (click)="service.refreshPreparation()">Refresh repository preparation</button>@if (service.preparationLoading()) { <p class="small muted" role="status">Refreshing preparation…</p> }@if (job.data.error) { <p class="notice warning">{{ job.data.error }}</p> }@if (job.data.log) { <details><summary>Repository preparation log</summary><pre>{{ job.data.log }}</pre></details> }@if (job.data.uploadId) { <button type="button" class="button primary" (click)="service.reviewPreparation()">Review repository preparation</button> } }
           @if (service.history().length) { <h4>Sync history</h4><div class="table-scroll"><table><caption class="sr-only">Repository synchronization history</caption><thead><tr><th>Created</th><th>State</th><th>Commit</th><th>Action</th></tr></thead><tbody>@for (sync of service.history(); track sync.id) { <tr><td>{{ sync.data.createdAt | date:'medium':'UTC' }} UTC</td><td>{{ sync.data.state }}</td><td class="commit">{{ sync.data.revision?.commit || 'Not resolved' }}</td><td><button type="button" class="button small secondary" [disabled]="service.busy()" (click)="service.inspectSync(sync)">Inspect sync</button></td></tr> }</tbody></table></div> }
           @if (service.syncCursor()) { <button type="button" class="button secondary" [disabled]="service.historyLoading()" (click)="service.loadHistory(true)">More sync history</button> }
         </article>
@@ -30,4 +31,6 @@ import { RepositoriesService } from './repositories.service'
   `,
   styles: [`.section-top { flex-wrap: wrap; } .section-top > .row-actions { flex-wrap: wrap; min-width: 0; } fieldset { border: 0; padding: 0; margin: 1rem 0; min-width: 0; } table { min-width: 42rem; } .commit, dd { overflow-wrap: anywhere; } .commit { font-family: ui-monospace, monospace; font-size: 11px; max-width: 22rem; } .repository-detail { margin-top: 1.5rem; } .preparation-row { display: flex; align-items: center; gap: 1rem; margin: .75rem 0; flex-wrap: wrap; } pre { max-height: 18rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; }`]
 })
-export class RepositoriesComponent { readonly service = inject(RepositoriesService) }
+export class RepositoriesComponent {
+  readonly preparationStateLabel = preparationStateLabel
+  readonly service = inject(RepositoriesService) }

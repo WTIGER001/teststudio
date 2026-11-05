@@ -107,3 +107,9 @@ Four targeted local race checks pass after the final trusted-controller source-p
 They cover settings ownership, caller mutation, live selected metadata, CIDR containment, subnet representations, fixed policy, DNS, SDK restrictions, and uncertainty.
 Earlier review repeats only changed branches; the final semantic policy change receives the four-check selection. No existing or broad suite repeats.
 Local checks use fake credentials and in-memory SDK transports, with no provider request, listener, registry publication, or deployment.
+
+## Assembly queue foundation
+
+The source service now supports [durable assembly-only handoff](source-assembly-handoff.md), with discovery deferred to a compatible worker.
+This separates confirmed source publication from execution-control authority without skipping discovery or approval.
+The current native mode supports existing ECS and Kubernetes registry settings. Azure configuration and placement remain unfinished.

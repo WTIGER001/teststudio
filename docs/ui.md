@@ -346,3 +346,9 @@ Advanced identity options contains the permanent identifier.
 Advanced filters and delivery options contains scope filters and automatic attempts.
 The final review keeps enable controls and their future execution or delivery consequences visible.
 These flows reuse the existing services, permissions, conflict handling, preview, and save contracts.
+
+### Source preparation handoff
+
+A source job that completes assembly can wait for a separate discovery worker.
+Display Waiting for discovery in preparation history, details, and repository status. Explain that review follows discovery.
+Keep cancellation and retained-source access available through their existing permission checks. Assembly metadata must not imply artifact approval or a test run.

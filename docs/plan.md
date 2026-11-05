@@ -515,7 +515,29 @@ The source queue also requires isolated discovery. These read-only checks do not
 Actual preparation workload placement, effective DNS and egress, separate writer identity grants, protection-management authority, and native wiring remain required.
 See [trusted preparation registry path](azure-preparation-registry.md). Acceptance 51 advances; the total remains 48 verified, nine open.
 
-Next bind actual preparation workload placement and its effective network path and writer identity, alongside remaining protection authority, identity consumers, and complete native admission.
+The preparation service now supports an optional assembly-only role and a durable handoff to the normal discovery queue.
+The writer publishes a validated immutable image, releases its owned journal without deleting content, and commits the handoff, lease removal, and audit atomically.
+Assembly and discovery retain separate references. Claim checks now bind the exact reference as well as worker identity.
+The API can discover the handed image and complete review, approval, publication, and owned discovery cleanup without a builder or registry writer.
+Assembly-only workers run no discovery. Compatible discovery workers recheck retained source, expiry, current access, and normal artifact provenance.
+Confirmed interrupted assembly resumes only its handoff; concurrent writers and repeated recovery create no duplicate build or discovery index.
+Waiting cancellation, expiry, revocation, and cancellation during handoff block dispatch. Old jobs and the default combined workflow remain compatible.
+
+The native preparation command adds --assembly-only for existing ECS and Kubernetes registry settings and rejects local mode before creating state.
+Azure settings remain unwired. This establishes a queue boundary for a future trusted Azure writer without enabling native coded execution.
+OpenAPI 0.34 and generated client types include the two optional assembly fields.
+Preparation and repository views show Waiting for discovery; page help explains when review becomes available.
+
+Six new behavior checks, eight targeted existing source regressions, generated-contract synchronization, and the Angular production build pass locally.
+The first source selection exposes missing expiry validation after queue handoff. Retained source now revalidates before discovery, including before retention sweeping.
+Only the four new source checks repeat after that fix, passing in 4.914 seconds. Registry preservation passes for both runners in 1.426 seconds; native rejection passes in 1.410 seconds.
+Contract synchronization passes in 0.269 seconds. The final UI build passes in 2.830 seconds and reuses the private viewer.
+A premature UI build after a script path error and a later one-line component formatting error are corrected before the final build; neither is used as final UI evidence.
+No existing browser workflow repeats: the UI changes only label the new state and add help, with no new controls or layout. Existing keyboard, theme, and narrow-layout evidence is retained.
+No cloud operation, image build, container, registry push, deployment, browser, or demo restart runs. Local TLS fixture servers close through test teardown.
+See [separate source assembly and discovery](source-assembly-handoff.md). Acceptance 51 advances; the total remains 48 verified, nine open.
+
+Next compose Azure assembly-only settings, observed private networking, explicit writer identity, and workload placement. Keep complete Azure discovery and coded execution admission separate until implemented.
 Reported app and job checks do not establish exclusive use across all Azure resources or subscriptions.
 Keep hosted read coverage, complete effective authorization, and cross-scope visibility separate until authoritative deployment evidence exists.
 Wire the bound session into native commands only after complete admission exists.

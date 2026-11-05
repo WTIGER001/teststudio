@@ -39,7 +39,7 @@ type bundleIndex struct {
 func bundleBucket(project string) string      { return "source-bundles/" + project }
 func buildQueueBucket(location string) string { return "preparation-build-queue/" + location }
 func jobQueue(job Job) string {
-	if job.Bundle != "" {
+	if job.Bundle != "" && !job.AssemblyComplete {
 		return buildQueueBucket(job.Location)
 	}
 	return queueBucket(job.Location)

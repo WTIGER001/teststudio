@@ -32,3 +32,8 @@ type ArtifactBuilder interface {
 func LocalSourceProfile(runner, profile string) bool {
 	return runner == "go" && (profile == "go-module" || profile == "go-environment") || runner == "playwright" && (profile == "playwright-node" || profile == "playwright-environment")
 }
+
+type AssemblyBuilder interface {
+	ArtifactBuilder
+	CompleteAssembly(context.Context, execution.Reference) error
+}

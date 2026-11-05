@@ -42,6 +42,7 @@ func run() error {
 	ecsEnv := flag.String("ecs-workers-env", "", "Environment variable containing private ECS preparation settings")
 	kubernetesConfig := flag.String("kubernetes-workers-config", "", "Private Kubernetes and registry preparation settings")
 	kubernetesEnv := flag.String("kubernetes-workers-env", "", "Environment variable containing private Kubernetes preparation settings")
+	assemblyOnly := flag.Bool("assembly-only", false, "Publish registry source bundles and queue isolated discovery without running it in this process")
 	registryGo := flag.String("registry-go-runtime", "", "Trusted supervised Go runtime distribution digest")
 	registryPlaywright := flag.String("registry-playwright-runtime", "", "Trusted supervised Playwright runtime distribution digest")
 	location := flag.String("execution-location", "local", "Preparation queue location")
@@ -71,6 +72,9 @@ func run() error {
 	}
 	if kubernetesSettings != nil && (*location != "kubernetes" || *runtime != "" || *browserRuntime != "") || kubernetesSettings == nil && ecsSettings == nil && (*registryGo != "" || *registryPlaywright != "") {
 		return errors.New("hosted preparation requires Kubernetes settings or ECS settings and the matching location without local source runtime flags")
+	}
+	if *assemblyOnly && ecsSettings == nil && kubernetesSettings == nil {
+		return errors.New("assembly-only preparation requires hosted registry settings; local image cleanup cannot preserve its artifact for handoff")
 	}
 	if err := runtimeconfig.RequirePostgres(connection, *requirePostgres || kubernetesSettings != nil || ecsSettings != nil); err != nil {
 		return err
@@ -112,7 +116,7 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	service := &sources.Service{Store: store, Auth: auth, Location: *location, Inspectors: map[string]preparation.ArtifactInspector{}, RecoveryInspectors: map[string]preparation.ArtifactInspector{}, Builders: map[string]preparation.ArtifactBuilder{}, RecoveryBuilders: map[string]preparation.ArtifactBuilder{}}
+	service := &sources.Service{AssemblyOnly: *assemblyOnly, Store: store, Auth: auth, Location: *location, Inspectors: map[string]preparation.ArtifactInspector{}, RecoveryInspectors: map[string]preparation.ArtifactInspector{}, Builders: map[string]preparation.ArtifactBuilder{}, RecoveryBuilders: map[string]preparation.ArtifactBuilder{}}
 	if ecsSettings != nil {
 		runtime, err := ecsSettings.Open(ctx, store, service.AuthorizeDiscoveryCleanup)
 		if err != nil {

@@ -8,10 +8,8 @@ import (
 
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/domain"
-	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/preparation"
 	"github.com/wtiger001/teststudio/internal/storage"
-	"github.com/wtiger001/teststudio/internal/workerstate"
 )
 
 func (s *Service) StartPreparation(ctx context.Context) <-chan struct{} {
@@ -74,6 +72,13 @@ func (s *Service) ProcessBuildNext(ctx context.Context, worker string) (bool, er
 	if len(s.Builders) == 0 {
 		return false, nil
 	}
+	if s.AssemblyOnly {
+		for _, builder := range s.Builders {
+			if _, ok := builder.(preparation.AssemblyBuilder); !ok {
+				return false, errAssemblyBuilder
+			}
+		}
+	}
 	return s.processQueue(ctx, worker, buildQueueBucket(s.Location))
 }
 
@@ -105,8 +110,15 @@ func (s *Service) processQueue(ctx context.Context, worker, bucket string) (bool
 			cancel()
 			<-heartbeatDone
 			finishContext, stop := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
-			err = s.finishPreparation(finishContext, job, worker, result, inspectErr)
-			stop()
+			defer stop()
+			if errors.Is(inspectErr, errAssemblyHandoff) {
+				err = s.completeAssembly(finishContext, job, worker)
+				if err != nil {
+					err = s.failPreparation(finishContext, job, worker, result, err)
+				}
+			} else {
+				err = s.finishPreparation(finishContext, job, worker, result, inspectErr)
+			}
 			return true, err
 		}
 		if page.Cursor == "" {
@@ -114,84 +126,6 @@ func (s *Service) processQueue(ctx context.Context, worker, bucket string) (bool
 		}
 		cursor = page.Cursor
 	}
-}
-
-func (s *Service) claimPreparation(ctx context.Context, index storage.Record, worker string) (job Job, claimed bool, resultErr error) {
-	item, err := storage.Decode[jobIndex](index)
-	if err != nil {
-		return job, false, err
-	}
-	installation, err := (workerstate.Ledger{Store: s.Store}).Installation(ctx, true)
-	if err != nil {
-		return job, false, err
-	}
-	resultErr = s.Auth.WithAssignmentTransaction(ctx, func(auth *authorization.Service) error {
-		store := auth.Directory.Store
-		row, err := store.Get(ctx, JobBucket(index.Project, item.Suite), item.Job)
-		if err != nil {
-			return err
-		}
-		job, err = storage.Decode[Job](row)
-		if err != nil {
-			return err
-		}
-		if job.State != "received" {
-			return store.Commit(ctx, storage.Change{Record: index, Delete: true})
-		}
-		if job.Bundle != "" && s.Builders[job.Runner] == nil {
-			return nil
-		}
-		driver := s.Inspectors[job.Runner]
-		denied := false
-		bound := &Service{Store: store, Auth: auth}
-		for _, permission := range []string{"sources.manage", "catalog.read", "catalog.import"} {
-			err := bound.Auth.Check(ctx, job.Actor, job.Project, "suite/"+job.Suite, permission)
-			if errors.Is(err, authorization.ErrForbidden) || errors.Is(err, storage.ErrNotFound) {
-				denied = true
-				break
-			}
-			if err != nil {
-				return err
-			}
-		}
-		if err := bound.checkRepositoryJob(ctx, job, false); err != nil {
-			denied = true
-		}
-		now := time.Now().UTC()
-		job.StartedAt = &now
-		changes := []storage.Change{{Record: index, Delete: true}}
-		if driver == nil || (job.Bundle != "" && s.Builders[job.Runner] == nil) || job.CancelRequested || denied {
-			job.State, job.Phase = "failed", "finished"
-			job.Error = "Preparation runner is no longer enabled."
-			if denied {
-				job.Error = "Current access no longer permits source preparation."
-			}
-			if job.CancelRequested {
-				job.State, job.Error = "cancelled", ""
-			}
-			job.FinishedAt = &now
-		} else {
-			ref := driver.Reference(execution.Reference{ID: domain.NewID(), Run: job.ID, Installation: "preparation-" + installation, Project: job.Project, Test: "catalog", Attempt: 1, Worker: worker})
-			deadline := now.Add(30 * time.Second)
-			job.Reference, job.Worker, job.LeaseUntil = &ref, worker, &deadline
-			job.State, job.Phase = "discovering", "discovering"
-			if job.Bundle != "" {
-				job.State, job.Phase = "preparing", "preparing"
-			}
-			lease, err := storage.Put(leaseBucket(job.Location), job.ID, job.Project, 0, jobIndex{Job: job.ID, Suite: job.Suite, Location: job.Location})
-			if err != nil {
-				return err
-			}
-			changes = append(changes, lease)
-			claimed = true
-		}
-		saved, err := storage.Put(row.Bucket, row.ID, row.Project, row.Revision, job)
-		if err != nil {
-			return err
-		}
-		return store.Commit(ctx, append(changes, saved)...)
-	})
-	return job, claimed && resultErr == nil, resultErr
 }
 
 func (s *Service) preparationHeartbeat(ctx context.Context, cancel context.CancelFunc, claimed Job, worker string) {
@@ -208,7 +142,7 @@ func (s *Service) preparationHeartbeat(ctx context.Context, cancel context.Cance
 				return
 			}
 			job, err := storage.Decode[Job](row)
-			if err != nil || job.Worker != worker || job.CancelRequested || !activeJob(job.State) {
+			if err != nil || !samePreparationClaim(job, claimed, worker) || job.CancelRequested || !activeJob(job.State) {
 				cancel()
 				return
 			}
@@ -249,7 +183,7 @@ func (s *Service) finishPreparation(ctx context.Context, claimed Job, worker str
 		if err != nil {
 			return err
 		}
-		if job.Worker != worker || job.State != "discovering" {
+		if !samePreparationClaim(job, claimed, worker) || job.State != "discovering" {
 			return storage.ErrConflict
 		}
 		if job.CancelRequested {
@@ -277,7 +211,7 @@ func (s *Service) finishPreparation(ctx context.Context, claimed Job, worker str
 		if err != nil {
 			return err
 		}
-		if job.State == "failed" && job.Bundle != "" || s.deferredInspection(job) {
+		if job.State == "failed" && requiresBuildCleanup(job) || s.deferredInspection(job) {
 			job.CleanupPending = true
 			retry := now.Add(5 * time.Second)
 			job.LeaseUntil = &retry
@@ -314,7 +248,7 @@ func (s *Service) failPreparation(ctx context.Context, claimed Job, worker strin
 		if err != nil {
 			return err
 		}
-		if job.Worker != worker || !activeJob(job.State) {
+		if !samePreparationClaim(job, claimed, worker) || !activeJob(job.State) {
 			return storage.ErrConflict
 		}
 		now := time.Now().UTC()
@@ -325,7 +259,7 @@ func (s *Service) failPreparation(ctx context.Context, claimed Job, worker strin
 		if job.CancelRequested {
 			job.State, job.Error = "cancelled", ""
 		}
-		job.CleanupPending = errors.Is(failure, preparation.ErrCleanupIncomplete) || job.Bundle != "" || s.deferredInspection(job)
+		job.CleanupPending = errors.Is(failure, preparation.ErrCleanupIncomplete) || requiresBuildCleanup(job) || s.deferredInspection(job)
 		changes := []storage.Change{}
 		if job.CleanupPending {
 			lease := now.Add(5 * time.Second)

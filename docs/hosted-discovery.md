@@ -76,6 +76,13 @@ Keep the worker running with the same database, provider settings, credentials, 
 The API retains discovery recovery even when new prebuilt discovery is disabled.
 For repository synchronization, use the existing [repository settings](repository-sources.md) and enable the corresponding provider on the preparation process.
 
+## Optional assembly-only preparation
+
+The preparation command can select [assembly-only handoff](source-assembly-handoff.md) with --assembly-only.
+It publishes registry source bundles and atomically queues discovery for the API's compatible hosted inspector.
+The API needs no source builder or upload journal to complete that queued discovery.
+Current source, access, review, and approval checks remain required. The default combined flow remains supported.
+
 ## Queue, review, and approval
 
 1. A tester stages a supported ZIP or pinned repository snapshot through the existing source workflow.
@@ -104,7 +111,8 @@ The cleanup guard uses the exact preparation reference instead of a fabricated t
 
 Ready reviews can show cleanup pending while their source remains available for review.
 Cleanup stops owned work, confirms termination, deletes with provider ownership preconditions, and then removes the exchange and upload journals.
-Recovery claims expired leases and performs cleanup only. It never repeats discovery or dispatches another worker.
+Discovery recovery claims expired leases and performs cleanup only. It never repeats discovery or dispatches another worker.
+A confirmed assembly-only checkpoint can instead complete its durable queue handoff. This starts no discovery and repeats no registry publication.
 An interrupted active preparation becomes failed after cleanup. The tester starts any replacement explicitly.
 Uncertain provider termination or upload cleanup retains a pending record for another reconciliation attempt.
 Published manifests and source blobs remain available for retained releases. Preparation cleanup does not delete them.

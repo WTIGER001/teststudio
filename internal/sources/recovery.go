@@ -52,7 +52,7 @@ func (s *Service) recoverPreparationPage(ctx context.Context, worker, cursor str
 			if driver == nil {
 				driver = s.RecoveryInspectors[job.Runner]
 			}
-			if driver == nil || job.Reference == nil || (job.Bundle != "" && s.Builders[job.Runner] == nil && s.RecoveryBuilders[job.Runner] == nil) {
+			if driver == nil && !assemblyJob(job) || job.Reference == nil || requiresBuildCleanup(job) && s.Builders[job.Runner] == nil && s.RecoveryBuilders[job.Runner] == nil {
 				return nil
 			}
 			lease := time.Now().UTC().Add(30 * time.Second)
@@ -77,13 +77,28 @@ func (s *Service) recoverPreparationPage(ctx context.Context, worker, cursor str
 		if !recovered {
 			continue
 		}
+		if claimed.State == "discovering" && confirmedAssembly(claimed) && !claimed.CancelRequested {
+			handoffContext, stop := context.WithTimeout(ctx, 15*time.Second)
+			handoffErr := s.completeAssembly(handoffContext, claimed, worker)
+			if handoffErr != nil {
+				handoffErr = s.failPreparation(handoffContext, claimed, worker, preparation.Inspection{Log: claimed.Log, LogTruncated: claimed.LogTruncated}, handoffErr)
+			}
+			stop()
+			if handoffErr != nil && !errors.Is(handoffErr, storage.ErrConflict) {
+				return "", handoffErr
+			}
+			continue
+		}
 		driver := s.Inspectors[claimed.Runner]
 		if driver == nil {
 			driver = s.RecoveryInspectors[claimed.Runner]
 		}
 		cleanupContext, cancel := context.WithTimeout(ctx, 15*time.Second)
-		cleanupErr := driver.CleanupInspection(cleanupContext, preparation.InspectionRequest{Image: claimed.Image, Suite: claimed.Suite, Reference: *claimed.Reference})
-		if claimed.Bundle != "" {
+		var cleanupErr error
+		if !assemblyJob(claimed) {
+			cleanupErr = driver.CleanupInspection(cleanupContext, preparation.InspectionRequest{Image: claimed.Image, Suite: claimed.Suite, Reference: *claimed.Reference})
+		}
+		if requiresBuildCleanup(claimed) {
 			builder := s.Builders[claimed.Runner]
 			if builder == nil {
 				builder = s.RecoveryBuilders[claimed.Runner]
