@@ -43,6 +43,21 @@ Public clients can omit secretRef or use an empty string.
 Local password sign-in remains optional through localAccounts. Initial OIDC administration can create and manage those accounts afterward.
 See [Identity providers](providers.md) and [Access](access.md) for managed sessions and authorization.
 
+### Private certificate authorities
+
+Set oidc.caSecret to an existing namespace Secret containing ca.crt when providers use a private certificate authority.
+The service trusts those authorities only for OIDC connections. Normal certificate and hostname validation remain enabled.
+This setting does not change browser trust or native HTTPS probes.
+
+Set httpTrust.existingSecret to an existing namespace Secret for project-scoped native HTTPS trust.
+Include bindings.json and the certificate files referenced by those bindings.
+The chart mounts that Secret at /etc/teststudio-http-trust and supplies --http-trust-bundles.
+Each binding's absolute caFile must point to its certificate file under that directory.
+Each binding names one project and exact HTTPS origin. Private environments still require the normal explicit permissions.
+See [HTTP checks](http-checks.md) for the binding contract and timing fingerprint behavior.
+
+Both settings default to empty. Restart the service after replacing mounted trust files.
+
 origins.ui and origins.artifacts contain different HTTPS hosts without paths, credentials, query strings, or custom ports.
 The Ingress routes the UI/API host to the API Service and the evidence host to the artifact Service.
 Their target ports remain 8040 and 8041. Each host selects its declared TLS Secret.
@@ -96,7 +111,8 @@ The chart contains no example projects, copied test suites, or imported history.
 
 A dedicated [local k3s cluster](local-kubernetes.md) now has a Ready node and verified host-client connectivity.
 The actual TestStudio chart installation passes with fresh PostgreSQL storage and TLS ingress.
-Authenticated application scenarios and isolated workers are next. Azure implementation remains deferred.
+A new HTTPS probe now passes through normal OIDC sign-in, publication, execution, timing, logs, and private artifact download.
+Actual isolated workers remain next. Azure implementation remains deferred.
 
 ## Local packaging checks
 

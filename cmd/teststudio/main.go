@@ -99,6 +99,7 @@ func run() error {
 	recoverLocal := flag.Bool("recover-local-admin", false, "Reenable the loopback local administrator and invalidate its earlier sessions; requires --local")
 	providers := flag.String("oidc-config", "", "Initial JSON provider configuration file")
 	providersEnvironment := flag.String("oidc-config-env", "", "Environment variable containing initial OIDC provider JSON settings")
+	oidcCAFile := flag.String("oidc-ca-file", "", "Mounted PEM certificate authorities trusted only for OIDC provider connections")
 	oidcSecretRefs := flag.String("oidc-secret-refs", "", "Comma-separated server credential references approved for OIDC provider configuration")
 	bootstrapIssuer := flag.String("bootstrap-issuer", "", "OIDC issuer for the initial installation administrator")
 	bootstrapSubject := flag.String("bootstrap-subject", "", "Exact OIDC subject for the initial installation administrator")
@@ -116,7 +117,7 @@ func run() error {
 	if !role.Worker && (*workerOrigin != "" || *workerCertificate != "" || *workerKey != "") {
 		return errors.New("direct worker TLS settings require the worker service role")
 	}
-	if !role.API && !role.Worker && !role.Controller && (*workerAddr != "" || *local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *preparedSources || *sourceBundles || *githubSources || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
+	if !role.API && !role.Worker && !role.Controller && (*workerAddr != "" || *local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *oidcCAFile != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *preparedSources || *sourceBundles || *githubSources || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
 		return errors.New("the artifact service role cannot configure identity bootstrap, sign-in, source preparation, recording, execution, or private worker transport")
 	}
 	if !role.API && !role.Worker && !role.Controller && (*kubernetesConfiguration != "" || *kubernetesEnvironment != "" || *ecsConfiguration != "" || *ecsEnvironment != "") {
@@ -200,6 +201,10 @@ func run() error {
 		if err != nil || (host != "localhost" && (ip == nil || !ip.IsLoopback())) {
 			return errors.New("local authentication requires a loopback listen address")
 		}
+	}
+	oidcClient, err := authoidc.TLSClient(*oidcCAFile)
+	if err != nil {
+		return err
 	}
 	initialProviders, err := authoidc.InitialProviders(*providers, *providersEnvironment, os.LookupEnv)
 	if err != nil {
@@ -300,7 +305,7 @@ func run() error {
 		}
 	}
 	sessionService := &sessions.Service{LocalAccounts: *localAccounts, Store: db, Directory: directory, Origin: *public, Secure: parsed.Scheme == "https"}
-	oidc := &authoidc.Service{Store: db, Directory: directory, Sessions: sessionService, Origin: *public, SecretRefs: approvedOIDCSecrets}
+	oidc := &authoidc.Service{Store: db, Directory: directory, Sessions: sessionService, Origin: *public, SecretRefs: approvedOIDCSecrets, Client: oidcClient}
 	catalogService := &catalog.Service{Store: db, Auth: auth}
 	runService := &runs.Service{Store: db, Auth: auth, Catalog: catalogService, Evidence: evidenceService, HTTP: &execution.HTTP{Trust: httpTrust}, Location: *location}
 	workerExchange := &workerexchange.Service{Store: db, Blobs: blobs, Authorize: runService.AuthorizeWorkerAttempt}

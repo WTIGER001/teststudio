@@ -47,6 +47,20 @@ Removing a reference prevents new sign-in that needs it. Review affected provide
 A disabled existing provider can retain its previous unavailable reference for inspection and repair.
 Enabling requires an approved reference or no client secret.
 
+## Private provider certificate authorities
+
+Use --oidc-ca-file for a private provider's mounted PEM certificate authorities.
+The service adds those authorities to system trust only for OIDC discovery, token exchange, keys, and provider logout discovery.
+Certificate hostname, lifetime, and chain validation remain enabled. The minimum protocol is TLS 1.2.
+The file must contain only valid certificate authorities within 64 KiB. Invalid configuration blocks startup without exposing file contents or paths.
+The service loads the file at startup. Restart the service after certificate changes.
+This setting does not configure browser trust or native HTTPS probe trust.
+Configure probe authorities separately by project and exact origin in [HTTP checks](http-checks.md).
+
+The Kubernetes chart accepts oidc.caSecret as an existing namespace Secret containing ca.crt.
+The chart mounts that certificate file read-only and supplies --oidc-ca-file.
+The chart creates no certificate or credential value. See [Kubernetes](kubernetes.md).
+
 ## Provider-owned groups
 
 Open a saved provider and use Create a provider group.

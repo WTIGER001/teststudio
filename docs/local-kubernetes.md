@@ -28,15 +28,27 @@ The selected cluster API uses loopback only. Its ingress maps to loopback port 1
 No user kubeconfig is merged or selected. Every cluster command must use the private kubeconfig or dedicated Docker socket.
 The official [k3d release](https://github.com/k3d-io/k3d/releases/tag/v5.9.0) supplies the verified tool and its release checksums.
 
-TestStudio is installed through the actual Helm chart in namespace teststudio-local, release teststudio, revision 1.
+TestStudio is installed through the actual Helm chart in namespace teststudio-local, release teststudio, revision 2.
 The service and fresh PostgreSQL Pods are Ready. Separate database and evidence claims are Bound with 2 GiB each.
 The service uses the locally imported immutable ARM64 manifest. No registry push or cloud account is required.
 The UI, API health, and artifact health return 200 through TLS ingress with certificate verification.
 Anonymous access to the projects API returns 401.
 The first service start precedes database readiness. Kubernetes restarts it once, and the next start succeeds.
 
-The configured local OIDC issuer is reserved test metadata. It does not yet provide working sign-in.
-Authenticated execution, coded workers, cancellation, deadlines, evidence retention, and recovery remain unverified on this cluster.
+The local OIDC issuer now runs as a new independent Go fixture in tests/kubernetes/fixture.
+The same fixture supplies a separate HTTPS probe target. It contains no copied application tests or data.
+Normal code flow, PKCE, signed identity verification, and the managed application session pass through actual TLS ingress.
+The service trusts the private OIDC authority through oidc.caSecret.
+Native HTTPS trust uses a separate httpTrust.existingSecret with an exact project and origin binding.
+
+Run 20261105T135704.336870446-2120fdc092213d2c32b6024c completes successfully with one logical HTTPS probe and complete evidence.
+Project, application, environment, suite, test, release, and run creation use the normal authorized API.
+The probe records HTTP 200, a 2.293329 ms duration, a 1.418414 ms TLS handshake, and certificate expiry.
+Four events, one attempt, four logs, and four artifacts remain available. A private download passes its SHA-256 check.
+The service Pod is then replaced. A fresh sign-in reads the same run and downloads its retained evidence without rerunning the test.
+
+Coded workers, cancellation, deadlines, and worker recovery remain unverified on this cluster.
+The single-Pod restart does not establish replica failover or cross-provider parity.
 The 57-item ledger remains at 48 verified and nine open items.
 
 ### Evidence and ownership
@@ -45,12 +57,20 @@ Local ownership and tool metadata are in .data/local-k3s/ownership.json and tool
 Cluster evidence is in output/local-k3s/cluster-summary.json, nodes.json, system-pods.json, helm-connectivity.json, and cluster-create.log.
 Installation evidence includes helm-install.log, installation-checks.json, pods.json, deployments.json, pvc.json, ingress.json, and networkpolicy.json.
 Current service output is service.log. The initial database startup race is recorded in service-previous.log.
+The successful probe records and summary are in output/local-k3s/probe.
+The service replacement records are before-evidence-restart.json, after-evidence-restart.json, and evidence-restart-summary.json.
 The private kubeconfig contains credentials. Do not commit, print, or copy it into application settings.
 Private dependency settings and TLS keys remain under .data/local-k3s with restricted file permissions.
 The local PostgreSQL connection uses cluster-internal plaintext transport for this dedicated development cluster.
 It uses a namespace Secret and a policy that permits ingress only from the TestStudio service Pods.
 This local arrangement does not verify hosted database TLS or backup requirements.
 The cluster and VM remain available for authenticated application verification.
+
+The test-only identity provider automatically approves one fixed integration subject.
+Its image and ingress belong only to this dedicated local cluster. Do not use this fixture as a production identity provider.
+The fixture uses an immutable imported ARM64 image. TLS private keys remain outside the repository.
+The owned coredns-custom ConfigMap maps identity.teststudio.test and probe.teststudio.test to the fixture Service inside this cluster.
+These records do not change host DNS or another cluster.
 
 The initial k3d export reports port zero after creation with an ephemeral API port.
 The verified private kubeconfig uses the actual Docker port mapping, observed from the owned server load balancer.
@@ -82,9 +102,35 @@ The development certificate is .data/local-k3s/tls/server.crt. It is not install
 Host checks map HTTPS port 443 to loopback port 18443 with curl --connect-to and use --cacert for certificate verification.
 These reserved names do not have host DNS configuration. The existing demo remains at http://127.0.0.1:8040.
 
-The next application step supplies a working local identity provider and authenticates through the normal sign-in flow.
-Do not bypass sessions or insert test projects and run records directly into the database.
-Then create and run one new HTTPS probe through the installed application.
+The authenticated verifier uses only the declared local installation and loopback ingress:
+
+```sh
+python3 scripts/verify-kubernetes-probe.py
+```
+
+It follows normal OIDC redirects, retains cookies only in memory, and revokes its owned session after verification.
+The first invocation authors the independent probe through the API and saves its run identifier.
+Later invocations use output/local-k3s/probe/run-reference.json to inspect that same run instead of executing another test.
+If authoring fails before that checkpoint, inspect the saved project before another submission.
+The verifier does not bypass sessions or insert project, catalog, or run records into the database.
+It does not launch a browser or contact a cloud service.
+
+Build the test-only fixture with an executable binary when recreating this local setup:
+
+```sh
+CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath -ldflags='-s -w' \
+  -o .data/local-k3s/teststudio-kubernetes-fixture ./tests/kubernetes/fixture
+install -m 755 .data/local-k3s/teststudio-kubernetes-fixture .data/local-k3s/fixture-build/fixture
+docker build --platform linux/arm64 -f tests/kubernetes/fixture/Dockerfile \
+  -t teststudio/local-kubernetes-fixture:arm64-local .data/local-k3s/fixture-build
+```
+
+The current private fixture manifest is .data/local-k3s/fixture.private.json.
+It retains Secret-backed TLS, separate OIDC and probe trust, an internal Service, TLS ingress, and restricted ingress peers.
+Import the fixture into the owned cluster and select its observed containerd manifest digest before starting its Pod.
+Do not change the default Docker context or reuse another application's records.
+
+The next application step runs actual isolated Go and Playwright workers.
 Isolated Go and Playwright workers require an enforced RuntimeClass and network policy before execution.
 Check cancellation, deadlines, artifacts, and restart recovery through those actual workers after basic installation works.
 

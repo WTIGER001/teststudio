@@ -11,12 +11,15 @@ database:
   existingSecret: ""
   key: database-url
 oidc:
+  caSecret: ""
   providers: []
   credentials: {}
 bootstrap:
   issuer: ""
   subject: ""
 localAccounts: false
+httpTrust:
+  existingSecret: ""
 artifactStore:
   driver: filesystem
 persistence:

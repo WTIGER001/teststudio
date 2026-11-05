@@ -65,6 +65,12 @@ spec:
             - --require-postgres=true
             - --oidc-config=/etc/teststudio/providers.json
             - {{ printf "--oidc-secret-refs=%s" (include "teststudio.oidcReferences" .) | quote }}
+            {{- if .Values.oidc.caSecret }}
+            - --oidc-ca-file=/etc/teststudio-oidc/ca.crt
+            {{- end }}
+            {{- if .Values.httpTrust.existingSecret }}
+            - --http-trust-bundles=/etc/teststudio-http-trust/bindings.json
+            {{- end }}
             - {{ printf "--bootstrap-issuer=%s" .Values.bootstrap.issuer | quote }}
             - {{ printf "--bootstrap-subject=%s" .Values.bootstrap.subject | quote }}
             - {{ printf "--local-accounts=%t" .Values.localAccounts | quote }}
@@ -149,6 +155,16 @@ spec:
               mountPath: /data
             - name: temporary
               mountPath: /tmp
+            {{- if .Values.oidc.caSecret }}
+            - name: oidc-ca
+              mountPath: /etc/teststudio-oidc
+              readOnly: true
+            {{- end }}
+            {{- if .Values.httpTrust.existingSecret }}
+            - name: http-trust
+              mountPath: /etc/teststudio-http-trust
+              readOnly: true
+            {{- end }}
             {{- if .Values.workers.enabled }}
             - name: controller-identity
               mountPath: /var/run/teststudio-controller
@@ -176,6 +192,21 @@ spec:
           emptyDir:
             medium: Memory
             sizeLimit: 64Mi
+        {{- if .Values.oidc.caSecret }}
+        - name: oidc-ca
+          secret:
+            secretName: {{ .Values.oidc.caSecret | quote }}
+            defaultMode: 0444
+            items:
+              - key: ca.crt
+                path: ca.crt
+        {{- end }}
+        {{- if .Values.httpTrust.existingSecret }}
+        - name: http-trust
+          secret:
+            secretName: {{ .Values.httpTrust.existingSecret | quote }}
+            defaultMode: 0444
+        {{- end }}
 
         {{- if .Values.workers.enabled }}
         - name: controller-identity

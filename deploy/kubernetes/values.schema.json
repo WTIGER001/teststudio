@@ -165,6 +165,11 @@
           },
           "additionalProperties": false,
           "maxProperties": 32
+        },
+        "caSecret": {
+          "type": "string",
+          "pattern": "^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+          "maxLength": 63
         }
       },
       "required": [
@@ -955,6 +960,20 @@
         "persistence",
         "registry",
         "resources"
+      ]
+    },
+    "httpTrust": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "existingSecret": {
+          "type": "string",
+          "pattern": "^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?$",
+          "maxLength": 63
+        }
+      },
+      "required": [
+        "existingSecret"
       ]
     }
   },

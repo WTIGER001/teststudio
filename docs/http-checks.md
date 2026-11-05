@@ -85,6 +85,7 @@ Queued runs keep their original prediction and block dispatch after that change.
 The selected bundle applies only to native HTTP execution for its configured project and exact origin.
 It does not apply to another project, another port, browser navigation, OIDC, repository downloads, or artifact storage.
 Operators configure browser and other provider trust separately.
+The Kubernetes chart mounts these bindings and their CA files through httpTrust.existingSecret. See [Kubernetes](kubernetes.md).
 Testers select the registered environment normally. They do not upload CA files or enter private file paths in the probe wizard.
 
 Publication rejects invalid assertion settings and limits before activation.

@@ -138,8 +138,21 @@ The service image uses the imported ARM64 manifest digest. No registry push occu
 The UI, API health, and artifact health return 200 through TLS ingress with certificate verification.
 Anonymous project access returns 401. Evidence is output/local-k3s/installation-checks.json and helm-install.log.
 The first service start precedes database readiness. Kubernetes restarts it once, and the next start succeeds.
-The configured local OIDC issuer is reserved test metadata. Authentication and probe execution remain unverified.
-The next measurable result is working local sign-in and one newly authored HTTPS probe with retained evidence.
+The local OIDC issuer now runs through a new independent fixture in the dedicated cluster.
+The service supports mounted private OIDC authorities without changing native HTTP or system client trust.
+The Helm chart separately mounts OIDC authorities and existing project-scoped native HTTPS bindings.
+Focused checks verify valid private trust, rejected hostname and expiry, rejected untrusted authorities, unchanged default trust, and invalid-file errors.
+The existing HTTP trust checks pass after extracting their certificate loader into the shared certificate package.
+Normal OIDC code flow and PKCE now authenticate the installation administrator through actual TLS ingress.
+Project, application, environment, suite, test, release, and run creation use the normal authorized API.
+Run 20261105T135704.336870446-2120fdc092213d2c32b6024c passes with one newly authored HTTPS probe and complete evidence.
+The probe duration is 2.293329 ms, with a 1.418414 ms TLS handshake and retained certificate expiry.
+Four events, one attempt, four logs, and four artifacts remain available. A private artifact download passes its SHA-256 check.
+After service Pod replacement, fresh OIDC sign-in reads the same single run and downloads its retained evidence without reexecution.
+This verifies core persistence across that restart. It does not establish replica failover or coded-worker recovery.
+Evidence is output/local-k3s/probe/summary.json and the adjacent retained run, event, attempt, artifact, and log records.
+No browser, AWS, or Azure test runs. This advances the Kubernetes portions of 51, 55, and 56 without closing their full scope.
+The next measurable result is actual isolated Go and Playwright execution with enforced runtime and network boundaries.
 See [local Kubernetes](local-kubernetes.md) for scoped commands and stop instructions.
 No numbered acceptance item closes. The total remains **48 verified, 9 open**.
 
@@ -150,7 +163,7 @@ The staged Azure changes are preserved. No Azure resource or account has been te
 Kubernetes evidence includes local SDK protocol, Helm rendering, schema, and container startup checks.
 A dedicated local cluster and actual TestStudio chart startup are now verified.
 The user now authorizes dedicated local k3s/k3d verification with a separate kubeconfig.
-The next measurable result is authenticated execution of one newly authored HTTPS probe through that installation.
+Authenticated execution of one newly authored HTTPS probe now passes through that installation.
 Isolated coded workers, cancellation, deadlines, artifacts, and restart recovery follow on that local cluster.
 The default Docker workloads and demo on port 8040 remain preserved.
 The active plan and repository instructions record this change of priority.
