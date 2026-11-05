@@ -13,7 +13,7 @@ Azure implementation and verification remain deferred. A later Azure deployment 
 | Profile | Authoritative current evidence | Remaining limits |
 | --- | --- | --- |
 | Local server | SQLite durability, managed identity, environment-backed browser and API execution, desktop recording, source publication, timing, evidence, and UI workflows. | This does not establish cloud deployment behavior. |
-| Kubernetes | Actual local k3s installation, PostgreSQL, private evidence, two OIDC providers, source preparation, offline suites, environment-backed browser and authenticated HTTPS API suites, gateway cancellation and recovery, native HTTPS, deadlines, and controller failover. | Companion recording now has separate local workflow evidence. Desktop distribution and deployed-profile verification remain. |
+| Kubernetes | Actual local k3s installation, PostgreSQL, private evidence, two OIDC providers, source preparation, offline suites, environment-backed browser and authenticated HTTPS API suites, gateway cancellation and recovery, native HTTPS, deadlines, and controller failover. | Companion recording has separate local workflow and macOS package evidence. Opt-in chart configuration and deployed-profile verification remain. |
 | AWS ECS and CloudFront | Service and worker templates, private exchange, native SDK adapters, offline execution contracts, preparation packaging, and local protocol checks. | No live target verification. Environment-backed coded execution and hosted recording remain unfinished. |
 | Azure | Core service and assembly packages, staged execution and sandbox adapters, and previously retained local protocol evidence. | Native coded execution and discovery wiring remain unfinished. The user defers this work and account verification. |
 
@@ -32,7 +32,7 @@ Packaging and SDK protocol checks do not prove target deployment acceptance.
 | 53 | The local and Kubernetes installations work without AWS services or credentials. Azure has an independent Blob and identity configuration. | Deferred Azure installation and coded-execution wiring remain incomplete. | An actual independent Azure installation. |
 | 54 | Two OIDC providers work through the shared directory locally and on Kubernetes. Project authorization and private evidence withdrawal pass. | No additional shared identity-engine gap is identified in this audit. | Equivalent configured-provider and project-scope scenarios on ECS and Azure. |
 | 56 | Newly authored local suites, Kubernetes offline suites, and Kubernetes environment-backed suites retain measured results, progress, history, and evidence. ECS gateway delivery and packaging pass local contract checks. | Azure discovery and execution remain deferred. | Generic suites, reports, and trends on every required target. |
-| 57 | All four deployment packages have implementation material. Local operation and actual Kubernetes browser, API, cancellation, and recovery scenarios pass. Hosted companion recording passes a separate real local browser workflow. | Standalone desktop distribution and deferred Azure wiring. | Complete common scenarios on each target. |
+| 57 | All four deployment packages have implementation material. Local operation and actual Kubernetes browser, API, cancellation, and recovery scenarios pass. Hosted companion recording passes a separate real local browser workflow and macOS package verification. | Opt-in provider configuration and deferred Azure wiring. | Complete common scenarios on each target. |
 
 Keep each broad item unchecked until its complete requirement passes.
 The completed generic failover and hosted-private-access contracts remain 52 and 55.
@@ -78,7 +78,7 @@ The current browser-recording guide correctly reports this limit.
 
 The local companion now has a scoped pairing API and desktop command that reuse the trusted recording helper and source conversion.
 Targeted local lifecycle and authored native helper checks pass. The guided connection workflow now also passes with actual native Chromium against a local installation.
-Standalone desktop distribution and deployed-profile verification remain unfinished.
+Standalone macOS ARM64 distribution now passes offline setup. Opt-in provider configuration and deployed-profile verification remain unfinished.
 Bind pairing, recording, stopping, code submission, permissions, and expiry to the requesting user, project, suite, and recording session.
 Keep that authorization narrower than the user's application session.
 Preserve the existing separation between recording, draft saving, publication, and execution.

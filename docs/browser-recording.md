@@ -30,14 +30,14 @@ The offline starter retains its existing isolated profile. It cannot reach a web
 The current native recorder requires a local desktop.
 Hosted recording uses the [desktop companion](recorder-companion.md) through the guided connection step.
 The complete connection, native capture, stop, review, and draft workflow now passes one focused local TestStudio browser run.
-Desktop distribution remains unfinished. Live deployment verification remains separate.
+Standalone macOS ARM64 packaging and offline setup also pass. Live deployment verification remains separate.
 
 ## Hosted companion API milestone
 
 The API now supports scoped desktop pairing behind the explicit --recording-companion option.
 The option remains disabled by default. Enable it only where testers have the trusted desktop command and dependencies.
 The desktop command, guided wizard, and real Chromium capture now have focused local evidence.
-The wizard shows the desktop command and a temporary connection code. Its First-time desktop setup disclosure describes the current checkout-based installation.
+The wizard shows the desktop command and a temporary connection code. Its First-time desktop setup disclosure describes the operator-provided archive and setup script.
 Get new connection code rotates an unclaimed code. The page clears the code after pairing and hides it after expiry.
 Reload restores the active recording status. It does not restore a connection code.
 The final review opens the existing source editor. Saving does not prepare, publish, activate, or execute the test.

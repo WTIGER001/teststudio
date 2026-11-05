@@ -4,6 +4,26 @@ TestStudio owns a new Playwright suite in `tests/selftest/playwright`.
 The suite runs through the normal catalog, publication, execution, timing, and evidence APIs.
 It copies no tests or configuration from another application.
 
+## Hosted recorder workflow
+
+The opt-in TestHostedRecorderCompanionCompletesGuidedUIAndNativeCapture check prepares and executes one new Playwright authoring test through TestStudio.
+It uses cached runtime and gateway images, the built UI, a temporary installation, and the real native desktop recorder.
+It verifies connection rotation, reload recovery, help, focus, dark mobile layout, light desktop layout, initial navigation capture, stop, review, and saved source.
+The initial navigation targets an independently authored local website. No recorded target test run starts.
+The check closes all sixteen owned processes and removes its source image, containers, volumes, and private contexts.
+
+Set TESTSTUDIO_NATIVE_RECORDING_UI=1, TESTSTUDIO_BROWSER_RUNTIME_IMAGE, TESTSTUDIO_BROWSER_GATEWAY_IMAGE, and TESTSTUDIO_UI_DIRECTORY.
+TESTSTUDIO_RECORDER_UI_OUTPUT selects the retained evidence directory.
+
+```sh
+go test ./internal/sources \
+  -run '^TestHostedRecorderCompanionCompletesGuidedUIAndNativeCapture$' -count=1 -timeout=180s -v
+```
+
+Passing evidence is output/playwright/recorder-companion-help-fix. The complete check takes about 27 seconds.
+Reuse that evidence for unchanged lifecycle behavior. Desktop packaging uses scripts/verify-recorder-package.py and does not need another browser run.
+See [desktop companion](recorder-companion.md) for packaging, offline setup, and native verification limits.
+
 ## Kubernetes packaging checks
 
 The Helm chart has strict installation values and local rendering checks in scripts/verify-kubernetes.py.

@@ -26,5 +26,5 @@ export function recordingRows(items: BrowserRecordingRecord[], row: BrowserRecor
 
 export function desktopRecorderCommand(origin: string): string {
   const address = new URL(origin).origin
-  return `teststudio-recorder --server '${address.replaceAll("'", "'\\''")}'`
+  return `./teststudio-recorder --server '${address.replaceAll("'", "'\\''")}'`
 }

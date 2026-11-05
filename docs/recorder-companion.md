@@ -6,7 +6,7 @@ The desktop companion connects a hosted TestStudio recording session to Playwrig
 It opens only its dedicated recording browser and Inspector. It does not execute uploaded test source.
 The first command implementation targets macOS and Linux desktops.
 The guided connection wizard and real Chromium capture now pass focused local verification.
-Desktop distribution remains unfinished. Operators currently provide a trusted checkout and its built command.
+Operators can now provide a standalone recorder archive. Testers need Node.js and the package; they do not need Go or a checkout.
 
 ## Concepts
 
@@ -33,18 +33,18 @@ This initial command does not automatically purge desktop recordings. Remove com
 
 ### Prepare the desktop
 
-Use a trusted TestStudio checkout. Build the command and install the locked recording dependencies:
+Get the archive for your desktop from your trusted TestStudio operator. Extract it and open a terminal in its directory.
+Install Node.js 22 or later, including npm. Run:
 
 ```sh
-go build -o .data/bin/teststudio-recorder ./cmd/teststudio-recorder
-npm ci --prefix runners/playwright
-node runners/playwright/node_modules/playwright/cli.js install chromium
+node setup-recorder.mjs
 ```
 
-Run the command from the checkout directory. The defaults use its trusted CLI and recording helper.
+Setup installs the locked Playwright dependencies and Chromium. Linux desktops can need operator-installed browser system libraries.
+Run the command from the extracted package directory. Keep its scripts and runners directories beside the binary.
 The CLI version must match the product's locked Playwright version, currently 1.64.1.
 The wizard includes First-time desktop setup and Advanced connection and recovery disclosures.
-A standalone distribution package remains the next setup improvement.
+A one-click installer and automatic updates remain optional later improvements.
 
 ### Connect a hosted session
 
@@ -57,7 +57,7 @@ The API routes are documented in [browser recording](browser-recording.md).
 Start the command with the trusted server origin:
 
 ```sh
-.data/bin/teststudio-recorder --server https://studio.example.test
+./teststudio-recorder --server https://studio.example.test
 ```
 
 Paste the connection code at the prompt. Use the dedicated Playwright windows to record actions and assertions.
@@ -72,7 +72,7 @@ The command prints the recording identifier without printing its credentials.
 Run the command with that identifier to recover its original server connection:
 
 ```sh
-.data/bin/teststudio-recorder --resume session-identifier
+./teststudio-recorder --resume session-identifier
 ```
 
 Resume uses the original private journal. An optional --server must match its original server exactly.
@@ -90,6 +90,35 @@ Use --directory to select another private recording directory.
 Use --playwright-cli and --helper only for operator-approved installed files.
 The companion never takes executable paths from a pairing response or uploaded source.
 
+## Operator packaging
+
+Build an archive from a trusted checkout:
+
+```sh
+node scripts/package-recorder.mjs
+```
+
+The default target matches the current desktop. Options select darwin or linux and arm64 or amd64.
+Use --output to choose the parent output directory. Each build creates a fresh directory without overwriting another package.
+Cross-compilation produces a package only. It does not prove native browser behavior on the selected target.
+
+The archive contains the recorder binary, trusted recording helper, locked dependency declarations, setup script, README, and manifest.
+The manifest records each distributed file checksum, compiler, source revision, and dirty source state.
+The archive has a separate SHA-256 checksum. macOS metadata files do not enter the archive.
+Distribute the archive and checksum through your trusted operator channel. No package is published automatically.
+
+Verify the archive before distribution:
+
+```sh
+python3 scripts/verify-recorder-package.py PATH_TO_ARCHIVE
+```
+
+The verifier checks archive paths, file types, exact contents, checksums, helper and dependency bytes, executable permissions, and native command help.
+Add --offline-setup on a matching desktop with cached npm dependencies and Chromium to check setup without downloads.
+Temporary verification files are removed. The verifier writes a verification JSON beside the archive.
+Other operating system and architecture packages require their own native setup and browser verification.
+The native macOS ARM64 package passes these checks in output/recorder/package-pOD1pj.
+
 ## Current verification
 
 Focused local checks cover connection restrictions, redirect refusal, private files, directory locking, ordered retries, lost acknowledgements, restart, revocation, and deadlines.
@@ -103,4 +132,4 @@ The test checks generated identifiers, code rotation, reload recovery, help, foc
 The native recorder captures the independent local target's initial navigation. Owner stop returns the source for review and draft saving.
 No target test run starts. The check confirms that sixteen owned processes exit and all owned execution resources are removed.
 Evidence is output/playwright/recorder-companion-help-fix. The check completes in about 27 seconds.
-Standalone distribution and actual cloud profile verification remain separate work. Acceptance 57 remains open.
+Standalone macOS ARM64 packaging and offline setup now pass. Actual cloud profile verification remains separate work. Acceptance 57 remains open.

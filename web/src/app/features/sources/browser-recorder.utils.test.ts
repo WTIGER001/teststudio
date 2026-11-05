@@ -23,5 +23,5 @@ test('Temporary pairing codes expire at their exact deadline', () => {
   assert.equal(recordingPairingExpired(pairing, Date.parse(pairing.expiresAt)), true)
   assert.equal(recordingPairingExpired({ ...pairing, expiresAt: 'invalid' }, 0), true)
   assert.equal(recordingPairingExpired(null, 0), true)
-  assert.equal(desktopRecorderCommand('https://studio.example.test/ignored?secret=private'), "teststudio-recorder --server 'https://studio.example.test'")
+  assert.equal(desktopRecorderCommand('https://studio.example.test/ignored?secret=private'), "./teststudio-recorder --server 'https://studio.example.test'")
 })

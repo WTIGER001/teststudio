@@ -135,7 +135,9 @@ The command integration uses an authored Node helper fixture. A separate complet
 Its normal TestStudio Playwright execution verifies connection rotation, reload recovery, help, focus, themes, native capture, stop, review, and draft saving.
 Run 20261105T213644.732520000-8266daf9143ea86cc6552e14 passes in about 27 seconds including preparation and cleanup.
 Sixteen owned processes exit. Its prepared image, execution containers, volumes, and private contexts are removed.
-The installation option remains disabled by default. Continue standalone desktop packaging and operator setup. Keep actual deployment verification separate.
+The standalone package builder now includes the command, trusted helper, locked dependency declarations, setup script, README, and checksummed manifest.
+The macOS ARM64 archive passes native help and offline setup using cached npm dependencies and Chromium. Temporary verification files are removed.
+The installation option remains disabled by default. Continue opt-in provider configuration and operator enablement. Keep actual deployment verification separate.
 See [desktop companion](recorder-companion.md). Keep the existing recording, review, draft, publication, and execution boundaries.
 Use a third VPC for trusted gateways and separate environment worker resources. Preserve the retained offline worker pool.
 See [native gateway networking](ecs-gateway-network.md) for exact resource and continuation requirements.

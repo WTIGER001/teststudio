@@ -59,6 +59,23 @@ Evidence is output/playwright/recorder-companion-help-fix. The initial failure r
 The user demo, its browser, and its data remain unchanged. No cloud or cluster operation runs.
 Standalone desktop distribution remains unfinished. This advances 57; the count remains 50 verified of 57.
 
+### Standalone desktop package
+
+The operator package builder now creates a fresh macOS or Linux archive for arm64 or amd64.
+It copies only the binary, trusted helper, locked dependency declarations, setup script, README, and checksum manifest.
+Testers install Node.js and run node setup-recorder.mjs. They do not need Go or a checkout.
+The wizard displays the relative packaged command and updates its First-time desktop setup instructions.
+The command now exits successfully after --help.
+
+The native macOS ARM64 package passes archive checksum, exact file inventory, trusted helper bytes, executable mode, and native help checks.
+Offline setup installs all three locked npm packages from cache and reuses the existing Chromium installation.
+The first archive exposes macOS metadata entries. COPYFILE_DISABLE removes them from the corrected archive.
+The corrected archive and verification record are in output/recorder/package-pOD1pj. Temporary verification files are removed.
+Focused command generation and UI build checks pass. The unchanged recording lifecycle retains its passing browser evidence.
+No new browser session, cloud operation, cluster operation, or user demo restart occurs for packaging.
+Other desktop targets have no new native verification. Opt-in provider configuration and deployed-profile verification remain separate.
+This advances 57; the total remains 50 verified of 57.
+
 ## Remote gateway transport milestone — 2026-11-05
 
 The trusted gateway now supports execution-scoped TLS forwarding through a supervisor-owned Unix socket bridge.
