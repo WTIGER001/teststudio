@@ -2,6 +2,7 @@ package azuresandbox
 
 import (
 	"context"
+	"strings"
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/execution"
@@ -10,7 +11,17 @@ import (
 )
 
 func (p *Provider) Inventory(ctx context.Context, installation, profile string) ([]execution.Reference, error) {
+	if p.closed.Load() {
+		return nil, hostedexecution.ErrUnavailable
+	}
 	if !validInventoryScope(installation, profile) {
+		return nil, hostedexecution.ErrConfiguration
+	}
+	operation := ""
+	if strings.HasSuffix(profile, "-discovery-v1") {
+		operation = "discover"
+	}
+	if !p.permits(operation) {
 		return nil, hostedexecution.ErrConfiguration
 	}
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)

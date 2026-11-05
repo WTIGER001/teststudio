@@ -17,7 +17,11 @@ func (f inspectCall) InspectImage(ctx context.Context, image string) (hostedexec
 
 func fixtureProvider(t *testing.T, f *controllerFixture, m *ImageManager, meta hostedexecution.Image) *Provider {
 	t.Helper()
-	p, err := NewProvider(ProviderOptions{Controller: f.controller, Images: m, Inspector: inspectCall(func(_ context.Context, ref string) (hostedexecution.Image, error) {
+	mode := "execution"
+	if f.plan.proof.Operation == "discover" {
+		mode = "discovery"
+	}
+	p, err := NewProvider(ProviderOptions{Mode: mode, Controller: f.controller, Images: m, Inspector: inspectCall(func(_ context.Context, ref string) (hostedexecution.Image, error) {
 		if ref != meta.Reference {
 			return hostedexecution.Image{}, hostedexecution.ErrOwnership
 		}

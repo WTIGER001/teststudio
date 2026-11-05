@@ -35,20 +35,11 @@ var blobName = regexp.MustCompile(`^[a-z0-9]{3,24}\.blob\.core\.windows\.net$`)
 var dataRegion = regexp.MustCompile(`^[a-z0-9]+$`)
 
 func New(options Options) (*Client, error) {
-	if !registryName.MatchString(options.Registry) || !tenantID.MatchString(options.Tenant) || !oci.RepositoryWithinPrefix(options.RepositoryPrefix, options.RepositoryPrefix) || options.Credential == nil || len(options.BlobRedirectOrigins) > 16 {
+	if options.Credential == nil || ValidateRegistry(options.Registry, options.Tenant, options.RepositoryPrefix, options.BlobRedirectOrigins) != nil {
 		return nil, oci.ErrConfiguration
 	}
 	origins := map[string]bool{}
 	for _, origin := range options.BlobRedirectOrigins {
-		u, err := url.Parse(origin)
-		if err != nil || u.Scheme != "https" || u.Host != u.Hostname() || u.User != nil || u.Path != "" || u.RawQuery != "" || u.ForceQuery || u.Fragment != "" || u.Opaque != "" || u.String() != origin || origins[origin] {
-			return nil, oci.ErrConfiguration
-		}
-		short := strings.TrimSuffix(options.Registry, ".azurecr.io")
-		region := strings.TrimSuffix(strings.TrimPrefix(u.Host, short+"."), ".data.azurecr.io")
-		if !blobName.MatchString(u.Host) && !(strings.HasPrefix(u.Host, short+".") && strings.HasSuffix(u.Host, ".data.azurecr.io") && dataRegion.MatchString(region)) {
-			return nil, oci.ErrConfiguration
-		}
 		origins[origin] = true
 	}
 	now := options.Now
@@ -63,6 +54,26 @@ func New(options Options) (*Client, error) {
 		return nil, err
 	}
 	return &Client{Client: client, auth: auth}, nil
+}
+
+func ValidateRegistry(registry, tenant, prefix string, redirects []string) error {
+	if !registryName.MatchString(registry) || !tenantID.MatchString(tenant) || !oci.RepositoryWithinPrefix(prefix, prefix) || len(redirects) > 16 {
+		return oci.ErrConfiguration
+	}
+	origins := map[string]bool{}
+	for _, origin := range redirects {
+		u, err := url.Parse(origin)
+		if err != nil || u.Scheme != "https" || u.Host != u.Hostname() || u.User != nil || u.Path != "" || u.RawQuery != "" || u.ForceQuery || u.Fragment != "" || u.Opaque != "" || u.String() != origin || origins[origin] {
+			return oci.ErrConfiguration
+		}
+		short := strings.TrimSuffix(registry, ".azurecr.io")
+		region := strings.TrimSuffix(strings.TrimPrefix(u.Host, short+"."), ".data.azurecr.io")
+		if !blobName.MatchString(u.Host) && !(strings.HasPrefix(u.Host, short+".") && strings.HasSuffix(u.Host, ".data.azurecr.io") && dataRegion.MatchString(region)) {
+			return oci.ErrConfiguration
+		}
+		origins[origin] = true
+	}
+	return nil
 }
 
 func (c *Client) Close() {

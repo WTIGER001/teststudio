@@ -8,7 +8,8 @@ The shared Go and Playwright executors use this bridge without a second executio
 Discovery can wait for conversion before a sandbox exists.
 
 No native command or deployment template enables this provider yet.
-Actual import and runtime admission, effective timer authority, configuration, and native packaging remain unfinished.
+The [runtime factory](azure-sandbox-runtime.md) now supplies independent settings and concrete SDK assembly.
+Actual import and runtime admission, effective timer authority, command wiring, and native packaging remain unfinished.
 Local protocol verification does not establish deployed Azure behavior.
 
 ## Concepts
@@ -101,7 +102,8 @@ No cloud account, registry operation, browser, container, demo restart, or remot
 
 ### Continue native setup
 
-Compose the concrete OCI client, image manager, sandbox client, independent timer SDK, and provider through native configuration.
+Use OpenRuntime for concrete OCI, image, sandbox, timer, and provider assembly with explicit scoped settings.
+Wire execution and discovery command roles separately. Native commands do not select this factory yet.
 Implement actual import and runtime admission before any command can enable dispatch.
 Retain separate API and preparation identities. Keep installation credentials outside uploaded code and execution sandboxes.
 Use the existing durable source queue, worker leases, evidence checkpoints, and orphan recovery.

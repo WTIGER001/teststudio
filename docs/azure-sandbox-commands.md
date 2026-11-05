@@ -5,7 +5,9 @@
 The sandbox client and controller now execute a fixed supervised command and retain the data-plane service's explicit exit result.
 Controller.Status maps that result and confirmed instance quiescence to the shared hosted status contract.
 Authenticated test reports, evidence, and measured test durations remain separate worker-exchange facts.
-Native configuration, durable source-image resolution, actual admission, and the complete Provider factory remain unfinished.
+The image manager and provider now supply durable source resolution and shared execution lifecycle.
+The [runtime factory](azure-sandbox-runtime.md) now supplies independent settings and concrete SDK clients.
+Actual admission and native command wiring remain unfinished.
 No native command selects Azure sandbox execution yet.
 
 ## Concepts
@@ -116,7 +118,7 @@ Actual converted root filesystem behavior, command limits, identity enforcement,
 
 Connect durable image import and Ready-image lookup to trusted source preparation.
 Use the [provider bridge](azure-sandbox-provider.md) for shared lifecycle and report collection.
-Bind actual instance and deadline authority, admission, and the concrete native SDK factory.
+Use the concrete runtime factory. Bind actual instance and deadline authority, admission, and native command roles before activation.
 Reuse Controller.Status and the existing hosted executor, report validation, evidence, cancellation, and cleanup contracts.
 Keep explicit observation gaps after lost command acknowledgments. Do not replace them with a repeated attempt.
 

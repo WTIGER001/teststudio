@@ -122,7 +122,35 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: sandbox provider integration and shared execution lifecycle
+## Current delivery: independent sandbox settings and concrete runtime assembly
+
+The new settings loader uses the existing bounded file or environment configuration path.
+It validates independent sandbox settings, explicit nonzero client and tenant identifiers, registry redirects, pull identity, and the separate timer scope.
+Legacy ordinary Job environment fields reject. Local startup remains unchanged when no sandbox configuration is supplied.
+
+OpenRuntime constructs the concrete read-only ACR client, sandbox image and command client, Logic Apps timer SDK, image manager, and provider.
+Managed identity construction selects the exact configured control and registry client identifiers without a default credential chain.
+Construction obtains no token and calls no service. Admission is mandatory, with import admission and checkpoint authorization also required for discovery.
+The factory supplies no permissive admission default.
+
+Execution mode cannot import images or control discovery references. Discovery mode cannot control ordinary execution references.
+Wrong-mode status, cancellation, removal, and inventory preserve the rightful exchange.
+Shutdown joins owned commands before closing created clients. Closed providers reject all new interface operations.
+The shared ACR registry validator now provides one policy for client and runtime settings validation.
+
+Five new focused checks verify configuration sources, rejected bindings before credential construction, actual SDK wiring, credential selection, modes, and shutdown.
+The affected shared executor and pending discovery flows pass with explicit scoped provider modes.
+The five new checks and two lifecycle regressions pass with race detection in 2.060 seconds.
+One existing ACR scope and credential-forwarding regression passes after validator extraction in 1.359 seconds.
+Evidence is output/azure-sandbox-runtime/summary.json and runtime.log.
+No identity endpoint, hosted service, cloud account, registry service, browser, container, UI build, demo restart, or remote push is involved.
+
+The runtime, provider, source, command, discovery, Azure, and plan guides match this library delivery. No user page behavior changes.
+Actual admission, effective timer authority, command role wiring, and deployment packaging remain unfinished. Commands do not select this factory yet.
+The plan records the published ARM version shape difference for the admission implementation and separate deployment verification.
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+## Previous delivery: sandbox provider integration and shared execution lifecycle
 
 The sandbox Provider now implements the common hosted interface with the existing OCI inspector, image manager, dispatch controller, and command bridge.
 Durable launch intents retain pending conversions before a sandbox exists.

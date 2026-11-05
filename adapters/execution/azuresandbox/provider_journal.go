@@ -23,7 +23,7 @@ func (p *Provider) loadIntent(ctx context.Context, ref execution.Reference) (lau
 	}
 	d, err := storage.Decode[launchIntent](row)
 	proof := d.Proof
-	if err != nil || row.ID != ref.ID || row.Project != ref.Project || proof.Reference != ref || !validReference(ref, proof.Image.Runner, proof.Operation) || d.CreatedAt.IsZero() || proof.Deadline.IsZero() || proof.Deadline.Year() < 2000 || proof.Deadline.Year() > 2200 || !checksum.MatchString(proof.TicketHash) || !checksum.MatchString(proof.InputHash) || proof.Fingerprint != p.fingerprint(proof) || d.Removed && !d.Stopping {
+	if err != nil || row.ID != ref.ID || row.Project != ref.Project || proof.Reference != ref || !p.permits(proof.Operation) || !validReference(ref, proof.Image.Runner, proof.Operation) || d.CreatedAt.IsZero() || proof.Deadline.IsZero() || proof.Deadline.Year() < 2000 || proof.Deadline.Year() > 2200 || !checksum.MatchString(proof.TicketHash) || !checksum.MatchString(proof.InputHash) || proof.Fingerprint != p.fingerprint(proof) || d.Removed && !d.Stopping {
 		return d, row, hostedexecution.ErrOwnership
 	}
 	image, err := NewImagePlan(p.controller.config, p.images.identity, proof.Image, hash("inspection"))
@@ -89,7 +89,7 @@ func (p *Provider) updateIntent(ctx context.Context, ref execution.Reference, fn
 }
 
 func (p *Provider) validJob(job hostedexecution.Job) bool {
-	return validReference(job.Reference, job.Runner, job.Operation) && job.ExchangeOrigin == p.controller.config.ExchangeOrigin && p.controller.config.validImage(job.Image) && job.Ticket.Execution == job.Reference.ID && ticketToken.MatchString(job.Ticket.Token) && job.Ticket.Deadline.After(p.controller.now()) && job.Ticket.Deadline.Sub(p.controller.now()) <= 2*time.Hour && (job.Operation != "discover" || p.images.writer)
+	return p.permits(job.Operation) && validReference(job.Reference, job.Runner, job.Operation) && job.ExchangeOrigin == p.controller.config.ExchangeOrigin && p.controller.config.validImage(job.Image) && job.Ticket.Execution == job.Reference.ID && ticketToken.MatchString(job.Ticket.Token) && job.Ticket.Deadline.After(p.controller.now()) && job.Ticket.Deadline.Sub(p.controller.now()) <= 2*time.Hour && (job.Operation != "discover" || p.images.writer)
 }
 
 func sameLaunch(proof launchProof, job hostedexecution.Job) bool {

@@ -22,7 +22,8 @@ Supply Commands for executable work. Without it, the controller provides resourc
 Instances is implemented by the production sandbox client.
 Its inventory must return a complete bounded result or an error. A partial list is not authoritative.
 The [sandbox deadline SDK](azure-sandbox-deadlines.md) now supplies durable independent timer control.
-Effective timer authority, native composition, and actual instance admission remain required before deployment selection.
+The [runtime factory](azure-sandbox-runtime.md) now supplies concrete composition.
+Effective timer authority, command wiring, and actual instance admission remain required before deployment selection.
 The local fixtures do not establish those production controls.
 
 The controller accepts a Plan after approved source inspection and Ready disk-image resolution.
@@ -120,7 +121,7 @@ DispatchState now includes independent [command completion facts](azure-sandbox-
 Controller.Status combines explicit service-returned exit codes with confirmed instance quiescence through the shared hosted status contract.
 It does not infer measured test duration or derive command success from a test report.
 The [provider bridge](azure-sandbox-provider.md) now connects source resolution and the shared lifecycle.
-Actual admission, concrete native SDK assembly, and configuration remain unfinished.
+The runtime factory now supplies concrete SDK assembly and settings. Actual admission and command wiring remain unfinished.
 Lost command acknowledgments retain explicit observation gaps and never restart the same logical attempt.
 Close joins owned command routines before SDK clients or the shared database close.
 

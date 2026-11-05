@@ -14,7 +14,8 @@ The [independent deadline SDK](azure-sandbox-deadlines.md) now supplies owned ti
 The [command bridge](azure-sandbox-commands.md) now supplies independent exit receipts and common hosted status mapping.
 The [image manager](azure-sandbox-images.md) now supplies durable import and verified converted-image lookup.
 The [provider bridge](azure-sandbox-provider.md) now connects pending image preparation and the shared execution lifecycle.
-Native SDK assembly still requires effective timer authority, admission, source-queue composition, and configuration.
+The [runtime factory](azure-sandbox-runtime.md) now supplies concrete SDK assembly and independent settings.
+Native activation still requires effective timer authority, admission, source-queue command wiring, and packaging.
 Local contract checks do not establish deployed isolation, service availability, identity authority, certificate trust, or complete product operation.
 
 ## Concepts
@@ -146,7 +147,7 @@ Reuse the existing source queue, database, approved OCI inspector, worker exchan
 Reconcile returned identifiers under complete ownership proofs. Never retry an ambiguous create as new work.
 Bind the independent sandbox deadline SDK to verified native identity grants and workflow protection.
 Use the implemented Provider for command status, terminal runner reports, deletion checkpoints, and pending-launch recovery.
-Compose its concrete SDK dependencies and actual admission through native configuration.
+Use OpenRuntime for concrete SDK assembly. Complete actual admission before command selection.
 Add explicit managed identity, group, VNet, source-import, and deadline packaging before native command selection.
 Keep all installation credentials in trusted processes.
 Keep actual Azure verification separate from this local implementation session.

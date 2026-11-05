@@ -10,6 +10,9 @@ import (
 )
 
 func (p *Provider) Ensure(ctx context.Context, job hostedexecution.Job) error {
+	if p.closed.Load() {
+		return hostedexecution.ErrUnavailable
+	}
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	if !p.validJob(job) {
@@ -47,6 +50,9 @@ func (p *Provider) Ensure(ctx context.Context, job hostedexecution.Job) error {
 }
 
 func (p *Provider) Observe(ctx context.Context, ref execution.Reference) (hostedexecution.Status, error) {
+	if p.closed.Load() {
+		return hostedexecution.Status{}, hostedexecution.ErrUnavailable
+	}
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	d, _, err := p.loadIntent(ctx, ref)

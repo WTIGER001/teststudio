@@ -84,7 +84,15 @@ The actual shared executor and worker exchange pass local protocol flows for bot
 Scope, restart, late creation, lost receipts, and concurrent admission updates pass targeted checks.
 See [sandbox provider integration](azure-sandbox-provider.md). This does not establish deployed Azure execution.
 
-Complete actual import and runtime admission, native configuration, and the concrete SDK factory next.
+Independent sandbox settings and OpenRuntime now assemble the concrete ACR, data-plane, timer, image, and provider clients.
+Construction selects explicit control and read-only registry client identifiers without token acquisition or service calls.
+Native execution and discovery modes reject control of the opposite workload. Closing the runtime prevents new provider operations.
+Local settings, credential, client, mode, shutdown, and affected shared lifecycle checks pass.
+See [sandbox runtime assembly](azure-sandbox-runtime.md). Commands do not load these settings yet.
+
+Complete actual import and runtime admission, native command role wiring, and deployment packaging next.
+Pin the group reader and template to an explicit service contract. Current preview guidance and the versioned ARM reference describe different shapes.
+Do not silently combine the pinned preview SDK with the 2026-07-01 environment-linked resource shape.
 Reuse the new command and status bridge. Preserve explicit gaps after a lost acknowledgment and never replay the logical attempt.
 Preserve source-queue authorization and the existing worker exchange. Keep controller credentials outside sandboxes.
 Bind actual source-import identity, group authority, VNet routing, proxy trust, and effective outbound enforcement before enabling native execution.

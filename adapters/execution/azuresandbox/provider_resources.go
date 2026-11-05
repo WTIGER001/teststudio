@@ -36,6 +36,9 @@ func (p *Provider) stopOwned(ctx context.Context, d launchIntent) error {
 }
 
 func (p *Provider) Stop(ctx context.Context, ref execution.Reference) error {
+	if p.closed.Load() {
+		return hostedexecution.ErrUnavailable
+	}
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	d, err := p.updateIntent(ctx, ref, func(current *launchIntent) error { current.Stopping = true; return nil })
@@ -69,6 +72,9 @@ func (p *Provider) stoppedStatus(ctx context.Context, d launchIntent) (hostedexe
 }
 
 func (p *Provider) Remove(ctx context.Context, ref execution.Reference) error {
+	if p.closed.Load() {
+		return hostedexecution.ErrUnavailable
+	}
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	d, _, err := p.loadIntent(ctx, ref)

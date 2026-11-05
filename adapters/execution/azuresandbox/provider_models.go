@@ -2,6 +2,7 @@ package azuresandbox
 
 import (
 	"context"
+	"sync/atomic"
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/execution"
@@ -15,12 +16,15 @@ type Inspector interface {
 }
 
 type ProviderOptions struct {
+	Mode       string
 	Controller *Controller
 	Images     *ImageManager
 	Inspector  Inspector
 }
 
 type Provider struct {
+	closed     atomic.Bool
+	mode       string
 	controller *Controller
 	images     *ImageManager
 	inspector  Inspector
@@ -46,15 +50,22 @@ type launchIntent struct {
 }
 
 func NewProvider(o ProviderOptions) (*Provider, error) {
-	if o.Controller == nil || o.Controller.commands == nil || o.Images == nil || o.Inspector == nil || o.Controller.exchange != o.Images.exchange || hash(o.Controller.config) != hash(o.Images.config) {
+	if o.Mode != "" && o.Mode != "execution" && o.Mode != "discovery" || o.Controller == nil || o.Controller.commands == nil || o.Images == nil || o.Inspector == nil || o.Controller.exchange != o.Images.exchange || hash(o.Controller.config) != hash(o.Images.config) || o.Mode == "discovery" && !o.Images.writer {
 		return nil, hostedexecution.ErrConfiguration
 	}
-	return &Provider{controller: o.Controller, images: o.Images, inspector: o.Inspector}, nil
+	return &Provider{controller: o.Controller, images: o.Images, inspector: o.Inspector, mode: o.Mode}, nil
 }
 
-func (p *Provider) Close() { p.controller.Close() }
+func (p *Provider) permits(operation string) bool {
+	return p.mode == "" || p.mode == "execution" && operation == "" || p.mode == "discovery" && operation == "discover"
+}
+
+func (p *Provider) Close() { p.closed.Store(true); p.controller.Close() }
 
 func (p *Provider) InspectImage(ctx context.Context, reference string) (hostedexecution.Image, error) {
+	if p.closed.Load() {
+		return hostedexecution.Image{}, hostedexecution.ErrUnavailable
+	}
 	if !p.controller.config.validImage(reference) {
 		return hostedexecution.Image{}, hostedexecution.ErrConfiguration
 	}
