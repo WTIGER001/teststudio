@@ -111,7 +111,8 @@ No cloud account, identity endpoint, registry service, role mutation, browser, c
 
 ### Complete deployment admission
 
-Verify effective assignments and exclusions, deny effects, identity host attachment, and protection from unintended identity reuse.
+The [service workload stage](azure-sandbox-service-workloads.md) now verifies reported relay and backend identity placement and federation absence.
+Verify effective assignments and exclusions, deny effects, controller and remaining identity host attachment, and protected identity administration.
 The network and private stages now check selected rules, routes, endpoint ownership, and complete selected DNS inventories.
 The topology stage now checks selected VNet contents, firewall attachments, and the complete deny-all firewall policy.
 The resolver stage now checks selected policy, actual association, and other reported subscription zone links.

@@ -7,6 +7,7 @@ The stage verifies the selected exchange relay and trusted worker backend throug
 It reuses existing private environment, identity, template, revision, endpoint approval, and certificate verifiers.
 The trusted templates have independent builders. Native settings require no ordinary Jobs configuration.
 
+The [service workload stage](azure-sandbox-service-workloads.md) now checks reported environment occupancy, exclusive service identity placement, identity resources, and federation absence.
 This is service metadata admission. The [backend endpoint stage](azure-sandbox-backend-endpoint.md) now joins approval, NIC address, and endpoint network policy.
 These stages do not establish deployed routing, fresh controller-observed readiness, or effective service permissions.
 The remaining protection dependencies stay mandatory. Native commands and deployment templates still do not enable sandbox execution.
@@ -126,7 +127,7 @@ The backend endpoint stage now binds the selected environment and NIC to the add
 Readiness runs in the relay network. Native admission checks its exact probe and reported healthy active revision.
 The [relay network stage](azure-sandbox-relay-network.md) now verifies the selected VNet, egress policy, registry endpoint, DNS, and pull grant.
 The [registry service stage](azure-sandbox-registry-service.md) now verifies access policies and complete reported consumer, member, and replication inventories.
-Complete trusted consumer network ownership, workload placement, identity host attachment, effective grants, deny effects, and protected write boundaries.
+Complete trusted consumer network ownership, controller and remaining identity host attachment, effective grants, deny effects, and protected write boundaries.
 Then wire scoped execution and discovery commands and complete deployment packaging.
 Verify actual private routing, TLS, service identity lifecycle behavior, dependency access, preview compatibility, and independent deadlines during separate deployment acceptance.
 

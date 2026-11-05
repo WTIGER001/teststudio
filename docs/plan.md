@@ -188,9 +188,19 @@ Fresh creation and import checks and bounded live evidence include this stage. R
 Six new checks and eleven affected checks pass locally with race detection. No cloud service is contacted.
 See [registry service admission](azure-sandbox-registry-service.md). Acceptance 51 advances; the total remains 48 verified, nine open.
 
+The runtime now verifies reported relay and backend occupancy and service identity placement across complete subscription Container Apps and job inventories.
+Both selected applications must appear in their configured environments. Other apps or jobs in those environments reject.
+The four service identities cannot appear on another reported workload by identity, client, principal, or system-principal alias.
+Selected identity resources must match their region, tenant, client, and principal. Their federated-credential inventories must be explicitly empty.
+The stage derives existing service settings and reuses pure placement, identity projection, lifecycle, and sharing verifiers.
+Fresh creation and import checks and bounded live evidence include the stage. Remaining protection and authorization stay uncached.
+Four new checks and nine affected checks pass locally with race detection. No cloud service is contacted.
+See [service workload identity binding](azure-sandbox-service-workloads.md). Acceptance 51 advances; the total remains 48 verified, nine open.
+
 Complete remaining effective-authority and protected network admission, native command role wiring, and deployment packaging next.
 Bind additional declared registry consumers to trusted workload and network ownership.
-Complete workload placement, identity host attachment, additional grants and deny effects, and protected write boundaries.
+Complete controller and remaining identity host attachment, additional grants and deny effects, and protected write boundaries.
+Reported service placement does not establish exclusive identity use across subscriptions, other host types, or deny-hidden resources.
 Keep cross-subscription link visibility and actual DNS hierarchy behavior explicit in separate deployment acceptance.
 Verify actual service acceptance of custom data-action roles and narrow timer grants during the separate deployment phase.
 Keep private registry conversion access and proxy trust as explicit deployment compatibility questions.

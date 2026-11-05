@@ -104,7 +104,8 @@ No cloud service, browser, container, UI build, demo restart, resource mutation,
 ### Complete native activation
 
 Bind additional declared consumers to their actual trusted workloads and network paths.
-Complete identity host attachment, effective grants, deny effects, and protected write boundaries.
+The [service workload stage](azure-sandbox-service-workloads.md) now verifies reported relay and backend identity placement and federation absence.
+Complete controller and remaining identity host attachment, effective grants, deny effects, and protected write boundaries.
 Then wire execution and discovery commands separately and package their dependencies.
 Verify private image conversion, publication, actual pulls, service compatibility, routing, and independent deadlines during separate deployment acceptance.
 

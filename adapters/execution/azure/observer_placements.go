@@ -7,6 +7,12 @@ import (
 )
 
 func verifyObserverPlacements(c Config, s ObserverHostSettings, observed []WorkloadPlacement, kind string) error {
+	return (identityHostBinding{s.Application, c.ControllerEnvironment, s.Identity.Identity, s.Identity.ClientID, s.Identity.PrincipalID}).verify(c, observed, kind)
+}
+
+type identityHostBinding struct{ application, environment, resource, client, principal string }
+
+func (s identityHostBinding) verify(c Config, observed []WorkloadPlacement, kind string) error {
 	if observed == nil || len(observed) > workloadInventoryItems || kind != "containerApps" && kind != "jobs" {
 		return hostedexecution.ErrUnavailable
 	}
@@ -23,11 +29,11 @@ func verifyObserverPlacements(c Config, s ObserverHostSettings, observed []Workl
 		if !placement.IdentityKnown || placement.Identities == nil || len(placement.Identities) > workloadIdentityItems {
 			return hostedexecution.ErrUnavailable
 		}
-		if strings.EqualFold(placement.SystemPrincipalID, s.Identity.PrincipalID) {
+		if strings.EqualFold(placement.SystemPrincipalID, s.principal) {
 			return hostedexecution.ErrOwnership
 		}
-		host := kind == "containerApps" && strings.EqualFold(placement.ResourceID, s.Application)
-		if host && !strings.EqualFold(placement.EnvironmentID, c.ControllerEnvironment) {
+		host := kind == "containerApps" && strings.EqualFold(placement.ResourceID, s.application)
+		if host && !strings.EqualFold(placement.EnvironmentID, s.environment) {
 			return hostedexecution.ErrOwnership
 		}
 		count := 0
@@ -35,8 +41,8 @@ func verifyObserverPlacements(c Config, s ObserverHostSettings, observed []Workl
 			if !workloadIdentityReference(identity.ResourceID) {
 				return hostedexecution.ErrUnavailable
 			}
-			selected := strings.EqualFold(identity.ResourceID, s.Identity.Identity)
-			alias := strings.EqualFold(identity.ClientID, s.Identity.ClientID) || strings.EqualFold(identity.PrincipalID, s.Identity.PrincipalID)
+			selected := strings.EqualFold(identity.ResourceID, s.resource)
+			alias := strings.EqualFold(identity.ClientID, s.client) || strings.EqualFold(identity.PrincipalID, s.principal)
 			if !selected && !alias {
 				continue
 			}
@@ -46,7 +52,7 @@ func verifyObserverPlacements(c Config, s ObserverHostSettings, observed []Workl
 			if identity.ClientID == "" || identity.PrincipalID == "" {
 				return hostedexecution.ErrUnavailable
 			}
-			if !strings.EqualFold(identity.ClientID, s.Identity.ClientID) || !strings.EqualFold(identity.PrincipalID, s.Identity.PrincipalID) {
+			if !strings.EqualFold(identity.ClientID, s.client) || !strings.EqualFold(identity.PrincipalID, s.principal) {
 				return hostedexecution.ErrOwnership
 			}
 			count++

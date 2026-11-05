@@ -122,6 +122,36 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: sandbox reported service workload identity binding
+
+OpenRuntime now constructs SDKServiceWorkloads with the existing metadata identity.
+Creation, source import, and live admission verify complete reported Container Apps and job inventories for the selected subscription.
+The relay and backend must appear in their configured environments. Other apps or jobs in either environment reject.
+The four service identities must appear only on their selected applications, with exact client, principal, identity set, and lifecycle bindings.
+Sharing by identity identifier, client, principal, or system-assigned principal rejects.
+Unknown reported identity metadata stays unavailable. Explicitly unrelated workloads remain permitted.
+The four selected identity resources must match their region, tenant, client, and principal.
+Their four federated-credential inventories must each report one complete empty page.
+
+The stage derives existing service settings and adds no configuration field or deployment resource.
+Shared pure placement, identity projection, lifecycle, and identity-host verifiers preserve the existing observer's behavior.
+The selected service and workload stages share their expected identity maps.
+Workload collections have 512-item and 16-page bounds. The joined observation retains the five-second bound and existing response guards.
+Fresh creation and import observations and bounded shared live evidence preserve uncached protection and authorization.
+Current failures invalidate prior success. Runtime shutdown closes the new reader.
+
+Four new checks and six affected native checks pass with race detection in 2.848 seconds.
+Three existing shared observer-placement checks pass with race detection in 1.830 seconds.
+Evidence is output/azure-sandbox-service-workloads/summary.json, native.log, and shared.log.
+Checks use local SQLite, fake credentials, and in-memory ARM responses.
+No cloud service, browser, container, UI build, demo restart, resource mutation, or remote push is involved.
+The active plan and affected operator guides match the change. User pages do not change.
+
+Reported Container Apps and jobs do not establish exclusive identity use across other subscriptions, host types, or deny-hidden resources.
+Remaining registry consumer network ownership, controller and remaining identity host attachment, effective grants, deny effects, and protected writes remain unfinished.
+Native command wiring, packaging, and separate deployment acceptance remain required.
+Acceptance **51** advances. No acceptance item closes. The total remains **48 verified, 9 open**.
+
 ## Current delivery: sandbox complete reported registry service inventory
 
 OpenRuntime now constructs SDKRegistryService with the existing metadata identity.

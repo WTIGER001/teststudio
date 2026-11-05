@@ -3,6 +3,7 @@
 ## Current boundary
 
 ObserverHostGuard checks the selected controller app's reported observer attachment, identity lifecycle, image, placement, and current revision.
+Its pure identity-sharing verifier is also reused by the independent [sandbox service workload stage](azure-sandbox-service-workloads.md).
 It follows the [reported subscription read-deny check](azure-read-deny.md) through the same bound observer credential.
 Its existing [workload inventory](azure-worker-workloads.md#observer-identity-placement) now rejects reported sharing on another Container App or job without another scan.
 Its identity reader also requires [federated-credential absence](azure-read-identity.md#federated-credential-absence) during bootstrap and each bound inspection.

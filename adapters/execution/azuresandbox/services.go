@@ -132,11 +132,10 @@ func (c *SDKServices) verifyApplication(app a.ContainerApp, revisions []a.Revisi
 	r, b := s.Placement.Services.Relay, s.Placement.Services.Backend
 	application, environment, certificate := r.Application, s.Placement.Private.ExchangeEnvironment, r.Certificate
 	expected := s.relayDefinition()
-	pins := map[string]azureworker.ServiceIdentityPin{r.Pull.Resource: {Client: r.Pull.Client, Principal: r.Pull.Principal, Lifecycle: "None"}}
+	pins := s.serviceWorkloadBinding(backend).Identities
 	if backend {
 		application, environment, certificate = b.Application, b.Environment, ""
 		expected = s.backendDefinition()
-		pins = map[string]azureworker.ServiceIdentityPin{b.Pull.Resource: {Client: b.Pull.Client, Principal: b.Pull.Principal, Lifecycle: "None"}, b.Startup.Resource: {Client: b.Startup.Client, Principal: b.Startup.Principal, Lifecycle: "None"}, b.Runtime.Resource: {Client: b.Runtime.Client, Principal: b.Runtime.Principal, Lifecycle: "Main"}}
 		name := application[strings.LastIndex(application, "/")+1:]
 		if b.Origin != "https://"+name+"."+domain {
 			return hostedexecution.ErrOwnership
