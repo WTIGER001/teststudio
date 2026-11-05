@@ -2,6 +2,8 @@
 
 Each attempt records UTC start and finish times and measured execution milliseconds.
 Native HTTP uses monotonic elapsed time. Go and Playwright use their framework execution durations.
+Go uses valid selected-test event timestamps when its framework rounds elapsed time to zero.
+The source-v2 runtime preserves that precise measurement without replacing genuine zero durations or positive reported durations.
 The final logical test also records total execution milliseconds across its attempts.
 Queue delay, evidence writes, and worker coordination do not enter this measurement.
 Interrupted attempts retain elapsed time. Their timing assessment has a censored status.
@@ -15,6 +17,7 @@ The complete status contract is in `docs/results.md`.
 A baseline belongs to a project, suite, permanent test identifier, environment, execution location, runner, and runtime profile.
 Definition and target fingerprints separate changed assertions, endpoints, and credential references.
 Display labels, catalog releases, source revisions, timing rules, and timeout limits do not reset a baseline.
+Changed runtime measurement or capture behavior requires a new runtime identity. Older observations remain in their original baseline.
 Fingerprints store no resolved credential values.
 
 The default window uses the latest 50 clean observations within 30 days.

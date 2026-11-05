@@ -31,6 +31,29 @@ func TestGoEventsCountOnlyTheExactRegisteredTestAndRetainSubtests(t *testing.T) 
 	}
 }
 
+func TestGoEventsRetainPreciseTimeWhenElapsedRoundsToZero(t *testing.T) {
+	start := time.Date(2026, 11, 5, 14, 0, 0, 0, time.UTC)
+	for _, scenario := range []struct {
+		name       string
+		elapsed    float64
+		interval   time.Duration
+		wantMillis float64
+	}{{"rounded", 0, 750 * time.Microsecond, 0.75}, {"measured-zero", 0, 0, 0}, {"reported-duration", 0.12, time.Millisecond, 120}} {
+		t.Run(scenario.name, func(t *testing.T) {
+			events := NewEvents(gosuite.Entry{Package: ".", Test: "TestRecord"}, nil)
+			finish := start.Add(scenario.interval)
+			for _, event := range []Event{{Time: start, Package: ".", Test: "TestRecord", Action: "run"}, {Time: finish, Package: ".", Test: "TestRecord", Action: "pass", Elapsed: scenario.elapsed}, {Time: finish, Package: ".", Action: "pass"}} {
+				data, _ := json.Marshal(event)
+				events.Line(string(data))
+			}
+			result := events.Result("FAST-GO", 0, false, false)
+			if result.State != "passed" || result.DurationUnavailable || result.DurationMs != scenario.wantMillis || len(result.Steps) != 1 || result.Steps[0].DurationMs != scenario.wantMillis || !result.FinishedAt.Equal(finish) {
+				t.Fatalf("the precise selected test observation was lost: %+v", result)
+			}
+		})
+	}
+}
+
 func TestGoEventFailuresCannotBecomePasses(t *testing.T) {
 	for _, test := range []struct {
 		name, terminal, output, state, kind string

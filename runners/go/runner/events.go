@@ -22,6 +22,7 @@ type Events struct {
 	Finished        bool
 	Start           time.Time
 	Elapsed         float64
+	Finish          time.Time
 	Status          string
 	PackageFailed   bool
 	PackageFinished bool
@@ -85,9 +86,13 @@ func (e *Events) Line(line string) {
 		e.Problem = "Go event duration is invalid."
 		return
 	}
+	duration := event.Elapsed * 1000
+	if event.Test == e.entry.Test && duration == 0 && !e.Start.IsZero() && event.Time.After(e.Start) {
+		duration = float64(event.Time.Sub(e.Start)) / float64(time.Millisecond)
+	}
 	if event.Test == e.entry.Test || strings.HasPrefix(event.Test, e.entry.Test+"/") {
 		if len(e.Steps) < 500 {
-			step := Step{Title: bounded(event.Test, 2048), Category: "go.test", DurationMs: event.Elapsed * 1000}
+			step := Step{Title: bounded(event.Test, 2048), Category: "go.test", DurationMs: duration}
 			if event.Action == "fail" {
 				step.Error = "Go test failed. See the retained event log."
 			}
@@ -104,7 +109,8 @@ func (e *Events) Line(line string) {
 		}
 		e.Finished = true
 		e.Status = event.Action
-		e.Elapsed = event.Elapsed * 1000
+		e.Elapsed = duration
+		e.Finish = event.Time
 	}
 }
 
@@ -118,6 +124,9 @@ func (e *Events) Result(id string, exit int, cancelled, deadline bool) Result {
 	}
 	if e.Finished {
 		r.DurationMs = e.Elapsed
+		if !e.Finish.IsZero() && !e.Finish.Before(r.StartedAt) {
+			r.FinishedAt = e.Finish
+		}
 	}
 	switch {
 	case cancelled:

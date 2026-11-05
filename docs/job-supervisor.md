@@ -146,8 +146,15 @@ The final overlay build has no network-enabled build step and needs no package i
 It compiles only the supervisor and retains the cached Go toolchain or Playwright browser runtime.
 
 The overlay runs as 1000:1000 and installs /runner/teststudio-job as a root-owned executable.
+For a private exchange certificate authority, include its public CA in the approved runtime's certificate bundle before publication.
+Include no private key, registry credential, or worker ticket in that image.
+The supervisor uses normal certificate and hostname validation. Worker Pods need no additional credential mount for this trust.
 It declares teststudio.task-storage=task-volumes/v1 and image volumes at /tmp and /output.
 Both directories belong to 1000:1000. Their modes are 1777 and 0700.
+The source-v2 Playwright runtime supplies a trusted execution configuration for offline and environment-backed suites.
+It writes framework output under /output/playwright-results and applies the frozen screenshot, trace, and video policy across projects.
+Uploaded configurations need no writable directory beneath /suite and no TestStudio-specific capture settings.
+Registered environment profiles still reject uploaded web servers. Restricted API execution still disables opaque media and suite proxy overrides.
 These declarations initialize non-root task-local storage under the [ECS worker contract](ecs-worker-contract.md).
 The remaining runtime and prepared suite stay on the read-only root filesystem.
 It retains the original runner entrypoint, runtime identity, API policy, and source-base labels.

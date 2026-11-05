@@ -7,7 +7,8 @@ Unit suites need no target, browser, network access, or application credentials.
 The installation administrator enables exact images through `--go-images`.
 Publication and execution use the normal catalog, release, run, timing, and evidence APIs.
 Registered HTTP API targets and credential bindings use the separate go-environment profile described below.
-Hosted Go execution and non-HTTP integration bindings remain pending.
+Hosted Go execution uses the protected provider profiles. Non-HTTP integration bindings remain pending.
+See [Kubernetes workers](kubernetes-workers.md) for the actual local cluster verification and remaining provider scope.
 Prepared manifests can now declare a module root and catalog for isolated discovery and normal execution.
 See [Prepared suite inspection](prepared-suites.md) for that contract and its local CLI.
 
@@ -53,6 +54,12 @@ Go's [test2json contract](https://pkg.go.dev/cmd/test2json) defines the event st
 The [test flags](https://pkg.go.dev/cmd/go#hdr-Testing_flags) define selection, count, and timeout behavior.
 
 Test duration excludes compilation and container preparation.
+When Go rounds its reported duration to zero, valid selected-test event timestamps preserve the measured sub-millisecond interval.
+An equal start and finish time remains zero. Positive framework durations remain unchanged.
+The selected test's final event supplies its finish timestamp.
+The source-v2 Go runtime identifies this timing change and starts a separate comparable baseline.
+Rebuild and publish the trusted runtime, then prepare a new suite release to use it.
+Retained runs keep their original runtime and observations.
 Recorded diagnostics retain build duration, toolchain, platform, process exit codes, and output truncation.
 Exit codes remain unavailable when their process never starts.
 A start event moves live progress from preparation to execution.

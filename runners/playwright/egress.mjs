@@ -1,6 +1,5 @@
 import net from 'node:net'
-import fs from 'node:fs'
-import path from 'node:path'
+import { executionConfig } from './execution-config.mjs'
 
 export async function browserEgress(input, context) {
   const socketPath = '/output/.browser-egress.sock'
@@ -32,12 +31,8 @@ export async function browserEgress(input, context) {
   })
   await new Promise((resolve, reject) => { server.once('error', reject); server.listen(0, '127.0.0.1', resolve) })
   const proxy = `http://127.0.0.1:${server.address().port}`
-  const filename = '/tmp/teststudio-environment.config.ts'
-  const directory = path.dirname(context.config)
-  const capture = input.capture
   const restricted = Boolean(input.browser.requests)
   const baseURL = restricted ? proxy : input.browser.origin
-  const use = { baseURL, ...(restricted ? {} : { proxy: { server: proxy } }), serviceWorkers: 'block', screenshot: restricted || capture.screenshots === 'off' ? 'off' : 'on', trace: restricted || capture.trace === 'off' ? 'off' : 'on', video: restricted || capture.video === 'off' ? 'off' : 'on' }
-  fs.writeFileSync(filename, `import suite from ${JSON.stringify(context.config)}\nimport path from 'node:path'\nconst use = ${JSON.stringify(use)}\nconst restricted = ${restricted}\nconst selectedUse = options => { const value = { ...options, ...use }; if (restricted) delete value.proxy; return value }\nconst directory = ${JSON.stringify(directory)}\nif (suite.webServer) throw new Error('The environment browser profile uses a registered target and cannot start a suite web server')\nexport default { ...suite, testDir: path.resolve(directory, suite.testDir || '.'), outputDir: '/tmp/teststudio-browser-results', use: selectedUse(suite.use), projects: (suite.projects || [{}]).map(project => ({ ...project, testDir: path.resolve(directory, project.testDir || suite.testDir || '.'), outputDir: '/tmp/teststudio-browser-results', use: selectedUse({ ...suite.use, ...project.use }) })) }\n`)
+  const filename = executionConfig(context, input.capture, { baseURL, ...(restricted ? {} : { proxy: { server: proxy } }), serviceWorkers: 'block' }, { restricted, environment: true })
   return { config: filename, env: { TESTSTUDIO_BASE_URL: baseURL, ...(restricted ? { TESTSTUDIO_API_BASE_URL: baseURL, ALL_PROXY: '', all_proxy: '' } : {}), HTTP_PROXY: restricted ? '' : proxy, HTTPS_PROXY: restricted ? '' : proxy, http_proxy: restricted ? '' : proxy, https_proxy: restricted ? '' : proxy, NO_PROXY: '', no_proxy: '' }, close: () => { for (const socket of sockets) socket.destroy(); server.close() } }
 }

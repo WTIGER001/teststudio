@@ -1,10 +1,10 @@
 FROM mcr.microsoft.com/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
 ARG TARGETARCH
-LABEL teststudio.runtime="playwright1.64.1-base2f05f8a73450-noble-linux-${TARGETARCH}-selftest-v1"
+LABEL teststudio.runtime="playwright1.64.1-base2f05f8a73450-noble-linux-${TARGETARCH}-selftest-v2"
 WORKDIR /runner
 COPY runners/playwright/package.json runners/playwright/package-lock.json ./
 RUN npm ci --ignore-scripts --omit=dev --no-audit --no-fund
-COPY runners/playwright/run.mjs runners/playwright/reporter.cjs runners/playwright/suite-context.mjs runners/playwright/discovery-reporter.cjs runners/playwright/egress.mjs ./
+COPY runners/playwright/run.mjs runners/playwright/reporter.cjs runners/playwright/suite-context.mjs runners/playwright/discovery-reporter.cjs runners/playwright/egress.mjs runners/playwright/execution-config.mjs ./
 COPY tests/selftest/playwright /suite
 RUN ln -s /runner/node_modules /suite/node_modules && mkdir -p /output && chmod 1777 /output
 COPY .data/selftest-build/teststudio /app/teststudio
