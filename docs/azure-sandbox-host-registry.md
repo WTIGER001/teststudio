@@ -83,7 +83,8 @@ No cloud service, browser, container, UI build, demo restart, or remote push run
 
 ### Continue activation
 
-Complete controller VNet contents, source security rules, routing, resolver association, and database, secret, storage, and control-plane access.
+The [source perimeter](azure-sandbox-host-network.md) now checks VNet contents, source rules, firewall routing, derived HTTPS dependencies, and resolver association.
+Complete database transport, native HTTPS-probe routing, and actual dependency access.
 Complete effective authority, deny effects, protected writes, remaining identity attachment, native command selection, and deployment packaging.
 Keep deployed pulls, private conversion, token behavior, routing, preview compatibility, and independent timer execution in separate deployment acceptance.
 

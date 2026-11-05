@@ -40,7 +40,7 @@ func TestSandboxPlacementReadsSelectedResourcesAndComposesBothAdmissionGates(t *
 	if err := r.Provider.images.admission.BeforeImport(t.Context(), s.Worker, s.PullIdentity); err != nil {
 		t.Fatal(err)
 	}
-	if protection.creates.Load() != 1 || protection.imports.Load() != 1 || len(w.calls) != 128 {
+	if protection.creates.Load() != 1 || protection.imports.Load() != 1 || len(w.calls) != 142 {
 		t.Fatal("native assembly omitted a selected observation or protection gate", protection.creates.Load(), protection.imports.Load(), len(w.calls))
 	}
 	for id := range placementVersions(s) {

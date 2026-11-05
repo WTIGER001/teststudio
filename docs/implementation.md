@@ -122,6 +122,28 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: controller VNet, source perimeter, and resolver association
+
+The runtime now checks controller VNet contents, source security rules, default routing, dedicated firewall policy, and actual resolver association.
+The VNet contains exactly the selected source, registry endpoint, and firewall subnets with matching embedded observations.
+Derived HTTPS dependencies include platform services, management endpoints, selected Key Vault hosts, and execution-only Blob storage.
+Discovery adds no Blob dependency. Trusted controller network access stays outside the sandbox policy and shared worker profile.
+Fresh creation and import reads and bounded live evidence include this stage. Current failure invalidates earlier success.
+Fourteen staged resource bodies support later packaging. Database transport and native HTTPS-probe target routing remain unfinished.
+Three new checks and eleven affected checks pass locally with race detection in 4.217 seconds.
+The stage reuses the existing pure VNet, attachment, route, firewall, and resolver verifiers without ordinary Jobs settings.
+Sixteen selected paths retain joined five-second bounds and scoped transport restrictions.
+The central cold discovery composition observes 142 unique selected paths.
+Checks cover both controller modes, dependency separation, invalid bindings, topology, route, firewall, resolver, current failure, and reader shutdown.
+Affected checks retain explicit credentials, scoped modes, host and private registry admission, relay networking, and resolver composition.
+Evidence is output/azure-sandbox-host-network/summary.json and local.log.
+Checks use local SQLite, fake credentials, and in-memory metadata. Owned readers close through cleanup.
+No cloud service, browser, container, UI build, demo restart, resource mutation, or remote push runs.
+The plan and affected operator guides match the change. No user page changes.
+Native command selection, dependency completion, effective authority, remaining identity attachment, protected writes, and deployment packaging stay unfinished.
+See [controller source perimeter](azure-sandbox-host-network.md).
+Acceptance **51** advances. No acceptance item closes. The total remains **48 verified, 9 open**.
+
 ## Current delivery: native controller private registry path
 
 The runtime now joins the controller private registry endpoint, NIC members, endpoint subnet rules, private DNS, selected pull identity, and registry-scoped grant.

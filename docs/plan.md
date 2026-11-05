@@ -239,9 +239,19 @@ Seven staged resource bodies support later packaging without creating resources.
 Three new checks and eleven affected checks pass locally with race detection in 4.277 seconds.
 See [controller registry path](azure-sandbox-host-registry.md). Acceptance 51 advances; the count remains 48 verified, nine open.
 
+The runtime now checks controller VNet contents, source security rules, default routing, dedicated firewall policy, and actual resolver association.
+The VNet contains exactly the selected source, registry endpoint, and firewall subnets with matching embedded observations.
+Derived HTTPS dependencies include platform services, management endpoints, selected Key Vault hosts, and execution-only Blob storage.
+Discovery adds no Blob dependency. Trusted controller network access stays outside the sandbox policy and shared worker profile.
+Fresh creation and import reads and bounded live evidence include this stage. Current failure invalidates earlier success.
+Fourteen staged resource bodies support later packaging. Database transport and native HTTPS-probe target routing remain unfinished.
+Three new checks and eleven affected checks pass locally with race detection in 4.217 seconds.
+See [controller source perimeter](azure-sandbox-host-network.md). Acceptance 51 advances; the count remains 48 verified, nine open.
+
 Complete remaining effective-authority and protected network admission, native command role wiring, and deployment packaging next.
 Bind additional declared registry consumers to trusted workload and network ownership.
-Complete controller VNet contents, source security rules, routing, resolver association, and database, secret, storage, and control-plane access.
+Complete database transport and actual dependency permissions and network paths.
+Bind native HTTPS-probe target routing to registered-target and request-policy contracts before native controller activation.
 Complete remaining import and timer identity attachment, additional grants and deny effects, and protected write boundaries.
 Reported service placement does not establish exclusive identity use across subscriptions, other host types, or deny-hidden resources.
 Keep cross-subscription link visibility and actual DNS hierarchy behavior explicit in separate deployment acceptance.

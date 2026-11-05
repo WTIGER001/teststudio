@@ -74,6 +74,7 @@ func newPlacementWorld(t *testing.T, s Settings) *placementWorld {
 	w.addBackendEndpoint()
 	w.addRelayNetwork()
 	w.addHostRegistry()
+	w.addHostNetwork()
 	w.addRegistryService()
 	w.addHost()
 	w.addServiceWorkloads()
@@ -120,6 +121,9 @@ func (w *placementWorld) Do(r *http.Request) (*http.Response, error) {
 	if version == "" {
 		version = hostRegistryVersions(w.s)[r.URL.Path]
 	}
+	if version == "" {
+		version = hostNetworkVersions(w.s)[r.URL.Path]
+	}
 	if version == "" && r.URL.Path == "/subscriptions/"+w.s.Worker.Subscription+"/providers/Microsoft.Network/privateDnsZones" {
 		version = "2024-06-01"
 	}
@@ -130,7 +134,7 @@ func (w *placementWorld) Do(r *http.Request) (*http.Response, error) {
 		}
 	}
 	method := "GET"
-	if r.URL.Path == w.s.Placement.virtualNetwork()+"/listDnsResolverPolicies" || r.URL.Path == w.s.Placement.Services.RelayNetwork.virtualNetwork(w.s)+"/listDnsResolverPolicies" {
+	if r.URL.Path == w.s.Host.virtualNetwork()+"/listDnsResolverPolicies" || r.URL.Path == w.s.Placement.virtualNetwork()+"/listDnsResolverPolicies" || r.URL.Path == w.s.Placement.Services.RelayNetwork.virtualNetwork(w.s)+"/listDnsResolverPolicies" {
 		method = "POST"
 	}
 	if r.Method != method || r.URL.Scheme != "https" || r.URL.Host != "management.azure.com" || version == "" || r.URL.RawQuery != "api-version="+version || r.Header.Get("Authorization") != "Bearer placement-metadata-canary" {

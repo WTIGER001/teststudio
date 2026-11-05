@@ -24,6 +24,7 @@ The [service stage](azure-sandbox-services.md) now checks fixed relay and backen
 The [backend endpoint stage](azure-sandbox-backend-endpoint.md) now joins approval, NIC address, network policy, and the existing relay readiness address.
 The [relay network stage](azure-sandbox-relay-network.md) now checks the trusted VNet, egress policy, DNS, private registry endpoint, and selected pull grant.
 The [registry service stage](azure-sandbox-registry-service.md) now checks access policies and complete reported consumer, member, and replication inventories.
+The [controller source stage](azure-sandbox-host-network.md) now checks VNet contents, source rules, firewall routing, derived HTTPS dependencies, and resolver association.
 The [controller registry stage](azure-sandbox-host-registry.md) now checks its private endpoint, DNS, selected pull grant, and reported approval.
 The [controller host stage](azure-sandbox-host.md) now checks fixed execution or discovery definitions, private environments, identity lifecycles, and complete revisions.
 The [service workload stage](azure-sandbox-service-workloads.md) now checks reported relay, backend, and controller occupancy, identity placement, identity resources, and federation absence.
