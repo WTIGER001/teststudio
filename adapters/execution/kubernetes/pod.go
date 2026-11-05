@@ -189,7 +189,7 @@ func statusOf(value pod, record dispatch) (hostedexecution.Status, error) {
 		}
 		status.Phase = "failed"
 		status.ExitCode = exit
-		if record.Stopping {
+		if record.Stopping && (record.Terminal == nil || record.Terminal.Phase == "stopped") {
 			status.Phase = "stopped"
 		} else if exit != nil && *exit == 0 {
 			return status, hostedexecution.ErrOwnership

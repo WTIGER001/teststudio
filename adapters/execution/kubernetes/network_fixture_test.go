@@ -96,6 +96,7 @@ func (n *networkFixture) serve(w http.ResponseWriter, r *http.Request, next http
 		}
 		for _, object := range n.objects {
 			if object.Kind == "NetworkPolicy" {
+				object.Kind, object.APIVersion = "", ""
 				items = append(items, object)
 			}
 		}
@@ -108,6 +109,7 @@ func (n *networkFixture) serve(w http.ResponseWriter, r *http.Request, next http
 		items := []networkObject{}
 		for _, object := range n.objects {
 			if r.URL.Path == f.provider.podsPath() && object.Kind == "Pod" || r.URL.Path == f.provider.networkPath("Service", "") && object.Kind == "Service" {
+				object.Kind, object.APIVersion = "", ""
 				items = append(items, object)
 			}
 		}
@@ -115,7 +117,7 @@ func (n *networkFixture) serve(w http.ResponseWriter, r *http.Request, next http
 			f.mu.Lock()
 			if f.value != nil {
 				v := f.value
-				items = append(items, networkObject{APIVersion: v.APIVersion, Kind: v.Kind, Metadata: v.Metadata, Spec: v.Spec})
+				items = append(items, networkObject{Metadata: v.Metadata, Spec: v.Spec})
 			}
 			f.mu.Unlock()
 		}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "teststudio.catalog/v1",
+  "tests": [{
+    "id": "NET-BROWSER-001",
+    "title": "Load availability from the registered application",
+    "description": "Exercise a real local application through the hosted gateway",
+    "category": "Gateway integration",
+    "applicationId": "gateway-fixture",
+    "type": "browser",
+    "runner": "playwright",
+    "state": "enabled",
+    "safety": "safe",
+    "rationale": "Reads only the independent local fixture",
+    "timeoutSeconds": 30,
+    "source": "browser/availability.spec.ts",
+    "selector": "@NET-BROWSER-001",
+    "capture": { "logs": true, "screenshots": "always", "trace": "always", "video": "off" }
+  }]
+}

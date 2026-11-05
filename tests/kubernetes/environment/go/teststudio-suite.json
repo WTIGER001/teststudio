@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "suiteId": "go-api-network",
+  "type": "api",
+  "runner": "go",
+  "applications": ["gateway-fixture"],
+  "moduleRoot": "module",
+  "tests": { "packages": ["./checks"] },
+  "catalog": "catalog.json",
+  "buildProfile": "go-environment",
+  "requiredBindings": ["reader"],
+  "browser": {
+    "endpoint": "api",
+    "requests": {
+      "authentication": { "binding": "reader", "scheme": "bearer" },
+      "rules": [{ "method": "GET", "pathPrefix": "/api/private/status", "readOnly": true, "maxBodyBytes": 0 }],
+      "maxRequests": 5,
+      "maxResponseBytes": 4096
+    }
+  }
+}

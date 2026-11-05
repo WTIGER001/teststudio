@@ -75,6 +75,36 @@ No image rebuild, cluster deployment, cloud test, browser session, or catalog ru
 The next step is the first actual browser and coded API flows on the dedicated local cluster.
 The count remains 50 of 57. This advances 41, 51, 56, and 57 without closing their full deployment scope.
 
+## Actual Kubernetes application networking — 2026-11-05
+
+The dedicated local installation now passes newly authored environment-backed Go API and Playwright browser suites.
+Normal OIDC sign-in, source upload, isolated discovery, reviewed publication, execution, and private evidence use the installed product APIs.
+Helm revision 14 preserves PostgreSQL, shared evidence, both identity providers, and two execution controllers.
+
+The API run is 20261105T190135.888651628-f45615b1da24f0d003db1922. Its measured logical duration is 20 ms.
+It verifies authenticated HTTPS, reflected-credential redaction, rejected methods and paths, and denial of direct worker access to the target.
+Seven private artifacts pass size, checksum, and credential-absence checks.
+
+The browser run is 20261105T190237.146588449-543e82e7b812fb2d345278ba. Its measured logical duration is 263 ms.
+It opens the independent local HTTP application, clicks its availability button, and checks the returned item count.
+Eight private artifacts pass verification. Screenshots and a trace survive, including archive-content checks for the fixture credential.
+Visual inspection confirms the screenshot shows ready: 3 items.
+
+Both execution records reach cleaned. The runner Pods, gateway Pods, headless Services, and execution policies are absent.
+CRI reports no running worker or gateway container. Temporary publisher archives and credential directories are absent.
+The twelve existing offline run identifiers remain unchanged. No host browser, AWS test, or Azure test runs.
+
+Actual integration fixes remove the stale targetless-suite discovery restriction and permit Docker's exact standard gateway PATH.
+Typed Kubernetes list responses now restore omitted item types from their requested endpoints while rejecting conflicting explicit types.
+Stopping a gateway preserves its worker's recorded failure outcome. The upgraded controller cleans the retained failed execution without another dispatch.
+The local proxy policy now admits the trusted gateway role. A smaller idle preparation CPU reservation lets one worker and gateway fit together.
+
+Targeted source, registry, bundle lifecycle, and failed-worker cleanup regression checks pass.
+Only the changed service image rebuilds after concrete fixes. Runtime images and existing offline checks remain reused.
+See [local gateway verification](local-kubernetes-gateway.md), output/local-k3s/gateway, and [deployment readiness](deployment-readiness.md).
+This advances **41, 51, 56, and 57**. The total remains **50 verified, 7 open**.
+Gateway cancellation and interrupted-run recovery remain the next targeted local scenarios. Azure stays deferred.
+
 ## Active application navigation correction — 2026-11-04
 
 The sidebar now has one project selector and an explicit application selector.

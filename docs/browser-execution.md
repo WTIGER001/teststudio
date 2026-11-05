@@ -2,6 +2,9 @@
 
 Use this local profile to run reviewed Playwright source against one registered application environment.
 The offline starter keeps its separate execution profile.
+Configured Kubernetes installations now support the same reviewed environment binding through a trusted remote gateway.
+See [local Kubernetes networking](local-kubernetes-gateway.md) for verified browser execution and operator configuration.
+Recording on a hosted installation still needs the planned local companion.
 
 ## Tester workflow
 

@@ -7,8 +7,11 @@ It connects to the [private initialization authority](remote-gateway.md) and exi
 Targeted local HTTP protocol checks pass. The changed lifecycle checks also pass with the race detector.
 Normal executor admission, source assembly, discovery admission, registry capability inspection, and opt-in Helm configuration are now implemented.
 Targeted local checks cover the managed result lifecycle and reject unsupported runtime capabilities.
-The dedicated local cluster still needs the changed images, installation upgrade, and actual browser and coded API scenarios.
-This component does not prove actual Kubernetes execution or close deployment acceptance.
+The changed images now publish to the local registry, and the dedicated installation upgrades with the optional gateway profile.
+Actual browser and authenticated HTTPS API scenarios now pass on the dedicated local installation.
+Both retain measured durations, complete private evidence, and cleaned resource bundles.
+See [local application networking](local-kubernetes-gateway.md) for retained checkpoints and continuation commands.
+These local scenarios do not close the broader deployment acceptance criteria.
 Azure remains deferred.
 
 ## Owned resources
@@ -51,6 +54,8 @@ Normal controller recovery revokes work and stops the existing bundle. It does n
 Every resource must match its kind, namespace, full execution reference, specification hash, labels, deadline, and recorded UID.
 Normal Kubernetes Service defaults are normalized before comparison.
 Changes to resource identity or specification remain ownership failures.
+Typed list responses can omit item kind and API version.
+The provider restores those fields from the requested resource endpoint and rejects conflicting explicit values.
 Namespace policy inspection permits the base policy and only journal-verified execution policies.
 An unrecognized additional policy invalidates admission.
 
@@ -99,6 +104,8 @@ The server certificate must cover the generated gateway Service host under the w
 The optional workers.gateway.caSecret names the public gateway CA Secret in the application namespace.
 It supplies ca.crt to the API and controller. Those processes receive no gateway server private key.
 The chart creates the separate gateway service account. It creates no certificate material.
+The private exchange ingress must permit trusted gateways as well as isolated workers.
+For a dedicated proxy policy, add the gateway-v1 worker label within the selected worker namespace on its configured TLS port.
 
 secretBindings.existingSecret names an application-namespace Secret containing bindings.json and its referenced credential files.
 Use absolute file references under /etc/teststudio-secrets in that project-scoped binding catalog.

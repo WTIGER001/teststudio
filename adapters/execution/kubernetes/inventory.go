@@ -116,6 +116,10 @@ func (p *Provider) Inventory(ctx context.Context, installation, profile string) 
 			return nil, hostedexecution.ErrUnavailable
 		}
 		for _, value := range list.Items {
+			if value.Kind != "" && value.Kind != "Pod" || value.APIVersion != "" && value.APIVersion != "v1" {
+				return nil, hostedexecution.ErrOwnership
+			}
+			value.Kind, value.APIVersion = "Pod", "v1"
 			var ref execution.Reference
 			if len(value.Metadata.Annotations[ownerAnnotation]) > 4096 || json.Unmarshal([]byte(value.Metadata.Annotations[ownerAnnotation]), &ref) != nil || !validReference(ref) || ref.Installation != installation || ref.Profile != profile || value.Metadata.Name != ref.Container || value.Metadata.Namespace != p.config.Namespace || value.Metadata.UID == "" || len(value.Metadata.OwnerReferences) != 0 {
 				return nil, hostedexecution.ErrOwnership

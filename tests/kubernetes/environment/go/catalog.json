@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "teststudio.catalog/v1",
+  "tests": [{
+    "id": "NET-API-001",
+    "title": "Read authenticated status through the reviewed policy",
+    "description": "Check HTTPS credentials, reflected-secret redaction, and request boundaries",
+    "category": "Gateway integration",
+    "applicationId": "gateway-fixture",
+    "type": "api",
+    "runner": "go",
+    "state": "enabled",
+    "safety": "safe",
+    "rationale": "Reads only the private fixture status and checks denied requests",
+    "requiredBindings": ["reader"],
+    "timeoutSeconds": 20,
+    "source": "module/checks/status_test.go",
+    "selector": "./checks::TestStatus",
+    "capture": { "logs": true, "screenshots": "off", "trace": "off", "video": "off" }
+  }]
+}

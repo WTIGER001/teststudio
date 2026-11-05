@@ -64,7 +64,7 @@ func (s *Service) AuthorizeDiscovery(ctx context.Context, ref execution.Referenc
 		return workerstate.Access{}, err
 	}
 	suite, err := storage.Decode[projects.Suite](suiteRow)
-	if err != nil || suite.Archived || suite.RequiresTarget {
+	if err != nil || suite.Archived {
 		return workerstate.Access{}, storage.ErrConflict
 	}
 	deadline := job.StartedAt.Add(5 * time.Minute)

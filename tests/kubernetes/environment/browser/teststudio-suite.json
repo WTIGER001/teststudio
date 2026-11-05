@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "suiteId": "browser-network",
+  "type": "browser",
+  "runner": "playwright",
+  "applications": ["gateway-fixture"],
+  "moduleRoot": "browser",
+  "tests": { "project": "chromium", "config": "playwright.config.ts" },
+  "catalog": "catalog.json",
+  "buildProfile": "playwright-environment",
+  "browser": { "endpoint": "api" }
+}

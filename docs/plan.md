@@ -90,12 +90,12 @@ Cloud-wide acceptance remains separate. Continue independent remaining product w
 
 ### Current queue after the deployment audit
 
-The current code still rejects environment-backed hosted browser and API artifacts because no trusted remote gateway is wired.
-The local Docker gateway and desktop recorder do not provide that hosted path.
-This is implementation work, not a reason to repeat offline runner checks or wait for an Azure account.
+Kubernetes now runs environment-backed browser and coded API artifacts through its trusted gateway.
+Both actual local cluster workflows pass with measured durations, private evidence, and complete resource cleanup.
+ECS still needs the shared gateway integration. Hosted recording still needs its local companion.
 
-1. Implement the Kubernetes trusted gateway using the current target, request-policy, credential, redaction, and durable execution contracts.
-2. Verify one new environment-backed browser and coded API flow on the dedicated local cluster, with targeted boundary and lifecycle checks.
+1. Keep the completed Kubernetes gateway and its two passing application workflows as retained evidence.
+2. Verify only the new gateway cancellation and interrupted-run recovery boundaries on the dedicated local cluster.
 3. Port the completed shared gateway contract to ECS packaging and adapters using local contract checks.
 4. Add a scoped local recorder companion for hosted authoring, preserving the existing wizard and source workflow.
 5. Complete target verification only in separately authorized deployment work. Keep Azure implementation deferred.
@@ -109,9 +109,18 @@ The [Kubernetes gateway bundle](kubernetes-gateway.md) now owns both workloads, 
 Its local checks cover identity, readiness, lost acknowledgements, partial creation, shutdown, inventory, and guarded cleanup.
 Normal executor and discovery admission, gateway image capability inspection, service-role secrets and authority, and opt-in Helm configuration are now implemented.
 New timing profiles include the supervisor build revision and gateway identity.
-Next build each changed image once, upgrade the dedicated local installation, and verify one browser and one coded API flow.
-Include only changed-boundary policy, credential, cancellation, recovery, and cleanup checks. Reuse existing offline evidence.
-Do not rebuild runtime images or deploy the gateway before that dispatch path exists.
+Changed images now build and publish. Helm revision 14 runs the corrected gateway profile on the dedicated local installation.
+New API and browser runs pass in 20 ms and 263 ms, with seven and eight verified private artifacts.
+The API scenario checks credential injection, reflected-secret redaction, reviewed methods and paths, and direct-egress denial.
+The browser scenario loads the independent local HTTP application and captures screenshots and a trace.
+Every owned worker, gateway, Service, and execution policy is absent after cleanup. The twelve original offline runs remain unchanged.
+Integration fixes cover target-suite discovery authorization, Docker's exact default PATH, typed list responses, and stable failure cleanup.
+The local proxy permits the new trusted gateway role. The local preparation CPU reservation permits a worker and gateway to fit together.
+The upgraded controller also cleans the retained failed execution without another dispatch.
+Retain unsuccessful attempts and both passing run identifiers in output/local-k3s/gateway/references.json.
+Continue only the changed-boundary cancellation and interrupted-run recovery checks before the ECS gateway port.
+Reuse existing offline and passing gateway evidence. Build only images affected by an actual implementation change.
+See [local gateway verification](local-kubernetes-gateway.md) for exact continuation commands and remaining scope.
 Read [deployment readiness](deployment-readiness.md) before the historical Azure continuation material below.
 Do not remove admission barriers or grant uploaded code direct target egress to bypass the missing gateway.
 

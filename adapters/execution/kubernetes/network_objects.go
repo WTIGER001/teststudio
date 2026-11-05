@@ -49,6 +49,18 @@ func normalizedNetworkSpec(kind string, input map[string]any, seconds int, stopp
 	return spec, nil
 }
 
+func networkListObject(value networkObject, kind string) (networkObject, error) {
+	api := "v1"
+	if kind == "NetworkPolicy" {
+		api = "networking.k8s.io/v1"
+	}
+	if value.Kind != "" && value.Kind != kind || value.APIVersion != "" && value.APIVersion != api {
+		return value, hostedexecution.ErrOwnership
+	}
+	value.Kind, value.APIVersion = kind, api
+	return value, nil
+}
+
 func resourceIndex(record dispatch, kind, name string) int {
 	if record.Network == nil {
 		return -1
@@ -138,6 +150,10 @@ func (p *Provider) checkPolicies(ctx context.Context) error {
 	}
 	base := false
 	for _, value := range list.Items {
+		value, err := networkListObject(value, "NetworkPolicy")
+		if err != nil {
+			return err
+		}
 		if value.Metadata.Name == p.config.PolicyName {
 			if base {
 				return hostedexecution.ErrConfiguration

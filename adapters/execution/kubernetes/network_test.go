@@ -82,6 +82,35 @@ func TestNetworkBundleBindsGatewayBeforeActivationAndCleansBothWorkloads(t *test
 	n.assertNoRepeatedCreation(t)
 }
 
+func TestNetworkBundleCleansARecordedFailedWorkerWithoutChangingItsOutcome(t *testing.T) {
+	n := newNetworkFixture(t)
+	p, ref := n.base.provider, n.job.Reference
+	if err := p.Ensure(t.Context(), n.job); err != nil {
+		t.Fatal(err)
+	}
+	n.initialize(t)
+	n.base.mu.Lock()
+	n.base.value.Status.Phase = "Failed"
+	setExit(n.base.value, 2)
+	n.base.mu.Unlock()
+	status, err := p.Observe(t.Context(), ref)
+	if err != nil || status.Phase != "failed" || status.ExitCode == nil || *status.ExitCode != 2 {
+		t.Fatal("worker failure was not retained", status, err)
+	}
+	if err := p.Stop(t.Context(), ref); err != nil {
+		t.Fatal("recorded failure prevented gateway shutdown", err)
+	}
+	status, err = p.Observe(t.Context(), ref)
+	if err != nil || status.Phase != "failed" || status.ExitCode == nil || *status.ExitCode != 2 {
+		t.Fatal("cleanup changed the recorded worker failure", status, err)
+	}
+	n.checkpoint(t)
+	if err := p.Remove(t.Context(), ref); err != nil {
+		t.Fatal("recorded failure prevented bundle cleanup", err)
+	}
+	n.assertNoRepeatedCreation(t)
+}
+
 func TestNetworkBundleRecoversLostGatewayAcknowledgementWithoutAnotherCreate(t *testing.T) {
 	n := newNetworkFixture(t)
 	n.lostGatewayAck = true

@@ -7,13 +7,15 @@ import (
 )
 
 func TestRegistryGatewayRequiresPinnedPlatformAndPrivateDeliveryCapabilities(t *testing.T) {
-	for _, mode := range []string{"valid", "old protocol", "source entrypoint", "root", "environment", "source ownership"} {
+	for _, mode := range []string{"valid", "default path", "old protocol", "source entrypoint", "root", "environment", "custom path", "extra environment", "source ownership"} {
 		t.Run(mode, func(t *testing.T) {
 			f := fresh(t, "go", false, func(c *configuration, _ *manifest) {
 				c.Config.WorkingDir = ""
 				c.Config.Entrypoint = []string{"/gateway"}
 				c.Config.Labels = map[string]string{"teststudio.gateway-remote": browsergateway.RemoteProtocol, "teststudio.api-policy": "request-policy/v1", "teststudio.api-credentials": "gateway-injection/v1", "teststudio.gateway-config": "private-config/v1"}
 				switch mode {
+				case "default path":
+					c.Config.Env = []string{"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"}
 				case "old protocol":
 					c.Config.Labels["teststudio.gateway-remote"] = "unsupported/v0"
 				case "source entrypoint":
@@ -22,12 +24,16 @@ func TestRegistryGatewayRequiresPinnedPlatformAndPrivateDeliveryCapabilities(t *
 					c.Config.User = "0:0"
 				case "environment":
 					c.Config.Env = []string{"PRIVATE_VALUE=fixture-canary"}
+				case "custom path":
+					c.Config.Env = []string{"PATH=/untrusted"}
+				case "extra environment":
+					c.Config.Env = []string{"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", "SSL_CERT_FILE=/untrusted/ca.crt"}
 				case "source ownership":
 					c.Config.Labels["teststudio.project"] = "untrusted-project"
 				}
 			})
 			image, err := f.client.InspectGateway(t.Context(), f.reference)
-			if mode != "valid" {
+			if mode != "valid" && mode != "default path" {
 				if err == nil {
 					t.Fatal("unsafe gateway image admitted", mode)
 				}

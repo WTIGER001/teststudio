@@ -11,9 +11,13 @@ import (
 
 	workerclient "github.com/wtiger001/teststudio/adapters/workerexchange/client"
 	workerhttp "github.com/wtiger001/teststudio/adapters/workerexchange/http"
+	"github.com/wtiger001/teststudio/internal/apipolicy"
+	"github.com/wtiger001/teststudio/internal/browsergateway"
+	"github.com/wtiger001/teststudio/internal/browserpolicy"
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
 	"github.com/wtiger001/teststudio/internal/preparation"
+	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/sources"
 	"github.com/wtiger001/teststudio/internal/storage"
 	"github.com/wtiger001/teststudio/internal/workerexchange"
@@ -44,7 +48,11 @@ type discoveryProvider struct {
 }
 
 func (p *discoveryProvider) InspectImage(_ context.Context, image string) (hostedexecution.Image, error) {
-	return hostedexecution.Image{Reference: image, Project: "alpha", SourceDigest: p.builder.digest, Runner: "go", Runtime: "go-discovery-fixture-v1", OS: "linux", Architecture: "arm64", Supervisor: "worker-exchange/v1", Discovery: "worker-exchange/v1"}, nil
+	value := hostedexecution.Image{Reference: image, Project: "alpha", SourceDigest: p.builder.digest, Runner: "go", Runtime: "go-discovery-fixture-v1", OS: "linux", Architecture: "arm64", Supervisor: "worker-exchange/v1", Discovery: "worker-exchange/v1"}
+	if p.mode == "environment" {
+		value.GatewayTransport, value.SupervisorRevision, value.APIPolicy = browsergateway.RemoteProtocol, strings.Repeat("a", 64), "request-policy/v1"
+	}
+	return value, nil
 }
 
 func (p *discoveryProvider) Ensure(_ context.Context, job hostedexecution.Job) error {
@@ -88,6 +96,13 @@ func (p *discoveryProvider) Observe(ctx context.Context, ref execution.Reference
 			return hostedexecution.Status{}, err
 		}
 		result.Discovery.Origin = p.builder.origin
+		if p.mode == "environment" {
+			result.Discovery.Manifest.Type, result.Discovery.Manifest.BuildProfile = "api", "go-environment"
+			result.Discovery.Manifest.Browser = &browserpolicy.Spec{Endpoint: "api", Requests: &apipolicy.Spec{Rules: []apipolicy.Rule{{Method: "GET", PathPrefix: "/status", ReadOnly: true}}, MaxRequests: 1, MaxResponseBytes: 4096}}
+			for index := range result.Discovery.Catalog.Tests {
+				result.Discovery.Catalog.Tests[index].Type = "api"
+			}
+		}
 		if p.mode == "wrong-source" {
 			result.Discovery.Origin.SnapshotDigest = "sha256:" + strings.Repeat("f", 64)
 		}
@@ -222,6 +237,28 @@ func TestHostedReadyPreparationCanCancelBeforeDeferredCleanup(t *testing.T) {
 	finished := recoverHostedPreparation(t, s, ready.ID)
 	if finished.State != "cancelled" || finished.CleanupPending || provider.created != 1 || provider.removed != 1 {
 		t.Fatal("cancelled discovery was redispatched or left without cleanup", finished)
+	}
+}
+
+func TestHostedTargetSuiteDiscoversOfflineBeforeReviewedPublication(t *testing.T) {
+	s, provider := hostedPreparation(t, "environment")
+	row, err := s.Store.Get(t.Context(), projects.Bucket("suites", "alpha"), "health")
+	if err != nil {
+		t.Fatal(err)
+	}
+	suite, _ := storage.Decode[projects.Suite](row)
+	suite.RequiresTarget = true
+	change, _ := storage.Put(row.Bucket, row.ID, row.Project, row.Revision, suite)
+	if err := s.Store.CommitAll(t.Context(), change); err != nil {
+		t.Fatal(err)
+	}
+	queued, _ := enqueueZIP(t, s, "target-suite-discovery")
+	_, ready := processBundle(t, s, queued.ID)
+	if ready.State != "ready" || provider.created != 1 || provider.discovered != 1 || provider.deliveryError != nil || provider.job.Reference.Gateway != "" || provider.job.Operation != "discover" {
+		t.Fatal("target suite did not reach offline discovery and review", ready.State, ready.Error, provider.deliveryError)
+	}
+	if rows, _ := s.Store.All(t.Context(), "runs", "alpha"); len(rows) != 0 {
+		t.Fatal("catalog discovery dispatched test execution")
 	}
 }
 

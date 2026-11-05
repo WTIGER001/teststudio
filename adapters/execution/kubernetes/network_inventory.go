@@ -33,6 +33,10 @@ func (p *Provider) networkInventory(ctx context.Context, installation, profile s
 				return nil, hostedexecution.ErrUnavailable
 			}
 			for _, value := range list.Items {
+				value, err := networkListObject(value, kind)
+				if err != nil {
+					return nil, err
+				}
 				ref, err := p.inventoryNetworkObject(ctx, kind, value, installation, profile)
 				if err != nil {
 					return nil, err

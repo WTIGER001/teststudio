@@ -12,6 +12,9 @@ API diagnostics now redact sensitive text and JSON before retention, including d
 Environment-backed credential injection now supports Bearer, Basic, and approved API-key headers through the trusted local gateway.
 Environment-backed Go clients use the same guarded gateway through the go-environment profile.
 Acceptance 35 is verified for the implemented local profiles. Hosted verification remains separate.
+The configured Kubernetes gateway now passes an actual authenticated HTTPS Go suite on the dedicated local cluster.
+This includes credential reflection redaction, request-policy denial, measured timing, complete private evidence, and resource cleanup.
+See [local Kubernetes networking](local-kubernetes-gateway.md). ECS gateway integration and Azure work remain separate.
 See [Go API execution](go-testing.md#guarded-go-api-execution) for source bundles and operator setup.
 
 ## Create an API draft

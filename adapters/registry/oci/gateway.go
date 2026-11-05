@@ -22,7 +22,8 @@ func (c *Client) InspectGateway(ctx context.Context, reference string) (hostedex
 	}
 	config := document.configuration
 	labels := config.Config.Labels
-	if !slices.Equal(config.Config.Entrypoint, []string{"/gateway"}) || len(config.Config.Cmd) != 0 || len(config.Config.Env) != 0 || len(config.Config.Volumes) != 0 || config.Config.WorkingDir != "" && config.Config.WorkingDir != "/" || labels["teststudio.gateway-remote"] != browsergateway.RemoteProtocol || labels["teststudio.api-policy"] != "request-policy/v1" || labels["teststudio.api-credentials"] != "gateway-injection/v1" || labels["teststudio.gateway-config"] != "private-config/v1" {
+	defaultEnvironment := len(config.Config.Env) == 0 || slices.Equal(config.Config.Env, []string{"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"})
+	if !slices.Equal(config.Config.Entrypoint, []string{"/gateway"}) || len(config.Config.Cmd) != 0 || !defaultEnvironment || len(config.Config.Volumes) != 0 || config.Config.WorkingDir != "" && config.Config.WorkingDir != "/" || labels["teststudio.gateway-remote"] != browsergateway.RemoteProtocol || labels["teststudio.api-policy"] != "request-policy/v1" || labels["teststudio.api-credentials"] != "gateway-injection/v1" || labels["teststudio.gateway-config"] != "private-config/v1" {
 		return hostedexecution.GatewayImage{}, ErrInvalid
 	}
 	for _, key := range []string{"teststudio.runtime", "teststudio.project", "teststudio.installation", "teststudio.preparation", "teststudio.source"} {
