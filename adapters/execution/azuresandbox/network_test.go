@@ -43,7 +43,7 @@ func TestSandboxNetworkPolicyRestrictsPrivateConnectionWithoutJobPlatformRules(t
 				t.Fatal("DNS is not constrained to the selected platform resolver")
 			}
 		case "sandbox-private-https":
-			if p["protocol"] != "Tcp" || p["destinationPortRange"] != "443" || hash(p["destinationAddressPrefixes"]) != hash([]string{"10.48.6.10", "10.48.6.11"}) {
+			if p["protocol"] != "Tcp" || p["destinationPortRange"] != "443" || hash(p["destinationAddressPrefixes"]) != hash([]string{"10.48.6.10", "10.48.6.11", "10.48.6.12"}) {
 				t.Fatal("private HTTPS destinations widened")
 			}
 		default:
@@ -143,7 +143,7 @@ func TestSandboxNetworkFreshAdmissionInvalidatesBoundedRunningEvidence(t *testin
 	s := runtimeSettings()
 	w := newPlacementWorld(t, s)
 	private := networkEntries(w, s.Placement.SecurityGroup, "securityRules")[4].(map[string]any)["properties"].(map[string]any)
-	private["destinationAddressPrefixes"] = []string{"10.48.6.11", "10.48.6.10"}
+	private["destinationAddressPrefixes"] = []string{"10.48.6.12", "10.48.6.11", "10.48.6.10"}
 	reader, err := NewSDKNetwork(s, &runtimeCredential{token: "placement-metadata-canary"}, w)
 	if err != nil {
 		t.Fatal(err)

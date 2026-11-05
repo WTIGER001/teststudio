@@ -30,6 +30,7 @@ type Runtime struct {
 	placement *SDKPlacement
 	authority *SDKAuthority
 	network   *SDKNetwork
+	private   *SDKPrivate
 	once      sync.Once
 }
 
@@ -86,7 +87,11 @@ func OpenRuntime(o RuntimeOptions) (result *Runtime, resultErr error) {
 	if err != nil {
 		return nil, err
 	}
-	admission := &placementAdmission{placement: r.placement, authority: r.authority, network: r.network, protection: o.Admission, importProtection: o.ImageAdmission}
+	r.private, err = NewSDKPrivate(s, metadata, o.ARMTransport)
+	if err != nil {
+		return nil, err
+	}
+	admission := &placementAdmission{placement: r.placement, authority: r.authority, network: r.network, private: r.private, protection: o.Admission, importProtection: o.ImageAdmission}
 	controller, err := NewController(ControllerOptions{Config: s.Worker, Instances: r.client, Deadlines: r.deadlines, Admission: admission, Exchange: o.Exchange, Commands: r.client})
 	if err != nil {
 		return nil, err
@@ -126,6 +131,9 @@ func (r *Runtime) Close() {
 		}
 		if r.network != nil {
 			r.network.Close()
+		}
+		if r.private != nil {
+			r.private.Close()
 		}
 		if r.client != nil {
 			r.client.Close()

@@ -122,7 +122,37 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: sandbox connection rules and routes
+## Current delivery: sandbox private endpoint and DNS bindings
+
+OpenRuntime now constructs SDKPrivate with the existing metadata identity.
+Creation, source import, and live admission require selected endpoint, NIC, endpoint subnet, security group, and private DNS observations.
+The allowed address set must exactly match registry login, regional registry data, and private exchange NIC addresses.
+The endpoints report the expected registry and relay environment services, approved connections, and selected interfaces.
+The endpoint subnet contains only the selected endpoint and NIC IP configuration references.
+Its complete security rules permit inbound HTTPS only from the execution subnet to the selected addresses.
+
+Complete bounded inventories verify the two selected zones' records and links.
+Expected A records, SOA metadata, short TTL bounds, exact VNet links, and reported counts must agree.
+Aliases, wildcards, duplicates, automatic registration, public fallback, and unrelated records reject.
+Pagination retains the selected host, path, version, and one bounded skip token.
+Unsafe continuations reject before credentials. Missing, oversized, duplicate, looping, or unfinished inventories return no partial evidence.
+The sandbox-placement/v3 profile binds private service, endpoint, subnet, address, and DNS settings.
+PrivateDNSDefinitions supplies seven reviewable resource bodies without mutation.
+Existing endpoint, NIC, subnet, and DNS verifiers are reused through independent bindings without Jobs configuration.
+
+Fresh creation and import observations and bounded shared live evidence preserve uncached protection and current worker authorization.
+Five new focused checks and twenty-three affected checks pass with race detection in 2.559 seconds.
+One initial runtime admission check passes before that regression run.
+Evidence is output/azure-sandbox-private/summary.json and targeted.log.
+No cloud service, credential endpoint, browser, container, UI build, demo restart, resource mutation, or remote push is involved.
+The plan and relevant operator guides match the change. No user page behavior changes.
+
+Effective DNS resolution, other linked zones, topology, firewall enforcement, trusted exchange service ownership, additional authority, host attachment, and deny effects remain unfinished.
+Native command wiring and packaging remain unfinished. Actual preview compatibility remains separate deployment verification.
+No native command or deployment template enables this runtime.
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+## Previous delivery: sandbox connection rules and routes
 
 OpenRuntime now constructs SDKNetwork with the selected metadata identity.
 Creation and source import obtain fresh selected security-group and route-table observations.

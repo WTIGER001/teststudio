@@ -17,6 +17,7 @@ type placementWorld struct {
 	resources map[string]map[string]any
 	calls     map[string]int
 	status    int
+	pages     map[string]map[string]any
 }
 
 func newPlacementWorld(t *testing.T, s Settings) *placementWorld {
@@ -66,6 +67,7 @@ func newPlacementWorld(t *testing.T, s Settings) *placementWorld {
 		}
 		put(id, kind, c.Region, props)
 	}
+	w.addPrivate()
 	return w
 }
 
@@ -79,6 +81,9 @@ func (w *placementWorld) Do(r *http.Request) (*http.Response, error) {
 	if version == "" {
 		version = networkVersions(w.s)[r.URL.Path]
 	}
+	if version == "" {
+		version = privateVersions(w.s)[r.URL.Path]
+	}
 	if r.Method != "GET" || r.URL.Scheme != "https" || r.URL.Host != "management.azure.com" || version == "" || r.URL.RawQuery != "api-version="+version || r.Header.Get("Authorization") != "Bearer placement-metadata-canary" {
 		w.t.Error("placement request escaped its selected identity or resource")
 		return response(403, `{}`), nil
@@ -86,6 +91,9 @@ func (w *placementWorld) Do(r *http.Request) (*http.Response, error) {
 	w.calls[r.URL.Path]++
 	if w.status != 0 {
 		return response(w.status, `{"error":{"code":"Unavailable","message":"sensitive-provider-canary"}}`), nil
+	}
+	if page, ok := w.pages[r.URL.Path]; ok {
+		return jsonResponse(page), nil
 	}
 	return jsonResponse(w.resources[r.URL.Path]), nil
 }

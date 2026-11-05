@@ -111,7 +111,8 @@ No cloud account, identity endpoint, registry service, role mutation, browser, c
 ### Complete deployment admission
 
 Verify effective assignments and exclusions, deny effects, identity host attachment, and protection from unintended identity reuse.
-Complete private exchange ownership, security-rule contents, route contents, DNS, and protected network bindings.
+The network and private stages now check selected rules, routes, endpoint ownership, and complete selected DNS inventories.
+Complete trusted exchange service ownership, effective DNS resolution, topology, firewall enforcement, and protected network bindings.
 Then wire the execution and discovery roles to native commands and package their resources.
 Verify custom sandbox data-action roles and the narrow timer roles with the actual service during the separate deployment phase.
 The published operation catalog supplies permission names. It does not prove preview-service compatibility or effective installation access.

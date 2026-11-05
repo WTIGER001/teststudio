@@ -20,6 +20,7 @@ type PlacementSettings struct {
 	PullPrincipalID string          `json:"pullPrincipalId"`
 	PolicyProfile   string          `json:"policyProfile"`
 	Network         NetworkSettings `json:"network"`
+	Private         PrivateSettings `json:"private"`
 }
 
 func resourceID(c Config, id, provider, kind string) bool {
@@ -27,8 +28,8 @@ func resourceID(c Config, id, provider, kind string) bool {
 	return len(p) == 9 && p[0] == "" && p[1] == "subscriptions" && p[2] == c.Subscription && p[3] == "resourceGroups" && groupName.MatchString(p[4]) && !strings.HasSuffix(p[4], ".") && !strings.Contains(p[4], "..") && p[5] == "providers" && p[6] == provider && p[7] == kind && identifier.MatchString(p[8])
 }
 
-func (p PlacementSettings) validate(c Config) error {
-	space, err := netip.ParsePrefix(p.SubnetPrefix)
+func privateIPv4Prefix(raw string) (netip.Prefix, bool) {
+	space, err := netip.ParsePrefix(raw)
 	private := false
 	if err == nil && space == space.Masked() && space.Addr().Is4() {
 		for _, raw := range []string{"10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"} {
@@ -36,11 +37,19 @@ func (p PlacementSettings) validate(c Config) error {
 			private = private || space.Bits() >= block.Bits() && block.Contains(space.Addr())
 		}
 	}
+	return space, private
+}
+
+func (p PlacementSettings) validate(c Config) error {
+	_, private := privateIPv4Prefix(p.SubnetPrefix)
 	parts := strings.Split(p.Subnet, "/")
 	if !private || len(parts) != 11 || parts[9] != "subnets" || !identifier.MatchString(parts[10]) || !resourceID(c, strings.Join(parts[:9], "/"), "Microsoft.Network", "virtualNetworks") || !resourceID(c, p.SecurityGroup, "Microsoft.Network", "networkSecurityGroups") || !resourceID(c, p.RouteTable, "Microsoft.Network", "routeTables") || !resourceID(c, p.Registry, "Microsoft.ContainerRegistry", "registries") || p.Registry[strings.LastIndex(p.Registry, "/")+1:] != strings.TrimSuffix(c.Registry, ".azurecr.io") || !strings.HasPrefix(p.PullAssignment, p.Registry+"/providers/Microsoft.Authorization/roleAssignments/") || !nonzeroGUID(strings.TrimPrefix(p.PullAssignment, p.Registry+"/providers/Microsoft.Authorization/roleAssignments/")) || !nonzeroGUID(p.PullClientID) || !nonzeroGUID(p.PullPrincipalID) || p.PullClientID == p.PullPrincipalID || !checksum.MatchString(p.PolicyProfile) {
 		return hostedexecution.ErrConfiguration
 	}
-	return p.Network.validate(p.SubnetPrefix)
+	if err := p.Network.validate(p.SubnetPrefix); err != nil {
+		return err
+	}
+	return p.Private.validate(c, p)
 }
 
 func (p PlacementSettings) NetworkProfile(c Config) (string, error) {
@@ -50,7 +59,7 @@ func (p PlacementSettings) NetworkProfile(c Config) (string, error) {
 		return "", hostedexecution.ErrConfiguration
 	}
 	c.NetworkProfile = ""
-	return hash([]any{"sandbox-placement/v2", c, p}), nil
+	return hash([]any{"sandbox-placement/v3", c, p}), nil
 }
 
 func (c Config) groupID() string {

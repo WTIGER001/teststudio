@@ -25,6 +25,7 @@ type placementHTTP struct {
 	base    policy.Transporter
 	owned   *http.Transport
 	allowed map[string]string
+	pages   map[string]bool
 	closed  atomic.Bool
 }
 
@@ -55,13 +56,10 @@ func newMetadataHTTP(versions map[string]string, base policy.Transporter) *place
 	return h
 }
 
-func (h *placementHTTP) Do(r *http.Request) (*http.Response, error) {
+func (h *placementHTTP) accepts(r *http.Request) bool {
 	u := r.URL
-	if h.closed.Load() {
-		return nil, hostedexecution.ErrUnavailable
-	}
-	if u == nil || r.Method != "GET" || r.Body != nil && r.Body != http.NoBody || u.Scheme != "https" || u.Host != "management.azure.com" || u.User != nil || u.Fragment != "" || u.Opaque != "" || r.Host != "" && r.Host != u.Host || h.allowed[u.Path] == "" || u.RawQuery != "api-version="+h.allowed[u.Path] {
-		return nil, hostedexecution.ErrOwnership
+	if u == nil || r.Method != "GET" || r.Body != nil && r.Body != http.NoBody || u.Scheme != "https" || u.Host != "management.azure.com" || u.User != nil || u.Fragment != "" || u.Opaque != "" || r.Host != "" && r.Host != u.Host || h.allowed[u.Path] == "" || !h.queryAllowed(u) {
+		return false
 	}
 	parts := strings.Split(u.Path, "/")
 	escaped := u.Path
@@ -69,6 +67,16 @@ func (h *placementHTTP) Do(r *http.Request) (*http.Response, error) {
 		escaped = strings.Replace(u.Path, "/resourceGroups/"+parts[4]+"/", "/resourceGroups/"+url.PathEscape(parts[4])+"/", 1)
 	}
 	if u.EscapedPath() != escaped {
+		return false
+	}
+	return true
+}
+
+func (h *placementHTTP) Do(r *http.Request) (*http.Response, error) {
+	if h.closed.Load() {
+		return nil, hostedexecution.ErrUnavailable
+	}
+	if !h.accepts(r) {
 		return nil, hostedexecution.ErrOwnership
 	}
 	response, err := h.base.Do(r)
@@ -122,22 +130,30 @@ func (c *metadataReader) get(ctx context.Context, id string) (placementResource,
 	if len(parts) > 4 && parts[3] == "resourceGroups" {
 		escaped = strings.Replace(id, "/resourceGroups/"+parts[4]+"/", "/resourceGroups/"+url.PathEscape(parts[4])+"/", 1)
 	}
-	request, err := runtime.NewRequest(ctx, http.MethodGet, "https://management.azure.com"+escaped+"?api-version="+version)
-	if err != nil {
-		return placementResource{}, hostedexecution.ErrConfiguration
+	var value placementResource
+	err := c.document(ctx, "https://management.azure.com"+escaped+"?api-version="+version, &value)
+	return value, err
+}
+
+func (c *metadataReader) document(ctx context.Context, target string, value any) error {
+	if ctx.Err() != nil || c.http.closed.Load() {
+		return hostedexecution.ErrUnavailable
+	}
+	request, err := runtime.NewRequest(ctx, http.MethodGet, target)
+	if err != nil || !c.http.accepts(request.Raw()) {
+		return hostedexecution.ErrOwnership
 	}
 	response, err := c.client.Pipeline().Do(request)
 	if err != nil {
-		return placementResource{}, hostedexecution.ErrUnavailable
+		return hostedexecution.ErrUnavailable
 	}
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		return placementResource{}, hostedexecution.ErrUnavailable
+		return hostedexecution.ErrUnavailable
 	}
-	var value placementResource
 	data, err := io.ReadAll(response.Body)
-	if err != nil || json.Unmarshal(data, &value) != nil {
-		return value, hostedexecution.ErrUnavailable
+	if err != nil || json.Unmarshal(data, value) != nil {
+		return hostedexecution.ErrUnavailable
 	}
-	return value, nil
+	return nil
 }

@@ -12,13 +12,14 @@ import (
 )
 
 type placementResource struct {
-	ID         string          `json:"id"`
-	Name       string          `json:"name"`
-	Type       string          `json:"type"`
-	Location   string          `json:"location"`
-	Identity   json.RawMessage `json:"identity"`
-	Properties json.RawMessage `json:"properties"`
-	SKU        struct {
+	ID               string          `json:"id"`
+	Name             string          `json:"name"`
+	Type             string          `json:"type"`
+	Location         string          `json:"location"`
+	Identity         json.RawMessage `json:"identity"`
+	ExtendedLocation json.RawMessage `json:"extendedLocation,omitempty"`
+	Properties       json.RawMessage `json:"properties"`
+	SKU              struct {
 		Name string `json:"name"`
 	} `json:"sku"`
 }
@@ -102,6 +103,7 @@ type placementAdmission struct {
 	placement        *SDKPlacement
 	authority        *SDKAuthority
 	network          *SDKNetwork
+	private          *SDKPrivate
 	protection       Admission
 	importProtection ImageAdmission
 }
@@ -111,6 +113,9 @@ func (a *placementAdmission) BeforeCreate(ctx context.Context, c Config) error {
 		return err
 	}
 	if err := a.network.Check(ctx, c); err != nil {
+		return err
+	}
+	if err := a.private.Check(ctx, c); err != nil {
 		return err
 	}
 	if err := a.authority.Check(ctx, c); err != nil {
@@ -129,6 +134,9 @@ func (a *placementAdmission) VerifyInstance(ctx context.Context, c Config, actua
 	if err := a.network.CheckRunning(ctx, c); err != nil {
 		return err
 	}
+	if err := a.private.CheckRunning(ctx, c); err != nil {
+		return err
+	}
 	if err := a.authority.Check(ctx, c); err != nil {
 		return err
 	}
@@ -143,6 +151,9 @@ func (a *placementAdmission) BeforeImport(ctx context.Context, c Config, identit
 		return err
 	}
 	if err := a.network.Check(ctx, c); err != nil {
+		return err
+	}
+	if err := a.private.Check(ctx, c); err != nil {
 		return err
 	}
 	if err := a.authority.Check(ctx, c); err != nil {

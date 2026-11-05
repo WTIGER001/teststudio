@@ -39,7 +39,11 @@ func networkFlag(raw json.RawMessage, wanted bool) bool {
 
 func (s Settings) verifySecurityGroup(r placementResource) error {
 	p := s.Placement
-	if !namedResource(r, p.SecurityGroup, "Microsoft.Network/networkSecurityGroups") || !strings.EqualFold(r.Location, s.Worker.Region) {
+	return verifyNetworkGroup(r, p.SecurityGroup, p.Subnet, s.Worker.Region, p.networkRules())
+}
+
+func verifyNetworkGroup(r placementResource, id, subnet, region string, rules []any) error {
+	if !namedResource(r, id, "Microsoft.Network/networkSecurityGroups") || !strings.EqualFold(r.Location, region) {
 		return hostedexecution.ErrOwnership
 	}
 	fields, err := networkProperties(r, "flushConnection", "securityRules", "defaultSecurityRules", "networkInterfaces", "subnets", "resourceGuid")
@@ -47,10 +51,10 @@ func (s Settings) verifySecurityGroup(r placementResource) error {
 		return err
 	}
 	var interfaces []json.RawMessage
-	if !networkFlag(fields["flushConnection"], true) || !networkSubnet(fields["subnets"], p.Subnet) || len(fields["networkInterfaces"]) > 0 && (json.Unmarshal(fields["networkInterfaces"], &interfaces) != nil || len(interfaces) != 0) {
+	if !networkFlag(fields["flushConnection"], true) || !networkSubnet(fields["subnets"], subnet) || len(fields["networkInterfaces"]) > 0 && (json.Unmarshal(fields["networkInterfaces"], &interfaces) != nil || len(interfaces) != 0) {
 		return hostedexecution.ErrOwnership
 	}
-	return verifyNetworkChildren(fields["securityRules"], p.SecurityGroup, "Microsoft.Network/networkSecurityGroups", "securityRules", p.networkRules())
+	return verifyNetworkChildren(fields["securityRules"], id, "Microsoft.Network/networkSecurityGroups", "securityRules", rules)
 }
 
 func (s Settings) verifyRouteTable(r placementResource) error {

@@ -111,13 +111,23 @@ The runtime now verifies the selected security group's complete custom rules and
 The sandbox connection policy permits only platform DNS and HTTPS to explicit private endpoint addresses, with metadata and remaining traffic denied.
 It includes no ordinary Jobs platform allow rules. Actual preview-service compatibility remains deployment work.
 The route table disables BGP propagation and contains only the selected default route through a private firewall address.
-The sandbox-placement/v2 profile binds those addresses. Canonical resource bodies support later packaging without mutation.
+The placement profile binds those addresses. Canonical resource bodies support later packaging without mutation.
 Initial and import checks stay fresh. Live observations share bounded positive evidence, and current failures invalidate prior success.
 Targeted local policy, drift, settings, caching, runtime integration, and affected lifecycle checks pass.
 See [sandbox connection rules and routes](azure-sandbox-network.md). This does not establish effective routing or endpoint ownership.
 
+The runtime now binds the allowed addresses to two selected private endpoints and their three exact NIC IP configurations.
+The registry login and regional data members target the selected registry. The exchange member targets the selected relay environment.
+The endpoint subnet has an exclusive endpoint inventory and a security group permitting HTTPS only from the execution subnet.
+Two selected private zones have complete bounded record and link inventories, exact A records, and no wildcard, alias, registration, or public fallback.
+The sandbox-placement/v3 profile binds endpoint, subnet, service, address, and zone settings.
+Fresh initial and import observations and bounded live evidence now include this private stage.
+Existing pure endpoint and DNS verifiers are reused without ordinary Jobs configuration.
+Targeted local drift, paging, settings, caching, runtime integration, and affected lifecycle checks pass.
+See [sandbox private endpoint and DNS admission](azure-sandbox-private.md). Reported records do not establish effective resolution or service ownership.
+
 Complete remaining effective-authority and protected network admission, native command role wiring, and deployment packaging next.
-Verify identity host attachment, additional grants and deny effects, VNet topology, firewall enforcement, private exchange ownership, and DNS.
+Verify identity host attachment, additional grants and deny effects, VNet topology, firewall enforcement, trusted exchange service ownership, and effective DNS resolution.
 Verify actual service acceptance of custom data-action roles and narrow timer grants during the separate deployment phase.
 Keep private registry conversion access and proxy trust as explicit deployment compatibility questions.
 Pin the group reader and template to an explicit service contract. Current preview guidance and the versioned ARM reference describe different shapes.

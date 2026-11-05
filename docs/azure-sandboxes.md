@@ -18,6 +18,7 @@ The [runtime factory](azure-sandbox-runtime.md) now supplies concrete SDK assemb
 The [placement stage](azure-sandbox-placement.md) now checks reported group, subnet, import identity, and selected pull authority.
 The [authority stage](azure-sandbox-authority.md) now checks selected identity and least-authority role profiles for control and timers.
 The [network stage](azure-sandbox-network.md) now verifies selected security rules, route contents, and exclusive subnet attachments.
+The [private stage](azure-sandbox-private.md) now checks selected endpoints, NIC addresses, endpoint subnet rules, and complete private DNS inventories.
 Native activation still requires complete authority and protected network admission, timer authority, source-queue command wiring, and packaging.
 Local contract checks do not establish deployed isolation, service availability, identity authority, certificate trust, or complete product operation.
 
