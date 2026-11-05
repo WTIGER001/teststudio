@@ -122,7 +122,41 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: bound Azure observer SDK sessions
+## Current delivery: reported subscription read-deny gate
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+ReadDenyGuard now scans reported subscription deny assignments before the bound observer reads its existing resource chain.
+The new SDK reader uses that same observer credential and the already-pinned preview authorization model.
+It sends an unfiltered subscription GET, follows only bounded same-path pages, and requires all five selected protection assignments in the response.
+Missing selected protection, unknown enforcement or principal metadata, incomplete arrays, duplicate identities, or unsafe pages cannot establish coverage.
+The gate rejects potentially applicable enforced conflicts with management reads or the existing bodyless DNS-association operation.
+It handles reported inherited scopes, direct principals, all-principal coverage, direct exclusions, and conservative unresolved group membership.
+Conditions that could affect a conflicting permission remain unavailable. The check assumes no false condition or unknown group exclusion.
+Write-only, delete-only, data-only, explicit audit, and proven read exceptions do not establish management read conflicts.
+Overlapping wildcard exclusions can conservatively reject coverage when their general subset relationship remains unproven.
+
+Each collection has a five-second context, 16-page limit, 1024-item limit, and the existing four-megabyte response limit.
+The composed check has a 130-second context and at most 2212 requests. Normal added cost is one GET.
+The session now owns and closes 21 readers. Bootstrap binding retains its separate existing bounds and performs no new observer request.
+No observation is cached. Runtime mismatch rejects before the scan. Failed coverage prevents all later parent reads.
+This stage implements no Network and enables no Azure coded execution.
+
+Three new focused race checks and two changed observer-session checks pass in 2.716 seconds.
+Coverage includes scope inheritance, principals, exclusions, conditions, enforcement, wildcard semantics, pagination, missing state, exact requests, parent gating, and fresh observations.
+The session checks verify its distinct observer test token and all-reader cleanup with the added scan.
+No unchanged broad suite repeats. No dependency version changes.
+Fixtures use fake credentials and in-memory SDK transports. They open no network connection or service listener.
+No real token, cloud operation, UI build, browser, image build, container, registry push, deployment, or demo restart runs.
+External requests read only public Microsoft documentation.
+Evidence is output/azure-read-deny/summary.json and the targeted command results.
+See [reported subscription read-deny inspection](azure-read-deny.md).
+
+Hosted API visibility, actual enforcement, host identity attachment, effective authorization, and complete native wiring remain unproven.
+Keep cross-scope visibility, clean provenance, protection-management authority, environment attachments, preparation networking, and execution isolation in the complete admission scope.
+All nine broad acceptance items remain open under their original requirements.
+
+## Previous delivery: bound Azure observer SDK sessions
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 

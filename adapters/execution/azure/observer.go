@@ -11,7 +11,7 @@ import (
 
 type Observer struct {
 	mu      sync.RWMutex
-	guard   *ReadIdentityGuard
+	guard   *ReadDenyGuard
 	readers []observerReader
 }
 
@@ -43,7 +43,12 @@ func newSDKObserver(c Config, s ReadIdentitySettings, credential azcore.TokenCre
 	}
 	b := &observerBuilder{worker: c, credential: credential, transport: transport}
 	endpoint := b.backend(s.Protection.PrivateDNS.Endpoint.DNS.Firewall.Perimeter.Topology.BackendEndpoint)
-	guard := b.relay(s, endpoint)
+	identity := b.relay(s, endpoint)
+	guard := observerStage(b, func() (*SDKReadDenyReader, error) {
+		return NewSDKReadDenyReader(c, credential, transport)
+	}, func(reader *SDKReadDenyReader) (*ReadDenyGuard, error) {
+		return NewReadDenyGuard(c, s, identity, reader)
+	})
 	if b.err != nil {
 		closeObserverReaders(b.readers)
 		return nil, controlError(b.err)

@@ -18,7 +18,7 @@ func TestAzureObserverBindsAllClientsWithoutBootstrapReuseAndClosesReaders(t *te
 	}
 	t.Cleanup(observer.Close)
 	bootstrapReads := f.bootstrapReads
-	if bootstrapReads == 0 || f.identity.reads != 3 || f.reads != 0 || f.credential.reads.Load() != 0 || len(f.factoryClients) != 1 || f.factoryClients[0] != s.ClientID || len(observer.readers) != f.bootstrapReaders {
+	if bootstrapReads == 0 || f.identity.reads != 3 || f.reads != 0 || f.credential.reads.Load() != 0 || len(f.factoryClients) != 1 || f.factoryClients[0] != s.ClientID || len(observer.readers) != f.bootstrapReaders+1 {
 		t.Fatal("observer binding did not preserve one bootstrap inspection and a pinned credential")
 	}
 	if _, ok := any(observer).(Network); ok {
@@ -27,7 +27,7 @@ func TestAzureObserverBindsAllClientsWithoutBootstrapReuseAndClosesReaders(t *te
 	s.ClientID = "aaaaaaaa-1111-2222-3333-444444444444"
 	s.Protection.PrivateDNS.Endpoint.DNS.Firewall.Perimeter.RegistryEndpointIPs[0] = "8.8.8.8"
 	for i := 1; i <= 2; i++ {
-		if err := observer.Check(t.Context(), c); err != nil || f.reads != bootstrapReads*i || f.bootstrapReads != bootstrapReads || len(f.factoryClients) != 1 {
+		if err := observer.Check(t.Context(), c); err != nil || f.reads != (bootstrapReads+1)*i || f.bootstrapReads != bootstrapReads || len(f.factoryClients) != 1 {
 			t.Fatal("bound clients rejected fresh state or reused bootstrap", err, f.reads, bootstrapReads)
 		}
 	}
@@ -36,7 +36,7 @@ func TestAzureObserverBindsAllClientsWithoutBootstrapReuseAndClosesReaders(t *te
 	}
 	f.identity.assignment.Properties.PrincipalID = to.Ptr("aaaaaaaa-1111-2222-3333-444444444444")
 	requireDeadlineError(t, observer.Check(t.Context(), c), hostedexecution.ErrOwnership)
-	if f.reads != bootstrapReads*3 || f.bootstrapReads != bootstrapReads {
+	if f.reads != (bootstrapReads+1)*3 || f.bootstrapReads != bootstrapReads {
 		t.Fatal("bound observer cached a successful assignment")
 	}
 	before := f.reads
@@ -47,12 +47,12 @@ func TestAzureObserverBindsAllClientsWithoutBootstrapReuseAndClosesReaders(t *te
 		t.Fatal("changed runtime configuration reached a bound SDK reader")
 	}
 	observer.Close()
-	if f.closed != f.bootstrapReaders {
-		t.Fatal("owned SDK readers did not close", f.closed, f.bootstrapReaders)
+	if f.closed != f.bootstrapReaders+1 {
+		t.Fatal("owned SDK readers did not close", f.closed, f.bootstrapReaders+1)
 	}
 	observer.Close()
 	requireDeadlineError(t, observer.Check(t.Context(), c), hostedexecution.ErrUnavailable)
-	if f.closed != f.bootstrapReaders || f.reads != before {
+	if f.closed != f.bootstrapReaders+1 || f.reads != before {
 		t.Fatal("closed observer reused transport or repeated cleanup")
 	}
 }

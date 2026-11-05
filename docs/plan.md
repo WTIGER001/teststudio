@@ -375,7 +375,19 @@ The new helper corrects its audience expectation by reusing the established cred
 See [bound observer sessions](azure-read-identity.md#bound-observer-session). Acceptance 51 advances; the total remains 48 of 57.
 No real token, cloud request, browser, UI build, image build, container, registry push, deployment, or demo restart runs.
 
-Next verify effective read coverage and host attachment. Wire the bound session into native commands only after complete admission exists.
+The reported read-deny stage now gates each bound observer check through the same selected credential.
+It inspects the unfiltered subscription response, requires the five selected protections, and rejects potentially applicable read or DNS-association conflicts.
+Principal exclusions, inherited scopes, explicit enforcement, conditions, wildcard actions, paging limits, and missing metadata remain explicit.
+Group applicability stays conservative without directory membership queries. Successful fixtures do not establish complete effective authorization or hosted visibility.
+The session now owns 21 readers. The composed check has a 130-second context and at most 2212 requests.
+Normal added cost is one GET; the existing parent chain runs only after the scan passes.
+Three new focused race checks and two changed session checks pass in 2.716 seconds. No unchanged broad suite repeats.
+See [reported subscription read-deny inspection](azure-read-deny.md). Acceptance 51 advances; the count stays 48 of 57.
+Only public documentation requests leave the environment. No real token, cloud operation, UI build, browser, container, image build, registry push, deployment, or demo restart runs.
+
+Next implement observer host-attachment bindings and verify their changed behavior with targeted local fixtures.
+Keep hosted read coverage, complete effective authorization, and cross-scope visibility separate until authoritative deployment evidence exists.
+Wire the bound session into native commands only after complete admission exists.
 Verify actual resource-scoped assignment provisioning and enforcement, and authority to change the owning protection arrangement.
 Establish authoritative existing cross-scope visibility or clean installation provenance. Observed deny assignments do not remove pre-existing foreign links.
 Continue environment attachment control, remaining perimeter protection, and trusted preparation networking.

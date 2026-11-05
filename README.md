@@ -23,6 +23,7 @@ The [relay private DNS observer](docs/azure-relay-private-dns.md) binds selected
 The [reported private DNS inventory](docs/azure-private-dns-inventory.md) detects additional subscription-visible links into worker and relay VNets. Cross-scope coverage and attachment authority remain required.
 The [network and DNS deny observer](docs/azure-network-deny.md) checks enforced, unconditional protection metadata on both VNets and three selected zones. Deployed enforcement and lifecycle authority remain required.
 The [observer identity and read grant](docs/azure-read-identity.md) bind a separate managed identity to one selected subscription read role. Bound sessions use that credential throughout inspection; effective access and native installation remain required.
+The [reported read-deny scan](docs/azure-read-deny.md) gates bound inspection on reported subscription conflicts and required protection visibility. Hosted coverage and enforcement remain unverified.
 The [trusted worker backend role](docs/worker-backend.md) serves private transport without UI, sign-in, or background workers. It supports optional direct TLS; private routing, certificate trust, and provider wiring remain required.
 The [private worker exchange](docs/worker-exchange.md) and [hosted supervisor](docs/job-supervisor.md) supply scoped transport and runner supervision for the provider adapters under development.
 

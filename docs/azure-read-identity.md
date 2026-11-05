@@ -10,6 +10,7 @@ This stage implements no Network and enables no native Azure coded execution.
 It observes the selected grant. It does not prove effective authorization, complete visibility, or absence of other grants.
 The initial guard requires an explicit bootstrap credential. A bound observer session then uses the verified observer credential throughout its SDK chain.
 Binding does not prove that the bootstrap credential itself uses the observer identity.
+The [reported read-deny scan](azure-read-deny.md) now gates each bound inspection before its existing resource chain.
 Identity attachment, token availability, deny coverage, protection-management authority, and cross-scope visibility remain installation requirements.
 Acceptance 51 advances. The total remains 48 verified of 57, with nine open.
 
@@ -74,8 +75,8 @@ Returned errors use fixed public categories and omit provider messages, conditio
 ## Bound observer session
 
 ReadIdentityGuard.BindObserver performs one complete bootstrap inspection and obtains a credential for the verified observed client identifier.
-It rebuilds all 20 SDK readers with that same credential and preserves their canonical settings and existing transport restrictions.
-The rebuilt chain includes topology, worker networking, private endpoints, registry, exchange, workload inventory, backend, relay networking, DNS inventory, protection, and identity.
+It rebuilds all 21 SDK readers with that same credential and preserves their canonical settings and existing transport restrictions.
+The rebuilt chain includes subscription read-deny inventory, topology, worker networking, endpoints, registry, exchange, workload inventory, backend, relay networking, DNS inventory, protection, and identity.
 The bootstrap readers and credential remain outside the returned session.
 
 Binding creates clients without requesting an observer token or performing an observer SDK request.
@@ -86,7 +87,8 @@ Changed immutable runtime settings reject before an SDK request. Missing identit
 Token acquisition and transport errors remain unavailable and omit private provider details.
 There is no alternate credential or bootstrap fallback after binding.
 
-Each Check retains the 125-second context and 2196-request ceiling. Binding adds one separate bootstrap inspection with the same bounds.
+Each Check now has a 130-second context and 2212-request ceiling, including the bounded subscription read-deny scan.
+Binding adds one separate bootstrap inspection with a 125-second context and 2196-request ceiling.
 Bind once per owned session. Do not bind again before every Check.
 Close the session after its final inspection. Close waits for active checks, closes owned readers in reverse order, and releases their references.
 Repeated Close calls are safe. Checks after Close return unavailable without a credential or transport request.
@@ -135,7 +137,8 @@ The complete chain receives a distinct observer test token. The bootstrap captur
 Later SDK requests reach those original mutable fixtures through the observer transporter, with the distinct token checked before fixture adaptation.
 Two successful inspections reuse no bootstrap reads. A changed assignment then fails a fresh third inspection.
 Checks also cover client construction without observer requests, frozen settings, runtime mismatch, nil credentials, token failure, transport failure, cancellation, and reader cleanup.
-All 20 owned readers close. Repeated cleanup and checks after closure produce no new request.
+All owned readers close. The read-deny extension increases the count from 20 to 21 and updates these targeted session checks.
+Repeated cleanup and checks after closure produce no new request.
 No real token, network connection, service listener, cloud operation, browser, image build, container, registry push, deployment, or demo restart runs.
 
 ```sh

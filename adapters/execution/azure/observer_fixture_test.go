@@ -10,6 +10,7 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	a "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/authorization/armauthorization/v3"
 )
 
 type observerFixture struct {
@@ -24,6 +25,8 @@ type observerFixture struct {
 	factoryClients   []string
 	identity         *readIdentityFixture
 	bootstrapReaders int
+	denyPath         string
+	denies           []a.DenyAssignment
 }
 
 type observerCredential struct {
@@ -48,6 +51,10 @@ func observerTest(t *testing.T) (Config, ReadIdentitySettings, *observerFixture,
 	t.Helper()
 	c, s, identity, g := readIdentityTest(t)
 	f := &observerFixture{t: t, routes: map[string]policy.Transporter{}, identity: identity, credential: &observerCredential{}}
+	f.denyPath = observerScope(c) + "/providers/Microsoft.Authorization/denyAssignments"
+	for _, assignment := range identity.protection.assignments {
+		f.denies = append(f.denies, assignment)
+	}
 	protection := g.protection
 	inventory := protection.inventory
 	relayZones := inventory.selected
@@ -123,12 +130,18 @@ func (f *observerFixture) Do(r *http.Request) (*http.Response, error) {
 	if r.Header.Get("Authorization") != "Bearer observer-credential-canary" {
 		f.t.Error("bound inspection used another credential")
 	}
-	if base == nil {
+	if base == nil && r.URL.Path != f.denyPath {
 		f.t.Error("bound inspection reached an unobserved bootstrap path")
 		return deadlineResponse(r, 404, nil), nil
 	}
 	if unavailable {
 		return deadlineResponse(r, 503, map[string]any{"error": map[string]any{"code": "Unavailable", "message": "private-observer-transport-canary"}}), nil
+	}
+	if r.URL.Path == f.denyPath {
+		if r.Method != "GET" || r.URL.RawQuery != "api-version="+networkDenyVersion {
+			f.t.Error("observer deny inventory widened its request")
+		}
+		return deadlineResponse(r, 200, map[string]any{"value": f.denies}), nil
 	}
 	copy := r.Clone(r.Context())
 	copy.Header.Set("Authorization", "Bearer local-credential-canary")
