@@ -6,6 +6,7 @@ The Azure adapter now checks the worker VNet's actual DNS resolver policy associ
 DNSGuard.Check first refreshes the [firewall and perimeter stages](azure-worker-firewall.md).
 It then inspects the DNS resources and complete bounded inventories through the official SDK.
 A configured policy name alone does not establish that the VNet uses that policy.
+The [relay DNS observer](azure-relay-dns.md) now reuses this verifier, SDK, definitions, and inventory helper with separate relay resources and domain declarations.
 
 This stage does not implement the execution Network interface or release worker input.
 The [selected private-zone stage](azure-worker-private-dns.md) now checks exact records, completed links, registration, and fallback settings.

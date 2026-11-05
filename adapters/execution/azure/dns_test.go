@@ -73,7 +73,7 @@ func TestAzureDNSRejectsDomainRuleAndAssociationBypasses(t *testing.T) {
 		"foreign-policy":    func(f *dnsFixture) { f.attached[0].ID = to.Ptr("foreign") },
 		"multiple-policies": func(f *dnsFixture) { f.attached = append(f.attached, d.SubResource{}) },
 		"controller-link": func(f *dnsFixture) {
-			f.links[0].Properties.VirtualNetwork.ID = to.Ptr(f.settings.Firewall.Perimeter.Topology.ControllerVNet)
+			f.links[0].Properties.VirtualNetwork.ID = to.Ptr(f.controllerVNet)
 		},
 		"extra-link":     func(f *dnsFixture) { f.links = append(f.links, clone(f.links[0])) },
 		"foreign-region": func(f *dnsFixture) { f.policy.Location = to.Ptr("westus") },

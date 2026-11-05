@@ -317,7 +317,13 @@ Four new focused race checks and seven selected existing checks pass locally. On
 See [relay firewall observation](azure-relay-firewall.md). Acceptance 51 advances; the count remains 48 of 57.
 No cloud operation, UI build, image build, browser, container, deployment, or demo restart runs.
 
-Next verify effective read coverage, environment attachment authority, effective relay DNS, and registry endpoint ownership.
+The relay DNS stage now observes exact lists, enabled rules, its exclusive VNet link, and the actual VNet policy association.
+Worker and relay profiles share the verifier, definitions, scoped SDK reader, bounded inventories, and local fixtures.
+The relay derives registry data region from the prior selected profile and omits backend and public exchange lookup declarations.
+Four new focused race checks and five selected existing checks pass locally. No cloud operation, UI build, image build, browser, or demo restart runs.
+See [relay DNS policy observation](azure-relay-dns.md). Acceptance 51 advances; the count remains 48 of 57.
+
+Next verify effective read coverage, environment attachment authority, selected relay private records, effective zone visibility, and registry endpoint ownership.
 A completed list response does not prove authorization coverage or prevent later attachments. Keep those native installation controls mandatory.
 Use the worker backend role to verify its restricted route, TLS authority, and placement before completing service admission.
 The staged Azure backend selects platform HTTPS termination. Other approved profiles can select direct TLS.
@@ -327,7 +333,10 @@ Pinned relay backend routing, TLS trust, and worker-role readiness now pass loca
 The selected relay VNet now passes local address-space, DNS-setting, peering, and subnet-consistency checks.
 The selected relay source NSG and default route now pass local binding, rule, attachment, and bypass checks.
 The selected relay firewall, dedicated policy, public IP backlink, and firewall subnet consistency now pass local checks.
-Verify effective relay and global DNS isolation, registry endpoint ownership, and deployed certificate trust next.
+The selected relay resolver policy, exact lists, enabled rules, exclusive link, and actual VNet association now pass local checks.
+Verify selected relay private records, effective VNet-wide DNS visibility, registry endpoint ownership, and deployed certificate trust next.
+The registry service guard currently permits exactly worker and preparation consumer endpoints.
+Extend its explicit selected-consumer contract and bounded inventory for the separate relay endpoint. Preserve unknown-consumer rejection.
 Inspect effective identity grants and backend infrastructure subnet controls.
 Backend hostname lookup is unnecessary in pinned mode. Preserve worker, exchange, registry, and platform DNS controls.
 Keep the staged backend separate from core deployment and coded worker packaging until admission and private relay access are complete.

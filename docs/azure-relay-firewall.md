@@ -10,7 +10,8 @@ It adds five normal reads without repeating VNet or source-subnet reads.
 The worker and relay use one firewall implementation for SDK reads, resource comparison, policy definitions, and bounded inventory.
 Their public settings and selected resources remain separate. Existing worker rule names and public APIs retain their behavior.
 This stage implements no Network, authorizes no dispatch, and enables no Azure coded execution.
-Effective DNS, registry endpoint ownership, identity and attachment authority, execution isolation, and complete provider wiring remain required.
+The [relay DNS observer](azure-relay-dns.md) now checks its resolver policy, lists, rules, link, and actual VNet association.
+Effective private-zone visibility, registry endpoint ownership, identity and attachment authority, execution isolation, and complete provider wiring remain required.
 Acceptance 51 advances. The verified total remains 48 of 57, with nine open.
 
 ## Explicit settings and attachment
@@ -88,4 +89,4 @@ Fixtures use explicit fake credentials and in-memory responses. They open no net
 No broad suite, cloud request, browser, UI build, image build, container, registry push, deployment, or demo restart runs.
 
 Evidence is output/azure-relay-firewall/summary.json and the targeted command results.
-Continue effective relay DNS, registry endpoint ownership, effective identity and attachment authority, and complete native admission.
+Continue effective private-zone visibility, registry endpoint ownership, effective identity and attachment authority, and complete native admission.

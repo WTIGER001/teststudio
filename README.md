@@ -17,6 +17,7 @@ The [backend private endpoint observer](docs/azure-worker-backend-endpoint.md) b
 The [relay VNet observer](docs/azure-relay-topology.md) checks address space, peering, DNS settings, and subnet consistency with one additional read. Complete native admission remains required.
 The [relay perimeter observer](docs/azure-relay-perimeter.md) binds the source NSG and default route through shared policy checks. Firewall and effective DNS controls remain required.
 The [relay firewall observer](docs/azure-relay-firewall.md) binds the routed appliance, policy, subnet, and public IP. Effective DNS and registry endpoint ownership remain required.
+The [relay DNS policy observer](docs/azure-relay-dns.md) checks exact lists, enabled rules, exclusive links, and actual VNet association. Effective private-zone visibility remains required.
 The [trusted worker backend role](docs/worker-backend.md) serves private transport without UI, sign-in, or background workers. It supports optional direct TLS; private routing, certificate trust, and provider wiring remain required.
 The [private worker exchange](docs/worker-exchange.md) and [hosted supervisor](docs/job-supervisor.md) supply scoped transport and runner supervision for the provider adapters under development.
 

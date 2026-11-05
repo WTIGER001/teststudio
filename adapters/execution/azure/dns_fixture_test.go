@@ -13,7 +13,8 @@ import (
 type dnsFixture struct {
 	t                    *testing.T
 	mu                   sync.Mutex
-	settings             DNSSettings
+	settings             dnsBinding
+	controllerVNet       string
 	policy               d.Policy
 	allow, block         d.DomainList
 	rules                []d.DNSSecurityRule
@@ -28,34 +29,8 @@ func dnsTest(t *testing.T) (Config, DNSSettings, *dnsFixture, *DNSGuard) {
 	t.Helper()
 	c, firewall, _, guard := firewallTest(t)
 	s := DNSSettings{RegistryDataRegion: "westus2", Firewall: firewall, Policy: c.resourceID("Microsoft.Network", "dnsResolverPolicies", "studio-dns"), AllowList: c.resourceID("Microsoft.Network", "dnsResolverDomainLists", "studio-dns-allow"), BlockList: c.resourceID("Microsoft.Network", "dnsResolverDomainLists", "studio-dns-block")}
-	f := &dnsFixture{t: t, settings: s}
-	f.policy, _ = s.PolicyDefinition(c)
-	f.policy.ID, f.policy.Name, f.policy.Type = to.Ptr(s.Policy), to.Ptr("studio-dns"), to.Ptr("Microsoft.Network/dnsResolverPolicies")
-	f.policy.Properties = &d.PolicyProperties{ProvisioningState: to.Ptr(d.ProvisioningStateSucceeded)}
-	for _, item := range []struct {
-		allow    bool
-		target   *d.DomainList
-		id, name string
-	}{{true, &f.allow, s.AllowList, "studio-dns-allow"}, {false, &f.block, s.BlockList, "studio-dns-block"}} {
-		*item.target, _ = s.DomainListDefinition(c, item.allow)
-		item.target.ID, item.target.Name, item.target.Type = to.Ptr(item.id), to.Ptr(item.name), to.Ptr("Microsoft.Network/dnsResolverDomainLists")
-		item.target.Properties.ProvisioningState = to.Ptr(d.ProvisioningStateSucceeded)
-	}
-	for _, allow := range []bool{true, false} {
-		rule, _ := s.RuleDefinition(c, allow)
-		name := "worker-default-block"
-		if allow {
-			name = "worker-allow-approved"
-		}
-		rule.ID, rule.Name, rule.Type = to.Ptr(s.rulePath()+"/"+name), to.Ptr(name), to.Ptr("Microsoft.Network/dnsResolverPolicies/dnsSecurityRules")
-		rule.Properties.ProvisioningState = to.Ptr(d.ProvisioningStateSucceeded)
-		f.rules = append(f.rules, rule)
-	}
-	link, _ := s.LinkDefinition(c)
-	link.ID, link.Name, link.Type = to.Ptr(s.linkPath()+"/worker-network"), to.Ptr("worker-network"), to.Ptr("Microsoft.Network/dnsResolverPolicies/virtualNetworkLinks")
-	link.Properties.ProvisioningState = to.Ptr(d.ProvisioningStateSucceeded)
-	f.links = []d.PolicyVirtualNetworkLink{link}
-	f.attached = []d.SubResource{{ID: to.Ptr(s.Policy)}}
+	f := dnsBindingFixture(t, c, s.binding(c))
+	f.controllerVNet = s.Firewall.Perimeter.Topology.ControllerVNet
 	reader, err := NewSDKDNSReader(c, s, fixtureCredential{}, f)
 	if err != nil {
 		t.Fatal(err)
@@ -66,6 +41,42 @@ func dnsTest(t *testing.T) (Config, DNSSettings, *dnsFixture, *DNSGuard) {
 		t.Fatal(err)
 	}
 	return c, s, f, dns
+}
+
+func dnsBindingFixture(t *testing.T, c Config, s dnsBinding) *dnsFixture {
+	t.Helper()
+	_, policyName := resourceParts(s.Policy)
+	_, allowName := resourceParts(s.AllowList)
+	_, blockName := resourceParts(s.BlockList)
+	f := &dnsFixture{t: t, settings: s}
+	f.policy = d.Policy{Location: to.Ptr(c.Region)}
+	f.policy.ID, f.policy.Name, f.policy.Type = to.Ptr(s.Policy), to.Ptr(policyName), to.Ptr("Microsoft.Network/dnsResolverPolicies")
+	f.policy.Properties = &d.PolicyProperties{ProvisioningState: to.Ptr(d.ProvisioningStateSucceeded)}
+	for _, item := range []struct {
+		allow    bool
+		target   *d.DomainList
+		id, name string
+	}{{true, &f.allow, s.AllowList, allowName}, {false, &f.block, s.BlockList, blockName}} {
+		*item.target = s.domainListDefinition(c.Region, item.allow)
+		item.target.ID, item.target.Name, item.target.Type = to.Ptr(item.id), to.Ptr(item.name), to.Ptr("Microsoft.Network/dnsResolverDomainLists")
+		item.target.Properties.ProvisioningState = to.Ptr(d.ProvisioningStateSucceeded)
+	}
+	for _, allow := range []bool{true, false} {
+		rule := s.ruleDefinition(c.Region, allow)
+		name := s.Role + "-default-block"
+		if allow {
+			name = s.Role + "-allow-approved"
+		}
+		rule.ID, rule.Name, rule.Type = to.Ptr(s.rulePath()+"/"+name), to.Ptr(name), to.Ptr("Microsoft.Network/dnsResolverPolicies/dnsSecurityRules")
+		rule.Properties.ProvisioningState = to.Ptr(d.ProvisioningStateSucceeded)
+		f.rules = append(f.rules, rule)
+	}
+	link := s.linkDefinition(c.Region)
+	link.ID, link.Name, link.Type = to.Ptr(s.linkPath()+"/"+s.Role+"-network"), to.Ptr(s.Role+"-network"), to.Ptr("Microsoft.Network/dnsResolverPolicies/virtualNetworkLinks")
+	link.Properties.ProvisioningState = to.Ptr(d.ProvisioningStateSucceeded)
+	f.links = []d.PolicyVirtualNetworkLink{link}
+	f.attached = []d.SubResource{{ID: to.Ptr(s.Policy)}}
+	return f
 }
 
 func (f *dnsFixture) Do(r *http.Request) (*http.Response, error) {

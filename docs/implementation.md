@@ -122,7 +122,42 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: relay firewall ownership and policy
+## Current delivery: relay DNS policy and actual VNet association
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+The relay DNS stage now observes its selected resolver policy, exact domain lists, enabled security rules, exclusive link, and actual VNet association.
+Worker and relay profiles share one verifier, definition generator, scoped SDK reader, bounded inventory routine, and local fixture implementation.
+Existing public worker APIs, names, exchange hostname declarations, and resource scope retain their behavior.
+The relay requires dedicated policy and list identifiers that cannot reuse the worker policy or either worker list.
+Registry region comes from the preceding selected registry profile without a separate override.
+
+The relay allowlist contains the nine fixed platform domains and four selected registry names.
+It omits public exchange and backend lookup declarations because the backend transport uses its pinned private address.
+The root-domain block remains mandatory. Exact relay rules and one relay VNet link must agree with the actual VNet policy association.
+Worker or controller links, shared policy, changed rules, broad names, bulk URLs, and incomplete observations reject or leave admission unavailable.
+DNS hierarchy and CNAME behavior remain separate from exact declaration comparison. Effective private-zone visibility is still unproven.
+
+Six concurrent selected observations add no duplicate parent read. The composed context is 75 seconds, with 71 normal and at most 129 reads.
+The SDK accepts one selected bodyless association POST and otherwise only selected DNS GET paths.
+No mutation, foreign action, resource substitution, retry, or provider registration is added.
+The stage implements no Network, authorizes no dispatch, and enables no Azure coded execution.
+
+Four new focused race checks and five selected existing checks pass locally in 4.106 seconds.
+They cover fresh association, parent reuse, canonical settings, immutable definitions, domain and rule bypasses, exclusive links, SDK scope, and paging uncertainty.
+Existing worker checks verify hierarchy declarations, incomplete observations, SDK construction, and prior bypass behavior.
+The relay firewall regression verifies fresh ownership and network-observation reuse.
+No broad suite, cloud request, browser, UI build, image build, container, registry push, deployment, or demo restart runs.
+Fixtures use explicit fake credentials and in-memory SDK responses. They open no network connection or listener.
+Evidence is output/azure-relay-dns/summary.json and the targeted command result.
+See [relay DNS policy observation](azure-relay-dns.md).
+
+Continue selected relay private records, effective VNet-wide visibility, and actual relay registry endpoint ownership.
+The existing registry guard still permits exactly worker and preparation consumers. Extend its explicit consumer contract before admitting a separate relay endpoint.
+Preserve unknown-consumer rejection, independent networking, identity and attachment authority, deployed trust, and complete native wiring.
+All nine broad acceptance items remain open under their original scope.
+
+## Previous delivery: relay firewall ownership and policy
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 

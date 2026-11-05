@@ -13,14 +13,14 @@ func dnsIdentity(id, name, kind, expected, expectedKind, location, region string
 	return strings.EqualFold(id, expected) && name == parts[len(parts)-1] && strings.EqualFold(kind, expectedKind) && location == region
 }
 
-func (g *DNSGuard) verifyDomainList(actual d.DomainList, allow bool) error {
-	id := g.settings.BlockList
+func (s dnsBinding) verifyDomainList(actual d.DomainList, allow bool, region string) error {
+	id := s.BlockList
 	expected := []string{"."}
 	if allow {
-		id = g.settings.AllowList
-		expected = g.settings.ApprovedDomains(g.worker)
+		id = s.AllowList
+		expected = s.Domains
 	}
-	if !dnsIdentity(value(actual.ID), value(actual.Name), value(actual.Type), id, "Microsoft.Network/dnsResolverDomainLists", value(actual.Location), g.worker.Region) || actual.Properties == nil {
+	if !dnsIdentity(value(actual.ID), value(actual.Name), value(actual.Type), id, "Microsoft.Network/dnsResolverDomainLists", value(actual.Location), region) || actual.Properties == nil {
 		return hostedexecution.ErrOwnership
 	}
 	p := actual.Properties
@@ -47,7 +47,7 @@ func (g *DNSGuard) verifyDomainList(actual d.DomainList, allow bool) error {
 	return nil
 }
 
-func (g *DNSGuard) verifyRules(rules []d.DNSSecurityRule) error {
+func (s dnsBinding) verifyRules(rules []d.DNSSecurityRule, region string) error {
 	if len(rules) < 2 {
 		return hostedexecution.ErrUnavailable
 	}
@@ -57,8 +57,8 @@ func (g *DNSGuard) verifyRules(rules []d.DNSSecurityRule) error {
 	seen := map[string]bool{}
 	for _, rule := range rules {
 		name := value(rule.Name)
-		allow := name == "worker-allow-approved"
-		if !allow && name != "worker-default-block" || seen[name] || !dnsIdentity(value(rule.ID), name, value(rule.Type), g.settings.rulePath()+"/"+name, "Microsoft.Network/dnsResolverPolicies/dnsSecurityRules", value(rule.Location), g.worker.Region) || rule.Properties == nil {
+		allow := name == s.Role+"-allow-approved"
+		if !allow && name != s.Role+"-default-block" || seen[name] || !dnsIdentity(value(rule.ID), name, value(rule.Type), s.rulePath()+"/"+name, "Microsoft.Network/dnsResolverPolicies/dnsSecurityRules", value(rule.Location), region) || rule.Properties == nil {
 			return hostedexecution.ErrOwnership
 		}
 		seen[name] = true
@@ -67,7 +67,7 @@ func (g *DNSGuard) verifyRules(rules []d.DNSSecurityRule) error {
 		}
 		fields := document(rule.Properties)
 		delete(fields, "provisioningState")
-		expected, _ := g.settings.RuleDefinition(g.worker, allow)
+		expected := s.ruleDefinition(region, allow)
 		if fingerprint(fields) != fingerprint(document(expected.Properties)) {
 			return hostedexecution.ErrOwnership
 		}
@@ -75,15 +75,15 @@ func (g *DNSGuard) verifyRules(rules []d.DNSSecurityRule) error {
 	return nil
 }
 
-func (g *DNSGuard) verifyLinks(links []d.PolicyVirtualNetworkLink, attached []d.SubResource) error {
+func (s dnsBinding) verifyLinks(links []d.PolicyVirtualNetworkLink, attached []d.SubResource, region string) error {
 	if len(links) == 0 || len(attached) == 0 {
 		return hostedexecution.ErrUnavailable
 	}
-	if len(links) != 1 || len(attached) != 1 || !strings.EqualFold(value(attached[0].ID), g.settings.Policy) {
+	if len(links) != 1 || len(attached) != 1 || !strings.EqualFold(value(attached[0].ID), s.Policy) {
 		return hostedexecution.ErrOwnership
 	}
 	link := links[0]
-	if !dnsIdentity(value(link.ID), value(link.Name), value(link.Type), g.settings.linkPath()+"/worker-network", "Microsoft.Network/dnsResolverPolicies/virtualNetworkLinks", value(link.Location), g.worker.Region) || link.Properties == nil {
+	if !dnsIdentity(value(link.ID), value(link.Name), value(link.Type), s.linkPath()+"/"+s.Role+"-network", "Microsoft.Network/dnsResolverPolicies/virtualNetworkLinks", value(link.Location), region) || link.Properties == nil {
 		return hostedexecution.ErrOwnership
 	}
 	if value(link.Properties.ProvisioningState) != d.ProvisioningStateSucceeded {
@@ -91,7 +91,7 @@ func (g *DNSGuard) verifyLinks(links []d.PolicyVirtualNetworkLink, attached []d.
 	}
 	fields := document(link.Properties)
 	delete(fields, "provisioningState")
-	expected, _ := g.settings.LinkDefinition(g.worker)
+	expected := s.linkDefinition(region)
 	if fingerprint(fields) != fingerprint(document(expected.Properties)) {
 		return hostedexecution.ErrOwnership
 	}

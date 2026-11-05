@@ -74,6 +74,8 @@ Actual platform behavior still requires separate deployment verification.
 ## Service-side approval
 
 The complete private endpoint connection list must contain exactly the selected worker registry endpoint and preparation endpoint.
+The [relay DNS stage](azure-relay-dns.md) does not yet extend this consumer contract.
+Add an explicit selected relay endpoint and bounded inventory before enabling relay registry access. Preserve rejection of unknown consumers.
 Each connection must have its own child identity under the registry and the correct endpoint resource identifier.
 Resource identity comparison ignores letter case. Duplicate identities cannot count as separate connections.
 Both connections must report successful provisioning, Approved status, and no outstanding update action.

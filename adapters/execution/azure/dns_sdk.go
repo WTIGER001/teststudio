@@ -11,7 +11,7 @@ import (
 )
 
 type SDKDNSReader struct {
-	settings DNSSettings
+	settings dnsBinding
 	policies *d.PoliciesClient
 	lists    *d.DomainListsClient
 	rules    *d.DNSSecurityRulesClient
@@ -24,6 +24,10 @@ func NewSDKDNSReader(c Config, s DNSSettings, credential azcore.TokenCredential,
 	if err != nil || credential == nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
+	return newSDKDNSReader(c, s.binding(c), credential, transport)
+}
+
+func newSDKDNSReader(c Config, s dnsBinding, credential azcore.TokenCredential, transport policy.Transporter) (*SDKDNSReader, error) {
 	resources := map[string]string{}
 	for _, id := range []string{s.Policy, s.AllowList, s.BlockList, s.rulePath(), s.linkPath(), s.vnetPolicyPath()} {
 		resources[id] = "2025-05-01"

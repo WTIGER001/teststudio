@@ -37,7 +37,7 @@ func (c *SDKDNSReader) Links(ctx context.Context, id string) ([]d.PolicyVirtualN
 }
 
 func (c *SDKDNSReader) VNetPolicies(ctx context.Context, id string) ([]d.SubResource, error) {
-	if id != c.settings.Firewall.Perimeter.Topology.WorkerVNet {
+	if id != c.settings.VirtualNetwork {
 		return nil, hostedexecution.ErrOwnership
 	}
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
