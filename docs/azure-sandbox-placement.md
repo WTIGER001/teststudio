@@ -22,15 +22,17 @@ The [authority stage](azure-sandbox-authority.md) now verifies selected identity
 | placement field | Required binding |
 | --- | --- |
 | subnet and subnetPrefix | Exact delegated subnet resource in the selected subscription and one canonical private IPv4 prefix. |
-| securityGroup and routeTable | Exact subnet attachments in the selected subscription. Content and effective route verification remain separate. |
+| securityGroup and routeTable | Exact subnet attachments in the selected subscription. The network stage checks their contents; effective routing remains separate. |
 | registry | Exact ARM registry resource matching worker.registry. |
 | pullAssignment | Exact registry-scoped role assignment resource. A subscription-scoped assignment does not qualify. |
 | pullClientId and pullPrincipalId | Explicit nonzero client and principal identifiers for pullIdentity. They differ from each other and the runtime client identifiers. |
 | policyProfile | Existing protected network-policy fingerprint. This is an expected binding, not evidence that policy is effective. |
+| network | Required private firewall address and bounded private endpoint addresses. See the network guide. |
 
 PlacementSettings.NetworkProfile computes the combined profile from placement and the worker configuration with its networkProfile field cleared.
 Set worker.networkProfile to that result. Settings validation rejects a mismatched profile before constructing credentials.
-Changes to subnet, import identity metadata, selected grant, or expected policy therefore change launch and source-cache ownership.
+The sandbox-placement/v2 profile includes firewall and private endpoint addresses.
+Changes to these addresses, subnet, import identity metadata, selected grant, or expected policy change launch and source-cache ownership.
 The factory adds one explicit managed identity credential for metadata reads. Construction still acquires no token and calls no service.
 Earlier staged settings without placement reject. No native command has installed those earlier sandbox settings.
 
@@ -57,6 +59,8 @@ Unknown writable connection fields reject.
 The subnet must report the expected prefix, security group, route table, and one Microsoft.App/environments delegation.
 Default outbound access, NAT attachment, private endpoints, and service endpoints reject this execution-subnet contract.
 These attachment checks do not verify the attached security rules, route contents, VNet peerings, or DNS resolution.
+The required [network stage](azure-sandbox-network.md) now verifies reported security rules and route contents.
+VNet topology, effective routes, firewall enforcement, endpoint ownership, and DNS remain separate protection checks.
 
 The import identity reports the configured resource, region, tenant, client, and principal.
 The registry reports Premium, successful provisioning, the exact login host, disabled public access, and no network-rule bypass.
@@ -112,7 +116,7 @@ No cloud account, identity endpoint, registry service, browser, container, demo 
 ### Complete native admission
 
 Implement the remaining authority and protected network checks behind the mandatory admission dependencies.
-Verify actual metadata-reader attachment and grants, control authority, timer authority, route and rule contents, private exchange ownership, and DNS.
+Verify actual metadata-reader attachment and grants, effective control and timer authority, private exchange ownership, topology, firewall enforcement, and DNS.
 The selected authority stage now covers the intended role and identity bindings. Verify effective access and attachment in addition to those reports.
 Bind those checks to placement.policyProfile before command activation.
 Then wire execution and discovery roles and package their resources.

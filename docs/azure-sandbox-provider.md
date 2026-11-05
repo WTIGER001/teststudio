@@ -11,6 +11,7 @@ No native command or deployment template enables this provider yet.
 The [runtime factory](azure-sandbox-runtime.md) now supplies independent settings and concrete SDK assembly.
 The [placement stage](azure-sandbox-placement.md) now checks reported group, subnet, import identity, and selected pull authority.
 The [authority stage](azure-sandbox-authority.md) now checks selected control, registry inspection, metadata, and timer identity grants.
+The [network stage](azure-sandbox-network.md) now checks complete selected security rules, the default firewall route, and exclusive subnet attachments.
 Remaining authority and protected network admission, effective timer authority, command wiring, and native packaging remain unfinished.
 Local protocol verification does not establish deployed Azure behavior.
 

@@ -16,6 +16,7 @@ The [provider bridge](azure-sandbox-provider.md) now connects the shared executi
 The [runtime factory](azure-sandbox-runtime.md) now supplies independent settings and concrete SDK assembly.
 The [placement stage](azure-sandbox-placement.md) now checks selected reported group, network, and source-pull metadata.
 The [authority stage](azure-sandbox-authority.md) now checks configured identity resources, custom control and timer permissions, and selected grants.
+The [network stage](azure-sandbox-network.md) now checks complete selected security rules and route contents. Effective routing and private endpoint ownership remain unfinished.
 Sandboxes and the selected API remain preview. Complete authority and network admission, timer authority, command wiring, and packaging remain unfinished.
 Ordinary Jobs stay disabled. Their contracts below remain reference material and do not establish sandbox isolation.
 The [Azure job contract](azure-worker-contract.md) now builds and verifies SDK requests for execution and discovery.

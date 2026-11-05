@@ -10,15 +10,16 @@ import (
 const pullRole = "/providers/Microsoft.Authorization/roleDefinitions/7f951dda-4ed3-4680-a7ca-43fe172d538d"
 
 type PlacementSettings struct {
-	Subnet          string `json:"subnet"`
-	SubnetPrefix    string `json:"subnetPrefix"`
-	SecurityGroup   string `json:"securityGroup"`
-	RouteTable      string `json:"routeTable"`
-	Registry        string `json:"registry"`
-	PullAssignment  string `json:"pullAssignment"`
-	PullClientID    string `json:"pullClientId"`
-	PullPrincipalID string `json:"pullPrincipalId"`
-	PolicyProfile   string `json:"policyProfile"`
+	Subnet          string          `json:"subnet"`
+	SubnetPrefix    string          `json:"subnetPrefix"`
+	SecurityGroup   string          `json:"securityGroup"`
+	RouteTable      string          `json:"routeTable"`
+	Registry        string          `json:"registry"`
+	PullAssignment  string          `json:"pullAssignment"`
+	PullClientID    string          `json:"pullClientId"`
+	PullPrincipalID string          `json:"pullPrincipalId"`
+	PolicyProfile   string          `json:"policyProfile"`
+	Network         NetworkSettings `json:"network"`
 }
 
 func resourceID(c Config, id, provider, kind string) bool {
@@ -39,7 +40,7 @@ func (p PlacementSettings) validate(c Config) error {
 	if !private || len(parts) != 11 || parts[9] != "subnets" || !identifier.MatchString(parts[10]) || !resourceID(c, strings.Join(parts[:9], "/"), "Microsoft.Network", "virtualNetworks") || !resourceID(c, p.SecurityGroup, "Microsoft.Network", "networkSecurityGroups") || !resourceID(c, p.RouteTable, "Microsoft.Network", "routeTables") || !resourceID(c, p.Registry, "Microsoft.ContainerRegistry", "registries") || p.Registry[strings.LastIndex(p.Registry, "/")+1:] != strings.TrimSuffix(c.Registry, ".azurecr.io") || !strings.HasPrefix(p.PullAssignment, p.Registry+"/providers/Microsoft.Authorization/roleAssignments/") || !nonzeroGUID(strings.TrimPrefix(p.PullAssignment, p.Registry+"/providers/Microsoft.Authorization/roleAssignments/")) || !nonzeroGUID(p.PullClientID) || !nonzeroGUID(p.PullPrincipalID) || p.PullClientID == p.PullPrincipalID || !checksum.MatchString(p.PolicyProfile) {
 		return hostedexecution.ErrConfiguration
 	}
-	return nil
+	return p.Network.validate(p.SubnetPrefix)
 }
 
 func (p PlacementSettings) NetworkProfile(c Config) (string, error) {
@@ -49,7 +50,7 @@ func (p PlacementSettings) NetworkProfile(c Config) (string, error) {
 		return "", hostedexecution.ErrConfiguration
 	}
 	c.NetworkProfile = ""
-	return hash([]any{"sandbox-placement/v1", c, p}), nil
+	return hash([]any{"sandbox-placement/v2", c, p}), nil
 }
 
 func (c Config) groupID() string {

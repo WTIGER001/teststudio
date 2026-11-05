@@ -10,6 +10,7 @@ Execution and discovery use explicit runtime modes.
 This is a library integration. The teststudio commands do not load these settings yet.
 The [placement stage](azure-sandbox-placement.md) now verifies reported group, subnet, import identity, and selected pull-grant metadata.
 The [authority stage](azure-sandbox-authority.md) now checks selected identity and permission bindings for control, metadata, registry inspection, and timers.
+The [network stage](azure-sandbox-network.md) now checks the complete selected security rules, default route, and exclusive subnet attachments.
 Remaining authority and protected network admission, effective timer authority, command role wiring, and deployment packaging remain unfinished.
 The factory requires admission dependencies. It supplies no permissive default.
 Do not treat client construction or local protocol checks as deployment acceptance.
@@ -40,6 +41,7 @@ The loader validates all fields before credential construction.
 | timer.stopIdentity | User-assigned timer identity in the selected subscription. Its resource differs from pullIdentity. |
 
 PlacementSettings.NetworkProfile derives worker.networkProfile from the placement bindings and worker configuration.
+The sandbox-placement/v2 profile also binds placement.network firewallIp and privateEndpointIps.
 The protected network fingerprint remains in placement.policyProfile. A mismatched derived worker profile rejects startup.
 
 Registry validation uses the same pure policy as the ACR client constructor.
@@ -56,6 +58,7 @@ It constructs the sandbox client for image, instance, and command operations.
 It constructs SDKDeadlines with the same control credential and the selected independent workflow scope.
 It constructs SDKPlacement with the explicit metadata credential and composes it before the additional protection checks.
 It constructs SDKAuthority with that metadata credential and compares selected identity, role, and assignment metadata.
+It constructs SDKNetwork with the metadata credential and verifies selected security rules, route contents, and exclusive attachments.
 The resulting image manager and provider share the controller's exact configuration and exchange.
 
 Default credential construction uses ManagedIdentityCredential with each exact configured client identifier.
@@ -88,7 +91,8 @@ That command integration remains unfinished.
 
 Admission is mandatory for every runtime. ImageAdmission is also mandatory for discovery mode.
 The existing controller calls the placement stage and these dependencies before creation, during live admission observation, and before import.
-Live placement and selected authority evidence have a 15-second bound. Initial placement checks remain fresh.
+Live placement, network, and selected authority evidence have a 15-second bound.
+Initial placement and network checks remain fresh, including source import.
 The additional protection, per-sandbox, and worker authorization checks remain uncached.
 OpenRuntime does not substitute a successful construction result for those checks.
 Native commands must compose actual group, VNet, private exchange, source identity, and timer authority checks before enabling dispatch.

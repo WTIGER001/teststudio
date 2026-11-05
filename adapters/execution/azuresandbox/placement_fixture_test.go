@@ -51,6 +51,21 @@ func newPlacementWorld(t *testing.T, s Settings) *placementWorld {
 	for id, value := range definitions {
 		w.resources[id] = value.(map[string]any)
 	}
+	for id, value := range s.Placement.networkDefinitions(c) {
+		r := value.(map[string]any)
+		kind, children := "Microsoft.Network/networkSecurityGroups", "securityRules"
+		if id == p.RouteTable {
+			kind, children = "Microsoft.Network/routeTables", "routes"
+		}
+		props := r["properties"].(map[string]any)
+		props["provisioningState"] = "Succeeded"
+		props["subnets"] = []any{map[string]any{"id": p.Subnet}}
+		for _, raw := range props[children].([]any) {
+			entry := raw.(map[string]any)
+			entry["properties"].(map[string]any)["provisioningState"] = "Succeeded"
+		}
+		put(id, kind, c.Region, props)
+	}
 	return w
 }
 
@@ -60,6 +75,9 @@ func (w *placementWorld) Do(r *http.Request) (*http.Response, error) {
 	version := placementVersions(w.s)[r.URL.Path]
 	if version == "" {
 		version = authorityVersions(w.s)[r.URL.Path]
+	}
+	if version == "" {
+		version = networkVersions(w.s)[r.URL.Path]
 	}
 	if r.Method != "GET" || r.URL.Scheme != "https" || r.URL.Host != "management.azure.com" || version == "" || r.URL.RawQuery != "api-version="+version || r.Header.Get("Authorization") != "Bearer placement-metadata-canary" {
 		w.t.Error("placement request escaped its selected identity or resource")

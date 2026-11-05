@@ -122,7 +122,34 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: selected sandbox and timer authority
+## Current delivery: sandbox connection rules and routes
+
+OpenRuntime now constructs SDKNetwork with the selected metadata identity.
+Creation and source import obtain fresh selected security-group and route-table observations.
+Live admission shares successful evidence for at most 15 seconds. Current failed full observations invalidate previous success.
+The complete custom rule list denies inbound traffic and metadata access.
+It allows only platform DNS and HTTPS to explicit private endpoint addresses before denying remaining outbound traffic.
+No ordinary Jobs platform allow rules enter this sandbox connection policy.
+The route table disables BGP propagation and retains only the selected default route through the private firewall address.
+Extra rules, broader ports, changed destinations, additional routes, shared attachments, and unknown writable properties reject.
+
+The sandbox-placement/v2 ownership profile binds the firewall and endpoint addresses.
+Invalid addresses, duplicate destinations, and stale profiles reject before credential construction.
+The network reader retains an independent destination-list copy.
+NetworkDefinitions returns reviewable resource bodies for later packaging without resource mutation.
+The runtime cannot omit this stage. It still requires the remaining uncached protection callbacks.
+
+Five new focused checks and eighteen affected runtime, authority, placement, shared execution, and command authorization checks pass with race detection.
+The targeted run completes in 2.211 seconds. Evidence is output/azure-sandbox-network/summary.json and targeted.log.
+No cloud service, credential endpoint, browser, container, UI build, demo restart, resource mutation, or remote push is involved.
+The plan and relevant Azure operator guides match the change. No user page behavior changes.
+
+Effective routing, topology, firewall ownership and policy, private endpoint ownership, DNS, additional authority, host attachment, and deny effects remain unfinished.
+Actual preview-service compatibility, role acceptance, timer execution, private conversion routing, token audience, and proxy trust remain separate deployment work.
+Native command wiring and packaging remain unfinished. No native command or deployment template enables this runtime.
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+## Previous delivery: selected sandbox and timer authority
 
 OpenRuntime now requires identity and selected-grant settings for controller, registry inspection, metadata, and independent timer authority.
 Identity resources, client identifiers, and principal identifiers remain distinct from one another and the import identity.

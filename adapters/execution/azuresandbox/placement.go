@@ -101,12 +101,16 @@ func (c *metadataReader) observe(ctx context.Context, ids []string) ([]placement
 type placementAdmission struct {
 	placement        *SDKPlacement
 	authority        *SDKAuthority
+	network          *SDKNetwork
 	protection       Admission
 	importProtection ImageAdmission
 }
 
 func (a *placementAdmission) BeforeCreate(ctx context.Context, c Config) error {
 	if err := a.placement.Check(ctx, c); err != nil {
+		return err
+	}
+	if err := a.network.Check(ctx, c); err != nil {
 		return err
 	}
 	if err := a.authority.Check(ctx, c); err != nil {
@@ -122,6 +126,9 @@ func (a *placementAdmission) VerifyInstance(ctx context.Context, c Config, actua
 	if err := a.placement.CheckRunning(ctx, c); err != nil {
 		return err
 	}
+	if err := a.network.CheckRunning(ctx, c); err != nil {
+		return err
+	}
 	if err := a.authority.Check(ctx, c); err != nil {
 		return err
 	}
@@ -133,6 +140,9 @@ func (a *placementAdmission) BeforeImport(ctx context.Context, c Config, identit
 		return hostedexecution.ErrOwnership
 	}
 	if err := a.placement.Check(ctx, c); err != nil {
+		return err
+	}
+	if err := a.network.Check(ctx, c); err != nil {
 		return err
 	}
 	if err := a.authority.Check(ctx, c); err != nil {

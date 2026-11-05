@@ -107,8 +107,17 @@ Authority observations share bounded positive metadata evidence. Domain authoriz
 Targeted local profiles, drift, scope, identity separation, cancellation, caching, composition, and affected lifecycle checks pass.
 See [sandbox selected authority](azure-sandbox-authority.md). This does not establish complete effective access or host attachment.
 
-Complete effective-authority and protected network admission, native command role wiring, and deployment packaging next.
-Verify identity host attachment, additional grants and deny effects, actual security rules and routes, private exchange ownership, and DNS.
+The runtime now verifies the selected security group's complete custom rules and the selected route table's contents.
+The sandbox connection policy permits only platform DNS and HTTPS to explicit private endpoint addresses, with metadata and remaining traffic denied.
+It includes no ordinary Jobs platform allow rules. Actual preview-service compatibility remains deployment work.
+The route table disables BGP propagation and contains only the selected default route through a private firewall address.
+The sandbox-placement/v2 profile binds those addresses. Canonical resource bodies support later packaging without mutation.
+Initial and import checks stay fresh. Live observations share bounded positive evidence, and current failures invalidate prior success.
+Targeted local policy, drift, settings, caching, runtime integration, and affected lifecycle checks pass.
+See [sandbox connection rules and routes](azure-sandbox-network.md). This does not establish effective routing or endpoint ownership.
+
+Complete remaining effective-authority and protected network admission, native command role wiring, and deployment packaging next.
+Verify identity host attachment, additional grants and deny effects, VNet topology, firewall enforcement, private exchange ownership, and DNS.
 Verify actual service acceptance of custom data-action roles and narrow timer grants during the separate deployment phase.
 Keep private registry conversion access and proxy trust as explicit deployment compatibility questions.
 Pin the group reader and template to an explicit service contract. Current preview guidance and the versioned ARM reference describe different shapes.
