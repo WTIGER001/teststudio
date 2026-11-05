@@ -101,6 +101,10 @@ This is implementation work, not a reason to repeat offline runner checks or wai
 5. Complete target verification only in separately authorized deployment work. Keep Azure implementation deferred.
 
 Keep all seven remaining acceptance items open: 41, 46, 51, 53, 54, 56, and 57.
+The [remote gateway transport](remote-gateway.md) now implements scoped TLS forwarding and deadline-bound tunnel shutdown.
+Targeted local policy, credential, authorization, TLS, and cancellation checks pass, including the race detector.
+Next wire separate private initialization authority, supervisor delivery, Kubernetes workload ownership, network policy, and durable cleanup.
+Do not rebuild runtime images or deploy the gateway before that dispatch path exists.
 Read [deployment readiness](deployment-readiness.md) before the historical Azure continuation material below.
 Do not remove admission barriers or grant uploaded code direct target egress to bypass the missing gateway.
 

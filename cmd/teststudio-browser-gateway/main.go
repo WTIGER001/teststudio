@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -10,7 +11,6 @@ import (
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/browsergateway"
-	"github.com/wtiger001/teststudio/internal/browserpolicy"
 )
 
 func main() {
@@ -23,17 +23,33 @@ func main() {
 func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
-	if len(os.Args) == 2 && os.Args[1] == "--configure" {
+	mode := ""
+	if len(os.Args) == 2 {
+		mode = os.Args[1]
+	}
+	if len(os.Args) > 2 || len(os.Args) == 2 && mode == "" {
+		return errors.New("gateway accepts --configure, --ready, --ready-remote, or --remote")
+	}
+	switch mode {
+	case "--configure":
 		deadline, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
 		return sendCredential(deadline, credentialSocket, os.Stdin)
-	}
-	if len(os.Args) == 2 && os.Args[1] == "--ready" {
+	case "--ready":
 		connection, err := net.DialTimeout("unix", "/output/.browser-egress.sock", time.Second)
 		if err != nil {
 			return err
 		}
 		return connection.Close()
+	case "--ready-remote":
+		connection, err := net.DialTimeout("tcp", "127.0.0.1:8044", time.Second)
+		if err != nil {
+			return errors.New("remote gateway is unavailable")
+		}
+		return connection.Close()
+	case "", "--remote":
+	default:
+		return errors.New("gateway accepts --configure, --ready, --ready-remote, or --remote")
 	}
 	deadline, cancel := context.WithTimeout(ctx, 10*time.Second)
 	configuration, err := receiveCredential(deadline, credentialSocket)
@@ -41,10 +57,13 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	target, credential := configuration.Target, configuration.Credential
-	if err := browserpolicy.ValidateTarget(target); err != nil {
-		return err
+	if mode == "--remote" {
+		return serveRemote(ctx, *configuration)
 	}
+	if configuration.Remote != nil {
+		return errors.New("local gateway does not accept remote transport configuration")
+	}
+	target, credential := configuration.Target, configuration.Credential
 	g, err := browsergateway.NewAuthenticated(target, credential)
 	if err != nil {
 		return err

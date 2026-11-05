@@ -6,6 +6,18 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
+## Remote gateway transport milestone — 2026-11-05
+
+The trusted gateway now supports execution-scoped TLS forwarding through a supervisor-owned Unix socket bridge.
+It reuses the canonical browser and API policy engine. Application credentials remain inside the trusted gateway.
+Cancellation and deadlines close hijacked browser tunnels as well as ordinary requests.
+Targeted local checks cover HTTPS delivery, credential injection and redaction, denied routes, authorization, certificate validation, and tunnel shutdown.
+The selected gateway checks pass with the race detector. Existing private command configuration checks also pass.
+No cloud, cluster, image rebuild, browser session, or catalog test execution occurs for this transport milestone.
+Hosted admission remains disabled until private initialization, supervisor dispatch, workload identity, network policy, and durable cleanup are wired.
+This advances implementation under 51, 56, and 57. All seven remaining broad criteria stay open; the verified count remains 50 of 57.
+See [remote transport](remote-gateway.md) for the component boundary and exact continuation instructions. Azure remains deferred.
+
 ## Active application navigation correction — 2026-11-04
 
 The sidebar now has one project selector and an explicit application selector.

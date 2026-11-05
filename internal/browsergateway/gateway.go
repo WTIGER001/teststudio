@@ -2,7 +2,6 @@ package browsergateway
 
 import (
 	"context"
-	"errors"
 	"io"
 	"net"
 	"net/http"
@@ -180,24 +179,5 @@ func ServeAuthenticated(ctx context.Context, listener net.Listener, target brows
 		return err
 	}
 	defer g.Close()
-	server := &http.Server{Handler: g, ReadHeaderTimeout: 5 * time.Second, IdleTimeout: 30 * time.Second, MaxHeaderBytes: 64 << 10}
-	if target.Requests != nil {
-		server.ReadTimeout, server.WriteTimeout = 30*time.Second, 30*time.Second
-	}
-	finished := make(chan struct{})
-	defer close(finished)
-	go func() {
-		select {
-		case <-ctx.Done():
-		case <-finished:
-			return
-		}
-		_ = server.Close()
-		_ = listener.Close()
-	}()
-	err = server.Serve(listener)
-	if errors.Is(err, http.ErrServerClosed) {
-		return nil
-	}
-	return err
+	return serveGateway(ctx, listener, g, target.Requests != nil, nil)
 }
