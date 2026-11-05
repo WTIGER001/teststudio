@@ -8,7 +8,8 @@ The user authorizes targeted tests and frequent feature commits. Remote pushes r
 
 The user resumes implementation on 2026-11-03.
 Focus on implementation, then targeted tests for the changed behavior.
-Run tests only locally. AWS, Kubernetes, and Azure verification are separate work.
+Run tests only locally. The user now authorizes a dedicated local k3s/k3d cluster.
+Live AWS and Azure verification remain separate work. Azure implementation is deferred at the user's request.
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
@@ -20,6 +21,38 @@ Ordinary project creator access and the first environment-backed local recorded 
 Tester investigation, failure recovery, and local manual/scheduled runner parity pass targeted verification.
 Continue source-workflow, access, storage, and hosted packaging gaps. Reuse passing runner evidence.
 Do not add new dashboard pages or repeat completed demonstration setup before closing the remaining workflow gaps.
+
+### Latest user direction: defer Azure and exercise local Kubernetes
+
+This direction supersedes the Azure continuation steps recorded below.
+The user defers Azure work until a later script-based deployment and account setup.
+Preserve the staged Azure code. Add no more Azure metadata or permission inspectors in the current phase.
+Prepare an Azure deployment script when the user requests it. An Azure account is not currently available for verification.
+Keep Azure acceptance open under the existing numbers. Deferral does not prove completion or remove the target.
+
+Kubernetes has local SDK protocol and Helm/schema evidence, but no real cluster verification.
+Use a dedicated local k3s cluster through k3d on this Mac. Keep its kubeconfig separate from user contexts.
+The existing default Colima VM has two CPUs and 2 GiB of memory.
+Use a separate test profile when more capacity is required. Preserve the default Docker workloads and the demo on port 8040.
+
+Deliver observable milestones in this order:
+
+| Milestone | State |
+| --- | --- |
+| Dedicated cluster with Ready nodes | Verified. k3d v5.9.0 runs k3s v1.35.5+k3s1 in the separate teststudio-k3s Colima profile. |
+| Chart installation with local PostgreSQL and private evidence | Next. No TestStudio application deployment is verified yet. |
+| Newly authored HTTPS probe through the installation | Pending installation. Retain its result and evidence. |
+| Isolated Go and Playwright workers | Pending an enforced RuntimeClass and network policy. |
+| Cancellation, deadlines, artifacts, and restart recovery | Pending actual worker execution. |
+
+The private kubeconfig uses the observed loopback API mapping and mode 0600. Helm host connectivity passes.
+CoreDNS, storage provisioning, metrics, and Traefik report Running. The default Docker context remains unchanged.
+See [local Kubernetes](local-kubernetes.md) and output/local-k3s/cluster-summary.json for evidence and continuation instructions.
+
+Report which milestone runs on a real cluster and which checks remain simulated.
+Use targeted checks and fix concrete integration failures. Do not substitute more generated-resource fixtures for running the application.
+Keep all 57 acceptance items and the verified count unchanged until their full evidence exists.
+Cloud-wide acceptance remains separate. Continue independent remaining product work without waiting for Azure.
 
 ### Current decisions
 
@@ -40,7 +73,8 @@ Do not add new dashboard pages or repeat completed demonstration setup before cl
 
 ### Azure isolated execution direction
 
-Continue Azure coded execution through Container Apps Sandboxes. Keep the UI and API in Container Apps.
+Azure implementation is deferred by the latest user direction above. This section records the preserved staged design.
+The staged coded execution path uses Container Apps Sandboxes, with UI and API in Container Apps.
 The public sandbox contract supplies a separate execution boundary and create-time outbound controls.
 The service and selected API remain preview. Complete deployment acceptance remains required.
 This uses the existing plan's suitable-backend alternative. It does not add a deployment target or change the 57 acceptance numbers.

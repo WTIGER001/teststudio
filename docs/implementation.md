@@ -122,6 +122,34 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: dedicated local k3s cluster
+
+The separate teststudio-k3s Colima profile runs with four CPUs, 6 GiB memory, and a 20 GiB disk.
+Verified k3d v5.9.0 creates one ARM64 k3s v1.35.5+k3s1 server node in about 17 seconds.
+The node reports Ready=True. CoreDNS, local storage, metrics, and Traefik report Running.
+The cluster API binds only to loopback. Its private kubeconfig has mode 0600 and uses the observed Docker API port mapping.
+Helm connects from the host using that kubeconfig and its Secret driver. The default Docker context remains unchanged.
+The existing demo remains on port 8040. No Azure work resumes.
+Evidence is output/local-k3s/cluster-summary.json, nodes.json, system-pods.json, helm-connectivity.json, and cluster-create.log.
+Local ownership and tool checksum metadata remain in .data/local-k3s. The cluster stays available for application installation.
+No TestStudio chart installation, application run, or coded worker scenario is verified on the cluster yet.
+The next measurable result is a chart installation and one newly authored HTTPS probe with retained evidence.
+See [local Kubernetes](local-kubernetes.md) for scoped commands and stop instructions.
+No numbered acceptance item closes. The total remains **48 verified, 9 open**.
+
+## Current direction: Azure deferred; local Kubernetes integration next
+
+The user defers Azure implementation and verification until a later deployment script and account setup.
+The staged Azure changes are preserved. No Azure resource or account has been tested.
+Kubernetes evidence currently consists of local SDK protocol, Helm rendering, schema, and container startup checks.
+A dedicated local cluster is now verified. No TestStudio chart deployment is verified yet.
+The user now authorizes dedicated local k3s/k3d verification with a separate kubeconfig.
+The next measurable result is a Ready cluster, then a chart installation and one newly authored HTTPS probe.
+Isolated coded workers, cancellation, deadlines, artifacts, and restart recovery follow on that local cluster.
+The default Docker workloads and demo on port 8040 remain preserved.
+The active plan and repository instructions record this change of priority.
+Acceptance **51** remains open. The total remains **48 verified, 9 open**.
+
 ## Current delivery: selected controller secret and evidence authority
 
 The existing authority reader now includes startup-secret and execution-evidence grants with selected vault, Blob account, and private container metadata.

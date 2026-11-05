@@ -19,7 +19,9 @@ Use the active delivery sequence in `docs/plan.md`. Historical checkpoints are r
 - Add no code comments unless the user requests them.
 - Write new tests and examples. Copy no existing application tests, data, or infrastructure configuration.
 - Focus on implementation, then run targeted local tests for changed behavior.
-- Do not run AWS, Kubernetes, or Azure tests in this work session.
+- The user defers Azure implementation and verification. Preserve staged code. Prepare an Azure deployment script only when the user requests that work.
+- Run Kubernetes verification only on a dedicated local k3s/k3d cluster with an explicit private kubeconfig. Do not use a remote or inherited cluster context.
+- Do not run live AWS or Azure tests in this work session.
 - Do not repeat broad suites or fixture builds without a concrete unresolved concern.
 - Commit verified features frequently, as the user requests.
 - Do not push without an explicit request.
