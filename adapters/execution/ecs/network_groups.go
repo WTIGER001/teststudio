@@ -12,6 +12,10 @@ import (
 )
 
 func permissions(values []types.IpPermission, account, vpc string) ([]string, error) {
+	return peerPermissions(values, account, vpc, "", "", "")
+}
+
+func peerPermissions(values []types.IpPermission, account, vpc, peerGroup, peerVPC, peering string) ([]string, error) {
 	result := []string{}
 	for _, p := range values {
 		if aws.ToString(p.IpProtocol) != "tcp" && aws.ToString(p.IpProtocol) != "6" || p.FromPort == nil || p.ToPort == nil || *p.FromPort != *p.ToPort || len(p.IpRanges)+len(p.Ipv6Ranges) != 0 {
@@ -21,7 +25,11 @@ func permissions(values []types.IpPermission, account, vpc string) ([]string, er
 			return nil, hostedexecution.ErrOwnership
 		}
 		for _, group := range p.UserIdGroupPairs {
-			if aws.ToString(group.UserId) != account || aws.ToString(group.VpcPeeringConnectionId) != "" || aws.ToString(group.PeeringStatus) != "" || aws.ToString(group.VpcId) != "" && aws.ToString(group.VpcId) != vpc {
+			groupVPC, connection := vpc, ""
+			if peerGroup != "" && aws.ToString(group.GroupId) == peerGroup {
+				groupVPC, connection = peerVPC, peering
+			}
+			if aws.ToString(group.UserId) != account || aws.ToString(group.VpcPeeringConnectionId) != "" && aws.ToString(group.VpcPeeringConnectionId) != connection || aws.ToString(group.PeeringStatus) != "" && (connection == "" || aws.ToString(group.PeeringStatus) != "active") || aws.ToString(group.VpcId) != "" && aws.ToString(group.VpcId) != groupVPC {
 				return nil, hostedexecution.ErrOwnership
 			}
 			result = append(result, fmt.Sprintf("%d:sg:%s", *p.FromPort, aws.ToString(group.GroupId)))
@@ -78,7 +86,11 @@ func (g *NetworkGuard) checkGroups(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
-		egress, err := permissions(group.IpPermissionsEgress, c.Account, vpc)
+		peerGroup, peerVPC, peering := "", "", ""
+		if id == c.SecurityGroups[0] && s.Gateway != nil {
+			peerGroup, peerVPC, peering = s.Gateway.SecurityGroup, s.Gateway.VPC, s.Gateway.PeeringConnection
+		}
+		egress, err := peerPermissions(group.IpPermissionsEgress, c.Account, vpc, peerGroup, peerVPC, peering)
 		if err != nil {
 			return err
 		}
@@ -86,6 +98,9 @@ func (g *NetworkGuard) checkGroups(ctx context.Context) error {
 		switch id {
 		case c.SecurityGroups[0]:
 			wantOut = []string{"443:sg:" + s.ExchangeGroup, "443:sg:" + s.RegistryGroup, "443:pl:" + s.S3PrefixList}
+			if s.Gateway != nil {
+				wantOut = append(wantOut, "8044:sg:"+s.Gateway.SecurityGroup)
+			}
 		case s.ExchangeGroup, s.RegistryGroup:
 			wantIn = []string{"443:sg:" + c.SecurityGroups[0]}
 			if len(egress) > 0 {

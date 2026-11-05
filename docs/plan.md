@@ -102,12 +102,18 @@ The task uses a separate execution role, subnets, security group, certificate re
 Its metadata helper derives the task identifier without forwarding secrets or following another endpoint.
 The gateway child provider now uses a separate durable role journal and the existing SDK state machine and cleanup checkpoints.
 Real private-exchange checks cover verified address binding, initialization order, withdrawn authority, lost acknowledgements, restart, and guarded removal.
-Image capabilities are required before native creation. Native network admission remains an explicit dependency, without a concrete gateway guard yet.
+Image capabilities are required before native creation.
 The composed environment provider now waits for verified gateway initialization and health before creating one worker.
 Concurrent observation, current-authority checks, cancellation before worker creation, lost launches, independent shutdown, and guarded cleanup pass local protocol checks.
 Gateway infrastructure failure survives restart and cannot confirm a passing worker outcome.
 Both role journals remain visible as one execution, including partial bundles. Changed lifecycle checks pass with the race detector.
-Next implement the concrete native gateway network guard, SDK factory selection, source preparation, and installation wiring.
+The concrete native network guard now verifies separate gateway VPC ownership, narrow peering and security rules, private task interfaces, NAT, and private exchange delivery.
+The worker DNS firewall and target-egress restriction remain required. Offline mode rejects all added peer routes and gateway egress.
+Changed native network checks and selected existing offline checks pass locally with the race detector.
+The production SDK factory rejects incomplete gateway network selection before any AWS request.
+Next implement SDK factory selection, source preparation, and dedicated environment network and service packaging.
+Use a third VPC for trusted gateways and separate environment worker resources. Preserve the retained offline worker pool.
+See [native gateway networking](ecs-gateway-network.md) for exact resource and continuation requirements.
 Keep production ECS environment registration disabled until that native path is complete.
 Preserve the worker DNS firewall and target-egress restrictions while providing trusted gateway target resolution.
 Require the address, certificate, and native task identity capabilities before enabling ECS environment profiles. See [ECS gateway integration](ecs-gateway.md).

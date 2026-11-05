@@ -31,6 +31,13 @@ func NewNetworkGuard(c Config, settings NetworkSettings, ec2Client EC2, elbClien
 	if err != nil || c.NetworkProfile != bound.NetworkProfile || ec2Client == nil || elbClient == nil || resolver == nil || profiles == nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
+	if settings.Gateway != nil {
+		if _, ok := ec2Client.(GatewayEC2); !ok {
+			return nil, hostedexecution.ErrConfiguration
+		}
+		selected := settings.Gateway.canonical()
+		settings.Gateway = &selected
+	}
 	return &NetworkGuard{worker: bound, settings: settings, ec2: ec2Client, elb: elbClient, resolver: resolver, profiles: profiles}, nil
 }
 
@@ -55,6 +62,11 @@ func (g *NetworkGuard) Admit(ctx context.Context, c Config) error {
 	defer cancel()
 	if err := g.checkVPC(ctx); err != nil {
 		return err
+	}
+	if g.settings.Gateway != nil {
+		if err := g.checkGatewayNetwork(ctx); err != nil {
+			return err
+		}
 	}
 	if err := g.checkGroups(ctx); err != nil {
 		return err

@@ -36,7 +36,7 @@ func (r *Runtime) Close() {
 }
 
 func (s Settings) Open(ctx context.Context, store *storage.Store, cleanup func(context.Context, execution.Reference) error) (*Runtime, error) {
-	if store == nil {
+	if store == nil || s.Network.Gateway != nil {
 		return nil, hostedexecution.ErrConfiguration
 	}
 	worker, err := s.Network.Bind(s.Worker)
@@ -60,7 +60,7 @@ func (s Settings) Open(ctx context.Context, store *storage.Store, cleanup func(c
 
 func (s Settings) open(ctx context.Context, store *storage.Store, cleanup func(context.Context, execution.Reference) error, credentials aws.CredentialsProvider, client aws.HTTPClient, registryTransport http.RoundTripper) (*Runtime, error) {
 	worker, err := s.Network.Bind(s.Worker)
-	if err != nil || s.Worker.NetworkProfile != worker.NetworkProfile || store == nil || credentials == nil || client == nil || strings.HasPrefix(worker.Region, "cn-") || strings.HasPrefix(worker.Region, "us-gov-") {
+	if err != nil || s.Worker.NetworkProfile != worker.NetworkProfile || s.Network.Gateway != nil || store == nil || credentials == nil || client == nil || strings.HasPrefix(worker.Region, "cn-") || strings.HasPrefix(worker.Region, "us-gov-") {
 		return nil, hostedexecution.ErrConfiguration
 	}
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)

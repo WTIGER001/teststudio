@@ -16,7 +16,7 @@ func (g *NetworkGuard) subnets(ctx context.Context) (map[string]types.Subnet, er
 	if err != nil || result == nil {
 		return nil, hostedexecution.ErrUnavailable
 	}
-	if len(result.Subnets) != len(g.worker.Subnets) {
+	if result.NextToken != nil || len(result.Subnets) != len(g.worker.Subnets) {
 		return nil, hostedexecution.ErrOwnership
 	}
 	values := map[string]types.Subnet{}
@@ -37,53 +37,66 @@ func (g *NetworkGuard) subnets(ctx context.Context) (map[string]types.Subnet, er
 }
 
 func (g *NetworkGuard) checkVPC(ctx context.Context) error {
+	vpc, err := g.vpcIdentity(ctx)
+	if err != nil {
+		return err
+	}
+	subnets, err := g.subnets(ctx)
+	if err != nil {
+		return err
+	}
+	cidrs, err := vpcCIDRs(vpc)
+	if err != nil || !containedSubnets(subnets, cidrs) {
+		return hostedexecution.ErrOwnership
+	}
+	g.routeIDs, err = g.routes(ctx, vpc)
+	return err
+}
+
+func (g *NetworkGuard) vpcIdentity(ctx context.Context) (types.Vpc, error) {
 	result, err := g.ec2.DescribeVpcs(ctx, &ec2.DescribeVpcsInput{VpcIds: []string{g.settings.VPC}}, oneEC2)
 	if err != nil || result == nil {
-		return hostedexecution.ErrUnavailable
+		return types.Vpc{}, hostedexecution.ErrUnavailable
 	}
-	if len(result.Vpcs) != 1 {
-		return hostedexecution.ErrOwnership
+	if result.NextToken != nil || len(result.Vpcs) != 1 {
+		return types.Vpc{}, hostedexecution.ErrOwnership
 	}
 	vpc := result.Vpcs[0]
 	if aws.ToString(vpc.VpcId) != g.settings.VPC || aws.ToString(vpc.OwnerId) != g.worker.Account || vpc.State != types.VpcStateAvailable || aws.ToBool(vpc.IsDefault) || len(vpc.Ipv6CidrBlockAssociationSet) != 0 {
-		return hostedexecution.ErrOwnership
+		return types.Vpc{}, hostedexecution.ErrOwnership
 	}
 	for _, attribute := range []types.VpcAttributeName{types.VpcAttributeNameEnableDnsSupport, types.VpcAttributeNameEnableDnsHostnames} {
 		value, err := g.ec2.DescribeVpcAttribute(ctx, &ec2.DescribeVpcAttributeInput{VpcId: aws.String(g.settings.VPC), Attribute: attribute}, oneEC2)
 		if err != nil || value == nil {
-			return hostedexecution.ErrUnavailable
+			return types.Vpc{}, hostedexecution.ErrUnavailable
 		}
 		if aws.ToString(value.VpcId) != g.settings.VPC {
-			return hostedexecution.ErrOwnership
+			return types.Vpc{}, hostedexecution.ErrOwnership
 		}
 		if attribute == types.VpcAttributeNameEnableDnsSupport && (value.EnableDnsSupport == nil || !aws.ToBool(value.EnableDnsSupport.Value)) || attribute == types.VpcAttributeNameEnableDnsHostnames && (value.EnableDnsHostnames == nil || !aws.ToBool(value.EnableDnsHostnames.Value)) {
-			return hostedexecution.ErrOwnership
+			return types.Vpc{}, hostedexecution.ErrOwnership
 		}
 	}
 	dhcp, err := g.ec2.DescribeDhcpOptions(ctx, &ec2.DescribeDhcpOptionsInput{DhcpOptionsIds: []string{aws.ToString(vpc.DhcpOptionsId)}}, oneEC2)
 	if err != nil || dhcp == nil {
-		return hostedexecution.ErrUnavailable
+		return types.Vpc{}, hostedexecution.ErrUnavailable
 	}
 	if len(dhcp.DhcpOptions) != 1 || aws.ToString(dhcp.DhcpOptions[0].DhcpOptionsId) != aws.ToString(vpc.DhcpOptionsId) || aws.ToString(dhcp.DhcpOptions[0].OwnerId) != g.worker.Account {
-		return hostedexecution.ErrOwnership
+		return types.Vpc{}, hostedexecution.ErrOwnership
 	}
 	servers := 0
 	for _, option := range dhcp.DhcpOptions[0].DhcpConfigurations {
 		if aws.ToString(option.Key) == "domain-name-servers" {
 			servers++
 			if len(option.Values) != 1 || aws.ToString(option.Values[0].Value) != "AmazonProvidedDNS" {
-				return hostedexecution.ErrOwnership
+				return types.Vpc{}, hostedexecution.ErrOwnership
 			}
 		}
 	}
 	if servers != 1 {
-		return hostedexecution.ErrOwnership
+		return types.Vpc{}, hostedexecution.ErrOwnership
 	}
-	if _, err := g.subnets(ctx); err != nil {
-		return err
-	}
-	g.routeIDs, err = g.routes(ctx, vpc)
-	return err
+	return vpc, nil
 }
 
 func (g *NetworkGuard) routeTables(ctx context.Context) ([]types.RouteTable, error) {
@@ -113,75 +126,52 @@ func (g *NetworkGuard) routes(ctx context.Context, vpc types.Vpc) ([]string, err
 	if err != nil {
 		return nil, err
 	}
-	byID := map[string]types.RouteTable{}
-	explicit := map[string]string{}
-	main := ""
-	for _, table := range tables {
-		id := aws.ToString(table.RouteTableId)
-		if id == "" || aws.ToString(table.VpcId) != g.settings.VPC || aws.ToString(table.OwnerId) != g.worker.Account {
-			return nil, hostedexecution.ErrOwnership
+	selected, err := selectedRouteTables(tables, g.worker.Subnets, g.settings.VPC, g.worker.Account)
+	if err != nil {
+		return nil, err
+	}
+	local, err := vpcCIDRs(vpc)
+	if err != nil {
+		return nil, err
+	}
+	peer := []string{}
+	if g.settings.Gateway != nil {
+		subnets, err := g.gatewayRole().subnets(ctx)
+		if err != nil {
+			return nil, err
 		}
-		if _, duplicate := byID[id]; duplicate {
-			return nil, hostedexecution.ErrOwnership
-		}
-		byID[id] = table
-		for _, a := range table.Associations {
-			if aws.ToBool(a.Main) {
-				if main != "" {
-					return nil, hostedexecution.ErrOwnership
-				}
-				main = id
-			}
-			if subnet := aws.ToString(a.SubnetId); slices.Contains(g.worker.Subnets, subnet) {
-				if explicit[subnet] != "" {
-					return nil, hostedexecution.ErrOwnership
-				}
-				explicit[subnet] = id
-			}
+		peer, err = subnetCIDRs(subnets)
+		if err != nil {
+			return nil, err
 		}
 	}
-	local := map[string]bool{aws.ToString(vpc.CidrBlock): true}
-	for _, a := range vpc.CidrBlockAssociationSet {
-		if a.CidrBlockState == nil || a.CidrBlockState.State != types.VpcCidrBlockStateCodeAssociated {
-			return nil, hostedexecution.ErrOwnership
-		}
-		local[aws.ToString(a.CidrBlock)] = true
-	}
-	selected := []string{}
-	for _, subnet := range g.worker.Subnets {
-		id := explicit[subnet]
-		if id == "" {
-			id = main
-		}
-		if id == "" {
-			return nil, hostedexecution.ErrOwnership
-		}
-		if slices.Contains(selected, id) {
-			continue
-		}
-		selected = append(selected, id)
+	ids := []string{}
+	for _, table := range selected {
+		ids = append(ids, aws.ToString(table.RouteTableId))
 		found := map[string]bool{}
-		for _, r := range byID[id].Routes {
-			r.Origin = ""
+		for _, route := range table.Routes {
+			route.Origin = ""
 			expected := types.Route{State: types.RouteStateActive}
 			key := "s3"
-			if cidr := aws.ToString(r.DestinationCidrBlock); local[cidr] {
-				expected.DestinationCidrBlock = aws.String(cidr)
-				expected.GatewayId = aws.String("local")
+			cidr := aws.ToString(route.DestinationCidrBlock)
+			if slices.Contains(local, cidr) {
+				expected.DestinationCidrBlock, expected.GatewayId = aws.String(cidr), aws.String("local")
+				key = cidr
+			} else if slices.Contains(peer, cidr) {
+				expected.DestinationCidrBlock, expected.VpcPeeringConnectionId = aws.String(cidr), aws.String(g.settings.Gateway.PeeringConnection)
 				key = cidr
 			} else {
-				expected.DestinationPrefixListId = aws.String(g.settings.S3PrefixList)
-				expected.GatewayId = aws.String(g.settings.S3Endpoint)
+				expected.DestinationPrefixListId, expected.GatewayId = aws.String(g.settings.S3PrefixList), aws.String(g.settings.S3Endpoint)
 			}
-			if fingerprint(document(r)) != fingerprint(document(expected)) || found[key] {
+			if fingerprint(document(route)) != fingerprint(document(expected)) || found[key] {
 				return nil, hostedexecution.ErrOwnership
 			}
 			found[key] = true
 		}
-		if len(found) != len(local)+1 || !found["s3"] {
+		if len(found) != len(local)+len(peer)+1 || !found["s3"] {
 			return nil, hostedexecution.ErrOwnership
 		}
 	}
-	slices.Sort(selected)
-	return selected, nil
+	slices.Sort(ids)
+	return ids, nil
 }

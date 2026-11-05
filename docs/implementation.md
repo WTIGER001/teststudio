@@ -205,6 +205,30 @@ No cloud test, image build, browser, Kubernetes redeployment, or catalog run occ
 The native gateway network guard, production SDK selection, source preparation, and installation wiring remain unfinished.
 Production environment-backed ECS registration remains disabled. This advances **41, 51, 56, and 57**; the total remains **50 of 57**.
 
+### Native ECS gateway network admission
+
+The native network guard now admits a separate gateway VPC through an explicit frozen network profile.
+It verifies same-account and same-Region peering, narrow subnet routes, reciprocal transport groups, public NAT, and private exchange endpoint delivery.
+Environment workers gain only gateway TCP 8044 alongside their existing private platform paths.
+The worker DNS firewall remains unchanged. Offline mode still rejects gateway routes, direct target egress, and NAT.
+The trusted gateway resolves application targets through its own VPC and retains the existing origin, request, credential, and destination guards.
+
+Worker and gateway task checks share the native ECS attachment and EC2 interface verifier.
+Public addresses, IPv6, extra groups, changed native identity, and mismatched address ownership fail.
+Frozen settings copy and canonicalize gateway subnet and NAT identifiers before binding the immutable network profile.
+Changing or removing these controls cannot reuse that profile.
+The production SDK factory rejects incomplete gateway network configuration before any AWS request.
+The worker package includes the additional peer, NAT, and internet gateway read permissions, without creating or enabling new network resources.
+
+Targeted local native SDK protocol checks pass for the accepted network, task binding, configuration changes, route and group drift, native errors, and incomplete production selection.
+Changed network checks and selected existing offline network checks pass with the race detector.
+A fresh local package preview passes the existing package-to-admission check and confirms the additional Region-bound read permissions.
+Retain that preview in output/ecs-gateway-network/admission-fixture.json. It uses the current template and does not replace older recorded evidence.
+No cloud request, image build, browser, Kubernetes redeployment, or catalog execution occurs.
+Next add SDK factory selection, source preparation, and dedicated environment deployment packaging.
+Keep the existing offline pool separate. See [native gateway networking](ecs-gateway-network.md).
+This advances **51, 56, and 57**; the total remains **50 verified of 57**.
+
 ## Active application navigation correction — 2026-11-04
 
 The sidebar now has one project selector and an explicit application selector.

@@ -8,6 +8,7 @@ The shared transport supports a verified task address and private certificate en
 Native gateway task construction, ownership, deadline, recovery proof, and metadata bootstrap components now pass targeted local checks.
 The gateway child provider now reuses the durable SDK lifecycle with a separate role journal and verified address binding.
 The composed environment provider now sequences gateway initialization before worker creation and manages both task lifecycles.
+The native network guard now verifies a separate gateway VPC, narrow peer routes, native task interfaces, NAT, and private exchange delivery.
 These components do not yet provide the complete native ECS dispatch lifecycle or deployment acceptance.
 Azure remains deferred, and this work makes no live cloud call.
 
@@ -120,7 +121,7 @@ They cover initialization order, unsupported capabilities, address mismatch, aut
 Selected existing offline worker lifecycle checks still pass.
 
 This child provider has no normal executor registration. It cannot enable environment execution by itself.
-The concrete native gateway network guard and installation wiring remain required.
+Production factory selection and installation wiring remain required.
 
 ### Environment task orchestration
 
@@ -151,19 +152,20 @@ Local protocol checks cover cold startup, concurrent observation, permission wit
 Changed lifecycle checks and selected existing worker checks pass with the race detector.
 
 The production SDK factory still selects the offline provider.
-The composed provider requires a concrete native gateway network guard and installation configuration before registration.
+The composed provider requires native factory selection and installation configuration before registration.
+The [gateway network guard](ecs-gateway-network.md) now supplies the concrete native observation contract.
 
 ### Remaining native integration
 
-Connect the composed provider to the production SDK factory, service roles, source preparation, and deployment settings.
+Connect the composed provider and native network guard to the SDK factory, service roles, source preparation, and deployment settings.
 Verify the gateway execution role, certificate references, image-pull path, private exchange path, and separate native network.
 Preserve uploaded source isolation and current run authority during this wiring.
 Build only affected runtime images after the native path is complete.
 
-The existing worker VPC has a restrictive DNS firewall and no general target egress.
-Preserve those worker restrictions when implementing the gateway network.
-Gateway target resolution and delivery require a trusted path that does not broaden uploaded worker DNS or target access.
-The configured worker network needs a narrowly verified route to its gateway transport.
+The network guard requires a dedicated gateway VPC with narrowly routed same-account and same-Region peering.
+The worker DNS firewall remains restricted. Only gateway TCP 8044 is added to the environment worker egress rules.
+The gateway has its own NAT path and private exchange endpoint.
+Provision this environment pool separately and preserve the existing offline pool.
 Keep environment profiles rejected until the native network, workload, identity, deadline, and recovery paths are complete.
 
 ## Tutorials

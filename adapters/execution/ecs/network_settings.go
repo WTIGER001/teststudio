@@ -10,25 +10,26 @@ import (
 )
 
 type NetworkSettings struct {
-	VPC                 string `json:"vpc"`
-	ControllerVPC       string `json:"controllerVpc"`
-	ExchangeGroup       string `json:"exchangeGroup"`
-	RegistryGroup       string `json:"registryGroup"`
-	LoadBalancerGroup   string `json:"loadBalancerGroup"`
-	ControllerGroup     string `json:"controllerGroup"`
-	ExchangeEndpoint    string `json:"exchangeEndpoint"`
-	ExchangeService     string `json:"exchangeService"`
-	APIEndpoint         string `json:"apiEndpoint"`
-	DKREndpoint         string `json:"dkrEndpoint"`
-	S3Endpoint          string `json:"s3Endpoint"`
-	S3PrefixList        string `json:"s3PrefixList"`
-	RepositoryPrefix    string `json:"repositoryPrefix"`
-	LoadBalancer        string `json:"loadBalancer"`
-	TargetGroup         string `json:"targetGroup"`
-	FirewallGroup       string `json:"firewallGroup"`
-	FirewallAssociation string `json:"firewallAssociation"`
-	AllowList           string `json:"allowList"`
-	BlockList           string `json:"blockList"`
+	Gateway             *GatewayNetworkSettings `json:"gateway,omitempty"`
+	VPC                 string                  `json:"vpc"`
+	ControllerVPC       string                  `json:"controllerVpc"`
+	ExchangeGroup       string                  `json:"exchangeGroup"`
+	RegistryGroup       string                  `json:"registryGroup"`
+	LoadBalancerGroup   string                  `json:"loadBalancerGroup"`
+	ControllerGroup     string                  `json:"controllerGroup"`
+	ExchangeEndpoint    string                  `json:"exchangeEndpoint"`
+	ExchangeService     string                  `json:"exchangeService"`
+	APIEndpoint         string                  `json:"apiEndpoint"`
+	DKREndpoint         string                  `json:"dkrEndpoint"`
+	S3Endpoint          string                  `json:"s3Endpoint"`
+	S3PrefixList        string                  `json:"s3PrefixList"`
+	RepositoryPrefix    string                  `json:"repositoryPrefix"`
+	LoadBalancer        string                  `json:"loadBalancer"`
+	TargetGroup         string                  `json:"targetGroup"`
+	FirewallGroup       string                  `json:"firewallGroup"`
+	FirewallAssociation string                  `json:"firewallAssociation"`
+	AllowList           string                  `json:"allowList"`
+	BlockList           string                  `json:"blockList"`
 }
 
 var vpcID = regexp.MustCompile(`^vpc-(?:[a-f0-9]{8}|[a-f0-9]{17})$`)
@@ -75,6 +76,13 @@ func (s NetworkSettings) Bind(c Config) (Config, error) {
 	}
 	if !strings.HasPrefix(s.ExchangeService, "com.amazonaws.vpce."+c.Region+".") || !endpointServiceID.MatchString(strings.TrimPrefix(s.ExchangeService, "com.amazonaws.vpce."+c.Region+".")) {
 		return c, hostedexecution.ErrConfiguration
+	}
+	if s.Gateway != nil {
+		if err := s.Gateway.validate(c, s); err != nil {
+			return c, err
+		}
+		selected := s.Gateway.canonical()
+		s.Gateway = &selected
 	}
 	identity := fingerprint([]any{"ecs-private-network/v1", s})
 	if c.NetworkProfile != "" && c.NetworkProfile != identity {
