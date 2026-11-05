@@ -196,6 +196,9 @@
         "subject"
       ]
     },
+    "recordingCompanion": {
+      "type": "boolean"
+    },
     "localAccounts": {
       "type": "boolean"
     },
@@ -1209,6 +1212,7 @@
     "oidc",
     "bootstrap",
     "localAccounts",
+    "recordingCompanion",
     "artifactStore",
     "persistence",
     "ingress",

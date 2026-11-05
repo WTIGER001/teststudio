@@ -24,6 +24,7 @@ oidc:
 bootstrap:
   issuer: https://identity.example.test
   subject: installation-owner-subject
+recordingCompanion: false
 ingress:
   className: installation-ingress
   uiTLSSecret: teststudio-ui-tls

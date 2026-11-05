@@ -76,6 +76,25 @@ No new browser session, cloud operation, cluster operation, or user demo restart
 Other desktop targets have no new native verification. Opt-in provider configuration and deployed-profile verification remain separate.
 This advances 57; the total remains 50 verified of 57.
 
+### Opt-in recorder deployment settings
+
+Kubernetes chart 0.1.1 adds recordingCompanion: false. The AWS core template adds RecordingCompanion with default false.
+Enabling either setting adds --recording-companion=true only to the API process.
+The setting adds no browser, workload, port, volume, credential, or permission. Existing worker and source settings remain independent.
+Kubernetes notes and operator guides describe trusted desktop distribution and the required updated service image.
+
+Three focused Kubernetes profiles validate 41 resources. Two malformed values are rejected.
+The enabled base manifest differs only by its API argument. Separate controller and preparation arguments exclude recording configuration.
+Four ECS previews cover enabled and disabled settings with and without coded workers. Three malformed values are rejected.
+The task previews differ only by the API argument. CloudFront retains HTTPS, authorization forwarding, POST delivery, disabled caching, and no UI rewrite.
+The focused service command check starts two private API subprocesses. Default mode stays disabled; explicit enablement reserves pairing without a browser dependency.
+Both subprocesses stop and release their listeners. The check takes 0.09 seconds, excluding compilation.
+
+Evidence is output/kubernetes-recording-package and output/aws-recording-package.
+No cloud, cluster, image build, or browser operation occurs in this packaging batch. The user demo remains running.
+The next verification uses the dedicated local Kubernetes installation and one changed service image.
+This advances 57; the verified count remains 50 of 57.
+
 ## Remote gateway transport milestone — 2026-11-05
 
 The trusted gateway now supports execution-scoped TLS forwarding through a supervisor-owned Unix socket bridge.

@@ -19,14 +19,15 @@ This section is the current implementation order. Historical continuation comman
 The local demonstration is usable and verified. The complete product remains unfinished at 50 verified items out of 57.
 Ordinary project creator access and the first environment-backed local recorded website flow pass targeted verification.
 Tester investigation, failure recovery, and local manual/scheduled runner parity pass targeted verification.
-Implement the trusted hosted browser/API gateway, then the hosted recorder companion. Reuse passing runner evidence.
+The trusted hosted browser/API gateway and recorder companion now have local implementation evidence. Continue the deployed local recorder handoff.
 The current [deployment readiness audit](deployment-readiness.md) separates implementation gaps from deferred verification gates.
 Do not add new dashboard pages or repeat completed demonstration setup before closing the remaining workflow gaps.
 
 ### User-facing priority categories
 
 Critical work fixes a blocker in the local create, run, or result inspection workflows. No such blocker is currently identified by retained verification.
-Important work completes the hosted recorder wizard, desktop setup, current-page help, and one focused local browser workflow.
+Important recorder authoring, desktop setup, help, local browser verification, and opt-in packaging now have evidence.
+The next Important milestone verifies the deployed recorder handoff on the dedicated local Kubernetes installation.
 Required AWS and Azure deployment gates remain Important, with their existing authorization and Azure deferral boundaries.
 Nice to Have covers optional one-click desktop installation, automatic updates, and later convenience polish. These additions do not replace required acceptance scope.
 
@@ -100,7 +101,7 @@ Cloud-wide acceptance remains separate. Continue independent remaining product w
 Kubernetes now runs environment-backed browser and coded API artifacts through its trusted gateway.
 Both actual local cluster workflows pass with measured durations, private evidence, and complete resource cleanup.
 ECS gateway integration and optional packaging now have local contract evidence. Actual AWS execution remains unverified.
-Hosted recording still needs its local companion.
+Hosted recording now has a local companion, guided wizard, standalone package, and opt-in Kubernetes and ECS configuration.
 The first ECS transport components now support a frozen private task address and private server certificate environment values.
 Pending addresses keep initialization and activation closed until the provider binds the observed task identity and address.
 TLS still verifies the configured hostname and certificate authority. Optional runtime and gateway capabilities are exposed through registry inspection.
@@ -127,7 +128,7 @@ It supplies the private worker and trusted gateway networks, scoped pull and cer
 Six local profiles and six rejected configurations pass. Resource-derived metadata also passes the production settings loader, network guard, and task address verifier.
 Default offline resources remain unchanged. A sealed installation can provision the repository and accept new endpoints before activating its environment settings.
 See [AWS environment packaging](aws-environment-package.md) for deployment prerequisites, exact local checks, and remaining live verification.
-Next implement the scoped local recorder companion for hosted authoring. Keep actual AWS verification in separately authorized deployment work.
+Retain the completed scoped local recorder companion. Keep actual AWS verification in separately authorized deployment work.
 The companion pairing and control API now passes targeted local authorization, expiry, snapshot-order, restart, and stop/cancel checks.
 The outbound desktop command now reuses the trusted native recorder and retains private recovery journals.
 Lost acknowledgements, no-relaunch recovery, authority withdrawal, deadline shutdown, and process cleanup pass targeted local checks.
@@ -137,7 +138,11 @@ Run 20261105T213644.732520000-8266daf9143ea86cc6552e14 passes in about 27 second
 Sixteen owned processes exit. Its prepared image, execution containers, volumes, and private contexts are removed.
 The standalone package builder now includes the command, trusted helper, locked dependency declarations, setup script, README, and checksummed manifest.
 The macOS ARM64 archive passes native help and offline setup using cached npm dependencies and Chromium. Temporary verification files are removed.
-The installation option remains disabled by default. Continue opt-in provider configuration and operator enablement. Keep actual deployment verification separate.
+The installation option remains disabled by default. Kubernetes chart 0.1.1 and the AWS core template now expose explicit opt-in settings.
+Three local Kubernetes profiles validate API-only enablement, including separate controller and preparation roles. Two malformed settings are rejected.
+Four local ECS task previews preserve the original task except for one API argument. Three malformed settings are rejected.
+The existing HTTPS route forwards authorization without caching. Native service checks confirm default-disabled and explicit companion modes without opening a browser.
+Next verify the opt-in recorder on the dedicated local Kubernetes installation. Build only the changed service image and reuse retained worker evidence.
 See [desktop companion](recorder-companion.md). Keep the existing recording, review, draft, publication, and execution boundaries.
 Use a third VPC for trusted gateways and separate environment worker resources. Preserve the retained offline worker pool.
 See [native gateway networking](ecs-gateway-network.md) for exact resource and continuation requirements.
@@ -148,7 +153,7 @@ Require the address, certificate, and native task identity capabilities before e
 1. Keep the completed Kubernetes gateway and its two passing application workflows as retained evidence.
 2. Retain the passing gateway cancellation and interrupted-run recovery cases. Both use their original execution identities and clean both workloads.
 3. Retain the completed ECS gateway adapters and optional package with their passing local contract checks. Keep actual AWS verification separate.
-4. Add a scoped local recorder companion for hosted authoring, preserving the existing wizard and source workflow.
+4. Retain the completed companion, wizard, macOS package, and opt-in settings. Verify the recorder handoff once on the dedicated local Kubernetes installation.
 5. Complete target verification only in separately authorized deployment work. Keep Azure implementation deferred.
 
 Keep all seven remaining acceptance items open: 41, 46, 51, 53, 54, 56, and 57.

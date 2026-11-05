@@ -24,6 +24,20 @@ Passing evidence is output/playwright/recorder-companion-help-fix. The complete 
 Reuse that evidence for unchanged lifecycle behavior. Desktop packaging uses scripts/verify-recorder-package.py and does not need another browser run.
 See [desktop companion](recorder-companion.md) for packaging, offline setup, and native verification limits.
 
+Recorder deployment settings have narrow package checks:
+
+```sh
+.data/kubernetes-tools/venv/bin/python scripts/verify-kubernetes.py --recording-only \
+  --helm .data/kubernetes-tools/helm --kubeconform .data/kubernetes-tools/kubeconform \
+  --output output/kubernetes-recording-package
+.data/aws-tools/venv/bin/python scripts/verify-aws-package.py --recording-only \
+  --output output/aws-recording-package
+go test ./cmd/teststudio -run '^TestServiceCommandExposesCompanionOnlyWhenExplicitlyEnabled$' -count=1
+```
+
+These checks cover default-disabled configuration, API-only enablement, malformed values, native process wiring, HTTPS routing, and authorization forwarding.
+They read no kubeconfig and perform no cloud or cluster operation. They open no browser.
+
 ## Kubernetes packaging checks
 
 The Helm chart has strict installation values and local rendering checks in scripts/verify-kubernetes.py.

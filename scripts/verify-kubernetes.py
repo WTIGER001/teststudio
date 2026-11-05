@@ -21,6 +21,7 @@ def main():
     selection.add_argument('--preparation-only', action='store_true')
     selection.add_argument('--routing-only', action='store_true')
     selection.add_argument('--controller-only', action='store_true')
+    selection.add_argument('--recording-only', action='store_true')
     parser.add_argument('--pod', type=Path)
     arguments = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
@@ -79,6 +80,10 @@ def main():
             assert container['securityContext']['capabilities']['drop'] == ['ALL']
             assert container['image'] == values['image']['repository'] + '@' + values['image']['digest']
             assert '--database-env=TESTSTUDIO_DATABASE' in container['args'] and '--require-postgres=true' in container['args']
+            assert ('--recording-companion=true' in container['args']) == values.get('recordingCompanion', False)
+            for other in by_kind['Deployment']:
+                if other['metadata']['name'] != 'fixture':
+                    assert not any('recording' in arg for entry in other['spec']['template']['spec']['containers'] for arg in entry.get('args', []))
             assert all('secretKeyRef' in item['valueFrom'] and 'value' not in item for item in container['env'])
             references = ','.join('env:' + name for name in sorted(values['oidc']['credentials']))
             assert '--oidc-secret-refs=' + references in container['args']
@@ -189,7 +194,32 @@ def main():
         lint = execute([arguments.helm, 'lint', str(chart), '--strict', '--values', str(values_file)])
         (output / 'lint.log').write_text(lint.stdout)
         original_checksum = render('filesystem-single', base)
-        if arguments.controller_only:
+        if arguments.recording_only:
+            enabled = copy.deepcopy(base)
+            enabled['recordingCompanion'] = True
+            render('desktop-companion', enabled)
+            baseline = list(yaml.safe_load_all((output / 'filesystem-single.yaml').read_text()))
+            recorded = list(yaml.safe_load_all((output / 'desktop-companion.yaml').read_text()))
+            api = next(item for item in recorded if item and item['kind'] == 'Deployment' and item['metadata']['name'] == 'fixture')
+            api['spec']['template']['spec']['containers'][0]['args'].remove('--recording-companion=true')
+            assert baseline == recorded
+            separated = copy.deepcopy(enabled)
+            separated.update(yaml.safe_load((chart / 'workers.example.yaml').read_text()))
+            defaults = yaml.safe_load((chart / 'values.yaml').read_text())
+            preparation = copy.deepcopy(defaults['preparation'])
+            overrides = yaml.safe_load((chart / 'preparation.example.yaml').read_text())['preparation']
+            preparation['registry'].update(overrides.pop('registry'))
+            preparation.update(overrides)
+            separated['preparation'] = preparation
+            separated['controller'] = copy.deepcopy(defaults['controller'])
+            separated['controller']['enabled'] = True
+            separated['persistence'] = {'existingClaim': 'shared-evidence', 'accessMode': 'ReadWriteMany'}
+            render('desktop-companion-separate-roles', separated)
+            for name, setting in [('string-companion-setting', 'true'), ('object-companion-setting', {'enabled': True})]:
+                invalid = copy.deepcopy(base)
+                invalid['recordingCompanion'] = setting
+                render(name, invalid, expected=False)
+        elif arguments.controller_only:
             enabled = copy.deepcopy(base)
             enabled.update(yaml.safe_load((chart / 'workers.example.yaml').read_text()))
             defaults = yaml.safe_load((chart / 'values.yaml').read_text())['controller']

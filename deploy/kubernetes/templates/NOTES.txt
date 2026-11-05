@@ -4,6 +4,11 @@ Database Secret: {{ .Values.database.existingSecret }} / {{ .Values.database.key
 
 Configure the declared TLS Secrets, ingress controller, PostgreSQL connection, and OIDC callbacks before use.
 Filesystem artifact claims remain after release removal. Manage retention and backups explicitly.
+{{ if .Values.recordingCompanion }}
+Desktop recording companion pairing is enabled on the public API.
+Provide testers with the trusted desktop archive, checksum, and Node.js setup instructions.
+Desktop capture does not prepare, publish, or execute a test.
+{{ end }}
 {{ if .Values.workers.enabled }}
 Worker namespace: {{ .Values.workers.namespace }}
 RuntimeClass: {{ .Values.workers.runtimeClass }}

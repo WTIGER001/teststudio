@@ -67,6 +67,11 @@ Parameters:
     Type: String
     Default: 'false'
     AllowedValues: ['false', 'true']
+  RecordingCompanion:
+    Type: String
+    Default: 'false'
+    AllowedValues: ['false', 'true']
+    Description: Enable owner-scoped desktop recorder pairing after distributing the trusted companion package
   WorkerSettingsSecretArn:
     Type: String
     Default: ''
@@ -107,6 +112,7 @@ Rules:
       - Assert: !Not [!Equals [!Ref ArtifactHostname, !Ref OriginHostname]]
         AssertDescription: The load balancer origin requires a separate host
 Conditions:
+  DesktopCompanion: !Equals [!Ref RecordingCompanion, 'true']
   Workers: !Not [!Equals [!Ref WorkerSettingsSecretArn, '']]
   NewWorkerSources: !And [!Not [!Equals [!Ref WorkerSettingsSecretArn, '']], !Equals [!Ref WorkerNewSources, 'true']]
   ClientOne: !Not [!Equals [!Ref OidcClientOneSecretArn, '']]
@@ -407,6 +413,7 @@ Resources:
             - !If [NewWorkerSources, --source-bundles, !Ref 'AWS::NoValue']
             - !If [NewWorkerSources, !Sub '--source-bundle-runners=${WorkerSourceRunners}', !Ref 'AWS::NoValue']
             - !Sub '--local-accounts=${LocalAccounts}'
+            - !If [DesktopCompanion, --recording-companion=true, !Ref 'AWS::NoValue']
             - !Sub '--bootstrap-issuer=${BootstrapIssuer}'
             - !Sub '--bootstrap-subject=${BootstrapSubject}'
             - !Join

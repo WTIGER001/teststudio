@@ -77,6 +77,9 @@ spec:
             - {{ printf "--bootstrap-issuer=%s" .Values.bootstrap.issuer | quote }}
             - {{ printf "--bootstrap-subject=%s" .Values.bootstrap.subject | quote }}
             - {{ printf "--local-accounts=%t" .Values.localAccounts | quote }}
+            {{- if .Values.recordingCompanion }}
+            - --recording-companion=true
+            {{- end }}
             - --artifact-store-config=/etc/teststudio/artifact-store.json
             - --execution-location=kubernetes
             {{- if .Values.controller.enabled }}

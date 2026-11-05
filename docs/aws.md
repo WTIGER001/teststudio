@@ -7,7 +7,8 @@ Current verification uses local schemas and package checks only. No AWS deployme
 
 The profile currently supports the catalog, identity, native HTTP execution, schedules, and private evidence service.
 Offline Go and Playwright workers and separate preparation now have an optional [staged infrastructure package](aws-workers-package.md).
-Their live execution and recovery remain unverified. Environment-backed coded execution and hosted recording remain unfinished.
+Their live execution and recovery remain unverified. Environment-backed execution now has optional gateway packaging and local contract evidence.
+Hosted recording has a desktop companion, guided authoring, and optional core-service configuration. Actual AWS behavior remains unverified.
 The [ECS task and deadline contracts](ecs-worker-contract.md) now provide immutable SDK drafts and recovery proofs for the worker adapter.
 The [durable provider lifecycle](ecs-worker-lifecycle.md) now adds reserved dispatch, recovery, and checkpointed cleanup.
 Network admission, settings parsing, and supported task-local storage pass local checks. Defaults retain native HTTP execution without coded workers.
@@ -96,6 +97,26 @@ Authorized infrastructure operators can inspect container environments and resol
 Replace service tasks after rotating database or OIDC secrets. Existing tasks retain their injected values.
 Initial provider records are inserted only when absent. Use TestStudio's provider administration to change existing provider settings.
 Bootstrap grants apply once. Later restarts do not restore revoked administrator access.
+
+## Desktop browser recording
+
+RecordingCompanion defaults to false in the core-service template.
+After distributing the trusted desktop archive, set RecordingCompanion=true with a service image built from the updated source.
+The task adds --recording-companion=true to the API process. It does not add a browser, sidecar, secret, mount, IAM grant, or listener.
+This setting works independently of coded-worker configuration. Capturing a recording does not require a worker task.
+Preparation, publication, and execution retain their existing prerequisites and permissions.
+
+The existing /api/* CloudFront behavior carries native companion POST requests to the API.
+It requires HTTPS, forwards Authorization, and disables response caching. It does not apply the UI route rewrite.
+Native requests have no browser Origin or Cookie headers. Keep that absence through any additional proxy layer.
+Browser authoring retains managed sign-in, Origin, and CSRF protection.
+Set RecordingCompanion=false to withdraw companion authority during a controlled service rollout.
+The desktop stops after its next rejected control request and retains private captured source.
+See [Desktop recording companion](recorder-companion.md) for pairing, setup, expiry, and recovery.
+
+Four local task previews cover enabled and disabled recording with and without coded workers.
+Three invalid settings are rejected. Native startup checks confirm the flag selects companion mode without a browser dependency.
+Evidence is output/aws-recording-package. These checks perform no AWS operation and do not prove deployed behavior.
 
 ## Routing and evidence
 

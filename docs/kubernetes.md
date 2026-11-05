@@ -6,6 +6,7 @@ The current chart runs the API, UI, schedules, notifications, and native HTTP ch
 Optional offline coded execution uses the [Kubernetes worker profile](kubernetes-workers.md).
 Native remote preparation and its optional Helm package are implemented. Kubernetes deployment acceptance remains open.
 Optional [separate execution controllers](kubernetes-controllers.md) provide independent controller replicas while the API retains sign-in and worker transport.
+Optional desktop recording uses the scoped [recording companion](recorder-companion.md).
 
 ## Installation inputs
 
@@ -43,6 +44,29 @@ Mapped references are also approved for later provider management through the UI
 Public clients can omit secretRef or use an empty string.
 Local password sign-in remains optional through localAccounts. Initial OIDC administration can create and manage those accounts afterward.
 See [Identity providers](providers.md) and [Access](access.md) for managed sessions and authorization.
+
+### Desktop browser recording
+
+Chart version 0.1.1 adds recordingCompanion. It defaults to false.
+Use a service image built from the updated source. After distributing the trusted desktop archive, set:
+
+```yaml
+recordingCompanion: true
+```
+
+The chart adds --recording-companion=true only to the API container.
+Separate controllers and preparation workers receive no recording flag.
+The option adds no ports, browser dependencies, credentials, mounts, workloads, or Kubernetes permissions.
+The browser runs on the tester's desktop. The API stores owner-private session state and captured source in PostgreSQL.
+The existing UI/API HTTPS ingress carries the scoped companion requests under /api/v1/recording-companion.
+Forward the Authorization header. Do not inject Origin or Cookie headers into native companion requests.
+Keep these POST routes outside proxy caches. Normal browser authoring still requires managed sign-in, Origin, and CSRF.
+Source review, draft saving, preparation, publication, and execution remain separate actions.
+Set recordingCompanion back to false to stop accepting companion authority. Desktop clients stop after their next rejected control request.
+
+Three focused local rendering profiles validate 41 resources. Two malformed settings are rejected.
+The enabled base profile differs only by its API argument. Separate-role checks exclude the flag from controllers and preparation.
+Evidence is output/kubernetes-recording-package. This verifies packaging, not a deployed recorder session.
 
 ### Private certificate authorities
 

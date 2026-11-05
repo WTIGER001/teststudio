@@ -49,6 +49,8 @@ A one-click installer and automatic updates remain optional later improvements.
 ### Connect a hosted session
 
 An operator enables --recording-companion on the API service without configuring the server's native desktop recorder.
+The Kubernetes chart uses recordingCompanion: true. The AWS core stack uses RecordingCompanion=true.
+Both options default to disabled. They require a service image built from the updated source and do not add a server-side browser.
 In Create test, choose Playwright browser test and a destination suite.
 Enter a title and start address. Use Advanced recording details only to change the generated identifier.
 Select Continue to desktop connection. The wizard reserves a session and shows its owner-private pairing code.
@@ -133,3 +135,9 @@ The native recorder captures the independent local target's initial navigation. 
 No target test run starts. The check confirms that sixteen owned processes exit and all owned execution resources are removed.
 Evidence is output/playwright/recorder-companion-help-fix. The check completes in about 27 seconds.
 Standalone macOS ARM64 packaging and offline setup now pass. Actual cloud profile verification remains separate work. Acceptance 57 remains open.
+
+The opt-in Kubernetes and AWS settings now pass focused local packaging checks.
+Kubernetes validates three profiles, including separate controller and preparation roles, and rejects two malformed settings.
+AWS validates four task profiles and rejects three malformed settings. HTTPS authorization forwarding and disabled caching remain required.
+A native service subprocess check confirms default-disabled and explicitly enabled API modes. Enabled recording waits for pairing without opening a browser.
+These settings have no new deployed-profile evidence. See [Kubernetes](kubernetes.md) and [AWS](aws.md) for operator configuration.

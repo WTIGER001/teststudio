@@ -6,6 +6,7 @@ import subprocess
 import sys
 
 from cfnlint.decode import decode
+from lib.ecs_recording_package import check_recording
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,6 +23,7 @@ def properties(template, name):
 def main():
     parser = argparse.ArgumentParser(description='Check AWS packaging locally without AWS credentials or service calls.')
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--recording-only', action='store_true')
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
@@ -34,6 +36,12 @@ def main():
     assert lint.returncode == 0, 'Local CloudFormation schema validation failed; inspect schema.log'
     template, errors = decode(str(source))
     assert not errors
+    recording = check_recording(template, output)
+    if args.recording_only:
+        summary = {'passed': True, 'scope': 'local schema and recording packaging contracts only; no AWS operation', 'regions': ['us-east-1', 'us-west-2'], 'recording': recording}
+        (output / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n')
+        print(json.dumps(summary))
+        return
     checks = ['CloudFormation lint and provider schemas pass locally for two regions']
     resource_types = [resource['Type'] for resource in template['Resources'].values()]
     assert resource_types.count('AWS::CloudFront::Distribution') == 2

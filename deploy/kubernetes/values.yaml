@@ -18,6 +18,7 @@ bootstrap:
   issuer: ""
   subject: ""
 localAccounts: false
+recordingCompanion: false
 httpTrust:
   existingSecret: ""
 secretBindings:
