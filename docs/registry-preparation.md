@@ -6,6 +6,8 @@ The registry source builder implements the existing ArtifactBuilder contract.
 It assembles validated offline Go and Playwright snapshots outside the API.
 It publishes an immutable OCI image through the registry HTTPS protocol.
 The [trusted ACR adapter](azure-registry-authentication.md) now supplies separate publication token scope for this same upload and journal flow.
+The [Azure preparation path observer](azure-preparation-registry.md) adds selected endpoint, subnet, NIC, security, and DNS checks.
+Native Azure queue setup remains unfinished because preparation also requires admitted isolated discovery.
 It needs no Docker daemon, local image cache, cloud SDK, shell, or uploaded Dockerfile execution.
 
 The preparation worker now enables this adapter through explicit Kubernetes settings and registry runtime flags.

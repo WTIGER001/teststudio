@@ -237,3 +237,6 @@ The observer requires fresh reported disabled state on the selected API app. Thi
 
 The [host observer profile](azure-observer-host-routes.md) requires an explicit empty controller-environment HTTP route collection.
 The core package creates no route overrides and removes none from the supplied existing environment. Select a suitable environment before admission.
+
+The [preparation registry path](azure-preparation-registry.md) now has selected resource and DNS observation through the existing SDKs.
+The core package creates none of those preparation resources and still declares no native Azure preparation workload.

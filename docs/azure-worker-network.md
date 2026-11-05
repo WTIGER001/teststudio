@@ -188,3 +188,6 @@ Native wiring, effective authorization, deployed authentication behavior, and ac
 
 The [controller route contract](azure-observer-host-routes.md) now requires no environment-level HTTP routing overrides for the staged API profile.
 The inspector observes absence and never changes existing routes. Authority to create later routes remains a separate installation requirement.
+
+The separate [preparation registry observer](azure-preparation-registry.md) now checks its selected controller-side endpoint, NIC, subnets, security group, and DNS zone.
+This branch enables no worker or source queue. Actual preparation placement, egress, writer grants, and discovery admission remain required.

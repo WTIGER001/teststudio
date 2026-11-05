@@ -494,7 +494,28 @@ No dependency, grant, additional reader, repeated parent scan, observation cache
 See [reported controller route absence](azure-observer-host-routes.md). Acceptance 51 advances; the total remains 48 verified, nine open.
 Reported absence does not prove effective visibility, prevent future route writes, establish external proxy behavior, or complete native execution admission.
 
-Next resolve authoritative assignment ownership and protection-management authority, other identity consumer types, trusted preparation networking, and complete native admission wiring.
+A separate PreparationRegistryGuard now checks the selected trusted registry path after the existing registry service and worker network observation chain.
+It binds the approved preparation endpoint to its NIC, exact registry and data members, dedicated endpoint subnet and security rules, source subnet, controller VNet, and separate private zone.
+Fresh VNet reads preserve worker separation, prefix containment, core-subnet separation, and direct-versus-embedded subnet agreement.
+The fixed security rules allow exactly the selected private controller VNet prefixes to the two IPs on TCP 443, followed by inbound and outbound deny rules.
+This preserves trusted controller and backend platform image pulls alongside preparation; writer authority remains separate.
+Configured controller spaces copy and sort into the bound settings, match fresh VNet metadata, and cannot overlap workers.
+The private zone has exact preparation addresses and one completed controller link, with no registration or public fallback under the existing DNS contract.
+The two explicit-credential readers reuse the network and DNS SDKs. Static SDK definitions support installation review without a cloud mutation.
+
+Four new targeted race checks pass after the final policy correction in 2.070 seconds.
+Review adds fresh address-space separation, containment, caller-copy protection, and the existing canonical single-prefix representation helper.
+Earlier verification repeats only changed branches. The final controller-prefix source policy receives all four directly affected checks.
+No existing Go check, broad suite, UI, browser, package, image, container, provider call, publication, deployment, registry push, or demo restart runs.
+The standalone guard has a 40-second context, including its existing 30-second registry parent, with nine ordinary additional requests and a twelve-request additional paging ceiling.
+It repeats no complete parent inspection and caches no success. Parent failure blocks preparation reads; network failure blocks DNS.
+The existing host-bound observer and its 22-reader limits remain unchanged.
+
+The source queue also requires isolated discovery. These read-only checks do not enable publication, a preparation queue, native coded execution, or complete Network admission.
+Actual preparation workload placement, effective DNS and egress, separate writer identity grants, protection-management authority, and native wiring remain required.
+See [trusted preparation registry path](azure-preparation-registry.md). Acceptance 51 advances; the total remains 48 verified, nine open.
+
+Next bind actual preparation workload placement and its effective network path and writer identity, alongside remaining protection authority, identity consumers, and complete native admission.
 Reported app and job checks do not establish exclusive use across all Azure resources or subscriptions.
 Keep hosted read coverage, complete effective authorization, and cross-scope visibility separate until authoritative deployment evidence exists.
 Wire the bound session into native commands only after complete admission exists.

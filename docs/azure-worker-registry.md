@@ -89,7 +89,8 @@ Rejected, disconnected, duplicate, foreign, and extra connections reject ownersh
 Descriptions and inventory order do not change authority.
 
 Service-side preparation approval does not prove the preparation endpoint's NIC, subnet, DNS, or trusted process placement.
-Inspect that separate trusted path before native preparation wiring.
+The [preparation registry guard](azure-preparation-registry.md) now checks its selected NIC, subnets, security rules, controller VNet, and private zone.
+Actual process placement, effective DNS and routing, writer grants, and native wiring remain required.
 Keep its resources in trusted networking. Do not add preparation exceptions to the worker endpoint subnet.
 
 ## SDK and read scope
@@ -138,7 +139,7 @@ Use the locally verified [standalone relay image](worker-relay.md#packaging-boun
 The [selected exchange stage](azure-worker-exchange.md) now checks approval, relay configuration, active revision, and HTTPS binding metadata.
 Complete workload occupancy, backend authority, and effective networking before native enablement.
 Resolve effective VNet-wide private DNS visibility and attachment controls.
-Inspect trusted preparation registry networking and effective managed identity role assignments.
+Continue actual trusted preparation placement, effective DNS and routing, managed identity grants, and native preparation wiring.
 Establish cross-job isolation and execution placement before composing Network.
 Then complete native configuration, infrastructure packaging, and separate deployment verification.
 

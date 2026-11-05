@@ -7,6 +7,8 @@ It supports the Azure worker profile's Linux AMD64 Go and Playwright images.
 It exchanges an explicit trusted Azure credential for registry and repository tokens. It does not use Docker or registry administrator passwords.
 The Azure API and preparation runtime can use this client as their Inspector or source registry client.
 Native Azure worker command wiring and identity role packaging remain unfinished. Coded Azure execution stays disabled.
+The [preparation registry path observer](azure-preparation-registry.md) now inspects selected private network and DNS resources.
+It does not automatically gate this client or enable the source queue; native integration remains required.
 
 The [registry service inspector](azure-worker-registry.md) now verifies private access settings, regional data authority, and service-side endpoint approval.
 It preserves platform ARM-audience authentication while this trusted client continues to request only the registry audience.
