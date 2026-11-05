@@ -8,7 +8,7 @@ The [acceptance ledger](implementation.md) measures full product requirements ra
 
 The service and UI build independently from MarketMaker and sibling checkouts.
 The local server uses SQLite and starts without cloud credentials.
-The current README starts the application with a UI build and go run command.
+The README starts with the local demonstration command and links the normal development setup.
 Local sign-in, project registration, catalog editing, publication, and native HTTP execution are implemented.
 Run details, logs, evidence, timing, stacked trends, failure reruns, help, and themes are implemented.
 Go and Playwright source preparation, normal execution, and retained artifacts pass local checks.
@@ -46,8 +46,8 @@ Clean up only processes and resources created by the demonstration check.
 
 ## Later delivery
 
-AWS, Kubernetes, and Azure deployment verification follows the local demonstration.
-Additional dependency preparation profiles, broader recovery checks, and remaining authorization and evidence requirements remain on the full ledger.
+Dedicated local Kubernetes deployment workflows now have retained evidence. Actual AWS and Azure verification remain separate gates.
+The full ledger tracks the remaining cross-profile timing, evidence, identity, execution, and installation requirements.
 Local installation backup and database transfer now pass focused verification. See [Database transfer](data-transfer.md).
 They do not gate this initial local demonstration.
 
@@ -64,6 +64,8 @@ Project creator access now passes ordinary-user setup and scoped-boundary checks
 The first environment-backed local recorded website flow now passes preparation, publication, execution, and private evidence collection.
 The demo enables the trusted single-origin gateway. The offline starter keeps its separate isolated profile.
 Tester investigation and failure recovery now pass scoped evidence, accessible mobile presentation, and rerun checks without duplicate children.
-Acceptance 44 is complete. Private trace viewing and remaining catalog workflows are next.
+Acceptance 44 is complete. Private [trace viewing](trace-viewer.md) and the [catalog workflows](catalog.md) also have retained local evidence.
+The [desktop recorder](recorder-companion.md) now has guided authoring, standalone packaging, and an actual local Kubernetes handoff.
+The ledger remains 50 verified of 57. See [deployment readiness](deployment-readiness.md) for the seven open criteria.
 Follow [the active delivery plan](plan.md#active-delivery-plan-after-the-tester-walkthrough) for bounded batches and required evidence.
-Keep the running demonstration available while these workflows are implemented.
+Preserve the user demonstration while remaining work continues. Reuse completed local workflow evidence unless a concrete change requires verification.

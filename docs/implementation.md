@@ -6,6 +6,20 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted local checks. Cloud verification remains separate work.
 
+## Current readiness and priority audit — 2026-11-05
+
+The [active plan](plan.md#user-facing-priority-categories) records Critical, Important, and Nice to Have priorities.
+No known local create, run, or result-inspection blocker remains in retained verification.
+The seven Important open criteria follow order 51, 46, 54, 41, 56, 57, and 53.
+Actual AWS verification remains separate work. Azure implementation and verification remain deferred.
+The [deployment audit](deployment-readiness.md) distinguishes completed local implementation from the remaining provider gates.
+The README now leads with local startup, tester guides, and the exact deployment limits.
+It links implemented identity linking and pending project access. Detailed staged Azure references move into the Azure operator guide.
+Database setup uses the supported environment reference rather than a credential-bearing command argument.
+Validation guidance selects changed workflows and preserves passing evidence.
+Documentation consistency and local link checks cover this update. No test, browser, build, deployment, or cloud operation runs.
+No acceptance item closes. The total remains 50 verified of 57.
+
 ## Hosted recorder pairing API — 2026-11-05
 
 The API can reserve an owner-private companion session without starting a server-side browser.

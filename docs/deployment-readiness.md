@@ -14,7 +14,7 @@ Azure implementation and verification remain deferred. A later Azure deployment 
 | --- | --- | --- |
 | Local server | SQLite durability, managed identity, environment-backed browser and API execution, desktop recording, source publication, timing, evidence, and UI workflows. | This does not establish cloud deployment behavior. |
 | Kubernetes | Actual local k3s installation, PostgreSQL, private evidence, two OIDC providers, source preparation, offline suites, environment-backed browser and authenticated HTTPS API suites, gateway lifecycle, deadlines, controller failover, and the desktop recorder handoff now pass. | The owned local cluster does not establish another installation's routing, storage, runtime, or desktop trust configuration. |
-| AWS ECS and CloudFront | Service and worker templates, private exchange, native SDK adapters, offline execution contracts, preparation packaging, and local protocol checks. | No live target verification. Environment-backed coded execution and hosted recording remain unfinished. |
+| AWS ECS and CloudFront | Service and worker templates, private exchange, native SDK adapters, optional environment gateway, source preparation, opt-in recorder packaging, and local protocol checks. | Actual AWS execution, storage, identity, and recorder handoff remain unverified. |
 | Azure | Core service and assembly packages, staged execution and sandbox adapters, and previously retained local protocol evidence. | Native coded execution and discovery wiring remain unfinished. The user defers this work and account verification. |
 
 Local coverage is documented in [browser execution](browser-execution.md), [API tests](api-testing.md), and [browser recording](browser-recording.md).
@@ -38,12 +38,13 @@ Keep each broad item unchecked until its complete requirement passes.
 The completed generic failover and hosted-private-access contracts remain 52 and 55.
 Their evidence does not close these separate cross-profile criteria.
 
-## Confirmed implementation gaps
+## Implementation status and remaining gaps
 
 ### Hosted browser and API networking
 
 The [shared hosted admission](../internal/hostedexecution/admission.go) now permits environment-backed artifacts only through a configured gateway provider and inspected capable runtime.
-Kubernetes implements that provider contract. ECS and Azure still reject these artifacts.
+Kubernetes and optional ECS environment profiles implement that provider contract. Azure native execution wiring remains deferred.
+ECS defaults remain offline-only. Environment execution requires complete separate settings and current exchange authority.
 The [ECS gateway provider](ecs-gateway.md) now has durable role journals, capability admission, verified address binding, and guarded cleanup.
 Its composed parent waits for private initialization and healthy gateway status before creating one worker under current run authority.
 Targeted local checks use the real private exchange and authored AWS protocol fixtures, including concurrent observation and partial cancellation.
@@ -65,7 +66,7 @@ Its [API handler](../internal/browsergateway/api.go) enforces methods, paths, re
 The existing Playwright bridge reaches that gateway through an owned Unix socket.
 That transport and Docker lifecycle do not provide a remote Kubernetes or ECS gateway.
 
-Implement a provider-owned gateway and authenticated transport before admitting the corresponding hosted artifact.
+Retain provider-owned gateways and authenticated transport as requirements for admitting hosted artifacts.
 Reuse the current target, request-policy, credential, redaction, timing, and execution-ledger contracts.
 Keep uploaded test code outside the trusted gateway's credentials and network identity.
 
@@ -93,13 +94,13 @@ The preparation command has a separate Azure assembly-only path.
 Staged sandbox and provider packages do not establish enabled native coded execution or complete discovery in an installation.
 Preserve that code and its existing evidence. Add no Azure inspectors, command wiring, or deployment script during this deferred phase.
 
-## Active implementation sequence
+## Retained milestones and next gates
 
 ### 1. Kubernetes trusted gateway
 
 Both environment-backed browser and authenticated HTTPS API paths now pass on the dedicated local cluster.
 Gateway cancellation and interrupted-run recovery also pass with the same execution identities and complete resource cleanup.
-Retain these results and continue the ECS gateway integration with targeted local checks.
+Retain these results and the completed ECS integration checks. Actual ECS deployment verification remains separate work.
 Use a separate trusted gateway workload with its own network identity and an immutable installation-approved image.
 The untrusted runner can reach only its owned gateway, private exchange, and declared DNS services.
 The gateway applies the existing reviewed target and request policy before outbound delivery.
@@ -124,14 +125,15 @@ Verification uses newly authored local website and API targets with bounded case
 One reviewed successful flow and targeted policy, credential, cancellation, and recovery checks must cover the changed boundary.
 Reuse the existing registry, identity, database, evidence, and runtime builds wherever their inputs stay unchanged.
 Do not repeat passing offline suites or run calibration loops to create timing history.
-Port the completed shared gateway contract to ECS after the Kubernetes path works.
+The ECS adapter now implements the shared gateway contract and has local protocol evidence. Do not infer actual AWS execution from those checks.
 
 ### 2. Hosted recorder companion
 
 The companion, guided wizard, contextual help, API contract, and operator package now have focused local evidence.
 The native browser workflow closes all sixteen owned processes and retains one reviewed source draft without running its target test.
 Kubernetes and ECS now have default-disabled opt-in settings. Their local package checks preserve API role boundaries and existing routes.
-The new recorder configuration now runs on Helm revision 15. One changed service image preserves the previous gateway and runtime choices.
+The native recorder handoff passes on Helm revision 15. Current revision 16 updates bundled UI styles and reuses all three unchanged service binaries.
+The gateway and runtime choices remain unchanged.
 Actual native capture, owner stop, retained source, and draft saving pass. All 23 owned verification processes exit.
 The original twelve offline and seven application-networking runs remain unchanged. No target test runs are added.
 Keep other passing browser and execution scenarios as retained evidence. Do not rerun the complete profile matrix.

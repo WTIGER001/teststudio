@@ -7,31 +7,6 @@ The [UI contract](docs/ui.md) defines tester workflows, shared interaction patte
 The [help guide](docs/help.md) explains contextual guide maintenance.
 Use the [workflow completion checklist](docs/plan.md#workflow-completion-checklist) for each behavior change.
 
-The [AWS core profile](docs/aws.md) documents ECS, separate CloudFront origins, private storage, and local packaging checks.
-The [Azure core profile](docs/azure.md) documents separate Container Apps, managed identities, Key Vault references, and private Blob evidence.
-The [Azure worker admission guide](docs/azure-worker-network.md) links the network, endpoint, and registry service checks under development.
-The [standalone worker relay](docs/worker-relay.md) supplies a bounded frontend without installation credentials, [pinned backend readiness](docs/worker-relay-readiness.md), and a UI-independent image builder. Provider service wiring remains unfinished.
-The [staged Azure worker backend](docs/azure-worker-backend.md) defines a dedicated private environment, worker-only app, and scoped installation identities. Admission and deployment remain separate.
-The [backend observation stage](docs/azure-worker-backend-admission.md) checks actual app configuration, reported placement, identities, and revisions through scoped reads. Complete admission remains unfinished.
-The [backend private endpoint observer](docs/azure-worker-backend-endpoint.md) binds service approval, NIC and address ownership, and the dedicated endpoint subnet policy. Effective routing and TLS remain unfinished.
-The [relay VNet observer](docs/azure-relay-topology.md) checks address space, peering, DNS settings, and subnet consistency with one additional read. Complete native admission remains required.
-The [relay perimeter observer](docs/azure-relay-perimeter.md) binds the source NSG and default route through shared policy checks. Firewall and effective DNS controls remain required.
-The [relay firewall observer](docs/azure-relay-firewall.md) binds the routed appliance, policy, subnet, and public IP. Effective DNS and registry endpoint ownership remain required.
-The [relay DNS policy observer](docs/azure-relay-dns.md) checks exact lists, enabled rules, exclusive links, and actual VNet association. Effective private-zone visibility remains required.
-The [relay registry endpoint observer](docs/azure-relay-registry-endpoint.md) binds an explicit approved consumer to its NIC, member addresses, subnet, and security rules. Private records remain required.
-The [relay private DNS observer](docs/azure-relay-private-dns.md) binds selected registry records to those member addresses and one relay-only link. Effective VNet-wide visibility remains required.
-The [reported private DNS inventory](docs/azure-private-dns-inventory.md) detects additional subscription-visible links into worker and relay VNets. Cross-scope coverage and attachment authority remain required.
-The [network and DNS deny observer](docs/azure-network-deny.md) checks enforced, unconditional protection metadata on both VNets and three selected zones. Deployed enforcement and lifecycle authority remain required.
-The [observer identity and read grant](docs/azure-read-identity.md) bind a separate managed identity to one selected subscription read role. Bound sessions use that credential throughout inspection; effective access and native installation remain required.
-The [reported read-deny scan](docs/azure-read-deny.md) gates bound inspection on reported subscription conflicts and required protection visibility. Hosted coverage and enforcement remain unverified.
-The [reported protection stacks](docs/azure-protection-stacks.md) must match fixed policy and protected roots; direct assignment ownership and management authority remain unproven.
-The [assembly-only source mode](docs/source-assembly-handoff.md) separates registry publication from mandatory discovery through a durable handoff. The [Azure assembly profile](docs/azure-native-assembly.md) supplies native configuration, a persistent-journal template, and startup checks for selected host, storage, and reader metadata. Actual deployment and isolated discovery remain unfinished.
-The [Azure preparation network](docs/azure-preparation-network.md) adds source egress, a private journal account and endpoint, native policy checks, and an actual writable SMB mount probe. Its separate template retrieves no storage keys.
-The [preparation registry observer](docs/azure-preparation-registry.md) checks the selected controller-side endpoint, NIC, subnets, security group, and private DNS. The [writer publisher](docs/azure-preparation-writer.md) composes those checks with an explicit identity and selected push grant. Actual placement, effective grants, and admitted discovery remain unfinished.
-The [observer host stage](docs/azure-observer-host.md) checks reported controller attachment and revisions. Optional core packaging declares its separate API-only identity; native startup remains required. Its [fixed runtime contract](docs/azure-observer-host-runtime.md) additionally checks API arguments, secret references, storage, ingress, probes, and scaling. The [platform authentication check](docs/azure-observer-host-auth.md) requires an explicit disabled current configuration. The [controller route check](docs/azure-observer-host-routes.md) requires reported absence of environment routing overrides.
-The [trusted worker backend role](docs/worker-backend.md) serves private transport without UI, sign-in, or background workers. It supports optional direct TLS; private routing, certificate trust, and provider wiring remain required.
-The [private worker exchange](docs/worker-exchange.md) and [hosted supervisor](docs/job-supervisor.md) supply scoped transport and runner supervision for the provider adapters under development.
-
 ## Local demonstration
 
 Start a separate demonstration with new generic examples:
@@ -61,9 +36,19 @@ Normal local development still starts with an empty project registry.
 | Inspect runs | [Results](docs/results.md), [Test history](docs/test-history.md), [Evidence](docs/evidence.md), [Timing](docs/timing.md), [Trends](docs/trends.md). |
 | Automate testing | [Schedules](docs/schedules.md), [Notifications](docs/notifications.md). |
 | Import and synchronize | [Native uploads](docs/sources.md), [Source bundles](docs/source-bundles.md), [Prepared suites](docs/prepared-suites.md), [Repositories](docs/repository-sources.md), [CLI sign-in](docs/cli-sign-in.md). |
-| Administer and operate | [Access](docs/access.md), [Artifact storage](docs/artifact-storage.md), [Backup and database transfer](docs/data-transfer.md), [Service image](docs/service-image.md), [Kubernetes profile](docs/kubernetes.md), [Identity providers](docs/providers.md), [Notification transports](docs/notification-transports.md). Current installation commands appear below. |
+| Administer and operate | [Desktop recorder setup](docs/recorder-companion.md), [Deployment readiness](docs/deployment-readiness.md), [Access](docs/access.md), [Artifact storage](docs/artifact-storage.md), [Backup and database transfer](docs/data-transfer.md), [Service image](docs/service-image.md), [Kubernetes profile](docs/kubernetes.md), [Identity providers](docs/providers.md), [Notification transports](docs/notification-transports.md). Current installation commands appear below. |
 | Use the API | [OpenAPI contract](contracts/openapi.yaml), [Source webhook contract](contracts/source-webhooks.openapi.yaml), and the affected feature guide. |
 | Contribute | [Plan](docs/plan.md), [Acceptance ledger](docs/implementation.md), [UI contract](docs/ui.md), [Help maintenance](docs/help.md), [Self-testing](docs/self-testing.md). |
+
+## Deployment coverage
+
+The acceptance ledger has 50 verified items of 57. The full product remains unfinished.
+The local application and dedicated local Kubernetes installation have retained workflow evidence.
+AWS ECS and CloudFront have service, execution, gateway, and optional desktop recorder packages with local contract checks.
+Actual AWS verification remains separate work in the selected MMDev account.
+Azure implementation and verification remain deferred at the user's request.
+See [deployment readiness](docs/deployment-readiness.md) for the seven open criteria and their exact gates.
+Operator guides cover [AWS](docs/aws.md), [Kubernetes](docs/kubernetes.md), and the [staged Azure profile](docs/azure.md).
 
 ## Portable service image
 
@@ -75,7 +60,7 @@ node scripts/build-service-image.mjs
 
 The builder reuses unchanged UI assets, binaries, and image output. It performs no registry push or deployment.
 The [service image guide](docs/service-image.md) covers architecture, database secrets, storage, identity, health, and local verification.
-Hosted execution adapters and AWS, Kubernetes, and Azure deployment acceptance remain required work.
+Local and dedicated Kubernetes workflows have retained evidence. Complete cross-profile deployment acceptance remains open.
 
 ## Local development
 
@@ -127,16 +112,18 @@ Other plan areas remain tracked in the acceptance ledger.
 
 ## TestStudio self-tests
 
-Run the new Playwright suite through TestStudio itself:
+Run the affected Playwright workflow through TestStudio itself. This example selects managed local account sign-in:
 
 ```sh
-bash scripts/test-self.sh
+bash scripts/test-self.sh --test=STUDIO-LOCAL-001
 ```
 
 The command needs Docker, Go, Node, and npm.
 It builds an immutable local image and starts disposable TestStudio instances.
 Results, steps, screenshots, traces, and logs use the normal run and private evidence contracts.
+Select the identifier for the changed workflow. Reuse retained results when its inputs remain unchanged.
 See [Self-testing](docs/self-testing.md) for registration, retained history, and intentional failure checks.
+Run the complete suite only when a concrete unresolved concern requires broader coverage.
 
 ## Authentication
 
@@ -164,8 +151,9 @@ The browser receives no provider tokens or client secret.
 ## Databases
 
 SQLite is the default for a single local service.
-Use `--database postgres://USER:PASSWORD@HOST/DATABASE` for PostgreSQL.
-Use a protected configuration mechanism for production database credentials.
+Supply the PostgreSQL connection through a protected TESTSTUDIO_DATABASE environment variable.
+Use `--database-env TESTSTUDIO_DATABASE --require-postgres` to select it and reject a SQLite fallback.
+Keep credentials outside command arguments and source control. See [database configuration](docs/service-image.md#runtime-configuration).
 The permission engine uses a separate `teststudio_permissions` schema in PostgreSQL.
 Metadata and permission migrations serialize concurrent startup within the database.
 
@@ -194,17 +182,17 @@ Built-in role overrides invalidate the local engine immediately and reach anothe
 
 ## Validation
 
-Run tests for the changed feature:
+Run the smallest relevant local check for the changed feature. A catalog change can use:
 
 ```sh
-go test ./internal/storage -count=1
-go test ./adapters/permissions/sqlite -count=1
 go test ./internal/catalog -count=1
-go test ./adapters/auth/oidc ./internal/sessions -count=1
-go test ./internal/httpapi -count=1
 ```
 
-Build the server with `go build -o bin/teststudio ./cmd/teststudio`.
+Use `-run` to select the affected cases when the package contains unrelated workflows.
+Build changed Go commands with `go build -o bin/teststudio ./cmd/teststudio`.
+Build changed UI code with `npm --prefix web run build`.
+Documentation-only changes need consistency and link checks. They do not require builds or browser tests.
+Do not repeat passing suites without a changed input or unresolved concern.
 The user authorizes frequent feature commits. Remote pushes require a separate request.
 
 ## Local Go source suites
@@ -239,13 +227,14 @@ User, group, local membership, profile, and session administration APIs enforce 
 Disabling invalidates earlier sessions through later restoration. Ordinary lifecycle actions protect the last usable installation administrator.
 Run `bash scripts/test-access.sh` to verify persistence, restart, and explicit loopback recovery with a fresh local installation.
 See [Identity administration](docs/access.md) and the [identity OpenAPI contract](contracts/openapi.yaml).
-Open Users, Installation groups, or the selected workspace's Project groups to manage authorized identity records.
+Open Users, Installation groups, or the selected project's Project groups to manage authorized identity records.
 Run `bash scripts/test-self.sh --test=STUDIO-ACCESS-001` for the focused local browser workflow.
 Open Installation access or Project access to manage predefined scoped role assignments.
 Enable managed password sign-in with `--local-accounts`, alongside configured OIDC providers if required.
 Use User details for authorized credential provisioning and reset. Use Your account for personal password changes.
 Run `bash scripts/test-self.sh --test=STUDIO-LOCAL-001` for the managed local account browser workflow.
-Project owners add members directly. Identity linking and pending project access remain pending.
+Project owners add members directly or [prepare project access](docs/access.md#pending-project-access) before an OIDC user signs in.
+Users can [link another sign-in](docs/access.md#explicit-identity-linking) through Your account after fresh authentication and explicit confirmation.
 Custom role APIs support exact scoped rules, inheritance, disabled state, and managed assignment.
 The permission catalog exposes registered descriptions and current grantability. See [Identity administration](docs/access.md).
 Open Project roles or Installation roles to edit custom policies, inspect inheritance, and preview proposed access without saving changes.

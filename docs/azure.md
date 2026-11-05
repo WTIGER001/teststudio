@@ -1,5 +1,8 @@
 # Azure core service profile
 
+Azure implementation and verification remain deferred at the user's request.
+This guide describes staged implementation. It does not establish deployed acceptance.
+
 The Azure package runs TestStudio in two Container Apps.
 One app serves the UI and API. The second app serves private evidence and the trace viewer on a separate HTTPS origin.
 The API app owns identity initialization, schedules, execution coordination, and maintenance.
@@ -45,6 +48,33 @@ The [selected private-zone inspector](azure-worker-private-dns.md) now verifies 
 Complete network admission, identity role binding, and command wiring remain required before enabling coded jobs.
 Do not enable local Docker runner flags or mount a Docker socket inside these apps.
 Local packaging checks do not close Azure deployment acceptance.
+
+## Staged component references
+
+These references preserve implementation details for a later Azure phase. They do not authorize deployment or further Azure work.
+
+The [Azure worker admission guide](azure-worker-network.md) links the network, endpoint, and registry service checks under development.
+The [standalone worker relay](worker-relay.md) supplies a bounded frontend without installation credentials, [pinned backend readiness](worker-relay-readiness.md), and a UI-independent image builder. Provider service wiring remains unfinished.
+The [staged Azure worker backend](azure-worker-backend.md) defines a dedicated private environment, worker-only app, and scoped installation identities. Admission and deployment remain separate.
+The [backend observation stage](azure-worker-backend-admission.md) checks actual app configuration, reported placement, identities, and revisions through scoped reads. Complete admission remains unfinished.
+The [backend private endpoint observer](azure-worker-backend-endpoint.md) binds service approval, NIC and address ownership, and the dedicated endpoint subnet policy. Effective routing and TLS remain unfinished.
+The [relay VNet observer](azure-relay-topology.md) checks address space, peering, DNS settings, and subnet consistency with one additional read. Complete native admission remains required.
+The [relay perimeter observer](azure-relay-perimeter.md) binds the source NSG and default route through shared policy checks. Firewall and effective DNS controls remain required.
+The [relay firewall observer](azure-relay-firewall.md) binds the routed appliance, policy, subnet, and public IP. Effective DNS and registry endpoint ownership remain required.
+The [relay DNS policy observer](azure-relay-dns.md) checks exact lists, enabled rules, exclusive links, and actual VNet association. Effective private-zone visibility remains required.
+The [relay registry endpoint observer](azure-relay-registry-endpoint.md) binds an explicit approved consumer to its NIC, member addresses, subnet, and security rules. Private records remain required.
+The [relay private DNS observer](azure-relay-private-dns.md) binds selected registry records to those member addresses and one relay-only link. Effective VNet-wide visibility remains required.
+The [reported private DNS inventory](azure-private-dns-inventory.md) detects additional subscription-visible links into worker and relay VNets. Cross-scope coverage and attachment authority remain required.
+The [network and DNS deny observer](azure-network-deny.md) checks enforced, unconditional protection metadata on both VNets and three selected zones. Deployed enforcement and lifecycle authority remain required.
+The [observer identity and read grant](azure-read-identity.md) bind a separate managed identity to one selected subscription read role. Bound sessions use that credential throughout inspection; effective access and native installation remain required.
+The [reported read-deny scan](azure-read-deny.md) gates bound inspection on reported subscription conflicts and required protection visibility. Hosted coverage and enforcement remain unverified.
+The [reported protection stacks](azure-protection-stacks.md) must match fixed policy and protected roots; direct assignment ownership and management authority remain unproven.
+The [assembly-only source mode](source-assembly-handoff.md) separates registry publication from mandatory discovery through a durable handoff. The [Azure assembly profile](azure-native-assembly.md) supplies native configuration, a persistent-journal template, and startup checks for selected host, storage, and reader metadata. Actual deployment and isolated discovery remain unfinished.
+The [Azure preparation network](azure-preparation-network.md) adds source egress, a private journal account and endpoint, native policy checks, and an actual writable SMB mount probe. Its separate template retrieves no storage keys.
+The [preparation registry observer](azure-preparation-registry.md) checks the selected controller-side endpoint, NIC, subnets, security group, and private DNS. The [writer publisher](azure-preparation-writer.md) composes those checks with an explicit identity and selected push grant. Actual placement, effective grants, and admitted discovery remain unfinished.
+The [observer host stage](azure-observer-host.md) checks reported controller attachment and revisions. Optional core packaging declares its separate API-only identity; native startup remains required. Its [fixed runtime contract](azure-observer-host-runtime.md) additionally checks API arguments, secret references, storage, ingress, probes, and scaling. The [platform authentication check](azure-observer-host-auth.md) requires an explicit disabled current configuration. The [controller route check](azure-observer-host-routes.md) requires reported absence of environment routing overrides.
+The [trusted worker backend role](worker-backend.md) serves private transport without UI, sign-in, or background workers. It supports optional direct TLS; private routing, certificate trust, and provider wiring remain required.
+The [private worker exchange](worker-exchange.md) and [hosted supervisor](job-supervisor.md) supply scoped transport and runner supervision for the provider adapters under development.
 
 ## Required installation resources
 

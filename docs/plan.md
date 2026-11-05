@@ -19,7 +19,8 @@ This section is the current implementation order. Historical continuation comman
 The local demonstration is usable and verified. The complete product remains unfinished at 50 verified items out of 57.
 Ordinary project creator access and the first environment-backed local recorded website flow pass targeted verification.
 Tester investigation, failure recovery, and local manual/scheduled runner parity pass targeted verification.
-The trusted hosted browser/API gateway and recorder companion now have local implementation evidence. Continue the deployed local recorder handoff.
+The trusted hosted browser/API gateway and recorder companion have local implementation evidence.
+The deployed recorder handoff also passes on the dedicated local Kubernetes installation. Retain that result.
 The current [deployment readiness audit](deployment-readiness.md) separates implementation gaps from deferred verification gates.
 Do not add new dashboard pages or repeat completed demonstration setup before closing the remaining workflow gaps.
 
@@ -30,6 +31,22 @@ Important recorder authoring, desktop setup, help, local browser verification, a
 The deployed recorder handoff now also passes on the dedicated local Kubernetes installation.
 Required AWS and Azure deployment gates remain Important, with their existing authorization and Azure deferral boundaries.
 Nice to Have covers optional one-click desktop installation, automatic updates, and later convenience polish. These additions do not replace required acceptance scope.
+
+The remaining Important acceptance work follows this priority order:
+
+| Order | Item | Remaining requirement |
+| --- | --- | --- |
+| 1 | 51 | Verify hosted execution status, cancellation, deadlines, artifacts, and recovery on the remaining targets. |
+| 2 | 46 | Verify cloud evidence identity, encryption, retention, quotas, and pins. |
+| 3 | 54 | Verify hosted OIDC providers and project-scoped permissions on the remaining profiles. |
+| 4 | 41 | Verify common timing and timeout behavior across the remaining execution profiles. |
+| 5 | 56 | Verify complete generic suite workflows, progress, history, reports, and trends on each target. |
+| 6 | 57 | Complete common acceptance scenarios across every deployment profile. |
+| 7 | 53 | Complete and verify the independent Azure installation after its deferral ends. |
+
+This order does not authorize live cloud work. Azure implementation remains deferred.
+See [deployment readiness](deployment-readiness.md) for missing implementation and separate verification gates.
+Optional Nice to Have work does not take priority over these requirements.
 
 ### Latest user direction: defer Azure and exercise local Kubernetes
 
