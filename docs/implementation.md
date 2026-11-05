@@ -122,7 +122,35 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: independent sandbox settings and concrete runtime assembly
+## Current delivery: reported sandbox placement and selected import authority
+
+OpenRuntime now constructs a concrete ARM placement reader with a separate explicit metadata identity.
+The stage runs before the remaining mandatory protection dependencies for creation, import, and live instance admission.
+Initial observations read seven selected resources in parallel: group, connection, subnet, pull identity, registry, assignment, and AcrPull definition.
+Native settings bind these resource identifiers and identity metadata into the existing network, timing, launch, and source-cache profiles.
+
+Reported drift rejects changed scope, subnet attachments, delegation, group identity, import tenant or client, public registry access, and altered pull authority.
+Unknown group or connection properties reject the pinned preview contract rather than adopting another ARM version shape.
+Metadata failures remain unavailable. A missing metadata resource cannot establish worker absence or authorize a replacement.
+The transport permits selected GET requests only, disables retries and registration, bounds responses, closes bodies, and redacts diagnostics.
+Cancellation checks precede SDK credential acquisition. A targeted fixture catches and verifies that early cancellation barrier.
+
+Live placement uses successful observations for at most 15 seconds from observation start.
+Expired successful reads coalesce across twelve callers and refresh only group, connection, and subnet.
+Failures invalidate live evidence. Older observations cannot overwrite a newer full check's cache result.
+The additional protection callback and all existing sandbox-definition and worker authorization checks remain uncached.
+This avoids seven ARM reads on every quarter-second status poll while retaining fresh initial admission.
+
+Six new checks and eight affected runtime, shared execution, and authorization checks pass with race detection in 1.913 seconds.
+Evidence is output/azure-sandbox-placement/summary.json and targeted.log.
+No cloud account, identity endpoint, registry service, browser, container, UI build, demo restart, or remote push is involved.
+The placement, runtime, source, provider, Azure, and plan guides match the change. No user page behavior changes.
+
+Complete effective authority, protected network content, private exchange and DNS, timer authority, command wiring, and packaging remain unfinished.
+The plan retains explicit deployment questions for private image conversion, actual routing, the token audience, and proxy trust.
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+## Previous delivery: independent sandbox settings and concrete runtime assembly
 
 The new settings loader uses the existing bounded file or environment configuration path.
 It validates independent sandbox settings, explicit nonzero client and tenant identifiers, registry redirects, pull identity, and the separate timer scope.

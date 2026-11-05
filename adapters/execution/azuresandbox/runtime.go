@@ -27,6 +27,7 @@ type Runtime struct {
 	registry  *acr.Client
 	client    *Client
 	deadlines *SDKDeadlines
+	placement *SDKPlacement
 	once      sync.Once
 }
 
@@ -49,6 +50,10 @@ func OpenRuntime(o RuntimeOptions) (result *Runtime, resultErr error) {
 	if err != nil || reader == nil {
 		return nil, hostedexecution.ErrUnavailable
 	}
+	metadata, err := credentials(s.MetadataClientID)
+	if err != nil || metadata == nil {
+		return nil, hostedexecution.ErrUnavailable
+	}
 	r := &Runtime{}
 	defer func() {
 		if resultErr != nil {
@@ -67,12 +72,17 @@ func OpenRuntime(o RuntimeOptions) (result *Runtime, resultErr error) {
 	if err != nil {
 		return nil, err
 	}
-	controller, err := NewController(ControllerOptions{Config: s.Worker, Instances: r.client, Deadlines: r.deadlines, Admission: o.Admission, Exchange: o.Exchange, Commands: r.client})
+	r.placement, err = NewSDKPlacement(s, metadata, o.ARMTransport)
+	if err != nil {
+		return nil, err
+	}
+	admission := &placementAdmission{placement: r.placement, protection: o.Admission, importProtection: o.ImageAdmission}
+	controller, err := NewController(ControllerOptions{Config: s.Worker, Instances: r.client, Deadlines: r.deadlines, Admission: admission, Exchange: o.Exchange, Commands: r.client})
 	if err != nil {
 		return nil, err
 	}
 	r.Provider = &Provider{controller: controller}
-	images, err := NewImageManager(ImageManagerOptions{Config: s.Worker, PullIdentity: s.PullIdentity, Images: r.client, Exchange: o.Exchange, Admission: o.ImageAdmission, AllowImport: s.Mode == "discovery"})
+	images, err := NewImageManager(ImageManagerOptions{Config: s.Worker, PullIdentity: s.PullIdentity, Images: r.client, Exchange: o.Exchange, Admission: admission, AllowImport: s.Mode == "discovery"})
 	if err != nil {
 		return nil, err
 	}
@@ -97,6 +107,9 @@ func (r *Runtime) Close() {
 		}
 		if r.deadlines != nil {
 			r.deadlines.Close()
+		}
+		if r.placement != nil {
+			r.placement.Close()
 		}
 		if r.client != nil {
 			r.client.Close()

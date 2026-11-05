@@ -90,7 +90,17 @@ Native execution and discovery modes reject control of the opposite workload. Cl
 Local settings, credential, client, mode, shutdown, and affected shared lifecycle checks pass.
 See [sandbox runtime assembly](azure-sandbox-runtime.md). Commands do not load these settings yet.
 
-Complete actual import and runtime admission, native command role wiring, and deployment packaging next.
+The runtime now includes a concrete ARM placement and import-grant stage before its remaining protection dependencies.
+Seven selected reads verify group, VNet attachment, subnet bindings, import identity, registry settings, and the reported pull grant.
+Placement and protected-policy fingerprints bind native launch and source-cache profiles. The metadata reader uses a third explicit identity.
+Initial and import checks stay fresh. Live placement observations have a 15-second positive cache and a three-resource shared refresh.
+Sandbox-definition, permission, revocation, and additional protection checks remain uncached.
+Targeted local SDK, drift, grant, cancellation, bounds, caching, and affected lifecycle checks pass.
+See [sandbox placement admission](azure-sandbox-placement.md). Reported metadata does not prove complete effective authority or private routing.
+
+Complete remaining authority and protected network admission, native command role wiring, and deployment packaging next.
+Verify metadata-reader placement and grants, control and timer authority, actual security rules and routes, private exchange ownership, and DNS.
+Keep private registry conversion access and proxy trust as explicit deployment compatibility questions.
 Pin the group reader and template to an explicit service contract. Current preview guidance and the versioned ARM reference describe different shapes.
 Do not silently combine the pinned preview SDK with the 2026-07-01 environment-linked resource shape.
 Reuse the new command and status bridge. Preserve explicit gaps after a lost acknowledgment and never replay the logical attempt.

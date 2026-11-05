@@ -15,14 +15,16 @@ type TimerSettings struct {
 }
 
 type Settings struct {
-	Worker              Config        `json:"worker"`
-	Mode                string        `json:"mode"`
-	TenantID            string        `json:"tenantId"`
-	ControlClientID     string        `json:"controlClientId"`
-	RegistryClientID    string        `json:"registryClientId"`
-	PullIdentity        string        `json:"pullIdentity"`
-	BlobRedirectOrigins []string      `json:"blobRedirectOrigins,omitempty"`
-	Timer               TimerSettings `json:"timer"`
+	Worker              Config            `json:"worker"`
+	Mode                string            `json:"mode"`
+	TenantID            string            `json:"tenantId"`
+	ControlClientID     string            `json:"controlClientId"`
+	RegistryClientID    string            `json:"registryClientId"`
+	MetadataClientID    string            `json:"metadataClientId"`
+	Placement           PlacementSettings `json:"placement"`
+	PullIdentity        string            `json:"pullIdentity"`
+	BlobRedirectOrigins []string          `json:"blobRedirectOrigins,omitempty"`
+	Timer               TimerSettings     `json:"timer"`
 }
 
 func (s Settings) deadlineConfig() DeadlineConfig {
@@ -34,7 +36,8 @@ func nonzeroGUID(value string) bool {
 }
 
 func (s Settings) Validate() error {
-	if Validate(s.Worker) != nil || s.Mode != "execution" && s.Mode != "discovery" || !nonzeroGUID(s.Worker.Subscription) || !nonzeroGUID(s.TenantID) || !nonzeroGUID(s.ControlClientID) || !nonzeroGUID(s.RegistryClientID) || s.ControlClientID == s.RegistryClientID || !s.Worker.validPullIdentity(s.PullIdentity) || strings.EqualFold(s.PullIdentity, s.Timer.StopIdentity) || s.deadlineConfig().validate() != nil || acr.ValidateRegistry(s.Worker.Registry, s.TenantID, s.Worker.RepositoryPrefix, s.BlobRedirectOrigins) != nil {
+	profile, err := s.Placement.NetworkProfile(s.Worker)
+	if err != nil || profile != s.Worker.NetworkProfile || Validate(s.Worker) != nil || s.Mode != "execution" && s.Mode != "discovery" || !nonzeroGUID(s.Worker.Subscription) || !nonzeroGUID(s.TenantID) || !nonzeroGUID(s.ControlClientID) || !nonzeroGUID(s.RegistryClientID) || !nonzeroGUID(s.MetadataClientID) || s.ControlClientID == s.RegistryClientID || s.ControlClientID == s.MetadataClientID || s.RegistryClientID == s.MetadataClientID || s.Placement.PullClientID == s.ControlClientID || s.Placement.PullClientID == s.RegistryClientID || s.Placement.PullClientID == s.MetadataClientID || !s.Worker.validPullIdentity(s.PullIdentity) || strings.EqualFold(s.PullIdentity, s.Timer.StopIdentity) || s.deadlineConfig().validate() != nil || acr.ValidateRegistry(s.Worker.Registry, s.TenantID, s.Worker.RepositoryPrefix, s.BlobRedirectOrigins) != nil {
 		return hostedexecution.ErrConfiguration
 	}
 	return nil

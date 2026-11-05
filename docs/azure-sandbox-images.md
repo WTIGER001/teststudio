@@ -7,7 +7,8 @@ Trusted preparation can reserve an import. Execution processes can resolve an ex
 The production data-plane client implements ImageControl. No Azure SDK process runs inside the API or test sandbox.
 The [provider bridge](azure-sandbox-provider.md) now connects pending conversion to the shared execution lifecycle.
 The [runtime factory](azure-sandbox-runtime.md) now supplies concrete SDK assembly and independent settings.
-Actual import admission, command wiring, and deployment packaging remain unfinished.
+The [placement stage](azure-sandbox-placement.md) now checks reported import identity and the selected registry pull grant.
+Complete effective import authority, private conversion routing, command wiring, and deployment packaging remain unfinished.
 This library does not enable Azure execution.
 
 ## Concepts

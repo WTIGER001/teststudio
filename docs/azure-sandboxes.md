@@ -15,7 +15,8 @@ The [command bridge](azure-sandbox-commands.md) now supplies independent exit re
 The [image manager](azure-sandbox-images.md) now supplies durable import and verified converted-image lookup.
 The [provider bridge](azure-sandbox-provider.md) now connects pending image preparation and the shared execution lifecycle.
 The [runtime factory](azure-sandbox-runtime.md) now supplies concrete SDK assembly and independent settings.
-Native activation still requires effective timer authority, admission, source-queue command wiring, and packaging.
+The [placement stage](azure-sandbox-placement.md) now checks reported group, subnet, import identity, and selected pull authority.
+Native activation still requires complete authority and protected network admission, timer authority, source-queue command wiring, and packaging.
 Local contract checks do not establish deployed isolation, service availability, identity authority, certificate trust, or complete product operation.
 
 ## Concepts

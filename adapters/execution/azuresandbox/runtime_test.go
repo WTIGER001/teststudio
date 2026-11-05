@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -19,15 +20,22 @@ import (
 func runtimeSettings() Settings {
 	c := fixtureConfig()
 	identity := "/subscriptions/" + c.Subscription + "/resourceGroups/studio-identities/providers/Microsoft.ManagedIdentity/userAssignedIdentities/"
-	return Settings{Worker: c, Mode: "execution", TenantID: "33333333-3333-3333-3333-333333333333", ControlClientID: "11111111-1111-1111-1111-111111111111", RegistryClientID: "22222222-2222-2222-2222-222222222222", PullIdentity: identity + "studio-pull", Timer: TimerSettings{ResourceGroup: "studio-timers", NamePrefix: "studio", StopIdentity: identity + "studio-stop"}}
+	prefix := "/subscriptions/" + c.Subscription + "/resourceGroups/studio-net/providers/Microsoft.Network/"
+	registry := "/subscriptions/" + c.Subscription + "/resourceGroups/studio-images/providers/Microsoft.ContainerRegistry/registries/studiotest"
+	pl := PlacementSettings{Subnet: prefix + "virtualNetworks/studio-network/subnets/sandbox", SubnetPrefix: "10.48.0.0/23", SecurityGroup: prefix + "networkSecurityGroups/studio-workers", RouteTable: prefix + "routeTables/studio-workers", Registry: registry, PullAssignment: registry + "/providers/Microsoft.Authorization/roleAssignments/77777777-7777-7777-7777-777777777777", PullClientID: "55555555-5555-5555-5555-555555555555", PullPrincipalID: "66666666-6666-6666-6666-666666666666", PolicyProfile: c.NetworkProfile}
+	c.NetworkProfile, _ = pl.NetworkProfile(c)
+	return Settings{Worker: c, Mode: "execution", TenantID: "33333333-3333-3333-3333-333333333333", ControlClientID: "11111111-1111-1111-1111-111111111111", RegistryClientID: "22222222-2222-2222-2222-222222222222", MetadataClientID: "44444444-4444-4444-4444-444444444444", Placement: pl, PullIdentity: identity + "studio-pull", Timer: TimerSettings{ResourceGroup: "studio-timers", NamePrefix: "studio", StopIdentity: identity + "studio-stop"}}
 }
 
 type runtimeCredential struct {
+	mu     sync.Mutex
 	token  string
 	scopes []string
 }
 
 func (c *runtimeCredential) GetToken(_ context.Context, r policy.TokenRequestOptions) (azcore.AccessToken, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	c.scopes = append(c.scopes, r.Scopes...)
 	return azcore.AccessToken{Token: c.token, ExpiresOn: time.Now().Add(time.Hour)}, nil
 }
@@ -119,6 +127,7 @@ func TestSandboxRuntimeAssemblesConcreteClientsWithExplicitCredentials(t *testin
 	s := runtimeSettings()
 	control := &runtimeCredential{token: "native-control-canary"}
 	reader := &runtimeCredential{token: "registry-reader-canary"}
+	metadata := &runtimeCredential{token: "metadata-reader-canary"}
 	selected := []string{}
 	dataCalls, armCalls := 0, 0
 	data := runtimeTransport(func(r *http.Request) (*http.Response, error) {
@@ -144,13 +153,16 @@ func TestSandboxRuntimeAssemblesConcreteClientsWithExplicitCredentials(t *testin
 		if id == s.RegistryClientID {
 			return reader, nil
 		}
+		if id == s.MetadataClientID {
+			return metadata, nil
+		}
 		return nil, errors.New("unexpected credential selection")
 	}})
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer runtime.Close()
-	if len(selected) != 2 || selected[0] != s.ControlClientID || selected[1] != s.RegistryClientID || len(control.scopes) != 0 || len(reader.scopes) != 0 || dataCalls+armCalls != 0 {
+	if len(selected) != 3 || selected[0] != s.ControlClientID || selected[1] != s.RegistryClientID || selected[2] != s.MetadataClientID || len(control.scopes) != 0 || len(reader.scopes) != 0 || len(metadata.scopes) != 0 || dataCalls+armCalls != 0 {
 		t.Fatal("construction obtained tokens or discovered another credential")
 	}
 	if runtime.Provider.controller.instances != runtime.client || runtime.Provider.controller.commands != runtime.client || runtime.Provider.controller.deadlines != runtime.deadlines || runtime.Provider.inspector != runtime.registry || runtime.Provider.images.writer || runtime.Provider.mode != "execution" {

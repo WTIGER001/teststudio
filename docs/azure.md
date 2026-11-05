@@ -14,7 +14,8 @@ The [command bridge](azure-sandbox-commands.md) now supplies independent exit re
 The [image manager](azure-sandbox-images.md) now supplies durable source conversion and verified image lookup.
 The [provider bridge](azure-sandbox-provider.md) now connects the shared execution and recovery lifecycle, including pending source conversion.
 The [runtime factory](azure-sandbox-runtime.md) now supplies independent settings and concrete SDK assembly.
-Sandboxes and the selected API remain preview. Effective timer authority, actual admission, native command wiring, and packaging remain unfinished.
+The [placement stage](azure-sandbox-placement.md) now checks selected reported group, network, and source-pull metadata.
+Sandboxes and the selected API remain preview. Complete authority and network admission, timer authority, command wiring, and packaging remain unfinished.
 Ordinary Jobs stay disabled. Their contracts below remain reference material and do not establish sandbox isolation.
 The [Azure job contract](azure-worker-contract.md) now builds and verifies SDK requests for execution and discovery.
 The [durable provider](azure-worker-lifecycle.md) now passes local dispatch, status, cancellation, and checkpointed recovery checks.
