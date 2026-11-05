@@ -20,9 +20,9 @@ type relayPerimeterFixture struct {
 	mode     string
 }
 
-func relayPerimeterTest(t *testing.T) (Config, RelayPerimeterSettings, *relayPerimeterFixture, *RelayPerimeterGuard) {
+func relayPerimeterTest(t *testing.T, relayName ...string) (Config, RelayPerimeterSettings, *relayPerimeterFixture, *RelayPerimeterGuard) {
 	t.Helper()
-	c, topology, previous, prior := relayTopologyTest(t)
+	c, topology, previous, prior := relayTopologyTest(t, relayName...)
 	s := RelayPerimeterSettings{Topology: topology, SecurityGroup: c.resourceID("Microsoft.Network", "networkSecurityGroups", "relay-source"), RouteTable: c.resourceID("Microsoft.Network", "routeTables", "relay-source"), FirewallIP: "10.40.1.4", RegistryEndpointIPs: []string{"10.40.3.5", "10.40.3.4"}}
 	subnet := topology.BackendEndpoint.Backend.Exchange.Subnet
 	p := previous.endpoint.relay.Properties

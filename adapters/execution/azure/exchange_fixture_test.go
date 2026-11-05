@@ -30,9 +30,9 @@ type exchangeFixture struct {
 	mode        string
 }
 
-func exchangeServiceTest(t *testing.T) (Config, ExchangeSettings, *exchangeFixture, *ExchangeGuard) {
+func exchangeServiceTest(t *testing.T, relayName ...string) (Config, ExchangeSettings, *exchangeFixture, *ExchangeGuard) {
 	t.Helper()
-	c, registry, _, guard := registryServiceTest(t)
+	c, registry, _, guard := registryServiceTest(t, relayName...)
 	env := registry.Endpoints.ExchangeEnvironment
 	vnet := c.resourceID("Microsoft.Network", "virtualNetworks", "exchange-network")
 	s := ExchangeSettings{Registry: registry, Application: c.resourceID("Microsoft.App", "containerApps", "worker-exchange-relay"), Certificate: env + "/certificates/worker-https", VirtualNetwork: vnet, Subnet: vnet + "/subnets/infrastructure", InfrastructureGroup: "studio-exchange-infra", Image: c.Registry + "/services/worker-relay@sha256:" + strings.Repeat("d", 64), BackendOrigin: "https://studio-worker-backend.backendzone." + c.Region + ".azurecontainerapps.io", BackendAddress: "10.40.2.4"}

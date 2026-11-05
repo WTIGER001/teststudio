@@ -22,9 +22,9 @@ type workloadInventoryFixture struct {
 	mode     string
 }
 
-func workloadInventoryTest(t *testing.T) (Config, ExchangeSettings, *workloadInventoryFixture, *WorkloadInventoryGuard) {
+func workloadInventoryTest(t *testing.T, relayName ...string) (Config, ExchangeSettings, *workloadInventoryFixture, *WorkloadInventoryGuard) {
 	t.Helper()
-	c, s, selected, guard := exchangeServiceTest(t)
+	c, s, selected, guard := exchangeServiceTest(t, relayName...)
 	f := &workloadInventoryFixture{t: t, worker: c, settings: s, pages: map[string]int{}}
 	other := c.resourceID("Microsoft.App", "containerApps", "unrelated-app")
 	f.apps = []*a.ContainerApp{to.Ptr(clone(selected.application)), {ID: to.Ptr(other), Name: to.Ptr("unrelated-app"), Type: to.Ptr("Microsoft.App/containerApps"), Properties: &a.ContainerAppProperties{ManagedEnvironmentID: to.Ptr(c.ControllerEnvironment), Configuration: &a.Configuration{Secrets: []*a.Secret{{Name: to.Ptr("unrelated"), Value: to.Ptr("private-list-config-canary")}}}}}}

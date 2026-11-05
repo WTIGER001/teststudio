@@ -23,16 +23,23 @@ type registryFixture struct {
 	mode        string
 }
 
-func registryServiceTest(t *testing.T) (Config, RegistrySettings, *registryFixture, *RegistryGuard) {
+func registryServiceTest(t *testing.T, relayName ...string) (Config, RegistrySettings, *registryFixture, *RegistryGuard) {
 	t.Helper()
 	c, endpoints, _, guard := endpointTest(t)
 	s := RegistrySettings{Endpoints: endpoints, PreparationEndpoint: c.resourceID("Microsoft.Network", "privateEndpoints", "preparation-registry")}
+	if len(relayName) > 1 {
+		t.Fatal("multiple relay consumers supplied")
+	}
+	if len(relayName) == 1 {
+		s.RelayEndpoint = c.resourceID("Microsoft.Network", "privateEndpoints", relayName[0])
+	}
 	id := s.registry()
 	_, name := resourceParts(id)
 	f := &registryFixture{t: t, settings: s, pages: map[string]int{}}
 	f.registry = a.Registry{ID: to.Ptr(id), Name: to.Ptr(name), Type: to.Ptr("Microsoft.ContainerRegistry/registries"), Location: to.Ptr("westus2"), SKU: &a.SKU{Name: to.Ptr(a.SKUNamePremium), Tier: to.Ptr(a.SKUTierPremium)}, Properties: &a.RegistryProperties{ProvisioningState: to.Ptr(a.ProvisioningStateSucceeded), LoginServer: to.Ptr(c.Registry), DataEndpointHostNames: []*string{to.Ptr(name + ".westus2.data.azurecr.io")}, AdminUserEnabled: to.Ptr(false), AnonymousPullEnabled: to.Ptr(false), DataEndpointEnabled: to.Ptr(true), NetworkRuleBypassAllowedForTasks: to.Ptr(false), NetworkRuleBypassOptions: to.Ptr(a.NetworkRuleBypassOptionsNone), PublicNetworkAccess: to.Ptr(a.PublicNetworkAccessDisabled), RoleAssignmentMode: to.Ptr(a.RoleAssignmentModeLegacyRegistryPermissions), NetworkRuleSet: &a.NetworkRuleSet{DefaultAction: to.Ptr(a.DefaultActionDeny)}, Policies: &a.Policies{ExportPolicy: &a.ExportPolicy{Status: to.Ptr(a.ExportPolicyStatusDisabled)}, AzureADAuthenticationAsArmPolicy: &a.AzureADAuthenticationAsArmPolicy{Status: to.Ptr(a.AzureADAuthenticationAsArmPolicyStatusEnabled)}}}}
-	for _, row := range [][2]string{{"worker.approval", s.Endpoints.RegistryEndpoint}, {"preparation.approval", s.PreparationEndpoint}} {
-		f.connections = append(f.connections, &a.PrivateEndpointConnection{ID: to.Ptr(s.connections() + "/" + row[0]), Name: to.Ptr(row[0]), Type: to.Ptr("Microsoft.ContainerRegistry/registries/privateEndpointConnections"), Properties: &a.PrivateEndpointConnectionProperties{ProvisioningState: to.Ptr(a.ProvisioningStateSucceeded), PrivateEndpoint: &a.PrivateEndpoint{ID: to.Ptr(row[1])}, PrivateLinkServiceConnectionState: &a.PrivateLinkServiceConnectionState{Status: to.Ptr(a.ConnectionStatusApproved), ActionsRequired: to.Ptr(a.ActionsRequiredNone)}}})
+	for i, endpoint := range s.consumers() {
+		name := []string{"worker.approval", "preparation.approval", "relay.approval"}[i]
+		f.connections = append(f.connections, &a.PrivateEndpointConnection{ID: to.Ptr(s.connections() + "/" + name), Name: to.Ptr(name), Type: to.Ptr("Microsoft.ContainerRegistry/registries/privateEndpointConnections"), Properties: &a.PrivateEndpointConnectionProperties{ProvisioningState: to.Ptr(a.ProvisioningStateSucceeded), PrivateEndpoint: &a.PrivateEndpoint{ID: to.Ptr(endpoint)}, PrivateLinkServiceConnectionState: &a.PrivateLinkServiceConnectionState{Status: to.Ptr(a.ConnectionStatusApproved), ActionsRequired: to.Ptr(a.ActionsRequiredNone)}}})
 	}
 	f.registry.Properties.PrivateEndpointConnections = clone(f.connections)
 	f.links = []*a.PrivateLinkResource{{ID: to.Ptr(s.links() + "/registry"), Name: to.Ptr("registry"), Type: to.Ptr("Microsoft.ContainerRegistry/registries/privateLinkResources"), Properties: &a.PrivateLinkResourceProperties{GroupID: to.Ptr("registry"), RequiredMembers: []*string{to.Ptr("registry"), to.Ptr("registry_data_westus2")}, RequiredZoneNames: []*string{to.Ptr("privatelink.azurecr.io")}}}}

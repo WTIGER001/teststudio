@@ -9,6 +9,7 @@ import (
 type RegistrySettings struct {
 	Endpoints           EndpointSettings `json:"endpoints"`
 	PreparationEndpoint string           `json:"preparationEndpoint"`
+	RelayEndpoint       string           `json:"relayEndpoint,omitempty"`
 }
 
 func (s RegistrySettings) canonical(c Config) (RegistrySettings, error) {
@@ -17,7 +18,25 @@ func (s RegistrySettings) canonical(c Config) (RegistrySettings, error) {
 	if err != nil || !c.ownsResource(s.PreparationEndpoint, "Microsoft.Network", "privateEndpoints") || strings.EqualFold(s.PreparationEndpoint, s.Endpoints.RegistryEndpoint) || strings.EqualFold(s.PreparationEndpoint, s.Endpoints.ExchangeEndpoint) {
 		return s, hostedexecution.ErrConfiguration
 	}
+	if s.RelayEndpoint != "" {
+		if !c.ownsResource(s.RelayEndpoint, "Microsoft.Network", "privateEndpoints") {
+			return s, hostedexecution.ErrConfiguration
+		}
+		for _, id := range []string{s.Endpoints.RegistryEndpoint, s.Endpoints.ExchangeEndpoint, s.PreparationEndpoint} {
+			if strings.EqualFold(s.RelayEndpoint, id) {
+				return s, hostedexecution.ErrConfiguration
+			}
+		}
+	}
 	return s, nil
+}
+
+func (s RegistrySettings) consumers() []string {
+	ids := []string{s.Endpoints.RegistryEndpoint, s.PreparationEndpoint}
+	if s.RelayEndpoint != "" {
+		ids = append(ids, s.RelayEndpoint)
+	}
+	return ids
 }
 
 func (s RegistrySettings) registry() string    { return s.Endpoints.Registry }

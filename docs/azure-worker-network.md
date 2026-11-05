@@ -24,6 +24,7 @@ The [relay VNet observer](azure-relay-topology.md) now checks the selected addre
 The [relay perimeter observer](azure-relay-perimeter.md) now binds the source NSG and default firewall route through shared policy checks.
 The [relay firewall observer](azure-relay-firewall.md) now binds the actual firewall resource, dedicated policy, subnet, and public IP association.
 The [relay DNS observer](azure-relay-dns.md) now checks the selected resolver policy, exact lists, enabled rules, exclusive link, and actual VNet association.
+The [relay registry endpoint observer](azure-relay-registry-endpoint.md) now binds explicit service approval, NIC members, addresses, subnet policy, and dedicated security rules.
 The complete adapter must also prove read coverage, attachment authority, effective zone visibility, full backend authority, exchange networking, and execution placement.
 Azure coded execution remains disabled in native commands and infrastructure packaging.
 See [durable Azure execution](azure-worker-lifecycle.md), [job contracts](azure-worker-contract.md), and [independent deadlines](azure-worker-deadlines.md).

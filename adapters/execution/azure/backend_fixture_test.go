@@ -25,9 +25,9 @@ type backendFixture struct {
 	mode        string
 }
 
-func backendServiceTest(t *testing.T) (Config, BackendSettings, *backendFixture, *BackendGuard) {
+func backendServiceTest(t *testing.T, relayName ...string) (Config, BackendSettings, *backendFixture, *BackendGuard) {
 	t.Helper()
-	c, exchange, _, prior := workloadInventoryTest(t)
+	c, exchange, _, prior := workloadInventoryTest(t, relayName...)
 	topology := exchange.Registry.Endpoints.PrivateDNS.DNS.Firewall.Perimeter.Topology
 	s := BackendSettings{Exchange: exchange, Application: c.resourceID("Microsoft.App", "containerApps", "studio-worker-backend"), Environment: c.resourceID("Microsoft.App", "managedEnvironments", "studio-backend"), Subnet: topology.ControllerVNet + "/subnets/backend", InfrastructureGroup: "studio-backend-infra", Image: c.Registry + "/services/teststudio@sha256:" + strings.Repeat("e", 64), PullIdentity: c.resourceID("Microsoft.ManagedIdentity", "userAssignedIdentities", "backend-pull"), StartupIdentity: c.resourceID("Microsoft.ManagedIdentity", "userAssignedIdentities", "backend-startup"), RuntimeIdentity: c.resourceID("Microsoft.ManagedIdentity", "userAssignedIdentities", "backend-runtime"), RuntimeClientID: "77777777-2222-3333-4444-555555555553", DatabaseSecretURL: "https://studiovault.vault.azure.net/secrets/backend-database", BlobServiceURL: "https://studioevidence.blob.core.windows.net/", EvidenceContainer: "evidence", Replicas: 1}
 	f := &backendFixture{t: t, settings: s}

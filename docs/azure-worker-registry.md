@@ -13,15 +13,17 @@ Local management responses do not prove actual image pulls or publication.
 
 ## Settings and profile
 
-RegistrySettings contains two values:
+RegistrySettings contains two required values and one optional relay consumer:
 
 | Setting | Requirement |
 | --- | --- |
 | endpoints | The exact EndpointSettings used by the preceding guard. |
 | preparationEndpoint | The separate private endpoint selected for trusted preparation registry access. |
+| relayEndpoint | Optional separate private endpoint selected for relay registry access. Required by the relay endpoint observer. |
 
 The preparation endpoint uses the selected subscription and an explicit resource group.
 It cannot reuse either selected worker endpoint.
+The optional relay endpoint cannot reuse either worker endpoint or the preparation endpoint.
 The constructor preserves the complete preceding configuration and its canonical address list.
 Changed configuration cannot reuse an earlier guard as authority.
 
@@ -73,12 +75,12 @@ Actual platform behavior still requires separate deployment verification.
 
 ## Service-side approval
 
-The complete private endpoint connection list must contain exactly the selected worker registry endpoint and preparation endpoint.
-The [relay DNS stage](azure-relay-dns.md) does not yet extend this consumer contract.
-Add an explicit selected relay endpoint and bounded inventory before enabling relay registry access. Preserve rejection of unknown consumers.
+Without relayEndpoint, the complete list must contain exactly the selected worker registry endpoint and preparation endpoint.
+With relayEndpoint, it must also contain that exact selected relay consumer and no fourth consumer.
+The [relay endpoint observer](azure-relay-registry-endpoint.md) requires this explicit third consumer and independently verifies its NIC, addresses, subnet, and NSG.
 Each connection must have its own child identity under the registry and the correct endpoint resource identifier.
 Resource identity comparison ignores letter case. Duplicate identities cannot count as separate connections.
-Both connections must report successful provisioning, Approved status, and no outstanding update action.
+Every selected connection must report successful provisioning, Approved status, and no outstanding update action.
 
 The registry's embedded connection inventory must independently satisfy those rules and agree with the complete collection.
 Different snapshots leave admission unavailable.
@@ -102,13 +104,13 @@ Automatic retries, resource-provider registration, and redirects remain disabled
 Each operation has a five-second context and four-megabyte response bound.
 Provider diagnostics become fixed control errors.
 
-Connections permit at most two items and three pages.
+Connections permit two items and three pages without a relay consumer, or three items and four pages with an explicit relay consumer.
 Private-link resources and replications each permit at most one item and two pages.
 The shared pager rejects foreign origins, other collections, repeated tokens, malformed queries, and excess inventory.
 Unfinished bounded paging remains unavailable.
 
 The four new reads run concurrently after endpoint inspection.
-A normal full check makes thirty-five reads. The complete paging bound is fifty reads.
+A normal full check makes thirty-five reads. The complete paging bound is fifty reads, or fifty-one with an explicit relay consumer.
 The guard has a thirty-second context and no successful-result cache.
 The controller needs read access only to these selected registry resources.
 This reader needs no registry password, image token, approval authority, or write permission.

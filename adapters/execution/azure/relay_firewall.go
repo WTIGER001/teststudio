@@ -33,26 +33,31 @@ func NewSDKRelayFirewallReader(c Config, s RelayFirewallSettings, credential azc
 	return newSDKFirewallReader(c, s.binding(), credential, transport)
 }
 
-func (g *RelayFirewallGuard) Check(ctx context.Context, c Config) (resultErr error) {
+func (g *RelayFirewallGuard) Check(ctx context.Context, c Config) error {
+	_, err := g.inspect(ctx, c)
+	return err
+}
+
+func (g *RelayFirewallGuard) inspect(ctx context.Context, c Config) (observation relayTopologyObservation, resultErr error) {
 	defer func() { resultErr = controlError(resultErr) }()
 	if fingerprint(c) != fingerprint(g.worker) {
-		return hostedexecution.ErrOwnership
+		return relayTopologyObservation{}, hostedexecution.ErrOwnership
 	}
 	ctx, cancel := context.WithTimeout(ctx, 70*time.Second)
 	defer cancel()
 	observed, err := g.perimeter.inspect(ctx, c)
 	if err != nil {
-		return err
+		return relayTopologyObservation{}, err
 	}
 	binding := g.settings.binding()
 	subnet, err := binding.inspect(ctx, c, g.reader)
 	if err != nil {
-		return err
+		return relayTopologyObservation{}, err
 	}
 	if !embeddedSubnet(observed.network, binding.subnet(), subnet) {
-		return hostedexecution.ErrUnavailable
+		return relayTopologyObservation{}, hostedexecution.ErrUnavailable
 	}
-	return nil
+	return observed, nil
 }
 
 func (s RelayFirewallSettings) FirewallDefinition(c Config) (n.AzureFirewall, error) {

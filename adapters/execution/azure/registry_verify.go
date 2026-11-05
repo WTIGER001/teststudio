@@ -79,13 +79,16 @@ func (g *RegistryGuard) verifyRegistry(actual a.Registry) error {
 
 func (g *RegistryGuard) verifyConnections(connections []a.PrivateEndpointConnection) (map[string]string, error) {
 	s := g.settings
-	if len(connections) < 2 {
+	if len(connections) < len(s.consumers()) {
 		return nil, hostedexecution.ErrUnavailable
 	}
-	if len(connections) != 2 {
+	if len(connections) != len(s.consumers()) {
 		return nil, hostedexecution.ErrOwnership
 	}
-	wanted := map[string]bool{strings.ToLower(s.Endpoints.RegistryEndpoint): true, strings.ToLower(s.PreparationEndpoint): true}
+	wanted := map[string]bool{}
+	for _, id := range s.consumers() {
+		wanted[strings.ToLower(id)] = true
+	}
 	observed := map[string]string{}
 	names := map[string]bool{}
 	for _, connection := range connections {

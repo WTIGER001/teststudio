@@ -17,9 +17,9 @@ type relayDNSFixture struct {
 	firewall *firewallFixture
 }
 
-func relayDNSTest(t *testing.T) (Config, RelayDNSSettings, *relayDNSFixture, *RelayDNSGuard) {
+func relayDNSTest(t *testing.T, relayName ...string) (Config, RelayDNSSettings, *relayDNSFixture, *RelayDNSGuard) {
 	t.Helper()
-	c, firewall, previous, _, prior := relayFirewallTest(t)
+	c, firewall, previous, _, prior := relayFirewallTest(t, relayName...)
 	s := RelayDNSSettings{Firewall: firewall, Policy: c.resourceID("Microsoft.Network", "dnsResolverPolicies", "relay-dns"), AllowList: c.resourceID("Microsoft.Network", "dnsResolverDomainLists", "relay-dns-allow"), BlockList: c.resourceID("Microsoft.Network", "dnsResolverDomainLists", "relay-dns-block")}
 	f := &relayDNSFixture{dnsFixture: dnsBindingFixture(t, c, s.binding(c)), firewall: previous}
 	f.controllerVNet = firewall.Perimeter.Topology.BackendEndpoint.Backend.Exchange.Registry.Endpoints.PrivateDNS.DNS.Firewall.Perimeter.Topology.ControllerVNet

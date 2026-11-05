@@ -29,9 +29,9 @@ type backendEndpointFixture struct {
 	mode        string
 }
 
-func backendEndpointTest(t *testing.T) (Config, BackendEndpointSettings, *backendEndpointFixture, *BackendEndpointGuard) {
+func backendEndpointTest(t *testing.T, relayName ...string) (Config, BackendEndpointSettings, *backendEndpointFixture, *BackendEndpointGuard) {
 	t.Helper()
-	c, backend, previous, prior := backendServiceTest(t)
+	c, backend, previous, prior := backendServiceTest(t, relayName...)
 	s := BackendEndpointSettings{Backend: backend, Endpoint: c.resourceID("Microsoft.Network", "privateEndpoints", "relay-backend"), Interface: c.resourceID("Microsoft.Network", "networkInterfaces", "relay-backend-nic"), Subnet: backend.Exchange.VirtualNetwork + "/subnets/backend-endpoint", SubnetPrefix: "10.40.2.0/24", RelaySubnetPrefix: "10.40.0.0/27", SecurityGroup: c.resourceID("Microsoft.Network", "networkSecurityGroups", "relay-backend-endpoint"), Address: "10.40.2.4"}
 	f := &backendEndpointFixture{t: t, settings: s, backend: previous}
 	f.subnet, _ = s.SubnetDefinition(c)

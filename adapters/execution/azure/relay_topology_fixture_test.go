@@ -17,9 +17,9 @@ type relayTopologyFixture struct {
 	mode     string
 }
 
-func relayTopologyTest(t *testing.T) (Config, RelayTopologySettings, *relayTopologyFixture, *RelayTopologyGuard) {
+func relayTopologyTest(t *testing.T, relayName ...string) (Config, RelayTopologySettings, *relayTopologyFixture, *RelayTopologyGuard) {
 	t.Helper()
-	c, endpoint, previous, prior := backendEndpointTest(t)
+	c, endpoint, previous, prior := backendEndpointTest(t, relayName...)
 	s := RelayTopologySettings{BackendEndpoint: endpoint, VirtualNetworkPrefix: "10.40.0.0/16"}
 	id := endpoint.Backend.Exchange.VirtualNetwork
 	_, name := resourceParts(id)

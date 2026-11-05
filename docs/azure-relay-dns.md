@@ -79,6 +79,7 @@ The VNet association permits one policy and one complete response. A continuatio
 Individual operations have five-second contexts and four-megabyte response limits. Retries and provider registration remain disabled.
 The six observations run concurrently after the parent firewall succeeds.
 The composed context is 75 seconds, with 71 normal reads and at most 129 reads with bounded parent paging.
+An explicit relay registry consumer adds one possible parent page, for a maximum of 130 reads. It adds no normal read.
 No successful observation is cached or persisted. No duplicate parent read is added.
 
 ## Targeted local verification and next work
@@ -97,6 +98,6 @@ go test -race ./adapters/execution/azure -run '^(TestAzureRelayDNS.*|TestAzureDN
 
 Evidence is output/azure-relay-dns/summary.json and the targeted command result.
 Continue selected relay private records, effective VNet-wide zone visibility, and actual relay registry endpoint ownership.
-The current registry service guard permits exactly the selected worker and preparation consumer endpoints.
-Add the selected relay consumer explicitly to that contract and its bounded inventory before enabling a third private registry path.
-Preserve unknown-consumer rejection and independent worker, preparation, and relay networking.
+The [relay registry endpoint observer](azure-relay-registry-endpoint.md) now requires an explicit third consumer in the registry service contract.
+It binds the selected endpoint, NIC, member addresses, subnet, and dedicated NSG while preserving unknown-consumer rejection.
+Independent worker, preparation, and relay networking remains required.

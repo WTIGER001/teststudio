@@ -10,9 +10,9 @@ import (
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
 )
 
-func relayFirewallTest(t *testing.T) (Config, RelayFirewallSettings, *firewallFixture, *relayPerimeterFixture, *RelayFirewallGuard) {
+func relayFirewallTest(t *testing.T, relayName ...string) (Config, RelayFirewallSettings, *firewallFixture, *relayPerimeterFixture, *RelayFirewallGuard) {
 	t.Helper()
-	c, perimeter, previous, prior := relayPerimeterTest(t)
+	c, perimeter, previous, prior := relayPerimeterTest(t, relayName...)
 	s := RelayFirewallSettings{Perimeter: perimeter, Firewall: c.resourceID("Microsoft.Network", "azureFirewalls", "relay-firewall"), Policy: c.resourceID("Microsoft.Network", "firewallPolicies", "relay-policy"), PublicIP: c.resourceID("Microsoft.Network", "publicIPAddresses", "relay-firewall-ip"), SubnetPrefix: "10.40.1.0/26"}
 	f := firewallBindingFixture(t, c, s.binding())
 	previous.topology.network.Properties.Subnets = append(previous.topology.network.Properties.Subnets, clone(&f.subnet))

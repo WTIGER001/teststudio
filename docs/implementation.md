@@ -122,7 +122,42 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: relay DNS policy and actual VNet association
+## Current delivery: explicit relay registry consumer and endpoint ownership
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+The registry service contract now accepts one explicit optional relayEndpoint beside its required worker and preparation consumers.
+Omitting the relay setting preserves exactly two approved consumers and the original paging bound.
+Selecting it requires exactly three approved consumers, distinct identifiers, independent embedded agreement, and no unknown fourth consumer.
+The SDK bounds connections to the selected consumer count and one additional page. No read path or credential authority expands.
+
+The relay endpoint stage requires that exact nonempty selected consumer before inspecting its endpoint, NIC, subnet, and NSG.
+It uses the canonical worker endpoint and interface verification without another registry resource or collection read.
+The registry and selected regional data members must use the exact two relay HTTPS destination addresses.
+Its dedicated endpoint subnet must enable network policies, disable default outbound access, and contain only the selected endpoint and NIC configurations.
+Its dedicated NSG permits relay-source TCP 443 to those two addresses and denies remaining inbound and outbound traffic.
+Shared subnets or groups, foreign services, wrong members, alternate addresses, public IPs, route bypasses, and changed rules reject observation.
+Reserved subnet addresses and destination-list mismatches reject configuration.
+
+The relay DNS and firewall guards now forward the current validated VNet observation. Public Check behavior remains unchanged.
+The new registry subnet must agree with that embedded inventory. Missing or inconsistent observations remain unavailable.
+Four concurrent selected reads add no duplicate registry, VNet, or source-subnet observation.
+The explicit three-consumer profile has an 80-second context, 75 normal reads, and at most 134 reads with bounded paging.
+It implements no Network, authorizes no dispatch, and enables no Azure coded execution.
+
+Six new focused race checks and four selected existing checks pass locally in 4.395 seconds.
+They cover service approval, exact members and addresses, parent reuse, dedicated policy, SDK scope, consumer aliases, missing or unknown consumers, and legacy rejection behavior.
+Only two changed checks repeat after review strengthens reserved-address and four-page-bound assertions. They pass in 1.623 seconds.
+The fixture chain accepts an explicit relay consumer without changing existing two-consumer cases.
+No broad suite, cloud request, browser, UI build, image build, container, registry push, deployment, or demo restart runs.
+Fixtures use explicit fake credentials and in-memory SDK responses. They open no network connection or listener.
+Evidence is output/azure-relay-registry-endpoint/summary.json and the targeted command results.
+See [relay registry endpoint observation](azure-relay-registry-endpoint.md).
+
+Continue relay private registry records, effective VNet-wide visibility, preparation networking, identity and attachment authority, deployed trust, and complete native wiring.
+All nine broad acceptance items remain open under their original scope.
+
+## Previous delivery: relay DNS policy and actual VNet association
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 

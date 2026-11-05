@@ -59,7 +59,7 @@ func (c *SDKRegistryReader) Connections(ctx context.Context, id string) ([]a.Pri
 	defer cancel()
 	group, name := resourceParts(id)
 	pager := c.connections.NewListPager(group, name, nil)
-	return armInventory(ctx, c.http, c.settings.connections(), registryVersion, 2, 3, pager.More, func(ctx context.Context) ([]*a.PrivateEndpointConnection, *string, error) {
+	return armInventory(ctx, c.http, c.settings.connections(), registryVersion, len(c.settings.consumers()), len(c.settings.consumers())+1, pager.More, func(ctx context.Context) ([]*a.PrivateEndpointConnection, *string, error) {
 		page, err := pager.NextPage(ctx)
 		return page.Value, page.NextLink, err
 	})

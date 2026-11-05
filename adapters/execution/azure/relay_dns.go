@@ -34,17 +34,26 @@ func NewSDKRelayDNSReader(c Config, s RelayDNSSettings, credential azcore.TokenC
 	return newSDKDNSReader(c, s.binding(c), credential, transport)
 }
 
-func (g *RelayDNSGuard) Check(ctx context.Context, c Config) (resultErr error) {
+func (g *RelayDNSGuard) Check(ctx context.Context, c Config) error {
+	_, err := g.inspect(ctx, c)
+	return err
+}
+
+func (g *RelayDNSGuard) inspect(ctx context.Context, c Config) (observation relayTopologyObservation, resultErr error) {
 	defer func() { resultErr = controlError(resultErr) }()
 	if fingerprint(c) != fingerprint(g.worker) {
-		return hostedexecution.ErrOwnership
+		return relayTopologyObservation{}, hostedexecution.ErrOwnership
 	}
 	ctx, cancel := context.WithTimeout(ctx, 75*time.Second)
 	defer cancel()
-	if err := g.firewall.Check(ctx, c); err != nil {
-		return err
+	observed, err := g.firewall.inspect(ctx, c)
+	if err != nil {
+		return relayTopologyObservation{}, err
 	}
-	return g.settings.binding(c).check(ctx, c, g.reader)
+	if err := g.settings.binding(c).check(ctx, c, g.reader); err != nil {
+		return relayTopologyObservation{}, err
+	}
+	return observed, nil
 }
 
 func (s RelayDNSSettings) PolicyDefinition(c Config) (d.Policy, error) {
