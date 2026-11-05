@@ -16,7 +16,8 @@ Environment-backed browser and API profiles require remote gateway delivery.
 AWS dispatch is implemented with separate deployment verification pending.
 Azure now has a [durable job provider](azure-worker-lifecycle.md) and [job ownership contract](azure-worker-contract.md).
 Those ordinary Job contracts remain staged. The active [sandbox execution client](azure-sandboxes.md) now has a [durable controller](azure-sandbox-controller.md).
-Concrete deadlines, independent command completion, durable image import, and native discovery wiring remain required.
+The [sandbox deadline SDK](azure-sandbox-deadlines.md) now supplies independent timer control.
+Effective timer authority, independent command completion, durable image import, and native discovery wiring remain required.
 The [ACR adapter](azure-registry-authentication.md) now supports trusted source registry authentication and publication.
 The [native Azure assembly profile](azure-native-assembly.md) now wires separate reader and writer identities into trusted registry preparation.
 Complete isolated discovery, effective authorization, actual workload placement, and deployed stop-resource enforcement remain open.

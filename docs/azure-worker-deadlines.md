@@ -1,5 +1,8 @@
 # Independent Azure worker deadlines
 
+The active sandbox path now uses [sandbox-specific deadlines](azure-sandbox-deadlines.md).
+This ordinary Job timer remains reference material. It does not target sandbox data-plane instances.
+
 ## Current boundary
 
 The Azure adapter now implements its Deadlines hook with Azure Logic Apps Consumption workflows.

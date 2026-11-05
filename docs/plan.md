@@ -59,13 +59,20 @@ Cancellation fences initial creation. Checkpointed cleanup retains uncertain cre
 Local restart, twelve-replica contention, in-flight cancellation, input binding, and cleanup checks pass.
 The controller returns resource facts. It does not turn a stopped instance or accepted report into independent command completion.
 
-Implement concrete sandbox deadlines and admission, durable image import, independent command completion, and the complete Provider bridge next.
+The concrete sandbox deadline SDK now reserves one independent Logic Apps timer per execution and verifies its exact owned definition.
+It finds matching owned instances through the data-plane API, including late creation without a receipt.
+Known timer rejection remains distinct from uncertainty. Confirmed instance absence and retained result checkpoints control timer removal.
+Local SDK, database-reopen, cleanup, public-schema, and static-reference checks pass. Actual workflow execution and authority remain unverified.
+
+Implement independent command completion next, then durable image import, actual admission, and the complete native Provider bridge.
+Use a trusted idle launch and fixed supervised command invocation. Preserve the inspected non-root runtime identity and version its image capability.
 Use the pinned command API's service-returned completion result. Preserve explicit gaps after a lost acknowledgment and never replay the logical attempt.
 Preserve source-queue authorization and the existing worker exchange. Keep controller credentials outside sandboxes.
 Bind actual source-import identity, group authority, VNet routing, proxy trust, and effective outbound enforcement before enabling native execution.
 Confirm the pinned SDK token audience during the separate deployment verification phase.
 Idle suspension and accepted stop responses cannot replace the absolute deadline contract.
 See [Azure isolated sandbox execution](azure-sandboxes.md) and [durable sandbox control](azure-sandbox-controller.md).
+See [independent sandbox deadlines](azure-sandbox-deadlines.md) for timer construction, verification, cleanup, and remaining deployment evidence.
 Acceptance 51 and supporting recovery under 52 advance; the total remains 48 verified of 57.
 
 ### Active application navigation correction

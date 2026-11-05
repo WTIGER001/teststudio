@@ -49,6 +49,9 @@ func (c *Controller) load(ctx context.Context, ref execution.Reference) (dispatc
 	if d.Removed && (!settled(d) || d.DeadlineAttempted && !d.DeadlineRemoved) {
 		return d, row, nil, hostedexecution.ErrOwnership
 	}
+	if d.TimerCreateAttempted && (!d.DeadlineAttempted || !checksum.MatchString(d.TimerProfile)) || d.TimerCreateRejected && !d.TimerCreateAttempted || d.TimerSeen && (!d.TimerCreateAttempted || d.TimerCreateRejected) || !d.TimerCheckAfter.IsZero() && (!d.TimerSeen || !d.DeadlineRemoving) {
+		return d, row, nil, hostedexecution.ErrOwnership
+	}
 	return d, row, plan, nil
 }
 

@@ -67,25 +67,30 @@ type DispatchState struct {
 }
 
 type dispatch struct {
-	Proof             Proof     `json:"proof"`
-	InputHash         string    `json:"inputHash"`
-	CreatedAt         time.Time `json:"createdAt"`
-	DeadlineAttempted bool      `json:"deadlineAttempted,omitempty"`
-	DeadlineVerified  bool      `json:"deadlineVerified,omitempty"`
-	CreateAttempted   bool      `json:"createAttempted,omitempty"`
-	CreateRejected    bool      `json:"createRejected,omitempty"`
-	CreationBlocked   bool      `json:"creationBlocked,omitempty"`
-	Receipt           string    `json:"receipt,omitempty"`
-	LastState         string    `json:"lastState,omitempty"`
-	Stopping          bool      `json:"stopping,omitempty"`
-	StopAfter         time.Time `json:"stopAfter,omitempty"`
-	Quiesced          bool      `json:"quiesced,omitempty"`
-	DeleteAttempted   bool      `json:"deleteAttempted,omitempty"`
-	DeleteAfter       time.Time `json:"deleteAfter,omitempty"`
-	InstanceAbsent    bool      `json:"instanceAbsent,omitempty"`
-	DeadlineRemoving  bool      `json:"deadlineRemoving,omitempty"`
-	DeadlineRemoved   bool      `json:"deadlineRemoved,omitempty"`
-	Removed           bool      `json:"removed,omitempty"`
+	Proof                Proof     `json:"proof"`
+	InputHash            string    `json:"inputHash"`
+	CreatedAt            time.Time `json:"createdAt"`
+	DeadlineAttempted    bool      `json:"deadlineAttempted,omitempty"`
+	DeadlineVerified     bool      `json:"deadlineVerified,omitempty"`
+	TimerProfile         string    `json:"timerProfile,omitempty"`
+	TimerCreateAttempted bool      `json:"timerCreateAttempted,omitempty"`
+	TimerCreateRejected  bool      `json:"timerCreateRejected,omitempty"`
+	TimerSeen            bool      `json:"timerSeen,omitempty"`
+	TimerCheckAfter      time.Time `json:"timerCheckAfter,omitempty"`
+	CreateAttempted      bool      `json:"createAttempted,omitempty"`
+	CreateRejected       bool      `json:"createRejected,omitempty"`
+	CreationBlocked      bool      `json:"creationBlocked,omitempty"`
+	Receipt              string    `json:"receipt,omitempty"`
+	LastState            string    `json:"lastState,omitempty"`
+	Stopping             bool      `json:"stopping,omitempty"`
+	StopAfter            time.Time `json:"stopAfter,omitempty"`
+	Quiesced             bool      `json:"quiesced,omitempty"`
+	DeleteAttempted      bool      `json:"deleteAttempted,omitempty"`
+	DeleteAfter          time.Time `json:"deleteAfter,omitempty"`
+	InstanceAbsent       bool      `json:"instanceAbsent,omitempty"`
+	DeadlineRemoving     bool      `json:"deadlineRemoving,omitempty"`
+	DeadlineRemoved      bool      `json:"deadlineRemoved,omitempty"`
+	Removed              bool      `json:"removed,omitempty"`
 }
 
 func NewController(o ControllerOptions) (*Controller, error) {

@@ -10,7 +10,8 @@ The existing Job contracts remain reference material. They do not establish a sa
 Sandboxes and the selected API are preview services. Hosted acceptance remains open.
 No native command selects this package yet. No deployment template enables sandbox execution yet.
 The [durable controller](azure-sandbox-controller.md) now supplies dispatch reservation, lost-receipt recovery, cancellation, and checkpointed cleanup.
-The client and controller do not yet compose the complete hosted Provider. Native deadline, admission, command completion, and source integration remain required.
+The [independent deadline SDK](azure-sandbox-deadlines.md) now supplies owned timer creation, verification, and checkpointed removal.
+The client and controller do not yet compose the complete hosted Provider. Effective timer authority, admission, command completion, and source integration remain required.
 Local contract checks do not establish deployed isolation, service availability, identity authority, certificate trust, or complete product operation.
 
 ## Concepts
@@ -70,7 +71,7 @@ Idle suspension uses Disk mode with a two-hour interval.
 This is housekeeping, not an absolute execution deadline.
 The native provider must install and verify an independent stop arrangement before allowing work activation.
 The arrangement must also cover an uncertain create response and controller failure.
-The existing Job timer targets the ARM Job API. It cannot stop these data-plane sandboxes without a separate implementation.
+The existing Job timer targets the ARM Job API. The [sandbox timer](azure-sandbox-deadlines.md) uses the separate data-plane stop contract.
 
 ### Recovery and ownership
 
@@ -138,7 +139,7 @@ Use the [durable dispatch controller](azure-sandbox-controller.md) for sandbox c
 Implement durable image import and Ready-image resolution before connecting native source preparation.
 Reuse the existing source queue, database, approved OCI inspector, worker exchange, and preparation authorization.
 Reconcile returned identifiers under complete ownership proofs. Never retry an ambiguous create as new work.
-Implement independent absolute deadlines for the sandbox API, including lost receipts.
+Bind the independent sandbox deadline SDK to verified native identity grants and workflow protection.
 Connect independent command completion, terminal runner reports, deletion checkpoints, and orphan recovery through the shared Provider contract.
 Add explicit managed identity, group, VNet, source-import, and deadline packaging before native command selection.
 Keep all installation credentials in trusted processes.

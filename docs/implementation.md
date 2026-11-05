@@ -122,7 +122,46 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: durable sandbox dispatch, receipt recovery, and cleanup
+## Current delivery: independent sandbox deadline SDK and workflow
+
+The sandbox deadline interface now has a concrete Azure Logic Apps SDK implementation.
+It reserves one workflow create call in the existing dispatch journal and verifies the exact owned definition before allowing sandbox creation.
+The workflow uses the selected stop identity and regional data-plane API to find and stop all matching logical ownership labels.
+It can cover delayed creation whose response never supplies a receipt.
+Its bounded, manually checked pagination retains the selected group, API version, and ownership filter.
+Sensitive HTTP and selection history is hidden. Runtime environments do not enter workflow variables.
+
+The SDK uses an explicit management credential, fixed ARM scope, disabled retries and registration, bounded bodies, and rejected redirects.
+Workflow identity, timing, policy, tags, and history settings participate in ownership verification.
+Known timer rejection remains distinct from uncertainty. A missing timer never proves the worker execution absent.
+Creation uncertainty remains durable until owned readback appears.
+Removal requires revoked work, retained result and evidence checkpoints, settled instance ownership, and another instance absence check.
+Timer deletion saves intent and backoff before the request and completes only after confirmed absence.
+A lost deletion response reconciles after database reopen without another delete.
+
+Five new deadline checks and three selected controller regressions pass with race detection in 2.006 seconds.
+They use the production ARM SDK and scoped transport with local in-memory responses, real SQLite storage, and the real worker exchange.
+Both runners and discovery cover lost creation responses, late timer appearance, definite rejection, unreserved resources, changed metadata, redirects, and checkpointed cleanup.
+A later missing-timer classification correction repeats only its changed scenario and passes in 1.474 seconds.
+
+An independent check validates the generated definition against the downloaded Microsoft workflow schema.
+The schema catches variable type capitalization and its one-variable initializer limit. The corrected workflow passes.
+The local checker also validates expression delimiters, variables, action references, sibling dependencies, dependency cycles, and HTTP history protection.
+The generated definition has 37 actions, six initialized variables, and 23 expressions.
+This checks schema and static references. It does not execute the workflow or establish runtime stop enforcement.
+The schema download, checksum, and separate local validator environment remain retained with the evidence.
+No product runtime dependency or existing SDK version changes.
+
+The [sandbox deadline guide](azure-sandbox-deadlines.md), controller and discovery guides, Azure overview, and active plan describe the concrete implementation and remaining work.
+Independent command completion is next, followed by durable image import, actual admission, native composition, and deployment packaging.
+Effective identity grants, workflow protection, scheduling, filter behavior, and stop enforcement remain separate deployed evidence.
+Native Azure coded execution remains disabled. The user demo and page-help behavior remain unchanged.
+No account request, identity discovery, registry operation, listener, image, browser, container, or deployment runs.
+
+This advances **51** and supporting cleanup recovery under **52**. The total remains **48 verified of 57**, with **9 open**.
+Evidence is output/azure-sandbox-deadlines/summary.json, schema-validation.json, and the retained focused command results.
+
+## Previous delivery: durable sandbox dispatch, receipt recovery, and cleanup
 
 The Azure sandbox Controller now persists dispatch reservations in the shared installation database.
 It uses the real worker exchange for fresh dispatch authorization, explicit activation gates, revocation, and result cleanup checkpoints.

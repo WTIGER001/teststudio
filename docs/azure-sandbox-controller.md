@@ -20,7 +20,8 @@ The caller owns its client and database lifetimes.
 
 Instances is implemented by the production sandbox client.
 Its inventory must return a complete bounded result or an error. A partial list is not authoritative.
-Deadline and admission implementations remain mandatory native integration requirements.
+The [sandbox deadline SDK](azure-sandbox-deadlines.md) now supplies durable independent timer control.
+Effective timer authority, native composition, and actual instance admission remain required before deployment selection.
 The local fixtures do not establish those production controls.
 
 The controller accepts a Plan after approved source inspection and Ready disk-image resolution.
@@ -58,7 +59,7 @@ An uncertain or missing deadline blocks dispatch.
 DeadlineSpec binds Config and the immutable logical execution proof before a sandbox identifier exists.
 The native deadline implementation must cover all matching late creations and lost create receipts.
 It must survive controller loss and must not depend on sandbox idle suspension.
-The ordinary Job ARM timer cannot satisfy this interface without a sandbox-specific implementation.
+The ordinary Job ARM timer remains separate from the [sandbox-specific implementation](azure-sandbox-deadlines.md).
 Deadline removal must confirm resource absence through that implementation. A delete acknowledgment alone is insufficient.
 
 After deadline verification, Advance reauthorizes the gated exchange, checks current creation admission, and reads complete sandbox inventory.
@@ -151,7 +152,7 @@ No actual registry, identity endpoint, cloud service, listener, browser, contain
 
 ### Continue the native worker path
 
-Implement the concrete sandbox deadline and admission composition before selecting the controller in native commands.
+Bind the sandbox deadline SDK and actual admission composition before selecting the controller in native commands.
 Connect durable image import and Ready-image resolution to the existing trusted preparation queue.
 Implement command execution and service-returned completion receipt handling without replay after an uncertain start.
 Connect the shared hosted Provider, source discovery, evidence, cancellation, and cleanup contracts.

@@ -54,11 +54,11 @@ func (c *Controller) ensureDeadline(ctx context.Context, d dispatch, plan *Plan)
 			return err
 		}
 		if err := bounded(ctx, func(ctx context.Context) error { return c.deadlines.Ensure(ctx, spec) }); err != nil {
-			return hostedexecution.ErrUnavailable
+			return err
 		}
 	}
 	if err := bounded(ctx, func(ctx context.Context) error { return c.deadlines.Verify(ctx, spec) }); err != nil {
-		return hostedexecution.ErrUnavailable
+		return err
 	}
 	_, err := c.update(ctx, ref, true, func(current *dispatch) error { current.DeadlineVerified = true; return nil })
 	return err

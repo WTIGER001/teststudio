@@ -9,7 +9,8 @@ The current package supports the catalog, identity, native HTTP execution, sched
 The separate [assembly profile](azure-native-assembly.md) now supplies a trusted source preparation command and headless template.
 Complete source discovery, Go execution, Playwright execution, and recording remain unfinished.
 The active coded execution path uses the [sandbox client and launch contract](azure-sandboxes.md) and [durable dispatch controller](azure-sandbox-controller.md).
-Sandboxes and the selected API remain preview. Native configuration, concrete sandbox deadlines, independent command completion, and complete provider composition remain unfinished.
+The [sandbox deadline SDK](azure-sandbox-deadlines.md) now supplies owned independent timers and checkpointed cleanup.
+Sandboxes and the selected API remain preview. Native configuration, effective timer authority, independent command completion, and complete provider composition remain unfinished.
 Ordinary Jobs stay disabled. Their contracts below remain reference material and do not establish sandbox isolation.
 The [Azure job contract](azure-worker-contract.md) now builds and verifies SDK requests for execution and discovery.
 The [durable provider](azure-worker-lifecycle.md) now passes local dispatch, status, cancellation, and checkpointed recovery checks.
