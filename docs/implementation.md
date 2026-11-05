@@ -122,7 +122,24 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: durable source assembly and discovery handoff
+## Current delivery: Azure preparation writer composition
+
+Explicit preparation library settings now compose the existing registry observation chain, trusted preparation networking, selected writer identity, and registry-scoped AcrPush grant.
+The factory reuses the existing registry builder and owns ten SDK readers. Construction makes no provider call.
+Each registry client opening refreshes the path, identity, assignment, and fixed built-in role before selecting the verified managed identity client.
+Publishing uses that separate credential, the configured tenant and repository prefix, and the selected regional data authority.
+Changed scopes, principals, conditions, role actions, incomplete metadata, provider failures, and unselected SDK operations block opening.
+Repeated publisher closure releases each owned reader once; closed publishers perform no provider operations.
+
+Three new writer race checks pass in 2.142 seconds.
+The new composed publisher check and one affected existing observer check pass in 1.839 seconds after extracting their shared registry factory.
+Checks use fake credentials and in-memory SDK transports. No cloud request, real registry publication, listener, browser, image build, deployment, or demo restart runs.
+No UI, API, or page help behavior changes. The operator guide, Azure guidance, and plan describe the library boundary and remaining native work.
+Selected assignment observation does not prove exclusive or complete effective authority. Workload placement, persistent journal storage, bootstrap read authority, and native command wiring remain unfinished.
+Azure coded execution remains disabled. Acceptance 51 advances; the verified total remains 48 of 57, with nine open.
+See [Azure preparation writer](azure-preparation-writer.md). Evidence is output/azure-preparation-writer/summary.json.
+
+## Previous delivery: durable source assembly and discovery handoff
 
 The preparation service now supports an optional assembly-only role and a durable handoff to the normal discovery queue.
 The writer publishes a validated immutable image, releases its owned journal without deleting content, and commits the handoff, lease removal, and audit atomically.

@@ -92,4 +92,5 @@ UI changes add status text and help without new controls or layout. Existing key
 
 The fixtures use local databases, local TLS servers, fake registry credentials, and in-process provider doubles.
 They start no Docker image, browser, cloud worker, real registry publication, or deployment.
-Azure private workload placement, writer identity and grants, command composition, and native isolated discovery remain separate implementation work.
+The [Azure publisher library](azure-preparation-writer.md) now composes selected private-path, writer identity, and registry push-grant checks.
+Private workload placement, complete effective grants, native command composition, and isolated discovery remain separate implementation work.

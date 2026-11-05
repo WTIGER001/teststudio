@@ -537,10 +537,16 @@ No existing browser workflow repeats: the UI changes only label the new state an
 No cloud operation, image build, container, registry push, deployment, browser, or demo restart runs. Local TLS fixture servers close through test teardown.
 See [separate source assembly and discovery](source-assembly-handoff.md). Acceptance 51 advances; the total remains 48 verified, nine open.
 
-Next compose Azure assembly-only settings, observed private networking, explicit writer identity, and workload placement. Keep complete Azure discovery and coded execution admission separate until implemented.
+Azure preparation library settings now compose private networking, a selected writer identity, its registry-scoped AcrPush grant, and an explicit managed-identity publishing client.
+The factory reuses the existing registry chain and owns ten SDK readers. Each client opening refreshes the chain and selected grant.
+Four new local checks and one affected observer regression pass. See [Azure preparation writer](azure-preparation-writer.md).
+This advances 51 without closing an item; the total remains 48 verified, nine open.
+Next bind the trusted assembly workload's placement, persistent journal, bootstrap read authority, and native command configuration.
+The selected grant check does not establish absence of additional authority or reuse of the writer by other workloads.
+Keep complete Azure discovery and coded execution admission separate until implemented.
 Reported app and job checks do not establish exclusive use across all Azure resources or subscriptions.
 Keep hosted read coverage, complete effective authorization, and cross-scope visibility separate until authoritative deployment evidence exists.
-Wire the bound session into native commands only after complete admission exists.
+Wire the bound execution observer into native commands only after complete execution admission exists.
 Verify actual resource-scoped assignment provisioning and enforcement, and authority to change the owning protection arrangement.
 Establish authoritative existing cross-scope visibility or clean installation provenance. Observed deny assignments do not remove pre-existing foreign links.
 Continue environment attachment control, remaining perimeter protection, and trusted preparation networking.

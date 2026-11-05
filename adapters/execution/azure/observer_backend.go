@@ -1,10 +1,7 @@
 package azureworker
 
-func (b *observerBuilder) backend(s BackendEndpointSettings) *BackendEndpointGuard {
+func (b *observerBuilder) registry(registrySettings RegistrySettings) *RegistryGuard {
 	c, credential, transport := b.worker, b.credential, b.transport
-	backendSettings := s.Backend
-	exchangeSettings := backendSettings.Exchange
-	registrySettings := exchangeSettings.Registry
 	endpointSettings := registrySettings.Endpoints
 	zoneSettings := endpointSettings.PrivateDNS
 	dnsSettings := zoneSettings.DNS
@@ -41,11 +38,18 @@ func (b *observerBuilder) backend(s BackendEndpointSettings) *BackendEndpointGua
 	}, func(reader *SDKEndpointReader) (*EndpointGuard, error) {
 		return NewEndpointGuard(c, endpointSettings, zones, reader)
 	})
-	registry := observerStage(b, func() (*SDKRegistryReader, error) {
+	return observerStage(b, func() (*SDKRegistryReader, error) {
 		return NewSDKRegistryReader(c, registrySettings, credential, transport)
 	}, func(reader *SDKRegistryReader) (*RegistryGuard, error) {
 		return NewRegistryGuard(c, registrySettings, endpoints, reader)
 	})
+}
+
+func (b *observerBuilder) backend(s BackendEndpointSettings) *BackendEndpointGuard {
+	c, credential, transport := b.worker, b.credential, b.transport
+	backendSettings := s.Backend
+	exchangeSettings := backendSettings.Exchange
+	registry := b.registry(exchangeSettings.Registry)
 	exchange := observerStage(b, func() (*SDKExchangeReader, error) {
 		return NewSDKExchangeReader(c, exchangeSettings, credential, transport)
 	}, func(reader *SDKExchangeReader) (*ExchangeGuard, error) {

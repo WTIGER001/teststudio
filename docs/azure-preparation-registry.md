@@ -9,7 +9,8 @@ The existing host-bound observer remains unchanged at 22 readers and its current
 Acceptance 51 advances; the verified total remains 48 of 57, with nine open.
 
 The source queue requires both image assembly and isolated discovery before source review and approval.
-Registry publication alone cannot complete preparation. Native discovery, complete execution admission, and writer identity wiring remain required.
+Registry publication alone cannot complete preparation. Native discovery and complete execution admission remain required.
+The [writer publisher](azure-preparation-writer.md) now composes this path with a selected identity and registry-scoped push grant. Native placement remains unfinished.
 See [registry source assembly](registry-preparation.md) and [trusted ACR authentication](azure-registry-authentication.md).
 
 ## Explicit settings
@@ -112,4 +113,5 @@ Local checks use fake credentials and in-memory SDK transports, with no provider
 
 The source service now supports [durable assembly-only handoff](source-assembly-handoff.md), with discovery deferred to a compatible worker.
 This separates confirmed source publication from execution-control authority without skipping discovery or approval.
-The current native mode supports existing ECS and Kubernetes registry settings. Azure configuration and placement remain unfinished.
+The current native mode supports existing ECS and Kubernetes registry settings.
+Azure library configuration and publisher composition now exist. Native command configuration, placement, and isolated discovery remain unfinished.
