@@ -134,7 +134,7 @@ func TestECSSDKFactoryBindsAccountRegionAndECRInspectionWithoutAmbientEndpoints(
 	t.Setenv("AWS_ENDPOINT_URL_STS", "https://foreign.invalid")
 	t.Setenv("AWS_ENDPOINT_URL_ECR", "https://foreign.invalid")
 	f, settings, db, credentials := sdkProtocol(t)
-	runtime, err := settings.open(t.Context(), db, nil, credentials, f, f)
+	runtime, err := settings.open(t.Context(), db, nil, credentials, f, f, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,7 +173,7 @@ func TestECSSDKFactoryRejectsWrongAccountAndDoesNotRetryPrivateProviderErrors(t 
 			if mode == "private-error" {
 				f.status = 503
 			}
-			runtime, err := settings.open(t.Context(), db, nil, credentials, f, f)
+			runtime, err := settings.open(t.Context(), db, nil, credentials, f, f, nil)
 			if runtime != nil || err == nil || strings.Contains(err.Error(), "canary") || f.calls["sts.us-east-1.amazonaws.com"] != 1 || len(f.calls) != 1 {
 				t.Fatal("invalid caller passed or SDK retried", err)
 			}

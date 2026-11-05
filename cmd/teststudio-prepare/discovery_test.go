@@ -67,3 +67,19 @@ func TestDiscoveryOnlyAttachesBothInspectorsWithoutBuilders(t *testing.T) {
 		t.Fatal("discovery mode accepted a registry builder", err)
 	}
 }
+
+func TestECSPreparationAttachesAddressCapabilityWithoutGatewayExecution(t *testing.T) {
+	service, provider := &sources.Service{}, &discoveryRegistrationProvider{}
+	if err := attachHostedDiscovery(service, provider, "ecs", "https://exchange.studio.example"); err != nil {
+		t.Fatal(err)
+	}
+	for _, runner := range []string{"go", "playwright"} {
+		inspector := service.Inspectors[runner].(*hostedexecution.DiscoveryInspector)
+		if !inspector.RequireGatewayAddress || inspector.Provider != provider || service.RecoveryInspectors[runner] != inspector {
+			t.Fatal("ECS preparation lost its offline discovery or capability boundary")
+		}
+	}
+	if len(service.Builders)+len(service.RecoveryBuilders) != 0 {
+		t.Fatal("dedicated discovery acquired assembly authority")
+	}
+}

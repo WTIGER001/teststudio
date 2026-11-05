@@ -2,14 +2,15 @@
 
 ## Introduction
 
-ECS environment-backed browser and coded API execution remains disabled.
+ECS environment-backed browser and coded API execution now has explicit optional SDK and command registration.
+Operators must supply complete separate pool settings. Default configuration retains only offline execution and discovery.
 The existing offline ECS lifecycle stays separate.
 The shared transport supports a verified task address and private certificate environment delivery.
 Native gateway task construction, ownership, deadline, recovery proof, and metadata bootstrap components now pass targeted local checks.
 The gateway child provider now reuses the durable SDK lifecycle with a separate role journal and verified address binding.
 The composed environment provider now sequences gateway initialization before worker creation and manages both task lifecycles.
 The native network guard now verifies a separate gateway VPC, narrow peer routes, native task interfaces, NAT, and private exchange delivery.
-These components do not yet provide the complete native ECS dispatch lifecycle or deployment acceptance.
+Dedicated environment deployment packaging and actual AWS verification remain unfinished.
 Azure remains deferred, and this work makes no live cloud call.
 
 ## Concepts
@@ -121,7 +122,8 @@ They cover initialization order, unsupported capabilities, address mismatch, aut
 Selected existing offline worker lifecycle checks still pass.
 
 This child provider has no normal executor registration. It cannot enable environment execution by itself.
-Production factory selection and installation wiring remain required.
+The optional environment SDK provider composes this child with the uploaded worker lifecycle.
+Dedicated installation packaging remains required.
 
 ### Environment task orchestration
 
@@ -151,13 +153,14 @@ Inventory merges both role journals into one execution reference, including part
 Local protocol checks cover cold startup, concurrent observation, permission withdrawal, partial cancellation, lost launches, successful completion, and recovery.
 Changed lifecycle checks and selected existing worker checks pass with the race detector.
 
-The production SDK factory still selects the offline provider.
-The composed provider requires native factory selection and installation configuration before registration.
+The SDK factory retains the offline provider and constructs the environment provider only with complete separate settings and current exchange authority.
+API and controller commands register its Go API and browser drivers alongside offline execution.
+Preparation constructs only the offline provider. Source assembly and discovery require the ECS address capability for environment metadata.
 The [gateway network guard](ecs-gateway-network.md) now supplies the concrete native observation contract.
 
 ### Remaining native integration
 
-Connect the composed provider and native network guard to the SDK factory, service roles, source preparation, and deployment settings.
+Package the separate environment network, gateway role, certificate references, image repository, and complete service settings.
 Verify the gateway execution role, certificate references, image-pull path, private exchange path, and separate native network.
 Preserve uploaded source isolation and current run authority during this wiring.
 Build only affected runtime images after the native path is complete.
@@ -166,7 +169,7 @@ The network guard requires a dedicated gateway VPC with narrowly routed same-acc
 The worker DNS firewall remains restricted. Only gateway TCP 8044 is added to the environment worker egress rules.
 The gateway has its own NAT path and private exchange endpoint.
 Provision this environment pool separately and preserve the existing offline pool.
-Keep environment profiles rejected until the native network, workload, identity, deadline, and recovery paths are complete.
+Native network, workload, image, authority, initialization, deadline, and recovery checks remain required before dispatch and activation.
 
 ## Tutorials
 

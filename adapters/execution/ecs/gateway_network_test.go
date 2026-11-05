@@ -112,7 +112,7 @@ func TestECSGatewayNetworkCannotSelectIncompleteProductionRegistration(t *testin
 	sdk, _, store, credentials := sdkProtocol(t)
 	guard, _, worker, _, _ := gatewayNetwork(t)
 	settings := Settings{Worker: worker, Network: guard.settings}
-	if _, err := settings.open(t.Context(), store, nil, credentials, sdk, sdk); !errors.Is(err, hostedexecution.ErrConfiguration) || len(sdk.calls) != 0 {
+	if _, err := settings.open(t.Context(), store, nil, credentials, sdk, sdk, nil); !errors.Is(err, hostedexecution.ErrConfiguration) || len(sdk.calls) != 0 {
 		t.Fatal("gateway settings selected an offline production executor", err)
 	}
 }

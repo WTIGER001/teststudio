@@ -16,9 +16,10 @@ import (
 )
 
 type Builder struct {
-	Registry     *oci.Client
-	RuntimeImage string
-	Directory    string
+	RequireGatewayAddress bool
+	Registry              *oci.Client
+	RuntimeImage          string
+	Directory             string
 }
 
 func validReference(ref execution.Reference) bool {
@@ -59,7 +60,7 @@ func (b *Builder) Build(ctx context.Context, input preparation.BuildRequest) (re
 	if runtime.Runner != manifest.Runner {
 		return result, errors.New("source runner differs from the trusted registry runtime")
 	}
-	if manifest.Browser != nil && (runtime.GatewayTransport != browsergateway.RemoteProtocol || runtime.SupervisorRevision == "" || manifest.Browser.Requests != nil && runtime.APIPolicy != "request-policy/v1") {
+	if manifest.Browser != nil && (runtime.GatewayTransport != browsergateway.RemoteProtocol || runtime.SupervisorRevision == "" || b.RequireGatewayAddress && runtime.GatewayAddress != browsergateway.RemoteAddressProtocol || manifest.Browser.Requests != nil && runtime.APIPolicy != "request-policy/v1") {
 		return result, errors.New("environment source assembly requires an approved gateway-capable runtime and matching request-policy support")
 	}
 	if runtime.Runner == "playwright" {

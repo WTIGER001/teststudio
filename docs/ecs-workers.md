@@ -4,8 +4,10 @@
 
 The API and preparation commands now accept optional ECS worker settings.
 They construct scoped SDK clients, verify the calling account, authenticate to ECR, and connect the existing durable lifecycle.
-The supported runners are offline Go and Playwright. Discovery uses the same gated provider with a separate preparation identity.
-Environment-backed coded tests and hosted browser recording remain unfinished.
+The supported runners include offline Go and Playwright, plus optional separate environment execution providers.
+Discovery uses the offline gated provider with a separate preparation identity.
+The SDK, command registration, source capability checks, and environment lifecycle pass targeted local protocol verification.
+Dedicated environment deployment packaging and actual AWS verification remain unfinished. Hosted browser recording also remains unfinished.
 Native HTTP checks retain their existing controller execution.
 
 This implementation has local protocol and native startup evidence only.
@@ -27,6 +29,32 @@ The network object identifies both VPCs, required groups and endpoints, registry
 See [network admission](ecs-network-admission.md) and [task contracts](ecs-worker-contract.md) for the exact required state.
 The loader derives networkProfile from these settings. Omit that derived field when writing a new configuration.
 Both processes must use the same worker and network settings for ownership and recovery.
+
+### Optional environment pool
+
+Keep the top-level worker and network objects for the offline execution and discovery pool.
+Add an environment object only when configuring the separate application execution pool.
+That object contains worker, network, and gateway objects.
+Its network object includes the [gateway network settings](ecs-gateway-network.md), and gateway selects the [trusted task contract](ecs-gateway.md).
+All objects must be complete and refer to consistent resources. Partial configuration fails before SDK initialization.
+
+The environment pool shares the offline pool's account, Region, architecture, cluster, exchange service, registry namespace, and controller backend.
+It has a separate worker VPC, subnets, security groups, endpoints, and immutable network profile.
+Its trusted gateway uses another VPC with narrow peering, separate private exchange delivery, and NAT.
+The gateway task and network settings must select the same private subnets and transport group.
+The immutable gateway image must belong to the same configured ECR namespace.
+Certificate settings contain approved secret references and optional public trust, never private key values.
+Omit derived networkProfile fields from new documents. The loader binds both pool identities.
+
+The API and headless controller pass their current private exchange authority to the runtime factory.
+Complete environment settings then construct the separate provider and register Go API and Playwright browser execution and recovery.
+Offline execution and discovery retain their existing provider.
+The preparation command supplies no environment execution authority. Its factory creates only the offline provider and shared registry client.
+The SDK registry client and HTTP pools close once with the runtime.
+
+These settings permit manually provisioned native resources after normal network and image admission.
+The existing worker template still generates only the offline configuration.
+Dedicated environment network, gateway role, certificate, image repository, and service packaging remain required.
 
 Select exactly one input source:
 

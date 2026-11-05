@@ -24,12 +24,13 @@ type DiscoveryExchange interface {
 }
 
 type DiscoveryInspector struct {
-	Provider       Provider
-	Exchange       DiscoveryExchange
-	Name           string
-	Runner         string
-	ExchangeOrigin string
-	PollInterval   time.Duration
+	RequireGatewayAddress bool
+	Provider              Provider
+	Exchange              DiscoveryExchange
+	Name                  string
+	Runner                string
+	ExchangeOrigin        string
+	PollInterval          time.Duration
 }
 
 func (i *DiscoveryInspector) DeferredCleanup() bool { return true }
@@ -67,7 +68,7 @@ func (i *DiscoveryInspector) Inspect(ctx context.Context, request preparation.In
 		return result, ErrUnavailable
 	}
 	input := workerprotocol.DiscoveryInput{Project: request.Reference.Project, Suite: request.Suite, Runner: i.Runner, Image: request.Image, SourceDigest: image.SourceDigest}
-	input.Environment = image.GatewayTransport == browsergateway.RemoteProtocol && supervisorRevision.MatchString(image.SupervisorRevision)
+	input.Environment = image.GatewayTransport == browsergateway.RemoteProtocol && supervisorRevision.MatchString(image.SupervisorRevision) && (!i.RequireGatewayAddress || image.GatewayAddress == browsergateway.RemoteAddressProtocol)
 	input.RequestPolicy = image.APIPolicy == "request-policy/v1"
 	if image.Reference != request.Image || image.Project != input.Project || image.Runner != i.Runner || !runtime.MatchString(image.Runtime) || image.Supervisor != "worker-exchange/v1" || image.Discovery != "worker-exchange/v1" || image.OS != "linux" || image.Architecture != "arm64" && image.Architecture != "amd64" || workerprotocol.ValidateDiscoveryInput(input) != nil {
 		return result, ErrOwnership

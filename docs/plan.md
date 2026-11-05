@@ -110,11 +110,14 @@ Both role journals remain visible as one execution, including partial bundles. C
 The concrete native network guard now verifies separate gateway VPC ownership, narrow peering and security rules, private task interfaces, NAT, and private exchange delivery.
 The worker DNS firewall and target-egress restriction remain required. Offline mode rejects all added peer routes and gateway egress.
 Changed native network checks and selected existing offline checks pass locally with the race detector.
-The production SDK factory rejects incomplete gateway network selection before any AWS request.
-Next implement SDK factory selection, source preparation, and dedicated environment network and service packaging.
+The SDK factory now accepts complete optional environment settings beside the offline pool and rejects partial or shared configuration before any AWS request.
+API and controller commands register separate environment execution and recovery. Preparation receives only offline discovery and registry access.
+ECS source assembly and discovery require verified-address transport for environment metadata while retaining legacy offline sources.
+Targeted local factory, registration, source publication, and source review checks pass with the race detector.
+Next implement dedicated environment network and service packaging, including gateway pull and certificate roles and combined settings.
 Use a third VPC for trusted gateways and separate environment worker resources. Preserve the retained offline worker pool.
 See [native gateway networking](ecs-gateway-network.md) for exact resource and continuation requirements.
-Keep production ECS environment registration disabled until that native path is complete.
+Keep default ECS configuration offline-only. Optional environment registration requires the complete separate native profile and current exchange authority.
 Preserve the worker DNS firewall and target-egress restrictions while providing trusted gateway target resolution.
 Require the address, certificate, and native task identity capabilities before enabling ECS environment profiles. See [ECS gateway integration](ecs-gateway.md).
 

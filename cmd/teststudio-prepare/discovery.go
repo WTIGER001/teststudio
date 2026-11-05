@@ -36,7 +36,7 @@ func attachHostedDiscovery(service *sources.Service, provider hostedexecution.Pr
 	exchange := &workerexchange.Service{Store: service.Store, Authorize: service.AuthorizeDiscovery, AuthorizeDiscoveryCleanup: service.AuthorizeDiscoveryCleanup}
 	inspectors, recovery := map[string]preparation.ArtifactInspector{}, map[string]preparation.ArtifactInspector{}
 	for _, runner := range []string{"go", "playwright"} {
-		inspector := &hostedexecution.DiscoveryInspector{Provider: provider, Exchange: exchange, Name: name, Runner: runner, ExchangeOrigin: origin}
+		inspector := &hostedexecution.DiscoveryInspector{RequireGatewayAddress: name == "ecs", Provider: provider, Exchange: exchange, Name: name, Runner: runner, ExchangeOrigin: origin}
 		inspectors[runner], recovery[runner] = inspector, inspector
 	}
 	service.Inspectors, service.RecoveryInspectors = inspectors, recovery

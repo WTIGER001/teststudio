@@ -21,18 +21,13 @@ func configureHostedWorkers(run *runs.Service, source *sources.Service, exchange
 		run.RecoveryDrivers = []execution.ManagedExecutor{goDriver, playwright}
 	}
 	run.GoAPI, run.Browser = nil, nil
-	if gateway, ok := executionProvider.(hostedexecution.GatewayProvider); ok && gateway.SupportsGateway() {
-		goAPI, browser := makeDriver("go"), makeDriver("playwright")
-		goAPI.Environment, browser.Environment = true, true
-		run.GoAPI, run.Browser = goAPI, browser
-		run.RecoveryDrivers = append(run.RecoveryDrivers, goAPI, browser)
-	}
+	configureHostedEnvironmentWorkers(run, source, exchange, executionProvider, name, origin)
 	run.RecoveryDriver = nil
 	source.RecoveryInspectors = map[string]preparation.ArtifactInspector{}
 	source.Inspectors = map[string]preparation.ArtifactInspector{}
 	if discoveryProvider != nil {
 		for _, runner := range []string{"go", "playwright"} {
-			inspector := &hostedexecution.DiscoveryInspector{Provider: discoveryProvider, Exchange: exchange, Name: name, Runner: runner, ExchangeOrigin: origin}
+			inspector := &hostedexecution.DiscoveryInspector{RequireGatewayAddress: name == "ecs", Provider: discoveryProvider, Exchange: exchange, Name: name, Runner: runner, ExchangeOrigin: origin}
 			source.RecoveryInspectors[runner] = inspector
 			if preparationEnabled {
 				source.Inspectors[runner] = inspector
@@ -40,4 +35,17 @@ func configureHostedWorkers(run *runs.Service, source *sources.Service, exchange
 		}
 	}
 	configureWorkerAuthorization(run, source, exchange)
+}
+
+func configureHostedEnvironmentWorkers(run *runs.Service, source *sources.Service, exchange *workerexchange.Service, provider hostedexecution.Provider, name, origin string) {
+	gateway, ok := provider.(hostedexecution.GatewayProvider)
+	if !ok || !gateway.SupportsGateway() {
+		return
+	}
+	driver := func(runner string) *hostedexecution.Executor {
+		return &hostedexecution.Executor{Environment: true, Provider: provider, Exchange: exchange, Name: name, Runner: runner, ExchangeOrigin: origin, ApproveArtifact: source.ApproveArtifact}
+	}
+	goAPI, browser := driver("go"), driver("playwright")
+	run.GoAPI, run.Browser = goAPI, browser
+	run.RecoveryDrivers = append(run.RecoveryDrivers, goAPI, browser)
 }

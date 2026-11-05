@@ -4,8 +4,9 @@
 
 The native ECS network guard now supports a separate trusted gateway VPC.
 Targeted local AWS protocol checks pass. This does not prove a deployed AWS network.
-Production executor selection and deployment resources remain unfinished.
-The current SDK factory rejects gateway network settings before it makes an AWS request.
+Production SDK selection now accepts a complete optional environment pool beside the unchanged offline pool.
+Partial, shared, or mismatched pool configuration fails before any SDK request.
+Dedicated deployment resources and actual AWS verification remain unfinished.
 Azure remains deferred. Retain the working local Kubernetes installation and its existing evidence.
 
 ## Concepts
@@ -49,7 +50,7 @@ See [PrivateLink DNS names](https://docs.aws.amazon.com/vpc/latest/privatelink/m
 
 ### Frozen configuration and task addresses
 
-NetworkSettings accepts an optional gateway object with these fields:
+The environment pool's NetworkSettings accepts a gateway object with these fields:
 
 | Field | Required value |
 | --- | --- |
@@ -77,11 +78,13 @@ Pool observations retain the existing two-second cache. Task interface checks re
 
 ### Continue installation implementation
 
-Connect the environment provider and this guard through explicit SDK settings and native factory selection.
+Use the optional environment settings described in [ECS workers](ecs-workers.md#optional-environment-pool).
+The API and controller create the environment provider with current private exchange authority.
+Preparation retains only offline discovery and registry publication authority.
 Add dedicated environment worker and gateway network resources without changing the existing offline pool.
 Package peering, narrow routes, security groups, NAT, the private exchange endpoint, and certificate delivery together.
 Use separate pull roles and retain the reviewed runtime and gateway image capabilities.
-Wire source preparation and discovery to their intended profiles. Discovery receives no application target or credential.
+Source preparation requires the ECS address capability. Discovery receives no application target or credential.
 The worker package now includes the three additional read operations for peer, NAT, and internet gateway observations.
 This permission addition does not create or enable an environment network.
 

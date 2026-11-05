@@ -353,12 +353,15 @@ func run() error {
 		}
 	}
 	if ecsSettings != nil {
-		runtime, err := ecsSettings.Open(ctx, db, sourceService.AuthorizeDiscoveryCleanup)
+		runtime, err := ecsSettings.Open(ctx, db, sourceService.AuthorizeDiscoveryCleanup, workerExchange)
 		if err != nil {
 			return err
 		}
 		defer runtime.Close()
 		configureHostedWorkers(runService, sourceService, workerExchange, runtime.Provider, runtime.Provider, "ecs", ecsSettings.Worker.ExchangeOrigin, *preparedSources)
+		if runtime.Environment != nil {
+			configureHostedEnvironmentWorkers(runService, sourceService, workerExchange, runtime.Environment, "ecs", ecsSettings.Worker.ExchangeOrigin)
+		}
 	}
 	if kubernetesSettings != nil {
 		provider, err := kubernetesSettings.Open(db, os.LookupEnv, sourceService.AuthorizeDiscoveryCleanup, workerExchange)

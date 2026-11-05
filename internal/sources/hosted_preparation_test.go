@@ -33,24 +33,28 @@ func (b *hostedBuilder) Build(ctx context.Context, request preparation.BuildRequ
 }
 
 type discoveryProvider struct {
-	t             *testing.T
-	source        *sources.Service
-	builder       *hostedBuilder
-	exchange      *workerexchange.Service
-	server        *httptest.Server
-	job           hostedexecution.Job
-	status        *hostedexecution.Status
-	mode          string
-	created       int
-	discovered    int
-	removed       int
-	deliveryError error
+	addressCapable bool
+	t              *testing.T
+	source         *sources.Service
+	builder        *hostedBuilder
+	exchange       *workerexchange.Service
+	server         *httptest.Server
+	job            hostedexecution.Job
+	status         *hostedexecution.Status
+	mode           string
+	created        int
+	discovered     int
+	removed        int
+	deliveryError  error
 }
 
 func (p *discoveryProvider) InspectImage(_ context.Context, image string) (hostedexecution.Image, error) {
 	value := hostedexecution.Image{Reference: image, Project: "alpha", SourceDigest: p.builder.digest, Runner: "go", Runtime: "go-discovery-fixture-v1", OS: "linux", Architecture: "arm64", Supervisor: "worker-exchange/v1", Discovery: "worker-exchange/v1"}
 	if p.mode == "environment" {
 		value.GatewayTransport, value.SupervisorRevision, value.APIPolicy = browsergateway.RemoteProtocol, strings.Repeat("a", 64), "request-policy/v1"
+		if p.addressCapable {
+			value.GatewayAddress = browsergateway.RemoteAddressProtocol
+		}
 	}
 	return value, nil
 }
@@ -259,6 +263,36 @@ func TestHostedTargetSuiteDiscoversOfflineBeforeReviewedPublication(t *testing.T
 	}
 	if rows, _ := s.Store.All(t.Context(), "runs", "alpha"); len(rows) != 0 {
 		t.Fatal("catalog discovery dispatched test execution")
+	}
+}
+
+func TestECSTargetDiscoveryFreezesAddressCapabilityAndKeepsLegacyOfflineSources(t *testing.T) {
+	for _, mode := range []string{"environment approved", "environment missing address", "offline legacy"} {
+		t.Run(mode, func(t *testing.T) {
+			s, provider := hostedPreparation(t, "environment")
+			s.Location = "ecs"
+			inspector := s.Inspectors["go"].(*hostedexecution.DiscoveryInspector)
+			inspector.Name, inspector.RequireGatewayAddress = "ecs", true
+			provider.addressCapable = mode == "environment approved"
+			if mode == "offline legacy" {
+				provider.mode = ""
+			}
+			queued, _ := enqueueZIP(t, s, "ecs-address-capability")
+			_, result := processBundle(t, s, queued.ID)
+			if mode == "environment missing address" {
+				if result.State != "failed" || result.Upload != "" || !errors.Is(provider.deliveryError, workerprotocol.ErrInvalid) {
+					t.Fatal("unsupported ECS target source reached catalog review", result.State, result.Error, provider.deliveryError)
+				}
+			} else if result.State != "ready" || provider.deliveryError != nil {
+				t.Fatal("compatible ECS discovery did not reach review", result.State, result.Error, provider.deliveryError)
+			}
+			if provider.created != 1 || provider.job.Reference.Gateway != "" || provider.job.Operation != "discover" {
+				t.Fatal("source discovery started an application gateway or another workload")
+			}
+			if rows, _ := s.Store.All(t.Context(), "runs", "alpha"); len(rows) != 0 {
+				t.Fatal("source preparation created a test run")
+			}
+		})
 	}
 }
 

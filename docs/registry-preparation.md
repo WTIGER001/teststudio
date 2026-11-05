@@ -5,6 +5,8 @@
 The registry source builder implements the existing ArtifactBuilder contract.
 It assembles validated Go and Playwright snapshots outside the API.
 Reviewed environment profiles require the gateway transport marker, supervisor build revision, and API-policy capability when needed.
+ECS environment profiles also require the verified-address marker before registry publication.
+ECS discovery freezes that capability into its private input. Missing support rejects environment discovery while retaining legacy offline source support.
 Discovery remains isolated. Actual environment execution requires the configured trusted gateway.
 It publishes an immutable OCI image through the registry HTTPS protocol.
 The [trusted ACR adapter](azure-registry-authentication.md) now supplies separate publication token scope for this same upload and journal flow.
@@ -44,8 +46,9 @@ ONBUILD instructions and unsupported runtime contracts remain invalid.
 The builder accepts a previously validated complete source snapshot and matching provenance.
 Its preparation reference identifies the project, installation, and job.
 The installation identifier must use the preparation namespace.
-Only go-module and playwright-node offline profiles are supported.
-Registered targets, credential bindings, environment profiles, and dependency downloads remain unsupported here.
+Go and Playwright offline and reviewed environment source profiles are supported.
+Assembly and discovery receive no resolved application target or credential value.
+Reviewed endpoint and credential binding names remain part of source metadata. Dependency downloads remain unsupported here.
 
 Playwright packages must match the trusted runtime's exact version and lockfile.
 Local and registry assembly use the same dependency validator.

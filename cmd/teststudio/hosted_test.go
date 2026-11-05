@@ -85,3 +85,25 @@ func TestHostedRegistrationKeepsExecutionAndDiscoveryProvidersSeparate(t *testin
 		})
 	}
 }
+
+func TestHostedRegistrationKeepsECSOfflineAndEnvironmentPoolsSeparate(t *testing.T) {
+	offline, environment := &registrationProvider{}, &gatewayRegistrationProvider{}
+	run, source, exchange := &runs.Service{}, &sources.Service{}, &workerexchange.Service{}
+	configureHostedWorkers(run, source, exchange, offline, offline, "ecs", "https://exchange.test", true)
+	configureHostedEnvironmentWorkers(run, source, exchange, environment, "ecs", "https://exchange.test")
+	if run.Go.(*hostedexecution.Executor).Provider != offline || run.Playwright.(*hostedexecution.Executor).Provider != offline || len(run.RecoveryDrivers) != 4 {
+		t.Fatal("environment registration replaced offline execution or recovery")
+	}
+	for _, driver := range []any{run.GoAPI, run.Browser} {
+		registered := driver.(*hostedexecution.Executor)
+		if registered.Provider != environment || !registered.Environment {
+			t.Fatal("application execution uses the offline pool")
+		}
+	}
+	for _, runner := range []string{"go", "playwright"} {
+		inspector := source.Inspectors[runner].(*hostedexecution.DiscoveryInspector)
+		if inspector.Provider != offline || !inspector.RequireGatewayAddress {
+			t.Fatal("ECS source discovery lost its isolated pool or address-capability requirement")
+		}
+	}
+}

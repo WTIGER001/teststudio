@@ -89,12 +89,15 @@ func runController(ctx context.Context, o controllerOptions) error {
 	defer closeArtifacts()
 	run, source, exchange := controllerServices(db, auth, blobs, o.Location, o.PublicOrigin, trust)
 	if ecsSettings != nil {
-		runtime, err := ecsSettings.Open(ctx, db, source.AuthorizeDiscoveryCleanup)
+		runtime, err := ecsSettings.Open(ctx, db, source.AuthorizeDiscoveryCleanup, exchange)
 		if err != nil {
 			return err
 		}
 		defer runtime.Close()
 		configureHostedWorkers(run, source, exchange, runtime.Provider, nil, "ecs", ecsSettings.Worker.ExchangeOrigin, false)
+		if runtime.Environment != nil {
+			configureHostedEnvironmentWorkers(run, source, exchange, runtime.Environment, "ecs", ecsSettings.Worker.ExchangeOrigin)
+		}
 	}
 	if kubeSettings != nil {
 		provider, err := kubeSettings.Open(db, os.LookupEnv, source.AuthorizeDiscoveryCleanup, exchange)

@@ -229,6 +229,28 @@ Next add SDK factory selection, source preparation, and dedicated environment de
 Keep the existing offline pool separate. See [native gateway networking](ecs-gateway-network.md).
 This advances **51, 56, and 57**; the total remains **50 verified of 57**.
 
+### Native ECS SDK registration and source preparation
+
+Settings now accept a complete optional environment pool beside the existing offline worker and network objects.
+Both pools share the configured account, Region, cluster, architecture, registry namespace, exchange service, and controller backend.
+Environment workers and gateways retain distinct VPCs, subnets, security groups, endpoints, and immutable network profiles.
+Partial, shared, foreign, or mismatched configuration fails before SDK initialization.
+
+The native factory retains the offline provider and constructs the composed environment provider with current private exchange authority.
+API and controller commands register separate Go API, browser, and recovery drivers without replacing offline execution or discovery.
+The preparation command supplies no application execution authority. Its runtime contains only offline discovery and registry access.
+Environment and offline providers share the scoped registry client and existing native SDK boundaries.
+
+Registry source assembly now requires the ECS verified-address capability before publishing environment source content.
+Discovery freezes that capability into its private input. Unsupported environment output cannot reach catalog review.
+New capable environment sources and legacy offline sources still reach review without a gateway, application target, credential, or test run.
+Kubernetes retains its existing transport capability contract.
+
+Targeted local factory, configuration, registration, source publication, and source review checks pass with the race detector.
+Selected existing factory and registration checks also pass. No image build, browser, Kubernetes redeployment, live cloud call, or catalog run occurs.
+Dedicated ECS environment network, gateway roles and certificate delivery, repository, and combined service settings remain to be packaged.
+This advances **41, 51, 56, and 57**; the total remains **50 verified of 57**.
+
 ## Active application navigation correction — 2026-11-04
 
 The sidebar now has one project selector and an explicit application selector.

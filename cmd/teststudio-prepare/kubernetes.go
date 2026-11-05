@@ -42,8 +42,8 @@ func attachRegistryPreparation(service *sources.Service, provider hostedexecutio
 
 	exchange := &workerexchange.Service{Store: service.Store, Authorize: service.AuthorizeDiscovery, AuthorizeDiscoveryCleanup: service.AuthorizeDiscoveryCleanup}
 	for _, runner := range []string{"go", "playwright"} {
-		inspector := &hostedexecution.DiscoveryInspector{Provider: provider, Exchange: exchange, Name: name, Runner: runner, ExchangeOrigin: origin}
-		builder := &registryimage.Builder{Registry: registry, RuntimeImage: runtimes[runner], Directory: directory}
+		inspector := &hostedexecution.DiscoveryInspector{RequireGatewayAddress: name == "ecs", Provider: provider, Exchange: exchange, Name: name, Runner: runner, ExchangeOrigin: origin}
+		builder := &registryimage.Builder{RequireGatewayAddress: name == "ecs", Registry: registry, RuntimeImage: runtimes[runner], Directory: directory}
 		service.RecoveryInspectors[runner] = inspector
 		service.RecoveryBuilders[runner] = builder
 		if runtimes[runner] != "" {

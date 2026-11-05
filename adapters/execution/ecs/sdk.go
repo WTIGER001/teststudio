@@ -25,22 +25,25 @@ import (
 )
 
 type Runtime struct {
-	Provider *Provider
-	Registry *oci.Client
-	sdk      *sdkHTTP
-	once     sync.Once
+	Provider    *Provider
+	Environment *EnvironmentProvider
+	Registry    *oci.Client
+	sdk         *sdkHTTP
+	once        sync.Once
 }
 
 func (r *Runtime) Close() {
 	r.once.Do(func() { r.Registry.Close(); r.sdk.CloseIdleConnections() })
 }
 
-func (s Settings) Open(ctx context.Context, store *storage.Store, cleanup func(context.Context, execution.Reference) error) (*Runtime, error) {
-	if store == nil || s.Network.Gateway != nil {
+func (s Settings) Open(ctx context.Context, store *storage.Store, cleanup func(context.Context, execution.Reference) error, authority EnvironmentAuthority) (*Runtime, error) {
+	bound, err := s.bind()
+	if err != nil || store == nil || bound.Worker.NetworkProfile != s.Worker.NetworkProfile || s.Environment != nil && bound.Environment.Worker.NetworkProfile != s.Environment.Worker.NetworkProfile {
 		return nil, hostedexecution.ErrConfiguration
 	}
-	worker, err := s.Network.Bind(s.Worker)
-	if err != nil || s.Worker.NetworkProfile != worker.NetworkProfile || strings.HasPrefix(worker.Region, "cn-") || strings.HasPrefix(worker.Region, "us-gov-") {
+	s = bound
+	worker := s.Worker
+	if strings.HasPrefix(worker.Region, "cn-") || strings.HasPrefix(worker.Region, "us-gov-") {
 		return nil, hostedexecution.ErrConfiguration
 	}
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
@@ -51,18 +54,20 @@ func (s Settings) Open(ctx context.Context, store *storage.Store, cleanup func(c
 		client.CloseIdleConnections()
 		return nil, hostedexecution.ErrConfiguration
 	}
-	result, err := s.open(ctx, store, cleanup, loaded.Credentials, client, nil)
+	result, err := s.open(ctx, store, cleanup, loaded.Credentials, client, nil, authority)
 	if err != nil {
 		client.CloseIdleConnections()
 	}
 	return result, err
 }
 
-func (s Settings) open(ctx context.Context, store *storage.Store, cleanup func(context.Context, execution.Reference) error, credentials aws.CredentialsProvider, client aws.HTTPClient, registryTransport http.RoundTripper) (*Runtime, error) {
-	worker, err := s.Network.Bind(s.Worker)
-	if err != nil || s.Worker.NetworkProfile != worker.NetworkProfile || s.Network.Gateway != nil || store == nil || credentials == nil || client == nil || strings.HasPrefix(worker.Region, "cn-") || strings.HasPrefix(worker.Region, "us-gov-") {
+func (s Settings) open(ctx context.Context, store *storage.Store, cleanup func(context.Context, execution.Reference) error, credentials aws.CredentialsProvider, client aws.HTTPClient, registryTransport http.RoundTripper, authority EnvironmentAuthority) (*Runtime, error) {
+	bound, err := s.bind()
+	if err != nil || bound.Worker.NetworkProfile != s.Worker.NetworkProfile || s.Environment != nil && bound.Environment.Worker.NetworkProfile != s.Environment.Worker.NetworkProfile || store == nil || credentials == nil || client == nil || strings.HasPrefix(s.Worker.Region, "cn-") || strings.HasPrefix(s.Worker.Region, "us-gov-") {
 		return nil, hostedexecution.ErrConfiguration
 	}
+	s = bound
+	worker := s.Worker
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 	transport := &sdkHTTP{base: client, region: worker.Region}
@@ -90,5 +95,19 @@ func (s Settings) open(ctx context.Context, store *storage.Store, cleanup func(c
 		registry.Close()
 		return nil, err
 	}
-	return &Runtime{Provider: provider, Registry: registry, sdk: transport}, nil
+	runtime := &Runtime{Provider: provider, Registry: registry, sdk: transport}
+	if s.Environment != nil && authority != nil {
+		e := s.Environment
+		guard, err := NewNetworkGuard(e.Worker, e.Network, ec2.NewFromConfig(cfg), elasticloadbalancingv2.NewFromConfig(cfg), route53resolver.NewFromConfig(cfg), route53profiles.NewFromConfig(cfg))
+		if err != nil {
+			runtime.Close()
+			return nil, err
+		}
+		runtime.Environment, err = NewEnvironment(EnvironmentOptions{Worker: Options{Config: e.Worker, Store: store, ECS: ecs.NewFromConfig(cfg), Scheduler: scheduler.NewFromConfig(cfg), Inspector: registry, Network: guard}, Gateway: e.Gateway, Authority: authority, Network: guard})
+		if err != nil {
+			runtime.Close()
+			return nil, err
+		}
+	}
+	return runtime, nil
 }

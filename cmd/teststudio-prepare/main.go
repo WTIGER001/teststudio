@@ -166,7 +166,7 @@ func run() error {
 		}
 		defer close()
 	} else if ecsSettings != nil {
-		runtime, err := ecsSettings.Open(ctx, store, service.AuthorizeDiscoveryCleanup)
+		runtime, err := ecsSettings.Open(ctx, store, service.AuthorizeDiscoveryCleanup, nil)
 		if err != nil {
 			return err
 		}
