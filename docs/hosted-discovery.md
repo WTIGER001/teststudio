@@ -8,6 +8,7 @@ ECS now has a [staged infrastructure and preparation package](aws-workers-packag
 It supports the offline Go and Playwright profiles. Local preparation retains its existing behavior.
 The API accepts source uploads and presents the normal source review. It does not assemble uploaded source in its process.
 The portable service image now includes /app/teststudio-prepare for a separate preparation process.
+Its [discovery-only mode](source-assembly-handoff.md#dedicated-discovery-process) now consumes assembled source handoffs without builders or a build directory.
 
 Native configuration, local TLS protocol checks, and package checks pass without registry or cluster access.
 The optional [Helm preparation package](kubernetes-preparation.md) now supplies a separate deployment, durable journal claim, and scoped writer references.

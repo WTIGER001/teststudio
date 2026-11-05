@@ -197,6 +197,17 @@ Fresh creation and import checks and bounded live evidence include the stage. Re
 Four new checks and nine affected checks pass locally with race detection. No cloud service is contacted.
 See [service workload identity binding](azure-sandbox-service-workloads.md). Acceptance 51 advances; the total remains 48 verified, nine open.
 
+Command inspection finds that common server registration previously assigned one provider to both execution and discovery.
+It now accepts distinct providers and can omit either role. Existing ECS and Kubernetes registration keeps its current shared-provider behavior.
+The preparation command now has a discovery-only path for existing ECS and Kubernetes profiles.
+That path creates inspectors and recovery drivers without builders, a build journal directory, repository sync, or runtime distribution inputs.
+The discovery loop strips builders from its private service copy and processes authorized automatic repository publication.
+Strict mode validation rejects conflicting roles and unrelated flags before configuration reads or state creation.
+Five new checks and four affected checks pass locally with race detection, using SQLite and an owned loopback TLS exchange.
+This supplies concrete discovery and execution registration boundaries for the pending native controller host binding.
+Native sandbox activation, effective deployment permissions, and separate provider packaging remain unfinished.
+See [dedicated discovery process](source-assembly-handoff.md#dedicated-discovery-process). Acceptance 51 advances; the total remains 48 verified, nine open.
+
 Complete remaining effective-authority and protected network admission, native command role wiring, and deployment packaging next.
 Bind additional declared registry consumers to trusted workload and network ownership.
 Complete controller and remaining identity host attachment, additional grants and deny effects, and protected write boundaries.

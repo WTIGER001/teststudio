@@ -13,14 +13,21 @@ import (
 )
 
 func (s *Service) StartPreparation(ctx context.Context) <-chan struct{} {
-	return s.startPreparation(ctx, false)
+	return s.startPreparation(ctx, false, false)
 }
 
 func (s *Service) StartBuildPreparation(ctx context.Context) <-chan struct{} {
-	return s.startPreparation(ctx, true)
+	return s.startPreparation(ctx, true, true)
 }
 
-func (s *Service) startPreparation(ctx context.Context, builds bool) <-chan struct{} {
+func (s *Service) StartDiscoveryPreparation(ctx context.Context) <-chan struct{} {
+	worker := *s
+	worker.AssemblyOnly = false
+	worker.Builders, worker.RecoveryBuilders = nil, nil
+	return worker.startPreparation(ctx, false, true)
+}
+
+func (s *Service) startPreparation(ctx context.Context, builds, publish bool) <-chan struct{} {
 	done := make(chan struct{})
 	go func() {
 		defer close(done)
@@ -43,10 +50,12 @@ func (s *Service) startPreparation(ctx context.Context, builds bool) <-chan stru
 			}
 
 			var err error
-			if builds {
+			if publish {
 				if _, publishErr := s.ProcessRepositoryPublication(ctx); publishErr != nil && ctx.Err() == nil {
 					slog.Error("repository publication could not persist its outcome")
 				}
+			}
+			if builds {
 				_, err = s.ProcessBuildNext(ctx, worker)
 			} else {
 				_, err = s.ProcessNext(ctx, worker)

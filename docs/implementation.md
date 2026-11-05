@@ -122,6 +122,31 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: separate hosted execution registration and discovery command
+
+Common server registration now accepts separate execution and discovery providers.
+Execution and discovery can be omitted independently. Recovery retains only the configured provider for each role.
+Existing ECS and Kubernetes API calls explicitly retain their shared-provider behavior.
+This removes a registration mismatch with the sandbox runtime's execution-only and discovery-only modes.
+
+The preparation command now accepts --discovery-only with an existing ECS or Kubernetes profile and matching queue location.
+The mode registers both inspectors and recovery drivers without image builders, recovery builders, runtime distributions, or a build directory.
+It rejects mixed providers, local or Azure assembly settings, assembly-only mode, build flags, repository sync, and secret bindings before configuration reads or state creation.
+The common discovery loop takes a private service copy with builder references removed.
+It processes received discovery jobs, normal discovery recovery, and authorized automatic repository publication.
+Unbuilt sources and assembly recovery remain available to the writer. Caller configuration stays unchanged.
+The mode does not remove permissions from an existing cloud role. Registry read and discovery control remain deployment requirements.
+Native Azure sandbox activation and controller host binding remain unfinished.
+
+Five new checks and four affected checks pass with race detection.
+The server command package passes in 1.561 seconds, preparation command in 1.509 seconds, and shared sources in 4.066 seconds.
+Checks cover role separation, early rejection, handoff, legacy unbuilt input skipping, independent discovery ownership, recovery, and automatic publication without another build or sync.
+Evidence is output/isolated-discovery-command/summary.json and local.log.
+Source workflow checks use local SQLite, an owned loopback TLS exchange, and in-process provider doubles.
+The worker loop and listener close through cleanup. No cloud service, browser, container, UI build, demo restart, or remote push is involved.
+The active plan and operator guides match the change. No user page changes.
+Acceptance **51** advances. No acceptance item closes. The total remains **48 verified, 9 open**.
+
 ## Current delivery: sandbox reported service workload identity binding
 
 OpenRuntime now constructs SDKServiceWorkloads with the existing metadata identity.

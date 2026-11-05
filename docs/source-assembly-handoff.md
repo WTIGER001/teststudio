@@ -41,6 +41,39 @@ Existing hosted client construction and startup credential checks still apply.
 The flag does not remove permissions from an existing cloud role or complete provider identity packaging.
 Keep registry publication authority on the trusted writer. Review deployment permissions separately.
 
+## Dedicated discovery process
+
+The preparation command now accepts --discovery-only for existing Kubernetes and ECS execution profiles.
+It consumes received discovery jobs and assembled source handoffs with both runner inspectors and their recovery drivers.
+It creates no image builder, recovery builder, build journal directory, or repository synchronization worker.
+It also processes authorized automatic repository publication after discovery completes.
+
+For Kubernetes, run:
+
+```sh
+bin/teststudio-prepare --discovery-only \
+  --kubernetes-workers-config=/private/discovery-workers.json \
+  --execution-location=kubernetes \
+  --database-env=TESTSTUDIO_DATABASE --require-postgres
+```
+
+For ECS, select --ecs-workers-config and execution-location=ecs instead.
+Use a separate provider profile with registry read access and the required discovery control permissions.
+The command uses the existing provider inspection client. Deployment permissions still determine its effective authority.
+The mode requires PostgreSQL and rejects local preparation, Azure assembly settings, combined provider settings, and assembly-only mode.
+Explicit runtime, build-directory, repository synchronization, and secret-binding flags also reject before configuration reads or state creation.
+It exposes no HTTP listener. Workers continue to use the configured private exchange.
+
+The source discovery loop removes builder and recovery-builder references from its private service copy.
+Unbuilt sources and assembly recovery remain available to the writer process.
+The caller's configured builders remain unchanged.
+Cancellation joins the loop before provider and database resources close.
+
+Native Azure sandbox command activation remains unfinished.
+The common server registration now accepts separate execution and discovery providers, including an absent provider for either role.
+Existing ECS and Kubernetes API registration still supplies the same provider to both roles.
+Separate registration does not change deployed permissions by itself.
+
 ## Durable handoff
 
 The worker claims the existing build queue with an assembly-specific reference.
@@ -94,3 +127,12 @@ The fixtures use local databases, local TLS servers, fake registry credentials, 
 They start no Docker image, browser, cloud worker, real registry publication, or deployment.
 The [Azure publisher library](azure-preparation-writer.md) now composes selected private-path, writer identity, and registry push-grant checks.
 Native command composition and a persistent-mount template now exist. Actual workload placement, complete effective grants, and isolated discovery remain unverified or unfinished.
+
+## Discovery command verification
+
+Five new focused checks and four affected checks pass locally with race detection.
+They cover role rejection before state, both runner registrations, separate execution and discovery providers, handoff, builder exclusion, and automatic publication.
+The shared source checks use local SQLite, an owned loopback TLS exchange, and in-process provider doubles.
+The loop and listener close through test cleanup. No cloud service, browser, container, UI build, demo restart, or remote push is involved.
+Evidence is output/isolated-discovery-command/summary.json and local.log.
+Acceptance 51 advances. The total remains 48 verified of 57, with nine open.

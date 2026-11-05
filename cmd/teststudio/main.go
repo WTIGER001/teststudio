@@ -337,7 +337,7 @@ func run() error {
 			return err
 		}
 		defer runtime.Close()
-		configureHostedWorkers(runService, sourceService, workerExchange, runtime.Provider, "ecs", ecsSettings.Worker.ExchangeOrigin, *preparedSources)
+		configureHostedWorkers(runService, sourceService, workerExchange, runtime.Provider, runtime.Provider, "ecs", ecsSettings.Worker.ExchangeOrigin, *preparedSources)
 	}
 	if kubernetesSettings != nil {
 		provider, err := kubernetesSettings.Open(db, os.LookupEnv, sourceService.AuthorizeDiscoveryCleanup)
@@ -345,7 +345,7 @@ func run() error {
 			return err
 		}
 		defer provider.Close()
-		configureHostedWorkers(runService, sourceService, workerExchange, provider, "kubernetes", kubernetesSettings.Worker.ExchangeOrigin, *preparedSources)
+		configureHostedWorkers(runService, sourceService, workerExchange, provider, provider, "kubernetes", kubernetesSettings.Worker.ExchangeOrigin, *preparedSources)
 	}
 	scheduleService := &schedules.Service{Store: db, Auth: auth, Runs: runService, RepositorySources: sourceService}
 	notificationService := &notifications.Service{Store: db, Auth: auth, Secrets: secretProvider, Sender: &webhook.Sender{}, Origin: *public}

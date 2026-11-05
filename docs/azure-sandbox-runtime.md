@@ -101,7 +101,10 @@ The library Provider constructor still permits an unscoped mode for explicit com
 OpenRuntime always selects a required scoped mode from Settings.
 Wire native execution and source discovery roles separately.
 Do not pass one execution-only runtime as both providers in a combined command registration.
-That command integration remains unfinished.
+The common server registration now accepts distinct execution and discovery providers.
+The preparation command has a discovery-only path for existing ECS and Kubernetes profiles.
+Native sandbox command integration remains unfinished.
+See [separate discovery command roles](source-assembly-handoff.md#dedicated-discovery-process).
 
 ### Admission and shutdown
 

@@ -47,6 +47,7 @@ func run() error {
 	azureConfig := flag.String("azure-assembly-config", "", "Private Azure assembly-only settings")
 	azureEnv := flag.String("azure-assembly-env", "", "Environment variable containing private Azure assembly-only settings")
 	assemblyOnly := flag.Bool("assembly-only", false, "Publish registry source bundles and queue isolated discovery without running it in this process")
+	discoveryOnly := flag.Bool("discovery-only", false, "Inspect assembled source images and recover discovery without image assembly or repository synchronization")
 	registryGo := flag.String("registry-go-runtime", "", "Trusted supervised Go runtime distribution digest")
 	registryPlaywright := flag.String("registry-playwright-runtime", "", "Trusted supervised Playwright runtime distribution digest")
 	location := flag.String("execution-location", "local", "Preparation queue location")
@@ -56,6 +57,9 @@ func run() error {
 	githubSources := flag.Bool("github-sources", false, "Process durable GitHub source synchronization")
 	secretBindings := flag.String("secret-bindings", "", "Project-scoped repository access credential bindings")
 	flag.Parse()
+	if err := validateDiscoveryOnlyFlags(flag.CommandLine, *discoveryOnly, *assemblyOnly, *location, *ecsConfig != "" || *ecsEnv != "", *kubernetesConfig != "" || *kubernetesEnv != ""); err != nil {
+		return err
+	}
 	connection, err := runtimeconfig.DatabaseConnection(*database, *databaseEnvironment, runtimeconfig.ExplicitFlag(flag.CommandLine, "database"), os.LookupEnv)
 	if err != nil {
 		return err
@@ -108,23 +112,26 @@ func run() error {
 	if !domain.ValidID(*location) {
 		return errors.New("a valid preparation location is required")
 	}
-	root, err := filepath.Abs(*directory)
-	if err != nil {
-		return err
-	}
-	if err := os.MkdirAll(root, 0700); err != nil {
-		return err
-	}
-	info, err := os.Lstat(root)
-	if err != nil {
-		return err
-	}
-	if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 || info.Mode().Perm()&0077 != 0 {
-		return errors.New("build-directory must be a private directory without a symbolic link")
-	}
-	if azureSettings != nil {
-		if err := validateAzureJournal(root, azureSettings.Host.JournalAccount, azureSettings.Host.JournalShare); err != nil {
+	root := ""
+	if !*discoveryOnly {
+		root, err = filepath.Abs(*directory)
+		if err != nil {
 			return err
+		}
+		if err := os.MkdirAll(root, 0700); err != nil {
+			return err
+		}
+		info, err := os.Lstat(root)
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() || info.Mode()&os.ModeSymlink != 0 || info.Mode().Perm()&0077 != 0 {
+			return errors.New("build-directory must be a private directory without a symbolic link")
+		}
+		if azureSettings != nil {
+			if err := validateAzureJournal(root, azureSettings.Host.JournalAccount, azureSettings.Host.JournalShare); err != nil {
+				return err
+			}
 		}
 	}
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -160,11 +167,20 @@ func run() error {
 			return err
 		}
 		defer runtime.Close()
-		if err := attachRegistryPreparation(service, runtime.Provider, runtime.Registry, "ecs", ecsSettings.Worker.ExchangeOrigin, root, map[string]string{"go": *registryGo, "playwright": *registryPlaywright}); err != nil {
+		if *discoveryOnly {
+			if err := attachHostedDiscovery(service, runtime.Provider, "ecs", ecsSettings.Worker.ExchangeOrigin); err != nil {
+				return err
+			}
+		} else if err := attachRegistryPreparation(service, runtime.Provider, runtime.Registry, "ecs", ecsSettings.Worker.ExchangeOrigin, root, map[string]string{"go": *registryGo, "playwright": *registryPlaywright}); err != nil {
 			return err
 		}
 	} else if kubernetesSettings != nil {
-		close, err := configureRegistryPreparation(service, *kubernetesSettings, root, map[string]string{"go": *registryGo, "playwright": *registryPlaywright}, os.LookupEnv)
+		var close func()
+		if *discoveryOnly {
+			close, err = configureKubernetesDiscovery(service, *kubernetesSettings, os.LookupEnv)
+		} else {
+			close, err = configureRegistryPreparation(service, *kubernetesSettings, root, map[string]string{"go": *registryGo, "playwright": *registryPlaywright}, os.LookupEnv)
+		}
 		if err != nil {
 			return err
 		}
@@ -196,7 +212,12 @@ func run() error {
 		service.Providers = map[string]sourceprovider.Provider{"github": &githubsource.Client{Secrets: provider}}
 		syncDone = service.StartRepositorySynchronization(ctx)
 	}
-	done := service.StartBuildPreparation(ctx)
+	var done <-chan struct{}
+	if *discoveryOnly {
+		done = service.StartDiscoveryPreparation(ctx)
+	} else {
+		done = service.StartBuildPreparation(ctx)
+	}
 	<-done
 	if syncDone != nil {
 		<-syncDone
