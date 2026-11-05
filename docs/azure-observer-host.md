@@ -5,6 +5,7 @@
 ObserverHostGuard checks the selected controller app's reported observer attachment, identity lifecycle, image, placement, and current revision.
 It follows the [reported subscription read-deny check](azure-read-deny.md) through the same bound observer credential.
 Its existing [workload inventory](azure-worker-workloads.md#observer-identity-placement) now rejects reported sharing on another Container App or job without another scan.
+Its identity reader also requires [federated-credential absence](azure-read-identity.md#federated-credential-absence) during bootstrap and each bound inspection.
 It does not establish exclusive identity use, complete trusted API configuration, actual host token issuance, or complete effective authorization.
 Those requirements remain part of native admission and separate hosted verification.
 No Network is implemented. Azure coded jobs remain disabled.
@@ -69,8 +70,8 @@ The shared service reader supplies bounded revision paging. Its environment, rou
 Each operation has a five-second context and four-megabyte response limit. Revisions permit at most four records across three pages.
 Retries and provider registration remain disabled. Unsafe pages, redirects, and incomplete revisions remain blocking errors.
 
-The composed host check has a 135-second context and at most 2216 requests.
-Normal additional cost is two GETs. Initial binding retains its separate 125-second bootstrap context and 2196-request ceiling.
+The composed host check has a 135-second context and at most 2217 requests, including the identity reader's federation-absence GET.
+The host-specific additional cost remains two GETs. Initial binding retains its separate 125-second bootstrap context and 2197-request ceiling.
 Successful observations are not cached. Closing the session releases all 22 readers and prevents later checks.
 Returned errors omit provider messages and private app configuration.
 

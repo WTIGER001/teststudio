@@ -146,19 +146,19 @@ func TestAzureReadDenyGatesFreshParentAndRejectsMissingSelectedProtection(t *tes
 	c, _, f, g := readDenyTest(t)
 	for i := 1; i <= 2; i++ {
 		slices.Reverse(f.assignments)
-		if err := g.Check(t.Context(), c); err != nil || f.reads != i || g.identity.reader.(*SDKReadIdentityReader).http.base.(*readIdentityFixture).reads != i*3 {
+		if err := g.Check(t.Context(), c); err != nil || f.reads != i || g.identity.reader.(*SDKReadIdentityReader).http.base.(*readIdentityFixture).reads != i*4 {
 			t.Fatal("fresh deny inspection repeated or skipped parent", err, f.reads)
 		}
 	}
 	previous := g.identity.reader.(*SDKReadIdentityReader).http.base.(*readIdentityFixture)
 	f.assignments = append(f.assignments, f.extra(observerScope(c), "*/read"))
 	requireReadDenyError(t, g.Check(t.Context(), c), hostedexecution.ErrOwnership)
-	if previous.reads != 6 {
+	if previous.reads != 8 {
 		t.Fatal("blocked read coverage reached parent inspection")
 	}
 	f.assignments = f.assignments[:3]
 	requireReadDenyError(t, g.Check(t.Context(), c), hostedexecution.ErrUnavailable)
-	if previous.reads != 6 {
+	if previous.reads != 8 {
 		t.Fatal("incomplete deny inventory reached parent inspection")
 	}
 	before := f.reads

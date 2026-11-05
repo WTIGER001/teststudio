@@ -122,7 +122,42 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: reported observer identity placement in existing workload scans
+## Current delivery: observer federated-credential absence
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+ReadIdentityReader now requires FederationAbsent alongside identity, assignment, and role observations.
+The existing SDK reader permits one additional GET on the selected identity's federatedIdentityCredentials collection through pinned API 2024-11-30.
+A successful response requires an explicit empty value array and no continuation. Any non-null credential object rejects ownership without evaluating its issuer or subject.
+Missing or null arrays, null-only entries, continuations, denied reads, redirects, or canceled calls remain unavailable.
+The reader follows no continuation and provides no credential metadata or provider response to the caller.
+
+The guard refreshes all four observations concurrently after the existing protection stage succeeds.
+Reported federation or unknown state blocks managed identity credential construction. Later diagnostic and host-bound checks use the selected observer credential for fresh absence checks.
+A successful observation is not cached. Failed absence prevents later host reads without repeating bootstrap inspection.
+The collection retains the existing five-second context and four-megabyte response limit. It sends no top, skip token, filter, or mutation.
+No optional reader-method fallback is allowed.
+
+One additional concurrent GET increases the identity and bootstrap ceiling to 2197 requests, the read-deny session ceiling to 2213, and the host-bound ceiling to 2217.
+The composed contexts remain 125, 130, and 135 seconds. The host session still owns 22 readers.
+No session reader, dependency, API version, role grant, or packaging build is added.
+The existing subscription read role already covers the collection operation.
+
+Three new focused race checks and four changed identity, coverage, and session checks pass in 3.179 seconds.
+Coverage includes reported credentials, missing or null state, forbidden reads, continuations, exact SDK scope, cancellation, factory gating, and fresh complete bound host checks.
+The bound host rejects a newly reported credential, accepts a later explicit empty response, and rejects a later incomplete response.
+Only counters affected by the additional GET change in existing checks. No broad suite repeats.
+Fixtures use fake credentials and in-memory SDK transports. They open no network connection or service listener and request no real token.
+No cloud operation, UI build, browser, image build, container, registry push, deployment, or demo restart runs.
+External requests read only public Microsoft documentation.
+Evidence is output/azure-observer-federation/summary.json and the targeted command results.
+See [federated credential absence](azure-read-identity.md#federated-credential-absence).
+
+Other identity consumer types, future attachment and credential-write authority, trusted host configuration, effective coverage, and native command wiring remain required.
+An empty collection response does not prevent a later privileged identity write or establish complete exclusivity.
+All nine broad acceptance items remain open under their original scope.
+
+## Previous delivery: reported observer identity placement in existing workload scans
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 

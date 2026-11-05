@@ -44,9 +44,9 @@ Each response retains the shared four-megabyte limit. Missing or null value arra
 Explicitly empty arrays cannot satisfy the five required selected protection assignments.
 The reported scan uses the same bound observer credential as the rest of the session.
 
-The composed guard has a 130-second context and at most 2212 requests, including the preceding chain's bounded inventories.
+The composed guard has a 130-second context and at most 2213 requests, including the preceding chain's bounded inventories and federation absence check.
 Normal additional cost is one GET. The scan and its successful observations are not cached.
-Binding still performs its separate 125-second bootstrap inspection before constructing the 21-reader session.
+Binding still performs its separate 125-second bootstrap inspection with at most 2197 requests before constructing the 21-reader session.
 The bootstrap guard itself does not perform this new scan. Each bound Check performs it before refreshing the existing identity and resource chain.
 
 ## Scope and principal contract

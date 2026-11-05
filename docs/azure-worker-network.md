@@ -38,7 +38,9 @@ Local SDK fixtures verify this gate. Hosted visibility and actual enforcement re
 The [observer host stage](azure-observer-host.md) now checks selected controller placement, identity lifecycles, image, and healthy current revision.
 Optional core packaging declares its separate API-only identity and fixed subscription read grant. Native startup and execution admission remain incomplete.
 Host-bound workload inventory now rejects reported observer sharing on other apps and jobs without another collection request.
-Other identity consumers, credential federation, complete read visibility, and future attachment authority remain unproven.
+Other identity consumers, complete read visibility, and future attachment authority remain unproven.
+The identity reader now rejects reported federated credentials and unknown collection state before credential construction or completed bound checks.
+Future credential writes, other consumer types, actual visibility, and identity-management authority remain separate requirements.
 The complete adapter must also prove read coverage, attachment authority, effective zone visibility, full backend authority, exchange networking, and execution placement.
 Azure coded execution remains disabled in native commands and infrastructure packaging.
 See [durable Azure execution](azure-worker-lifecycle.md), [job contracts](azure-worker-contract.md), and [independent deadlines](azure-worker-deadlines.md).

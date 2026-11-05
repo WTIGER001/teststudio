@@ -403,7 +403,17 @@ No additional collection, SDK resource, permission, reader, or request is added.
 See [reported observer identity placement](azure-worker-workloads.md#observer-identity-placement). Acceptance 51 advances; the count remains 48 of 57.
 No cloud operation, UI build, browser, image build, container, registry push, deployment, or demo restart runs. Only public documentation requests leave the environment.
 
-Next inspect other identity consumer types, credential federation, future attachment authority, and the remaining trusted host configuration and management authority.
+The identity reader now requires an explicit empty federated-credential collection during bootstrap and each bound inspection.
+The existing SDK adds one selected collection GET. It rejects any credential object and treats missing values, null entries, or continuations as unavailable.
+No continuation is followed, and no credential metadata reaches callers. A failed observation prevents managed identity credential construction and later host reads.
+Three new focused race checks and four changed identity, coverage, and session checks pass in 3.179 seconds.
+No session reader, dependency, API version, role grant, or packaging build is added. One concurrent GET increases the existing request ceilings by one.
+The identity and bootstrap bound is now 2197 requests, the read-deny session bound is 2213, and the host-bound session limit is 2217.
+Their contexts remain 125, 130, and 135 seconds respectively. No parent scan or bootstrap inspection repeats during a bound check.
+See [federated credential absence](azure-read-identity.md#federated-credential-absence). Acceptance 51 advances; the count remains 48 of 57.
+No cloud operation, UI build, browser, image build, container, registry push, deployment, or demo restart runs. Only public documentation requests leave the environment.
+
+Next inspect other identity consumer types, future attachment and credential-write authority, and the remaining trusted host configuration and management authority.
 Reported app and job checks do not establish exclusive use across all Azure resources or subscriptions.
 Keep hosted read coverage, complete effective authorization, and cross-scope visibility separate until authoritative deployment evidence exists.
 Wire the bound session into native commands only after complete admission exists.

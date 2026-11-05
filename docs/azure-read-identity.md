@@ -13,6 +13,7 @@ Binding does not prove that the bootstrap credential itself uses the observer id
 The [reported read-deny scan](azure-read-deny.md) now gates each bound inspection before its existing resource chain.
 The [host-bound observer](azure-observer-host.md) additionally checks the selected controller app's reported identity exposure and current revision.
 Its workload stage now rejects [reported app and job identity sharing](azure-worker-workloads.md#observer-identity-placement) while retaining the same collection requests.
+The identity stage now requires an explicit empty federated-credential collection before constructing a credential or completing a bound inspection.
 Identity attachment, token availability, deny coverage, protection-management authority, and cross-scope visibility remain installation requirements.
 Acceptance 51 advances. The total remains 48 verified of 57, with nine open.
 
@@ -61,18 +62,45 @@ It provides no default-credential fallback. This method does not request or rede
 SDK calls made later with that credential can request tokens. Host identity attachment and successful authentication require separate verification.
 The [managed identity credential API](https://pkg.go.dev/github.com/Azure/azure-sdk-for-go/sdk/azidentity#ManagedIdentityCredentialOptions) defines explicit user-assigned identity selection.
 
-SDKReadIdentityReader requires an explicit credential and permits only three selected GET paths.
+SDKReadIdentityReader requires an explicit credential and permits only four selected GET paths.
 The identity reader pins armmsi v1.3.0 and API 2024-11-30.
 The existing armauthorization/v3 v3.0.0-beta.3 supplies role assignment API 2022-04-01 and role definition API 2022-05-01-preview.
 The scoped role Get method preserves the exact query. GetByID adds an SDK disambiguation query outside this transport contract.
-The shared transport rejects mutations, lists, alternate resources, extra query parameters, secret operations, and redirects.
+The shared transport rejects mutations, other collections, alternate resources, extra query parameters, secret operations, and redirects.
 Provider registration and retries remain disabled. Each selected read has a five-second context and four-megabyte response limit.
 
-Three selected reads run concurrently after protection succeeds. Parent observations do not repeat within one inspection.
-The composed guard has a 125-second context and at most 2196 requests, including the bounded reported-subscription scan.
-Normal additional cost is exactly three GETs. Successful observations are not cached or persisted.
+Four selected reads run concurrently after protection succeeds: identity, assignment, role, and federated-credential absence.
+Parent observations do not repeat within one inspection.
+The composed guard has a 125-second context and at most 2197 requests, including the bounded reported-subscription scan.
+Normal additional cost is exactly four GETs. Successful observations are not cached or persisted.
 Credential construction uses the identity from that same inspection.
 Returned errors use fixed public categories and omit provider messages, condition text, and credential factory details.
+
+## Federated credential absence
+
+The observer profile uses explicit managed identity authentication and accepts no federated identity credential under its selected user-assigned identity.
+The pinned armmsi v1.3.0 client reads only this additional collection path with API 2024-11-30:
+
+```text
+SELECTED_IDENTITY/federatedIdentityCredentials
+```
+
+The [Microsoft list API](https://learn.microsoft.com/en-us/rest/api/managedidentity/federated-identity-credentials/list?view=rest-managedidentity-2024-11-30) defines that identity-scoped collection.
+The reader sends no top, skip token, tenant, or filter parameter. It permits no child credential GET, mutation, or other identity collection.
+It fetches exactly one page with a five-second context and the shared four-megabyte response limit.
+A successful response must contain an explicit empty value array and no nonempty nextLink.
+Any non-null credential object rejects ownership, regardless of issuer, subject, audience, or other metadata.
+The reader does not evaluate an allowlist or assume that a reported credential is unusable.
+Missing or null arrays, null-only entries, and any continuation remain unavailable.
+Continuations are never followed, even when they name the same collection. An incomplete empty page cannot prove absence.
+Provider errors, denied reads, redirects, and canceled requests remain blocking errors through fixed public categories.
+
+ReadIdentityReader requires FederationAbsent as part of its contract. There is no optional missing-method or skipped-observation fallback.
+The guard checks absence alongside its identity and selected grant reads after the existing protection stage succeeds.
+Credential construction therefore requires that observation too. Later bound checks refresh it through the selected observer credential.
+The reader returns no issuer, subject, audience, credential name, response body, or federated configuration to the caller.
+Successful absence is not cached or persisted. It does not prevent a later administrative write or establish complete identity exclusivity.
+Future credential-write authority and protection of the identity resource remain separate installation requirements.
 
 ## Bound observer session
 
@@ -89,8 +117,8 @@ Changed immutable runtime settings reject before an SDK request. Missing identit
 Token acquisition and transport errors remain unavailable and omit private provider details.
 There is no alternate credential or bootstrap fallback after binding.
 
-Each Check now has a 130-second context and 2212-request ceiling, including the bounded subscription read-deny scan.
-Binding adds one separate bootstrap inspection with a 125-second context and 2196-request ceiling.
+Each Check now has a 130-second context and 2213-request ceiling, including the bounded subscription read-deny scan.
+Binding adds one separate bootstrap inspection with a 125-second context and 2197-request ceiling.
 Bind once per owned session. Do not bind again before every Check.
 Close the session after its final inspection. Close waits for active checks, closes owned readers in reverse order, and releases their references.
 Repeated Close calls are safe. Checks after Close return unavailable without a credential or transport request.
@@ -150,3 +178,22 @@ go test -race ./adapters/execution/azure -run '^TestAzureObserver' -count=1
 ```
 
 Evidence is output/azure-observer/summary.json and the targeted command results.
+
+## Targeted local verification of federation absence
+
+Three new focused race checks and four changed identity, coverage, and session checks pass in 3.179 seconds.
+They cover reported credentials, missing or null state, forbidden reads, continuations, exact SDK scope, canceled requests, freshness, and factory gating.
+The complete host-bound check rejects a newly reported credential, accepts a later explicit empty response, and rejects a later incomplete response.
+Host reads remain blocked on failed absence. Bootstrap inspection does not repeat during those bound checks.
+Only counters affected by the additional GET change in the existing checks. No broad suite repeats.
+The method reuses the identity reader and SDK dependency. No additional session reader, role grant, API version, or packaging build is needed.
+Fixtures use fake credentials and in-memory SDK transports. They open no network connection or listener and request no real token.
+No cloud operation, UI build, browser, image build, container, registry push, deployment, or demo restart runs.
+External requests read only public Microsoft documentation.
+
+```sh
+go test -race ./adapters/execution/azure -run '^(TestAzureReadIdentityFederation.*|TestAzureReadIdentityBindsFreshPrincipalAndSubscriptionGrant|TestAzureReadIdentityCredentialFactoryPinsVerifiedClientWithoutTokenRequest|TestAzureReadDenyGatesFreshParentAndRejectsMissingSelectedProtection|TestAzureObserverBindsAllClientsWithoutBootstrapReuseAndClosesReaders)$' -count=1
+```
+
+Evidence is output/azure-observer-federation/summary.json and the targeted command results.
+Other identity consumer types, future attachment and credential-write authority, full trusted host configuration, and complete native admission remain required.

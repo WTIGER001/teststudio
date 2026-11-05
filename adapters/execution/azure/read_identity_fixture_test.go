@@ -21,6 +21,7 @@ type readIdentityFixture struct {
 	role       a.RoleDefinition
 	reads      int
 	mode       string
+	federation string
 }
 
 func readIdentityTest(t *testing.T) (Config, ReadIdentitySettings, *readIdentityFixture, *ReadIdentityGuard) {
@@ -59,6 +60,8 @@ func (f *readIdentityFixture) Do(r *http.Request) (*http.Response, error) {
 		body = f.assignment
 	case f.settings.Role:
 		version, body = readRoleVersion, f.role
+	case f.settings.Identity + "/federatedIdentityCredentials":
+		version, body = readIdentityVersion, map[string]any{"value": []any{}}
 	default:
 		f.t.Error("unselected observer identity resource reached transport")
 		return deadlineResponse(r, 404, nil), nil
@@ -79,6 +82,24 @@ func (f *readIdentityFixture) Do(r *http.Request) (*http.Response, error) {
 	}
 	if f.mode == "empty-role" && strings.EqualFold(r.URL.Path, f.settings.Role) {
 		body = a.RoleDefinition{ID: f.role.ID, Name: f.role.Name, Type: f.role.Type}
+	}
+	if r.URL.Path == f.settings.Identity+"/federatedIdentityCredentials" {
+		switch f.federation {
+		case "present":
+			body = map[string]any{"value": []any{map[string]any{"name": "private-federation-name", "properties": map[string]any{"issuer": "https://private-issuer.invalid", "subject": "private-subject-canary", "audiences": []string{"api://AzureADTokenExchange"}}}}}
+		case "missing-value":
+			body = map[string]any{}
+		case "null-value":
+			body = map[string]any{"value": nil}
+		case "null-item":
+			body = map[string]any{"value": []any{nil}}
+		case "incomplete":
+			body = map[string]any{"value": []any{}, "nextLink": "https://management.azure.com" + r.URL.Path + "?api-version=" + readIdentityVersion + "&%24skiptoken=private-next-canary"}
+		case "foreign-page":
+			body = map[string]any{"value": []any{}, "nextLink": "https://foreign.invalid/private-next-canary"}
+		case "forbidden":
+			return deadlineResponse(r, 403, map[string]any{"error": map[string]any{"code": "AuthorizationFailed", "message": "private-federation-canary"}}), nil
+		}
 	}
 	return deadlineResponse(r, 200, body), nil
 }

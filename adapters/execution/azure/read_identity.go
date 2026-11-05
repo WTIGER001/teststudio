@@ -17,6 +17,7 @@ type ReadIdentityReader interface {
 	Identity(context.Context, string) (m.Identity, error)
 	Assignment(context.Context, string) (a.RoleAssignment, error)
 	Role(context.Context, string) (a.RoleDefinition, error)
+	FederationAbsent(context.Context, string) error
 }
 
 type ReadIdentityGuard struct {
@@ -63,11 +64,12 @@ func (g *ReadIdentityGuard) inspect(ctx context.Context, c Config) (identity m.I
 	}
 	var assignment a.RoleAssignment
 	var role a.RoleDefinition
-	var errs [3]error
+	var errs [4]error
 	var group sync.WaitGroup
 	group.Go(func() { identity, errs[0] = g.reader.Identity(ctx, g.settings.Identity) })
 	group.Go(func() { assignment, errs[1] = g.reader.Assignment(ctx, g.settings.Assignment) })
 	group.Go(func() { role, errs[2] = g.reader.Role(ctx, g.settings.Role) })
+	group.Go(func() { errs[3] = g.reader.FederationAbsent(ctx, g.settings.Identity) })
 	group.Wait()
 	for _, err := range errs {
 		if errors.Is(err, hostedexecution.ErrOwnership) {

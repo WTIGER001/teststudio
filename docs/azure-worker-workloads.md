@@ -88,7 +88,8 @@ The observer-specific reader rejects unknown identity observations as unavailabl
 The general placement reader can still return those records for its earlier placement-only checks.
 
 The public APIs list resources within the selected subscription. See Microsoft's [application collection](https://learn.microsoft.com/en-us/rest/api/resource-manager/containerapps/container-apps/list-by-subscription?view=rest-resource-manager-containerapps-2025-07-01) and [job collection](https://learn.microsoft.com/en-us/rest/api/resource-manager/containerapps/jobs/list-by-subscription?view=rest-resource-manager-containerapps-2025-07-01).
-These observations do not establish complete visibility, exclusive use by other Azure resource types, absence of federated credential routes, or future attachment restrictions.
+These observations do not establish complete visibility, exclusive use by other Azure resource types, or future attachment restrictions.
+The separate [identity reader](azure-read-identity.md#federated-credential-absence) now requires an explicit empty federated-credential collection during each complete inspection.
 Those requirements remain part of complete identity admission and separate hosted verification.
 
 Three new focused race checks and two selected existing host and placement checks pass in 2.410 seconds.
@@ -105,7 +106,7 @@ go test -race ./adapters/execution/azure -run '^(TestAzureObserverPlacements.*|T
 
 Evidence is output/azure-observer-placements/summary.json and the targeted command results.
 This projection adds no SDK resource, permission, API version, collection request, or session reader.
-The existing 22-reader host session retains its 135-second context and 2216-request ceiling.
+The 22-reader host session retains its 135-second context. The separate federation-absence GET increases its ceiling to 2217 requests.
 
 ## Completeness, permissions, and attachment authority
 
