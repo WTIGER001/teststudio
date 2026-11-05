@@ -73,6 +73,13 @@ Invalid, incomplete, or oversized material produces a bounded diagnostic with no
 When both variables are absent, the process uses the existing certificate files.
 Only the trusted gateway receives these private values. Uploaded workers receive neither variable.
 
+The --remote-ecs-exchange=HTTPS_ORIGIN mode derives the gateway instance from canonical Fargate version-four task metadata.
+It accepts only the literal metadata host and canonical container path, without redirects or forwarded private headers.
+The response and request duration are bounded. An explicit gateway instance variable is rejected in this mode.
+The controller must verify the same native task identity and address before private initialization can return application credentials.
+Gateway images advertise this mode through teststudio.gateway-instance=ecs-task/v1.
+See [ECS gateway integration](ecs-gateway.md#metadata-bootstrap) for implementation scope and remaining native lifecycle work.
+
 ## Separate initialization authority
 
 The controller calls `PrepareGateway` after preparing the gated execution.

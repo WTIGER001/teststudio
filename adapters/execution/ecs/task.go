@@ -27,14 +27,15 @@ func (p *Plan) verifyTaskForCleanup(task types.Task, definitionARN string, allow
 	if task.CapacityProviderName != nil && *task.CapacityProviderName != "" && *task.CapacityProviderName != "FARGATE" {
 		return hostedexecution.ErrOwnership
 	}
-	for _, field := range []struct{ actual, expected string }{{aws.ToString(task.Cpu), "2048"}, {aws.ToString(task.Memory), "4096"}, {aws.ToString(task.PlatformVersion), p.config.Platform}, {aws.ToString(task.PlatformFamily), "Linux"}} {
+	cpu, memory := p.taskResources()
+	for _, field := range []struct{ actual, expected string }{{aws.ToString(task.Cpu), cpu}, {aws.ToString(task.Memory), memory}, {aws.ToString(task.PlatformVersion), p.config.Platform}, {aws.ToString(task.PlatformFamily), "Linux"}} {
 		if field.actual != "" && field.actual != field.expected || state == "RUNNING" && field.actual != field.expected {
 			return hostedexecution.ErrOwnership
 		}
 	}
 	override := *task.Overrides
 	override.ContainerOverrides = slices.Clone(override.ContainerOverrides)
-	if len(override.ContainerOverrides) != 1 || aws.ToString(override.ContainerOverrides[0].Name) != "runner" {
+	if len(override.ContainerOverrides) != 1 || aws.ToString(override.ContainerOverrides[0].Name) != p.containerName() {
 		return hostedexecution.ErrOwnership
 	}
 	env := override.ContainerOverrides[0].Environment
@@ -49,11 +50,15 @@ func (p *Plan) verifyTaskForCleanup(task types.Task, definitionARN string, allow
 		}
 		values[name] = aws.ToString(field.Value)
 	}
-	if values["TESTSTUDIO_JOB_EXECUTION"] != p.job.Reference.ID || fingerprint(values["TESTSTUDIO_JOB_TOKEN"]) != p.ticketHash {
+	executionName, tokenName := "TESTSTUDIO_JOB_EXECUTION", "TESTSTUDIO_JOB_TOKEN"
+	if p.gateway != nil {
+		executionName, tokenName = "TESTSTUDIO_GATEWAY_EXECUTION", "TESTSTUDIO_GATEWAY_TOKEN"
+	}
+	if values[executionName] != p.job.Reference.ID || fingerprint(values[tokenName]) != p.ticketHash {
 		return hostedexecution.ErrOwnership
 	}
 	override.ContainerOverrides[0].Environment = nil
-	expected := types.TaskOverride{ContainerOverrides: []types.ContainerOverride{{Name: aws.String("runner")}}}
+	expected := types.TaskOverride{ContainerOverrides: []types.ContainerOverride{{Name: aws.String(p.containerName())}}}
 	if !reflect.DeepEqual(document(override), document(expected)) {
 		return hostedexecution.ErrOwnership
 	}
@@ -61,7 +66,7 @@ func (p *Plan) verifyTaskForCleanup(task types.Task, definitionARN string, allow
 		return hostedexecution.ErrOwnership
 	}
 	for _, container := range task.Containers {
-		if aws.ToString(container.Name) != "runner" || aws.ToString(container.Image) != "" && aws.ToString(container.Image) != p.job.Image || state == "RUNNING" && aws.ToString(container.Image) != p.job.Image || aws.ToString(container.TaskArn) != "" && aws.ToString(container.TaskArn) != aws.ToString(task.TaskArn) || len(container.ManagedAgents) != 0 || len(container.GpuIds) != 0 || len(container.NetworkBindings) != 0 {
+		if aws.ToString(container.Name) != p.containerName() || aws.ToString(container.Image) != "" && aws.ToString(container.Image) != p.job.Image || state == "RUNNING" && aws.ToString(container.Image) != p.job.Image || aws.ToString(container.TaskArn) != "" && aws.ToString(container.TaskArn) != aws.ToString(task.TaskArn) || len(container.ManagedAgents) != 0 || len(container.GpuIds) != 0 || !p.validBindings(container) {
 			return hostedexecution.ErrOwnership
 		}
 	}
@@ -74,6 +79,10 @@ func (p *Plan) taskStatus(task types.Task, stopping bool) (hostedexecution.Statu
 	case "PROVISIONING", "PENDING", "ACTIVATING", "DEACTIVATING", "STOPPING", "DEPROVISIONING":
 	case "RUNNING":
 		status.Phase = "running"
+		if p.gateway != nil {
+			status.AdmissionPending = task.HealthStatus != types.HealthStatusHealthy
+			status.InfrastructureFailure = task.HealthStatus == types.HealthStatusUnhealthy
+		}
 	case "STOPPED":
 		status.Phase = "failed"
 		if stopping {

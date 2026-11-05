@@ -9,6 +9,7 @@ import (
 )
 
 type Proof struct {
+	Gateway     *GatewayConfig      `json:"gateway,omitempty"`
 	Reference   execution.Reference `json:"reference"`
 	Image       string              `json:"image"`
 	Runner      string              `json:"runner"`
@@ -19,12 +20,17 @@ type Proof struct {
 }
 
 func (p *Plan) Proof() Proof {
-	return Proof{Reference: p.job.Reference, Image: p.job.Image, Runner: p.job.Runner, Operation: p.job.Operation, Deadline: p.job.Ticket.Deadline, TicketHash: p.ticketHash, Fingerprint: p.fingerprint}
+	value := Proof{Reference: p.job.Reference, Image: p.job.Image, Runner: p.job.Runner, Operation: p.job.Operation, Deadline: p.job.Ticket.Deadline, TicketHash: p.ticketHash, Fingerprint: p.fingerprint}
+	if p.gateway != nil {
+		selected := canonicalGateway(*p.gateway)
+		value.Gateway = &selected
+	}
+	return value
 }
 
 func Restore(config Config, proof Proof) (*Plan, error) {
 	job := hostedexecution.Job{Reference: proof.Reference, Image: proof.Image, Runner: proof.Runner, Operation: proof.Operation, ExchangeOrigin: config.ExchangeOrigin, Ticket: workerexchange.Ticket{Execution: proof.Reference.ID, Deadline: proof.Deadline}}
-	plan, err := newPlan(config, job, proof.TicketHash)
+	plan, err := newTaskPlan(config, job, proof.TicketHash, proof.Gateway)
 	if err != nil || plan.fingerprint != proof.Fingerprint {
 		return nil, hostedexecution.ErrOwnership
 	}

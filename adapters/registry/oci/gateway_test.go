@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/wtiger001/teststudio/internal/browsergateway"
+	"github.com/wtiger001/teststudio/internal/ecsidentity"
 )
 
 func TestRegistryGatewayRequiresPinnedPlatformAndPrivateDeliveryCapabilities(t *testing.T) {
@@ -16,6 +17,7 @@ func TestRegistryGatewayRequiresPinnedPlatformAndPrivateDeliveryCapabilities(t *
 				switch mode {
 				case "private certificate":
 					c.Config.Labels["teststudio.gateway-certificate"] = browsergateway.RemoteCertificateProtocol
+					c.Config.Labels["teststudio.gateway-instance"] = ecsidentity.Protocol
 				case "default path":
 					c.Config.Env = []string{"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"}
 				case "old protocol":
@@ -50,6 +52,13 @@ func TestRegistryGatewayRequiresPinnedPlatformAndPrivateDeliveryCapabilities(t *
 			}
 			if image.CertificateConfiguration != wantCertificate {
 				t.Fatal("registry lost the optional private certificate configuration capability")
+			}
+			wantInstance := ""
+			if mode == "private certificate" {
+				wantInstance = ecsidentity.Protocol
+			}
+			if image.InstanceProtocol != wantInstance {
+				t.Fatal("registry lost the optional native task identity capability")
 			}
 			if _, err := f.client.Inspect(t.Context(), f.reference); err == nil {
 				t.Fatal("gateway image became an uploaded source runtime")

@@ -31,5 +31,5 @@ func (c *Client) InspectGateway(ctx context.Context, reference string) (hostedex
 			return hostedexecution.GatewayImage{}, ErrInvalid
 		}
 	}
-	return hostedexecution.GatewayImage{Reference: reference, OS: config.OS, Architecture: config.Architecture, Protocol: labels["teststudio.gateway-remote"], CertificateConfiguration: labels["teststudio.gateway-certificate"]}, nil
+	return hostedexecution.GatewayImage{Reference: reference, OS: config.OS, Architecture: config.Architecture, Protocol: labels["teststudio.gateway-remote"], CertificateConfiguration: labels["teststudio.gateway-certificate"], InstanceProtocol: labels["teststudio.gateway-instance"]}, nil
 }

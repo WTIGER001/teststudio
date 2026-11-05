@@ -4,8 +4,9 @@
 
 ECS environment-backed browser and coded API execution remains disabled.
 The existing offline ECS lifecycle stays separate.
-The shared transport now supports a verified task address and private certificate environment delivery.
-These components pass targeted local checks. They do not prove native ECS dispatch or deployment acceptance.
+The shared transport supports a verified task address and private certificate environment delivery.
+Native gateway task construction, ownership, deadline, recovery proof, and metadata bootstrap components now pass targeted local checks.
+These components do not yet provide the complete native ECS dispatch lifecycle or deployment acceptance.
 Azure remains deferred, and this work makes no live cloud call.
 
 ## Concepts
@@ -47,11 +48,57 @@ The runtime builder validates this marker, and registry inspection exposes it.
 Gateway images with private certificate environment support declare teststudio.gateway-certificate=secret-env/v1.
 The gateway registry inspector exposes this separate optional capability.
 The native ECS gateway provider must require both capabilities before enabling environment execution.
+It must also require teststudio.gateway-instance=ecs-task/v1 on the gateway image.
+Registry inspection exposes this separate metadata identity capability.
 Old offline images remain valid for offline work. Kubernetes certificate-file execution retains its existing contract.
+
+### Implemented gateway task contract
+
+NewGatewayPlan creates one fixed trusted gateway task for the environment execution reference.
+It reuses the existing task definition, launch, ownership, deadline, and recovery-proof verifiers.
+The gateway has its own deterministic family, ownership tags, task name, and schedule name.
+It uses a separate execution role, subnet set, and security group.
+The constructor rejects shared worker subnets, worker security groups, and worker or deadline execution roles.
+Its fixed resources are 512 CPU units and 1024 MiB of memory.
+
+The container runs /gateway as user 1000:1000 with a read-only filesystem and dropped capabilities.
+It has no task role, uploaded source mount, output volume, interactive shell, restart policy, or execute-command access.
+Its only declared port is TCP 8044. Its health command uses --ready-remote.
+Unknown health keeps admission pending. Unhealthy status marks the infrastructure boundary failed.
+
+Two Secrets Manager references supply the server certificate and key.
+References must be distinct full secret ARNs from the configured account and region.
+This first task contract accepts separate secrets, without JSON-key or version selectors.
+The task definition contains no raw initialization ticket or application credential.
+Launch overrides contain only the execution identifier and separate gateway initialization ticket.
+The uploaded worker ticket cannot serve as that gateway ticket.
+
+The gateway schedule retains the original execution deadline and the scoped StopTask target.
+It uses the separate gateway resource name, preventing collision with the worker deadline.
+The durable proof includes the frozen gateway configuration and ticket hash.
+Restoring that proof can verify the original definition and schedule but cannot launch another task.
+Changed certificate references, task identities, commands, resources, or launch authority fail ownership checks.
+
+### Metadata bootstrap
+
+The gateway supports --remote-ecs-exchange=HTTPS_ORIGIN.
+It reads ECS_CONTAINER_METADATA_URI_V4 and requests only its /task endpoint.
+Fargate injects that metadata variable. See the official [Fargate metadata guide](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-metadata-endpoint-v4-fargate.html).
+The helper accepts only the literal link-local metadata host and canonical version-four container path.
+It permits no credentials, query, alternate host, encoded path, port override, or redirect.
+The read has a three-second limit and a 64 KiB response limit.
+No initialization ticket or certificate value enters that request.
+Additional metadata fields remain compatible with the platform contract.
+
+The helper extracts the task identifier from the canonical task ARN.
+It uses that identifier for the existing private initialization request.
+An explicitly supplied gateway instance variable is rejected in this mode.
+The native controller must independently verify the complete observed task ARN, cluster, account, region, and network before binding the same identifier.
+Task metadata alone does not prove controller-side ownership.
 
 ### Remaining native integration
 
-Implement an owned gateway task beside each uploaded worker task.
+Wire the implemented task contract into an owned gateway lifecycle beside each uploaded worker task.
 Bind the observed gateway identity and private interface before credential delivery.
 Keep uploaded source outside the gateway's filesystem, execution role, credentials, and network identity.
 Supply the private gateway certificate only to that trusted task.
@@ -59,6 +106,14 @@ Confirm readiness, inspected images, network policy, and independent deadlines b
 The hosted task health command must use --ready-remote instead of the image's local socket health command.
 Track both tasks, definitions, and deadline resources through the durable dispatch journal and cleanup checkpoints.
 Preserve original identities across lost acknowledgements and recovery. Never invent a passing observation or duration.
+Reuse the existing provider lifecycle with role-specific plans and separate journal rows instead of duplicating its SDK state machine.
+Gateway and worker rows must share the original execution authority while retaining distinct task, definition, and schedule identities.
+Stop both workloads even when one observation fails. Cleanup requires the existing result and evidence checkpoint.
+
+Create the worker only after the gateway's identity, initialization, readiness, network, and deadline are verified.
+The current supervisor retries initial input for a short bounded period.
+Do not let a cold gateway exhaust that period before the worker can receive activated input.
+Continue only unattempted dispatch steps under current run authority. Recovery must never launch uploaded code again.
 
 The existing worker VPC has a restrictive DNS firewall and no general target egress.
 Preserve those worker restrictions when implementing the gateway network.
@@ -71,7 +126,7 @@ Keep environment profiles rejected until the native network, workload, identity,
 ### Reuse local evidence
 
 Retain the passing Kubernetes records under output/local-k3s/gateway and its lifecycle directory.
-The new shared transport checks need no image build, browser, Kubernetes redeployment, or cloud account.
+The new transport, task-contract, and metadata checks need no image build, browser, Kubernetes redeployment, or cloud account.
 They verify pinned transport with normal certificate validation, immutable address binding, and private certificate parsing.
 Continue native ECS implementation before building the changed gateway and supervisor images.
 Use targeted local SDK and policy fixtures for the new ECS behavior. Keep live deployment verification separate.

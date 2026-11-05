@@ -91,7 +91,7 @@ func (p *Provider) removeDeadline(ctx context.Context, plan *Plan, value dispatc
 	if _, err := p.update(ctx, plan.job.Reference, false, func(value *dispatch) error { value.DeadlineVerified = true; return nil }); err != nil {
 		return err
 	}
-	if _, err := p.scheduler.DeleteSchedule(ctx, &scheduler.DeleteScheduleInput{Name: aws.String(plan.job.Reference.Container), GroupName: aws.String(p.config.ScheduleGroup), ClientToken: aws.String(fingerprint([]string{value.Proof.Fingerprint, "delete-deadline"}))}, singleScheduler); err != nil && !missing(err) {
+	if _, err := p.scheduler.DeleteSchedule(ctx, &scheduler.DeleteScheduleInput{Name: aws.String(plan.resourceName()), GroupName: aws.String(p.config.ScheduleGroup), ClientToken: aws.String(fingerprint([]string{value.Proof.Fingerprint, "delete-deadline"}))}, singleScheduler); err != nil && !missing(err) {
 		return hostedexecution.ErrUnavailable
 	}
 	if _, err := p.getDeadline(ctx, plan); !missing(err) {

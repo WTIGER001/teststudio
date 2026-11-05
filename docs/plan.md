@@ -97,9 +97,13 @@ The first ECS transport components now support a frozen private task address and
 Pending addresses keep initialization and activation closed until the provider binds the observed task identity and address.
 TLS still verifies the configured hostname and certificate authority. Optional runtime and gateway capabilities are exposed through registry inspection.
 Targeted local checks pass. No image rebuild or Kubernetes redeployment occurs for these shared components.
-Next implement native ECS gateway tasks, network admission, metadata identity, readiness, independent deadlines, and durable bundle cleanup.
+Native ECS gateway task construction, ownership, readiness interpretation, independent deadline plans, recovery proofs, and metadata bootstrap now pass targeted local checks.
+The task uses a separate execution role, subnets, security group, certificate references, and initialization ticket, without source or output mounts.
+Its metadata helper derives the task identifier without forwarding secrets or following another endpoint.
+Next wire these task contracts into role-specific durable provider rows, address binding, and network admission.
+Reuse the existing SDK state machine and cleanup checkpoints. Delay worker creation until the gateway can release activated input.
 Preserve the worker DNS firewall and target-egress restrictions while providing trusted gateway target resolution.
-Require the new address and certificate capabilities before enabling ECS environment profiles. See [ECS gateway integration](ecs-gateway.md).
+Require the address, certificate, and native task identity capabilities before enabling ECS environment profiles. See [ECS gateway integration](ecs-gateway.md).
 
 1. Keep the completed Kubernetes gateway and its two passing application workflows as retained evidence.
 2. Retain the passing gateway cancellation and interrupted-run recovery cases. Both use their original execution identities and clean both workloads.

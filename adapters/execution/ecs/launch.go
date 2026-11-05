@@ -32,17 +32,23 @@ func (p *Plan) Launch(definitionARN string) (*ecs.RunTaskInput, error) {
 	if !p.validDefinitionARN(definitionARN) || !ticket.MatchString(p.job.Ticket.Token) {
 		return nil, hostedexecution.ErrOwnership
 	}
+	subnets, groups := p.config.Subnets, p.config.SecurityGroups
+	executionName, tokenName := "TESTSTUDIO_JOB_EXECUTION", "TESTSTUDIO_JOB_TOKEN"
+	if p.gateway != nil {
+		subnets, groups = p.gateway.Subnets, []string{p.gateway.SecurityGroup}
+		executionName, tokenName = "TESTSTUDIO_GATEWAY_EXECUTION", "TESTSTUDIO_GATEWAY_TOKEN"
+	}
 	return &ecs.RunTaskInput{
 		Cluster: aws.String(p.config.Cluster), TaskDefinition: aws.String(definitionARN),
 		LaunchType: ecstypes.LaunchTypeFargate, PlatformVersion: aws.String(p.config.Platform), Count: aws.Int32(1),
 		ClientToken: aws.String(p.fingerprint), StartedBy: aws.String(p.StartedBy()), Group: aws.String("teststudio:" + p.owner[:40]),
 		EnableExecuteCommand: false, EnableECSManagedTags: false, Tags: p.tags(),
 		NetworkConfiguration: &ecstypes.NetworkConfiguration{AwsvpcConfiguration: &ecstypes.AwsVpcConfiguration{
-			AssignPublicIp: ecstypes.AssignPublicIpDisabled, Subnets: slices.Clone(p.config.Subnets), SecurityGroups: slices.Clone(p.config.SecurityGroups),
+			AssignPublicIp: ecstypes.AssignPublicIpDisabled, Subnets: slices.Clone(subnets), SecurityGroups: slices.Clone(groups),
 		}},
-		Overrides: &ecstypes.TaskOverride{ContainerOverrides: []ecstypes.ContainerOverride{{Name: aws.String("runner"), Environment: []ecstypes.KeyValuePair{
-			{Name: aws.String("TESTSTUDIO_JOB_EXECUTION"), Value: aws.String(p.job.Reference.ID)},
-			{Name: aws.String("TESTSTUDIO_JOB_TOKEN"), Value: aws.String(p.job.Ticket.Token)},
+		Overrides: &ecstypes.TaskOverride{ContainerOverrides: []ecstypes.ContainerOverride{{Name: aws.String(p.containerName()), Environment: []ecstypes.KeyValuePair{
+			{Name: aws.String(executionName), Value: aws.String(p.job.Reference.ID)},
+			{Name: aws.String(tokenName), Value: aws.String(p.job.Ticket.Token)},
 		}}}},
 	}, nil
 }
@@ -51,10 +57,14 @@ func (p *Plan) Deadline(taskARN string) (*scheduler.CreateScheduleInput, error) 
 	if !p.validTaskARN(taskARN) {
 		return nil, hostedexecution.ErrOwnership
 	}
-	input, _ := json.Marshal(map[string]string{"cluster": p.config.Cluster, "task": taskARN, "reason": "TestStudio worker deadline"})
+	reason := "TestStudio worker deadline"
+	if p.gateway != nil {
+		reason = "TestStudio gateway deadline"
+	}
+	input, _ := json.Marshal(map[string]string{"cluster": p.config.Cluster, "task": taskARN, "reason": reason})
 	at := p.job.Ticket.Deadline.UTC().Add(time.Second - time.Nanosecond).Truncate(time.Second)
 	return &scheduler.CreateScheduleInput{
-		Name: aws.String(p.job.Reference.Container), GroupName: aws.String(p.config.ScheduleGroup),
+		Name: aws.String(p.resourceName()), GroupName: aws.String(p.config.ScheduleGroup),
 		ClientToken:        aws.String(fingerprint([]string{p.fingerprint, taskARN, "deadline"})),
 		Description:        aws.String("TestStudio owner " + p.owner),
 		ScheduleExpression: aws.String("at(" + at.Format("2006-01-02T15:04:05") + ")"), ScheduleExpressionTimezone: aws.String("UTC"),

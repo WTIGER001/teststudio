@@ -145,6 +145,28 @@ No image build, new catalog run, browser, Kubernetes redeployment, or live cloud
 Native ECS environment execution remains disabled until its full provider lifecycle and network integration are implemented.
 See [ECS gateway integration](ecs-gateway.md). This advances implementation under **51, 56, and 57**; the total remains **50 verified, 7 open**.
 
+### Native ECS gateway task and metadata contracts
+
+NewGatewayPlan constructs the separate fixed Fargate gateway task from a frozen environment execution and its initialization ticket.
+It reuses the existing immutable definition, launch, task ownership, deadline, and recovery-proof paths.
+The gateway has distinct role, subnets, security group, tags, family, deadline name, and certificate secret references.
+It runs without a task role, source or output mounts, elevated capabilities, interactive access, or restart permission.
+Health uses the remote readiness command. Unknown health keeps admission pending, and unhealthy status marks an infrastructure failure.
+Recovery proofs contain hashes and secret references, never raw tickets or private certificate values. Restored proofs cannot launch tasks.
+
+The new ECS bootstrap mode reads only the canonical version-four task metadata endpoint.
+It derives the task instance without forwarding initialization tickets, certificate values, or other private headers.
+Alternate endpoints, redirects, encoded paths, explicit instance overrides, invalid ARNs, oversized responses, and trailing documents fail.
+The gateway image declares its separate native task identity capability, and registry inspection exposes it.
+
+Targeted local task, ownership, readiness, deadline, recovery, metadata, and registry checks pass.
+Selected existing worker-plan, deadline, and recovery-proof checks also pass after the shared verifier changes.
+No broad suite, image build, browser, Kubernetes redeployment, or cloud call occurs.
+This is a task-contract milestone. Durable two-workload orchestration, actual network admission, and deployment packaging remain required.
+The existing provider still rejects environment-backed ECS dispatch before creation.
+Continue with role-specific provider journals and the existing cleanup state machine. Keep worker creation behind gateway readiness and activation.
+This advances **51, 56, and 57**; the verified total remains **50 of 57**.
+
 ## Active application navigation correction — 2026-11-04
 
 The sidebar now has one project selector and an explicit application selector.

@@ -21,6 +21,7 @@ type Plan struct {
 	spec        string
 	fingerprint string
 	ticketHash  string
+	gateway     *GatewayConfig
 }
 
 func NewPlan(config Config, job hostedexecution.Job, now time.Time) (*Plan, error) {
@@ -31,15 +32,31 @@ func NewPlan(config Config, job hostedexecution.Job, now time.Time) (*Plan, erro
 }
 
 func newPlan(config Config, job hostedexecution.Job, ticketHash string) (*Plan, error) {
+	return newTaskPlan(config, job, ticketHash, nil)
+}
+
+func newTaskPlan(config Config, job hostedexecution.Job, ticketHash string, gateway *GatewayConfig) (*Plan, error) {
 	ref := job.Reference
-	if Validate(config) != nil || !validReference(ref, job.Runner, job.Operation) || !immutable.MatchString(job.Image) || len(job.Image) > 1024 || strings.Contains(job.Image, "..") || job.ExchangeOrigin != config.ExchangeOrigin || job.Ticket.Execution != ref.ID || job.Ticket.Deadline.IsZero() || !checksum.MatchString(ticketHash) {
+	valid := validReference(ref, job.Runner, job.Operation)
+	if gateway != nil {
+		valid = validGatewayReference(ref, job.Runner, job.Operation) && validateGateway(config, *gateway) == nil && gateway.Image == job.Image
+	}
+	if Validate(config) != nil || !valid || !immutable.MatchString(job.Image) || len(job.Image) > 1024 || strings.Contains(job.Image, "..") || job.ExchangeOrigin != config.ExchangeOrigin || job.Ticket.Execution != ref.ID || job.Ticket.Deadline.IsZero() || !checksum.MatchString(ticketHash) {
 		return nil, hostedexecution.ErrConfiguration
 	}
 	job.Ticket.Deadline = job.Ticket.Deadline.UTC()
 	p := &Plan{config: canonical(config), job: job, owner: fingerprint(ref), scope: fingerprint(canonical(config)), ticketHash: ticketHash}
 	p.family = config.FamilyPrefix + "-" + p.owner[:40]
+	protocol := "ecs-worker/v1"
+	if gateway != nil {
+		selected := canonicalGateway(*gateway)
+		p.gateway = &selected
+		p.scope = fingerprint([]any{canonical(config), selected})
+		p.family = config.FamilyPrefix + "-gateway-" + p.owner[:40]
+		protocol = "ecs-gateway/v1"
+	}
 	p.spec = fingerprint(document(p.definition(false)))
-	p.fingerprint = fingerprint([]any{"ecs-worker/v1", p.scope, ref, job.Image, job.Runner, job.Operation, job.Ticket.Deadline, ticketHash, p.spec})
+	p.fingerprint = fingerprint([]any{protocol, p.scope, ref, job.Image, job.Runner, job.Operation, job.Ticket.Deadline, ticketHash, p.spec})
 	return p, nil
 }
 
@@ -55,7 +72,12 @@ func validReference(ref execution.Reference, runner, operation string) bool {
 	return operation == "" && ref == expected
 }
 
-func (p *Plan) String() string   { return "ECS worker plan: " + p.job.Reference.ID }
+func (p *Plan) String() string {
+	if p.gateway != nil {
+		return "ECS gateway plan: " + p.job.Reference.ID
+	}
+	return "ECS worker plan: " + p.job.Reference.ID
+}
 func (p *Plan) GoString() string { return p.String() }
 
 func (p *Plan) Fingerprint() string { return p.fingerprint }
@@ -64,11 +86,15 @@ func (p *Plan) StartedBy() string   { return "ts-" + p.owner[:32] }
 
 func (p *Plan) tags() []types.Tag {
 	operation := "execute"
+	worker := "isolated-v1"
+	if p.gateway != nil {
+		operation, worker = "gateway", "gateway-v1"
+	}
 	if p.job.Operation == "discover" {
 		operation = "discover"
 	}
 	return []types.Tag{
-		{Key: aws.String("teststudio:worker"), Value: aws.String("isolated-v1")},
+		{Key: aws.String("teststudio:worker"), Value: aws.String(worker)},
 		{Key: aws.String("teststudio:owner"), Value: aws.String(p.owner)},
 		{Key: aws.String("teststudio:scope"), Value: aws.String(p.scope)},
 		{Key: aws.String("teststudio:spec"), Value: aws.String(p.spec)},
@@ -83,6 +109,9 @@ func (p *Plan) tags() []types.Tag {
 func (p *Plan) Definition() *ecs.RegisterTaskDefinitionInput { return p.definition(true) }
 
 func (p *Plan) definition(tagged bool) *ecs.RegisterTaskDefinitionInput {
+	if p.gateway != nil {
+		return p.gatewayDefinition(tagged)
+	}
 	architecture := types.CPUArchitectureX8664
 	if p.config.Architecture == "arm64" {
 		architecture = types.CPUArchitectureArm64

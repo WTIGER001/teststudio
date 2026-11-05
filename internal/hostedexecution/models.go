@@ -39,6 +39,7 @@ type Image struct {
 }
 
 type GatewayImage struct {
+	InstanceProtocol                      string `json:"instanceProtocol,omitempty"`
 	Reference, OS, Architecture, Protocol string
 	CertificateConfiguration              string `json:"certificateConfiguration,omitempty"`
 }

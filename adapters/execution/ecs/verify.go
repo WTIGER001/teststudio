@@ -118,7 +118,7 @@ func (p *Plan) VerifyDeadline(taskARN string, actual *scheduler.GetScheduleOutpu
 	if err != nil || actual == nil {
 		return hostedexecution.ErrOwnership
 	}
-	arn := "arn:aws:scheduler:" + p.config.Region + ":" + p.config.Account + ":schedule/" + p.config.ScheduleGroup + "/" + p.job.Reference.Container
+	arn := "arn:aws:scheduler:" + p.config.Region + ":" + p.config.Account + ":schedule/" + p.config.ScheduleGroup + "/" + p.resourceName()
 	if aws.ToString(actual.Arn) != arn {
 		return hostedexecution.ErrOwnership
 	}

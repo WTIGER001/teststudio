@@ -30,6 +30,9 @@ func missing(err error) bool {
 
 func (p *Provider) Ensure(ctx context.Context, job hostedexecution.Job) (resultErr error) {
 	defer func() { resultErr = controlError(resultErr) }()
+	if job.Reference.Gateway != "" {
+		return hostedexecution.ErrConfiguration
+	}
 	plan, err := NewPlan(p.config, job, p.now())
 	if err != nil {
 		return err
@@ -134,5 +137,5 @@ func controlError(err error) error {
 }
 
 func (p *Provider) getDeadline(ctx context.Context, plan *Plan) (*scheduler.GetScheduleOutput, error) {
-	return p.scheduler.GetSchedule(ctx, &scheduler.GetScheduleInput{Name: aws.String(plan.job.Reference.Container), GroupName: aws.String(p.config.ScheduleGroup)}, singleScheduler)
+	return p.scheduler.GetSchedule(ctx, &scheduler.GetScheduleInput{Name: aws.String(plan.resourceName()), GroupName: aws.String(p.config.ScheduleGroup)}, singleScheduler)
 }
