@@ -140,12 +140,12 @@ func TestAzureProtectionStacksRefreshPolicyAndGateCredentialsAndBoundHost(t *tes
 		t.Fatal("lost stack protection reached host reads or repeated bootstrap")
 	}
 	identity.stacks[id] = clone(baseline)
-	if err := observer.Check(t.Context(), c); err != nil || f.reads != 3 {
+	if err := observer.Check(t.Context(), c); err != nil || f.reads != 4 {
 		t.Fatal("fresh stack restoration rejected", err, f.reads)
 	}
 	identity.stacks[id] = d.DeploymentStack{}
 	requireReadDenyError(t, observer.Check(t.Context(), c), hostedexecution.ErrUnavailable)
-	if f.reads != 3 || len(f.parent.factoryClients) != 1 {
+	if f.reads != 4 || len(f.parent.factoryClients) != 1 {
 		t.Fatal("missing stack metadata reused a successful host observation")
 	}
 }

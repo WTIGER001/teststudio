@@ -97,12 +97,12 @@ func TestAzureReadIdentityFederationGatesBoundHostAndRefreshesAbsence(t *testing
 		t.Fatal("reported federation reached host reads or repeated bootstrap")
 	}
 	identity.federation = ""
-	if err := observer.Check(t.Context(), c); err != nil || f.reads != 3 || identity.reads != before+14 {
+	if err := observer.Check(t.Context(), c); err != nil || f.reads != 4 || identity.reads != before+14 {
 		t.Fatal("fresh empty federation did not restore bound host inspection", err, f.reads)
 	}
 	identity.federation = "incomplete"
 	requireReadDenyError(t, observer.Check(t.Context(), c), hostedexecution.ErrUnavailable)
-	if f.reads != 3 || identity.reads != before+21 || len(f.parent.factoryClients) != 1 || f.parent.bootstrapReads != bootstrap {
+	if f.reads != 4 || identity.reads != before+21 || len(f.parent.factoryClients) != 1 || f.parent.bootstrapReads != bootstrap {
 		t.Fatal("incomplete federation reused a previous successful observation")
 	}
 }

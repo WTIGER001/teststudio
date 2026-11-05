@@ -124,12 +124,12 @@ func TestAzureObserverHostAuthenticationRefreshesBeforeSuccessfulBoundInspection
 	}
 	f.authMode = "missing"
 	requireReadDenyError(t, observer.Check(t.Context(), c), hostedexecution.ErrUnavailable)
-	if f.reads != 15 || f.parent.bootstrapReads != bootstrap || len(f.parent.factoryClients) != 1 {
+	if f.reads != 20 || f.parent.bootstrapReads != bootstrap || len(f.parent.factoryClients) != 1 {
 		t.Fatal("authentication checks reused stale state, repeated bootstrap, or widened host cost", f.reads)
 	}
 	f.parent.unavailable = true
 	requireReadDenyError(t, observer.Check(t.Context(), c), hostedexecution.ErrUnavailable)
-	if f.reads != 15 {
+	if f.reads != 20 {
 		t.Fatal("unverified parent chain reached host authentication")
 	}
 }

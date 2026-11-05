@@ -122,7 +122,27 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: explicit reported host platform authentication
+## Current delivery: reported controller HTTP route absence
+
+The host observer now requires an explicit empty controller-environment HTTP route collection on every successful Check.
+Its mandatory RoutesAbsent method reads one selected page through the existing SDK client and observer credential.
+Any route object rejects ownership. Missing or null values, null-only rows, failed reads, and incomplete empty pages remain unavailable.
+It never follows continuations, even to the same collection, and returns no route names, hosts, targets, rules, or response bodies.
+The staged profile supports no environment routing overrides, including routes for unrelated apps. The inspector changes no existing route.
+The core package declares no such override. Installation tooling must select a suitable controller environment.
+
+Three new focused race checks and seven affected host or protection regressions pass in 4.929 seconds.
+They cover explicit absence, present and unknown routes, same and foreign continuations, exact scope, rejected queries and mutations, cancellation, freshness, and parent gating.
+Four concurrent host reads now yield four ordinary GETs and at most six host-specific requests with revision paging.
+Only the host ceiling increases to 2222 requests; its context remains 135 seconds with 22 readers.
+Bootstrap remains 125 seconds and 2200 requests; diagnostic read-deny remains 130 seconds and 2216 requests.
+No dependency, grant, additional reader, repeated parent scan, observation cache, package build, UI, browser, image, container, provider call, deployment, registry push, or demo restart is added.
+See [reported controller route absence](azure-observer-host-routes.md). Acceptance 51 advances; the total remains 48 verified, nine open.
+Reported absence does not prove effective visibility, prevent future route writes, establish external proxy behavior, or complete native execution admission.
+
+Evidence is output/azure-observer-host-routes/summary.json and the targeted command result.
+
+## Previous delivery: explicit reported host platform authentication
 
 The host reader now requires the selected API app's authConfigs/current with an explicit false platform enabled flag.
 It uses the existing SDK and returns only resource identity and that flag. Provider, registration, encryption, and login metadata do not reach callers.

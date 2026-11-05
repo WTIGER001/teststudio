@@ -15,10 +15,13 @@ type observerHostFixture struct {
 	t           *testing.T
 	mu          sync.Mutex
 	parent      *observerFixture
+	environment string
 	settings    ObserverHostSettings
 	application a.ContainerApp
 	auth        a.AuthConfig
 	authMode    string
+	routesMode  string
+	routeReads  int
 	revisions   []a.Revision
 	reads       int
 	mode        string
@@ -29,7 +32,7 @@ func observerHostTest(t *testing.T) (Config, ObserverHostSettings, *observerHost
 	c, identity, parent, g := observerTest(t)
 	s := ObserverHostSettings{Identity: identity, Application: c.resourceID("Microsoft.App", "containerApps", "studio-api"), Image: c.Registry + "/services/teststudio@sha256:" + strings.Repeat("e", 64), PullIdentity: c.resourceID("Microsoft.ManagedIdentity", "userAssignedIdentities", "api-pull"), StartupIdentity: c.resourceID("Microsoft.ManagedIdentity", "userAssignedIdentities", "api-startup"), RuntimeIdentity: c.resourceID("Microsoft.ManagedIdentity", "userAssignedIdentities", "api-runtime")}
 	s.Runtime = ObserverHostRuntime{RuntimeClientID: "66666666-aaaa-bbbb-cccc-111111111112", DatabaseSecretURL: "https://studiovault.vault.azure.net/secrets/api-database", OIDCConfigurationSecretURL: "https://studiovault.vault.azure.net/secrets/oidc-configuration", OIDCClientOneSecretURL: "https://studiovault.vault.azure.net/secrets/oidc-client-one", OIDCClientTwoSecretURL: "https://studiovault.vault.azure.net/secrets/oidc-client-two", BlobServiceURL: "https://studioevidence.blob.core.windows.net/", EvidenceContainer: "evidence", UIOrigin: "https://studio-api.controllerzone.eastus.azurecontainerapps.io", ArtifactOrigin: "https://studio-artifacts.controllerzone.eastus.azurecontainerapps.io", BootstrapIssuer: "https://login.example.test/tenant", BootstrapSubject: "teststudio-owner", Replicas: 1}
-	f := &observerHostFixture{t: t, parent: parent, settings: s}
+	f := &observerHostFixture{t: t, parent: parent, settings: s, environment: c.ControllerEnvironment}
 	_, name := resourceParts(s.Application)
 	var err error
 	f.application, err = s.ApplicationDefinition(c)
@@ -71,7 +74,7 @@ func observerHostTest(t *testing.T) (Config, ObserverHostSettings, *observerHost
 }
 
 func (f *observerHostFixture) Do(r *http.Request) (*http.Response, error) {
-	if r.URL.Path != f.settings.Application && r.URL.Path != f.settings.Application+"/revisions" && r.URL.Path != f.settings.Application+"/authConfigs/current" {
+	if r.URL.Path != f.settings.Application && r.URL.Path != f.settings.Application+"/revisions" && r.URL.Path != f.settings.Application+"/authConfigs/current" && r.URL.Path != f.environment+"/httpRouteConfigs" {
 		return f.parent.Do(r)
 	}
 	f.mu.Lock()
@@ -90,6 +93,34 @@ func (f *observerHostFixture) Do(r *http.Request) (*http.Response, error) {
 		response := deadlineResponse(r, 302, nil)
 		response.Header.Set("Location", "https://foreign.invalid/private")
 		return response, nil
+	}
+	if r.URL.Path == f.environment+"/httpRouteConfigs" {
+		f.routeReads++
+		switch f.routesMode {
+		case "missing-array":
+			return deadlineResponse(r, 200, map[string]any{}), nil
+		case "null-array":
+			return deadlineResponse(r, 200, map[string]any{"value": nil}), nil
+		case "null-row":
+			return deadlineResponse(r, 200, map[string]any{"value": []any{nil}}), nil
+		case "present":
+			return deadlineResponse(r, 200, map[string]any{"value": []any{map[string]any{"name": "private-controller-route-canary"}}}), nil
+		case "present-and-next":
+			return deadlineResponse(r, 200, map[string]any{"value": []any{map[string]any{}}, "nextLink": "https://foreign.invalid/private-route-canary"}), nil
+		case "same-next":
+			return deadlineResponse(r, 200, map[string]any{"value": []any{}, "nextLink": "https://management.azure.com" + f.environment + "/httpRouteConfigs?api-version=" + exchangeVersion + "&%24skipToken=private-next-canary"}), nil
+		case "foreign-next":
+			return deadlineResponse(r, 200, map[string]any{"value": []any{}, "nextLink": "https://foreign.invalid/private-next-canary"}), nil
+		case "missing":
+			return deadlineResponse(r, 404, nil), nil
+		case "unavailable":
+			return deadlineResponse(r, 503, map[string]any{"error": map[string]any{"message": "private-route-error-canary"}}), nil
+		case "redirect":
+			response := deadlineResponse(r, 302, nil)
+			response.Header.Set("Location", "https://foreign.invalid/private-route-canary")
+			return response, nil
+		}
+		return deadlineResponse(r, 200, map[string]any{"value": []any{}}), nil
 	}
 	if r.URL.Path == f.settings.Application+"/authConfigs/current" {
 		switch f.authMode {

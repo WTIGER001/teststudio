@@ -23,7 +23,7 @@ func TestAzureObserverHostBindsFreshMainIdentityAndHealthyRevision(t *testing.T)
 	}
 	for i := 1; i <= 2; i++ {
 		slices.Reverse(f.application.Properties.Configuration.IdentitySettings)
-		if err := observer.Check(t.Context(), c); err != nil || f.reads != i*3 || f.parent.bootstrapReads != bootstrap || len(f.parent.factoryClients) != 1 {
+		if err := observer.Check(t.Context(), c); err != nil || f.reads != i*4 || f.parent.bootstrapReads != bootstrap || len(f.parent.factoryClients) != 1 {
 			t.Fatal("fresh host attachment rejected or bootstrap repeated", err, f.reads)
 		}
 	}

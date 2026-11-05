@@ -23,7 +23,8 @@ ObserverHostReader requires Auth as part of its contract. It has no optional mis
 SDKObserverHostReader.Auth takes the selected application identifier, not a child-resource identifier.
 It uses the existing Container Apps SDK and API 2025-07-01 to GET exactly SELECTED_APP/authConfigs/current.
 The transport permits no auth collection, alternate app, alternate configuration, mutation, secret operation, or extra query.
-Environment and route paths remain outside this host reader's allowlist.
+Environment resource GETs and route-item reads remain outside this host reader's allowlist.
+The [controller route absence check](azure-observer-host-routes.md) separately permits its one selected collection request.
 
 The call has a five-second context and the existing four-megabyte response limit.
 Retries and provider registration remain disabled. Redirects are never followed.
@@ -38,12 +39,12 @@ Successful state is not cached or persisted.
 ## Bound session cost and packaging
 
 Each host Check completes the existing read-deny and identity chain once.
-It then reads app, revisions, and current authentication concurrently through the same verified observer credential.
+It then reads app, revisions, current authentication, and controller route absence concurrently through the same verified observer credential.
 Changed authentication rejects the next check. A restored explicit false value can pass a later fresh inspection.
-A failed parent chain prevents all three host reads. Binding creates no observer request and repeats no bootstrap inspection during Check.
+A failed parent chain prevents all four host reads. Binding creates no observer request and repeats no bootstrap inspection during Check.
 
-The host-specific cost is now three ordinary GETs, with at most five requests including bounded revision paging.
-The composed host ceiling increases from 2220 to 2221 requests within the unchanged 135-second context.
+The host-specific cost is now four ordinary GETs, with at most six requests including bounded revision paging.
+The composed host ceiling is now 2222 requests within the unchanged 135-second context.
 The session retains 22 readers. No SDK dependency or role grant is added.
 The separate bootstrap remains 125 seconds and 2200 requests. The diagnostic read-deny session remains 130 seconds and 2216 requests.
 

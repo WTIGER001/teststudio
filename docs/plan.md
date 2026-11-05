@@ -478,7 +478,23 @@ No role grant, dependency, repeated parent scan, observation cache, UI build, br
 See [reported host platform authentication](azure-observer-host-auth.md). Acceptance 51 and supporting packaging under 57 advance; the total remains 48 verified, nine open.
 Reported state does not establish deployed authentication behavior, other identity consumers, protection-management authority, execution isolation, or complete native admission.
 
-Next resolve authoritative assignment ownership and protection-management authority, other identity consumer types, controller route configuration, and complete native admission wiring.
+The host observer now requires an explicit empty controller-environment HTTP route collection on every successful Check.
+Its mandatory RoutesAbsent method reads one selected page through the existing SDK client and observer credential.
+Any route object rejects ownership. Missing or null values, null-only rows, failed reads, and incomplete empty pages remain unavailable.
+It never follows continuations, even to the same collection, and returns no route names, hosts, targets, rules, or response bodies.
+The staged profile supports no environment routing overrides, including routes for unrelated apps. The inspector changes no existing route.
+The core package declares no such override. Installation tooling must select a suitable controller environment.
+
+Three new focused race checks and seven affected host or protection regressions pass in 4.929 seconds.
+They cover explicit absence, present and unknown routes, same and foreign continuations, exact scope, rejected queries and mutations, cancellation, freshness, and parent gating.
+Four concurrent host reads now yield four ordinary GETs and at most six host-specific requests with revision paging.
+Only the host ceiling increases to 2222 requests; its context remains 135 seconds with 22 readers.
+Bootstrap remains 125 seconds and 2200 requests; diagnostic read-deny remains 130 seconds and 2216 requests.
+No dependency, grant, additional reader, repeated parent scan, observation cache, package build, UI, browser, image, container, provider call, deployment, registry push, or demo restart is added.
+See [reported controller route absence](azure-observer-host-routes.md). Acceptance 51 advances; the total remains 48 verified, nine open.
+Reported absence does not prove effective visibility, prevent future route writes, establish external proxy behavior, or complete native execution admission.
+
+Next resolve authoritative assignment ownership and protection-management authority, other identity consumer types, trusted preparation networking, and complete native admission wiring.
 Reported app and job checks do not establish exclusive use across all Azure resources or subscriptions.
 Keep hosted read coverage, complete effective authorization, and cross-scope visibility separate until authoritative deployment evidence exists.
 Wire the bound session into native commands only after complete admission exists.

@@ -21,7 +21,7 @@ func NewSDKObserverHostReader(c Config, s ObserverHostSettings, credential azcor
 	if err != nil {
 		return nil, err
 	}
-	service.http.resources = map[string]string{s.Application: exchangeVersion, s.Application + "/revisions": exchangeVersion, s.Application + "/authConfigs/current": exchangeVersion}
+	service.http.resources = map[string]string{s.Application: exchangeVersion, s.Application + "/revisions": exchangeVersion, s.Application + "/authConfigs/current": exchangeVersion, c.ControllerEnvironment + "/httpRouteConfigs": exchangeVersion}
 	service.http.pages = map[string]bool{s.Application + "/revisions": true}
 	return &SDKObserverHostReader{service: service}, nil
 }

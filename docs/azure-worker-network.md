@@ -185,3 +185,6 @@ The core package creates no such arrangement. Direct assignment ownership and pr
 The host stage now compares the [fixed reported API runtime](azure-observer-host-runtime.md) with app and revision configuration.
 The [host authentication check](azure-observer-host-auth.md) now observes explicit disabled platform authentication.
 Native wiring, effective authorization, deployed authentication behavior, and actual execution isolation remain required.
+
+The [controller route contract](azure-observer-host-routes.md) now requires no environment-level HTTP routing overrides for the staged API profile.
+The inspector observes absence and never changes existing routes. Authority to create later routes remains a separate installation requirement.

@@ -9,6 +9,7 @@ Its identity reader also requires [federated-credential absence](azure-read-iden
 It now requires [reported identity write protection](azure-read-identity.md#identity-write-protection) on that exact identity and its child scopes.
 It now checks the [fixed reported API runtime](azure-observer-host-runtime.md), including arguments, environment, secret references, ingress, probes, and scaling.
 The [platform authentication check](azure-observer-host-auth.md) now requires an explicit disabled current configuration on the selected API app.
+The [controller route check](azure-observer-host-routes.md) also requires an explicit empty environment route collection.
 It does not establish exclusive identity use, secret contents, actual host token issuance, deployed authentication behavior, or complete effective authorization.
 Those requirements remain part of native admission and separate hosted verification.
 No Network is implemented. Azure coded jobs remain disabled.
@@ -64,19 +65,20 @@ Identity changes require fresh app observations; an old revision identifier alon
 
 ReadIdentityGuard.BindHostObserver accepts the explicit host settings and builds all 22 SDK readers with the verified observer credential.
 It retains the existing single bootstrap inspection and performs no observer request during client construction.
-Each Check refreshes the existing chain once, then reads the selected app, revisions, and current authentication configuration concurrently.
+Each Check refreshes the existing chain once, then reads the selected app, revisions, current authentication, and controller route absence concurrently.
 The workload stage first requires the selected host in the application collection and blocks shared or unknown observer identity placement.
 BindObserver remains available for the preceding 21-reader diagnostic scope. It does not check host attachment.
 Use the host-bound method when this attachment observation is required. Neither method enables native dispatch.
 
-SDKObserverHostReader permits GET on only the selected app, its revisions collection, and authConfigs/current.
+SDKObserverHostReader permits GET on only the selected app, its revisions collection, authConfigs/current, and the selected controller environment's httpRouteConfigs collection.
 It reuses the existing Container Apps SDK and API 2025-07-01 with no new dependency.
-The shared service reader supplies bounded revision paging. Its environment, route, other auth, and secret paths are outside this reader's allowlist.
+The shared service reader supplies bounded revision paging. Environment resource GETs, route-item reads, other auth, and secret paths remain outside this reader's allowlist.
+The route collection is restricted to one explicit empty page and permits no continuation request.
 Each operation has a five-second context and four-megabyte response limit. Revisions permit at most four records across three pages.
 Retries and provider registration remain disabled. Unsafe pages, redirects, and incomplete revisions remain blocking errors.
 
-The composed host check has a 135-second context and at most 2221 requests, including federation absence and identity protection.
-The host-specific additional cost is three GETs. Initial binding retains its separate 125-second bootstrap context and 2200-request ceiling.
+The composed host check has a 135-second context and at most 2222 requests, including federation absence and identity protection.
+The host-specific additional cost is four GETs. Initial binding retains its separate 125-second bootstrap context and 2200-request ceiling.
 Successful observations are not cached. Closing the session releases all 22 readers and prevents later checks.
 Returned errors omit provider messages and private app configuration.
 
@@ -126,3 +128,5 @@ The [reported protection-stack checks](azure-protection-stacks.md) add two selec
 The [fixed runtime contract](azure-observer-host-runtime.md) adds no GET, context allowance, or reader. Four new checks and seven affected regressions pass locally.
 
 The [current platform authentication contract](azure-observer-host-auth.md) adds one selected concurrent GET and no reader or role grant.
+
+The [controller route contract](azure-observer-host-routes.md) adds one selected GET without another SDK reader, role grant, or parent scan.

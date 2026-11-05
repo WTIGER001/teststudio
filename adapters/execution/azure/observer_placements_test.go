@@ -118,12 +118,12 @@ func TestAzureObserverPlacementsGateBoundHostWithoutAnotherSubscriptionScan(t *t
 		t.Fatal("reported sharing repeated inventory or reached host reads", inventory.reads, f.reads)
 	}
 	inventory.jobs[0].Identity = &a.ManagedServiceIdentity{Type: to.Ptr(a.ManagedServiceIdentityTypeNone)}
-	if err := observer.Check(t.Context(), c); err != nil || inventory.reads != before+4 || f.reads != 3 {
+	if err := observer.Check(t.Context(), c); err != nil || inventory.reads != before+4 || f.reads != 4 {
 		t.Fatal("fresh sharing removal or single subscription scan failed", err, inventory.reads, f.reads)
 	}
 	inventory.apps = inventory.apps[:len(inventory.apps)-1]
 	requireReadDenyError(t, observer.Check(t.Context(), c), hostedexecution.ErrUnavailable)
-	if inventory.reads != before+6 || f.reads != 3 {
+	if inventory.reads != before+6 || f.reads != 4 {
 		t.Fatal("missing reported host repeated inventory or reached host reads")
 	}
 }

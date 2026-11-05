@@ -234,3 +234,6 @@ It supplies references rather than secret values. It enables no coded execution 
 
 Both core apps explicitly disable [Container Apps platform authentication](azure-observer-host-auth.md) so TestStudio handles sessions and private report authorization.
 The observer requires fresh reported disabled state on the selected API app. This enables no native coded execution.
+
+The [host observer profile](azure-observer-host-routes.md) requires an explicit empty controller-environment HTTP route collection.
+The core package creates no route overrides and removes none from the supplied existing environment. Select a suitable environment before admission.

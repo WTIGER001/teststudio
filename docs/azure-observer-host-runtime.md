@@ -71,8 +71,8 @@ The observer option remains disabled by default. The output remains incomplete u
 
 Each bound Check reads fresh app and revision state through the selected observer credential.
 Changed app and revision settings reject even when they agree with each other. Restored valid state can pass the next inspection.
-The host session still uses 22 readers, a 135-second context, and at most 2221 requests.
-Its ordinary host-specific cost is now three GETs, including the [platform authentication check](azure-observer-host-auth.md). Initial binding retains one separate bootstrap inspection.
+The host session still uses 22 readers, a 135-second context, and at most 2222 requests.
+Its ordinary host-specific cost is now four GETs, including [platform authentication](azure-observer-host-auth.md) and [controller route absence](azure-observer-host-routes.md). Initial binding retains one separate bootstrap inspection.
 
 ## Remaining installation evidence
 
