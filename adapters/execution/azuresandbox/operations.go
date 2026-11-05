@@ -10,11 +10,12 @@ import (
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
 )
 
-func (c *Client) ImportImage(ctx context.Context, reference, pullIdentity string) (DiskImage, error) {
-	if !c.config.validImage(reference) || !c.config.validPullIdentity(pullIdentity) {
+func (c *Client) ImportImage(ctx context.Context, plan *ImagePlan) (DiskImage, error) {
+	if plan == nil || hash(plan.config) != hash(c.config) || plan.valid() != nil {
 		return DiskImage{}, hostedexecution.ErrConfiguration
 	}
-	body := map[string]any{"image": map[string]any{"base": reference, "entrypoint": []string{"/runner/teststudio-job"}, "cmd": []string{}}, "managedIdentityResourceId": pullIdentity, "labels": map[string]string{"name": "teststudio-" + hash(reference)[:24]}}
+	body := plan.definition()
+	body["managedIdentityResourceId"] = plan.proof.PullIdentity
 	data, err := c.request(ctx, http.MethodPut, c.target("/diskimages"), body)
 	if err != nil {
 		return DiskImage{}, err
@@ -23,7 +24,7 @@ func (c *Client) ImportImage(ctx context.Context, reference, pullIdentity string
 	if err != nil {
 		return DiskImage{}, err
 	}
-	if image.Base != reference {
+	if plan.Verify(image) != nil {
 		return DiskImage{}, hostedexecution.ErrOwnership
 	}
 	return image, nil
@@ -58,7 +59,8 @@ func (c *Client) image(data []byte) (DiskImage, error) {
 	if !identifier.MatchString(value.Status.State) {
 		return DiskImage{}, hostedexecution.ErrUnavailable
 	}
-	return DiskImage{ID: value.ID, Base: value.Image.Base, State: value.Status.State, Entrypoint: value.Image.Entrypoint, Command: value.Image.Command}, nil
+	definition := map[string]any{"image": map[string]any{"base": value.Image.Base, "entrypoint": value.Image.Entrypoint, "cmd": []string{}}, "labels": value.Labels, "dockerfileContent": value.Dockerfile}
+	return DiskImage{ID: value.ID, Base: value.Image.Base, State: value.Status.State, Entrypoint: value.Image.Entrypoint, Command: value.Image.Command, DefinitionHash: hash(definition)}, nil
 }
 
 func (c *Client) Create(ctx context.Context, plan *Plan) (Snapshot, error) {

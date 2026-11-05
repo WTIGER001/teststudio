@@ -17,7 +17,9 @@ func TestSandboxClientUsesPinnedAPIForImageAndExecutionLifecycle(t *testing.T) {
 	c := p.config
 	ctx := context.Background()
 	identity := "/subscriptions/" + c.Subscription + "/resourceGroups/studio-identities/providers/Microsoft.ManagedIdentity/userAssignedIdentities/studio-pull"
+	importPlan := fixtureImagePlan(t, p)
 	image := map[string]any{"id": p.proof.DiskImage, "image": map[string]any{"base": p.proof.Image, "entrypoint": []string{"/runner/teststudio-job"}, "cmd": []string{}}, "status": map[string]string{"state": "Ready"}}
+	image["labels"] = importPlan.definition()["labels"]
 	instance := instanceBody(t, p, "sandbox-123")
 	requests := []string{}
 	cred := &credential{t: t}
@@ -61,7 +63,7 @@ func TestSandboxClientUsesPinnedAPIForImageAndExecutionLifecycle(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer client.Close()
-	if _, err := client.ImportImage(ctx, p.proof.Image, identity); err != nil {
+	if _, err := client.ImportImage(ctx, importPlan); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := client.ReadImage(ctx, p.proof.DiskImage); err != nil {
@@ -214,7 +216,7 @@ func TestSandboxClientRejectsInvalidReferencesBeforeAcquiringCredentials(t *test
 	if _, err := client.Create(ctx, restored); err != hostedexecution.ErrRejected {
 		t.Fatal("credential-free recovery proof can dispatch")
 	}
-	if _, err := client.ImportImage(ctx, "public.example/image:latest", "identity"); err != hostedexecution.ErrConfiguration {
+	if _, err := client.ImportImage(ctx, nil); err != hostedexecution.ErrConfiguration {
 		t.Fatal("unapproved image import accepted")
 	}
 	if cred.calls != 0 {

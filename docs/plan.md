@@ -71,7 +71,14 @@ Controller.Status requires both a valid exit receipt and quiescence before succe
 Cancellation suppresses late success and checks resource ownership before interrupting a connection.
 Targeted protocol, restart, scope, cancellation, OCI, and supervisor checks pass. Local Linux identity probes pass and their containers are removed.
 
-Implement durable image import and Ready-image resolution next, then actual admission and the complete native Provider factory.
+Durable image import and converted-image lookup now use the shared database and gated discovery authorization.
+One reservation controls each import. Lost acknowledgments reconcile complete inventory without replay.
+Fresh image reads verify immutable source, supervisor, labels, and ownership before launch.
+Only a new authorized discovery request can replace a known failed generation. Retained history prevents reuse of earlier requests.
+Lookup processes cannot initiate conversion. Targeted local restart, contention, authorization, history, and protocol checks pass.
+See [durable sandbox images](azure-sandbox-images.md). The verified count remains 48 of 57.
+
+Connect pending image preparation and the controller through the complete native Provider next. Then complete actual admission and its native factory.
 Reuse the new command and status bridge. Preserve explicit gaps after a lost acknowledgment and never replay the logical attempt.
 Preserve source-queue authorization and the existing worker exchange. Keep controller credentials outside sandboxes.
 Bind actual source-import identity, group authority, VNet routing, proxy trust, and effective outbound enforcement before enabling native execution.

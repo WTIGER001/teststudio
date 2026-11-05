@@ -26,7 +26,7 @@ Effective timer authority, native composition, and actual instance admission rem
 The local fixtures do not establish those production controls.
 
 The controller accepts a Plan after approved source inspection and Ready disk-image resolution.
-Durable image import and source-queue composition remain separate work.
+The [image manager](azure-sandbox-images.md) now supplies durable import and lookup. Source-queue composition remains separate work.
 This controller does not execute uploaded code during source inspection or import.
 
 ### Immutable work and reservation

@@ -8,11 +8,12 @@ import (
 )
 
 type DiskImage struct {
-	ID         string   `json:"id"`
-	Base       string   `json:"base"`
-	State      string   `json:"state"`
-	Entrypoint []string `json:"entrypoint"`
-	Command    []string `json:"command"`
+	DefinitionHash string   `json:"definitionHash"`
+	ID             string   `json:"id"`
+	Base           string   `json:"base"`
+	State          string   `json:"state"`
+	Entrypoint     []string `json:"entrypoint"`
+	Command        []string `json:"command"`
 }
 
 type Snapshot struct {
@@ -41,8 +42,10 @@ type sandboxPage struct {
 }
 
 type imageResponse struct {
-	ID    string `json:"id"`
-	Image struct {
+	Labels     map[string]string `json:"labels"`
+	Dockerfile string            `json:"dockerfileContent"`
+	ID         string            `json:"id"`
+	Image      struct {
 		Base       string   `json:"base"`
 		Entrypoint []string `json:"entrypoint"`
 		Command    []string `json:"cmd"`

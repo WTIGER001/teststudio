@@ -122,7 +122,36 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: independent sandbox command completion and guarded supervision
+## Current delivery: durable sandbox source conversion and lookup
+
+The production data-plane client now requires a complete image plan for imports.
+Its proof binds configuration, pull identity, immutable OCI metadata, project, runner, and discovery generation.
+Readback verifies the source, fixed supervisor, empty command, ownership labels, and Dockerfile content.
+Ready and Succeeded follow the pinned SDK's completed conversion states.
+
+The new ImageManager shares the installation database and real worker exchange.
+Trusted preparation requires gated discovery input, its original ticket, fresh authorization, and explicit import admission.
+Reservation and the import marker assert current exchange and permission revisions.
+Twelve competing controllers make one import call. Lookup processes cannot initiate imports.
+Both runners retain their converted source across database reopen.
+
+Lost acknowledgments reconcile one complete ownership match. Missing receipts, duplicate matches, and incomplete inventory cannot authorize another import.
+Acknowledged image lookup uses the exact receipt and rechecks the provider's current definition.
+Known failed conversions can receive a new generation only through a different authorized discovery request.
+The transaction retains previous proofs and receipts. Earlier requests cannot become eligible again after another generation fails.
+Current and archived source assets remain outside per-run deletion. Provider source retention remains open under 46.
+
+Seven new focused checks and two affected client checks pass with race detection in 1.769 seconds.
+Two selected launch-proof regressions pass in 1.422 seconds. Affected documentation links resolve.
+They cover protocol drift, both runners, SQLite reopen, contention, lost receipts, current permissions, grant revisions, and failed-generation history.
+The evidence is output/azure-sandbox-images/summary.json and targeted.log.
+No cloud request, registry operation, browser, container, demo restart, UI rebuild, or remote push occurs.
+No page behavior changes. The new image guide and affected operator and integration guides match this library delivery.
+
+Native Provider composition, actual import and runtime admission, configuration, and deployment packaging remain unfinished.
+Acceptance **51** and supporting recovery under **52** advance. The verified total remains **48 of 57**, with **9 open**.
+
+## Previous delivery: independent sandbox command completion and guarded supervision
 
 Sandbox plans now start a trusted idle supervisor and invoke executable work only through the fixed command API.
 The v3 proof binds the image capability, command body, UID class, deadline, source, and immutable execution settings.

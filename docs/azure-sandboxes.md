@@ -12,7 +12,8 @@ No native command selects this package yet. No deployment template enables sandb
 The [durable controller](azure-sandbox-controller.md) now supplies dispatch reservation, lost-receipt recovery, cancellation, and checkpointed cleanup.
 The [independent deadline SDK](azure-sandbox-deadlines.md) now supplies owned timer creation, verification, and checkpointed removal.
 The [command bridge](azure-sandbox-commands.md) now supplies independent exit receipts and common hosted status mapping.
-The complete native Provider still requires effective timer authority, admission, source resolution, and configuration.
+The [image manager](azure-sandbox-images.md) now supplies durable import and verified converted-image lookup.
+The complete native Provider still requires effective timer authority, admission, source-queue composition, and configuration.
 Local contract checks do not establish deployed isolation, service availability, identity authority, certificate trust, or complete product operation.
 
 ## Concepts
@@ -43,13 +44,15 @@ Image import accepts one distribution digest under the configured registry and r
 It uses an explicit user-assigned pull identity in the selected subscription.
 It supplies no registry password. The runtime launch receives no pull or controller identity.
 The imported image fixes the supervisor entrypoint and clears the inherited command.
-Ready image reads must match their requested identifier and approved registry namespace.
+Completed image reads must match their requested identifier, approved source, fixed supervisor, and complete ownership proof.
+Both Ready and Succeeded are completed image states in the pinned SDK contract.
 Complete bounded image inventory supports later reconciliation of a lost import acknowledgment.
-Image import is a mutation. Its caller must reserve it durably before dispatch.
+The image manager reserves imports through the existing discovery exchange before dispatch.
+Lookup processes cannot import. A lost receipt never permits automatic replacement.
 
 A launch requires the approved OCI inspection result for its exact image, project, and runner.
 It requires the common supervisor, non-root task-storage contract, Linux AMD64, source digest, and explicit discovery support when requested.
-The converted disk image must be Ready and retain the exact original immutable reference.
+The converted disk image must be Ready or Succeeded and retain the exact original immutable reference.
 Service conversion does not replace source inspection or prove effective runtime user and filesystem controls.
 
 ### Execution request
@@ -137,7 +140,7 @@ Current retained evidence is output/azure-sandbox-contract/summary.json, final-c
 ### Continue native integration
 
 Use the [durable dispatch controller](azure-sandbox-controller.md) for sandbox creation and lifecycle mutations.
-Implement durable image import and Ready-image resolution before connecting native source preparation.
+Connect the durable image manager and verified Ready-image lookup to native source preparation.
 Reuse the existing source queue, database, approved OCI inspector, worker exchange, and preparation authorization.
 Reconcile returned identifiers under complete ownership proofs. Never retry an ambiguous create as new work.
 Bind the independent sandbox deadline SDK to verified native identity grants and workflow protection.

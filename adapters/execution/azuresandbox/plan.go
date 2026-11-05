@@ -27,7 +27,7 @@ func NewPlan(c Config, job hostedexecution.Job, disk DiskImage, inspected hosted
 	if disk.Base != job.Image || !identifier.MatchString(disk.ID) || !slices.Equal(disk.Entrypoint, []string{"/runner/teststudio-job"}) || len(disk.Command) != 0 {
 		return nil, hostedexecution.ErrOwnership
 	}
-	if disk.State != "Ready" {
+	if !readyImage(disk.State) {
 		return nil, hostedexecution.ErrUnavailable
 	}
 	proof := Proof{Reference: job.Reference, Image: job.Image, SourceDigest: inspected.SourceDigest, Sandbox: inspected.Sandbox, DiskImage: disk.ID, Runner: job.Runner, Operation: job.Operation, Deadline: job.Ticket.Deadline.UTC(), TicketHash: hash(job.Ticket.Token), EnvironmentHash: hash(environment(job.Reference.ID, job.Ticket.Token))}
@@ -38,6 +38,8 @@ func NewPlan(c Config, job hostedexecution.Job, disk DiskImage, inspected hosted
 	p.token = job.Ticket.Token
 	return p, nil
 }
+
+func readyImage(state string) bool { return state == "Ready" || state == "Succeeded" }
 
 func newPlan(c Config, proof Proof) (*Plan, error) {
 	if Validate(c) != nil || !validReference(proof.Reference, proof.Runner, proof.Operation) || !c.validImage(proof.Image) || !validSourceDigest(proof.SourceDigest) || proof.Sandbox != hostedexecution.SandboxSupervisor || !identifier.MatchString(proof.DiskImage) || !checksum.MatchString(proof.TicketHash) || !checksum.MatchString(proof.EnvironmentHash) || proof.Deadline.IsZero() || proof.Deadline.Year() < 2000 || proof.Deadline.Year() > 2200 {
