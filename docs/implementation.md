@@ -122,7 +122,39 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: observer identity and selected subscription read grant
+## Current delivery: bound Azure observer SDK sessions
+
+Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
+
+ReadIdentityGuard.BindObserver now builds an owned SDK session using a credential for the verified observed client identifier.
+It performs one complete bootstrap inspection, then rebuilds all 20 readers with the selected observer credential and fixed canonical settings.
+The session retains no bootstrap reader or bootstrap credential. It provides no alternate-credential fallback.
+Client construction makes no observer request. Each later Check refreshes the complete inspection chain through that observer credential.
+Successful resource observations are not cached. SDK token caching remains separate from resource freshness.
+Each check retains the 125-second context and 2196-request ceiling. Initial binding adds one separate bootstrap inspection with those same bounds.
+
+The composition preserves existing SDK allowlists, API versions, pagination limits, response bounds, disabled retries, and disabled provider registration.
+Changed runtime configuration rejects before a request. Missing state, changed grants, token failures, and transport failures remain blocking errors.
+Close waits for active checks, closes owned readers in reverse order, releases references, and prevents later inspection requests.
+Partial construction closes already-owned readers. The caller retains ownership of its bootstrap readers.
+Observer implements no Network and enables no native Azure coded execution.
+
+Two new focused race checks pass in 2.325 seconds. One selected existing credential check runs without failure in the initial targeted command.
+The initial new helper expects the wrong token audience. Reusing the established credential fixture corrects the expectation.
+Only the two changed checks repeat. No unchanged broad suite repeats.
+Every bound SDK request carries a distinct observer test token, checked before routing into existing mutable in-memory fixtures.
+Two successful full inspections repeat no bootstrap reads. A changed assignment fails the next fresh inspection.
+Additional coverage includes frozen settings, runtime mismatch, nil credentials, bootstrap rejection, token failure, transport failure, cancellation, and all-reader cleanup.
+All 20 readers close. Repeated Close and checks after closure produce no new request.
+No real token, network connection, service listener, cloud operation, UI build, browser, image build, container, registry push, deployment, or demo restart runs.
+Evidence is output/azure-observer/summary.json and the targeted command results.
+See [bound observer sessions](azure-read-identity.md#bound-observer-session).
+
+Continue effective read coverage, actual host attachment, complete native command wiring, deployed protection, provenance, attachment authority, and execution isolation.
+One matching selected grant and successful local SDK fixtures do not prove complete effective authorization or cross-scope visibility.
+All nine broad acceptance items remain open under their original scope.
+
+## Previous delivery: observer identity and selected subscription read grant
 
 Acceptance **51** advances. The verified total remains **48 of 57**, with **9 open**.
 

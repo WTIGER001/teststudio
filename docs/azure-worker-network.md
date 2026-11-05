@@ -31,7 +31,8 @@ It establishes neither cross-subscription or cross-tenant coverage nor authority
 The [selected deny observer](azure-network-deny.md) now checks explicit enforcement, all-principal coverage, child scopes, and fixed exceptions on both VNets and three selected zones.
 Deployed enforcement, existing cross-scope links, clean provenance, read coverage, and authority to change protection remain separate requirements.
 The [observer identity stage](azure-read-identity.md) now binds the reported client, principal, tenant, and selected subscription read grant.
-Its credential factory selects that verified client. Effective access, host attachment, and native observation-client wiring remain unverified.
+Bound observer sessions now use that verified client credential throughout the rebuilt SDK inspection chain.
+Effective access, host attachment, and native command wiring remain unverified.
 The complete adapter must also prove read coverage, attachment authority, effective zone visibility, full backend authority, exchange networking, and execution placement.
 Azure coded execution remains disabled in native commands and infrastructure packaging.
 See [durable Azure execution](azure-worker-lifecycle.md), [job contracts](azure-worker-contract.md), and [independent deadlines](azure-worker-deadlines.md).

@@ -8,7 +8,8 @@ The observer identity remains separate from worker pull, backend pull, backend s
 
 This stage implements no Network and enables no native Azure coded execution.
 It observes the selected grant. It does not prove effective authorization, complete visibility, or absence of other grants.
-The SDK readers still require an explicit bootstrap credential. This stage does not prove that credential uses the selected observer identity.
+The initial guard requires an explicit bootstrap credential. A bound observer session then uses the verified observer credential throughout its SDK chain.
+Binding does not prove that the bootstrap credential itself uses the observer identity.
 Identity attachment, token availability, deny coverage, protection-management authority, and cross-scope visibility remain installation requirements.
 Acceptance 51 advances. The total remains 48 verified of 57, with nine open.
 
@@ -70,7 +71,44 @@ Normal additional cost is exactly three GETs. Successful observations are not ca
 Credential construction uses the identity from that same inspection.
 Returned errors use fixed public categories and omit provider messages, condition text, and credential factory details.
 
-## Targeted local verification
+## Bound observer session
+
+ReadIdentityGuard.BindObserver performs one complete bootstrap inspection and obtains a credential for the verified observed client identifier.
+It rebuilds all 20 SDK readers with that same credential and preserves their canonical settings and existing transport restrictions.
+The rebuilt chain includes topology, worker networking, private endpoints, registry, exchange, workload inventory, backend, relay networking, DNS inventory, protection, and identity.
+The bootstrap readers and credential remain outside the returned session.
+
+Binding creates clients without requesting an observer token or performing an observer SDK request.
+Observer.Check performs the complete fresh inspection through the selected observer credential.
+Later checks reuse the SDK clients and their normal token cache. They do not reuse successful resource observations or repeat bootstrap inspection.
+The final identity and assignment reads therefore also use the selected observer credential.
+Changed immutable runtime settings reject before an SDK request. Missing identity metadata and rejected grants remain blocking errors.
+Token acquisition and transport errors remain unavailable and omit private provider details.
+There is no alternate credential or bootstrap fallback after binding.
+
+Each Check retains the 125-second context and 2196-request ceiling. Binding adds one separate bootstrap inspection with the same bounds.
+Bind once per owned session. Do not bind again before every Check.
+Close the session after its final inspection. Close waits for active checks, closes owned readers in reverse order, and releases their references.
+Repeated Close calls are safe. Checks after Close return unavailable without a credential or transport request.
+If client construction fails, binding closes the readers that it already creates.
+The caller retains ownership of the bootstrap readers and closes them separately.
+
+```go
+observer, err := guard.BindObserver(ctx, config, nil)
+if err != nil {
+    return err
+}
+defer observer.Close()
+return observer.Check(ctx, config)
+```
+
+The optional transport parameter supports trusted installation integration and local protocol fixtures.
+Production uses nil for the existing restricted HTTPS transport. Fixture tests supply an in-memory transporter and a private credential factory spy.
+The public binding API accepts no credential override. Token requests occur only through later SDK calls.
+Observer implements no Network. Native commands still require complete admission and installation wiring before coded jobs can run.
+Passing these requests does not establish complete effective authorization or visibility across subscriptions and tenants.
+
+## Targeted local verification of identity
 
 Five new focused race checks and one selected existing protection regression pass in 4.003 seconds.
 They cover fresh grants, parent gating, changed principals, foreign scopes, conditions, extra authority, exact SDK paths, unknown metadata, and settings isolation.
@@ -85,5 +123,23 @@ go test -race ./adapters/execution/azure -run '^(TestAzureReadIdentity.*|TestAzu
 ```
 
 Evidence is output/azure-read-identity/summary.json and the targeted command results.
-Next bind the observer credential to actual observation clients and verify effective access rather than inferring it from one selected grant.
+The bound session now connects this credential to actual inspection clients. Effective access remains a separate requirement.
 Keep clean creation provenance, existing cross-scope visibility, deployed protection, attachment controls, preparation networking, and execution isolation in the native admission scope.
+
+## Targeted local verification of session binding
+
+Two new focused race checks pass in 2.325 seconds. One selected existing credential check also runs without failure in the initial targeted command.
+The initial new helper expects the wrong token audience. It now reuses the existing fixture credential's exact audience validation.
+Only the two changed checks repeat after that fixture correction. No unchanged broad suite repeats.
+The complete chain receives a distinct observer test token. The bootstrap capture records selected routes without storing credentials or freezing response bodies.
+Later SDK requests reach those original mutable fixtures through the observer transporter, with the distinct token checked before fixture adaptation.
+Two successful inspections reuse no bootstrap reads. A changed assignment then fails a fresh third inspection.
+Checks also cover client construction without observer requests, frozen settings, runtime mismatch, nil credentials, token failure, transport failure, cancellation, and reader cleanup.
+All 20 owned readers close. Repeated cleanup and checks after closure produce no new request.
+No real token, network connection, service listener, cloud operation, browser, image build, container, registry push, deployment, or demo restart runs.
+
+```sh
+go test -race ./adapters/execution/azure -run '^TestAzureObserver' -count=1
+```
+
+Evidence is output/azure-observer/summary.json and the targeted command results.

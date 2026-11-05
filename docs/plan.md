@@ -366,7 +366,16 @@ Five new focused race checks and one selected existing protection regression pas
 See [observer identity and selected read grant](azure-read-identity.md). Acceptance 51 advances; the count remains 48 of 57.
 No cloud operation, browser, UI build, image build, container, registry push, deployment, or demo restart runs.
 
-Next bind the verified observer credential to actual inspection clients and verify effective read coverage.
+The bound observer session now rebuilds all 20 SDK readers with one credential for the verified observed client identifier.
+Binding performs one bootstrap inspection. Later checks use only the bound credential and refresh the complete resource chain without repeating bootstrap reads.
+Client construction makes no observer request. Runtime mismatches, credential failures, unavailable state, changed grants, and closed sessions block inspection.
+Owned readers close in reverse order. Closing waits for active checks and prevents later requests.
+Two new focused race checks pass in 2.325 seconds. One selected existing credential check runs without failure in the initial command.
+The new helper corrects its audience expectation by reusing the established credential fixture. Only the two changed checks repeat.
+See [bound observer sessions](azure-read-identity.md#bound-observer-session). Acceptance 51 advances; the total remains 48 of 57.
+No real token, cloud request, browser, UI build, image build, container, registry push, deployment, or demo restart runs.
+
+Next verify effective read coverage and host attachment. Wire the bound session into native commands only after complete admission exists.
 Verify actual resource-scoped assignment provisioning and enforcement, and authority to change the owning protection arrangement.
 Establish authoritative existing cross-scope visibility or clean installation provenance. Observed deny assignments do not remove pre-existing foreign links.
 Continue environment attachment control, remaining perimeter protection, and trusted preparation networking.
