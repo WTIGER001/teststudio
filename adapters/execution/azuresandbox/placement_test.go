@@ -41,12 +41,12 @@ func TestSandboxPlacementReadsSelectedResourcesAndComposesBothAdmissionGates(t *
 	if err := r.Provider.images.admission.BeforeImport(t.Context(), s.Worker, s.PullIdentity); err != nil {
 		t.Fatal(err)
 	}
-	if protection.creates.Load() != 1 || protection.imports.Load() != 1 || len(w.calls) != 69 {
+	if protection.creates.Load() != 1 || protection.imports.Load() != 1 || len(w.calls) != 93 {
 		t.Fatal("native assembly omitted a selected observation or protection gate")
 	}
 	for id := range placementVersions(s) {
 		count := w.calls[id]
-		if id == s.Placement.Subnet {
+		if id == s.Placement.Subnet || id == s.Placement.Registry || id == "/subscriptions/"+s.Worker.Subscription+pullRole {
 			count -= 2
 		}
 		if count != 2 {
@@ -71,7 +71,7 @@ func TestSandboxPlacementReadsSelectedResourcesAndComposesBothAdmissionGates(t *
 	protection.denied.Store(false)
 	for id := range placementVersions(s) {
 		count := w.calls[id]
-		if id == s.Placement.Subnet {
+		if id == s.Placement.Subnet || id == s.Placement.Registry || id == "/subscriptions/"+s.Worker.Subscription+pullRole {
 			count -= 2
 		}
 		if count != 2 {

@@ -16,6 +16,7 @@ The [topology stage](azure-sandbox-topology.md) now checks selected VNet content
 The [resolver stage](azure-sandbox-resolver.md) now checks policy rules, actual association, and reported subscription private-zone links.
 The [service stage](azure-sandbox-services.md) now checks relay and trusted backend definitions, private environments, identity exposure, certificate metadata, and complete revisions.
 The [backend endpoint stage](azure-sandbox-backend-endpoint.md) now joins endpoint approval, NIC address, network policy, and the relay's existing readiness address.
+The [relay network stage](azure-sandbox-relay-network.md) now joins the trusted VNet, egress policy, resolver, private registry path, and selected pull grant.
 Remaining authority and protected network admission, effective timer authority, command role wiring, and deployment packaging remain unfinished.
 The factory requires admission dependencies. It supplies no permissive default.
 Do not treat client construction or local protocol checks as deployment acceptance.
@@ -46,7 +47,7 @@ The loader validates all fields before credential construction.
 | timer.stopIdentity | User-assigned timer identity in the selected subscription. Its resource differs from pullIdentity. |
 
 PlacementSettings.NetworkProfile derives worker.networkProfile from the placement bindings and worker configuration.
-The sandbox-placement/v7 profile also binds the required placement.services.backendEndpoint settings.
+The sandbox-placement/v8 profile also binds the required placement.services.backendEndpoint and placement.services.relayNetwork settings.
 The protected network fingerprint remains in placement.policyProfile. A mismatched derived worker profile rejects startup.
 
 Registry validation uses the same pure policy as the ACR client constructor.
@@ -69,6 +70,7 @@ It constructs SDKTopology with that credential and compares VNet contents, firew
 It constructs SDKResolver with that credential and compares resolver rules, actual VNet association, and reported subscription zone-link inventories.
 It constructs SDKServices with that credential and compares trusted relay and backend service metadata against independent fixed definitions.
 It constructs SDKBackendEndpoint with that credential and compares backend endpoint ownership, NIC address, subnet policy, and relay source prefix.
+It constructs SDKRelayNetwork with that credential and checks the selected relay network, private registry path, DNS, and pull grant.
 The resulting image manager and provider share the controller's exact configuration and exchange.
 
 Default credential construction uses ManagedIdentityCredential with each exact configured client identifier.
@@ -101,8 +103,8 @@ That command integration remains unfinished.
 
 Admission is mandatory for every runtime. ImageAdmission is also mandatory for discovery mode.
 The existing controller calls the placement stage and these dependencies before creation, during live admission observation, and before import.
-Live placement, network, private binding, topology, resolver, services, backend endpoint, and selected authority evidence have a 15-second bound.
-Initial network, placement, private binding, topology, resolver, service, and backend endpoint checks remain fresh, including source import.
+Live placement, network, private binding, topology, resolver, services, backend endpoint, relay network, and selected authority evidence have a 15-second bound.
+Initial network, placement, private binding, topology, resolver, service, backend endpoint, and relay network checks remain fresh, including source import.
 The additional protection, per-sandbox, and worker authorization checks remain uncached.
 OpenRuntime does not substitute a successful construction result for those checks.
 Native commands must compose actual group, VNet, private exchange, source identity, and timer authority checks before enabling dispatch.

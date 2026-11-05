@@ -168,8 +168,18 @@ Five new local checks and affected native, relay TLS, and worker database-health
 Readiness runs inside the relay network. Native service admission checks the exact probe and reported healthy active revision; it adds no controller-side HTTPS probe.
 See [backend endpoint and readiness binding](azure-sandbox-backend-endpoint.md). Local TLS checks do not establish deployed routes or platform readiness.
 
+The runtime now joins the relay VNet, its four subnets, security rules, default route, firewall, resolver, and private registry path.
+The registry endpoint has exactly two configured NIC addresses. Selected registry-side approval and the embedded connection must agree on that endpoint.
+Exact private records and one relay-network link bind registry resolution. The subscription DNS inventory now guards both relay and sandbox VNets.
+The selected relay pull identity, tenant, registry-scoped assignment, and fixed AcrPull role must match.
+Trusted relay platform rules remain separate from the sandbox's narrower connection rules and deny-all firewall policy.
+The sandbox-placement/v8 profile binds the added settings. Twenty-one reviewable bodies support later packaging without mutation.
+Fresh creation and import observations and bounded live evidence include this stage. Remaining protection and authorization stay uncached.
+Six new checks and fourteen affected checks pass locally with race detection. No cloud service is contacted.
+See [relay network and registry binding](azure-sandbox-relay-network.md). Acceptance 51 advances; the count remains 48 verified, nine open.
+
 Complete remaining effective-authority and protected network admission, native command role wiring, and deployment packaging next.
-Complete native relay VNet and private registry observations, workload placement, identity host attachment, additional grants and deny effects, and protected write boundaries.
+Complete registry consumer, replication, and member inventory, workload placement, identity host attachment, additional grants and deny effects, and protected write boundaries.
 Keep cross-subscription link visibility and actual DNS hierarchy behavior explicit in separate deployment acceptance.
 Verify actual service acceptance of custom data-action roles and narrow timer grants during the separate deployment phase.
 Keep private registry conversion access and proxy trust as explicit deployment compatibility questions.

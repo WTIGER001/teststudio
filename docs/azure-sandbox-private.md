@@ -30,7 +30,7 @@ placement.private supplies these bindings:
 
 The endpoint subnet reserves Azure's first four addresses and its final address.
 Public, noncanonical, overlapping, undersized, foreign, reused, and inconsistent bindings reject before credential construction.
-The sandbox-placement/v7 profile includes these bindings and required backend endpoint, network, topology, resolver, and trusted service settings.
+The sandbox-placement/v8 profile includes these bindings and required backend endpoint, network, topology, resolver, and trusted service settings.
 Changes require a new derived worker.networkProfile. Older staged profiles reject.
 No native command currently loads those profiles.
 

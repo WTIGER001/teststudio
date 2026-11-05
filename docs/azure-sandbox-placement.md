@@ -34,10 +34,11 @@ The [authority stage](azure-sandbox-authority.md) now verifies selected identity
 | private | Required endpoint, NIC, service, subnet, address, and private zone bindings. See the private admission guide. |
 | services | Required relay and backend resources, immutable images, dependency references, and four distinct service identity pins. |
 | services.backendEndpoint | Required backend endpoint, NIC, subnet, source prefix, and security group bindings. |
+| services.relayNetwork | Required relay VNet, egress policy, resolver, private registry endpoint, zone, and selected pull assignment. |
 
 PlacementSettings.NetworkProfile computes the combined profile from placement and the worker configuration with its networkProfile field cleared.
 Set worker.networkProfile to that result. Settings validation rejects a mismatched profile before constructing credentials.
-The sandbox-placement/v7 profile includes trusted services, backend endpoint bindings, and the existing resolver, topology, firewall, subnet, and DNS bindings.
+The sandbox-placement/v8 profile includes trusted services, backend endpoint and relay network bindings, and the existing resolver, topology, firewall, subnet, and DNS bindings.
 Changes to these addresses, subnet, import identity metadata, selected grant, or expected policy change launch and source-cache ownership.
 The factory adds one explicit managed identity credential for metadata reads. Construction still acquires no token and calls no service.
 Earlier staged settings without placement reject. No native command has installed those earlier sandbox settings.
@@ -128,7 +129,8 @@ No cloud account, identity endpoint, registry service, browser, container, demo 
 ### Complete native admission
 
 Implement the remaining authority and protected network checks behind the mandatory admission dependencies.
-Verify relay network and registry paths, metadata-reader attachment and grants, effective authority, write protection, and deployed routing and readiness.
+The [relay network stage](azure-sandbox-relay-network.md) now verifies the selected relay VNet and private registry path.
+Complete registry inventory, metadata-reader attachment, effective grants, write protection, and deployed routing and readiness.
 The selected authority stage now covers the intended role and identity bindings. Verify effective access and attachment in addition to those reports.
 Bind those checks to placement.policyProfile before command activation.
 Then wire execution and discovery roles and package their resources.

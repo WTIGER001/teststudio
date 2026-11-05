@@ -85,8 +85,12 @@ func (g *RelayPerimeterGuard) inspect(ctx context.Context, c Config) (observatio
 }
 
 func verifyRelaySourceSubnet(subnet n.Subnet, s RelayPerimeterSettings) error {
+	return VerifyRelaySubnetAttachments(subnet, s.SecurityGroup, s.RouteTable)
+}
+
+func VerifyRelaySubnetAttachments(subnet n.Subnet, securityGroup, routeTable string) error {
 	p := subnet.Properties
-	if p == nil || p.DefaultOutboundAccess == nil || value(p.DefaultOutboundAccess) || p.NetworkSecurityGroup == nil || !strings.EqualFold(value(p.NetworkSecurityGroup.ID), s.SecurityGroup) || p.RouteTable == nil || !strings.EqualFold(value(p.RouteTable.ID), s.RouteTable) || p.NatGateway != nil || value(p.SharingScope) != "" || len(p.ServiceEndpoints)+len(p.ServiceEndpointPolicies)+len(p.PrivateEndpoints)+len(p.ApplicationGatewayIPConfigurations)+len(p.IPAllocations)+len(p.IpamPoolPrefixAllocations) != 0 {
+	if p == nil || p.DefaultOutboundAccess == nil || value(p.DefaultOutboundAccess) || p.NetworkSecurityGroup == nil || !strings.EqualFold(value(p.NetworkSecurityGroup.ID), securityGroup) || p.RouteTable == nil || !strings.EqualFold(value(p.RouteTable.ID), routeTable) || p.NatGateway != nil || value(p.SharingScope) != "" || len(p.ServiceEndpoints)+len(p.ServiceEndpointPolicies)+len(p.PrivateEndpoints)+len(p.ApplicationGatewayIPConfigurations)+len(p.IPAllocations)+len(p.IpamPoolPrefixAllocations) != 0 {
 		return hostedexecution.ErrOwnership
 	}
 	return nil

@@ -35,6 +35,7 @@ type Runtime struct {
 	resolver        *SDKResolver
 	services        *SDKServices
 	backendEndpoint *SDKBackendEndpoint
+	relayNetwork    *SDKRelayNetwork
 	once            sync.Once
 }
 
@@ -111,7 +112,11 @@ func OpenRuntime(o RuntimeOptions) (result *Runtime, resultErr error) {
 	if err != nil {
 		return nil, err
 	}
-	admission := &placementAdmission{placement: r.placement, authority: r.authority, network: r.network, private: r.private, topology: r.topology, resolver: r.resolver, services: r.services, backendEndpoint: r.backendEndpoint, protection: o.Admission, importProtection: o.ImageAdmission}
+	r.relayNetwork, err = NewSDKRelayNetwork(s, metadata, o.ARMTransport)
+	if err != nil {
+		return nil, err
+	}
+	admission := &placementAdmission{placement: r.placement, authority: r.authority, network: r.network, private: r.private, topology: r.topology, resolver: r.resolver, services: r.services, backendEndpoint: r.backendEndpoint, relayNetwork: r.relayNetwork, protection: o.Admission, importProtection: o.ImageAdmission}
 	controller, err := NewController(ControllerOptions{Config: s.Worker, Instances: r.client, Deadlines: r.deadlines, Admission: admission, Exchange: o.Exchange, Commands: r.client})
 	if err != nil {
 		return nil, err
@@ -166,6 +171,9 @@ func (r *Runtime) Close() {
 		}
 		if r.backendEndpoint != nil {
 			r.backendEndpoint.Close()
+		}
+		if r.relayNetwork != nil {
+			r.relayNetwork.Close()
 		}
 		if r.client != nil {
 			r.client.Close()

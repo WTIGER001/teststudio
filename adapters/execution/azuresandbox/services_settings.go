@@ -41,6 +41,7 @@ type BackendServiceSettings struct {
 }
 
 type ServicesSettings struct {
+	RelayNetwork    RelayNetworkSettings    `json:"relayNetwork"`
 	Relay           RelayServiceSettings    `json:"relay"`
 	Backend         BackendServiceSettings  `json:"backend"`
 	BackendEndpoint BackendEndpointSettings `json:"backendEndpoint"`
@@ -95,7 +96,10 @@ func (v ServicesSettings) validate(c Config, p PlacementSettings) error {
 		}
 		resources[id], clients[identity.Client], principals[identity.Principal] = true, true, true
 	}
-	return v.BackendEndpoint.validate(c, p, v)
+	if err := v.BackendEndpoint.validate(c, p, v); err != nil {
+		return err
+	}
+	return v.RelayNetwork.validate(c, p, v)
 }
 
 func (v ServicesSettings) validateIdentities(s Settings) error {

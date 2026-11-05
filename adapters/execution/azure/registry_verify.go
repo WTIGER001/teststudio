@@ -78,22 +78,25 @@ func (g *RegistryGuard) verifyRegistry(actual a.Registry) error {
 }
 
 func (g *RegistryGuard) verifyConnections(connections []a.PrivateEndpointConnection) (map[string]string, error) {
-	s := g.settings
-	if len(connections) < len(s.consumers()) {
+	return VerifyRegistryEndpointConnections(g.settings.registry(), g.settings.consumers(), connections)
+}
+
+func VerifyRegistryEndpointConnections(registry string, endpoints []string, connections []a.PrivateEndpointConnection) (map[string]string, error) {
+	if len(connections) < len(endpoints) {
 		return nil, hostedexecution.ErrUnavailable
 	}
-	if len(connections) != len(s.consumers()) {
+	if len(connections) != len(endpoints) {
 		return nil, hostedexecution.ErrOwnership
 	}
 	wanted := map[string]bool{}
-	for _, id := range s.consumers() {
+	for _, id := range endpoints {
 		wanted[strings.ToLower(id)] = true
 	}
 	observed := map[string]string{}
 	names := map[string]bool{}
 	for _, connection := range connections {
 		name := value(connection.Name)
-		if !endpointChild(value(connection.ID), name, s.registry(), "privateEndpointConnections") || !strings.EqualFold(value(connection.Type), "Microsoft.ContainerRegistry/registries/privateEndpointConnections") || names[strings.ToLower(name)] || connection.Properties == nil || connection.Properties.PrivateEndpoint == nil {
+		if !endpointChild(value(connection.ID), name, registry, "privateEndpointConnections") || !strings.EqualFold(value(connection.Type), "Microsoft.ContainerRegistry/registries/privateEndpointConnections") || names[strings.ToLower(name)] || connection.Properties == nil || connection.Properties.PrivateEndpoint == nil {
 			return nil, hostedexecution.ErrOwnership
 		}
 		names[strings.ToLower(name)] = true

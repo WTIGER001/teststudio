@@ -122,6 +122,36 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
+## Current delivery: sandbox relay network and private registry binding
+
+OpenRuntime now constructs SDKRelayNetwork with the existing metadata identity.
+Creation, source import, and live admission verify the relay VNet and its four selected subnets, security rules, default route, firewall, and resolver.
+The private registry endpoint and NIC retain exactly the login and regional data addresses.
+Selected registry-side approval and its embedded connection must approve the same relay endpoint.
+Private DNS records and the sole relay-network link bind registry resolution.
+The shared subscription zone inventory now rejects additional reported links to either the sandbox or relay VNet.
+The selected pull identity must match its tenant, client, principal, registry-scoped assignment, and fixed built-in AcrPull role.
+Trusted relay platform access remains separate from sandbox connection rules and its deny-all firewall policy.
+
+The sandbox-placement/v8 profile binds the required relayNetwork settings.
+Aliases, overlaps, reserved addresses, foreign resources, and stale profiles reject before credentials.
+RelayNetworkDefinitions supplies 21 reviewable resource bodies without mutation.
+Fresh creation and import observations and bounded shared live evidence preserve uncached protection and authorization.
+Current failures invalidate prior safe evidence. Runtime shutdown closes the new reader.
+Shared pure platform, subnet, route, registry-approval, private-zone, and resolver helpers retain their existing callers.
+
+Six new checks and twelve affected native checks pass with race detection in 3.572 seconds.
+Two affected shared verifier checks pass with race detection in 3.048 seconds.
+Evidence is output/azure-sandbox-relay-network/summary.json, native.log, and shared.log.
+Checks use local SQLite, fake credentials, and in-memory ARM responses.
+No cloud service, browser, container, UI build, demo restart, resource mutation, or remote push is involved.
+The active plan and affected operator guides match the change. User pages do not change.
+
+Complete registry consumer, replication, and member inventory remains required.
+Effective grants, identity host attachment, workload placement, deny effects, protected writes, native command wiring, and packaging remain unfinished.
+Reported configuration does not prove deployed routing, resolution, readiness, private conversion, or preview compatibility.
+Acceptance **51** advances. No acceptance item closes. The total remains **48 verified, 9 open**.
+
 ## Current delivery: sandbox backend endpoint and readiness binding
 
 OpenRuntime now constructs SDKBackendEndpoint with the existing metadata identity.

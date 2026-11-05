@@ -72,6 +72,7 @@ func newPlacementWorld(t *testing.T, s Settings) *placementWorld {
 	w.addResolver()
 	w.addServices()
 	w.addBackendEndpoint()
+	w.addRelayNetwork()
 	return w
 }
 
@@ -100,6 +101,9 @@ func (w *placementWorld) Do(r *http.Request) (*http.Response, error) {
 	if version == "" {
 		version = backendEndpointVersions(w.s)[r.URL.Path]
 	}
+	if version == "" {
+		version = relayNetworkVersions(w.s)[r.URL.Path]
+	}
 	if version == "" && r.URL.Path == "/subscriptions/"+w.s.Worker.Subscription+"/providers/Microsoft.Network/privateDnsZones" {
 		version = "2024-06-01"
 	}
@@ -110,7 +114,7 @@ func (w *placementWorld) Do(r *http.Request) (*http.Response, error) {
 		}
 	}
 	method := "GET"
-	if r.URL.Path == w.s.Placement.virtualNetwork()+"/listDnsResolverPolicies" {
+	if r.URL.Path == w.s.Placement.virtualNetwork()+"/listDnsResolverPolicies" || r.URL.Path == w.s.Placement.Services.RelayNetwork.virtualNetwork(w.s)+"/listDnsResolverPolicies" {
 		method = "POST"
 	}
 	if r.Method != method || r.URL.Scheme != "https" || r.URL.Host != "management.azure.com" || version == "" || r.URL.RawQuery != "api-version="+version || r.Header.Get("Authorization") != "Bearer placement-metadata-canary" {

@@ -103,7 +103,7 @@ func (c *SDKPrivate) read(ctx context.Context) error {
 		resources, errors[0] = c.observe(ctx, []string{setting.RegistryEndpoint, setting.RegistryInterface, setting.ExchangeEndpoint, setting.ExchangeInterface, setting.Subnet, setting.SecurityGroup})
 	})
 	for i, zone := range setting.zoneBindings(c.settings) {
-		group.Go(func() { errors[i+1] = c.readZone(ctx, zone) })
+		group.Go(func() { errors[i+1] = c.readPrivateZone(ctx, zone) })
 	}
 	group.Wait()
 	if ctx.Err() != nil {
@@ -139,7 +139,7 @@ func (c *SDKPrivate) read(ctx context.Context) error {
 	return verifyNetworkGroup(resources[5], setting.SecurityGroup, setting.Subnet, c.settings.Worker.Region, setting.rules(c.settings))
 }
 
-func (c *SDKPrivate) readZone(ctx context.Context, binding azureworker.PrivateZoneBinding) error {
+func (c *metadataReader) readPrivateZone(ctx context.Context, binding azureworker.PrivateZoneBinding) error {
 	var zone placementResource
 	var records, links []placementResource
 	var errors [3]error

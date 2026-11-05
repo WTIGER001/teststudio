@@ -18,7 +18,7 @@ placement.network.resolver requires policy, allowList, and blockList.
 Each field identifies the matching resource type in the selected subscription.
 The two domain lists must differ.
 Invalid scope, type, missing settings, or stale ownership profiles reject before credential construction.
-The sandbox-placement/v7 profile binds resolver settings with required trusted services, topology, both endpoint paths, DNS, and placement bindings.
+The sandbox-placement/v8 profile binds resolver settings with required trusted services, topology, both endpoint paths, DNS, and placement bindings.
 Older staged profiles require regeneration. No native command currently loads them.
 
 ResolverDefinitions returns six reviewable bodies: policy, two domain lists, two security rules, and one VNet link.
@@ -63,7 +63,8 @@ Policy, list, rule, and link identities, regions, types, and successful provisio
 
 The selected policy, domain lists, rules, and links use API version 2025-05-01.
 GET remains the default transport method for metadata readers.
-Only this resolver reader permits an empty POST to the exact selected VNet's listDnsResolverPolicies path.
+This resolver reader permits an empty POST to the selected sandbox VNet's listDnsResolverPolicies path.
+The relay network reader independently permits the same read action for the selected relay VNet.
 That action reads association metadata. Other actions, GET on that action, PUT, request bodies, positive body lengths, filters, and foreign hosts reject.
 The transport checks the selected request before acquiring credentials and checks it again before transmission.
 The metadata authority profile already includes this read action. It gains no write action.
@@ -79,8 +80,9 @@ Returned errors omit provider bodies and credential diagnostics.
 The reused inventory reader lists private zones in the selected subscription with API version 2024-06-01.
 It then observes complete link inventories for every reported zone.
 Zone and link identities, successful states, reported link counts, duplicate detection, and registration counts must agree.
-The two selected private zones and their sandbox-network links must be present.
-Any other reported zone or link targeting the sandbox VNet rejects admission.
+The two sandbox private zones and their sandbox-network links must be present.
+The relay registry zone and its relay-network link must also be present.
+Any other reported zone or link targeting either guarded VNet rejects admission.
 Unrelated zones linked to unrelated VNets remain permitted.
 
 The subscription observation retains limits of 1024 zones, 4096 links, 16 pages per collection, and 2048 HTTP requests.
@@ -90,7 +92,7 @@ Large or slow subscriptions can exceed these bounds and remain unavailable.
 Incomplete pages, count gaps, inaccessible metadata, or missing selected zones never qualify as evidence of absence.
 
 This checks the selected subscription's reported inventory.
-It does not prove that other subscriptions contain no link to the VNet, or that deny effects hide no relevant resource.
+It does not prove that other subscriptions contain no link to either VNet, or that deny effects hide no relevant resource.
 Effective observer authority, deny inspection, protected write boundaries, and deployment ownership remain required.
 No claim of complete tenant-wide DNS visibility is made.
 
@@ -124,7 +126,8 @@ No cloud service, browser, container, UI build, demo restart, resource mutation,
 
 The service stage now checks selected relay and backend metadata, fixed definitions, identity exposure, and revisions.
 The backend endpoint stage now binds selected approval, NIC address, network policy, and the relay's configured readiness address.
-Complete relay network and registry observations, additional grants, deny effects, credential host attachment, and protection bindings.
+The [relay network stage](azure-sandbox-relay-network.md) now verifies the selected VNet, egress policy, registry endpoint, DNS, and pull grant.
+Complete registry inventory, additional grants, deny effects, credential host attachment, and protection bindings.
 Then wire scoped execution and discovery commands and package their dependencies.
 Verify actual resolution, routing, preview compatibility, private conversion, role acceptance, timer execution, token audience, and proxy trust during separate deployment acceptance.
 

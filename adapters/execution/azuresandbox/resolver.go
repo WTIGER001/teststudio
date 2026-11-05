@@ -97,7 +97,9 @@ func (c *SDKResolver) read(ctx context.Context) error {
 		}
 		p := c.settings.Placement
 		wanted := map[string]string{p.Private.RegistryZone + "/virtualNetworkLinks/sandbox-network": p.virtualNetwork(), p.Private.ExchangeZone + "/virtualNetworkLinks/sandbox-network": p.virtualNetwork()}
-		errors[1] = azureworker.VerifyPrivateDNSInventoryLinks(c.settings.Worker.Subscription, actual, wanted, []string{p.virtualNetwork()})
+		r := p.Services.RelayNetwork
+		wanted[r.Registry.Zone+"/virtualNetworkLinks/relay-network"] = r.virtualNetwork(c.settings)
+		errors[1] = azureworker.VerifyPrivateDNSInventoryLinks(c.settings.Worker.Subscription, actual, wanted, []string{p.virtualNetwork(), r.virtualNetwork(c.settings)})
 	})
 	group.Wait()
 	if ctx.Err() != nil {
@@ -112,7 +114,10 @@ func (c *SDKResolver) read(ctx context.Context) error {
 }
 
 func (c *SDKResolver) readPolicy(ctx context.Context) error {
-	r := c.settings.Placement.Network.Resolver
+	return c.readResolverPolicy(ctx, c.settings.Placement.Network.Resolver.binding(c.settings), c.settings.Worker.Region)
+}
+
+func (c *metadataReader) readResolverPolicy(ctx context.Context, r azureworker.ResolverBinding, region string) error {
 	var values, rules, links []placementResource
 	var attached struct {
 		Value    *[]d.SubResource `json:"value"`
@@ -124,7 +129,7 @@ func (c *SDKResolver) readPolicy(ctx context.Context) error {
 	group.Go(func() { rules, errors[1] = c.inventoryPages(ctx, r.Policy+"/dnsSecurityRules", 2, 2) })
 	group.Go(func() { links, errors[2] = c.inventoryPages(ctx, r.Policy+"/virtualNetworkLinks", 1, 2) })
 	group.Go(func() {
-		errors[3] = c.documentID(ctx, c.settings.Placement.virtualNetwork()+"/listDnsResolverPolicies", &attached)
+		errors[3] = c.documentID(ctx, r.VirtualNetwork+"/listDnsResolverPolicies", &attached)
 	})
 	group.Wait()
 	for _, err := range errors {
@@ -151,5 +156,5 @@ func (c *SDKResolver) readPolicy(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	return r.binding(c.settings).Verify(c.settings.Worker.Region, azureworker.ResolverObservation{Policy: policy, Allow: lists[0], Block: lists[1], Rules: ruleModels, Links: linkModels, Attached: *attached.Value})
+	return r.Verify(region, azureworker.ResolverObservation{Policy: policy, Allow: lists[0], Block: lists[1], Rules: ruleModels, Links: linkModels, Attached: *attached.Value})
 }
