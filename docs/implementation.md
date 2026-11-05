@@ -122,7 +122,46 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.
 
-## Current delivery: Azure preparation egress and private journal network
+## Current delivery: isolated Azure sandbox launch and data-plane client
+
+The active Azure coded execution path now uses Container Apps Sandboxes. The UI and API remain Container Apps.
+Ordinary Jobs remain disabled because their execution isolation boundary is unresolved.
+The existing plan permits another suitable Azure backend. Deployment targets and the stable 57 acceptance numbers stay unchanged.
+Sandboxes and the selected API remain preview. This local client does not establish hosted acceptance.
+
+The new Go package implements immutable image import, image reads, bounded image inventory, sandbox creation, status, stop, deletion, and bounded sandbox inventory.
+It pins data-plane API 2026-02-01-preview and the regional endpoint format from Microsoft SDK 0.1.0b4.
+Source inspection verifies the wheel checksum. No Python dependency is installed, executed, or included in the product.
+The implementation follows the pinned SDK's dynamicsessions token audience. Separate deployment verification must confirm that audience against the actual service.
+
+Launches require an approved source inspection result and Ready private disk image for the exact project and runner.
+They fix the supervisor, resources, VNet connection, virtualization selection, Full outbound inspection, default Deny, and one exact exchange-host Allow rule.
+Only the execution identifier and attempt-scoped worker ticket enter the environment.
+No registry password, controller identity, application secret, shared volume, port, preset, or snapshot enters the launch.
+Both execution runners and both discovery operations use this contract.
+Proofs bind the launch definition and retain ticket and environment hashes without a usable ticket.
+Restored proofs verify readback but cannot dispatch. Value and pointer diagnostics also omit the ticket.
+
+The client uses explicit credentials, no redirect following, no environment proxy, no automatic mutation retries, and fixed error classifications.
+Requests, credentials, responses, inventory pages, total items, continuation scope, and duplicate identifiers have explicit bounds.
+Lost acknowledgments stay unavailable. Incomplete inventory returns no partial result or authoritative absence.
+Accepted stop and delete responses remain acknowledgments. Provider state does not invent a passing result, exit code, or duration.
+
+Ten focused package checks pass with race detection in 1.369 seconds.
+They exercise the production HTTP client through an in-memory transport, including lifecycle requests, ownership mutations, lost responses, unsafe continuations, cancellation, and body cleanup.
+A review extends diagnostic redaction to copied plan values and retains writable virtualization settings in ownership comparison.
+Only those changed checks repeat during review. The final new-package check runs after the explicit virtualization binding changes its shared launch schema.
+No unrelated product suite, UI build, image, browser, listener, credential discovery, registry operation, cloud test, or deployment runs.
+The existing user demo is preserved. No product route or page-help behavior changes.
+The [sandbox operator guide](azure-sandboxes.md), Azure guides, and active plan record the preview dependency and remaining integration requirements.
+
+Native command selection, durable create reservation, lost-receipt reconciliation, independent sandbox deadlines, complete reports, and checkpointed cleanup remain required.
+Idle suspension does not satisfy the absolute deadline contract. The existing ARM Job timer does not stop these sandbox instances.
+Complete actual identity, VNet, egress enforcement, source conversion, proxy trust, and placement verification remain separate hosted work.
+This advances acceptance **51**. The total remains **48 verified of 57**, with **9 open**.
+Evidence is output/azure-sandbox-contract/summary.json, final-contract.json, final-contract.log, the focused review checks, and the retained SDK provenance.
+
+## Previous delivery: Azure preparation egress and private journal network
 
 Native Azure assembly now requires explicit network settings after the host and writer checks.
 The source subnet selects a dedicated NSG and Standard NAT gateway, with private PostgreSQL, registry, and SMB destinations.

@@ -2,6 +2,9 @@
 
 ## Current boundary
 
+The active Azure execution path now uses [isolated sandboxes](azure-sandboxes.md).
+This ordinary Job contract remains reference material. Native coded Jobs remain disabled.
+
 The new adapters/execution/azure package builds and verifies Container Apps Job requests through the official Go SDK.
 It pins armappcontainers/v4 version 4.0.0 and management API 2025-07-01, matching the core Azure package.
 These local contracts cover Go and Playwright execution and catalog discovery.

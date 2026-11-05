@@ -36,7 +36,29 @@ Do not add new dashboard pages or repeat completed demonstration setup before cl
 | Persistence | SQLite is the single-instance local default. PostgreSQL is the hosted and multi-instance default. Installation export and import preserve identifiers and access across both databases. Shared storage parity is verified under 06. Hosted profile acceptance remains separate. |
 | Charts | Keep the existing accessible SVG stacked-area implementation. A chart-library migration is not required. |
 | Local verification | Use local fixtures, cached builds, and targeted checks. Public customer websites are manual user targets, not verification dependencies. |
-| Deployment | Retain local server, AWS ECS with CloudFront, Kubernetes, and Azure Container Apps with Jobs as required profiles. Hosted parity remains unverified. |
+| Deployment | Retain local server, AWS ECS with CloudFront, Kubernetes, and Azure Container Apps as required profiles. Develop isolated sandbox execution for Azure. Hosted parity remains unverified. |
+
+### Azure isolated execution direction
+
+Continue Azure coded execution through Container Apps Sandboxes. Keep the UI and API in Container Apps.
+The public sandbox contract supplies a separate execution boundary and create-time outbound controls.
+The service and selected API remain preview. Complete deployment acceptance remains required.
+This uses the existing plan's suitable-backend alternative. It does not add a deployment target or change the 57 acceptance numbers.
+Ordinary Jobs remain disabled. Retain their request and recovery contracts as reference material.
+Do not continue adding Job network inspectors as a substitute for an execution isolation boundary.
+
+The new Go client now supports digest-based image import, image inventory, sandbox creation, status, stop, deletion, and bounded sandbox inventory.
+Launches use the approved source inspector result, fixed supervisor, private VNet connection, and Full default-deny outbound inspection.
+Only the exact private exchange host is allowed. Runtime environments contain only attempt-scoped worker credentials.
+Recovery proofs and returned snapshots retain hashes without usable tickets. Restored proofs cannot create another execution.
+Local protocol and ownership checks pass for both runners and discovery. No native configuration or deployment enables this client yet.
+
+Implement durable mutation reservation, lost-receipt reconciliation, sandbox-specific independent deadlines, reports, cancellation, and cleanup next.
+Preserve source-queue authorization and the existing worker exchange. Keep controller credentials outside sandboxes.
+Bind actual source-import identity, group authority, VNet routing, proxy trust, and effective outbound enforcement before enabling native execution.
+Confirm the pinned SDK token audience during the separate deployment verification phase.
+Idle suspension and accepted stop responses cannot replace the absolute deadline contract.
+See [Azure isolated sandbox execution](azure-sandboxes.md). Acceptance 51 advances; the total remains 48 verified of 57.
 
 ### Active application navigation correction
 

@@ -2,6 +2,9 @@
 
 ## Current boundary
 
+The active Azure execution path now uses [isolated sandboxes](azure-sandboxes.md).
+This ordinary Job lifecycle remains reference material. Its ARM stop resources do not control sandbox data-plane instances.
+
 The Azure adapter now implements the shared hosted Provider interface for Go and Playwright execution and discovery.
 It uses the [job ownership contract](azure-worker-contract.md), shared worker exchange, and durable installation database.
 Local fixtures exercise the production provider with a reopened SQLite database and simulated job controls.

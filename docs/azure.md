@@ -8,6 +8,9 @@ The artifact app validates existing grants against current stored sessions, cred
 The current package supports the catalog, identity, native HTTP execution, schedules, and private evidence service.
 The separate [assembly profile](azure-native-assembly.md) now supplies a trusted source preparation command and headless template.
 Complete source discovery, Go execution, Playwright execution, and recording remain unfinished.
+The active coded execution path uses the [sandbox client and launch contract](azure-sandboxes.md).
+Sandboxes and the selected API remain preview. Native configuration, independent sandbox deadlines, and complete provider lifecycle remain unfinished.
+Ordinary Jobs stay disabled. Their contracts below remain reference material and do not establish sandbox isolation.
 The [Azure job contract](azure-worker-contract.md) now builds and verifies SDK requests for execution and discovery.
 The [durable provider](azure-worker-lifecycle.md) now passes local dispatch, status, cancellation, and checkpointed recovery checks.
 The [trusted ACR adapter](azure-registry-authentication.md) now supports separate inspection and preparation credentials.
