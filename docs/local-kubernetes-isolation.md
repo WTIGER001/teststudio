@@ -31,7 +31,7 @@ See [containerd configuration](https://gvisor.dev/docs/user_guide/containerd/con
 ### Private routing and policy
 
 The isolation phase uses Helm revision 3 and .data/local-k3s/worker-values.json.
-The current source-enabled installation uses revision 7 and .data/local-k3s/preparation-values.json.
+The current source-enabled installation uses revision 8 and .data/local-k3s/preparation-values.json.
 The worker namespace is teststudio-workers. Its RuntimeClass, restricted service account, projected controller identity, and network policy are installed.
 The chart uses workers.privateIngress.enabled=false with an externally supplied local TLS proxy.
 The proxy runs in teststudio-private-routing, accepts the worker hostname, and exposes only the private execution path prefix.

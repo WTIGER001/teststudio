@@ -297,3 +297,37 @@ func TestPodAdmissionMutationCannotReleaseExecutableWork(t *testing.T) {
 		t.Fatal("foreign Pod was recreated or removed", f.posts, f.deletes)
 	}
 }
+
+func TestPodRemovalWaitsForAcknowledgedAsynchronousDeletion(t *testing.T) {
+	f := fresh(t, "go")
+	f.deleteReads = 2
+	report := f.driver.Execute(t.Context(), f.input)
+	entry, _, err := (workerstate.Ledger{Store: f.store}).Get(t.Context(), f.input.Reference.Run, f.input.Reference.ID)
+	if err != nil || report.Result.State != "passed" || entry.State != "cleaned" || entry.CleanupAttempts != 1 {
+		t.Fatal("acknowledged asynchronous deletion required recovery", report, entry, err)
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.posts != 1 || f.deletes != 1 || f.value != nil {
+		t.Fatal("cleanup repeated dispatch or deletion", f.posts, f.deletes)
+	}
+}
+
+func TestPodRemovalRetainsForeignReplacementAfterAcknowledgedDeletion(t *testing.T) {
+	f := fresh(t, "go")
+	f.replaceAfterDelete = true
+	f.driver.Execute(t.Context(), f.input)
+	entry, _, err := (workerstate.Ledger{Store: f.store}).Get(t.Context(), f.input.Reference.Run, f.input.Reference.ID)
+	if err != nil || entry.State != "cleanup-failed" {
+		t.Fatal("a foreign replacement passed cleanup", entry, err)
+	}
+	record, _, err := f.provider.load(t.Context(), *f.input.Reference)
+	if err != nil || record.Removed {
+		t.Fatal("uncertain deletion entered the removal journal", record, err)
+	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.value == nil || f.value.Metadata.UID != "foreign-replacement" || f.deletes != 1 {
+		t.Fatal("cleanup removed or retried deletion of a foreign Pod")
+	}
+}

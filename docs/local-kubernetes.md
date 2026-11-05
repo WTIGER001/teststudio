@@ -28,7 +28,7 @@ The selected cluster API uses loopback only. Its ingress maps to loopback port 1
 No user kubeconfig is merged or selected. Every cluster command must use the private kubeconfig or dedicated Docker socket.
 The official [k3d release](https://github.com/k3d-io/k3d/releases/tag/v5.9.0) supplies the verified tool and its release checksums.
 
-TestStudio is installed through the actual Helm chart in namespace teststudio-local, release teststudio, revision 7.
+TestStudio is installed through the actual Helm chart in namespace teststudio-local, release teststudio, revision 8.
 The service and fresh PostgreSQL Pods are Ready. Separate database and evidence claims are Bound with 2 GiB each.
 The service uses the locally imported immutable ARM64 manifest. No registry push or cloud account is required.
 The UI, API health, and artifact health return 200 through TLS ingress with certificate verification.
@@ -49,7 +49,9 @@ The service Pod is then replaced. A fresh sign-in reads the same run and downloa
 
 Fresh Go and Playwright suites now pass actual registry preparation, isolated discovery, publication, execution, timing, and private evidence checks.
 See [local source execution](local-kubernetes-source-execution.md) for their retained results and verified cleanup.
-Cancellation, deadlines, and interrupted worker recovery remain unverified on this cluster.
+Cancellation, separate timeout status, timeout reruns, and abrupt controller restart now pass on this cluster.
+See [local lifecycle](local-kubernetes-lifecycle.md) for retained evidence and first-attempt cleanup after asynchronous deletion.
+Independent deadlines and concurrent replica failover remain unverified.
 Actual gVisor runtime execution and selective worker network denial now pass. See [worker isolation](local-kubernetes-isolation.md).
 The single-Pod restart does not establish replica failover or cross-provider parity.
 The 57-item ledger remains at 48 verified and nine open items.
@@ -62,6 +64,8 @@ Installation evidence includes helm-install.log, installation-checks.json, pods.
 Current service output is service.log. The initial database startup race is recorded in service-previous.log.
 The successful probe records and summary are in output/local-k3s/probe.
 The service replacement records are before-evidence-restart.json, after-evidence-restart.json, and evidence-restart-summary.json.
+Current coded and lifecycle summaries are output/local-k3s/coded/summary.json and output/local-k3s/lifecycle/summary.json.
+The latest service image and upgrade log are service-cleanup-image.json and service-cleanup-deploy.log.
 The private kubeconfig contains credentials. Do not commit, print, or copy it into application settings.
 Private dependency settings and TLS keys remain under .data/local-k3s with restricted file permissions.
 The local PostgreSQL connection uses cluster-internal plaintext transport for this dedicated development cluster.

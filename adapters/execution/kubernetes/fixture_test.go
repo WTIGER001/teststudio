@@ -40,6 +40,9 @@ type fixture struct {
 	mode                    string
 	posts, deletes, patches int
 	unsafePolicy            bool
+	deleteReads             int
+	deletePending           bool
+	replaceAfterDelete      bool
 	checkpointError         bool
 	token                   string
 	auths                   []string
@@ -212,6 +215,13 @@ func (f *fixture) serve(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(value)
 		return
 	}
+	if f.deletePending && r.Method == "GET" {
+		if f.deleteReads == 0 {
+			f.value = nil
+		} else {
+			f.deleteReads--
+		}
+	}
 	if f.value == nil {
 		w.WriteHeader(404)
 		return
@@ -265,7 +275,13 @@ func (f *fixture) serve(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(409)
 			return
 		}
-		f.value = nil
+		if f.replaceAfterDelete {
+			f.value.Metadata.UID = "foreign-replacement"
+		} else if f.deleteReads > 0 {
+			f.deletePending = true
+		} else {
+			f.value = nil
+		}
 		json.NewEncoder(w).Encode(map[string]string{"status": "Success"})
 	default:
 		w.WriteHeader(405)

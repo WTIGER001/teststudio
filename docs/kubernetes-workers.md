@@ -9,7 +9,8 @@ Local protocol and packaging checks pass. A dedicated [local k3s cluster](local-
 Core application installation, OIDC sign-in, and a newly authored HTTPS probe now pass.
 Actual local gVisor execution and selective worker network denial also pass.
 Fresh Go and Playwright suites now pass actual preparation, publication, execution, timing, and private evidence checks.
-See [local source execution](local-kubernetes-source-execution.md). Cancellation, deadlines, and interrupted worker recovery remain pending on this cluster.
+See [local source execution](local-kubernetes-source-execution.md). Actual cancellation, test timeout, and interrupted-controller recovery now pass.
+See [local lifecycle](local-kubernetes-lifecycle.md). Independent deadline and replica-failover verification remain open.
 Acceptance 51 remains open across providers. The total stays 48 verified items out of 57.
 
 The separate preparation command now connects registry assembly, immutable publication, and hosted discovery to the existing source queue.
@@ -163,6 +164,8 @@ The adapter never force-deletes an unconfirmed live worker to make cleanup appea
 
 A confirmed terminal state is retained in the dispatch journal.
 Final deletion uses the exact Pod UID and resource version.
+The adapter waits for confirmed absence within the cleanup call deadline after deletion acknowledgement.
+Intermediate reads retain ownership checks. A foreign replacement never passes cleanup or receives another deletion request.
 The normal result and evidence checkpoint must permit cleanup before deletion.
 Private staging and quota reservations clear only through the existing exchange cleanup contract.
 The worker ledger records cleanup completion afterward.

@@ -152,7 +152,7 @@ After service Pod replacement, fresh OIDC sign-in reads the same single run and 
 This verifies core persistence across that restart. It does not establish replica failover or coded-worker recovery.
 Evidence is output/local-k3s/probe/summary.json and the adjacent retained run, event, attempt, artifact, and log records.
 No browser, AWS, or Azure test runs. This advances the Kubernetes portions of 51, 55, and 56 without closing their full scope.
-The next measurable result is actual cancellation, independent deadlines, and interrupted coded-worker recovery.
+The next measurable result is independent deadline enforcement and concurrent replica failover.
 The local cluster now runs the verified gVisor 20261005.0 package through RuntimeClass teststudio-isolated.
 An actual non-root diagnostic Pod reports the gVisor kernel and exits zero.
 The chart can use external private TLS routing while preserving the worker Service, controller permissions, and exact policy peers.
@@ -182,6 +182,25 @@ See [local source execution](local-kubernetes-source-execution.md) for installat
 This advances the Kubernetes portions of 41, 51, 55, and 56. The total remains 48 verified, 9 open.
 See [local Kubernetes](local-kubernetes.md) for scoped commands and stop instructions.
 No numbered acceptance item closes. The total remains **48 verified, 9 open**.
+
+## Local Kubernetes lifecycle progress — 2026-11-05
+
+Three newly authored lifecycle cases pass through normal source publication on the actual local cluster.
+Cancellation records a cancelled run, an unknown interrupted attempt, unavailable duration, and an explicit evidence gap.
+The timeout case records one timed-out result in 2008 ms with complete evidence and no failed-test count.
+The controller receives SIGKILL only after its exact Pod UID, container, namespace, and live process are verified.
+Kubernetes restarts the controller. The original run and execution identifiers remain unchanged.
+Its recovered passing observation retains 20000 ms timing and complete evidence. The interrupted logical run remains incomplete.
+All three execution records reach cleaned and their original worker Pods disappear.
+The verifier stores checkpoints and reuses existing runs instead of repeating execution after an observation delay.
+Actual asynchronous Pod deletion exposes an unnecessary recovery delay. The adapter now confirms absence within its existing call deadline.
+Two focused checks cover delayed deletion and rejection of a foreign replacement. Both pass.
+The new service deploys through Helm revision 8 with cached UI and trace assets.
+An actual Rerun failures request includes the timed-out test and retains its parent link.
+Its child run 20261105T154833.201607664-fc55cd1fb3946ebffd6803ef has one timeout, complete evidence, and cleanup on the first attempt.
+No host browser, live AWS, or Azure verification runs. Independent deadlines and concurrent replica failover remain open.
+See [local lifecycle](local-kubernetes-lifecycle.md) for exact identifiers, evidence, and continuation instructions.
+This advances the Kubernetes portions of 41, 51, 52, and 56. The total remains **48 verified, 9 open**.
 
 ## Current direction: Azure deferred; local Kubernetes integration
 

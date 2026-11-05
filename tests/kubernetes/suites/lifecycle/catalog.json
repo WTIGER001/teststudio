@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "teststudio.catalog/v1",
+  "tests": [
+    {
+      "id": "K3S-CANCEL-001",
+      "title": "Cancel an active isolated check",
+      "description": "New local Kubernetes lifecycle check",
+      "category": "Kubernetes lifecycle",
+      "applicationId": "workers",
+      "type": "unit",
+      "runner": "go",
+      "state": "enabled",
+      "safety": "safe",
+      "rationale": "Waits inside its isolated worker without external traffic",
+      "timeoutSeconds": 60,
+      "source": "module/lifecycle_test.go",
+      "selector": ".::TestCancellationWindow"
+    },
+    {
+      "id": "K3S-TIMEOUT-001",
+      "title": "Retain a separate timeout result",
+      "description": "New local Kubernetes lifecycle check",
+      "category": "Kubernetes lifecycle",
+      "applicationId": "workers",
+      "type": "unit",
+      "runner": "go",
+      "state": "enabled",
+      "safety": "safe",
+      "rationale": "Waits inside its isolated worker without external traffic",
+      "timeoutSeconds": 2,
+      "source": "module/lifecycle_test.go",
+      "selector": ".::TestTimeoutWindow"
+    },
+    {
+      "id": "K3S-RECOVERY-001",
+      "title": "Recover an interrupted controller",
+      "description": "New local Kubernetes lifecycle check",
+      "category": "Kubernetes lifecycle",
+      "applicationId": "workers",
+      "type": "unit",
+      "runner": "go",
+      "state": "enabled",
+      "safety": "safe",
+      "rationale": "Waits inside its isolated worker without external traffic",
+      "timeoutSeconds": 60,
+      "source": "module/lifecycle_test.go",
+      "selector": ".::TestRecoveryWindow"
+    }
+  ]
+}

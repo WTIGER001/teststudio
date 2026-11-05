@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/hostedexecution"
@@ -83,8 +84,8 @@ func (p *Provider) Remove(ctx context.Context, ref execution.Reference) error {
 		if err := p.request(ctx, http.MethodDelete, p.podPath(ref.Container), nil, options, nil); err != nil && !errors.Is(err, errAbsent) {
 			return hostedexecution.ErrUnavailable
 		}
-		if err := p.request(ctx, http.MethodGet, p.podPath(ref.Container), nil, nil, &value); !errors.Is(err, errAbsent) {
-			return hostedexecution.ErrUnavailable
+		if err := p.confirmRemoval(ctx, ref, record); err != nil {
+			return err
 		}
 	} else if !errors.Is(err, errAbsent) {
 		return hostedexecution.ErrUnavailable
@@ -97,4 +98,27 @@ func (p *Provider) Remove(ctx context.Context, ref execution.Reference) error {
 		return hostedexecution.ErrUnavailable
 	}
 	return nil
+}
+
+func (p *Provider) confirmRemoval(ctx context.Context, ref execution.Reference, record dispatch) error {
+	for {
+		var value pod
+		err := p.request(ctx, http.MethodGet, p.podPath(ref.Container), nil, nil, &value)
+		if errors.Is(err, errAbsent) {
+			return nil
+		}
+		if err != nil {
+			return hostedexecution.ErrUnavailable
+		}
+		if err := p.verifyPod(value, record); err != nil {
+			return err
+		}
+		timer := time.NewTimer(50 * time.Millisecond)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return hostedexecution.ErrUnavailable
+		case <-timer.C:
+		}
+	}
 }

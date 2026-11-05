@@ -5,14 +5,15 @@
 Fresh Go and Playwright suites now pass through the actual local Kubernetes installation.
 The workflow uses normal OIDC sign-in, ZIP upload, registry assembly, isolated discovery, reviewed publication, execution, timing, and private evidence.
 It copies no existing application tests, data, or infrastructure configuration.
-Cancellation, deadlines, replica failover, and interrupted coded-worker recovery remain separate verification steps.
+Cancellation, test timeouts, and interrupted-controller recovery now pass actual local verification.
+Independent deadlines and concurrent replica failover remain separate steps. See [local lifecycle](local-kubernetes-lifecycle.md).
 The overall acceptance count remains 48 of 57. Azure implementation remains deferred.
 
 ## Concepts
 
 ### Current installation
 
-Helm release teststudio now uses revision 7 and .data/local-k3s/preparation-values.json.
+Helm release teststudio now uses revision 8 and .data/local-k3s/preparation-values.json.
 The API and preparation workload run separately against the dedicated PostgreSQL database.
 Preparation uses its own service account, projected Kubernetes identity, registry writer references, and retained private journal claim.
 The API receives only the registry reader references.
@@ -122,8 +123,8 @@ Retain registry storage while published releases or retained observations requir
 
 ### Continue provider lifecycle verification
 
-Use fresh bounded cases for cancellation and independent deadlines on the current installation.
-Then interrupt a controller around actual execution and verify retained results without duplicate logical runs.
+Cancellation, timeout, and interrupted-controller cases now have saved references in output/local-k3s/lifecycle.
+Continue with independent deadline enforcement and concurrent replica failover without repeating those passing cases.
 Keep all worker execution on the dedicated local cluster and retain actual provider status and cleanup evidence.
 Environment-backed remote gateway delivery and cloud-target verification remain open.
 
