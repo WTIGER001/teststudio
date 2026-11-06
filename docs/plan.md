@@ -8,8 +8,10 @@ The user authorizes targeted tests and frequent feature commits. Remote pushes r
 
 The user resumes implementation on 2026-11-03.
 Focus on implementation, then targeted tests for the changed behavior.
-Run tests only locally. The user now authorizes a dedicated local k3s/k3d cluster.
-Live AWS and Azure verification remain separate work. Azure implementation is deferred at the user's request.
+Use targeted local checks for code changes and the dedicated local k3s/k3d cluster.
+Use focused live checks for the authorized MMDev AWS deployment only.
+The user authorizes deployment to the MMDev ECS cluster as teststudioapi on 2026-11-05.
+Use the mm_dev profile and preserve existing services. Azure implementation and verification remain deferred.
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
@@ -21,6 +23,8 @@ Ordinary project creator access and the first environment-backed local recorded 
 Tester investigation, failure recovery, and local manual/scheduled runner parity pass targeted verification.
 The trusted hosted browser/API gateway and recorder companion have local implementation evidence.
 The deployed recorder handoff also passes on the dedicated local Kubernetes installation. Retain that result.
+The authorized MMDev ECS core now runs as teststudioapi. Actual Cognito sign-in, one native HTTPS probe, and private S3 evidence pass.
+See [MMDev deployment](aws-mmdev.md). The next AWS milestone is the separate isolated worker and preparation installation.
 The current [deployment readiness audit](deployment-readiness.md) separates implementation gaps from deferred verification gates.
 Do not add new dashboard pages or repeat completed demonstration setup before closing the remaining workflow gaps.
 
@@ -44,7 +48,7 @@ The remaining Important acceptance work follows this priority order:
 | 6 | 57 | Complete common acceptance scenarios across every deployment profile. |
 | 7 | 53 | Complete and verify the independent Azure installation after its deferral ends. |
 
-This order does not authorize live cloud work. Azure implementation remains deferred.
+AWS deployment to the MMDev ECS cluster is now authorized as teststudioapi. Azure implementation remains deferred.
 See [deployment readiness](deployment-readiness.md) for missing implementation and separate verification gates.
 Optional Nice to Have work does not take priority over these requirements.
 
@@ -117,7 +121,7 @@ Cloud-wide acceptance remains separate. Continue independent remaining product w
 
 Kubernetes now runs environment-backed browser and coded API artifacts through its trusted gateway.
 Both actual local cluster workflows pass with measured durations, private evidence, and complete resource cleanup.
-ECS gateway integration and optional packaging now have local contract evidence. Actual AWS execution remains unverified.
+ECS gateway integration and optional packaging now have local contract evidence. Actual AWS coded execution remains unverified.
 Hosted recording now has a local companion, guided wizard, standalone package, and opt-in Kubernetes and ECS configuration.
 The first ECS transport components now support a frozen private task address and private server certificate environment values.
 Pending addresses keep initialization and activation closed until the provider binds the observed task identity and address.

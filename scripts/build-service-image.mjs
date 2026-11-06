@@ -48,7 +48,9 @@ for (const name of ['teststudio', 'teststudio-health', 'teststudio-prepare']) {
 const dockerfile = path.join(root, 'deploy/service/Dockerfile')
 const certificateSource = JSON.parse(fs.readFileSync('deploy/service/certificate-source.json', 'utf8'))
 if (!/^[^\s]+@sha256:[a-f0-9]{64}$/.test(certificateSource.image) || !/^linux\/(amd64|arm64)$/.test(certificateSource.platform) || certificateSource.path !== '/etc/ssl/certs/ca-certificates.crt') throw new Error('The service certificate source requires a fixed image digest, platform, and certificate path')
-const sourceKey = digest([architecture, buildBackend, certificateSource, hashFile(dockerfile), hashFile('scripts/build-service-image.mjs'), hashFile('scripts/lib/docker-build.mjs'), cache.binaries, assets.uiOutput, assets.traceOutput])
+const rdsSource = JSON.parse(fs.readFileSync('deploy/service/rds-ca-source.json', 'utf8'))
+if (rdsSource.url !== 'https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem' || hashFile('deploy/service/rds-ca-bundle.pem') !== rdsSource.sha256) throw new Error('The reviewed RDS certificate bundle does not match its pinned source hash')
+const sourceKey = digest([rdsSource, architecture, buildBackend, certificateSource, hashFile(dockerfile), hashFile('scripts/build-service-image.mjs'), hashFile('scripts/lib/docker-build.mjs'), cache.binaries, assets.uiOutput, assets.traceOutput])
 if (cache.sourceKey === sourceKey && cache.image) {
   const previous = inspect(cache.image)
   if (previous?.Id === cache.image && previous.Architecture === architecture) { console.error('Reusing the unchanged service image.'); console.log(JSON.stringify({ image: cache.image, architecture, sourceKey })); process.exit(0) }
@@ -66,6 +68,7 @@ try {
     fs.chmodSync(path.join(context, name), mode)
   }
   for (const name of ['teststudio', 'teststudio-health', 'teststudio-prepare']) fs.copyFileSync(path.join(directory, name), path.join(context, name))
+  fs.copyFileSync('deploy/service/rds-ca-bundle.pem', path.join(context, 'rds-ca-bundle.pem'))
   fs.cpSync(assets.ui, path.join(context, 'ui'), { recursive: true, dereference: false })
   fs.cpSync(assets.traceViewer, path.join(context, 'trace-viewer'), { recursive: true, dereference: false })
   execFileSync(buildCommand, [...buildPrefix, '--network=none', '--pull=false', '--platform=linux/' + architecture, '--build-arg', 'TARGETARCH=' + architecture, '--build-arg', 'SOURCE_KEY=' + sourceKey, '-q', '-f', dockerfile, '-t', 'teststudio/service:' + architecture + '-local', context], { stdio: ['ignore', 2, 2] })

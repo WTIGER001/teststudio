@@ -1,6 +1,18 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Independent TestStudio core service on ECS Fargate with separate CloudFront UI and evidence origins
 Parameters:
+  ExistingClusterArn:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|^arn:aws:ecs:[a-z0-9-]+:[0-9]{12}:cluster/[A-Za-z0-9_-]+$'
+  ServiceName:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|^[A-Za-z0-9_-]{1,255}$'
+  DatabaseSecurityGroupId:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|^sg-[a-f0-9]+$'
   VpcId:
     Type: AWS::EC2::VPC::Id
   PublicSubnets:
@@ -112,6 +124,9 @@ Rules:
       - Assert: !Not [!Equals [!Ref ArtifactHostname, !Ref OriginHostname]]
         AssertDescription: The load balancer origin requires a separate host
 Conditions:
+  CreateCluster: !Equals [!Ref ExistingClusterArn, '']
+  NamedService: !Not [!Equals [!Ref ServiceName, '']]
+  DatabaseIngress: !Not [!Equals [!Ref DatabaseSecurityGroupId, '']]
   DesktopCompanion: !Equals [!Ref RecordingCompanion, 'true']
   Workers: !Not [!Equals [!Ref WorkerSettingsSecretArn, '']]
   NewWorkerSources: !And [!Not [!Equals [!Ref WorkerSettingsSecretArn, '']], !Equals [!Ref WorkerNewSources, 'true']]
@@ -294,9 +309,19 @@ Resources:
         HostedZoneId: !GetAtt LoadBalancer.CanonicalHostedZoneID
         EvaluateTargetHealth: false
   Cluster:
+    Condition: CreateCluster
     Type: AWS::ECS::Cluster
     Properties:
       ClusterSettings: [{Name: containerInsights, Value: enabled}]
+  DatabaseAccess:
+    Condition: DatabaseIngress
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref DatabaseSecurityGroupId
+      IpProtocol: tcp
+      FromPort: 5432
+      ToPort: 5432
+      SourceSecurityGroupId: !Ref TaskSecurityGroup
   ServiceLog:
     Type: AWS::Logs::LogGroup
     DeletionPolicy: Retain
@@ -454,7 +479,8 @@ Resources:
     Type: AWS::ECS::Service
     DependsOn: [ApiRoute, ArtifactRoute, EvidencePolicy]
     Properties:
-      Cluster: !Ref Cluster
+      Cluster: !If [CreateCluster, !Ref Cluster, !Ref ExistingClusterArn]
+      ServiceName: !If [NamedService, !Ref ServiceName, !Ref 'AWS::NoValue']
       LaunchType: FARGATE
       PlatformVersion: '1.4.0'
       TaskDefinition: !Ref Task
@@ -727,10 +753,10 @@ Outputs:
   TaskSecurityGroupId:
     Value: !Ref TaskSecurityGroup
   ClusterName:
-    Value: !Ref Cluster
+    Value: !If [CreateCluster, !Ref Cluster, !Select [1, !Split ['/', !Ref ExistingClusterArn]]]
   ServiceName:
     Value: !GetAtt Service.Name
   TaskRoleName:
     Value: !Ref TaskRole
   ClusterArn:
-    Value: !GetAtt Cluster.Arn
+    Value: !If [CreateCluster, !GetAtt Cluster.Arn, !Ref ExistingClusterArn]

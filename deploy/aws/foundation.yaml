@@ -1,0 +1,252 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Independent TestStudio development networking, PostgreSQL, registry, identity, and origin certificate
+Parameters:
+  InstallationName:
+    Type: String
+    Default: teststudioapi
+    AllowedPattern: '^[a-z][a-z0-9-]{2,30}$'
+  HostedZoneId:
+    Type: AWS::Route53::HostedZone::Id
+  UiHostname:
+    Type: String
+  OriginHostname:
+    Type: String
+  AvailabilityZoneOne:
+    Type: AWS::EC2::AvailabilityZone::Name
+  AvailabilityZoneTwo:
+    Type: AWS::EC2::AvailabilityZone::Name
+  PostgreSQLVersion:
+    Type: String
+    Default: '17.11'
+Resources:
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.91.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags: [{Key: Name, Value: !Ref InstallationName}]
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+  GatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref Vpc
+      InternetGatewayId: !Ref InternetGateway
+  PublicOne:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.91.0.0/24
+      AvailabilityZone: !Ref AvailabilityZoneOne
+  PublicTwo:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.91.1.0/24
+      AvailabilityZone: !Ref AvailabilityZoneTwo
+  PrivateOne:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.91.16.0/24
+      AvailabilityZone: !Ref AvailabilityZoneOne
+  PrivateTwo:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.91.17.0/24
+      AvailabilityZone: !Ref AvailabilityZoneTwo
+  PublicRoutes:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+  InternetRoute:
+    Type: AWS::EC2::Route
+    DependsOn: GatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRoutes
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+  PublicOneRoutes:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRoutes
+      SubnetId: !Ref PublicOne
+  PublicTwoRoutes:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRoutes
+      SubnetId: !Ref PublicTwo
+  NatAddress:
+    Type: AWS::EC2::EIP
+    DependsOn: GatewayAttachment
+    Properties:
+      Domain: vpc
+  Nat:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatAddress.AllocationId
+      SubnetId: !Ref PublicOne
+  PrivateRoutes:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+  OutboundRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRoutes
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref Nat
+  PrivateOneRoutes:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRoutes
+      SubnetId: !Ref PrivateOne
+  PrivateTwoRoutes:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PrivateRoutes
+      SubnetId: !Ref PrivateTwo
+  DatabaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: TestStudio PostgreSQL access from explicitly admitted service groups
+      VpcId: !Ref Vpc
+  DatabaseSubnets:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Private TestStudio database subnets
+      SubnetIds: [!Ref PrivateOne, !Ref PrivateTwo]
+  DatabaseCredentials:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${InstallationName}/database-credentials'
+      GenerateSecretString:
+        SecretStringTemplate: '{"username":"teststudio"}'
+        GenerateStringKey: password
+        PasswordLength: 40
+        ExcludePunctuation: true
+  Database:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Snapshot
+    UpdateReplacePolicy: Snapshot
+    Properties:
+      DBInstanceIdentifier: !Sub '${InstallationName}-postgres'
+      DBName: teststudio
+      Engine: postgres
+      EngineVersion: !Ref PostgreSQLVersion
+      DBInstanceClass: db.t4g.micro
+      AllocatedStorage: '20'
+      MaxAllocatedStorage: 100
+      StorageType: gp3
+      StorageEncrypted: true
+      PubliclyAccessible: false
+      MultiAZ: false
+      BackupRetentionPeriod: 7
+      CopyTagsToSnapshot: true
+      AutoMinorVersionUpgrade: true
+      EnableCloudwatchLogsExports: [postgresql]
+      DBSubnetGroupName: !Ref DatabaseSubnets
+      VPCSecurityGroups: [!Ref DatabaseSecurityGroup]
+      MasterUsername: teststudio
+      MasterUserPassword: !Sub '{{resolve:secretsmanager:${DatabaseCredentials}:SecretString:password}}'
+      Tags: [{Key: Application, Value: TestStudio}]
+  DatabaseConnection:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${InstallationName}/database-url'
+      SecretString: !Sub 'postgres://teststudio:{{resolve:secretsmanager:${DatabaseCredentials}:SecretString:password}}@${Database.Endpoint.Address}:${Database.Endpoint.Port}/teststudio?sslmode=verify-full&sslrootcert=/app/rds-ca-bundle.pem'
+  Repository:
+    Type: AWS::ECR::Repository
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RepositoryName: !Sub '${InstallationName}/service'
+      ImageTagMutability: IMMUTABLE
+      ImageScanningConfiguration: {ScanOnPush: true}
+      EncryptionConfiguration: {EncryptionType: AES256}
+  Identity:
+    Type: AWS::Cognito::UserPool
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      UserPoolName: !Ref InstallationName
+      AdminCreateUserConfig: {AllowAdminCreateUserOnly: true}
+      MfaConfiguration: 'OFF'
+      UsernameConfiguration: {CaseSensitive: false}
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 16
+          RequireLowercase: true
+          RequireUppercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+          TemporaryPasswordValidityDays: 7
+  IdentityDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Sub '${InstallationName}-${AWS::AccountId}'
+      UserPoolId: !Ref Identity
+  IdentityClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref Identity
+      ClientName: !Ref InstallationName
+      GenerateSecret: false
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows: [code]
+      AllowedOAuthScopes: [openid, profile, email]
+      SupportedIdentityProviders: [COGNITO]
+      CallbackURLs: [!Sub 'https://${UiHostname}/auth/callback/cognito']
+      LogoutURLs: [!Sub 'https://${UiHostname}/']
+      PreventUserExistenceErrors: ENABLED
+      EnableTokenRevocation: true
+      ExplicitAuthFlows: [ALLOW_USER_SRP_AUTH, ALLOW_REFRESH_TOKEN_AUTH]
+  IdentityConfiguration:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${InstallationName}/oidc-configuration'
+      SecretString: !Sub '[{"id":"cognito","name":"TestStudio sign-in","issuer":"https://cognito-idp.${AWS::Region}.amazonaws.com/${Identity}","clientId":"${IdentityClient}","scopes":["openid","profile","email"],"autoProvision":false,"disabled":false}]'
+  AdministratorCredential:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub '${InstallationName}/initial-administrator'
+      GenerateSecretString:
+        SecretStringTemplate: '{"username":"studioadmin"}'
+        GenerateStringKey: password
+        PasswordLength: 32
+        ExcludePunctuation: true
+  OriginCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref OriginHostname
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Ref OriginHostname
+          HostedZoneId: !Ref HostedZoneId
+Outputs:
+  VpcId:
+    Value: !Ref Vpc
+  PublicSubnets:
+    Value: !Join [',', [!Ref PublicOne, !Ref PublicTwo]]
+  PrivateSubnets:
+    Value: !Join [',', [!Ref PrivateOne, !Ref PrivateTwo]]
+  DatabaseSecurityGroupId:
+    Value: !Ref DatabaseSecurityGroup
+  DatabaseSecretArn:
+    Value: !Ref DatabaseConnection
+  OidcConfigurationSecretArn:
+    Value: !Ref IdentityConfiguration
+  UserPoolId:
+    Value: !Ref Identity
+  OidcIssuer:
+    Value: !Sub 'https://cognito-idp.${AWS::Region}.amazonaws.com/${Identity}'
+  AdministratorSecretArn:
+    Value: !Ref AdministratorCredential
+  OriginCertificateArn:
+    Value: !Ref OriginCertificate
+  ServiceRepositoryName:
+    Value: !Ref Repository
+  ServiceRepositoryUri:
+    Value: !GetAtt Repository.RepositoryUri

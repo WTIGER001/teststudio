@@ -42,7 +42,10 @@ Source inputs, effective compiler settings, binary hashes, asset hashes, Dockerf
 The final container build has no network access and uses a scratch base.
 Its certificate bundle comes from deploy/service/certificate-source.json and a stopped container from the pinned image.
 The producer copies trusted certificates without executing that container. It removes and verifies the extraction container after assembly.
-Its temporary context contains only the selected binaries and static assets. The context is removed after assembly.
+The image also includes the reviewed public Amazon RDS CA bundle at /app/rds-ca-bundle.pem.
+Its source URL and SHA-256 hash appear in deploy/service/rds-ca-source.json. The builder rejects different bytes.
+The bundle permits PostgreSQL sslmode=verify-full without disabling certificate or hostname verification.
+Its temporary context contains only the selected binaries, public certificates, and static assets. The context is removed after assembly.
 An unchanged image build reuses existing assets, binaries, and the verified image identifier.
 
 ## Runtime configuration

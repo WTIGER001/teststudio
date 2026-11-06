@@ -2,8 +2,9 @@
 
 The template packages TestStudio's core service on ECS Fargate with CloudFront.
 It creates independent resources. It imports no MarketMaker configuration.
-Use the authorized MMDev account for later AWS verification.
-Current verification uses local schemas and package checks only. No AWS deployment occurs in this session.
+The user authorizes MMDev deployment on 2026-11-05, using the existing ECS cluster and service name teststudioapi.
+See [MMDev deployment](aws-mmdev.md) for observed progress and installation boundaries.
+Local package evidence and actual target evidence remain distinct.
 
 The profile currently supports the catalog, identity, native HTTP execution, schedules, and private evidence service.
 Offline Go and Playwright workers and separate preparation now have an optional [staged infrastructure package](aws-workers-package.md).
@@ -24,6 +25,9 @@ Provision the following installation resources before deployment:
 
 | Input | Requirement |
 | --- | --- |
+| ExistingClusterArn | Optional existing cluster ARN. An empty value creates a dedicated cluster. |
+| ServiceName | Optional explicit service name. MMDev uses teststudioapi. |
+| DatabaseSecurityGroupId | Optional database security group. The template permits only the service group on TCP 5432. |
 | VPC | One installation VPC with DNS support. |
 | PublicSubnets | At least two public subnets in separate availability zones for the load balancer. |
 | PrivateSubnets | Private task subnets with database reachability and outbound access. Tasks receive no public addresses. |
@@ -42,8 +46,10 @@ Provision the following installation resources before deployment:
 | BootstrapIssuer | One configured provider's exact issuer. |
 | BootstrapSubject | The initial administrator's exact external subject. |
 
-The template creates an ECS cluster, service, roles, log group, load balancer, security groups, distributions, buckets, and DNS records.
-It creates no database, VPC, subnet, certificate, ECR repository, external identity provider, or upstream application secret.
+The template creates a service, roles, log group, load balancer, security groups, distributions, buckets, and DNS records.
+It creates a cluster only when ExistingClusterArn is empty. It does not manage other services in a supplied cluster.
+The core template creates no database, VPC, subnet, certificate, ECR repository, external identity provider, or upstream application secret.
+The separate deploy/aws/foundation.yaml template supplies dedicated development prerequisites when an installation has none.
 Enable TLS verification for PostgreSQL. Use the database's supported root certificate configuration.
 Grant the output TaskSecurityGroupId access to the database's TLS port through the database security group.
 The API needs that access before ECS can become healthy.

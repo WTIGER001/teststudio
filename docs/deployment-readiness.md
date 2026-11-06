@@ -14,7 +14,7 @@ Azure implementation and verification remain deferred. A later Azure deployment 
 | --- | --- | --- |
 | Local server | SQLite durability, managed identity, environment-backed browser and API execution, desktop recording, source publication, timing, evidence, and UI workflows. | This does not establish cloud deployment behavior. |
 | Kubernetes | Actual local k3s installation, PostgreSQL, private evidence, two OIDC providers, source preparation, offline suites, environment-backed browser and authenticated HTTPS API suites, gateway lifecycle, deadlines, controller failover, and the desktop recorder handoff now pass. | The owned local cluster does not establish another installation's routing, storage, runtime, or desktop trust configuration. |
-| AWS ECS and CloudFront | Service and worker templates, private exchange, native SDK adapters, optional environment gateway, source preparation, opt-in recorder packaging, and local protocol checks. | Actual AWS execution, storage, identity, and recorder handoff remain unverified. |
+| AWS ECS and CloudFront | Actual MMDev core deployment, PostgreSQL TLS, Cognito sign-in, one measured native HTTPS probe, private S3 evidence, and matching public UI assets now pass. Worker and gateway packages retain local contract evidence. | Actual coded workers, preparation, lifecycle, two-provider permission parity, storage policies, and recorder handoff remain unverified. |
 | Azure | Core service and assembly packages, staged execution and sandbox adapters, and previously retained local protocol evidence. | Native coded execution and discovery wiring remain unfinished. The user defers this work and account verification. |
 
 Local coverage is documented in [browser execution](browser-execution.md), [API tests](api-testing.md), and [browser recording](browser-recording.md).
@@ -26,13 +26,13 @@ Packaging and SDK protocol checks do not prove target deployment acceptance.
 
 | Item | Current implementation and evidence | Missing implementation | Separate verification gate |
 | --- | --- | --- | --- |
-| 41 | Shared timing assessment, measured reports, immutable profiles, and actual local and Kubernetes observations, including the new gateway profiles. | Deferred Azure execution remains unwired. | Common timing behavior on actual ECS and Azure execution profiles. |
-| 46 | Filesystem, S3, and Azure Blob adapters exist. Shared quotas, pins, retention, and local SDK protocol checks exist. | No additional shared evidence-engine gap is identified in this audit. | Actual provider identity, encryption, lifecycle, retention, quota, and pin behavior on S3 and Azure storage. |
+| 41 | Shared timing assessment, measured reports, immutable profiles, local and Kubernetes observations, and one actual AWS native HTTPS measurement. | Deferred Azure execution remains unwired. | Common timing behavior on actual ECS and Azure execution profiles. |
+| 46 | Filesystem, S3, and Azure Blob adapters exist. Shared quotas, pins, retention, and local SDK protocol checks exist. Actual AWS private evidence upload and checksum-verified download now pass. | No additional shared evidence-engine gap is identified in this audit. | Actual provider identity, encryption, lifecycle, retention, quota, and pin behavior on S3 and Azure storage. |
 | 51 | Kubernetes gateway workflows have actual lifecycle evidence. ECS orchestration, native admission, registration, preparation, and environment packaging pass local checks. | Deferred Azure native execution and discovery wiring. | Actual ECS and Azure lifecycle scenarios. |
 | 53 | The local and Kubernetes installations work without AWS services or credentials. Azure has an independent Blob and identity configuration. | Deferred Azure installation and coded-execution wiring remain incomplete. | An actual independent Azure installation. |
-| 54 | Two OIDC providers work through the shared directory locally and on Kubernetes. Project authorization and private evidence withdrawal pass. | No additional shared identity-engine gap is identified in this audit. | Equivalent configured-provider and project-scope scenarios on ECS and Azure. |
-| 56 | Newly authored local suites, Kubernetes offline suites, and Kubernetes environment-backed suites retain measured results, progress, history, and evidence. ECS gateway delivery and packaging pass local contract checks. | Azure discovery and execution remain deferred. | Generic suites, reports, and trends on every required target. |
-| 57 | All four deployment packages have implementation material. Local operation and actual Kubernetes browser, API, lifecycle, identity, and desktop recording pass. The companion also has local UI, macOS package, and opt-in Kubernetes and ECS package evidence. | Deferred Azure wiring remains incomplete. | Complete common scenarios on ECS and Azure, including their deployed recorder handoff. |
+| 54 | Two OIDC providers work through the shared directory locally and on Kubernetes. Project authorization and private evidence withdrawal pass. The AWS core now has actual Cognito sign-in and anonymous project denial. | No additional shared identity-engine gap is identified in this audit. | Equivalent configured-provider and project-scope scenarios on ECS and Azure. |
+| 56 | Newly authored local suites, Kubernetes offline suites, and Kubernetes environment-backed suites retain measured results, progress, history, and evidence. ECS gateway delivery and packaging pass local contract checks. | Azure discovery and execution remain deferred. | Coded suites, reports, and trends on remaining required targets. The AWS core now retains one newly authored native HTTPS run. |
+| 57 | All four deployment packages have implementation material. Actual AWS core operation now passes. Local operation and actual Kubernetes browser, API, lifecycle, identity, and desktop recording pass. The companion also has local UI, macOS package, and opt-in Kubernetes and ECS package evidence. | Deferred Azure wiring remains incomplete. | Complete common scenarios on ECS and Azure, including their deployed recorder handoff. |
 
 Keep each broad item unchecked until its complete requirement passes.
 The completed generic failover and hosted-private-access contracts remain 52 and 55.
@@ -52,7 +52,7 @@ The [native gateway network guard](ecs-gateway-network.md) now verifies private 
 Production SDK selection now preserves the offline pool and enables environment providers only with complete separate settings and current authority.
 ECS source assembly and discovery enforce the verified-address capability for environment metadata.
 The [optional environment package](aws-environment-package.md) now provides private networks, gateway permissions, certificate references, repository, and combined settings.
-Its rendered resources pass local schema and native admission checks. Actual AWS execution remains unverified.
+Its rendered resources pass local schema and native admission checks. Actual AWS coded execution remains unverified.
 The [Kubernetes gateway component](kubernetes-gateway.md) now supports separate environment references and provider-owned gateway bundles.
 Its normal executor registration, image approval, source discovery, and Helm path now pass targeted local checks.
 The deployed offline worker policy still permits only the private exchange and DNS.
@@ -140,8 +140,8 @@ Keep other passing browser and execution scenarios as retained evidence. Do not 
 
 ### 3. Target verification when separately authorized
 
-Keep live AWS and Azure verification outside the current local implementation session.
-AWS verification uses the previously selected MMDev account when the user authorizes that deployment work.
+The user authorizes MMDev deployment on 2026-11-05, using the existing ECS cluster and service name teststudioapi.
+The [MMDev deployment guide](aws-mmdev.md) records actual changes and evidence. Complete provider acceptance remains open.
 Azure needs a later account and deployment-script request. Its deferral stays in force.
 Retain the full original target scope and seven open criteria while these gates remain unsatisfied.
 

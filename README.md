@@ -45,7 +45,9 @@ Normal local development still starts with an empty project registry.
 The acceptance ledger has 50 verified items of 57. The full product remains unfinished.
 The local application and dedicated local Kubernetes installation have retained workflow evidence.
 AWS ECS and CloudFront have service, execution, gateway, and optional desktop recorder packages with local contract checks.
-Actual AWS verification remains separate work in the selected MMDev account.
+The MMDev ECS core now runs as teststudioapi with CloudFront, PostgreSQL, dedicated sign-in, and private evidence.
+See [deployment and sign-in](docs/aws-mmdev.md) for the address, initial credential reference, and verified scope.
+Complete AWS acceptance remains open until actual target verification passes.
 Azure implementation and verification remain deferred at the user's request.
 See [deployment readiness](docs/deployment-readiness.md) for the seven open criteria and their exact gates.
 Operator guides cover [AWS](docs/aws.md), [Kubernetes](docs/kubernetes.md), and the [staged Azure profile](docs/azure.md).

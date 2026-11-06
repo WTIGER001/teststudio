@@ -21,7 +21,8 @@ Use the active delivery sequence in `docs/plan.md`. Historical checkpoints are r
 - Focus on implementation, then run targeted local tests for changed behavior.
 - The user defers Azure implementation and verification. Preserve staged code. Prepare an Azure deployment script only when the user requests that work.
 - Run Kubernetes verification only on a dedicated local k3s/k3d cluster with an explicit private kubeconfig. Do not use a remote or inherited cluster context.
-- Do not run live AWS or Azure tests in this work session.
+- The user authorizes AWS deployment to the MMDev ECS cluster as teststudioapi. Use the mm_dev profile and verify the selected account before mutations.
+- Keep AWS changes scoped to TestStudio-owned resources and the new service. Preserve existing ECS services. Azure remains deferred.
 - Do not repeat broad suites or fixture builds without a concrete unresolved concern.
 - Commit verified features frequently, as the user requests.
 - Do not push without an explicit request.

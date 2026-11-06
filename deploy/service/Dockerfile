@@ -7,7 +7,7 @@ COPY ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --chown=65532:65532 data /data
 COPY --chown=65532:65532 temporary /tmp
 COPY --chown=65532:65532 journals /private/source-journals
-COPY teststudio teststudio-health teststudio-prepare /app/
+COPY teststudio teststudio-health teststudio-prepare rds-ca-bundle.pem /app/
 COPY ui /app/ui
 COPY trace-viewer /app/trace-viewer
 ENV HOME=/tmp TESTSTUDIO_DATABASE=/data/teststudio.db

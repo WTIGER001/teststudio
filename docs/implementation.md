@@ -4,9 +4,38 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
-Focus on implementation and targeted local checks. Cloud verification remains separate work.
+Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
-## Current readiness and priority audit — 2026-11-05
+## Authorized MMDev ECS core deployment — 2026-11-05
+
+The user authorizes deployment into the MMDev ECS cluster, with service name teststudioapi.
+The mm_dev profile resolves to account 253455159142 in us-west-2. The selected cluster is marketmaker-testing-dev.
+The existing testing-server service remains healthy at one desired and running task.
+The core template now supports an existing cluster, an explicit service name, and narrowly scoped database ingress.
+A separate development foundation supplies dedicated networking, private encrypted PostgreSQL, ECR, Cognito, startup secrets, and an origin certificate.
+Reviewed add-only change sets create 29 foundation resources and 31 core resources. The core stack creates no cluster.
+Both stacks report CREATE_COMPLETE. ECS reports a completed one-task rollout and two healthy target groups.
+Both CloudFront distributions report Deployed. The public address is https://teststudioapi.devfoodmarketmaker.com.
+
+The image adds a reviewed public RDS CA bundle with pinned provenance. Database TLS keeps certificate and hostname verification enabled.
+The builder reuses unchanged UI, trace viewer, and all three Go binaries.
+The bootstrap helper preserves an existing confirmed administrator. Generated credentials stay in Secrets Manager and protected temporary request files.
+Temporary credential files and the private Docker authentication directory are removed after use.
+
+The focused cloud workflow passes actual Cognito OIDC sign-in, ordinary catalog publication, one native HTTPS execution, and private S3 evidence access.
+The first setup request omits the publication idempotency key. The corrected request reuses its draft; no failed or duplicate test execution occurs.
+Run 20261106T014449.692767879-e0841a5b4b501c410e0db21d passes in 167.768248 ms, with a 16.519076 ms TLS handshake.
+It retains one attempt, four events, four log segments, and four artifacts. The downloaded evidence matches its size and checksum.
+The public index and main JavaScript match the built bytes. Anonymous project access returns 401.
+The evidence bucket reports AES256 encryption and all four public-access blocks enabled. The owned application session signs out.
+The repeatable verifier preserves its original run reference and idempotency key. No browser or coded worker starts for this check.
+
+Both templates pass focused schema checks. The recorder packaging contract remains valid across its four profiles and three rejected settings.
+Actual AWS coded workers, preparation, lifecycle, two-provider permissions, storage policies, and recorder handoff remain separate work.
+This advances 41, 46, 54, 56, and 57. No acceptance item closes; the total remains 50 verified of 57.
+See [MMDev installation](aws-mmdev.md) and output/aws-mmdev for exact references, operation receipts, and continuation instructions.
+
+## Readiness and priority audit before AWS authorization — 2026-11-05
 
 The [active plan](plan.md#user-facing-priority-categories) records Critical, Important, and Nice to Have priorities.
 No known local create, run, or result-inspection blocker remains in retained verification.
