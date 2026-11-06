@@ -37,9 +37,9 @@ The reviewed foundation change set adds 29 resources. The reviewed core change s
 Neither change set modifies existing resources. The core change set creates no cluster.
 ECS reports one desired and one running teststudioapi task with a completed rollout.
 Both API and artifact target groups report healthy. The existing testing-server remains at one running task.
-The ARM64 image is sha256:6270eaeb52d48d9be5a56c5c8ab194c6e7a42dae03fb920f5ea375b8c6b8350c.
-It is published in teststudioapi/service. The project creation update includes the matching UI assets.
-The unchanged trace viewer and all three Go binaries are reused. The image retains the reviewed public RDS trust bundle.
+The ARM64 image is sha256:c52b8386a239cd279620fd1c102abcaafbdbf2424da5a45712d06ef5e8f569f1.
+It is published in teststudioapi/service. The project gallery update includes private image APIs and matching UI assets.
+The unchanged trace viewer is reused. Native image storage uses the existing private database. The image retains the reviewed public RDS trust bundle.
 
 Actual Cognito sign-in, catalog publication, and one native HTTPS probe now pass through the public installation.
 The original run is 20261106T014449.692767879-e0841a5b4b501c410e0db21d in project aws-core.

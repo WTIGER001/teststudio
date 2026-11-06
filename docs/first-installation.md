@@ -8,6 +8,8 @@ Build the UI and start the local server with the README commands.
 Open Projects and select Create project. The wizard opens on its own page at /projects/new.
 The setup wizard can add your first application, target, and empty suite.
 Back to projects and Cancel setup return to the project list. Changed entries require confirmation before leaving.
+Projects uses square tiles. Select Image on a tile to upload or capture its optional background.
+See [Project images](project-images.md) for browser capture, permissions, and storage.
 No cloud account, Docker runtime, or database server is required for native HTTP checks.
 
 ## Add only the examples you choose

@@ -101,12 +101,21 @@ h2 .count-label { background: var(--surface-muted); border-radius: 5px; padding:
 .section-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 19px; }
 .section-heading { margin: 0 0 16px; }
 .two-column { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr); gap: 27px; align-items: start; }
-.project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-.project-card { display: block; padding: 25px; color: var(--text); transition: border-color 140ms; }
-.project-card:hover { text-decoration: none; border-color: var(--accent); }
-.project-card h3 { margin: 15px 0 8px; font-size: 17px; }
-.project-card p { min-height: 50px; font-size: 12px; margin-bottom: 18px; }
-.project-card > .small { color: var(--accent); }
+.project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 20rem)); gap: 20px; }
+.project-grid > .empty-state { grid-column: 1 / -1; }
+.project-card { position: relative; min-width: 0; aspect-ratio: 1; overflow: hidden; background: radial-gradient(at top left, var(--accent-soft), var(--surface)); transition: border-color 140ms; }
+.project-card:hover { border-color: var(--accent); }
+.project-card-link { position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: 1.5rem; height: 100%; padding: 24px; color: var(--text); }
+.project-card-link:hover { text-decoration: none; }
+.project-card-link:focus-visible { outline-offset: -4px; }
+.project-card h3 { margin: 0 0 8px; font-size: 17px; }
+.project-card p { font-size: 12px; margin-bottom: 16px; color: var(--muted); }
+.project-card h3, .project-card p { overflow-wrap: anywhere; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.project-card .small { color: var(--accent); }
+.project-cover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.project-card.with-image .project-card-link { background: linear-gradient(rgb(0 0 0 / 15%), rgb(0 0 0 / 92%)); }
+.project-card.with-image h3, .project-card.with-image p, .project-card.with-image .project-card-details .small { color: #fff; }
+.project-image-action { position: absolute; top: 14px; right: 14px; }
 .project-icon, .empty-icon { display: grid; place-items: center; color: var(--accent); background: var(--accent-soft); width: 38px; height: 38px; border-radius: 10px; font-size: 24px; }
 .field { min-width: 0; display: grid; gap: 6px; margin-bottom: 17px; }
 .field select { min-width: 0; width: 100%; }

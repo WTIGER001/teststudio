@@ -22,6 +22,9 @@ Empty states explain the next available action. Access failures and unavailable 
 Use a wizard with a labeled stepper for configuration that spans several decisions or creates related resources.
 Group steps by the tester's decisions. Keep a short form or direct action for a simple task.
 Use dedicated routes for substantial authoring workflows. Small edits can remain beside their context.
+Projects uses square tiles with a 17rem minimum and 20rem maximum width. Narrow screens shrink tiles to fit.
+Keep the redundant project total out of the page heading. Optional images fill the tile behind a readable title overlay.
+Image editing uses a focused dialog with upload, browser-assisted tab capture, review, and explicit Save image.
 Project creation opens at /projects/new from the Projects page. Keep its wizard separate from the project list.
 Its progress stays in one row. Narrow screens scroll the progress region without widening the page.
 Keep common controls visible. Put uncommon filters, tuning, pins, and identifiers under clearly named Advanced sections.

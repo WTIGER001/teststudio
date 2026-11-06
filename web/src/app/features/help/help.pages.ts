@@ -337,12 +337,14 @@ export const helpPages: Record<string, HelpPage> = {
     id: 'projects', title: 'Projects',
     introduction: ['Projects keep related applications, test suites, and results together. Open a project to manage its catalog and runs.'],
     concepts: [
+      { title: 'Project images', description: 'Projects use square tiles. Image opens an optional background editor for project managers. Upload an image or capture a website tab through your browser sharing prompt. Review before saving. Saved images are visible only to people with project read access.' },
       { title: 'Project', description: 'A project provides the shared home for a test catalog, configuration, and run history.' },
       { title: 'Permanent identifier', description: 'Identifiers stay stable when display names change. Use letters, numbers, periods, underscores, or hyphens.' },
       { title: 'Permissions', description: 'The projects and controls you see depend on your access. Creating a project requires project creation permission. Ordinary creators receive project-scoped administration, editing, publication, and run roles together. Installation privileges do not change.' }
     ],
     tutorials: [
       { title: 'Create your first project', steps: ['Open Projects and select Create project. Setup opens on its own page.', 'Enter a project name. The permanent identifier is generated; change it under Advanced details when needed.', 'Select Continue. Name your first application and choose whether to create an empty Availability suite.', 'Select Continue. Optionally register a target URL, stage, and protection.', 'Review the selected resources, then select Create project. No tests run during setup.', 'If setup stops after creating resources, Retry remaining setup continues without creating those resources again.', 'Use Back to projects or Cancel setup to leave. Confirm before discarding changed entries. On narrow screens, scroll the progress row to see later steps.'] },
+      { title: 'Set a project image', steps: ['Select Image on the project tile. Upload a PNG, JPEG, or WebP image.', 'For a website screenshot, expand Capture from a website. Enter its address, open the website, and select Capture website tab.', 'Choose the website tab in your browser sharing prompt. TestStudio captures one frame and stops sharing.', 'Review the preview and select Save image. Cancel keeps the current saved image.', 'Use Remove image and Save image to restore the default tile.'] },
       { title: 'Return to existing work', steps: ['Open a project card to choose an application.', 'Use All applications for the project overview. Choose an application to scope daily testing. Use Test runs for execution history or Project settings for other configuration.', 'Use the Project selector to switch projects.'] }
     ]
   },

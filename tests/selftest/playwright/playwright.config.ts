@@ -6,7 +6,8 @@ export default defineConfig({
   testDir: '.', testMatch: '*.spec.ts', forbidOnly: true, fullyParallel: false, retries: 0, workers: 1,
   outputDir: '/tmp/teststudio-playwright-results',
   use: {
-    baseURL: 'http://127.0.0.1:8040', browserName: 'chromium', headless: true,
+    launchOptions: input.test?.selector === '@STUDIO-PROJECTS-001' ? { env: { ...process.env, DISPLAY: ':97' }, args: ['--auto-select-tab-capture-source-by-title=TestStudio cover capture target', '--enable-usermedia-screen-capturing', '--allow-http-screen-capture'] } : {},
+    baseURL: 'http://127.0.0.1:8040', browserName: 'chromium', headless: input.test?.selector !== '@STUDIO-PROJECTS-001',
     screenshot: capture.screenshots === 'off' ? 'off' : 'on',
     trace: capture.trace === 'off' ? 'off' : 'on', video: capture.video === 'off' ? 'off' : 'on',
     serviceWorkers: 'block'

@@ -6,6 +6,30 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## Square project tiles and private images — 2026-11-06
+
+Projects removes the redundant project total. Square tiles use bounded widths and responsive columns instead of stretching across the page.
+Project managers can upload a screenshot or capture a website tab through the browser sharing prompt.
+The focused image dialog previews the crop and readable title before an explicit Save image. Remove image restores the default tile.
+Capture records one frame and stops sharing. Cancel, failure, and page departure stop active tracks.
+The flow uses no hosted browser worker and starts no test run. Unsupported browsers retain the upload path.
+Private image content requires current project read permission. Changes require project management permission and the exact cover revision.
+The server validates and re-encodes bounded JPEG images. Separate database records preserve project settings revisions and ordinary project payloads.
+Audit records retain change metadata without duplicating image bytes. Backup and transfer include the cover records.
+
+Three targeted Go service and API checks pass for private access, revisions, upload validation, removal, and authenticated JPEG responses.
+The focused local TestStudio workflow verifies square desktop tiles, narrow layout, upload, persistence, real browser tab capture, cleanup, and removal.
+A private virtual display runs this capture check because headless Chromium does not provide the tested capture surface.
+Visual review identifies and corrects image-button contrast without changing the screenshot overlay.
+Page help, the project image guide, first-installation instructions, UI rules, and the active plan describe both image paths.
+Run: 20261106T140014.789307000-4ac204a42ec7e6e01bf4e4e1. STUDIO-PROJECTS-001 passes in 1.688 seconds with complete evidence and cleaned execution records.
+The image editor disables input until its current saved state loads, preventing an initial readiness race.
+The owned capture display, browser processes, containers, and local verification controllers exit.
+The matching API and UI deploy to MMDev. The stack reaches UPDATE_COMPLETE and the service rollout completes with one healthy task.
+The public Projects index and changed assets match the built files. Anonymous image metadata access returns 401.
+The existing testing-server remains healthy at one running task. The deployment creates no image or test data.
+This refines verified items 49 and 50. The verified count remains 50 of 57.
+
 ## Dedicated project creation page — 2026-11-06
 
 Projects shows the project list and a Create project action. The action opens the dedicated /projects/new route.

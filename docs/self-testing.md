@@ -705,3 +705,11 @@ Rendered operator settings pass the real loader and compare with the adapter's e
 The startup verifier checks native and local packaged guard failures without network or cluster access.
 Reuse prior source-runtime, browser, and UI checks when those inputs are unchanged.
 See [Kubernetes execution workers](kubernetes-workers.md) for the exact boundary.
+
+## Project image capture check
+
+STUDIO-PROJECTS-001 verifies bounded square tiles, image upload, saved images, tab capture, contrast, and narrow layout.
+This check uses headed Chromium on a private Xvfb display inside its isolated test container.
+Its browser selects the dedicated fixture tab through a test-only capture switch. It uses the real browser capture API.
+The fixture closes the extra tab and stops the display at teardown. Capture assertions verify that sharing tracks have ended.
+Other self-tests keep their existing headless browser configuration.

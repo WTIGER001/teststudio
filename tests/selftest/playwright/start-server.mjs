@@ -1,9 +1,10 @@
 import { createServer } from 'node:http'
 import { execFile, spawn } from 'node:child_process'
 import { randomBytes } from 'node:crypto'
-import { writeFile, unlink } from 'node:fs/promises'
+import { access, writeFile, unlink } from 'node:fs/promises'
 import { createOIDCFixture } from './oidc-fixture.mjs'
 
+const projectImagesWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-PROJECTS-001'
 const historyWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-HISTORY-001'
 const apiAuthoringWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-API-AUTHOR-001'
 const privateTraceWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-TRACE-001'
@@ -115,6 +116,17 @@ function startChild() {
 process.on('SIGTERM', () => { void stop(0) })
 process.on('SIGINT', () => { void stop(0) })
 try {
+  if (projectImagesWorkflow) {
+    const display = spawn('Xvfb', [':97', '-screen', '0', '1440x1000x24', '-ac', '-nolisten', 'tcp'], { stdio: 'ignore' })
+    helpers.add(display)
+    display.once('error', () => { void stop(1) })
+    let ready = false
+    for (let count = 0; count < 100 && !ready; count++) {
+      ready = await access('/tmp/.X11-unix/X97').then(() => true, () => false)
+      if (!ready) await new Promise(resolve => setTimeout(resolve, 25))
+    }
+    if (!ready) throw new Error('The isolated capture display did not start')
+  }
   await new Promise((resolve, reject) => { server.once('error', reject); server.listen(8050, '127.0.0.1', resolve) })
   if (localWorkflow) await writeFile(providerPath, JSON.stringify([{ id: 'selftest-oidc', name: 'Self-test identity', issuer: 'https://identity.selftest.invalid', clientId: 'teststudio-selftest', scopes: ['openid'], autoProvision: false }]), { mode: 0o600 })
   const bindings = kinds.map(kind => ({ id: `${kind}-receiver`, name: `${kind} receiver`, projectId: 'notification-selftests', purpose: 'notification-webhook', environmentVariable: `TESTSTUDIO_SELFTEST_${kind.toUpperCase()}`, network: 'loopback' }))

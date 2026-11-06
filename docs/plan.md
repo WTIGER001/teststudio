@@ -15,6 +15,13 @@ Use the mm_dev profile and preserve existing services. Azure implementation and 
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
+## Project gallery and images
+
+Remove the redundant project total. Use square project tiles with bounded width and responsive columns.
+Support image uploads and browser-assisted website tab capture. Keep a readable title overlay and an image-free fallback.
+Require project management permission for changes. Review before saving and keep images private to project readers.
+Capture takes one frame after browser sharing approval. Stop sharing after capture, cancellation, error, or page departure.
+
 ## Project creation layout
 
 Create project opens a dedicated /projects/new page. Keep the project list focused on finding and opening projects.

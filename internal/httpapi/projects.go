@@ -11,6 +11,7 @@ import (
 
 func (s *Server) projectRoutes(m *http.ServeMux) {
 	s.suiteLifecycleRoutes(m)
+	s.projectCoverRoutes(m)
 	m.HandleFunc("GET /api/v1/projects/{project}/api-credential-references", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		refs, err := s.Projects.CredentialReferences(r.Context(), actor(r), r.PathValue("project"))
 		if err != nil {
