@@ -16,6 +16,17 @@ Use the mm_dev profile and preserve existing services. Azure implementation and 
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
+## Latest user direction: HTTPS probes and visual help
+
+The user requests a complete HTTPS probes feature and help plan on 2026-11-06.
+Follow [the HTTPS probes plan](https-probes-plan.md) for this requested workflow before returning to the default AWS worker queue.
+Start with dedicated first-probe help, examples rendered from shared UI components, and safe current-page field highlights.
+Then deliver target-specific probe bindings and summaries, the operational overview, reviewed actions and schedules, and multiple-target setup.
+The selected onboarding scope is website, admin, and search probes across production, beta, and development.
+Keep those addresses in private project configuration and keep product examples generic.
+The current delivery is planning only. Application changes, probe creation, schedule enablement, and deployment remain pending.
+The ledger remains 50 verified of 57. Refine the affected HTTPS, results, automation, UI, and help criteria without closing broad cross-profile items.
+
 ## Release versions and build identity
 
 Delivered on 2026-11-06. VERSION defines the product semantic release and the helper synchronizes UI package files.
@@ -64,7 +75,7 @@ Keep those requirements explicit before enabling the corresponding tests. Preser
 
 ## Active delivery plan after the tester walkthrough
 
-This section is the current implementation order. Historical continuation commands below do not override it.
+This section is the default implementation order after the latest user-directed HTTPS probes work above. Historical continuation commands below do not override it.
 The local demonstration is usable and verified. The complete product remains unfinished at 50 verified items out of 57.
 Ordinary project creator access and the first environment-backed local recorded website flow pass targeted verification.
 Tester investigation, failure recovery, and local manual/scheduled runner parity pass targeted verification.

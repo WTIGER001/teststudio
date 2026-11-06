@@ -48,6 +48,7 @@ Register each new page with a `helpTopic` value in `web/src/app/app.routes.ts`.
 Add its content under the same key in `help.pages.ts`.
 The shared help service selects content. The drawer component handles display and keyboard interaction.
 Help content ships with the application and requires no additional service or database.
+The [HTTPS probes plan](https-probes-plan.md#help-with-examples-rendered-from-shared-components) defines planned shared-component examples and current-page highlights. The current help renderer remains text-only until those milestones are implemented.
 
 ## Local verification
 

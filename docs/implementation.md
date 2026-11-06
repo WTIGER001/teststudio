@@ -6,6 +6,18 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## HTTPS probes feature and help planning — 2026-11-06
+The user requests a complete plan for HTTPS probes and help with examples rendered from shared application components.
+The [feature plan](https-probes-plan.md) defines six delivery milestones and their acceptance mappings and targeted checks.
+It covers target-specific identities, bounded summaries, result freshness, observation coverage, creation, publication, scheduling, notifications, recovery, and private onboarding.
+Visual help reuses presentational components with isolated example data. Current-page highlights preserve edits and respect the modal drawer.
+The plan keeps application-specific addresses out of product defaults and tests. It preserves the existing run, release, permission, and evidence contracts.
+The active plan and continuation guide prioritize this latest request before the default AWS worker queue.
+
+This delivery changes documentation only. Consistency, local links, and the stable acceptance ledger are checked before commit.
+No application build, browser workflow, probe creation, schedule enablement, version bump, or deployment occurs.
+The count remains **50 verified of 57**. Open items remain **41, 46, 51, 53, 54, 56, and 57**.
+
 ## Agent continuation handoff — 2026-11-06
 
 AGENTS.md now provides session startup, repository boundaries, focused verification, UI rules, deployment limits, release policy, and Git instructions.
