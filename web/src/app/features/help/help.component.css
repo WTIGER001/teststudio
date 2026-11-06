@@ -26,3 +26,5 @@
 .help-tutorial li { padding-left: 4px; margin-bottom: 10px; }
 .help-tutorial li::marker { color: var(--accent); font-weight: 650; }
 @media (max-width: 540px) { .help-header { padding: 20px; } .help-content { padding: 22px 20px; } .help-sections { padding: 10px 12px; } }
+
+.help-return { position: fixed; z-index: 100; bottom: 16px; right: 16px; max-width: min(32rem, calc(100vw - 32px)); display: flex; flex-wrap: wrap; gap: 8px; padding: 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); box-shadow: 0 4px 20px #0003; font-size: 13px; }

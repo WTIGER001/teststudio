@@ -6,6 +6,16 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## HTTPS probe visual help — 2026-11-06
+
+Milestone 1 delivers dedicated probe and creation guides with complete create, run, inspect, activate, and schedule tutorials.
+Request URL, Review, and retained HTTP diagnostics reuse application components with fixed example data.
+Examples make no mutation or target requests. Current-page highlights preserve values, respect the modal drawer, and restore help scroll and keyboard focus.
+The UI build passes. STUDIO-PROBE-HELP-001 passes in 2.572 seconds through normal local TestStudio execution with complete evidence and a cleaned execution record.
+Run 20261106T152207.991011000-e5d322390d91e4005be1a202 verifies light and dark themes, mobile width, reduced motion, missing controls, and zero mutations.
+The owned controller exits. Target-aware summaries, operational actions, multiple setup, and deployment remain in progress.
+This refines 05, 33, 34, 49, and 50. The count stays 50 verified of 57.
+
 ## HTTPS probes feature and help planning — 2026-11-06
 The user requests a complete plan for HTTPS probes and help with examples rendered from shared application components.
 The [feature plan](https-probes-plan.md) defines six delivery milestones and their acceptance mappings and targeted checks.

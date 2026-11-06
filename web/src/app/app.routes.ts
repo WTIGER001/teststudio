@@ -8,7 +8,7 @@ import type { SourcesPage } from './features/sources/sources.page'
 import type { Routes } from '@angular/router'
 
 const projectRoutes: Routes = [
-  { path: 'projects/:projectId/probes', canDeactivate: [(page: CatalogPage) => page.canLeave()], data: { helpTopic: 'catalog', testType: 'https' }, loadComponent: () => import('./features/catalog/catalog.page').then(m => m.CatalogPage) },
+  { path: 'projects/:projectId/probes', canDeactivate: [(page: CatalogPage) => page.canLeave()], data: { helpTopic: 'https-probes', testType: 'https' }, loadComponent: () => import('./features/catalog/catalog.page').then(m => m.CatalogPage) },
   { path: 'projects/:projectId/suites', canDeactivate: [(page: SuitesPage) => page.canLeave()], data: { helpTopic: 'suites' }, loadComponent: () => import('./features/configuration/suites.page').then(m => m.SuitesPage) },
   { path: 'projects/:projectId/applications', canDeactivate: [(page: ApplicationsPage) => page.canLeave()], data: { helpTopic: 'applications' }, loadComponent: () => import('./features/applications/applications.page').then(m => m.ApplicationsPage) },
   { path: 'projects/:projectId/applications/:applicationId', canDeactivate: [(page: ApplicationsPage) => page.canLeave()], data: { helpTopic: 'applications' }, loadComponent: () => import('./features/applications/applications.page').then(m => m.ApplicationsPage) },

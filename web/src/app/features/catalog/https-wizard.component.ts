@@ -5,13 +5,15 @@ import { WizardStepperComponent } from '../../shared/wizard/wizard-stepper.compo
 import { WizardHeadingComponent } from '../../shared/wizard/wizard-heading.component'
 import { WizardFormDirective } from '../../shared/wizard/wizard-form.directive'
 import { TimingPolicyEditorComponent } from '../timing/timing-policy-editor.component'
+import { ProbeReviewComponent } from '../../shared/probes/probe-review.component'
+import { HelpAnchorDirective } from '../help/help-anchor.directive'
 import { HTTPCheckEditorComponent } from './http-check-editor.component'
 import { HTTPSWizardService } from './https-wizard.service'
 import { ProbeTargetService } from './probe-target.service'
 import { ProbeTargetComponent } from './probe-target.component'
 
 @Component({
-  selector: 'ts-https-wizard', standalone: true, imports: [ReactiveFormsModule, JsonPipe, WizardStepperComponent, WizardHeadingComponent, WizardFormDirective, HTTPCheckEditorComponent, TimingPolicyEditorComponent, ProbeTargetComponent], providers: [ProbeTargetService, HTTPSWizardService], changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'ts-https-wizard', standalone: true, imports: [ProbeReviewComponent, HelpAnchorDirective, ReactiveFormsModule, JsonPipe, WizardStepperComponent, WizardHeadingComponent, WizardFormDirective, HTTPCheckEditorComponent, TimingPolicyEditorComponent, ProbeTargetComponent], providers: [ProbeTargetService, HTTPSWizardService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <ts-wizard-stepper [steps]="titles" [current]="wizard.flow.step()" [reached]="wizard.flow.reached()" [disabled]="wizard.busy() || wizard.locked()" (selected)="wizard.flow.go($event); feedback.reveal()" />
     <form [formGroup]="wizard.editor.form" tsWizardForm #feedback="tsWizardForm" (ngSubmit)="advance(); feedback.reveal()">
@@ -31,10 +33,10 @@ import { ProbeTargetComponent } from './probe-target.component'
         <details><summary>Advanced timeout and slowdown policy</summary><div class="field"><label for="test-timeout">Catalog timeout ceiling (seconds)</label><input id="test-timeout" type="number" formControlName="timeout" min="1" max="3600" step="1" required></div><ts-timing-policy-editor /></details>
       }
       @if (wizard.flow.step() === 2) {
-        <dl><dt>Test</dt><dd>{{ wizard.editor.form.controls.title.value }} · {{ wizard.suiteName() }}</dd><dt>Request</dt><dd class="wrap-anywhere">{{ wizard.editor.checkEditor.form.controls.method.value }} {{ wizard.requestURL() }}</dd><dt>Endpoint and path</dt><dd class="wrap-anywhere">{{ wizard.editor.checkEditor.form.controls.endpoint.value }} · {{ wizard.editor.checkEditor.form.controls.path.value }}</dd><dt>Accepted status codes</dt><dd>{{ wizard.editor.checkEditor.form.controls.statusCodes.value }}</dd><dt>Timeout ceiling</dt><dd>{{ wizard.editor.form.controls.timeout.value }} seconds</dd></dl>
+        <section tabindex="-1" tsHelpAnchor="probe-review"><ts-probe-review [title]="wizard.editor.form.controls.title.value" [suite]="wizard.suiteName()" [url]="wizard.requestURL()" [method]="wizard.editor.checkEditor.form.controls.method.value" [statuses]="wizard.editor.checkEditor.form.controls.statusCodes.value" [timeout]="wizard.editor.form.controls.timeout.value" /></section>
         @if (wizard.target(); as target) { <p class="notice">Target: {{ target.data.name }} · {{ target.data.stage }} · {{ target.data.protected ? 'Protected — safe tests and protected execution permission required.' : 'Not protected.' }}</p> }
         @if (wizard.targets.needsTarget()) {
-          <section class="notice" aria-label="Target configuration to save"><h4>Target configuration to save</h4><p>Saving this probe also {{ wizard.targets.targetSaved() ? 'keeps the saved' : 'registers a' }} target for {{ wizard.targets.parsed()?.origin }} under {{ wizard.targets.applicationName() }}.</p><p>{{ wizard.targets.stage.value }} · {{ wizard.targets.protected.value ? 'Protected — safe tests and protected execution permission required.' : 'Not protected.' }}</p>@if (wizard.targets.needsApplication()) { <p>{{ wizard.targets.applicationSaved() ? 'Application saved' : 'A new application will also be created' }}: {{ wizard.targets.applicationName() }}.</p> }<p class="small">Save draft stores this configuration without contacting the website. Save and run starts the selected check locally.</p></section>
+          <section class="notice" aria-label="Target configuration to save"><h4>Target configuration to save</h4><p>Saving this probe also {{ wizard.targets.targetSaved() ? 'keeps the saved' : 'registers a' }} target for {{ wizard.targets.parsed()?.origin }} under {{ wizard.targets.applicationName() }}.</p><p>{{ wizard.targets.stage.value }} · {{ wizard.targets.protected.value ? 'Protected — safe tests and protected execution permission required.' : 'Not protected.' }}</p>@if (wizard.targets.needsApplication()) { <p>{{ wizard.targets.applicationSaved() ? 'Application saved' : 'A new application will also be created' }}: {{ wizard.targets.applicationName() }}.</p> }<p class="small">Save draft stores this configuration without contacting the website. Save and run starts the selected check on this installation.</p></section>
         }
         <div class="field"><label for="test-safety">Production-safety label</label><select id="test-safety" formControlName="safety"><option value="needs-review">Needs review</option><option value="safe">Safe</option><option value="unsafe">Unsafe</option></select><small>GET and HEAD requests can have side effects. Confirm safety based on the target application.</small></div>
         <div class="field"><label for="test-rationale">Safety rationale</label><textarea id="test-rationale" formControlName="rationale" required rows="2"></textarea></div>
@@ -44,7 +46,7 @@ import { ProbeTargetComponent } from './probe-target.component'
         </details>
       }
       </fieldset>
-      @if (wizard.flow.step() === 2) { <p class="small muted">Save draft adds this test to the catalog. Save and run also validates and publishes the suite snapshot without changing its active release, then runs this test and its dependencies locally.</p> }
+      @if (wizard.flow.step() === 2) { <p class="small muted">Save draft adds this test to the catalog. Save and run also validates and publishes the suite snapshot without changing its active release, then runs this test and its dependencies on this installation.</p> }
       <div class="row-actions">@if (wizard.flow.step() > 0 && !wizard.locked()) { <button class="button secondary" type="button" [disabled]="wizard.busy()" (click)="wizard.flow.back()">Back</button> }
       <button class="button primary" type="submit" [disabled]="wizard.busy()">{{ wizard.flow.step() === 2 ? wizard.saved() ? 'Open saved draft' : wizard.targets.locked() ? 'Retry save' : 'Save draft' : 'Continue' }}</button>
       @if (wizard.flow.step() === 2 && wizard.canRun()) { <button class="button primary" type="button" [disabled]="wizard.busy()" (click)="wizard.save(true); feedback.reveal()">{{ wizard.saved() ? 'Retry run' : 'Save and run' }}</button> }

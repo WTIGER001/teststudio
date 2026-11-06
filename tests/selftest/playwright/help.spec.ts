@@ -22,7 +22,7 @@ test('Page help, keyboard access, and responsive drawer', { tag: '@STUDIO-HELP-0
     await page.getByRole('link', { name: '+ Create test' }).click()
     await page.getByRole('link', { name: 'HTTPS probe', exact: true }).click()
     await page.getByLabel('Title', { exact: true }).fill('Unsaved help check')
-    const drawer = await openHelp(page, 'Create test')
+    const drawer = await openHelp(page, 'Create HTTPS probe')
     const close = drawer.getByRole('button', { name: 'Close help' })
     await expect(close).toBeFocused()
     await page.keyboard.press('Shift+Tab')

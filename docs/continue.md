@@ -55,8 +55,10 @@ See [versioning](versioning.md), [project images](project-images.md), [first ins
 
 The user requests a complete plan for a focused HTTPS probes workflow and help with examples rendered from shared UI components.
 The [HTTPS probes plan](https-probes-plan.md) defines six milestones, target identity, overview semantics, actions, schedules, visual help, verification, and release steps.
-This planning delivery changes no application behavior. Probe creation and schedule enablement remain pending.
-Start implementation with milestone 1: dedicated first-probe help, shared Request and Review examples, and safe current-page field highlights.
+Milestone 1 now passes local verification with shared visual examples, dedicated tutorials, and safe current-page highlights.
+Run 20261106T152207.991011000-e5d322390d91e4005be1a202 passes with complete evidence and cleaned execution.
+The user authorizes milestones 1 through 6. Continue target-aware summaries and the operational workflow; deployment and private onboarding remain pending.
+Preserve milestone 1: dedicated first-probe help, shared Request and Review examples, and safe current-page field highlights.
 It refines acceptance 05, 33, 34, 49, and 50. Then follow the remaining milestones before returning to the default AWS worker queue.
 Use private project configuration for the user's nine selected website, admin, and search targets across production, beta, and development.
 Keep generic examples and self-tests independent. The acceptance count remains 50 verified of 57, with the same seven open items.

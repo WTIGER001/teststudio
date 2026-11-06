@@ -48,7 +48,7 @@ Register each new page with a `helpTopic` value in `web/src/app/app.routes.ts`.
 Add its content under the same key in `help.pages.ts`.
 The shared help service selects content. The drawer component handles display and keyboard interaction.
 Help content ships with the application and requires no additional service or database.
-The [HTTPS probes plan](https-probes-plan.md#help-with-examples-rendered-from-shared-components) defines planned shared-component examples and current-page highlights. The current help renderer remains text-only until those milestones are implemented.
+HTTPS probes and its creation page provide dedicated tutorials with shared Request, Review, and HTTP result components using isolated example data. Examples never contact a target or save resources. Show me actions close the modal help drawer before focusing a visible current-page control. Return to help restores its scroll position. Missing controls explain the required step without changing it. Escape and dismissal preserve form values.
 
 ## Local verification
 

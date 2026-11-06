@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { ReactiveFormsModule } from '@angular/forms'
+import { ProbeURLFieldComponent } from '../../shared/probes/probe-url-field.component'
 import { ProbeTargetService } from './probe-target.service'
 
 @Component({
-  selector: 'ts-probe-target', standalone: true, imports: [ReactiveFormsModule], changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'ts-probe-target', standalone: true, imports: [ReactiveFormsModule, ProbeURLFieldComponent], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <fieldset><legend>Request target</legend><div class="row-actions wrap-actions"><label class="checkbox-field"><input type="radio" name="probe-target-mode" value="url" [formControl]="targets.mode">Enter a website URL</label><label class="checkbox-field"><input type="radio" name="probe-target-mode" value="registered" [formControl]="targets.mode">Use a registered environment</label></div></fieldset>
     @if (targets.direct()) {
-      <div class="field"><label for="probe-url">Website URL</label><input id="probe-url" type="url" [formControl]="targets.address" placeholder="https://example.com" autocomplete="url" [attr.aria-invalid]="targets.address.touched && !targets.parsed()" aria-describedby="probe-url-help"><small id="probe-url-help">Paste the full address, including the path. HTTPS uses port 443 automatically; no port is needed.</small></div>
+      <ts-probe-url-field [control]="targets.address" />
       @if (targets.matches().length > 1) { <div class="field"><label for="probe-url-choice">Matching registered target</label><select id="probe-url-choice" [formControl]="targets.choice"><option value="">Choose the target to use</option>@for (match of targets.matches(); track match.key) { <option [value]="match.key">{{ match.environment.data.name }} · {{ match.endpoint }} · {{ match.environment.data.stage }}{{ match.environment.data.protected ? ' · Protected' : '' }}{{ match.environment.data.disabled ? ' · Disabled' : '' }}</option> }</select></div> }
       @if (targets.target(); as target) { <p class="notice">Uses registered target {{ target.data.name }} · {{ target.data.stage }} · {{ target.data.protected ? 'Protected' : 'Not protected' }}{{ target.data.disabled ? ' · Disabled' : '' }}. Its settings stay unchanged.</p> }
       @if (targets.needsTarget() && targets.loaded()) {

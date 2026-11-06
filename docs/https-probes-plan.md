@@ -1,6 +1,6 @@
 # HTTPS probes feature and help plan
 
-Status: Planned on 2026-11-06 at the user's request. This document defines delivery scope. It does not describe deployed behavior.
+Status: Implementation authorized on 2026-11-06. Milestone 1 passes local verification. Milestones 2 through 6 are in progress; deployed behavior remains unchanged.
 
 Make HTTPS probes easy to create, run, schedule, and investigate from one project overview.
 Give each task contextual help with examples rendered from the same components as the application.

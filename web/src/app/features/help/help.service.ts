@@ -11,7 +11,8 @@ export class HelpService {
   private readonly session = inject(SessionService)
   private readonly topic = toSignal(this.router.events.pipe(
     filter(event => event instanceof NavigationEnd),
-    map(() => this.router.routerState.snapshot.root.firstChild?.data['helpTopic'] as string | undefined)
-  ), { initialValue: this.router.routerState.snapshot.root.firstChild?.data['helpTopic'] as string | undefined })
+    map(() => this.currentTopic())
+  ), { initialValue: this.currentTopic() })
+  private currentTopic(): string | undefined { const route = this.router.routerState.snapshot.root.firstChild; return route?.data['helpTopic'] === 'create-test' && route.paramMap.get('kind') === 'https' ? 'https-create' : route?.data['helpTopic'] }
   readonly page = computed(() => this.session.mustChangePassword() ? helpPages['password-required'] : this.session.signedIn() ? (helpPages[this.topic() ?? 'projects'] ?? helpPages['projects']) : helpPages['signin'])
 }

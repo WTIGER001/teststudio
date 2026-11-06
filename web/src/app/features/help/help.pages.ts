@@ -1,3 +1,4 @@
+import { probeHelp } from './help.probes'
 import type { HelpPage } from './help.models'
 
 export const helpPages: Record<string, HelpPage> = {
@@ -36,6 +37,8 @@ export const helpPages: Record<string, HelpPage> = {
     ],
     tutorials: [{ title: 'Sign in from the publisher CLI', steps: ['Run teststudio-publish login with --server and --browser. Use --no-open to copy the address manually.', 'Sign in through the browser when required. Review the displayed account and client name.', 'Enter Terminal code exactly as printed in your terminal, then select Approve CLI sign-in.', 'Return to the terminal. It saves its managed session privately. Run logout when that CLI session is no longer needed.'] }, { title: 'Reject a request', steps: ['Select Decline CLI sign-in when you do not want to connect this terminal.', 'Start a new request in your own terminal if the client name, account, or code is incorrect.', 'Use user session administration to revoke an issued CLI session when necessary.'] }]
   },
+  'https-probes': probeHelp,
+  'https-create': { ...probeHelp, id: 'https-create', title: 'Create HTTPS probe' },
   'create-test': {
     id: 'create-test', title: 'Create test',
     introduction: ['Choose a test type before entering its definition. Browser tests begin with recording. HTTPS probes and API tests use Name, Request, and Review steps. API tests continue into a code editor. Go suites use source preparation.'],
