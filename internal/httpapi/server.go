@@ -14,6 +14,7 @@ import (
 
 	authoidc "github.com/wtiger001/teststudio/adapters/auth/oidc"
 	"github.com/wtiger001/teststudio/internal/authorization"
+	"github.com/wtiger001/teststudio/internal/buildinfo"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/evidence"
 	"github.com/wtiger001/teststudio/internal/localauth"
@@ -142,6 +143,10 @@ func (s *Server) authenticated(handler http.HandlerFunc, allowPasswordChange boo
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	s.healthRoutes(mux)
+	mux.HandleFunc("GET /api/v1/version", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store")
+		JSON(w, 200, buildinfo.Current())
+	})
 	s.identityLinkRoutes(mux)
 	s.authRoutes(mux)
 	s.localAccountRoutes(mux)

@@ -3,6 +3,7 @@ import path from 'node:path'
 import crypto from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
+import { buildLinkerFlags } from './lib/version.mjs'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
 process.chdir(root)
@@ -51,6 +52,7 @@ if (!localOnly) {
   if (!['amd64', 'arm64'].includes(architecture)) throw new Error('Unsupported self-test runtime architecture')
 }
 
+const buildInfo = JSON.parse(execFileSync(process.execPath, ['scripts/build-info.mjs'], { encoding: 'utf8' }))
 const uiKey = fingerprint(['web/src', 'web/public', 'web/angular.json', 'web/tsconfig.json', 'web/tsconfig.app.json', 'web/package.json', 'web/package-lock.json'], false, true)
 const uiDirectory = 'web/dist/web/browser'
 let uiOutput = fs.existsSync(`${uiDirectory}/index.html`) ? fingerprint([uiDirectory]) : ''
@@ -78,10 +80,11 @@ const targets = localOnly ? [
 ]
 cache.binaries ??= {}
 for (const target of targets) {
-  const output = `${directory}/${target.id}`, key = digest([goKey, target.package, target.platform])
+  const flags = target.package === './cmd/teststudio' ? ['-ldflags=' + buildLinkerFlags(buildInfo)] : []
+  const output = `${directory}/${target.id}`, key = digest([goKey, target.package, target.platform, flags])
   const previous = cache.binaries[target.id], actual = fileHash(output)
   if (!actual || previous?.key !== key || previous?.hash !== actual) {
-    run('go', ['build', '-o', output, target.package], { env: { ...process.env, ...target.env } })
+    run('go', ['build', ...flags, '-o', output, target.package], { env: { ...process.env, ...target.env } })
     cache.binaries[target.id] = { key, hash: fileHash(output) }; save()
   } else console.error(`Reusing unchanged self-test binary: ${target.id}.`)
 }

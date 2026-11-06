@@ -1,13 +1,16 @@
 {
   "name": "teststudio-web",
-  "version": "0.1.0",
+  "version": "0.1.0-dev",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "ng serve --host 127.0.0.1 --port 4200 --proxy-config proxy.json",
     "build": "ng build",
     "check": "tsc --noEmit",
-    "postbuild": "node ../scripts/build-trace-viewer.mjs"
+    "postbuild": "node ../scripts/build-trace-viewer.mjs",
+    "prebuild": "node ../scripts/build-info.mjs",
+    "prestart": "node ../scripts/build-info.mjs",
+    "precheck": "node ../scripts/build-info.mjs"
   },
   "dependencies": {
     "@angular/common": "22.2.4",

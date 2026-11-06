@@ -4,6 +4,7 @@ import os from 'node:os'
 import crypto from 'node:crypto'
 import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
+import { buildLinkerFlags } from './lib/version.mjs'
 import { dockerBuildBackend } from './lib/docker-build.mjs'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
@@ -31,10 +32,11 @@ function inspect(reference) {
 function save() { const temporary = `${cacheFile}.${process.pid}.tmp`; fs.writeFileSync(temporary, JSON.stringify(cache, null, 2), { mode: 0o600 }); fs.renameSync(temporary, cacheFile) }
 const assets = JSON.parse(execFileSync(process.execPath, ['scripts/build-selftest.mjs', '--assets-only'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 2] }))
 const goEnvironment = { ...process.env, GOWORK: 'off', GOFLAGS: '', GOOS: 'linux', GOARCH: architecture, CGO_ENABLED: '0' }
-const buildArguments = ['build', '-mod=readonly', '-trimpath', '-ldflags=-s -w']
+const buildInfo = JSON.parse(fs.readFileSync('.data/build-info.json', 'utf8')).info
 const goVersion = execFileSync('go', ['version'], { encoding: 'utf8', env: goEnvironment }).trim()
 cache.binaries ??= {}
 for (const name of ['teststudio', 'teststudio-health', 'teststudio-prepare']) {
+  const buildArguments = ['build', '-mod=readonly', '-trimpath', '-ldflags=-s -w' + (name === 'teststudio' ? ' ' + buildLinkerFlags(buildInfo) : '')]
   const package_ = './cmd/' + name
   const dependencies = execFileSync('go', ['list', '-mod=readonly', '-deps', '-f', '{{if .Module}}{{if .Module.Main}}{{.Dir}}{{end}}{{end}}', package_], { encoding: 'utf8', env: goEnvironment }).trim().split(/\r?\n/).filter(Boolean)
   const inputs = [goVersion, architecture, buildArguments, { GOWORK: 'off', GOFLAGS: '', CGO_ENABLED: '0', GOOS: 'linux', GOARCH: architecture, GOEXPERIMENT: process.env.GOEXPERIMENT ?? '', GOAMD64: process.env.GOAMD64 ?? '', GOARM64: process.env.GOARM64 ?? '' }, hashFile('go.mod'), hashFile('go.sum')]
@@ -53,7 +55,7 @@ if (rdsSource.url !== 'https://truststore.pki.rds.amazonaws.com/global/global-bu
 const sourceKey = digest([rdsSource, architecture, buildBackend, certificateSource, hashFile(dockerfile), hashFile('scripts/build-service-image.mjs'), hashFile('scripts/lib/docker-build.mjs'), cache.binaries, assets.uiOutput, assets.traceOutput])
 if (cache.sourceKey === sourceKey && cache.image) {
   const previous = inspect(cache.image)
-  if (previous?.Id === cache.image && previous.Architecture === architecture) { console.error('Reusing the unchanged service image.'); console.log(JSON.stringify({ image: cache.image, architecture, sourceKey })); process.exit(0) }
+  if (previous?.Id === cache.image && previous.Architecture === architecture) { console.error('Reusing the unchanged service image.'); console.log(JSON.stringify({ image: cache.image, architecture, sourceKey, buildInfo })); process.exit(0) }
 }
 if (!inspect(certificateSource.image)) execFileSync('docker', ['pull', '--platform=' + certificateSource.platform, certificateSource.image], { stdio: ['ignore', 2, 2] })
 const certificateContainer = 'teststudio-service-certificates-' + crypto.randomUUID()
@@ -71,11 +73,11 @@ try {
   fs.copyFileSync('deploy/service/rds-ca-bundle.pem', path.join(context, 'rds-ca-bundle.pem'))
   fs.cpSync(assets.ui, path.join(context, 'ui'), { recursive: true, dereference: false })
   fs.cpSync(assets.traceViewer, path.join(context, 'trace-viewer'), { recursive: true, dereference: false })
-  execFileSync(buildCommand, [...buildPrefix, '--network=none', '--pull=false', '--platform=linux/' + architecture, '--build-arg', 'TARGETARCH=' + architecture, '--build-arg', 'SOURCE_KEY=' + sourceKey, '-q', '-f', dockerfile, '-t', 'teststudio/service:' + architecture + '-local', context], { stdio: ['ignore', 2, 2] })
+  execFileSync(buildCommand, [...buildPrefix, '--network=none', '--pull=false', '--platform=linux/' + architecture, '--build-arg', 'TARGETARCH=' + architecture, '--build-arg', 'SOURCE_KEY=' + sourceKey, '--build-arg', 'RELEASE_VERSION=' + buildInfo.version, '--build-arg', 'BUILD_ID=' + buildInfo.buildId, '--build-arg', 'BUILT_AT=' + buildInfo.builtAt, '--build-arg', 'VCS_REF=' + buildInfo.commit, '-q', '-f', dockerfile, '-t', 'teststudio/service:' + architecture + '-local', context], { stdio: ['ignore', 2, 2] })
   const image = inspect('teststudio/service:' + architecture + '-local')
   if (!image || image.Architecture !== architecture || !/^sha256:[a-f0-9]{64}$/.test(image.Id) || image.Config.User !== '65532:65532') throw new Error('The built service image metadata does not match the requested package')
   cache.sourceKey = sourceKey; cache.image = image.Id; save()
-  console.log(JSON.stringify({ image: image.Id, architecture, sourceKey }))
+  console.log(JSON.stringify({ image: image.Id, architecture, sourceKey, buildInfo }))
 } finally {
   fs.rmSync(context, { recursive: true, force: true })
   if (certificateCreated) {

@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms'
 import { NavigationEnd, Router } from '@angular/router'
 import { filter, map } from 'rxjs'
 import { WorkspaceService } from './workspace.service'
+import { BuildInfoComponent } from './build-info.component'
 import { SidebarLinksComponent } from './sidebar-links.component'
 import { navigationSections, projectNavigation } from './navigation.utils'
 
 @Component({
-  selector: 'ts-sidebar', standalone: true, imports: [FormsModule, SidebarLinksComponent], changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'ts-sidebar', standalone: true, imports: [FormsModule, SidebarLinksComponent, BuildInfoComponent], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <aside class="sidebar">
       <nav aria-label="Main navigation" class="sidebar-navigation">
@@ -24,7 +25,7 @@ import { navigationSections, projectNavigation } from './navigation.utils'
         }
       </div>
       </nav>
-      <div class="sidebar-footer"><span class="status-dot" aria-hidden="true"></span><span>TestStudio<br><small>Built for clear answers.</small></span></div>
+      <div class="sidebar-footer" [class.mobile-open]="mobileOpen()"><ts-build-info /></div>
     </aside>
   `,
   styleUrl: './sidebar.component.css'

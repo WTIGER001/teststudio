@@ -6,6 +6,23 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## Semantic release and build identity — 2026-11-06
+
+VERSION starts the tracked product release at 0.1.0-dev. The footer displays the requested four-part form, 0.1.0.dev.
+The release helper synchronizes the canonical version with UI package and lock metadata.
+The footer shows an immutable build identifier and UTC creation date. Expand Build for source details.
+The shared generator stamps the UI and Go API with the same metadata. The image includes standard release labels.
+Unchanged build inputs retain their date and identifier. Raw unversioned Go builds report development without inventing a build date.
+Mobile Navigation reveals the footer. Current-page help, release guidance, UI rules, and the active plan describe this behavior.
+
+Three focused Node checks and two Go checks pass for release increments, tag syntax, linker metadata, fallback, and the version API.
+The Angular production build passes. STUDIO-VERSION-001 passes through local TestStudio execution in 0.532 seconds.
+Run: 20261106T141549.201293000-da61d7429e7ac5e9b3ab33b7. Evidence is complete and the execution ledger is cleaned.
+The workflow verifies exact UI/API identity, UTC date, expanded details, reload stability, and mobile layout.
+Two consecutive metadata generations retain the same date and build identifier. The release helper preserves synchronized version files.
+Owned verification browsers, containers, and the local controller exit. No user browser or demonstration data changes.
+This refines verified items 49 and 50. The verified count remains 50 of 57.
+
 ## Square project tiles and private images — 2026-11-06
 
 Projects removes the redundant project total. Square tiles use bounded widths and responsive columns instead of stretching across the page.

@@ -13,3 +13,5 @@ output/
 bin/
 coverage/
 .playwright-cli/
+
+web/src/app/core/generated/build-info.ts

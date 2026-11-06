@@ -337,6 +337,7 @@ export const helpPages: Record<string, HelpPage> = {
     id: 'projects', title: 'Projects',
     introduction: ['Projects keep related applications, test suites, and results together. Open a project to manage its catalog and runs.'],
     concepts: [
+      { title: 'Version and build', description: 'The sidebar footer shows Major.Minor.Patch.Tag, the immutable build identifier, and its UTC creation date. Expand Build for the source commit and source state. On a narrow screen, open Navigation to see the footer. The build date stays unchanged when a server restarts.' },
       { title: 'Project images', description: 'Projects use square tiles. Image opens an optional background editor for project managers. Upload an image or capture a website tab through your browser sharing prompt. Review before saving. Saved images are visible only to people with project read access.' },
       { title: 'Project', description: 'A project provides the shared home for a test catalog, configuration, and run history.' },
       { title: 'Permanent identifier', description: 'Identifiers stay stable when display names change. Use letters, numbers, periods, underscores, or hyphens.' },

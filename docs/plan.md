@@ -15,6 +15,14 @@ Use the mm_dev profile and preserve existing services. Azure implementation and 
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
+## Release versions and build identity
+
+VERSION defines the product semantic release. Use the version helper to synchronize UI package files.
+Show Major.Minor.Patch.Tag, build ID, and UTC build date in the sidebar footer. Keep source details expandable.
+Generate one immutable metadata snapshot for the UI, API, and portable image labels. Reuse it for unchanged build inputs.
+Document numeric release increments, tags, stable releases, and raw unversioned Go builds.
+Verify version utilities and the changed footer locally. Keep deployment dates distinct from build creation dates.
+
 ## Project gallery and images
 
 Remove the redundant project total. Use square project tiles with bounded width and responsive columns.

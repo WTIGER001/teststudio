@@ -17,6 +17,12 @@ Generate identifiers and retain sensible defaults. Keep identifier editing under
 Accept familiar input directly. A quick HTTPS check accepts a complete URL without requiring separate setup pages.
 Empty states explain the next available action. Access failures and unavailable data must not look like empty registries.
 
+### Release identity
+
+The sidebar footer shows Major.Minor.Patch.Tag, build identifier, and UTC build creation date.
+Expand Build for the canonical semantic version and source details. Navigation reveals the footer on narrow screens.
+Use immutable build metadata shared with the API. Keep build creation, deployment, and server startup dates distinct.
+
 ### Choose the smallest useful interaction
 
 Use a wizard with a labeled stepper for configuration that spans several decisions or creates related resources.

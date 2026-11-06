@@ -1,7 +1,12 @@
 FROM scratch
 ARG TARGETARCH
 ARG SOURCE_KEY
+ARG RELEASE_VERSION
+ARG BUILD_ID
+ARG BUILT_AT
+ARG VCS_REF
 LABEL org.opencontainers.image.title="TestStudio" org.opencontainers.image.source="https://github.com/wtiger001/teststudio"
+LABEL org.opencontainers.image.version="${RELEASE_VERSION}" org.opencontainers.image.created="${BUILT_AT}" org.opencontainers.image.revision="${VCS_REF}" teststudio.build-id="${BUILD_ID}"
 LABEL teststudio.package="service/v1" teststudio.architecture="${TARGETARCH}" teststudio.source-key="${SOURCE_KEY}"
 COPY ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 COPY --chown=65532:65532 data /data
