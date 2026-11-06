@@ -6,6 +6,16 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## Agent continuation handoff — 2026-11-06
+
+AGENTS.md now provides session startup, repository boundaries, focused verification, UI rules, deployment limits, release policy, and Git instructions.
+The tracked continuation guide summarizes the deployed release, open acceptance items, next priorities, known gaps, and retained evidence.
+The plan marks the latest UI and version work as delivered. Historical checkpoints remain reference material.
+README and the plan link the continuation guide. Resume no longer depends on chat history or ignored helper scripts.
+The new review records partial OpenAPI coverage for version and project-image endpoints. Their feature guides already describe the APIs.
+Documentation consistency, local links, and the 57-item ledger are checked. No build, browser test, deployment, or version bump runs for this documentation update.
+The acceptance count remains 50 verified of 57. No new acceptance item closes.
+
 ## Semantic release and build identity — 2026-11-06
 
 VERSION starts the tracked product release at 0.1.0-dev. The footer displays the requested four-part form, 0.1.0.dev.

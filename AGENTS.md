@@ -1,34 +1,82 @@
-# TestStudio
+# TestStudio agent instructions
 
-Build the independent Go and Angular product described in `docs/plan.md`.
-Keep the complete acceptance ledger in `docs/implementation.md`.
-Use the active delivery sequence in `docs/plan.md`. Historical checkpoints are reference material, not the current task queue.
+## Start each session
 
-- Use standalone Angular components, OnPush, signals, small services, and pure utilities.
-- Keep components below 450 lines and keep workflows outside components.
-- Use semantic HTML and shared light and dark theme tokens.
-- Follow `docs/ui.md` for tester workflows, navigation, wizards, Advanced options, and accessible feedback.
-- Update affected page help and user, API, or operator guides with behavior changes. Follow the completion checklist in `docs/plan.md`.
-- Keep documentation-only validation to document consistency and links. Do not rebuild or rerun browser suites for prose changes.
-- Use `github.com/wtiger001/go-permissions` through `permissions.Service`.
-- Store identity and memberships in TestStudio. Enforce authorization after parsing resource context.
-- Keep permission checks inside handlers or domain services.
-- Report progress against the stable 57 acceptance numbers in docs/implementation.md.
-- Report verified totals, advanced item numbers, and the targeted local checks used.
-- Use PostgreSQL for hosted deployments and SQLite for single-instance local deployments.
-- Add no code comments unless the user requests them.
-- Write new tests and examples. Copy no existing application tests, data, or infrastructure configuration into TestStudio.
-- The user authorizes adapting the separate marketmaker-tests repository and documenting a reusable test-repository contract. Keep application-specific adapters in that repository.
-- Focus on implementation, then run targeted local tests for changed behavior.
-- The user defers Azure implementation and verification. Preserve staged code. Prepare an Azure deployment script only when the user requests that work.
-- Run Kubernetes verification only on a dedicated local k3s/k3d cluster with an explicit private kubeconfig. Do not use a remote or inherited cluster context.
-- The user authorizes AWS deployment to the MMDev ECS cluster as teststudioapi. Use the mm_dev profile and verify the selected account before mutations.
-- Keep AWS changes scoped to TestStudio-owned resources and the new service. Preserve existing ECS services. Azure remains deferred.
-- The user selects external Cognito pool us-west-2_p1Epu0go8 and authorizes a dedicated TestStudio OIDC client through mm_prod. Keep the application generic OIDC. Identity-provider federation stays in Cognito.
-- Do not repeat broad suites or fixture builds without a concrete unresolved concern.
-- Follow docs/versioning.md. Use scripts/version.mjs to bump the release before publishing changed application behavior. Documentation-only changes need no version bump.
-- Build published release artifacts from committed source. Keep immutable build dates distinct from deployment and startup dates.
-- Commit verified features frequently, as the user requests.
-- Do not push without an explicit request.
-- Close every browser session started for verification and verify shutdown. Preserve unrelated browser windows.
-- Use short, active sentences in documentation.
+1. Confirm this checkout with `pwd`, `git status --short`, and `git branch --show-current`. Preserve unrelated edits.
+2. Read [continuation notes](docs/continue.md), the active sections at the start of [the plan](docs/plan.md), and the acceptance section in [the ledger](docs/implementation.md).
+3. Read the affected feature guide and source before editing. Read [UI rules](docs/ui.md) for UI work and [versioning](docs/versioning.md) before a release.
+4. Choose one concrete milestone. State its acceptance numbers and the smallest useful local verification.
+5. Update the user when a milestone completes. Distinguish implemented behavior, local evidence, deployment checks, and unverified target acceptance.
+
+Historical plan checkpoints are reference material. They do not override the active delivery sequence or later user instructions.
+Use focused reads and searches. The long implementation ledger is not a current task queue.
+This file applies to TestStudio. Read separate repository instructions before editing another checkout.
+
+## Product boundaries
+
+- Build the independent Go and Angular product in this repository. It must not require MarketMaker packages, configuration, credentials, sibling checkouts, or existing application tests.
+- Write new product tests, fixtures, and examples. Normal installation starts with empty testing registries. Examples require explicit selection.
+- The user authorizes adapting the separate marketmaker-tests repository. Keep its application-specific adapter and existing tests there.
+- PostgreSQL is the hosted database. SQLite supports single-instance development and local-server operation.
+- Use `github.com/wtiger001/go-permissions` through `permissions.Service`. TestStudio owns its internal identities and memberships.
+- Parse resource context before authorization. Enforce permissions inside handlers or domain services. Recheck current authority for mutations.
+- Keep local accounts and configurable OIDC generic. Upstream federation belongs to the issuer. Add no Google-specific application flow.
+- Successful sign-in grants no project membership. Do not merge identities by email or broaden installation privileges to solve project access.
+
+## Implementation and UI
+
+- Use standalone Angular components, OnPush, signals, small services, and pure utilities. Keep components below 450 lines.
+- Components handle rendering and local interaction. Services own APIs, state, workflows, and side effects. Pure utilities handle transformations and validation.
+- Use shared components and semantic HTML. Preserve light, dark, and system themes, keyboard focus, accessible feedback, and narrow layouts.
+- Follow docs/ui.md. Use dedicated routes for substantial creation, labeled steppers for related decisions, and named Advanced sections for uncommon controls.
+- Keep project and application context explicit. Suites remain project-owned and can link to multiple applications. Environments belong to applications.
+- Every current page needs a right-hand help drawer with Introduction, Concepts, and Tutorials. Help must preserve edits.
+- Preserve review, unsaved changes, revision conflicts, explicit execution, and partial-save recovery. Do not replace them with parallel workflows.
+- Record test durations and preserve frozen timing criteria. Timeouts remain a distinct result status; failure reruns include them. State trends use stacked area charts.
+- Project images are optional and private. URL screenshots use browser-approved tab capture, not automatic server rendering. Stop sharing tracks and retain the upload fallback.
+- Add no code comments unless the user requests them. Use short, active sentences in documentation.
+
+## Implementation first; targeted verification
+
+- Implement the requested behavior, then run the smallest relevant check. Use local targets for functional testing.
+- Use TestStudio's normal Playwright execution for changed browser workflows. Select explicit IDs; do not run the full catalog by default.
+- Reuse passing evidence, cached assets, binaries, and runtimes. Repeat a check only for changed behavior, a failure, or a concrete unresolved concern.
+- Do not run broad test matrices, rebuild unrelated fixtures, or repeat setup to fill time. Targeted checks must exercise meaningful outcomes.
+- Documentation-only work needs consistency and link checks. It needs no UI build, browser run, release bump, or deployment.
+- Close and verify shutdown of owned browsers, automation processes, containers, and test servers after success or failure. Preserve user browsers and other workloads.
+- Preserve the user's demo on port 8040, its database, and its history. A UI build alone does not replace the demo's private UI snapshot.
+
+| Changed area | Starting command |
+| --- | --- |
+| Go package behavior | `go test ./internal/<package> -run '^TestRelevantName$' -count=1` |
+| UI compilation | `npm --prefix web run build` |
+| Focused browser workflow | `bash scripts/test-self.sh --test=STUDIO-ID` |
+| Version utilities | `node --test scripts/lib/version.test.mjs` |
+| Stamped local package without Docker | `node scripts/build-selftest.mjs --local-only` |
+| Portable service package | `node scripts/build-service-image.mjs --arch=arm64` |
+
+See docs/self-testing.md and tests/selftest/catalog.json before choosing browser IDs. Build commands are not deployment commands.
+
+## Deployment authorization and limits
+
+- AWS deployment is authorized in MMDev as teststudioapi. Use mm_dev, account 253455159142, region us-west-2, cluster marketmaker-testing-dev.
+- Verify the selected account before mutations. Scope changes to TestStudio-owned resources. Preserve the existing testing-server and other services.
+- Review a concrete CloudFormation change set before execution. Preserve in-progress deployments; inspect them instead of starting duplicates.
+- Follow docs/aws-mmdev.md and the relevant worker package guide. Core health does not establish coded-worker or source-preparation readiness.
+- mm_prod access is limited to the user-selected external Cognito pool us-west-2_p1Epu0go8 and its dedicated TestStudio OIDC client. Preserve other clients and upstream federation.
+- Never print passwords, tokens, cookies, secret payloads, or guarded origin headers. Use secret references and private temporary credential files; remove owned files afterward.
+- Kubernetes verification uses only the dedicated local k3s/k3d installation with its explicit private kubeconfig. Do not use inherited or remote cluster contexts.
+- Azure implementation and verification remain deferred. Preserve staged code. Prepare an Azure deployment script only when requested. Do not resume historical Azure inspector work.
+- Keep local implementation checks and target deployment checks separate. Never infer cross-profile completion from mocks or one healthy native HTTP run.
+
+## Releases, documentation, and Git
+
+- VERSION is the product release source. Follow docs/versioning.md and use scripts/version.mjs before publishing changed application behavior.
+- Build release artifacts from committed implementation source. Use the shared generated metadata for UI, API, and image labels.
+- Keep build creation, deployment, and server startup dates distinct. Do not hand-edit generated build metadata.
+- API contract and dependency versions remain separate from the product version.
+- Update affected help, feature guides, API contracts, and operator instructions with behavior changes. Follow the plan's workflow completion checklist.
+- Track all 57 stable acceptance numbers in docs/implementation.md. Report verified totals and the item numbers advanced. Keep broad criteria open until their complete scope passes.
+- Update docs/continue.md when priorities, release state, deployment state, known gaps, or resume instructions materially change.
+- Commit verified features frequently; the user already authorizes these local commits. Do not push without an explicit request.
+- Keep secrets, local databases, generated metadata, temporary helpers, and raw evidence out of Git. Important resume knowledge belongs in tracked documentation.

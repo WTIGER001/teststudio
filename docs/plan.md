@@ -2,6 +2,7 @@
 
 Status: Resumed at the user's request on 2026-11-03. Implementation remains authorized.
 Track verified delivery in `implementation.md`.
+Start resumed work with [the continuation guide](continue.md). It summarizes the current release, remaining priorities, boundaries, and retained evidence.
 The user authorizes targeted tests and frequent feature commits. Remote pushes remain separate operations.
 
 ## Current execution direction
@@ -17,24 +18,26 @@ The full product scope remains required. This direction supersedes the testing s
 
 ## Release versions and build identity
 
-VERSION defines the product semantic release. Use the version helper to synchronize UI package files.
-Show Major.Minor.Patch.Tag, build ID, and UTC build date in the sidebar footer. Keep source details expandable.
-Generate one immutable metadata snapshot for the UI, API, and portable image labels. Reuse it for unchanged build inputs.
-Document numeric release increments, tags, stable releases, and raw unversioned Go builds.
-Verify version utilities and the changed footer locally. Keep deployment dates distinct from build creation dates.
+Delivered on 2026-11-06. VERSION defines the product semantic release and the helper synchronizes UI package files.
+The sidebar shows Major.Minor.Patch.Tag, build ID, and UTC creation date with expandable source details.
+One immutable metadata snapshot stamps the UI, API, and portable image labels. Unchanged build inputs reuse it.
+Release 0.1.0-dev, build e9dc1c0ca5e9, is deployed from committed source ca6968f.
+The [release guide](versioning.md) documents increments, tags, stable releases, and unversioned raw Go builds.
+Keep deployment dates distinct from creation dates. Continue with a release bump only when publishing changed behavior.
 
 ## Project gallery and images
 
-Remove the redundant project total. Use square project tiles with bounded width and responsive columns.
-Support image uploads and browser-assisted website tab capture. Keep a readable title overlay and an image-free fallback.
-Require project management permission for changes. Review before saving and keep images private to project readers.
-Capture takes one frame after browser sharing approval. Stop sharing after capture, cancellation, error, or page departure.
+Delivered on 2026-11-06. The project list has no redundant total and uses square tiles with bounded width and responsive columns.
+Private backgrounds support uploads and browser-assisted website tab capture. The title overlay and image-free fallback remain readable.
+Changes require project management permission and review. Reads require project access.
+Capture takes one frame after browser sharing approval and stops tracks on completion, cancellation, error, or page departure.
+See [project images](project-images.md). Automatic server rendering of an entered URL is not implemented.
 
 ## Project creation layout
 
-Create project opens a dedicated /projects/new page. Keep the project list focused on finding and opening projects.
-Reuse the existing setup wizard, permissions, review, unsaved changes guard, and partial-save recovery.
-Keep progress in one row with contained scrolling on narrow screens. Update help and verify the changed workflow locally.
+Delivered on 2026-11-06. Create project opens the dedicated /projects/new page; Projects focuses on finding and opening projects.
+The existing wizard retains permissions, review, the unsaved changes guard, and partial-save recovery.
+Progress stays in one row with contained scrolling on narrow screens. Current help and targeted local evidence cover this flow.
 
 ## Latest sign-in direction
 
@@ -70,6 +73,8 @@ The deployed recorder handoff also passes on the dedicated local Kubernetes inst
 The authorized MMDev ECS core now runs as teststudioapi. Actual Cognito sign-in, one native HTTPS probe, and private S3 evidence pass.
 See [MMDev deployment](aws-mmdev.md). The next AWS milestone is the separate isolated worker and preparation installation.
 The current [deployment readiness audit](deployment-readiness.md) separates implementation gaps from deferred verification gates.
+The continuation guide records the new version and project-image OpenAPI coverage gap. Reconcile those families during the next contract pass.
+The feature guides already document their runtime behavior. The main OpenAPI contract remains partial.
 Do not add new dashboard pages or repeat completed demonstration setup before closing the remaining workflow gaps.
 
 ### User-facing priority categories

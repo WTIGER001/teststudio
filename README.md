@@ -5,6 +5,7 @@ The implementation follows [the product plan](docs/plan.md).
 The [acceptance ledger](docs/implementation.md) records verified work and pending requirements.
 The [UI contract](docs/ui.md) defines tester workflows, shared interaction patterns, and documentation requirements.
 The [help guide](docs/help.md) explains contextual guide maintenance.
+For agent work, start with [AGENTS.md](AGENTS.md) and the [continuation guide](docs/continue.md).
 Use the [workflow completion checklist](docs/plan.md#workflow-completion-checklist) for each behavior change.
 
 ## Local demonstration
@@ -38,7 +39,7 @@ Normal local development still starts with an empty project registry.
 | Import and synchronize | [Native uploads](docs/sources.md), [Source bundles](docs/source-bundles.md), [Prepared suites](docs/prepared-suites.md), [Repositories](docs/repository-sources.md), [CLI sign-in](docs/cli-sign-in.md). |
 | Administer and operate | [Desktop recorder setup](docs/recorder-companion.md), [Deployment readiness](docs/deployment-readiness.md), [Access](docs/access.md), [Artifact storage](docs/artifact-storage.md), [Backup and database transfer](docs/data-transfer.md), [Versions and builds](docs/versioning.md), [Service image](docs/service-image.md), [Kubernetes profile](docs/kubernetes.md), [Identity providers](docs/providers.md), [Notification transports](docs/notification-transports.md). Current installation commands appear below. |
 | Use the API | [OpenAPI contract](contracts/openapi.yaml), [Source webhook contract](contracts/source-webhooks.openapi.yaml), and the affected feature guide. |
-| Contribute | [Plan](docs/plan.md), [Acceptance ledger](docs/implementation.md), [UI contract](docs/ui.md), [Help maintenance](docs/help.md), [Self-testing](docs/self-testing.md). |
+| Contribute | [Continue implementation](docs/continue.md), [Plan](docs/plan.md), [Acceptance ledger](docs/implementation.md), [UI contract](docs/ui.md), [Help maintenance](docs/help.md), [Self-testing](docs/self-testing.md). |
 
 ## Deployment coverage
 
