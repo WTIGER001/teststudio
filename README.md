@@ -81,6 +81,14 @@ Start the local server:
 go run ./cmd/teststudio --local
 ```
 
+A raw Go run reports an unversioned development API. For a stamped local server, run these existing build commands instead:
+
+```sh
+node scripts/build-selftest.mjs --local-only
+.data/selftest-build/controller --local
+```
+
+The stamped server shares its immutable build metadata with the compiled UI. See [versioning](docs/versioning.md).
 Open http://127.0.0.1:8040 and select Open local workspace.
 The explicit local mode binds to loopback and provides local installation administrator access.
 The server starts with an empty project registry.

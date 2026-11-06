@@ -37,8 +37,9 @@ The reviewed foundation change set adds 29 resources. The reviewed core change s
 Neither change set modifies existing resources. The core change set creates no cluster.
 ECS reports one desired and one running teststudioapi task with a completed rollout.
 Both API and artifact target groups report healthy. The existing testing-server remains at one running task.
-The ARM64 image is sha256:c52b8386a239cd279620fd1c102abcaafbdbf2424da5a45712d06ef5e8f569f1.
-It is published in teststudioapi/service. The project gallery update includes private image APIs and matching UI assets.
+The ARM64 image is sha256:8e9af90c8cbbc397593946e2b266446dd062adc3dcb37a60eaed36ec289e371f.
+It is published in teststudioapi/service. The versioned release is 0.1.0-dev, displayed as 0.1.0.dev. Build e9dc1c0ca5e9 uses committed source ca6968f.
+Its UTC creation date is 2026-11-06T14:18:59.251Z. The API, UI, and image labels share that immutable identity.
 The unchanged trace viewer is reused. Native image storage uses the existing private database. The image retains the reviewed public RDS trust bundle.
 
 Actual Cognito sign-in, catalog publication, and one native HTTPS probe now pass through the public installation.

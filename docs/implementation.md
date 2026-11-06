@@ -21,6 +21,10 @@ Run: 20261106T141549.201293000-da61d7429e7ac5e9b3ab33b7. Evidence is complete an
 The workflow verifies exact UI/API identity, UTC date, expanded details, reload stability, and mobile layout.
 Two consecutive metadata generations retain the same date and build identifier. The release helper preserves synchronized version files.
 Owned verification browsers, containers, and the local controller exit. No user browser or demonstration data changes.
+The final release builds from committed source ca6968f, with working changes false.
+A dedicated local package check verifies the actual service endpoint and image labels against the generated snapshot. Its containers exit.
+MMDev deploys build e9dc1c0ca5e9 with creation date 2026-11-06T14:18:59.251Z. The stack and service rollout complete.
+The public API and UI assets match the same build identity. The existing testing-server remains healthy.
 This refines verified items 49 and 50. The verified count remains 50 of 57.
 
 ## Square project tiles and private images — 2026-11-06
