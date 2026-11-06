@@ -167,6 +167,7 @@ func (s *Server) Handler() http.Handler {
 	s.recordingRoutes(mux)
 	s.runRoutes(mux)
 	s.scheduleRoutes(mux)
+	s.probeRoutes(mux)
 	s.notificationRoutes(mux)
 	s.timingRoutes(mux)
 	s.trendRoutes(mux)

@@ -6,6 +6,17 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## Target-specific HTTPS probe bindings and summaries — 2026-11-06
+
+Milestone 2 adds revisioned project-owned bindings for suite, test, environment, endpoint, and execution location.
+Identical creation reuses deterministic identity. Mutations retain current catalog and target authority, reference assertions, audits, and revision conflicts.
+The overview reads one indexed batch of at most 1000 newest project runs, filters exact current permissions, and reports partial coverage rather than invented percentages.
+Target changes retain old observations with a boundary. Logical results preserve timeout and evidence distinctions. Schedule freshness accounts for due times and reporting grace.
+The normal retained history API now accepts environment and location filters. Its client preserves those filters across route query changes.
+OpenAPI 0.36 documents the new family and generates matching client types; the product release version remains separate.
+Four focused API checks pass on SQLite. PostgreSQL checks cover target separation, permissions, late completion, bounded coverage, and schedule freshness; cursor and scoped-history parity receive their own focused check.
+The generated client synchronization check passes. The total remains 50 verified of 57; this refines 06, 13, 25, 27, 28, 34, 37, 39, 40, and 45.
+
 ## HTTPS probe visual help — 2026-11-06
 
 Milestone 1 delivers dedicated probe and creation guides with complete create, run, inspect, activate, and schedule tutorials.

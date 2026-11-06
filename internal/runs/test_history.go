@@ -46,6 +46,10 @@ func (s *Service) TestHistory(ctx context.Context, user, project, suite, id, cur
 }
 
 func (s *Service) ApplicationTestHistory(ctx context.Context, user, project, suite, id, application, cursor string, limit int) (TestHistoryPage, error) {
+	return s.ScopedTestHistory(ctx, user, project, suite, id, application, "", "", cursor, limit)
+}
+
+func (s *Service) ScopedTestHistory(ctx context.Context, user, project, suite, id, application, environment, location, cursor string, limit int) (TestHistoryPage, error) {
 	result := TestHistoryPage{Items: []TestHistoryItem{}}
 	if !domain.ValidID(project) || !domain.ValidID(suite) || !domain.ValidID(id) || application != "" && !domain.ValidID(application) || limit < 1 || limit > 100 {
 		return result, errors.New("test history requires valid identifiers and a page limit from 1 through 100")
@@ -55,7 +59,10 @@ func (s *Service) ApplicationTestHistory(ctx context.Context, user, project, sui
 			return result, err
 		}
 	}
-	scope := fmt.Sprintf("%s\x00%s\x00%s\x00%s\x00%d", user, project, suite, id, limit) + "\x00" + application
+	if environment != "" && !domain.ValidID(environment) || location != "" && !domain.ValidID(location) {
+		return result, errors.New("invalid target history scope")
+	}
+	scope := environment + "\x00" + location + "\x00" + fmt.Sprintf("%s\x00%s\x00%s\x00%s\x00%d", user, project, suite, id, limit) + "\x00" + application
 	raw, err := paging.Open(ctx, s.Store, "test-history-settings", scope, cursor)
 	if err != nil {
 		return result, err
@@ -79,7 +86,7 @@ func (s *Service) ApplicationTestHistory(ctx context.Context, user, project, sui
 			if err != nil {
 				return result, err
 			}
-			if value.Project != project || value.Request.Suite != suite {
+			if value.Project != project || value.Request.Suite != suite || environment != "" && value.Request.Environment != environment || location != "" && value.Request.Location != location {
 				continue
 			}
 			title := ""

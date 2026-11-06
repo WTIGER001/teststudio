@@ -1,7 +1,7 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio API"
-  "version": "0.35.0"
+  "version": "0.36.0"
   "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Includes optional client-identifier RP-initiated provider logout after local session revocation. Includes staged native JSON and YAML sources with atomic catalog publication and retained source provenance. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
@@ -10,6 +10,256 @@
   -
     "SessionCookie": []
 "paths":
+  "/api/v1/projects/{project}/probes": {
+    "get": {
+      "operationId": "listHTTPSProbes",
+      "summary": "Read authorized target-specific probes and up to 30 recent observations. Scan at most 1000 newest project runs once. Explicit partial coverage suppresses percentages. Cursor binds user, filters, and current result revisions. Reads require catalog and environment access; run and schedule data respect their own exact permissions.",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "search",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "application",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "stage",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "state",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "freshness",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "schedule",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "cursor",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "hours",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 720,
+            "default": 24
+          }
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 30
+          }
+        },
+        {
+          "in": "query",
+          "name": "archived",
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProbeOverviewPage"
+              }
+            }
+          }
+        },
+        "default": {
+          "$ref": "#/components/responses/Problem"
+        }
+      }
+    },
+    "post": {
+      "operationId": "createHTTPSProbeBinding",
+      "summary": "Bind an existing native definition to an explicit target. Requires current catalog.update on suite and test and environments.read. References are permanent. Deterministic identity makes identical creation replay safe. No publication, execution, target request, or schedule enablement.",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProbeBindingRecord"
+              }
+            }
+          }
+        },
+        "default": {
+          "$ref": "#/components/responses/Problem"
+        }
+      },
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProbeBinding"
+            }
+          }
+        }
+      }
+    }
+  }
+  "/api/v1/projects/{project}/probes/{probe}": {
+    "get": {
+      "operationId": "readHTTPSProbeBinding",
+      "summary": "Read binding under current suite, test and target authority.",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "probe",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProbeBindingRecord"
+              }
+            }
+          }
+        },
+        "default": {
+          "$ref": "#/components/responses/Problem"
+        }
+      }
+    },
+    "put": {
+      "operationId": "updateHTTPSProbeBinding",
+      "summary": "Rename, archive or restore with a positive If-Match revision. References are permanent. Archival preserves tests, runs and schedules; it does not pause shared schedules. Conflicts require reload.",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "probe",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "header",
+          "name": "If-Match",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProbeBindingRecord"
+              }
+            }
+          }
+        },
+        "default": {
+          "$ref": "#/components/responses/Problem"
+        }
+      },
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProbeBinding"
+            }
+          }
+        }
+      }
+    }
+  }
   "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/pairing": {
     "post": {
       "operationId": "createBrowserRecordingPairing",
@@ -290,6 +540,8 @@
     "get": {
       "operationId": "readTestRunHistory",
       "parameters": [
+        {"in": "query", "name": "environment", "required": false, "schema": {"type": "string"}},
+        {"in": "query", "name": "location", "required": false, "schema": {"type": "string"}},
         { "in": "query", "name": "application", "schema": { "type": "string" }, "description": "Filter by frozen application context. Omit for all applications." },
         {
           "in": "path",
@@ -6965,6 +7217,326 @@
           "schema":
             "$ref": "#/components/schemas/Problem"
   "schemas":
+    "ProbeBinding": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "suiteId": {
+          "type": "string"
+        },
+        "testId": {
+          "type": "string"
+        },
+        "environmentId": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "executionLocation": {
+          "type": "string"
+        },
+        "archived": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "suiteId",
+        "testId",
+        "environmentId",
+        "endpoint"
+      ]
+    }
+    "ProbeHTTPObservation": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer"
+        },
+        "durationMs": {
+          "type": "number"
+        },
+        "timingsMs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "certificateExpires": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "url",
+        "status",
+        "durationMs"
+      ]
+    }
+    "ProbeObservation": {
+      "type": "object",
+      "properties": {
+        "runId": {
+          "type": "string"
+        },
+        "releaseId": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "observedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "state": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        },
+        "evidenceState": {
+          "type": "string"
+        },
+        "http": {
+          "$ref": "#/components/schemas/ProbeHTTPObservation"
+        },
+        "targetChanged": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "runId",
+        "releaseId",
+        "createdAt",
+        "state",
+        "evidenceState",
+        "targetChanged"
+      ]
+    }
+    "ProbeSchedule": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "intervalSeconds": {
+          "type": "integer"
+        },
+        "cron": {
+          "type": "string"
+        },
+        "nextAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastState": {
+          "type": "string"
+        },
+        "shared": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "enabled",
+        "kind",
+        "shared"
+      ]
+    }
+    "ProbeSummary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "suiteId": {
+          "type": "string"
+        },
+        "testId": {
+          "type": "string"
+        },
+        "environmentId": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "executionLocation": {
+          "type": "string"
+        },
+        "archived": {
+          "type": "boolean"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "applicationId": {
+          "type": "string"
+        },
+        "stage": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "string"
+        },
+        "availability": {
+          "type": "string"
+        },
+        "latest": {
+          "$ref": "#/components/schemas/ProbeObservation"
+        },
+        "active": {
+          "$ref": "#/components/schemas/ProbeObservation"
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ProbeObservation"
+          }
+        },
+        "schedules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ProbeSchedule"
+          }
+        },
+        "scheduleState": {
+          "type": "string"
+        },
+        "samples": {
+          "type": "integer"
+        },
+        "passed": {
+          "type": "integer"
+        },
+        "other": {
+          "type": "integer"
+        },
+        "successRate": {
+          "type": "number"
+        },
+        "partial": {
+          "type": "boolean"
+        },
+        "activeReleaseId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "suiteId",
+        "testId",
+        "environmentId",
+        "endpoint",
+        "executionLocation",
+        "archived",
+        "revision",
+        "state",
+        "freshness",
+        "availability",
+        "history",
+        "schedules",
+        "scheduleState",
+        "samples",
+        "passed",
+        "other",
+        "partial"
+      ]
+    }
+    "ProbeBindingRecord": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "data": {
+          "$ref": "#/components/schemas/ProbeBinding"
+        }
+      },
+      "required": [
+        "id",
+        "revision",
+        "updatedAt",
+        "data"
+      ]
+    }
+    "ProbeOverviewPage": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/ProbeSummary"
+          }
+        },
+        "matched": {
+          "type": "integer"
+        },
+        "cursor": {
+          "type": "string"
+        },
+        "serverTime": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "windowStart": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "partial": {
+          "type": "boolean"
+        },
+        "scanned": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "items",
+        "matched",
+        "serverTime",
+        "windowStart",
+        "partial",
+        "scanned"
+      ]
+    }
     "RetainedTest": {
       "type": "object",
       "properties": {

@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.35.0"
+export const accessContractVersion = "0.36.0"
 
 export type APIAuthentication = { "binding": string; "header"?: string; "scheme": "bearer" | "basic" | "header" }
 export type APIRequestPolicy = { "authentication"?: APIAuthentication; "maxRequests": number; "maxResponseBytes": number; "redactFields"?: (string)[]; "rules": (APIRequestRule)[] }
@@ -90,6 +90,13 @@ export type PredefinedRole = { "canManage": boolean; "disabled": boolean; "id": 
 export type PredefinedRolePage = { "items": (PredefinedRoleRecord)[] }
 export type PredefinedRoleRecord = { "data": PredefinedRole; "id": string; "revision": number; "updatedAt"?: string }
 export type PredefinedRoleUpdate = { "disabled": boolean; "reason": string }
+export type ProbeBinding = { "archived"?: boolean; "endpoint": string; "environmentId": string; "executionLocation"?: string; "id"?: string; "name": string; "suiteId": string; "testId": string }
+export type ProbeBindingRecord = { "data": ProbeBinding; "id": string; "revision": number; "updatedAt": string }
+export type ProbeHTTPObservation = { "certificateExpires"?: string; "durationMs": number; "status": number; "timingsMs"?: { [key: string]: number }; "url": string }
+export type ProbeObservation = { "createdAt": string; "error"?: string; "evidenceState": string; "http"?: ProbeHTTPObservation; "observedAt"?: string; "releaseId": string; "runId": string; "state": string; "targetChanged": boolean }
+export type ProbeOverviewPage = { "cursor"?: string; "items": (ProbeSummary)[]; "matched": number; "partial": boolean; "scanned": number; "serverTime": string; "windowStart": string }
+export type ProbeSchedule = { "cron"?: string; "enabled": boolean; "id": string; "intervalSeconds"?: number; "kind": string; "lastState"?: string; "name": string; "nextAt"?: string; "shared": boolean }
+export type ProbeSummary = { "active"?: ProbeObservation; "activeReleaseId"?: string; "applicationId"?: string; "archived": boolean; "availability": string; "endpoint": string; "environmentId": string; "executionLocation": string; "freshness": string; "history": (ProbeObservation)[]; "id": string; "latest"?: ProbeObservation; "name": string; "other": number; "partial": boolean; "passed": number; "revision": number; "samples": number; "scheduleState": string; "schedules": (ProbeSchedule)[]; "stage"?: string; "state": string; "successRate"?: number; "suiteId": string; "testId": string; "url"?: string }
 export type Problem = { "message": string; "status"?: number }
 export type Profile = { "identities": ExternalIdentityPage; "localAccount": boolean; "user": User }
 export type Provider = { "autoProvision": boolean; "callbackUrl": string; "canManage": boolean; "clientId": string; "disabled": boolean; "groupClaim"?: string; "groupMappings": ProviderMappings; "id": string; "issuer": string; "logoutCallbackUrl": string; "logoutEndpoint"?: string; "membershipTtlSeconds": number; "name": string; "scopes": (string)[]; "secretRef"?: string }
@@ -229,6 +236,10 @@ export interface AccessRequests {
   removeProjectGrant: { "project": string; "grant": string; revision: number; body: Reason }
   readProjectGrant: { "project": string; "grant": string }
   updateProjectGrant: { "project": string; "grant": string; revision: number; body: GrantUpdate }
+  listHTTPSProbes: { "project": string; query?: { "search"?: string; "application"?: string; "stage"?: string; "state"?: string; "freshness"?: string; "schedule"?: string; "cursor"?: string; "hours"?: number; "limit"?: number; "archived"?: boolean } }
+  createHTTPSProbeBinding: { "project": string; body: ProbeBinding }
+  readHTTPSProbeBinding: { "project": string; "probe": string }
+  updateHTTPSProbeBinding: { "project": string; "probe": string; revision: number; body: ProbeBinding }
   readRepositorySourceOptions: { "project": string }
   listRepositorySources: { "project": string; query?: { "limit"?: number; "cursor"?: string } }
   readRepositorySource: { "project": string; "source": string }
@@ -299,7 +310,7 @@ export interface AccessRequests {
   changeCatalogTestState: { "project": string; "suite": string; "test": string; "action": "disable" | "enable" | "archive" | "restore"; revision: number }
   readRetainedTest: { "project": string; "suite": string; "test": string }
   listCatalogTestRevisions: { "project": string; "suite": string; "test": string }
-  readTestRunHistory: { "project": string; "suite": string; "test": string; query?: { "application"?: string; "cursor"?: string; "limit"?: number } }
+  readTestRunHistory: { "project": string; "suite": string; "test": string; query?: { "environment"?: string; "location"?: string; "application"?: string; "cursor"?: string; "limit"?: number } }
   listProjectCatalog: { "project": string; query?: { "query"?: string; "suite"?: string; "application"?: string; "category"?: string; "tag"?: string; "owner"?: string; "type"?: string; "runner"?: string; "state"?: string; "safety"?: string; "source"?: string; "sort"?: string; "cursor"?: string; "descendants"?: boolean; "uncategorized"?: boolean; "limit"?: number } }
   readRecordingCompanionControl: { "id": string; body: RecordingCompanionControlRequest }
   pairRecordingCompanion: { "id": string; body: RecordingCompanionPairRequest }
@@ -383,6 +394,10 @@ export interface AccessResponses {
   removeProjectGrant: GrantRemoved
   readProjectGrant: GrantRecord
   updateProjectGrant: GrantRecord
+  listHTTPSProbes: ProbeOverviewPage
+  createHTTPSProbeBinding: ProbeBindingRecord
+  readHTTPSProbeBinding: ProbeBindingRecord
+  updateHTTPSProbeBinding: ProbeBindingRecord
   readRepositorySourceOptions: SourceRepositoryOptions
   listRepositorySources: SourceRepositoryPage
   readRepositorySource: SourceRepositoryRecord
@@ -537,6 +552,10 @@ export const accessOperations = {
   removeProjectGrant: { method: "DELETE", path: "/api/v1/projects/{project}/permissions/{grant}" },
   readProjectGrant: { method: "GET", path: "/api/v1/projects/{project}/permissions/{grant}" },
   updateProjectGrant: { method: "PUT", path: "/api/v1/projects/{project}/permissions/{grant}" },
+  listHTTPSProbes: { method: "GET", path: "/api/v1/projects/{project}/probes" },
+  createHTTPSProbeBinding: { method: "POST", path: "/api/v1/projects/{project}/probes" },
+  readHTTPSProbeBinding: { method: "GET", path: "/api/v1/projects/{project}/probes/{probe}" },
+  updateHTTPSProbeBinding: { method: "PUT", path: "/api/v1/projects/{project}/probes/{probe}" },
   readRepositorySourceOptions: { method: "GET", path: "/api/v1/projects/{project}/repository-source-options" },
   listRepositorySources: { method: "GET", path: "/api/v1/projects/{project}/repository-sources" },
   readRepositorySource: { method: "GET", path: "/api/v1/projects/{project}/repository-sources/{source}" },

@@ -1,3 +1,4 @@
+import { combineLatest } from 'rxjs'
 import { computed, DestroyRef, effect, inject, Injectable, signal, untracked } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { ActivatedRoute } from '@angular/router'
@@ -17,6 +18,8 @@ export class TestHistoryService {
   readonly applicationId = signal('')
   readonly suite = signal('')
   readonly test = signal('')
+  readonly environment = signal('')
+  readonly location = signal('')
   readonly returnRun = signal('')
   readonly context = signal<RetainedTest | null>(null)
   readonly runs = signal<TestHistoryItem[]>([])
@@ -38,9 +41,9 @@ export class TestHistoryService {
 
   constructor() {
     const route = inject(ActivatedRoute), destroy = inject(DestroyRef)
-    route.paramMap.pipe(takeUntilDestroyed(destroy)).subscribe(params => {
+    combineLatest([route.paramMap,route.queryParamMap]).pipe(takeUntilDestroyed(destroy)).subscribe(([params,query]) => {
       this.generation++; this.historyGeneration++; this.revisionGeneration++; this.runLoading.set(false); this.runQueryStarted = false; this.context.set(null); this.runs.set([]); this.revisions.set([]); this.cursor.set(''); this.error.set(''); this.runError.set(''); this.revisionError.set(''); this.revisionsLoaded = false
-      this.applicationId.set(params.get('applicationId') ?? ''); this.project.set(params.get('projectId') ?? ''); this.suite.set(params.get('suiteId') ?? ''); this.test.set(params.get('testId') ?? ''); this.returnRun.set(route.snapshot.queryParamMap.get('run') ?? '')
+      this.applicationId.set(params.get('applicationId') ?? ''); this.project.set(params.get('projectId') ?? ''); this.suite.set(params.get('suiteId') ?? ''); this.test.set(params.get('testId') ?? ''); this.returnRun.set(query.get('run') ?? ''); this.environment.set(query.get('environment') ?? ''); this.location.set(query.get('location') ?? '')
       void this.load()
     })
     effect(() => {
@@ -75,7 +78,7 @@ export class TestHistoryService {
     const generation = ++this.historyGeneration
     this.runQueryStarted = true; this.runLoading.set(true); this.runError.set('')
     try {
-      const page = await this.client.call('readTestRunHistory', { ...this.scope(), query: { application: this.applicationId() || undefined, limit: 20, cursor: more ? this.cursor() : undefined } })
+      const page = await this.client.call('readTestRunHistory', { ...this.scope(), query: { application: this.applicationId() || undefined, environment: this.environment() || undefined, location: this.location() || undefined, limit: 20, cursor: more ? this.cursor() : undefined } })
       if (generation !== this.historyGeneration) return
       this.runs.set(more ? [...this.runs(), ...page.items] : page.items); this.cursor.set(page.cursor ?? ''); this.partial.set(page.partial)
     } catch (error) { if (generation === this.historyGeneration) { this.runs.set([]); this.cursor.set(''); this.runError.set(error instanceof Error ? error.message : 'Run history is unavailable. Refresh access and retry.') } }
