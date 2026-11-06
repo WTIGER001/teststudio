@@ -24,7 +24,7 @@ Start with dedicated first-probe help, examples rendered from shared UI componen
 Then deliver target-specific probe bindings and summaries, the operational overview, reviewed actions and schedules, and multiple-target setup.
 The selected onboarding scope is website, admin, and search probes across production, beta, and development.
 Keep those addresses in private project configuration and keep product examples generic.
-Milestones 1 through 5 now pass targeted local implementation checks. Continue with milestone 6: committed release publication and private onboarding in the user-selected FoodMarketMaker project. Hosted probe creation and schedule enablement remain pending until that step.
+Milestones 1 through 5 pass targeted local implementation checks. Milestone 6 deploys release 0.2.0-dev and creates the user-selected FoodMarketMaker project with nine passing probes and enabled five-minute schedules. Their first automatic firings also pass with complete evidence. Return to the default AWS worker queue.
 The ledger remains 50 verified of 57. Refine the affected HTTPS, results, automation, UI, and help criteria without closing broad cross-profile items.
 
 ## Release versions and build identity
@@ -32,7 +32,7 @@ The ledger remains 50 verified of 57. Refine the affected HTTPS, results, automa
 Delivered on 2026-11-06. VERSION defines the product semantic release and the helper synchronizes UI package files.
 The sidebar shows Major.Minor.Patch.Tag, build ID, and UTC creation date with expandable source details.
 One immutable metadata snapshot stamps the UI, API, and portable image labels. Unchanged build inputs reuse it.
-Release 0.1.0-dev, build e9dc1c0ca5e9, is deployed from committed source ca6968f.
+Release 0.2.0-dev, build 6caa2b0ca508, is deployed from committed source 6d2444f. Build creation is 2026-11-06T16:02:07.885Z. UI publication occurs separately at 2026-11-06T16:09:03Z.
 The [release guide](versioning.md) documents increments, tags, stable releases, and unversioned raw Go builds.
 Keep deployment dates distinct from creation dates. Continue with a release bump only when publishing changed behavior.
 

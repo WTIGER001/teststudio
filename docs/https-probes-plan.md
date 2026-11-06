@@ -1,6 +1,6 @@
 # HTTPS probes feature and help plan
 
-Status: Milestones 1 through 5 pass targeted local verification on 2026-11-06. Milestone 6 is in progress. Deployed behavior remains unchanged until the release below completes.
+Status: Milestones 1 through 6 are complete on 2026-11-06. Local workflows pass. Release 0.2.0-dev is deployed, and the selected private project has nine passing initial probes and nine passing first automatic firings with complete evidence.
 
 Make HTTPS probes easy to create, run, schedule, and investigate from one project overview.
 Give each task contextual help with examples rendered from the same components as the application.
@@ -259,7 +259,7 @@ These milestones refine the stable acceptance ledger. They add no new product ac
 | 5. Multiple-target setup | A dedicated Add multiple probes route uses Addresses, Targets, and Review. It accepts explicit URL rows, validates duplicates and stage/application choices, and records per-row receipts. Draft saving makes no target requests. Run and enable remain explicit reviewed actions. | 03, 05, 21, 25, 33, 34, 38, 50 | A focused normal TestStudio browser workflow with nine new generic addresses across three surfaces and stages, including one partial save and retry. |
 | 6. Release and selected-domain onboarding | Commit verified implementation, stamp matching artifacts, publish through the authorized release process, then create or adopt the user's nine private project probes without duplication. Verify one explicit initial run per selected target and schedule enablement separately. | 33, 34, 49, 50; bounded progress under 57 | Inspect deployed version/assets/help, verify each selected run identity and actual result, and inspect the first enabled schedule firing without repeating the full local workflow suite. |
 
-Milestones 1 through 5 are implemented. Preserve their retained local evidence; continue with the committed release and selected-domain onboarding in milestone 6.
+Milestones 1 through 6 are implemented and verified within this request. Preserve their local and selected AWS evidence. Resume the default worker queue from the continuation guide.
 Milestones 2 through 4 complete the single-probe operational workflow before adding the multi-address setup in milestone 5.
 Ship verified increments with complete help for the behavior they expose. Do not show empty or misleading planned controls between milestones.
 
@@ -267,7 +267,7 @@ Ship verified increments with complete help for the behavior they expose. Do not
 
 Register new workflows in `tests/selftest/catalog.json` before invoking their IDs.
 Suggested new IDs are `STUDIO-PROBE-HELP-001`, `STUDIO-PROBE-OVERVIEW-001`, `STUDIO-PROBE-ACTIONS-001`, and `STUDIO-PROBE-SETUP-001`.
-These four IDs are now registered and have retained passing evidence. Select only the workflow affected by a later change.
+These four planned IDs and STUDIO-PROBE-BULK-001 are now registered and have retained passing evidence. Select only the workflow affected by a later change.
 Use `bash scripts/test-self.sh --test=REGISTERED-ID` with the actual selected ID after registration.
 
 Reuse retained evidence for unchanged behavior. Rerun existing `STUDIO-URL-001`, `STUDIO-HTTPS-001`, `STUDIO-SCHEDULE-001`, `STUDIO-HISTORY-001`, or `STUDIO-HELP-001` only when the implementation changes their behavior or leaves a specific unresolved concern.
@@ -328,3 +328,18 @@ The user selects a new FoodMarketMaker project for hosted onboarding. Private co
 The product guide documents the bounded overview and its partial coverage. No continuous uptime claim is made.
 
 STUDIO-PROBE-BULK-001 passes in run 20261106T160047.377724000-fbc74e1dca4ff433c8f4cc37. It preserves successful run identities across partial failure and review reopening, and reconciles a lost archive acknowledgement without duplicate effects. Its evidence is complete and the execution is cleaned.
+
+## Hosted release and onboarding
+
+Release 0.2.0-dev, build 6caa2b0ca508, uses committed implementation source 6d2444f.
+Build creation is 2026-11-06T16:02:07.885Z. Task startup is 2026-11-06T16:06:11.177Z. Matching UI publication is 2026-11-06T16:09:03Z.
+A reviewed change set changes only the owned ECS Service and Task. The previous deployment and existing testing-server remain preserved.
+The twelve portable-package checks pass. Public build metadata and relevant UI bundles match; API and evidence health pass.
+The user-selected FoodMarketMaker project has nine explicit bindings in three applications and stages, normal project roles, and one active native suite release.
+All nine initial normal runs pass with HTTP 200, TLS validation, and complete evidence. Overview identity, anonymous denial, and a private evidence checksum pass.
+Nine five-minute schedules are enabled using the retained AWS execution location. All nine first automatic firings pass with complete evidence.
+Private project configuration and raw evidence remain outside Git. No coded-worker or Azure completion is claimed.
+
+The first automatic firings occur at 2026-11-06T16:18:26Z through 16:18:32Z. All nine finish passed with complete evidence.
+The retained checkpoint contains nine initial run identities, nine schedule identities, and the first scheduled observations. Inspection reuses those identities.
+This completes the requested native HTTPS scope. The broader acceptance ledger stays 50 verified of 57, with 41, 46, 51, 53, 54, 56, and 57 open.

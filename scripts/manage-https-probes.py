@@ -1,4 +1,5 @@
 import argparse
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -9,7 +10,7 @@ import urllib.request
 
 def main():
     parser = argparse.ArgumentParser(description='Inspect and configure explicitly selected native HTTPS probes through an owned hosted installation.')
-    parser.add_argument('action', choices=['inspect', 'configure', 'run', 'enable', 'check'])
+    parser.add_argument('action', choices=['inspect', 'configure', 'run', 'enable', 'check', 'verify'])
     for name in ['profile', 'region', 'account', 'stack', 'credential-secret']:
         parser.add_argument('--' + name, required=True)
     parser.add_argument('--project')
@@ -43,6 +44,8 @@ def main():
             if args.project:
                 path = '/api/v1/projects/' + urllib.parse.quote(args.project, safe='')
                 result['applications'] = [{'id': v['id'], 'name': v['data']['name']} for v in api.call('GET', path + '/applications')['items']]
+                summary=api.call('GET',path+'/probes')
+                result['probes']=[{'name':v['name'],'state':v['state'],'freshness':v['freshness'],'draftChanged':v.get('draftChanged'),'latestRunId':v.get('latest',{}).get('runId'),'scheduleState':v['scheduleState']} for v in summary['items']]
                 result['suites'] = [{'id': v['id'], 'name': v['data']['name'], 'applications': v['data'].get('applications', [])} for v in api.call('GET', path + '/suites')['items']]
             print(json.dumps(result, indent=2)); return
         config = json.loads(Path(args.config).read_text())
@@ -118,14 +121,39 @@ def main():
                 schedules = api.call('GET', project + '/schedules?limit=100')['items']
                 schedule_id = 'probe-' + selected['id'].lower()
                 old = next((v for v in schedules if v['id'] == schedule_id), None)
-                definition = {'id': schedule_id, 'name': selected['name'] + ' checks', 'enabled': True, 'kind': 'interval', 'intervalSeconds': 300, 'timezone': 'UTC', 'overlap': 'skip', 'request': {'suiteId': config['suite']['id'], 'environmentId': selected['environmentId'], 'testIds': [selected['id']], 'executionLocation': 'local', 'timeoutSeconds': 60, 'retries': 0}}
+                definition = {'id': schedule_id, 'name': selected['name'] + ' checks', 'enabled': True, 'kind': 'interval', 'intervalSeconds': 300, 'timezone': 'UTC', 'overlap': 'skip', 'request': {'suiteId': config['suite']['id'], 'environmentId': selected['environmentId'], 'testIds': [selected['id']], 'executionLocation': run['request']['executionLocation'], 'timeoutSeconds': 60, 'retries': 0}}
                 if not old:
                     api.call('POST', project + '/schedules/preview', definition)
                     api.call('POST', project + '/schedules', definition)
                 else:
-                    assert old['data']['enabled'] and old['data']['request']['testIds'] == [selected['id']] and old['data']['request']['environmentId'] == selected['environmentId'], 'Existing schedule requires explicit review'
+                    assert all(old['data'].get(k)==definition[k] for k in ['enabled','kind','intervalSeconds','timezone','overlap']) and all(old['data']['request'].get(k)==v for k,v in definition['request'].items()), 'Existing schedule requires explicit review'
                 row['scheduleId'] = schedule_id; save()
             print(json.dumps({'enabledSchedules': [v['scheduleId'] for v in receipt['rows'].values()], 'intervalSeconds': 300})); return
+        if args.action == 'verify':
+            summary=api.call('GET',project+'/probes?limit=100')
+            expected={v['probeId'] for v in receipt['rows'].values()}
+            assert summary['matched']==len(expected) and {v['id'] for v in summary['items']}==expected, 'The overview does not match the selected bindings'
+            assert all(v['state']=='passed' and not v['draftChanged'] for v in summary['items']), 'Inspect a current failed or changed probe'
+            assignments=api.call('GET',project+'/role-assignments?limit=100')['items']
+            for selected in config.get('access',[]):
+                assert any(all(v['data'].get(k)==selected[k] for k in ['principalKind','principalId','roleId']) for v in assignments), 'The requested project role is unavailable'
+            first=next(iter(receipt['rows'].values()))['runId']
+            run_path=project+'/runs/'+first
+            artifacts=api.call('GET',run_path+'/artifacts')['items']
+            artifact=next(v['data'] for v in artifacts if v['data']['state']=='available' and v['data']['size']<=1000000)
+            grant=api.call('POST',run_path+'/artifacts/'+artifact['id']+'/access',{'action':'download'})
+            assert grant['url'].startswith(outputs['ArtifactUrl']+'/'), 'Unexpected evidence origin'
+            with urllib.request.urlopen(grant['url'],timeout=30) as response:
+                body=response.read(1000001)
+            assert len(body)==artifact['size'] and hashlib.sha256(body).hexdigest()==artifact['checksum'], 'Private evidence checksum did not match'
+            try:
+                urllib.request.urlopen(outputs['UiUrl']+project+'/probes',timeout=30)
+            except urllib.error.HTTPError as error:
+                assert error.code==401, 'Anonymous project access must require sign-in'
+            else:
+                raise AssertionError('Anonymous project access was accepted')
+            receipt['verification']={'overviewMatches':True,'currentProbes':len(expected),'requestedProjectRolesVerified':True,'anonymousProjectDenied':True,'privateDownloadVerified':True,'artifactRunId':first}
+            save();print(json.dumps(receipt['verification']));return
         status = []
         for selected in config['probes']:
             row = receipt['rows'][selected['id']]

@@ -6,6 +6,31 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## HTTPS probes release and private onboarding — 2026-11-06
+
+Milestone 6 completes the requested six-milestone HTTPS probes delivery.
+Release 0.2.0-dev, build 6caa2b0ca508, uses committed implementation source 6d2444fcb27a0d03af68c258e36da173adc38b77.
+Build creation is 2026-11-06T16:02:07.885Z. The new task starts at 2026-11-06T16:06:11.177Z. Matching UI publication is 2026-11-06T16:09:03Z.
+The service image is sha256:eb8ff64d74fcdc9eb06f2c5127bb8b202ee2029d39a0126dd9e0fa70e1651fdb.
+Twelve local portable-package checks pass. The concrete CloudFormation change set modifies only TestStudio's Service and Task.
+The resulting service is healthy with a completed rollout. The existing testing-server remains healthy with its completed rollout.
+Public API metadata, UI index, main bundle, probe overview bundle, and setup bundle match the committed release. API and evidence health pass.
+
+The user selects a new FoodMarketMaker project. It contains Website, Admin, and Search applications, one active native HTTPS suite release, and nine explicit target bindings across production, beta, and development.
+All nine initial normal runs pass with HTTP 200, valid TLS, and complete private evidence. The observed initial durations range from 51.8 through 241.8 ms.
+The existing requesting user's four normal project roles are verified. No installation administrator role is granted. Anonymous project API access returns 401.
+A private evidence download matches its retained size and SHA-256 checksum. Every owned operator application session signs out.
+Nine interval schedules use their actual retained AWS execution location, 300-second cadence, zero retries, skipped overlaps, and normal current-owner authority checks.
+All nine first automatic firings at 16:18:26Z through 16:18:32Z pass with complete evidence. This proves actual recurring native execution on the selected AWS installation.
+The first rejected schedule preview used a workstation location and created no run or schedule. The tracked operator helper now derives the location from the retained hosted run; the normal UI handoff already uses its binding's actual location.
+
+Tracked publish-aws-core.py prepares, reviews, executes, and finishes owned image-only releases without depending on ignored workstation snippets.
+Tracked manage-https-probes.py separates inspection, configuration, explicit execution, enablement, retained-result checks, and private-access verification.
+Private configuration, credentials, and raw evidence stay outside Git. Retained receipts are output/aws-mmdev/https-probes-release.json and foodmarketmaker-probes.json.
+The user's port 8040 demo, database, history, other services, and existing identities remain preserved.
+This refines the accepted native HTTPS, results, scheduling, UI, help, access, and evidence workflows. Items 41, 46, 51, 53, 54, 56, and 57 remain open; the total stays 50 verified of 57.
+Coded workers and source preparation are not installed by this release. Azure stays deferred. Resume the default worker queue without repeating the completed probe onboarding.
+
 ## HTTPS probe overview, actions, and multiple setup — 2026-11-06
 
 Milestones 3 through 5 deliver the project operational overview, server filters, target-aware observations, recent logical checks, TLS and timing diagnostics, and scoped investigation links.

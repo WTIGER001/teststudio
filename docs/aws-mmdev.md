@@ -37,12 +37,12 @@ The reviewed foundation change set adds 29 resources. The reviewed core change s
 Neither change set modifies existing resources. The core change set creates no cluster.
 ECS reports one desired and one running teststudioapi task with a completed rollout.
 Both API and artifact target groups report healthy. The existing testing-server remains at one running task.
-The ARM64 image is sha256:8e9af90c8cbbc397593946e2b266446dd062adc3dcb37a60eaed36ec289e371f.
-It is published in teststudioapi/service. The versioned release is 0.1.0-dev, displayed as 0.1.0.dev. Build e9dc1c0ca5e9 uses committed source ca6968f.
-Its UTC creation date is 2026-11-06T14:18:59.251Z. The API, UI, and image labels share that immutable identity.
+The ARM64 image is sha256:eb8ff64d74fcdc9eb06f2c5127bb8b202ee2029d39a0126dd9e0fa70e1651fdb.
+It is published in teststudioapi/service. The versioned release is 0.2.0-dev, displayed as 0.2.0.dev. Build 6caa2b0ca508 uses committed source 6d2444f.
+Its UTC build creation date is 2026-11-06T16:02:07.885Z. The new task starts at 2026-11-06T16:06:11.177Z and UI publication occurs at 2026-11-06T16:09:03Z. The API, UI, and image labels share that immutable identity.
 The unchanged trace viewer is reused. Native image storage uses the existing private database. The image retains the reviewed public RDS trust bundle.
 
-Actual Cognito sign-in, catalog publication, and one native HTTPS probe now pass through the public installation.
+Initial core verification retains actual Cognito sign-in, catalog publication, and one native HTTPS probe through the public installation.
 The original run is 20261106T014449.692767879-e0841a5b4b501c410e0db21d in project aws-core.
 It passes in 167.768248 ms, including a 16.519076 ms TLS handshake.
 One attempt, four events, four log segments, and four artifacts are retained.
@@ -188,6 +188,18 @@ Run finish to inspect an in-progress rollout without starting another. It publis
 The receipt records immutable build creation separately from UI publication. It contains no credentials or guarded origin headers.
 
 scripts/manage-https-probes.py uses the ordinary hosted sign-in and project APIs with explicit private configuration.
-Its inspect, configure, run, enable, and check actions keep configuration, execution, schedule enablement, and observation inspection separate.
+Its inspect, configure, run, enable, check, and verify actions keep configuration, execution, schedule enablement, and observation inspection separate.
 It reuses checkpointed run identities and revokes its owned application session on exit.
 See [HTTPS probes](https-probes.md) for user workflows and current overview limits.
+
+### HTTPS probe delivery
+
+Release 0.2.0-dev deploys through a reviewed image-only change set that modifies only Service and Task.
+The public API metadata, UI index, main bundle, probe overview, and setup bundles match the selected committed artifact.
+The twelve local portable-package checks pass before deployment. Both TestStudio listeners are healthy, and testing-server retains its completed healthy rollout.
+The FoodMarketMaker project contains nine explicitly selected native probes in Website, Admin, and Search applications across production, beta, and development.
+All nine initial runs pass with HTTP 200, valid TLS, and complete private evidence. A private download matches its checksum, and anonymous project access is denied.
+The existing requesting user has project-scoped management roles; installation authority is unchanged.
+Five-minute schedules use the actual retained AWS execution location, normal owner checks, zero retries, and skipped overlaps.
+All nine first automatic firings pass with complete evidence. This native HTTP scope does not establish coded-worker readiness or full cross-profile acceptance.
+The tracked manage-https-probes.py verify action inspects overview identity, project roles, anonymous denial, and a private evidence checksum without another test execution.

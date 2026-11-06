@@ -23,20 +23,24 @@ UI improvements refine existing accepted items. They do not close the remaining 
 | Item | Last verified value |
 | --- | --- |
 | Hosted UI | https://teststudio.devfoodmarketmaker.com |
-| Product version | 0.1.0-dev; footer displays 0.1.0.dev |
-| Build identifier | e9dc1c0ca5e9 |
-| Build creation | 2026-11-06T14:18:59.251Z |
-| Implementation commit | ca6968f3ff712e47acc0a1663fc1500c78df7547 |
+| Product version | 0.2.0-dev; footer displays 0.2.0.dev |
+| Build identifier | 6caa2b0ca508 |
+| Build creation | 2026-11-06T16:02:07.885Z |
+| Implementation commit | 6d2444fcb27a0d03af68c258e36da173adc38b77 |
 | Source state at build | Committed source; modified is false |
-| Service image digest | sha256:8e9af90c8cbbc397593946e2b266446dd062adc3dcb37a60eaed36ec289e371f |
+| Service image digest | sha256:eb8ff64d74fcdc9eb06f2c5127bb8b202ee2029d39a0126dd9e0fa70e1651fdb |
 | Live version metadata | GET /api/v1/version; public and no-store |
 
-Later documentation commits do not change the deployed implementation commit or its immutable build date.
+Later documentation and operator-tooling commits do not change the deployed implementation commit or its immutable build date.
 The public API, UI bundle, and portable image labels match this release.
 The local user demo is separate. Do not assume it runs the same release as the hosted installation.
 
 ## Recent completed work to preserve
 
+- HTTPS probes now has target-specific results, reviewed single and bulk actions, explicit adoption, multiple-address setup, and shared-component visual help.
+- The user-selected FoodMarketMaker project contains nine private configured probes across three applications and stages. Initial normal hosted runs all pass.
+- Nine five-minute schedules are enabled. All nine first automatic firings pass with complete evidence.
+- Normal project roles grant the existing requesting user access. Installation privileges remain unchanged.
 - Project creation uses /projects/new. The project list has a Create project action and no redundant count.
 - Project tiles are square and use bounded widths. Optional private backgrounds support upload and browser-assisted website tab capture.
 - Image capture requires a browser sharing prompt. It takes one frame, stops sharing, and requires explicit Save image.
@@ -53,15 +57,14 @@ See [versioning](versioning.md), [project images](project-images.md), [first ins
 
 ### Latest request: HTTPS probes features and help
 
-The user requests a complete plan for a focused HTTPS probes workflow and help with examples rendered from shared UI components.
-The [HTTPS probes plan](https-probes-plan.md) defines six milestones, target identity, overview semantics, actions, schedules, visual help, verification, and release steps.
-Milestone 1 now passes local verification with shared visual examples, dedicated tutorials, and safe current-page highlights.
-Run 20261106T152207.991011000-e5d322390d91e4005be1a202 passes with complete evidence and cleaned execution.
-The user authorizes milestones 1 through 6 and selects a new FoodMarketMaker project. Milestones 1 through 5 pass focused local checks. Continue the committed release, reviewed image-only change set, and private onboarding in milestone 6.
-Preserve milestone 1: dedicated first-probe help, shared Request and Review examples, and safe current-page field highlights.
-It refines acceptance 05, 33, 34, 49, and 50. Then follow the remaining milestones before returning to the default AWS worker queue.
-Use private project configuration for the user's nine selected website, admin, and search targets across production, beta, and development.
-Keep generic examples and self-tests independent. The acceptance count remains 50 verified of 57, with the same seven open items.
+The [HTTPS probes guide](https-probes.md) documents the delivered workflow. The [six-milestone plan](https-probes-plan.md) records implementation and verification evidence.
+Milestones 1 through 6 are complete for this request. Local workflows pass and release 0.2.0-dev is deployed from committed source 6d2444f with matching public UI and API assets.
+The user selects a new FoodMarketMaker project. Its nine explicit probes have passing normal runs, complete evidence, and enabled five-minute schedules.
+Private evidence download and the requesting user's project roles pass inspection. All nine first automatic schedule firings pass with complete evidence.
+Return to the default AWS worker queue below. Do not repeat onboarding, initial runs, or local workflow tests.
+Important receipts are output/aws-mmdev/https-probes-release.json and foodmarketmaker-probes.json. They contain run checkpoints and publication metadata, not credentials.
+Use the tracked publish-aws-core.py and manage-https-probes.py helpers. The latter derives schedule execution location from the actual retained run.
+Keep private domain configuration outside product defaults and self-tests. The acceptance count stays 50 verified of 57, with the same seven open items.
 
 ### Critical: complete the requested import and execution path
 
@@ -82,9 +85,9 @@ The version and project-image endpoints are documented in their feature guides b
 Reconcile those API families during the next contract documentation pass. The canonical contract already states that some families remain pending.
 Do not describe its current coverage as complete or overwrite its separate contract version with the product version.
 
-Replace any useful ad hoc deployment helpers with tracked, reviewed tooling before depending on them for repeatable releases.
-The ignored .data/aws-mmdev scripts from this workstation are convenience history, not a supported deployment command.
-Use tracked templates and operator guides as the durable deployment contract.
+Core application publication and HTTPS onboarding now use tracked publish-aws-core.py and manage-https-probes.py tooling.
+Replace other useful ad hoc helpers before relying on them for worker releases.
+The ignored .data/aws-mmdev snippets remain convenience history. Use tracked templates and operator guides as the durable deployment contract.
 
 | Priority | Acceptance item | Remaining scope |
 | --- | --- | --- |
