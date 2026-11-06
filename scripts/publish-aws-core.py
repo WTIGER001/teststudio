@@ -76,7 +76,8 @@ def main():
         change = aws('cloudformation', 'describe-change-set', '--stack-name', args.stack, '--change-set-name', receipt['changeSet'])
         summary = [{'action': v['ResourceChange']['Action'], 'resource': v['ResourceChange']['LogicalResourceId'], 'type': v['ResourceChange']['ResourceType'], 'replacement': v['ResourceChange'].get('Replacement')} for v in change.get('Changes', [])]
         assert change['Status'] == 'CREATE_COMPLETE', 'The change set is not ready'
-        assert summary and all(v['action'] == 'Modify' and v['resource'] in ['TaskDefinition', 'Service'] for v in summary), 'Review unexpected resources separately'
+        allowed = {'Task': 'AWS::ECS::TaskDefinition', 'Service': 'AWS::ECS::Service'}
+        assert summary and all(v['action'] == 'Modify' and allowed.get(v['resource']) == v['type'] for v in summary), 'Review unexpected resources separately'
         if args.action == 'review':
             receipt['reviewedChanges'] = summary
             receipt_path.write_text(json.dumps(receipt, indent=2) + '\n')
