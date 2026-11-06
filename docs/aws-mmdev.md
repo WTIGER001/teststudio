@@ -127,6 +127,40 @@ Keep all seven open acceptance items unchanged until their complete requirements
 
 Provider references: [ECS service cluster selection](https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-resource-ecs-service.html), [RDS PostgreSQL TLS verification](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/PostgreSQL.Concepts.General.SSL.html).
 
+### Organization OIDC sign-in
+
+The user selects existing Cognito pool us-west-2_p1Epu0go8 for organization sign-in.
+That external issuer is in account 507334592829. TestStudio's service and database remain in MMDev account 253455159142.
+Stack teststudio-oidc-login creates one dedicated public app client in the selected pool.
+The generic template is deploy/aws/cognito-client.yaml. ClientName, UserPoolId, IdentityProviders, UiHostname, and ProviderId are parameters.
+It creates no pool, identity-provider secret, user, application role, or modification to another client.
+Cognito owns the configured upstream methods. TestStudio's application code and service image remain unchanged.
+
+| TestStudio setting | Configured value |
+| --- | --- |
+| Provider identifier | organization |
+| Display name | Organization sign-in |
+| Issuer | https://cognito-idp.us-west-2.amazonaws.com/us-west-2_p1Epu0go8 |
+| Client identifier | hn7kqpel11og80p4ho47tsb9i |
+| Client secret | None. This client uses authorization code with PKCE. |
+| Scopes | openid profile email |
+| Callback | https://teststudio.devfoodmarketmaker.com/auth/callback/organization |
+| Profile creation | Enabled. New profiles receive no automatic project or installation roles. |
+
+The existing TestStudio sign-in remains available for the bootstrap administrator.
+While signed in as that administrator, open Your account and Link another sign-in.
+Select Organization sign-in, enter a reason, verify the current account, and verify the new identity through Cognito.
+Review the issuer and subject, then select Confirm identity link. Later organization sign-in uses the same account and administrator roles.
+Starting a separate sign-in before linking can create another account. It does not inherit the bootstrap administrator's roles.
+
+The managed provider is registered through the protected provider API. No service restart or issuer-specific application code is required.
+Public discovery and the actual application redirect verify the issuer, client, callback, code flow, PKCE, state, and nonce.
+The redirect contains no upstream-provider hint. Cognito returns its own sign-in page with its configured choices.
+An interactive organization login and account linking still require the user. These checks do not claim a completed human authentication.
+The unused initial provider-specific staging client is removed. The three original clients in the selected pool remain available.
+Receipts are output/aws-mmdev/organization-provider.json, oidc-client.json, and organization-signin-check.json.
+See [Identity providers](providers.md) for generic OIDC administration and account-linking behavior.
+
 ### Verify the first core workflow
 
 ```sh

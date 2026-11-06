@@ -15,6 +15,15 @@ Use the mm_dev profile and preserve existing services. Azure implementation and 
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
+## Latest sign-in direction
+
+The user requires generic OIDC sign-in. Add no Google-specific application path, protocol handling, or identity-provider hint.
+Use issuer discovery and the existing configurable provider model. The external issuer owns upstream authentication choices.
+The user selects Cognito pool us-west-2_p1Epu0go8. A dedicated organization app client now uses the canonical TestStudio callback.
+The managed Organization sign-in provider is configured alongside the existing administrator provider.
+Authorization initialization passes with PKCE, nonce, state, and the selected callback. Human authentication and explicit account linking remain user actions.
+Keep administrator ownership and email-linking rules intact. Do not infer project or installation access from successful sign-in.
+
 ## Latest delivery request: hosted address and test repositories
 
 The user selects teststudio.devfoodmarketmaker.com for the hosted UI. Keep the ECS service name teststudioapi.

@@ -6,6 +6,25 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## Generic organization OIDC configuration — 2026-11-05
+
+The user selects the existing Cognito issuer us-west-2_p1Epu0go8 and requires generic OIDC behavior.
+The separate app-client template uses configurable identity choices and creates one public client in the selected external pool.
+The client supports authorization-code flow and the canonical organization callback. Existing pool configuration and original clients remain unchanged.
+The service, database, evidence, and runtime remain in MMDev. The external identity app client is in the user-selected MMProd pool.
+The managed Organization sign-in provider is configured through the existing protected provider API.
+No application authentication source, service image, or browser bundle changes.
+
+The original administrator completes normal sign-in, provider registration, and sign-out.
+Actual issuer discovery and application authorization initialization validate client, callback, PKCE, state, nonce, and the code flow.
+The request contains no social-provider hint. Cognito returns its own sign-in page and controls its upstream choices.
+Interactive authentication and explicit identity linking require the user. No human identity is inferred or linked through email.
+Profile creation grants no project or installation roles. The existing administrator provider remains available.
+The initial provider-specific staging client is removed after the generic replacement is configured.
+Targeted template schema and actual configuration checks pass. No test run or browser process starts.
+This advances hosted identity configuration under 54 and 57 without closing their broader requirements. The count remains 50 verified of 57.
+See [MMDev organization sign-in](aws-mmdev.md#organization-oidc-sign-in) for exact configuration and receipts.
+
 ## Hosted UI address and repository integration — 2026-11-05
 
 The user selects https://teststudio.devfoodmarketmaker.com. The ECS service keeps its name teststudioapi.

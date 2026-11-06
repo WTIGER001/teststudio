@@ -24,6 +24,7 @@ Use the active delivery sequence in `docs/plan.md`. Historical checkpoints are r
 - Run Kubernetes verification only on a dedicated local k3s/k3d cluster with an explicit private kubeconfig. Do not use a remote or inherited cluster context.
 - The user authorizes AWS deployment to the MMDev ECS cluster as teststudioapi. Use the mm_dev profile and verify the selected account before mutations.
 - Keep AWS changes scoped to TestStudio-owned resources and the new service. Preserve existing ECS services. Azure remains deferred.
+- The user selects external Cognito pool us-west-2_p1Epu0go8 and authorizes a dedicated TestStudio OIDC client through mm_prod. Keep the application generic OIDC. Identity-provider federation stays in Cognito.
 - Do not repeat broad suites or fixture builds without a concrete unresolved concern.
 - Commit verified features frequently, as the user requests.
 - Do not push without an explicit request.

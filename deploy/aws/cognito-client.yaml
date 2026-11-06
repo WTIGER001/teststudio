@@ -1,0 +1,50 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Dedicated public TestStudio OIDC client in an existing Cognito user pool
+Parameters:
+  ClientName:
+    Type: String
+    Default: TestStudio
+  IdentityProviders:
+    Type: CommaDelimitedList
+    Default: COGNITO
+  UserPoolId:
+    Type: String
+    AllowedPattern: '^[a-z0-9-]+_[A-Za-z0-9]+$'
+  UiHostname:
+    Type: String
+    AllowedPattern: '^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?\.[a-z]{2,63}$'
+  ProviderId:
+    Type: String
+    Default: organization
+    AllowedPattern: '^[A-Za-z0-9][A-Za-z0-9_.-]{0,95}$'
+Resources:
+  Client:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPoolId
+      ClientName: !Ref ClientName
+      GenerateSecret: false
+      SupportedIdentityProviders: !Ref IdentityProviders
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthFlows: [code]
+      AllowedOAuthScopes: [openid, profile, email]
+      CallbackURLs: [!Sub 'https://${UiHostname}/auth/callback/${ProviderId}']
+      LogoutURLs:
+        - !Sub 'https://${UiHostname}/'
+        - !Sub 'https://${UiHostname}/auth/logout/callback/${ProviderId}'
+      ExplicitAuthFlows: [ALLOW_REFRESH_TOKEN_AUTH]
+      PreventUserExistenceErrors: ENABLED
+      EnableTokenRevocation: true
+      AccessTokenValidity: 60
+      IdTokenValidity: 60
+      RefreshTokenValidity: 1
+      TokenValidityUnits: {AccessToken: minutes, IdToken: minutes, RefreshToken: days}
+Outputs:
+  ClientId:
+    Value: !Ref Client
+  CallbackUrl:
+    Value: !Sub 'https://${UiHostname}/auth/callback/${ProviderId}'
+  ProviderId:
+    Value: !Ref ProviderId
+  UserPoolId:
+    Value: !Ref UserPoolId

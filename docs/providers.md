@@ -5,6 +5,20 @@ Provider read authority permits inspection. Provider management authority permit
 Project administration alone grants no installation provider authority.
 Local accounts and OIDC accounts use the same internal directory and project permissions.
 
+## Generic OIDC boundary
+
+TestStudio integrates with an OIDC issuer through discovery, authorization-code flow, PKCE, token verification, and a managed application session.
+The issuer owns its sign-in page, account chooser, upstream federation, and authentication policy.
+Cognito can offer Google or other methods without a Google integration in TestStudio.
+Configure the issuer and client identifier in Identity providers. The display name is configuration, not application logic.
+TestStudio does not choose an upstream social provider or accept its password.
+It validates the configured issuer, audience, signature, expiry, nonce, state, and transaction binding before creating a session.
+A signed-in identity grants no project or installation authority by itself. Current TestStudio permissions still apply.
+
+Use Your account and Link another sign-in to add an organization identity to an existing account.
+Complete fresh proof of the current and new identities, then explicitly confirm the link.
+This preserves the current internal account and its roles. Matching email addresses never merge accounts.
+
 ## Register and configure
 
 Select + Register provider.
