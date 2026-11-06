@@ -1,5 +1,7 @@
 # Repository sources
 
+Read the [test repository contract](test-repositories.md) for required files, permanent selectors, dependencies, targets, and current execution limits.
+
 The Import and sync tests page registers one GitHub repository with one or more suite manifest paths.
 Each binding selects a targetless suite and an offline Go or Playwright build profile.
 Application source, shared libraries, and several suites can share the same repository snapshot.

@@ -1,5 +1,7 @@
 # Source bundles
 
+Read the [test repository contract](test-repositories.md) for required files, permanent selectors, dependencies, targets, and current execution limits.
+
 The Import and sync tests page stores complete Go or Playwright ZIP bundles and queues durable preparation jobs.
 A separate worker assembles the source and invokes isolated discovery.
 Review and publication use the common immutable release workflow.

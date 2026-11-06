@@ -30,7 +30,9 @@ The UI and evidence use separate CloudFront origins and hostnames. The load bala
 
 ### Current progress
 
-Both CloudFormation stacks now report CREATE_COMPLETE. Both CloudFront distributions report Deployed.
+The initial installation completes both stacks. The hostname update now leaves both stacks at UPDATE_COMPLETE.
+Both CloudFront distributions report Deployed. The canonical UI address is https://teststudio.devfoodmarketmaker.com.
+The ECS service name remains teststudioapi.
 The reviewed foundation change set adds 29 resources. The reviewed core change set adds 31 resources.
 Neither change set modifies existing resources. The core change set creates no cluster.
 ECS reports one desired and one running teststudioapi task with a completed rollout.
@@ -102,6 +104,11 @@ aws ecs describe-services --profile mm_dev --cluster marketmaker-testing-dev \
 ```
 
 Review status and existing resources before continuing an interrupted operation. Do not recreate a pending stack.
+The hostname update changes only the Cognito callback, core public URL, CloudFront alias, and UI DNS record.
+The existing service image, UI assets, database, and evidence bucket are retained.
+Normal sign-in and private access to the original run pass on the new host. The owned probe environment now uses that host.
+No additional test run starts for this hostname update.
+
 The local receipt directory is output/aws-mmdev. Foundation changes and published image metadata contain no credential values.
 Initial private request files use .data/aws-mmdev. The bootstrap helper uses protected operating-system temporary files.
 Both remove request files immediately after their operation.
@@ -109,7 +116,7 @@ ECR authentication uses a temporary private Docker configuration, removed after 
 
 ### Sign in after deployment
 
-Open https://teststudioapi.devfoodmarketmaker.com and choose TestStudio sign-in.
+Open https://teststudio.devfoodmarketmaker.com and choose TestStudio sign-in.
 Retrieve the initial credential through the MMDev Secrets Manager console. Select teststudioapi/initial-administrator.
 Use username studioadmin and the stored password. Rotate the password through authorized Cognito administration after handoff.
 The evidence origin is https://teststudio-evidence.devfoodmarketmaker.com.

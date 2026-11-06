@@ -6,6 +6,24 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## Hosted UI address and repository integration — 2026-11-05
+
+The user selects https://teststudio.devfoodmarketmaker.com. The ECS service keeps its name teststudioapi.
+Reviewed change sets update only the Cognito client, service task public URL, CloudFront alias, and UI DNS record.
+Both stacks report UPDATE_COMPLETE. One ECS task reaches its completed rollout.
+Normal OIDC sign-in and private evidence access pass on the new hostname using the original run reference.
+The owned probe environment changes to the canonical origin. No additional test run starts for this update.
+The service image and static UI assets remain unchanged.
+
+The user also authorizes a separate repository adapter for existing application tests and a generic authoring guide.
+The adapter code stays in the application test repository. No existing application test enters the TestStudio source tree.
+A new source archive preserves all 604 identifiers, recommendations, conditions, dependencies, and application boundaries.
+The canonical publisher assembles both native manifests and discovers 505 Website and 99 FoodSearcher tests in isolated local workers.
+This proves bundle and discovery compatibility, not remote application execution.
+Source preparation on AWS, reviewed multi-origin browser routing, and a managed credential bridge remain explicit prerequisites.
+The generic [test repository contract](test-repositories.md) documents source layout, manifests, selectors, dependencies, targets, secrets, and evidence.
+The count remains 50 verified of 57. No cross-profile acceptance item closes.
+
 ## Authorized MMDev ECS core deployment — 2026-11-05
 
 The user authorizes deployment into the MMDev ECS cluster, with service name teststudioapi.

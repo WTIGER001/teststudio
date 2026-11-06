@@ -17,7 +17,8 @@ Use the active delivery sequence in `docs/plan.md`. Historical checkpoints are r
 - Report verified totals, advanced item numbers, and the targeted local checks used.
 - Use PostgreSQL for hosted deployments and SQLite for single-instance local deployments.
 - Add no code comments unless the user requests them.
-- Write new tests and examples. Copy no existing application tests, data, or infrastructure configuration.
+- Write new tests and examples. Copy no existing application tests, data, or infrastructure configuration into TestStudio.
+- The user authorizes adapting the separate marketmaker-tests repository and documenting a reusable test-repository contract. Keep application-specific adapters in that repository.
 - Focus on implementation, then run targeted local tests for changed behavior.
 - The user defers Azure implementation and verification. Preserve staged code. Prepare an Azure deployment script only when the user requests that work.
 - Run Kubernetes verification only on a dedicated local k3s/k3d cluster with an explicit private kubeconfig. Do not use a remote or inherited cluster context.

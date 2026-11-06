@@ -15,6 +15,20 @@ Use the mm_dev profile and preserve existing services. Azure implementation and 
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
+## Latest delivery request: hosted address and test repositories
+
+The user selects teststudio.devfoodmarketmaker.com for the hosted UI. Keep the ECS service name teststudioapi.
+The hostname deployment and normal OIDC sign-in now pass. The original run and private evidence remain available without another execution.
+The user authorizes integration changes in the separate foodmarketmaker/marketmaker-tests repository.
+Document the generic authoring contract for other teams. Keep existing application tests and configuration outside TestStudio.
+The application adapter now exports all 604 existing tests in two native suite manifests, preserving identifiers and safety metadata.
+Local source assembly and isolated discovery verify 505 Website and 99 FoodSearcher definitions without running test bodies.
+Hosted source preparation remains unavailable until the separate AWS worker package is installed.
+Current repository sync binds targetless suites. Environment-backed bundles use the ZIP preparation workflow.
+Multiple reviewed browser origins and a managed browser credential bridge remain product gaps for these existing application workflows.
+Do not claim that successful source discovery proves supported remote execution or that all 604 tests pass.
+Keep those requirements explicit before enabling the corresponding tests. Preserve the seven open cross-profile acceptance items.
+
 ## Active delivery plan after the tester walkthrough
 
 This section is the current implementation order. Historical continuation commands below do not override it.
@@ -30,7 +44,9 @@ Do not add new dashboard pages or repeat completed demonstration setup before cl
 
 ### User-facing priority categories
 
-Critical work fixes a blocker in the local create, run, or result inspection workflows. No such blocker is currently identified by retained verification.
+Critical work fixes a blocker in the requested create, import, run, or result workflow.
+The existing application repository exposes critical prerequisites: hosted source preparation, reviewed additional browser origins, and a managed credential or fixture bridge.
+The verified local HTTPS and result workflows remain available.
 Important recorder authoring, desktop setup, help, local browser verification, and opt-in packaging now have evidence.
 The deployed recorder handoff now also passes on the dedicated local Kubernetes installation.
 Required AWS and Azure deployment gates remain Important, with their existing authorization and Azure deferral boundaries.
