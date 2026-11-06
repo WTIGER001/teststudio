@@ -16,15 +16,16 @@ type Binding struct {
 	Archived    bool   `json:"archived"`
 }
 type Observation struct {
-	Run           string                     `json:"runId"`
-	Release       string                     `json:"releaseId"`
-	CreatedAt     time.Time                  `json:"createdAt"`
-	At            *time.Time                 `json:"observedAt,omitempty"`
-	State         string                     `json:"state"`
-	Error         string                     `json:"error,omitempty"`
-	Evidence      string                     `json:"evidenceState"`
-	HTTP          *execution.HTTPObservation `json:"http,omitempty"`
-	TargetChanged bool                       `json:"targetChanged"`
+	Run               string                     `json:"runId"`
+	Release           string                     `json:"releaseId"`
+	CreatedAt         time.Time                  `json:"createdAt"`
+	At                *time.Time                 `json:"observedAt,omitempty"`
+	State             string                     `json:"state"`
+	Error             string                     `json:"error,omitempty"`
+	Evidence          string                     `json:"evidenceState"`
+	HTTP              *execution.HTTPObservation `json:"http,omitempty"`
+	DefinitionChanged bool                       `json:"definitionChanged"`
+	TargetChanged     bool                       `json:"targetChanged"`
 }
 type Schedule struct {
 	ID        string     `json:"id"`
@@ -56,6 +57,7 @@ type Summary struct {
 	Other         int           `json:"other"`
 	Rate          *float64      `json:"successRate,omitempty"`
 	Partial       bool          `json:"partial"`
+	DraftChanged  bool          `json:"draftChanged"`
 	ActiveRelease string        `json:"activeReleaseId,omitempty"`
 }
 type Query struct {

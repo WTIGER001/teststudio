@@ -1,0 +1,6 @@
+import type { HTTPObservation } from '../runs/run.models'
+export interface ProbeBinding { id: string; name: string; suiteId: string; testId: string; environmentId: string; endpoint: string; executionLocation: string; archived: boolean }
+export interface ProbeObservation { runId: string; releaseId: string; createdAt: string; observedAt?: string; state: string; error?: string; evidenceState: string; http?: HTTPObservation; targetChanged: boolean; definitionChanged: boolean }
+export interface ProbeSchedule { id: string; name: string; enabled: boolean; kind: string; intervalSeconds?: number; cron?: string; nextAt?: string; lastState?: string; shared: boolean }
+export interface ProbeSummary extends ProbeBinding { revision: number; applicationId?: string; stage?: string; url?: string; state: string; freshness: string; availability: string; latest?: ProbeObservation; active?: ProbeObservation; history: ProbeObservation[]; schedules: ProbeSchedule[]; scheduleState: string; samples: number; passed: number; other: number; successRate?: number; partial: boolean; draftChanged: boolean; activeReleaseId?: string }
+export interface ProbePage { items: ProbeSummary[]; matched: number; cursor?: string; serverTime: string; windowStart: string; partial: boolean; scanned: number }

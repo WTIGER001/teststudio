@@ -1,3 +1,5 @@
+import type { ProbeOverviewPage } from './features/probes/probe-overview.page'
+import type { ProbeSetupPage } from './features/probes/probe-setup.page'
 import type { CatalogPage } from './features/catalog/catalog.page'
 import type { SuitesPage } from './features/configuration/suites.page'
 import type { ProjectsPage } from './features/projects/projects.page'
@@ -8,7 +10,9 @@ import type { SourcesPage } from './features/sources/sources.page'
 import type { Routes } from '@angular/router'
 
 const projectRoutes: Routes = [
-  { path: 'projects/:projectId/probes', canDeactivate: [(page: CatalogPage) => page.canLeave()], data: { helpTopic: 'https-probes', testType: 'https' }, loadComponent: () => import('./features/catalog/catalog.page').then(m => m.CatalogPage) },
+  { path: 'projects/:projectId/probes/new', canDeactivate: [(page: ProbeSetupPage) => page.canLeave()], data: { helpTopic: 'https-probes' }, loadComponent: () => import('./features/probes/probe-setup.page').then(m => m.ProbeSetupPage) },
+  { path: 'projects/:projectId/probes/adopt', canDeactivate: [(page: ProbeSetupPage) => page.canLeave()], data: { helpTopic: 'https-probes', adopt: true }, loadComponent: () => import('./features/probes/probe-setup.page').then(m => m.ProbeSetupPage) },
+  { path: 'projects/:projectId/probes', canDeactivate: [(page: ProbeOverviewPage) => page.canLeave()], data: { helpTopic: 'https-probes' }, loadComponent: () => import('./features/probes/probe-overview.page').then(m => m.ProbeOverviewPage) },
   { path: 'projects/:projectId/suites', canDeactivate: [(page: SuitesPage) => page.canLeave()], data: { helpTopic: 'suites' }, loadComponent: () => import('./features/configuration/suites.page').then(m => m.SuitesPage) },
   { path: 'projects/:projectId/applications', canDeactivate: [(page: ApplicationsPage) => page.canLeave()], data: { helpTopic: 'applications' }, loadComponent: () => import('./features/applications/applications.page').then(m => m.ApplicationsPage) },
   { path: 'projects/:projectId/applications/:applicationId', canDeactivate: [(page: ApplicationsPage) => page.canLeave()], data: { helpTopic: 'applications' }, loadComponent: () => import('./features/applications/applications.page').then(m => m.ApplicationsPage) },

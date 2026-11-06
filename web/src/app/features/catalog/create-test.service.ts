@@ -32,7 +32,7 @@ export class CreateTestService {
     })
   }
 
-  afterCreate(): void { void this.router.navigate(this.sources.workspace.path('catalog'), { queryParams: { created: this.native.form.controls.id.value } }) }
+  afterCreate(): void { void this.router.navigate(this.sources.workspace.path(this.route.snapshot.queryParamMap.get('from') === 'probes' ? 'probes' : 'catalog'), { queryParams: { created: this.native.form.controls.id.value } }) }
 
   canLeave(): boolean {
     const dirty = this.sources.draftDirty() || this.sources.creationDirty() || this.kind() === 'https' && this.native.dirty()

@@ -20,6 +20,7 @@ export class SchedulesService {
   readonly archived = signal(false)
   readonly loading = signal(false)
   readonly busy = signal(false)
+  readonly pendingAction = signal<{ item: RecordValue<Schedule>; action: 'pause'|'enable'|'archive'|'restore' } | null>(null)
   readonly error = signal('')
   readonly message = signal('')
   readonly history = signal<RecordValue<Schedule> | null>(null)
@@ -56,6 +57,11 @@ export class SchedulesService {
     } catch (error) { if (generation === this.generation) this.error.set(errorMessage(error, 'Schedules could not be loaded.')) }
     finally { if (generation === this.generation) this.loading.set(false) }
   }
+  reviewAction(item: RecordValue<Schedule>, action: 'pause'|'enable'|'archive'|'restore'): void {
+    if ((item.data.request.testIds?.length ?? 0) !== 1) this.pendingAction.set({item,action})
+    else void this.action(item,action)
+  }
+  async confirmAction(): Promise<void> { const pending=this.pendingAction(); if(!pending)return; await this.action(pending.item,pending.action); if(!this.error())this.pendingAction.set(null) }
   async action(item: RecordValue<Schedule>, action: 'pause' | 'enable' | 'archive' | 'restore'): Promise<void> {
     this.busy.set(true); this.error.set(''); this.message.set('')
     try {

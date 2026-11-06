@@ -5,12 +5,14 @@ import (
 	"fmt"
 	permissions "github.com/wtiger001/go-permissions"
 	"github.com/wtiger001/teststudio/internal/access"
+	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/probes"
 	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/schedules"
 	"github.com/wtiger001/teststudio/internal/storage"
+	"strings"
 	"testing"
 	"time"
 )
@@ -166,6 +168,18 @@ func TestProbeSummaryBoundsCoverageAndShowsMissedSchedule(t *testing.T) {
 	if value["freshness"] != "stale" || value["scheduleState"] != "enabled" {
 		t.Fatal(value)
 	}
+	future := time.Now().Add(time.Hour)
+	schedule.ID = "z-future"
+	schedule.Name = "Future firing"
+	schedule.NextAt = &future
+	change, _ = storage.Put(schedules.Bucket("example"), schedule.ID, "example", 0, schedule)
+	if err := c.api.Store.Commit(t.Context(), change); err != nil {
+		t.Fatal(err)
+	}
+	value = probeList(t, c)["items"].([]any)[0].(map[string]any)
+	if value["freshness"] != "stale" || value["scheduleState"] != "multiple" {
+		t.Fatal("a future schedule hid the missed occurrence", value)
+	}
 }
 
 func TestProbePagesRejectChangedScopeAndHistoryKeepsTarget(t *testing.T) {
@@ -203,5 +217,33 @@ func TestProbePagesRejectChangedScopeAndHistoryKeepsTarget(t *testing.T) {
 		if target == "local" && (len(items) != 1 || items[0].(map[string]any)["runId"] != id) || target == "other" && len(items) != 0 {
 			t.Fatal(target, history)
 		}
+	}
+}
+
+func TestProbeDraftAndActiveDefinitionKeepObservationBoundaries(t *testing.T) {
+	c, _, _ := probeFixture(t)
+	row, err := c.api.Store.Get(t.Context(), catalog.Bucket("tests", "example", "health"), "HEALTH-1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	definition, _ := storage.Decode[catalog.Test](row)
+	definition.Check.Path = "/new-health"
+	if err := c.api.Catalog.SaveTest(t.Context(), "admin", "example", "health", definition, row.Revision); err != nil {
+		t.Fatal(err)
+	}
+	value := probeList(t, c)["items"].([]any)[0].(map[string]any)
+	if value["draftChanged"] != true || value["state"] != "passed" || !strings.HasSuffix(value["url"].(string), "/healthz") {
+		t.Fatal("draft was displayed as the observed active target", value)
+	}
+	draft, err := c.api.Catalog.CreateDraft(t.Context(), "admin", "example", "health", catalog.Artifact{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.api.Catalog.Publish(t.Context(), "admin", "example", "health", draft.ID, "new-probe-definition", 1, true); err != nil {
+		t.Fatal(err)
+	}
+	value = probeList(t, c)["items"].([]any)[0].(map[string]any)
+	if value["state"] != "never-checked" || value["latest"] != nil || value["history"].([]any)[0].(map[string]any)["definitionChanged"] != true {
+		t.Fatal("old assertion success became current after activation", value)
 	}
 }

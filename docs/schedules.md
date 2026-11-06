@@ -2,6 +2,8 @@
 
 ## Schedule definitions
 
+HTTPS probes can open this editor with the suite, selected test, environment, and location prefilled. Review displays the exact selection. A published release observed by Save and run can be pinned when it is not active. Shared selection actions show all selected tests or all eligible tests before confirmation. See [HTTPS probes](https-probes.md#schedule-and-stop-checks).
+
 Schedules belong to one project and select a published suite through the normal run request contract.
 Each definition records its owner, enabled state, cadence, target, selected tests, release policy, time limits, and retries.
 The creator or latest configuration editor becomes the execution owner.

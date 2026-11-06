@@ -1,6 +1,6 @@
 # HTTPS probes feature and help plan
 
-Status: Implementation authorized on 2026-11-06. Milestone 1 passes local verification. Milestones 2 through 6 are in progress; deployed behavior remains unchanged.
+Status: Milestones 1 through 5 pass targeted local verification on 2026-11-06. Milestone 6 is in progress. Deployed behavior remains unchanged until the release below completes.
 
 Make HTTPS probes easy to create, run, schedule, and investigate from one project overview.
 Give each task contextual help with examples rendered from the same components as the application.
@@ -259,7 +259,7 @@ These milestones refine the stable acceptance ledger. They add no new product ac
 | 5. Multiple-target setup | A dedicated Add multiple probes route uses Addresses, Targets, and Review. It accepts explicit URL rows, validates duplicates and stage/application choices, and records per-row receipts. Draft saving makes no target requests. Run and enable remain explicit reviewed actions. | 03, 05, 21, 25, 33, 34, 38, 50 | A focused normal TestStudio browser workflow with nine new generic addresses across three surfaces and stages, including one partial save and retry. |
 | 6. Release and selected-domain onboarding | Commit verified implementation, stamp matching artifacts, publish through the authorized release process, then create or adopt the user's nine private project probes without duplication. Verify one explicit initial run per selected target and schedule enablement separately. | 33, 34, 49, 50; bounded progress under 57 | Inspect deployed version/assets/help, verify each selected run identity and actual result, and inspect the first enabled schedule firing without repeating the full local workflow suite. |
 
-Milestone 1 is the first implementation milestone after this plan. Begin with its read-only examples and tutorial; add current-page highlights after those work.
+Milestones 1 through 5 are implemented. Preserve their retained local evidence; continue with the committed release and selected-domain onboarding in milestone 6.
 Milestones 2 through 4 complete the single-probe operational workflow before adding the multi-address setup in milestone 5.
 Ship verified increments with complete help for the behavior they expose. Do not show empty or misleading planned controls between milestones.
 
@@ -267,7 +267,7 @@ Ship verified increments with complete help for the behavior they expose. Do not
 
 Register new workflows in `tests/selftest/catalog.json` before invoking their IDs.
 Suggested new IDs are `STUDIO-PROBE-HELP-001`, `STUDIO-PROBE-OVERVIEW-001`, `STUDIO-PROBE-ACTIONS-001`, and `STUDIO-PROBE-SETUP-001`.
-These IDs are planned and are not currently runnable catalog entries.
+These four IDs are now registered and have retained passing evidence. Select only the workflow affected by a later change.
 Use `bash scripts/test-self.sh --test=REGISTERED-ID` with the actual selected ID after registration.
 
 Reuse retained evidence for unchanged behavior. Rerun existing `STUDIO-URL-001`, `STUDIO-HTTPS-001`, `STUDIO-SCHEDULE-001`, `STUDIO-HISTORY-001`, or `STUDIO-HELP-001` only when the implementation changes their behavior or leaves a specific unresolved concern.
@@ -311,3 +311,20 @@ Keep hosted evidence separate from local verification. Azure stays deferred, and
 - Current authority, review, revision conflicts, immutable history, explicit execution, and partial-save recovery remain enforced.
 - The nine selected private project probes have explicit targets, actual normal-run evidence, and reviewed schedule settings after onboarding.
 - Local evidence, deployed behavior, target observations, and still-open cross-profile acceptance are reported separately.
+
+## Local delivery evidence
+
+| Milestone | Retained evidence |
+| --- | --- |
+| 1 | STUDIO-PROBE-HELP-001 passes in 2.566 seconds in run 20261106T154749.647355000-82092f4dbdf96f9c6b1c276e, including expanded schedule and failure examples. |
+| 2 | Five focused API scenarios pass on SQLite and PostgreSQL. They cover exact target and permission scope, conflicts, late completion, bounded history, missed schedules, sealed cursor scope, and retained history filtering. The generated contract client matches OpenAPI 0.36. |
+| 3 | STUDIO-PROBE-OVERVIEW-001 passes in 1.358 seconds in run 20261106T154952.367637000-5ffe357c21c6e949124d677a after fixing application-option initialization. A later focused run 20261106T155446.415808000-2d124bc412b4f78300ce0d21 verifies the active-definition boundary. |
+| 4 | STUDIO-PROBE-ACTIONS-001 passes in 13.906 seconds in run 20261106T154749.647355000-82092f4dbdf96f9c6b1c276e. It verifies explicit execution, the first schedule firing, pause, archive, and shared-selection review. |
+| 5 | STUDIO-PROBE-SETUP-001 passes in 1.288 seconds in run 20261106T154408.698159000-41b5d1fe777dfad234684740. Nine generic addresses retain partial-save receipts, retry without duplicate resources, and adopt an existing binding without execution. |
+
+Each retained execution is cleaned and evidence is complete. Owned verification controllers exit and PostgreSQL fixtures are removed.
+Successful checks from grouped runs remain valid even when another selected workflow needed a focused correction and rerun.
+The user selects a new FoodMarketMaker project for hosted onboarding. Private configuration holds its selected addresses and exact existing user identity.
+The product guide documents the bounded overview and its partial coverage. No continuous uptime claim is made.
+
+STUDIO-PROBE-BULK-001 passes in run 20261106T160047.377724000-fbc74e1dca4ff433c8f4cc37. It preserves successful run identities across partial failure and review reopening, and reconciles a lost archive acknowledgement without duplicate effects. Its evidence is complete and the execution is cleaned.

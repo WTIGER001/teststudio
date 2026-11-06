@@ -6,6 +6,23 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## HTTPS probe overview, actions, and multiple setup — 2026-11-06
+
+Milestones 3 through 5 deliver the project operational overview, server filters, target-aware observations, recent logical checks, TLS and timing diagnostics, and scoped investigation links.
+Creation saves explicit bindings; Run now reviews the active release and uses the normal estimate and run APIs with one request identity.
+Schedule handoff preserves the exact test, environment, location, and release policy. Shared selection actions show their consequences before confirmation.
+Multiple setup uses Addresses, Targets, and Review with current protection, explicit stages, and recoverable per-row saves. Existing binding adoption remains explicit and idempotent.
+Visual help adds successful and failed diagnostics and the same schedule Review component used by the editor.
+The UI build passes. STUDIO-PROBE-OVERVIEW-001 passes in 1.358 seconds in run 20261106T154952.367637000-5ffe357c21c6e949124d677a.
+STUDIO-PROBE-ACTIONS-001 and STUDIO-PROBE-HELP-001 pass in 13.906 and 2.566 seconds in run 20261106T154749.647355000-82092f4dbdf96f9c6b1c276e.
+STUDIO-PROBE-SETUP-001 passes in 1.288 seconds in run 20261106T154408.698159000-41b5d1fe777dfad234684740, including duplicate-free adoption and partial-save retry for nine generic addresses.
+All recorded executions are cleaned and have complete evidence. The failed filter initialization is corrected and only its affected workflow is rerun.
+Owned controllers and database fixtures stop. The user's demo and workloads remain unchanged.
+This refines existing catalog, HTTPS, execution, scheduling, results, UI, and help criteria. No cross-profile criterion closes; the total remains 50 of 57.
+STUDIO-PROBE-BULK-001 passes in run 20261106T160047.377724000-fbc74e1dca4ff433c8f4cc37 with complete evidence and cleaned execution. Bulk actions preserve request identities and successful rows across partial failure and reconcile a lost archive acknowledgement.
+The active-definition boundary passes SQLite, PostgreSQL, and a focused overview rerun 20261106T155446.415808000-2d124bc412b4f78300ce0d21. Draft changes and previously published criteria never relabel old successes as current.
+The user selects a new FoodMarketMaker project. Committed release publication and private onboarding remain milestone 6.
+
 ## Target-specific HTTPS probe bindings and summaries — 2026-11-06
 
 Milestone 2 adds revisioned project-owned bindings for suite, test, environment, endpoint, and execution location.
@@ -14,7 +31,7 @@ The overview reads one indexed batch of at most 1000 newest project runs, filter
 Target changes retain old observations with a boundary. Logical results preserve timeout and evidence distinctions. Schedule freshness accounts for due times and reporting grace.
 The normal retained history API now accepts environment and location filters. Its client preserves those filters across route query changes.
 OpenAPI 0.36 documents the new family and generates matching client types; the product release version remains separate.
-Four focused API checks pass on SQLite. PostgreSQL checks cover target separation, permissions, late completion, bounded coverage, and schedule freshness; cursor and scoped-history parity receive their own focused check.
+Five focused API checks pass on SQLite. The active-definition boundary also passes PostgreSQL. PostgreSQL checks cover target separation, permissions, late completion, bounded coverage, and schedule freshness; cursor and scoped-history parity receive their own focused check.
 The generated client synchronization check passes. The total remains 50 verified of 57; this refines 06, 13, 25, 27, 28, 34, 37, 39, 40, and 45.
 
 ## HTTPS probe visual help — 2026-11-06

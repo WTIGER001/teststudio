@@ -1,7 +1,7 @@
 import { randomId } from '../../core/random-id'
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
-import { Router } from '@angular/router'
+import { Router, ActivatedRoute } from '@angular/router'
 import { ApiService, RecordValue } from '../../core/api.service'
 import { WorkspaceService } from '../../core/workspace.service'
 import { WizardController } from '../../shared/wizard/wizard-controller'
@@ -19,6 +19,8 @@ export class HTTPSWizardService {
   readonly workspace = inject(WorkspaceService)
   private readonly api = inject(ApiService)
   private readonly router = inject(Router)
+  private readonly route = inject(ActivatedRoute)
+  private bindingSaved = false
   private readonly destroy = inject(DestroyRef)
   readonly flow = new WizardController(3, step => this.validate(step))
   readonly targets = inject(ProbeTargetService)
@@ -70,6 +72,7 @@ export class HTTPSWizardService {
     if (this.busy() || !this.flow.ready()) return
     this.editor.form.markAllAsTouched()
     if (this.editor.form.invalid) { this.error.set('Choose a safety label and provide its rationale before saving.'); return }
+    if (this.route.snapshot.queryParamMap.get('from') === 'probes' && !this.targets.target() && !this.targets.needsTarget()) { this.error.set('Choose a target before adding this probe to the overview.'); return }
     const issue = this.targets.issue(run)
     if (issue) { this.error.set(issue); return }
     if (run && !this.canRun()) { this.error.set('Publication and run permissions are required.'); return }
@@ -83,6 +86,11 @@ export class HTTPSWizardService {
         this.progress.set('Saving test…')
         if (!await this.editor.save()) { this.error.set(this.editor.error()); return }
         this.saved.set(true)
+      }
+      if (!this.bindingSaved && this.route.snapshot.queryParamMap.get('from') === 'probes') {
+        this.progress.set('Saving the target-specific probe…')
+        await this.api.request(`/api/v1/projects/${project}/probes`, 'POST', { name: value.title, suiteId: value.suite, testId: value.id, environmentId: this.targets.environmentId(), endpoint: this.editor.checkEditor.form.controls.endpoint.value })
+        this.bindingSaved = true
       }
       if (!run) { this.creation.afterCreate(); return }
       if (this.disposed || project !== this.creation.sources.project()) return

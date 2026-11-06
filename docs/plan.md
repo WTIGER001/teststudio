@@ -24,7 +24,7 @@ Start with dedicated first-probe help, examples rendered from shared UI componen
 Then deliver target-specific probe bindings and summaries, the operational overview, reviewed actions and schedules, and multiple-target setup.
 The selected onboarding scope is website, admin, and search probes across production, beta, and development.
 Keep those addresses in private project configuration and keep product examples generic.
-The current delivery is planning only. Application changes, probe creation, schedule enablement, and deployment remain pending.
+Milestones 1 through 5 now pass targeted local implementation checks. Continue with milestone 6: committed release publication and private onboarding in the user-selected FoodMarketMaker project. Hosted probe creation and schedule enablement remain pending until that step.
 The ledger remains 50 verified of 57. Refine the affected HTTPS, results, automation, UI, and help criteria without closing broad cross-profile items.
 
 ## Release versions and build identity

@@ -1,3 +1,4 @@
+import type { ProbeBinding } from '../probes/probe.models'
 import { randomId } from '../../core/random-id'
 import { DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
@@ -20,6 +21,7 @@ export class ScheduleEditorService {
   readonly list = inject(SchedulesService)
   readonly lookups = inject(RunLookupsService)
   readonly opened = signal(false)
+  readonly probe = signal<ProbeBinding | null>(null)
   readonly flow = new WizardController(3, step => { this.form.markAllAsTouched(); const issue = scheduleWizardIssue(step, this.form.getRawValue()); this.error.set(issue); return !issue })
   private suffix = randomId().slice(0, 8)
   readonly editing = signal<RecordValue<Schedule> | null>(null)
@@ -44,16 +46,32 @@ export class ScheduleEditorService {
     this.form.controls.name.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(name => { if (!this.editing() && this.form.controls.id.pristine) this.form.controls.id.setValue(suggestedIdentifier(name, this.suffix)) })
     this.form.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(() => { this.generation++; this.preview.set(null) })
     this.route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(() => { this.generation++; this.opened.set(false); this.editing.set(null); this.preview.set(null); this.error.set(''); this.busy.set(false) })
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(q => {
+      if (q.get('probe')) void this.openProbe(q.get('probe')!, q.get('release') ?? '')
+      else if (q.get('schedule')) void this.openSchedule(q.get('schedule')!)
+    })
     this.destroy.onDestroy(() => { this.generation++ })
   }
   async open(item?: RecordValue<Schedule>): Promise<void> {
     this.suffix = randomId().slice(0, 8); this.flow.reset()
-    this.editing.set(item ?? null); this.form.reset(scheduleForm(item?.data)); this.opened.set(true); this.error.set(''); this.conflict.set(false); this.preview.set(null)
+    this.probe.set(null); this.editing.set(item ?? null); this.form.reset(scheduleForm(item?.data)); this.opened.set(true); this.error.set(''); this.conflict.set(false); this.preview.set(null)
     const generation = ++this.generation
     this.list.message.set('')
     this.list.focus('schedule-editor-heading')
     try { await this.lookups.load(this.list.projectId()) }
     catch (error) { if (generation === this.generation) this.error.set(errorMessage(error, 'Schedule options could not be loaded.')) }
+  }
+  private async openSchedule(id: string): Promise<void> {
+    try { const item = await this.api.request<RecordValue<Schedule>>(`${this.list.base()}/${encodeURIComponent(id)}`); await this.open(item) }
+    catch (e) { this.error.set(errorMessage(e, 'The selected schedule is unavailable.')) }
+  }
+  private async openProbe(id: string, release: string): Promise<void> {
+    await this.open()
+    try {
+      const record = await this.api.request<RecordValue<ProbeBinding>>(`/api/v1/projects/${this.list.projectId()}/probes/${encodeURIComponent(id)}`)
+      this.probe.set(record.data)
+      this.form.patchValue({ name: record.data.name + ' checks', suite: record.data.suiteId, environment: record.data.environmentId, ids: record.data.testId, location: record.data.executionLocation, interval: 300, timeout: 60, retries: 0, overlap: 'skip', enabled: false, release })
+    } catch (e) { this.error.set(errorMessage(e, 'The selected probe is unavailable.')) }
   }
   close(): void { this.generation++; this.opened.set(false); this.list.focus('schedules-heading') }
   async reload(): Promise<void> {

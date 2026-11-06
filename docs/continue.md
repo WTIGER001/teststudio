@@ -57,7 +57,7 @@ The user requests a complete plan for a focused HTTPS probes workflow and help w
 The [HTTPS probes plan](https-probes-plan.md) defines six milestones, target identity, overview semantics, actions, schedules, visual help, verification, and release steps.
 Milestone 1 now passes local verification with shared visual examples, dedicated tutorials, and safe current-page highlights.
 Run 20261106T152207.991011000-e5d322390d91e4005be1a202 passes with complete evidence and cleaned execution.
-The user authorizes milestones 1 through 6. Continue target-aware summaries and the operational workflow; deployment and private onboarding remain pending.
+The user authorizes milestones 1 through 6 and selects a new FoodMarketMaker project. Milestones 1 through 5 pass focused local checks. Continue the committed release, reviewed image-only change set, and private onboarding in milestone 6.
 Preserve milestone 1: dedicated first-probe help, shared Request and Review examples, and safe current-page field highlights.
 It refines acceptance 05, 33, 34, 49, and 50. Then follow the remaining milestones before returning to the default AWS worker queue.
 Use private project configuration for the user's nine selected website, admin, and search targets across production, beta, and development.

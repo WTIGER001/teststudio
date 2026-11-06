@@ -1,3 +1,4 @@
+import { ScheduleReviewComponent } from '../../shared/probes/schedule-review.component'
 import { DatePipe } from '@angular/common'
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { ReactiveFormsModule } from '@angular/forms'
@@ -7,7 +8,7 @@ import { WizardHeadingComponent } from '../../shared/wizard/wizard-heading.compo
 import { WizardFormDirective } from '../../shared/wizard/wizard-form.directive'
 
 @Component({
-  selector: 'ts-schedule-editor', standalone: true, imports: [ReactiveFormsModule, DatePipe, WizardStepperComponent, WizardHeadingComponent, WizardFormDirective], changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'ts-schedule-editor', standalone: true, imports: [ScheduleReviewComponent, ReactiveFormsModule, DatePipe, WizardStepperComponent, WizardHeadingComponent, WizardFormDirective], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="panel schedule-editor" aria-labelledby="schedule-editor-heading">
       <div class="section-top"><h2 id="schedule-editor-heading" tabindex="-1">{{ editor.editing() ? 'Edit schedule' : 'Create schedule' }}</h2><button type="button" class="button subtle" [disabled]="editor.busy()" (click)="editor.close()">Close editor</button></div>
@@ -16,6 +17,7 @@ import { WizardFormDirective } from '../../shared/wizard/wizard-form.directive'
       <form [formGroup]="editor.form" tsWizardForm #feedback="tsWizardForm" (ngSubmit)="advance(); feedback.reveal()">
         <ts-wizard-heading [step]="editor.flow.step()" [title]="titles[editor.flow.step()]" />
         @if (editor.error()) { <p class="notice error" role="alert">{{ editor.error() }}</p> }
+        @if (editor.probe(); as probe) { <p class="notice">Probe selection: {{ probe.name }} · Test {{ probe.testId }} · Target {{ probe.environmentId }} · {{ probe.executionLocation }}. Save and run does not activate a release. Use a reviewed active release or pin its published release below.</p> }
         <fieldset [disabled]="editor.busy()"><legend class="sr-only">Schedule configuration</legend>
           @if (editor.flow.step() === 0) { <div class="form-grid">
             <div class="field"><label for="schedule-name">Schedule name</label><input id="schedule-name" formControlName="name" required maxlength="256"></div>
@@ -39,7 +41,7 @@ import { WizardFormDirective } from '../../shared/wizard/wizard-form.directive'
             <div class="field"><label for="schedule-retries">Retries per test</label><input id="schedule-retries" type="number" formControlName="retries" min="0" max="2" required></div>
           </div></details> }
           @if (editor.flow.step() === 2) {
-          <dl><dt>Schedule</dt><dd>{{ editor.form.controls.name.value }}</dd><dt>Suite</dt><dd>{{ editor.suiteName() }}</dd><dt>Target</dt><dd>{{ editor.targetName() }}</dd><dt>Cadence</dt><dd>{{ editor.form.controls.kind.value === 'interval' ? 'Every ' + editor.form.controls.interval.value + ' seconds · UTC' : editor.form.controls.cron.value + ' · ' + editor.form.controls.timezone.value }}</dd><dt>Tests</dt><dd class="wrap-anywhere">{{ editor.form.controls.ids.value || 'All eligible tests and dependencies' }}</dd><dt>Release</dt><dd class="wrap-anywhere">{{ editor.form.controls.release.value || 'Follow the active release at each firing' }}</dd><dt>Run options</dt><dd>{{ editor.form.controls.location.value }} · {{ editor.form.controls.timeout.value }} seconds · {{ editor.form.controls.retries.value }} retries · {{ editor.form.controls.overlap.value === 'skip' ? 'Skip overlapping firings' : 'Allow overlapping runs' }}</dd></dl>
+          <ts-schedule-review [name]="editor.form.controls.name.value" [suite]="editor.suiteName()" [target]="editor.targetName()" [cadence]="editor.form.controls.kind.value === 'interval' ? 'Every '+editor.form.controls.interval.value+' seconds · UTC' : editor.form.controls.cron.value+' · '+editor.form.controls.timezone.value" [tests]="editor.form.controls.ids.value" [release]="editor.form.controls.release.value" [options]="editor.form.controls.location.value+' · '+editor.form.controls.timeout.value+' seconds · '+editor.form.controls.retries.value+' retries · '+editor.form.controls.overlap.value" />
           <p class="notice">Enabling this schedule repeatedly starts runs against the selected target. Protected targets require safe tests and protected execution permission.</p>
           <label class="checkbox-field"><input type="checkbox" formControlName="enabled"> Enable this schedule</label>
           @if (editor.conflict()) { <p class="small">Another configuration change exists. Reload stored configuration before retrying.</p> }

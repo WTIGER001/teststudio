@@ -30,6 +30,8 @@ See [Browser recording](browser-recording.md) and [Website execution](browser-ex
 
 ## HTTPS probes
 
+Add HTTPS probe from the project overview opens this type directly and saves an explicit target binding. Save draft returns to that overview. Ordinary Create test keeps its catalog return. See [HTTPS probes](https-probes.md) for target-specific history, multiple-address setup, visual help, and schedule handoff.
+
 Enter a title and choose a suite. Select Continue.
 The wizard generates a permanent identifier. Advanced details contains its editor and the category.
 Paste the complete website URL and enter accepted status codes.

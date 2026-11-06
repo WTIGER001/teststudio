@@ -124,7 +124,7 @@ Switching applications keeps the main destination and clears old suite, environm
 Existing unsaved-work guards run before changing scope. A rejected change restores the selector value.
 All applications opens project-wide testing. Unassigned suites and unknown legacy run scopes remain available there.
 Project overviews contains All applications and HTTPS probes. Its destinations visibly use project scope.
-HTTPS probes has its own project route. Clear filters retains the HTTPS type.
+HTTPS probes has its own project route with target-specific observations, recent logical checks, freshness, TLS diagnostics, and matching schedules. Creation, explicit adoption, run review, and schedule handoff reuse existing workflows. Add multiple probes opens Addresses, Targets, and Review. Shared-schedule actions show their actual selection before confirmation.
 Shared suites keep project ownership. Their cards show a Shared suite badge.
 Application catalogs explain that publication, transfer, and saved selections operate on the complete shared suite.
 Run lists and trends count matching application tests. Shared run details explicitly show the complete saved run.
@@ -378,3 +378,7 @@ Hide expired codes and clear them after pairing or access loss. Reload restores 
 Show Closing recorder while waiting for final source. Permit cancellation during that wait.
 Review opens the existing editor. New recording creates a fresh identifier and retains the previous address and title.
 The focused TestStudio browser check uses real native recording and verifies private draft saving, focus, help, light and dark themes, and narrow layout.
+
+## Shared visual help examples
+
+HTTPS help renders Request, Review, HTTP diagnostics, and schedule Review with shared presentation components and isolated example data. Examples perform no API requests or mutations. Current-page highlights close the modal drawer before focusing a visible semantic anchor. Return to help restores scroll. Examples and highlights preserve edits, keyboard focus, themes, narrow layouts, and reduced motion.

@@ -6,7 +6,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"github.com/wtiger001/teststudio/internal/catalog"
 	"net/url"
+	"reflect"
 	"slices"
 	"sort"
 	"strconv"
@@ -157,10 +159,22 @@ func (s *Service) summarize(ctx context.Context, user, project string, v Binding
 	}
 	result.Application = env.Application
 	result.Stage = env.Stage
-	if t.Test.Check != nil {
+	desired := t.Test
+	result.DraftChanged = true
+	if active, e := s.Catalog.ActiveRelease(ctx, project, v.Suite); e == nil {
+		result.ActiveRelease = active.ID
+		for _, test := range active.Draft.Tests {
+			if test.ID == v.Test {
+				desired = test
+				result.DraftChanged = !reflect.DeepEqual(test, t.Test)
+				break
+			}
+		}
+	}
+	if desired.Check != nil {
 		base, e := url.Parse(env.Endpoints[v.Endpoint])
 		if e == nil && base.Host != "" {
-			rel, _ := url.Parse(t.Test.Check.Path)
+			rel, _ := url.Parse(desired.Check.Path)
 			base.Path = strings.TrimRight(base.Path, "/") + rel.Path
 			base.RawQuery = ""
 			base.Fragment = ""
@@ -188,17 +202,20 @@ func (s *Service) summarize(ctx context.Context, user, project string, v Binding
 			continue
 		}
 		testFound := false
+		var snapshot catalog.Test
 		for _, test := range run.Tests {
 			if test.ID == v.Test && test.Check != nil && test.Check.Endpoint == v.Endpoint {
 				testFound = true
+				snapshot = test
 				break
 			}
 		}
 		if !testFound {
 			continue
 		}
+		definitionChanged := !reflect.DeepEqual(snapshot.Check, desired.Check) || snapshot.TimeoutSeconds != desired.TimeoutSeconds || !reflect.DeepEqual(snapshot.Timing, desired.Timing)
 		changed := run.Environment == nil || run.Environment.Endpoints[v.Endpoint] != env.Endpoints[v.Endpoint]
-		observation := Observation{Run: run.ID, Release: run.Release.ID, CreatedAt: run.CreatedAt, At: run.FinishedAt, State: run.State, Error: run.Error, Evidence: run.EvidenceState, TargetChanged: changed}
+		observation := Observation{Run: run.ID, Release: run.Release.ID, CreatedAt: run.CreatedAt, At: run.FinishedAt, State: run.State, Error: run.Error, Evidence: run.EvidenceState, TargetChanged: changed, DefinitionChanged: definitionChanged}
 		if !runs.Terminal(run.State) {
 			if result.Active == nil {
 				copy := observation
@@ -219,12 +236,12 @@ func (s *Service) summarize(ctx context.Context, user, project string, v Binding
 		if !run.CreatedAt.Before(since) && len(result.History) < 30 {
 			result.History = append(result.History, observation)
 		}
-		if !changed && result.Latest == nil {
+		if !changed && !definitionChanged && result.Latest == nil {
 			copy := observation
 			result.Latest = &copy
 			result.State = observation.State
 		}
-		if !changed && !run.CreatedAt.Before(since) {
+		if !changed && !definitionChanged && !run.CreatedAt.Before(since) {
 			switch observation.State {
 			case "passed", "failed", "timed-out", "flaky":
 				result.Samples++
@@ -255,7 +272,7 @@ func (s *Service) summarize(ctx context.Context, user, project string, v Binding
 		if schedule.Enabled {
 			enabled++
 			result.ScheduleState = "enabled"
-			if result.Freshness != "unavailable" {
+			if result.Freshness != "unavailable" && result.Freshness != "stale" {
 				result.Freshness = "current"
 			}
 			grace := time.Duration(max(request.TimeoutSeconds, 1))*time.Second + 60*time.Second

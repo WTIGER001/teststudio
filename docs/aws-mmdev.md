@@ -176,3 +176,18 @@ A saved run reference and stable idempotency key reuse the original run after in
 The check verifies measured execution, retained attempts, events, logs, and a private evidence download with its checksum.
 It signs out its owned application session. It starts no browser and executes no coded worker.
 It does not establish complete AWS or cross-provider acceptance.
+
+### Publish a reviewed application release
+
+Use the tracked scripts/publish-aws-core.py helper instead of workstation-only release snippets.
+Build the portable service from committed source and retain its JSON output in a private ignored image receipt.
+Run prepare with profile, region, account, stack, image-receipt, and receipt arguments.
+It verifies the account and stack ownership, uses a temporary Docker login configuration, publishes the selected image, and creates an image-only change set.
+Review the concrete change set with its review action before execute. The review permits only the owned TaskDefinition and Service changes.
+Run finish to inspect an in-progress rollout without starting another. It publishes the matching UI only after the selected service digest is healthy and its API metadata matches.
+The receipt records immutable build creation separately from UI publication. It contains no credentials or guarded origin headers.
+
+scripts/manage-https-probes.py uses the ordinary hosted sign-in and project APIs with explicit private configuration.
+Its inspect, configure, run, enable, and check actions keep configuration, execution, schedule enablement, and observation inspection separate.
+It reuses checkpointed run identities and revokes its owned application session on exit.
+See [HTTPS probes](https-probes.md) for user workflows and current overview limits.

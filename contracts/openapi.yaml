@@ -7311,7 +7311,8 @@
         "http": {
           "$ref": "#/components/schemas/ProbeHTTPObservation"
         },
-        "targetChanged": {
+        "definitionChanged": {"type":"boolean"},
+      "targetChanged": {
           "type": "boolean"
         }
       },
@@ -7321,7 +7322,7 @@
         "createdAt",
         "state",
         "evidenceState",
-        "targetChanged"
+        "targetChanged", "definitionChanged"
       ]
     }
     "ProbeSchedule": {
@@ -7448,7 +7449,8 @@
         "partial": {
           "type": "boolean"
         },
-        "activeReleaseId": {
+        "draftChanged": {"type":"boolean"},
+      "activeReleaseId": {
           "type": "string"
         }
       },

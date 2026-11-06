@@ -2,302 +2,60 @@
   "schemaVersion": "teststudio.selftest/v1",
   "source": "teststudio-selftests",
   "tests": [
-    {
-      "id": "STUDIO-PROBE-HELP-001",
-      "title": "Probe visual examples preserve edits and locate current controls",
-      "selector": "@STUDIO-PROBE-HELP-001",
-      "category": "Interface"
-    },
-    {
-      "id": "STUDIO-VERSION-001",
-      "title": "Sidebar semantic release, immutable build date and matching API build metadata",
-      "selector": "@STUDIO-VERSION-001",
-      "category": "Interface"
-    },
-    {
-      "id": "STUDIO-PROJECTS-001",
-      "title": "Square project tiles, private image upload and browser-assisted screenshot capture",
-      "selector": "@STUDIO-PROJECTS-001",
-      "category": "Interface"
-    },
-    {
-      "id": "STUDIO-API-AUTHOR-001",
-      "title": "API creation wizard, request-policy review, persistent source and mobile editor",
-      "selector": "@STUDIO-API-AUTHOR-001",
-      "category": "Catalog"
-    },
-    {
-      "id": "STUDIO-API-STEPS-001",
-      "title": "API steps preserve one logical test and retained native results",
-      "selector": "@STUDIO-API-STEPS-001",
-      "category": "Runner contracts",
-      "type": "api"
-    },
-    {
-      "id": "STUDIO-HISTORY-001",
-      "title": "Retained test history, archived suites, removed working definitions and private evidence",
-      "selector": "@STUDIO-HISTORY-001",
-      "category": "Results"
-    },
-    {
-      "id": "STUDIO-TRANSFER-001",
-      "title": "Catalog pagination, retained selection, full export, reviewed file import and stale recovery",
-      "selector": "@STUDIO-TRANSFER-001",
-      "category": "Catalog"
-    },
-    {
-      "id": "STUDIO-PUBLISH-001",
-      "title": "Publication change review, schedule impact, stale conflicts and response-loss recovery",
-      "selector": "@STUDIO-PUBLISH-001",
-      "category": "Catalog"
-    },
-    {
-      "id": "STUDIO-BROWSE-001",
-      "title": "Category browsing, metadata filters, sorting, retained selections and lifecycle actions",
-      "selector": "@STUDIO-BROWSE-001",
-      "category": "Catalog"
-    },
-    {
-      "id": "STUDIO-TRACE-001",
-      "title": "Private installation-hosted trace actions, DOM snapshots, access expiry and local download fallback",
-      "selector": "@STUDIO-TRACE-001",
-      "category": "Results"
-    },
-    {
-      "id": "STUDIO-DIAGNOSTICS-001",
-      "title": "Scoped failure steps, retry logs, private screenshots, evidence gaps and rerun response recovery",
-      "selector": "@STUDIO-DIAGNOSTICS-001",
-      "category": "Results"
-    },
-    {
-      "id": "STUDIO-OWNER-001",
-      "title": "Ordinary creator onboarding, scoped administration, publication and local execution",
-      "selector": "@STUDIO-OWNER-001",
-      "category": "Access"
-    },
-    {
-      "id": "STUDIO-URL-001",
-      "title": "Quick URL probe entry, reviewed target registration, protected reuse and local execution",
-      "selector": "@STUDIO-URL-001",
-      "category": "Catalog"
-    },
-    {
-      "id": "STUDIO-WIZARD-001",
-      "title": "Guided setup, advanced validation, reviewed probes and recoverable local runs",
-      "selector": "@STUDIO-WIZARD-001",
-      "category": "Interface"
-    },
-    {
-      "id": "STUDIO-APPS-001",
-      "title": "Applications navigation, linked suites, environment registration, and scoped views",
-      "selector": "@STUDIO-APPS-001",
-      "category": "Interface"
-    },
-    {
-      "id": "STUDIO-CREATE-001",
-      "title": "Dedicated typed creation, browser recording drafts, native probes, and retained source copies",
-      "selector": "@STUDIO-CREATE-001",
-      "category": "Catalog"
-    },
-    {
-      "id": "STUDIO-EDITOR-001",
-      "title": "Playwright editor, persistent drafts, conflicts, and immutable preparation",
-      "selector": "@STUDIO-EDITOR-001",
-      "category": "Sources"
-    },
-    {
-      "id": "STUDIO-NAV-001",
-      "title": "Grouped sidebar, administration disclosure, and responsive navigation",
-      "selector": "@STUDIO-NAV-001",
-      "category": "Interface"
-    },
-    {
-      "id": "STUDIO-SELECTIONS-001",
-      "title": "Saved selections, versioned filters, resolved dependencies, and frozen runs",
-      "selector": "@STUDIO-SELECTIONS-001",
-      "category": "Catalog"
-    },
-    {
-      "id": "STUDIO-BULK-METADATA-001",
-      "title": "Reviewed bulk metadata, atomic conflicts, explicit clearing, and frozen definitions",
-      "selector": "@STUDIO-BULK-METADATA-001",
-      "category": "Catalog"
-    },
-    {
-      "id": "STUDIO-SUITES-001",
-      "title": "Suite settings, archive and restoration with retained evidence and schedule pins",
-      "selector": "@STUDIO-SUITES-001",
-      "category": "Catalog"
-    },
-    {
-      "id": "STUDIO-RELEASES-001",
-      "title": "Retained release comparisons, activation conflicts, rollback, and frozen runs",
-      "selector": "@STUDIO-RELEASES-001",
-      "category": "Catalog"
-    },
-    {
-      "id": "STUDIO-CLI-001",
-      "title": "Publisher CLI browser confirmation with local and OIDC accounts",
-      "selector": "@STUDIO-CLI-001",
-      "category": "Authentication"
-    },
-    {
-      "id": "STUDIO-GIT-001",
-      "title": "Repository registration, multiple suite bindings, and durable sync history",
-      "selector": "@STUDIO-GIT-001",
-      "category": "Sources"
-    },
-    {
-      "id": "STUDIO-BUNDLES-001",
-      "title": "Go and browser ZIP staging, retained source, queued builds, and cancellation",
-      "selector": "@STUDIO-BUNDLES-001",
-      "category": "Sources"
-    },
-    {
-      "id": "STUDIO-SOURCES-001",
-      "title": "Native source upload, immutable releases, and guarded publication",
-      "selector": "@STUDIO-SOURCES-001",
-      "category": "Sources"
-    },
-    {
-      "id": "STUDIO-AUTH-001",
-      "title": "OIDC key rotation, group refresh, provider logout, and callback feedback",
-      "selector": "@STUDIO-AUTH-001",
-      "category": "Authentication"
-    },
-    {
-      "id": "STUDIO-PENDING-001",
-      "title": "Pending project access, verified provider claims, and retained approvals",
-      "selector": "@STUDIO-PENDING-001",
-      "category": "Administration"
-    },
-    {
-      "id": "STUDIO-LINKS-001",
-      "title": "Fresh account proof, explicit identity linking, and session rotation",
-      "selector": "@STUDIO-LINKS-001",
-      "category": "Administration"
-    },
-    {
-      "id": "STUDIO-PROVIDERS-001",
-      "title": "Managed providers, scoped group mappings, and isolated OIDC sign-in",
-      "selector": "@STUDIO-PROVIDERS-001",
-      "category": "Administration"
-    },
-    {
-      "id": "STUDIO-PERMISSIONS-001",
-      "title": "Effective access decisions, inherited sources, privacy, and changing authority",
-      "selector": "@STUDIO-PERMISSIONS-001",
-      "category": "Administration"
-    },
-    {
-      "id": "STUDIO-POLICY-001",
-      "title": "Custom policies, inheritance, previews, and guarded role editors",
-      "selector": "@STUDIO-POLICY-001",
-      "category": "Administration"
-    },
-    {
-      "id": "STUDIO-BUILTIN-001",
-      "title": "Installation-wide predefined role state, retained assignments, and recovery guards",
-      "selector": "@STUDIO-BUILTIN-001",
-      "category": "Administration"
-    },
-    {
-      "id": "STUDIO-GRANTS-001",
-      "title": "Direct grant editors, expiry, deny precedence, and guarded removal",
-      "selector": "@STUDIO-GRANTS-001",
-      "category": "Administration"
-    },
-    {
-      "id": "STUDIO-LOCAL-001",
-      "title": "Local accounts, required password changes, and credential administration",
-      "selector": "@STUDIO-LOCAL-001",
-      "category": "Administration"
-    },
-    {
-      "id": "STUDIO-ROLES-001",
-      "title": "Scoped role assignments, delegation, and durable revocation controls",
-      "selector": "@STUDIO-ROLES-001",
-      "category": "Administration"
-    },
-    {
-      "id": "STUDIO-ACCESS-001",
-      "title": "Identity administration, scoped groups, and session controls",
-      "selector": "@STUDIO-ACCESS-001",
-      "category": "Administration"
-    },
-    {
-      "id": "STUDIO-NOTIFY-001",
-      "title": "Notification channels, durable delivery, and retained attempts",
-      "selector": "@STUDIO-NOTIFY-001",
-      "category": "Notifications"
-    },
-    {
-      "id": "STUDIO-SCHEDULE-001",
-      "title": "Durable schedules, editable configuration, and retained firing history",
-      "selector": "@STUDIO-SCHEDULE-001",
-      "category": "Schedules"
-    },
-    {
-      "id": "STUDIO-HTTPS-001",
-      "title": "Declarative HTTP assertions, HEAD edits, and retained diagnostics",
-      "selector": "@STUDIO-HTTPS-001",
-      "category": "Catalog"
-    },
-    {
-      "id": "STUDIO-TRENDS-001",
-      "title": "Stacked result trends, selection gaps, and rankings",
-      "selector": "@STUDIO-TRENDS-001",
-      "category": "Trends"
-    },
-    {
-      "id": "STUDIO-TIMEOUT-001",
-      "title": "Timeout status and failure rerun",
-      "selector": "@STUDIO-TIMEOUT-001",
-      "category": "Timing"
-    },
-    {
-      "id": "STUDIO-HELP-001",
-      "title": "Page help, keyboard access, and responsive drawer",
-      "selector": "@STUDIO-HELP-001",
-      "category": "Interface"
-    },
-    {
-      "id": "STUDIO-UI-001",
-      "title": "Theme persistence and mobile layout",
-      "selector": "@STUDIO-UI-001",
-      "category": "Interface"
-    },
-    {
-      "id": "STUDIO-CATALOG-001",
-      "title": "Catalog publication and native execution",
-      "selector": "@STUDIO-CATALOG-001",
-      "category": "Catalog"
-    },
-    {
-      "id": "STUDIO-TIMING-001",
-      "title": "Timing history and immutable results",
-      "selector": "@STUDIO-TIMING-001",
-      "category": "Timing"
-    }
+    {"id": "STUDIO-PROBE-BULK-001", "title": "Reviewed bulk probe actions retain completed runs during a partial retry", "selector": "@STUDIO-PROBE-BULK-001", "category": "HTTPS probes"},
+    {"id": "STUDIO-PROBE-SETUP-001", "title": "Nine generic probes save without execution and recover partial rows", "selector": "@STUDIO-PROBE-SETUP-001", "category": "HTTPS probes"},
+    {"id": "STUDIO-PROBE-ACTIONS-001", "title": "Probe run and schedule handoff keep explicit selection and execution", "selector": "@STUDIO-PROBE-ACTIONS-001", "category": "HTTPS probes"},
+    {"id": "STUDIO-PROBE-OVERVIEW-001", "title": "Probe overview separates observations and supports retained investigation", "selector": "@STUDIO-PROBE-OVERVIEW-001", "category": "HTTPS probes"},
+    {"id": "STUDIO-PROBE-HELP-001", "title": "Probe visual examples preserve edits and locate current controls", "selector": "@STUDIO-PROBE-HELP-001", "category": "Interface"},
+    {"id": "STUDIO-VERSION-001", "title": "Sidebar semantic release, immutable build date and matching API build metadata", "selector": "@STUDIO-VERSION-001", "category": "Interface"},
+    {"id": "STUDIO-PROJECTS-001", "title": "Square project tiles, private image upload and browser-assisted screenshot capture", "selector": "@STUDIO-PROJECTS-001", "category": "Interface"},
+    {"id": "STUDIO-API-AUTHOR-001", "title": "API creation wizard, request-policy review, persistent source and mobile editor", "selector": "@STUDIO-API-AUTHOR-001", "category": "Catalog"},
+    {"id": "STUDIO-API-STEPS-001", "title": "API steps preserve one logical test and retained native results", "selector": "@STUDIO-API-STEPS-001", "category": "Runner contracts", "type": "api"},
+    {"id": "STUDIO-HISTORY-001", "title": "Retained test history, archived suites, removed working definitions and private evidence", "selector": "@STUDIO-HISTORY-001", "category": "Results"},
+    {"id": "STUDIO-TRANSFER-001", "title": "Catalog pagination, retained selection, full export, reviewed file import and stale recovery", "selector": "@STUDIO-TRANSFER-001", "category": "Catalog"},
+    {"id": "STUDIO-PUBLISH-001", "title": "Publication change review, schedule impact, stale conflicts and response-loss recovery", "selector": "@STUDIO-PUBLISH-001", "category": "Catalog"},
+    {"id": "STUDIO-BROWSE-001", "title": "Category browsing, metadata filters, sorting, retained selections and lifecycle actions", "selector": "@STUDIO-BROWSE-001", "category": "Catalog"},
+    {"id": "STUDIO-TRACE-001", "title": "Private installation-hosted trace actions, DOM snapshots, access expiry and local download fallback", "selector": "@STUDIO-TRACE-001", "category": "Results"},
+    {"id": "STUDIO-DIAGNOSTICS-001", "title": "Scoped failure steps, retry logs, private screenshots, evidence gaps and rerun response recovery", "selector": "@STUDIO-DIAGNOSTICS-001", "category": "Results"},
+    {"id": "STUDIO-OWNER-001", "title": "Ordinary creator onboarding, scoped administration, publication and local execution", "selector": "@STUDIO-OWNER-001", "category": "Access"},
+    {"id": "STUDIO-URL-001", "title": "Quick URL probe entry, reviewed target registration, protected reuse and local execution", "selector": "@STUDIO-URL-001", "category": "Catalog"},
+    {"id": "STUDIO-WIZARD-001", "title": "Guided setup, advanced validation, reviewed probes and recoverable local runs", "selector": "@STUDIO-WIZARD-001", "category": "Interface"},
+    {"id": "STUDIO-APPS-001", "title": "Applications navigation, linked suites, environment registration, and scoped views", "selector": "@STUDIO-APPS-001", "category": "Interface"},
+    {"id": "STUDIO-CREATE-001", "title": "Dedicated typed creation, browser recording drafts, native probes, and retained source copies", "selector": "@STUDIO-CREATE-001", "category": "Catalog"},
+    {"id": "STUDIO-EDITOR-001", "title": "Playwright editor, persistent drafts, conflicts, and immutable preparation", "selector": "@STUDIO-EDITOR-001", "category": "Sources"},
+    {"id": "STUDIO-NAV-001", "title": "Grouped sidebar, administration disclosure, and responsive navigation", "selector": "@STUDIO-NAV-001", "category": "Interface"},
+    {"id": "STUDIO-SELECTIONS-001", "title": "Saved selections, versioned filters, resolved dependencies, and frozen runs", "selector": "@STUDIO-SELECTIONS-001", "category": "Catalog"},
+    {"id": "STUDIO-BULK-METADATA-001", "title": "Reviewed bulk metadata, atomic conflicts, explicit clearing, and frozen definitions", "selector": "@STUDIO-BULK-METADATA-001", "category": "Catalog"},
+    {"id": "STUDIO-SUITES-001", "title": "Suite settings, archive and restoration with retained evidence and schedule pins", "selector": "@STUDIO-SUITES-001", "category": "Catalog"},
+    {"id": "STUDIO-RELEASES-001", "title": "Retained release comparisons, activation conflicts, rollback, and frozen runs", "selector": "@STUDIO-RELEASES-001", "category": "Catalog"},
+    {"id": "STUDIO-CLI-001", "title": "Publisher CLI browser confirmation with local and OIDC accounts", "selector": "@STUDIO-CLI-001", "category": "Authentication"},
+    {"id": "STUDIO-GIT-001", "title": "Repository registration, multiple suite bindings, and durable sync history", "selector": "@STUDIO-GIT-001", "category": "Sources"},
+    {"id": "STUDIO-BUNDLES-001", "title": "Go and browser ZIP staging, retained source, queued builds, and cancellation", "selector": "@STUDIO-BUNDLES-001", "category": "Sources"},
+    {"id": "STUDIO-SOURCES-001", "title": "Native source upload, immutable releases, and guarded publication", "selector": "@STUDIO-SOURCES-001", "category": "Sources"},
+    {"id": "STUDIO-AUTH-001", "title": "OIDC key rotation, group refresh, provider logout, and callback feedback", "selector": "@STUDIO-AUTH-001", "category": "Authentication"},
+    {"id": "STUDIO-PENDING-001", "title": "Pending project access, verified provider claims, and retained approvals", "selector": "@STUDIO-PENDING-001", "category": "Administration"},
+    {"id": "STUDIO-LINKS-001", "title": "Fresh account proof, explicit identity linking, and session rotation", "selector": "@STUDIO-LINKS-001", "category": "Administration"},
+    {"id": "STUDIO-PROVIDERS-001", "title": "Managed providers, scoped group mappings, and isolated OIDC sign-in", "selector": "@STUDIO-PROVIDERS-001", "category": "Administration"},
+    {"id": "STUDIO-PERMISSIONS-001", "title": "Effective access decisions, inherited sources, privacy, and changing authority", "selector": "@STUDIO-PERMISSIONS-001", "category": "Administration"},
+    {"id": "STUDIO-POLICY-001", "title": "Custom policies, inheritance, previews, and guarded role editors", "selector": "@STUDIO-POLICY-001", "category": "Administration"},
+    {"id": "STUDIO-BUILTIN-001", "title": "Installation-wide predefined role state, retained assignments, and recovery guards", "selector": "@STUDIO-BUILTIN-001", "category": "Administration"},
+    {"id": "STUDIO-GRANTS-001", "title": "Direct grant editors, expiry, deny precedence, and guarded removal", "selector": "@STUDIO-GRANTS-001", "category": "Administration"},
+    {"id": "STUDIO-LOCAL-001", "title": "Local accounts, required password changes, and credential administration", "selector": "@STUDIO-LOCAL-001", "category": "Administration"},
+    {"id": "STUDIO-ROLES-001", "title": "Scoped role assignments, delegation, and durable revocation controls", "selector": "@STUDIO-ROLES-001", "category": "Administration"},
+    {"id": "STUDIO-ACCESS-001", "title": "Identity administration, scoped groups, and session controls", "selector": "@STUDIO-ACCESS-001", "category": "Administration"},
+    {"id": "STUDIO-NOTIFY-001", "title": "Notification channels, durable delivery, and retained attempts", "selector": "@STUDIO-NOTIFY-001", "category": "Notifications"},
+    {"id": "STUDIO-SCHEDULE-001", "title": "Durable schedules, editable configuration, and retained firing history", "selector": "@STUDIO-SCHEDULE-001", "category": "Schedules"},
+    {"id": "STUDIO-HTTPS-001", "title": "Declarative HTTP assertions, HEAD edits, and retained diagnostics", "selector": "@STUDIO-HTTPS-001", "category": "Catalog"},
+    {"id": "STUDIO-TRENDS-001", "title": "Stacked result trends, selection gaps, and rankings", "selector": "@STUDIO-TRENDS-001", "category": "Trends"},
+    {"id": "STUDIO-TIMEOUT-001", "title": "Timeout status and failure rerun", "selector": "@STUDIO-TIMEOUT-001", "category": "Timing"},
+    {"id": "STUDIO-HELP-001", "title": "Page help, keyboard access, and responsive drawer", "selector": "@STUDIO-HELP-001", "category": "Interface"},
+    {"id": "STUDIO-UI-001", "title": "Theme persistence and mobile layout", "selector": "@STUDIO-UI-001", "category": "Interface"},
+    {"id": "STUDIO-CATALOG-001", "title": "Catalog publication and native execution", "selector": "@STUDIO-CATALOG-001", "category": "Catalog"},
+    {"id": "STUDIO-TIMING-001", "title": "Timing history and immutable results", "selector": "@STUDIO-TIMING-001", "category": "Timing"}
   ],
   "diagnostics": [
-    {
-      "id": "ADAPTER-NOMEDIA",
-      "title": "Passing observation with missing requested media",
-      "selector": "@ADAPTER-NOMEDIA",
-      "category": "Runner diagnostics"
-    },
-    {
-      "id": "ADAPTER-FAIL",
-      "title": "Intentional failure and evidence",
-      "selector": "@ADAPTER-FAIL",
-      "category": "Runner diagnostics"
-    },
-    {
-      "id": "ADAPTER-TIMEOUT",
-      "title": "Intentional timeout",
-      "selector": "@ADAPTER-TIMEOUT",
-      "category": "Runner diagnostics"
-    }
+    {"id": "ADAPTER-NOMEDIA", "title": "Passing observation with missing requested media", "selector": "@ADAPTER-NOMEDIA", "category": "Runner diagnostics"},
+    {"id": "ADAPTER-FAIL", "title": "Intentional failure and evidence", "selector": "@ADAPTER-FAIL", "category": "Runner diagnostics"},
+    {"id": "ADAPTER-TIMEOUT", "title": "Intentional timeout", "selector": "@ADAPTER-TIMEOUT", "category": "Runner diagnostics"}
   ]
 }
