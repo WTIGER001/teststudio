@@ -6,6 +6,25 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## Dedicated project creation page — 2026-11-06
+
+Projects shows the project list and a Create project action. The action opens the dedicated /projects/new route.
+The existing wizard keeps project, application, target, and review steps. Progress stays in one row with contained scrolling on narrow screens.
+Back to projects and Cancel setup use the existing unsaved changes guard. Help preserves entered values.
+Creation permission remains installation-scoped. The creation route has no active project context.
+The wizard keeps its existing review, partial-save receipts, and retry behavior.
+Page help, first-installation instructions, UI rules, and the active plan describe this flow.
+
+The Angular production build passes. STUDIO-WIZARD-001 passes through normal local TestStudio execution in 7.533 seconds.
+Run: 20261106T131801.535325000-755c948292cb022d7125d961. Evidence is complete and the execution ledger is cleaned.
+The check covers desktop and 390-pixel layout, help, cancelled navigation, preserved fields, setup recovery, and the application-scoped destination.
+The first attempt exposed an outdated destination assertion. The corrected check retains the existing application scope.
+Owned verification containers, browser processes, and local controllers exit after the check. No user browser or demo data changes.
+The matching UI is published at teststudio.devfoodmarketmaker.com/projects/new. Public assets match the verified build.
+The ARM64 service update reuses all three Go binaries. Its new task and both target groups are healthy.
+The TestStudio rollout completes. The existing testing-server service remains healthy at one running task.
+This refines verified items 05, 49, and 50. The verified count remains 50 of 57.
+
 ## Generic organization OIDC configuration — 2026-11-05
 
 The user selects the existing Cognito issuer us-west-2_p1Epu0go8 and requires generic OIDC behavior.

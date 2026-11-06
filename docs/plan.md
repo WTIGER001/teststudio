@@ -15,6 +15,12 @@ Use the mm_dev profile and preserve existing services. Azure implementation and 
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
+## Project creation layout
+
+Create project opens a dedicated /projects/new page. Keep the project list focused on finding and opening projects.
+Reuse the existing setup wizard, permissions, review, unsaved changes guard, and partial-save recovery.
+Keep progress in one row with contained scrolling on narrow screens. Update help and verify the changed workflow locally.
+
 ## Latest sign-in direction
 
 The user requires generic OIDC sign-in. Add no Google-specific application path, protocol handling, or identity-provider hint.

@@ -9,6 +9,7 @@ export function resolvedTheme(preference: ThemePreference, systemDark: boolean):
 }
 
 export function projectFromURL(url: string): string {
+  if (/^\/projects\/new(?:[?#]|$)/.test(url)) return ''
   const match = /^\/projects\/([A-Za-z0-9._-]+)(?:\/|$)/.exec(url)
   return match?.[1] ?? ''
 }

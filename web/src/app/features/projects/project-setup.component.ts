@@ -9,7 +9,7 @@ import { WizardFormDirective } from '../../shared/wizard/wizard-form.directive'
 @Component({
   selector: 'ts-project-setup', standalone: true, imports: [ReactiveFormsModule, RouterLink, WizardStepperComponent, WizardHeadingComponent, WizardFormDirective], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <ts-wizard-stepper [steps]="['Project', 'Application', 'Target', 'Review']" [current]="service.flow.step()" [reached]="service.flow.reached()" [disabled]="service.saving() || service.locked()" (selected)="service.flow.go($event); feedback.reveal()" />
+    <ts-wizard-stepper [singleRow]="true" [steps]="['Project', 'Application', 'Target', 'Review']" [current]="service.flow.step()" [reached]="service.flow.reached()" [disabled]="service.saving() || service.locked()" (selected)="service.flow.go($event); feedback.reveal()" />
     <form [formGroup]="service.form" tsWizardForm #feedback="tsWizardForm" (ngSubmit)="advance(); feedback.reveal()">
       <ts-wizard-heading [title]="titles[service.flow.step()]" [step]="service.flow.step()" />
       @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }

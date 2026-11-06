@@ -1,8 +1,27 @@
 import { test, expect, expectHTTPFailure, followNavigation } from './fixtures'
 
 test('Guided setup and HTTPS creation preserve entries and recover without duplicate runs', { tag: '@STUDIO-WIZARD-001' }, async ({ page, api }, testInfo) => {
+  await expect(page.locator('ts-project-setup')).toHaveCount(0)
+  await page.getByRole('link', { name: 'Create project', exact: true }).click()
+  await expect(page).toHaveURL('/projects/new')
   const setup = page.locator('ts-project-setup')
   await setup.getByLabel('Project name', { exact: true }).fill('Wizard workspace')
+  await page.getByRole('button', { name: 'Help', exact: true }).click()
+  await expect(setup.getByLabel('Project name', { exact: true })).toHaveValue('Wizard workspace')
+  await page.getByRole('button', { name: 'Close help', exact: true }).click()
+  page.once('dialog', dialog => dialog.dismiss())
+  await page.getByRole('link', { name: 'Cancel setup', exact: true }).click()
+  await expect(page).toHaveURL('/projects/new')
+  await expect(setup.getByLabel('Project name', { exact: true })).toHaveValue('Wizard workspace')
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({ width, height: 900 })
+    const progress = setup.getByRole('navigation', { name: 'Setup progress' })
+    const rows = await progress.locator('li').evaluateAll(items => items.map(item => Math.round(item.getBoundingClientRect().top)))
+    expect(new Set(rows).size).toBe(1)
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+    await testInfo.attach(`project-setup-${width}`, { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' })
+  }
+  await page.setViewportSize({ width: 1280, height: 900 })
   await expect(setup.getByLabel('Permanent identifier', { exact: true })).not.toBeVisible()
   await setup.getByText('Advanced details', { exact: true }).click()
   const project = await setup.getByLabel('Permanent identifier', { exact: true }).inputValue()
@@ -30,7 +49,7 @@ test('Guided setup and HTTPS creation preserve entries and recover without dupli
   await expect(setup.getByRole('alert')).toContainText('Project, Application created.')
   await page.unroute(`**${environmentPath}`)
   await setup.getByRole('button', { name: 'Retry remaining setup', exact: true }).click()
-  await expect(page).toHaveURL(`/projects/${project}/tests/new?suite=availability-${suffix}`)
+  await expect(page).toHaveURL(`/projects/${project}/applications/customer-portal-${suffix}/tests/new?suite=availability-${suffix}`)
   await page.getByRole('link', { name: 'HTTPS probe', exact: true }).click()
   const probe = page.locator('ts-https-wizard')
   await probe.getByLabel('Title', { exact: true }).fill('Service health')

@@ -11,6 +11,8 @@ test('Ordinary project creators finish setup, publish tests and delegate only pr
   await expect(page.getByRole('heading', { name: 'Projects', exact: true })).toBeVisible()
   await expect(page.getByRole('link', { name: /Self-test workspace/ })).toHaveCount(0)
   const session = await (await page.request.get('/auth/session')).json(), ownAPI = new API(page.request, session.session.csrfToken)
+  await page.getByRole('link', { name: 'Create project', exact: true }).click()
+  await expect(page).toHaveURL('/projects/new')
   const setup = page.locator('ts-project-setup')
   await setup.getByLabel('Project name', { exact: true }).fill('Creator workspace')
   await setup.getByRole('button', { name: 'Continue', exact: true }).click()

@@ -5,7 +5,9 @@ Authentication setup can create the initial administrator and built-in access po
 Restarting the server preserves existing records. It does not add examples or self-tests.
 
 Build the UI and start the local server with the README commands.
-Use Projects to create your project. The setup wizard can add your first application, target, and empty suite.
+Open Projects and select Create project. The wizard opens on its own page at /projects/new.
+The setup wizard can add your first application, target, and empty suite.
+Back to projects and Cancel setup return to the project list. Changed entries require confirmation before leaving.
 No cloud account, Docker runtime, or database server is required for native HTTP checks.
 
 ## Add only the examples you choose

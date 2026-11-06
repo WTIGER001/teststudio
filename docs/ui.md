@@ -22,6 +22,8 @@ Empty states explain the next available action. Access failures and unavailable 
 Use a wizard with a labeled stepper for configuration that spans several decisions or creates related resources.
 Group steps by the tester's decisions. Keep a short form or direct action for a simple task.
 Use dedicated routes for substantial authoring workflows. Small edits can remain beside their context.
+Project creation opens at /projects/new from the Projects page. Keep its wizard separate from the project list.
+Its progress stays in one row. Narrow screens scroll the progress region without widening the page.
 Keep common controls visible. Put uncommon filters, tuning, pins, and identifiers under clearly named Advanced sections.
 Keep target protection, safety, enable state, and execution or notification consequences visible on review.
 Do not hide consequences under Advanced options.
