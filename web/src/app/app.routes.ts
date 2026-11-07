@@ -7,9 +7,12 @@ import type { CreateProjectPage } from './features/projects/create-project.page'
 import type { ApplicationsPage } from './features/applications/applications.page'
 import type { CreateTestPage } from './features/catalog/create-test.page'
 import type { SourcesPage } from './features/sources/sources.page'
+import type { AssignmentsPage } from './features/access/assignments.page'
 import type { Routes } from '@angular/router'
 
 const projectRoutes: Routes = [
+  { path: 'projects/:projectId/applications/:applicationId/members', canDeactivate: [(page: AssignmentsPage) => page.canLeave()], data: { helpTopic: 'application-members' }, loadComponent: () => import('./features/access/assignments.page').then(m => m.AssignmentsPage) },
+  { path: 'projects/:projectId/applications/:applicationId/explain-access', data: { helpTopic: 'effective-permissions' }, loadComponent: () => import('./features/access/permission-explanation.page').then(m => m.PermissionExplanationPage) },
   { path: 'projects/:projectId/probes/new', canDeactivate: [(page: ProbeSetupPage) => page.canLeave()], data: { helpTopic: 'https-probes' }, loadComponent: () => import('./features/probes/probe-setup.page').then(m => m.ProbeSetupPage) },
   { path: 'projects/:projectId/probes/adopt', canDeactivate: [(page: ProbeSetupPage) => page.canLeave()], data: { helpTopic: 'https-probes', adopt: true }, loadComponent: () => import('./features/probes/probe-setup.page').then(m => m.ProbeSetupPage) },
   { path: 'projects/:projectId/probes', canDeactivate: [(page: ProbeOverviewPage) => page.canLeave()], data: { helpTopic: 'https-probes' }, loadComponent: () => import('./features/probes/probe-overview.page').then(m => m.ProbeOverviewPage) },
@@ -30,14 +33,14 @@ const projectRoutes: Routes = [
   { path: 'projects/:projectId/explain-access', data: { helpTopic: 'effective-permissions' }, loadComponent: () => import('./features/access/permission-explanation.page').then(m => m.PermissionExplanationPage) },
   { path: 'projects/new', canDeactivate: [(page: CreateProjectPage) => page.canLeave()], data: { helpTopic: 'projects' }, loadComponent: () => import('./features/projects/create-project.page').then(m => m.CreateProjectPage) },
   { path: 'projects', canDeactivate: [(page: ProjectsPage) => page.canLeave()], data: { helpTopic: 'projects' }, loadComponent: () => import('./features/projects/projects.page').then(m => m.ProjectsPage) },
-  { path: 'settings/access', data: { helpTopic: 'installation-access' }, loadComponent: () => import('./features/access/assignments.page').then(m => m.AssignmentsPage) },
+  { path: 'settings/access', canDeactivate: [(page: AssignmentsPage) => page.canLeave()], data: { helpTopic: 'installation-access' }, loadComponent: () => import('./features/access/assignments.page').then(m => m.AssignmentsPage) },
   { path: 'settings/permissions', data: { helpTopic: 'grants' }, loadComponent: () => import('./features/access/grants.page').then(m => m.GrantsPage) },
   { path: 'projects/:projectId/permissions', data: { helpTopic: 'grants' }, loadComponent: () => import('./features/access/grants.page').then(m => m.GrantsPage) },
   { path: 'settings/roles', data: { helpTopic: 'roles' }, loadComponent: () => import('./features/access/role-policies.page').then(m => m.RolePoliciesPage) },
   { path: 'settings/roles/:roleId', data: { helpTopic: 'role' }, loadComponent: () => import('./features/access/role-policy-detail.page').then(m => m.RolePolicyDetailPage) },
   { path: 'projects/:projectId/roles', data: { helpTopic: 'roles' }, loadComponent: () => import('./features/access/role-policies.page').then(m => m.RolePoliciesPage) },
   { path: 'projects/:projectId/roles/:roleId', data: { helpTopic: 'role' }, loadComponent: () => import('./features/access/role-policy-detail.page').then(m => m.RolePolicyDetailPage) },
-  { path: 'projects/:projectId/members', data: { helpTopic: 'project-access' }, loadComponent: () => import('./features/access/assignments.page').then(m => m.AssignmentsPage) },
+  { path: 'projects/:projectId/members', canDeactivate: [(page: AssignmentsPage) => page.canLeave()], data: { helpTopic: 'project-access' }, loadComponent: () => import('./features/access/assignments.page').then(m => m.AssignmentsPage) },
   { path: 'settings/users', data: { helpTopic: 'users' }, loadComponent: () => import('./features/access/users.page').then(m => m.UsersPage) },
   { path: 'settings/users/:userId', data: { helpTopic: 'user' }, loadComponent: () => import('./features/access/user-detail.page').then(m => m.UserDetailPage) },
   { path: 'settings/groups', data: { helpTopic: 'groups' }, loadComponent: () => import('./features/access/groups.page').then(m => m.GroupsPage) },

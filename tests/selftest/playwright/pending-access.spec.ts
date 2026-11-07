@@ -10,7 +10,7 @@ test('Pending project access, verified provider claims, and retained approvals',
   }
   const prepared = await page.request.post('http://127.0.0.1:8050/access/prepare', { data: { project } }); expect(prepared.ok()).toBe(true)
   const fixture = await prepared.json()
-  const manager = async () => { await page.context().addCookies([{ name: 'teststudio_session', value: fixture.cookie, domain: '127.0.0.1', path: '/', httpOnly: true, sameSite: 'Lax', secure: false }]); await page.goto(route); await expect(page.getByRole('heading', { name: 'Project access', exact: true })).toBeVisible() }
+  const manager = async () => { await page.context().addCookies([{ name: 'teststudio_session', value: fixture.cookie, domain: '127.0.0.1', path: '/', httpOnly: true, sameSite: 'Lax', secure: false }]); await page.goto(route); await expect(page.getByRole('heading', { name: 'Project members', exact: true })).toBeVisible() }
   const table = () => page.getByRole('table', { name: 'Pending project role approvals', exact: true })
   const row = (email: string, state: string) => table().getByRole('row').filter({ hasText: email }).filter({ has: page.getByText(state, { exact: true }) })
   const editor = () => page.getByRole('region', { name: 'Prepare project access', exact: true })
@@ -31,7 +31,7 @@ test('Pending project access, verified provider claims, and retained approvals',
   await test.step('Project owner prepares access without installation directory authority and retains its opened provider revision', async () => {
     await manager()
     await page.getByRole('button', { name: '+ Prepare project access', exact: true }).click(); await fill()
-    await expect(page.getByLabel('Pending project role', { exact: true }).getByRole('option', { name: 'Installation administrator', exact: true })).toHaveCount(0)
+    await expect(page.getByLabel('Pending project role', { exact: true }).getByRole('option', { name: 'System Admin', exact: true })).toHaveCount(0)
     await updateProvider('Pending identity one reviewed')
     await page.getByRole('button', { name: 'Refresh pending access', exact: true }).click()
     await expect(editor()).toContainText('Configuration revision 1')
@@ -41,7 +41,7 @@ test('Pending project access, verified provider claims, and retained approvals',
     await page.getByRole('button', { name: 'Review pending records and reload choices', exact: true }).click()
     await expect(editor()).toContainText('Configuration revision 2')
     await page.getByRole('button', { name: 'Help', exact: true }).click()
-    const help = page.getByRole('dialog', { name: 'Project access help', exact: true })
+    const help = page.getByRole('dialog', { name: 'Project members help', exact: true })
     for (const title of ['Introduction', 'Concepts', 'Tutorials']) await expect(help.getByRole('heading', { name: title, exact: true })).toBeVisible()
     await expect(help).toContainText('Pending project access'); await page.keyboard.press('Escape')
     for (const theme of ['light', 'dark']) {

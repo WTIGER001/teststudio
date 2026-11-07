@@ -25,6 +25,7 @@ export class WorkspaceService {
   readonly project = computed(() => this.projects().find(p => p.id === this.projectId())?.data ?? null)
   readonly capabilities = signal<Record<string, boolean>>({})
   readonly installationCapabilities = signal<Record<string, boolean>>({})
+  readonly projectCapabilities = signal<Record<string, boolean>>({})
   private capabilityGeneration = 0
   private projectGeneration = 0
   private applicationProject = ''
@@ -47,7 +48,7 @@ export class WorkspaceService {
     this.projects.set(response.items); await this.loadCapabilities()
   }
 
-  reset(): void { this.projectGeneration++; this.capabilityGeneration++; this.applicationProject = ''; this.projects.set([]); this.applications.set([]); this.applicationError.set(''); this.capabilities.set({}); this.installationCapabilities.set({}) }
+  reset(): void { this.projectGeneration++; this.capabilityGeneration++; this.applicationProject = ''; this.projects.set([]); this.applications.set([]); this.applicationError.set(''); this.capabilities.set({}); this.installationCapabilities.set({}); this.projectCapabilities.set({}) }
 
   async refreshAccess(): Promise<void> {
     try { await this.load() }
@@ -57,17 +58,17 @@ export class WorkspaceService {
   async loadCapabilities(): Promise<void> {
     const generation = ++this.capabilityGeneration
     const project = this.projectId()
-    this.capabilities.set({}); this.installationCapabilities.set({})
+    this.capabilities.set({}); this.installationCapabilities.set({}); this.projectCapabilities.set({})
     try {
-      const [capabilities, installation] = await Promise.all([this.readCapabilities(project), project ? this.readCapabilities('') : Promise.resolve(null)])
-      if (generation === this.capabilityGeneration) { this.capabilities.set(capabilities); this.installationCapabilities.set(installation ?? capabilities); await this.loadApplications(project, generation) }
-    } catch { if (generation === this.capabilityGeneration) { this.capabilities.set({}); this.installationCapabilities.set({}) } }
+      const [capabilities, installation, projectCapabilities] = await Promise.all([this.readCapabilities(project, this.applicationId()), project ? this.readCapabilities('') : Promise.resolve(null), this.readCapabilities(project)])
+      if (generation === this.capabilityGeneration) { this.capabilities.set(capabilities); this.installationCapabilities.set(installation ?? capabilities); this.projectCapabilities.set(projectCapabilities); await this.loadApplications(project, generation) }
+    } catch { if (generation === this.capabilityGeneration) { this.capabilities.set({}); this.installationCapabilities.set({}); this.projectCapabilities.set({}) } }
   }
 
-  readCapabilities(project: string): Promise<Record<string, boolean>> { return this.api.request<Record<string, boolean>>(`/api/v1/me/capabilities?project=${encodeURIComponent(project)}`) }
+  readCapabilities(project: string, application = ''): Promise<Record<string, boolean>> { return this.api.request<Record<string, boolean>>(`/api/v1/me/capabilities?project=${encodeURIComponent(project)}${application ? '&application=' + encodeURIComponent(application) : ''}`) }
 
   private async loadApplications(project: string, generation: number): Promise<void> {
-    if (!project || !this.can('projects.read')) { this.applicationProject = ''; this.applications.set([]); this.applicationError.set(''); return }
+    if (!project || !this.projects().some(row => row.id === project)) { this.applicationProject = ''; this.applications.set([]); this.applicationError.set(''); return }
     if (this.applicationProject === project) return
     this.applications.set([]); this.applicationError.set('')
     try {

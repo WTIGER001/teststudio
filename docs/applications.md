@@ -46,7 +46,10 @@ Environment registration provides Advanced credentials for optional API authenti
 Map a binding name to a current project's approved reference. Review the mapping and target before creating the environment.
 The operator controls secret values and permitted origins. See [API credentials](api-credentials.md).
 
-Application lists require project read permission. Application creation requires project management permission.
+Application lists contain only authorized applications. Application-only members receive enough parent context to select their authorized application.
+Application creation requires project management permission. Project management links use separate project capabilities.
+Application members manages direct roles; Project members manages roles inherited by every application.
+See [membership administration](access.md#manage-membership-in-the-interface) for review, Owner safeguards, conversion, and recovery.
 Environment and suite read permissions control the related lists independently.
 Missing read permission displays an explanation instead of an empty resource claim.
 The client does not request registries that its current capabilities do not permit.
@@ -57,6 +60,8 @@ Management permissions control the environment and suite registration buttons.
 
 | Route | Purpose |
 | --- | --- |
+| /projects/{project}/applications/{application}/members | Direct application roles and inherited project access. |
+| /projects/{project}/applications/{application}/explain-access | Effective permission decisions in this exact application. |
 | /projects/{project}/applications | Application list and registration. |
 | /projects/{project}/applications/{application} | Active application overview, environments, and linked suites. |
 | /projects/{project}/applications/{application}/suites | Suites linked to the active application. |

@@ -18,16 +18,17 @@ export function sourceDetails(source: PermissionSource): SourceDetail[] {
   if (source.kind === 'role') {
     details.push({ label: 'Assigned role', value: `${source.assignedRoleName || source.assignedRoleId} · ${source.assignedRoleId}` })
     if (source.assignedRoleId !== source.roleId) details.push({ label: 'Inherited grant owner', value: `${source.roleName || source.roleId} · ${source.roleId}` })
+    if (source.assignmentApplication) details.push({ label: 'Application binding', value: source.assignmentApplication })
     details.push({ label: 'Assignment binding', value: source.assignmentProject ? `Project · ${source.assignmentProject}` : 'No disclosed project binding' })
   }
-  details.push({ label: 'Source ownership', value: source.scopeKnown ? source.projectId ? `Project · ${source.projectId}` : 'Installation' : 'Native scope · ownership not managed by TestStudio' })
+  details.push({ label: 'Source ownership', value: source.scopeKnown ? source.projectId ? `Project · ${source.projectId}` : 'System' : 'Native scope · ownership not managed by TestStudio' })
   details.push({ label: 'Configured project scope', value: source.teamScope || 'Unspecified' }, { label: 'Configured object scope', value: source.objectScope || 'Whole scope' }, { label: 'Expiry', value: source.expiresAt || 'No expiry' })
   if (source.restrictedFields?.length) details.push({ label: 'Field restrictions', value: source.restrictedFields.join(', ') })
   if (source.grantId) details.push({ label: 'Managed grant identifier', value: source.grantId })
   return details
 }
 export function appendExplanation(previous: PermissionExplanation, next: PermissionExplanation): PermissionExplanation {
-  if (!previous.cursor || ['userId', 'projectId', 'object', 'permission', 'allowed', 'reason'].some(key => previous[key as keyof PermissionExplanation] !== next[key as keyof PermissionExplanation])) throw new Error('The explanation changed during the scan. Check access again to load current sources.')
+  if (!previous.cursor || ['userId', 'projectId', 'applicationId', 'object', 'permission', 'allowed', 'reason'].some(key => previous[key as keyof PermissionExplanation] !== next[key as keyof PermissionExplanation])) throw new Error('The explanation changed during the scan. Check access again to load current sources.')
   const ids = new Set(previous.items.map(source => source.id))
   return { ...next, items: [...previous.items, ...next.items.filter(source => !ids.has(source.id))] }
 }

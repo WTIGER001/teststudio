@@ -9,7 +9,7 @@ import { UserEditorComponent } from './user-editor.component'
 @Component({
   standalone: true, imports: [DatePipe, RouterLink, UserEditorComponent], providers: [UsersService, UserEditorService, AccessActionService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="page-heading"><div><span class="eyebrow">Installation administration</span><h1 id="users-heading" tabindex="-1">Users</h1><p class="muted">Manage profiles and account state across this installation.</p></div>@if (service.manage()) { <button type="button" class="button primary" (click)="editor.open()">+ Register user</button> }</div>
+    <div class="page-heading"><div><span class="eyebrow">System administration</span><h1 id="users-heading" tabindex="-1">Users</h1><p class="muted">Manage profiles and account state across this installation.</p></div>@if (service.manage()) { <button type="button" class="button primary" (click)="editor.open()">+ Register user</button> }</div>
     @if (editor.opened()) { <ts-user-editor /> }
     @if (service.message()) { <p class="notice success" role="status">{{ service.message() }}</p> }
     @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }

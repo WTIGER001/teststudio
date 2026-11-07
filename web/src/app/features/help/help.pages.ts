@@ -2,6 +2,21 @@ import { probeHelp } from './help.probes'
 import type { HelpPage } from './help.models'
 
 export const helpPages: Record<string, HelpPage> = {
+  'application-members': {
+    id: 'application-members', title: 'Application members',
+    introduction: ['Assign registered users and groups to one application. Project roles and group membership can add inherited access.'],
+    concepts: [
+      { title: 'Five cumulative roles', description: 'Reader views results. Member runs published tests and manages execution schedules. Developer also authors and publishes tests. Contributor also manages settings and non-Owner membership. Owner adds deletion and ownership changes.' },
+      { title: 'Direct and inherited access', description: 'A lower direct role does not reduce a higher Project or group role. Project assignments are read-only here. Inspect access explains the current decision and its readable sources.' },
+      { title: 'Owner safeguards', description: 'Contributors cannot add, remove, promote, or demote Owners, including through groups. The server protects usable Owners and rejects stale revisions.' },
+      { title: 'Shared groups', description: 'Assigning a group also requires authority over its owning Project or System. Application ownership does not grant control of shared groups.' },
+      { title: 'Review and recovery', description: 'Review shows the registered user, exact scope, and role powers. Conflicts retain entries. An unconfirmed conversion must be reconciled by reloading its receipt. Help preserves edits.' }
+    ],
+    tutorials: [
+      { title: 'Assign a Member', steps: ['Select + Add role. Choose User and enter the registered identifier.', 'Select Member and enter an assignment reason.', 'Select Review assignment. Verify the user name, application, and role.', 'Select Assign role. The new access applies without another sign-in.'] },
+      { title: 'Change or remove a role', steps: ['Find the direct assignment. Choose Change role, select an available role, and enter a reason.', 'Review the old and new roles, then select Save role.', 'To revoke the exact path, select Remove role and confirm with a reason.', 'Use Inspect access to check permissions retained through Project roles or groups.'] }
+    ]
+  },
   'test-history': {
     id: 'test-history', title: 'Test history',
     introduction: ['Follow a permanent test identity through its saved runs, definitions, and retained evidence. The test or suite can be archived.'],
@@ -112,7 +127,7 @@ export const helpPages: Record<string, HelpPage> = {
       { title: 'Current revision', description: 'Refresh provider updates the stored view without replacing an opened editor revision. Every save requires a reason and current revision. Failed authorization clears private editors.' }
     ],
     tutorials: [
-      { title: 'Connect external group access', steps: ['Use Create a provider group. Enter New group identifier, New group name, and an optional Group project identifier.', 'Select Create provider group. The new group has no roles or memberships.', 'Select Edit provider. Enter Group claim name and select + Add group mapping.', 'Enter the exact External group value and Destination group identifier. Set Membership lifetime in seconds.', 'Clear Provider disabled when ready, enter Provider change reason, and select Save provider.', 'Assign appropriate roles to the group through Project access or Installation access. Verify with a fresh provider sign-in.'] },
+      { title: 'Connect external group access', steps: ['Use Create a provider group. Enter New group identifier, New group name, and an optional Group project identifier.', 'Select Create provider group. The new group has no roles or memberships.', 'Select Edit provider. Enter Group claim name and select + Add group mapping.', 'Enter the exact External group value and Destination group identifier. Set Membership lifetime in seconds.', 'Clear Provider disabled when ready, enter Provider change reason, and select Save provider.', 'Assign appropriate roles to the group through Project members or System access. Verify with a fresh provider sign-in.'] },
       { title: 'Disable or restore sign-in', steps: ['Select Edit provider. Set or clear Provider disabled.', 'Review group mappings and enter Provider change reason. Select Save provider.', 'Disabling withdraws provider sessions and memberships. Restoration requires fresh validated sign-in and does not revive earlier cookies.'] }
     ]
   },
@@ -155,10 +170,10 @@ export const helpPages: Record<string, HelpPage> = {
     concepts: [
       { title: 'Permanent ownership', description: 'A custom role belongs to one scope. Its identifier and ownership cannot change. Installation policies can grant access across projects. Project policies use one exact project.' },
       { title: 'Explicit policy', description: 'Rules allow or deny registered actions, optionally for an exact object and expiry. Denies take precedence. Object rules do not grant descendant access.' },
-      { title: 'Predefined and custom roles', description: 'Predefined definitions are code managed. Installation roles provides installation-wide disabled-state controls. Project roles shows their current state. Custom roles support editable rules and inheritance. Creating a policy does not assign it to anyone.' },
+      { title: 'Predefined and custom roles', description: 'Predefined definitions are code managed. System roles provides installation-wide disabled-state controls. Project roles shows their current state. Custom roles support editable rules and inheritance. Creating a policy does not assign it to anyone.' },
       { title: 'Bounded catalog', description: 'More custom roles continues a bounded scan. A filtered page can contain no readable records and still have another page.' }
     ],
-    tutorials: [{ title: 'Create a policy', steps: ['Read the ownership scope and select + Create role.', 'Enter Role name, a permanent Role identifier, and an optional Role description.', 'Use + Add permission rule. Select an action and effect. Leave Exact object empty for the ownership scope, or enter an exact resource such as suite/health.', 'Refresh rule permissions after changing an object. Enter an optional complete UTC expiry timestamp.', 'Use + Inherit role to include existing managed roles from this scope.', 'Enter a Policy change reason and select Save role policy. Open the new role to inspect it.'] }, { title: 'Inspect and assign a role', steps: ['Open a custom role from the catalog. Inspect its rules and inherited policies.', 'Use Project access or Installation access to assign an authorized role to an existing user or group.', 'Read More custom role choices when the required role is outside the first choice page.'] }, { title: 'Change a predefined role state', steps: ['Open Installation roles and find Installation-wide predefined roles.', 'Inspect the role and its code-managed permissions. State changes apply across the entire installation.', 'Select Disable predefined role or Enable predefined role. Read the target and impact.', 'Enter a Reason and select Confirm action. Existing assignments remain retained.', 'After a conflict or unconfirmed response, cancel, select Refresh predefined roles, inspect current state, and open a new action.'] }]
+    tutorials: [{ title: 'Create a policy', steps: ['Read the ownership scope and select + Create role.', 'Enter Role name, a permanent Role identifier, and an optional Role description.', 'Use + Add permission rule. Select an action and effect. Leave Exact object empty for the ownership scope, or enter an exact resource such as suite/health.', 'Refresh rule permissions after changing an object. Enter an optional complete UTC expiry timestamp.', 'Use + Inherit role to include existing managed roles from this scope.', 'Enter a Policy change reason and select Save role policy. Open the new role to inspect it.'] }, { title: 'Inspect and assign a role', steps: ['Open a custom role from the catalog. Inspect its rules and inherited policies.', 'Use Project members or System access to assign an authorized role to an existing user or group.', 'Read More custom role choices when the required role is outside the first choice page.'] }, { title: 'Change a predefined role state', steps: ['Open System roles and find System-wide predefined roles.', 'Inspect the role and its code-managed permissions. State changes apply across the entire installation.', 'Select Disable predefined role or Enable predefined role. Read the target and impact.', 'Enter a Reason and select Confirm action. Existing assignments remain retained.', 'After a conflict or unconfirmed response, cancel, select Refresh predefined roles, inspect current state, and open a new action.'] }]
   },
   role: {
     id: 'role', title: 'Role details',
@@ -172,32 +187,35 @@ export const helpPages: Record<string, HelpPage> = {
     tutorials: [{ title: 'Edit and preview', steps: ['Select Edit role policy. Adjust the name, description, rules, or inherited roles.', 'Enter Preview user identifier and an optional Preview exact object. Select Preview access.', 'Compare Current access and Proposed access. Changed editor fields make the preview out of date.', 'Enter a Policy change reason and select Save role policy. If a conflict appears, review your entries before selecting Reload stored role.'] }, { title: 'Disable or restore access', steps: ['Close the editor after saving or discarding its changes.', 'Select Disable role or Enable role. Read the target and its effect on assignments and parent roles.', 'Enter a reason and select Confirm action.', 'If the action conflicts, cancel, refresh the role, inspect its current state, and open a new action.'] }]
   },
   'project-access': {
-    id: 'project-access', title: 'Project access',
-    introduction: ['Manage this project’s roles for existing users and groups. Prepare pending access for users who have not signed in. No invitation is required.'],
+    id: 'project-access', title: 'Project members',
+    introduction: ['Manage cumulative Project roles for existing users and groups. These roles apply to every application. Prepare pending access for users who have not signed in.'],
     concepts: [
-      { title: 'Exact scope', description: 'The project route supplies the exact project binding. Project administrators can delegate permitted predefined project roles. Installation administration does not appear in these project choices.' },
-      { title: 'Pending project access', description: 'Prepare one allowed provider, verified email, and project role. Only provider-confirmed email at sign-in activates access. Configuration, inherited roles, and owner authority are checked again. Pending access never merges accounts or grants installation administration.' },
-      { title: 'Delegation and group ownership', description: 'Role choices come from the server. Shared installation groups require installation group management authority. A visible assignment can remain read-only.' },
-      { title: 'Retained access', description: 'Removing one assignment can leave access through other roles or groups. Inactive principals and disabled roles remain visible for review. The last usable installation administrator remains protected.' },
+      { title: 'Standard roles and conversion', description: 'Reader, Member, Developer, Contributor, and Owner are cumulative. Contributor can manage everything in scope except deletion and ownership changes. Use Review conversion on a legacy row to preview all predefined roles replaced. Apply only the reviewed changes. Advanced recovery prepares a reviewed rollback.' },
+      { title: 'Exact scope', description: 'The project route supplies the exact project binding. Project administrators can delegate permitted predefined project roles. System administration does not appear in these project choices.' },
+      { title: 'Pending project access', description: 'Prepare one allowed provider, verified email, and project role. Only provider-confirmed email at sign-in activates access. Configuration, inherited roles, and owner authority are checked again. Pending access never merges accounts or grants System administration.' },
+      { title: 'Delegation and group ownership', description: 'Role choices come from the server. Shared System groups require System group management authority. A visible assignment can remain read-only.' },
+      { title: 'Retained access', description: 'Removing one assignment can leave access through other roles or groups. Inactive principals and disabled roles remain visible for review. The last usable System Admin remains protected.' },
       { title: 'Conflicts and bounded pages', description: 'Removal uses the revision displayed when the action opens. Cancel stale actions, refresh access, and review the current assignment before reopening. More assignments can continue a bounded scan even when its first page is empty.' }
     ],
     tutorials: [
-      { title: 'Add a role', steps: ['Inspect Role choices and expand View permissions for the intended role.', 'Select + Add role. Choose User or Group and enter the registered principal identifier.', 'Select the role and enter an Assignment reason. Review the displayed scope.', 'Select Assign role. The new permissions apply without another sign-in. This action creates no credentials or identity links.'] },
+      { title: 'Add a role', steps: ['Inspect Role choices and expand View permissions for the intended role.', 'Select + Add role. Choose User or Group and enter the registered principal identifier.', 'Select the role and enter an Assignment reason. Review the displayed scope. For a standard role, select Review assignment and inspect the verified name, scope, and new powers.', 'Select Assign role. The new permissions apply without another sign-in. This action creates no credentials or identity links.'] },
+      { title: 'Change or transfer ownership', steps: ['Choose Change role on a direct standard assignment. Select the new role and enter a reason.', 'Select Review assignment, inspect the old and new powers, then select Save role.', 'To transfer ownership, assign another usable Owner first. Then lower or remove the original Owner. Contributor cannot change Owners.'] },
+      { title: 'Convert compatibility roles', steps: ['Select Review conversion on a compatibility assignment.', 'Choose a Target standard role and Conversion reason. Select Preview conversion.', 'Inspect Assignments replaced and every added and removed permission. Select Apply reviewed conversion only after review.', 'Reload conversion receipt after an unconfirmed save. Advanced recovery prepares a separately reviewed rollback; it never silently restores access.'] },
       { title: 'Prepare access before sign-in', steps: ['Select + Prepare project access. Choose Allowed sign-in provider and inspect its exact issuer.', 'Enter Required verified email. The mailbox before @ must match exactly; domain letters ignore case.', 'Choose Pending project role and enter Pending access reason. Select Prepare access.', 'After provider sign-in, select Refresh pending access. Read activated user details or the reason an approval is blocked.', 'Cancel stale or incorrect approvals with a reason, then prepare a new approval after review. Activated roles use ordinary assignment removal.'] },
       { title: 'Remove and review access', steps: ['Find the exact principal and role in Role assignments. Use More assignments to continue a bounded scan.', 'Select Remove role on the intended row and review the target and scope.', 'Enter a reason and select Confirm action. Cancel the action if its target is incorrect.', 'If a conflict appears, cancel, use Refresh access, inspect the current assignment, and open a new action. Other role and group access can still apply.'] }
     ]
   },
   'installation-access': {
-    id: 'installation-access', title: 'Installation access',
+    id: 'installation-access', title: 'System access',
     introduction: ['Review role assignments and manage access for registered users and groups in this installation. Local and OIDC identities use the same internal user identifiers.'],
     concepts: [
-      { title: 'Exact scope', description: 'This page manages installation administration. Use Project access inside a workspace to assign project roles. Bootstrap and operator-managed assignments remain visible before their first API-managed change.' },
-      { title: 'Delegation and group ownership', description: 'Role choices come from the server. Shared installation groups require installation group management authority. A visible assignment can remain read-only.' },
-      { title: 'Retained access', description: 'Removing one assignment can leave access through other roles or groups. Inactive principals and disabled roles remain visible for review. The last usable installation administrator remains protected.' },
+      { title: 'Exact scope', description: 'This page manages System administration. Use Project members inside a workspace to assign project roles. Bootstrap and operator-managed assignments remain visible before their first API-managed change.' },
+      { title: 'Delegation and group ownership', description: 'Role choices come from the server. Shared System groups require System group management authority. A visible assignment can remain read-only.' },
+      { title: 'Retained access', description: 'Removing one assignment can leave access through other roles or groups. Inactive principals and disabled roles remain visible for review. The last usable System Admin remains protected.' },
       { title: 'Conflicts and bounded pages', description: 'Removal uses the revision displayed when the action opens. Cancel stale actions, refresh access, and review the current assignment before reopening. More assignments can continue a bounded scan even when its first page is empty.' }
     ],
     tutorials: [
-      { title: 'Add a role', steps: ['Inspect Role choices and expand View permissions for the intended role.', 'Select + Add role. Choose User or Group and enter the registered principal identifier.', 'Select the role and enter an Assignment reason. Review the displayed scope.', 'Select Assign role. The new permissions apply without another sign-in. This action creates no credentials or identity links.'] },
+      { title: 'Add a role', steps: ['Inspect Role choices and expand View permissions for the intended role.', 'Select + Add role. Choose User or Group and enter the registered principal identifier.', 'Select the role and enter an Assignment reason. Review the displayed scope. For a standard role, select Review assignment and inspect the verified name, scope, and new powers.', 'Select Assign role. The new permissions apply without another sign-in. This action creates no credentials or identity links.'] },
       { title: 'Remove and review access', steps: ['Find the exact principal and role in Role assignments. Use More assignments to continue a bounded scan.', 'Select Remove role on the intended row and review the target and scope.', 'Enter a reason and select Confirm action. Cancel the action if its target is incorrect.', 'If a conflict appears, cancel, use Refresh access, inspect the current assignment, and open a new action. Other role and group access can still apply.'] }
     ]
   },
@@ -213,11 +231,11 @@ export const helpPages: Record<string, HelpPage> = {
   },
   account: {
     id: 'account', title: 'Your account',
-    introduction: ['Your account applies across TestStudio. Project access is assigned separately. Open your account from the global header on any page. Inspect your profile, identity links, and password state here.'],
+    introduction: ['Your account applies across TestStudio. Project members is assigned separately. Open your account from the global header on any page. Inspect your profile, identity links, and password state here.'],
     concepts: [
       { title: 'System-wide account', description: 'Your account belongs to this TestStudio installation. It is independent of the active project or application. Project memberships and permissions control access to individual projects.' },
       { title: 'Your identifier', description: 'Local password sign-in uses your permanent internal user identifier. Email matching never links accounts.' },
-      { title: 'Independent sign-in methods', description: 'Local credentials and configured OIDC identities can share the directory. Disabled or unconfigured local credentials require installation administration. Link another sign-in requires fresh proof of both identities and your explicit confirmation. Existing accounts never merge.' },
+      { title: 'Independent sign-in methods', description: 'Local credentials and configured OIDC identities can share the directory. Disabled or unconfigured local credentials require System administration. Link another sign-in requires fresh proof of both identities and your explicit confirmation. Existing accounts never merge.' },
       { title: 'Identity linking', description: 'A link request belongs to this browser session and expires after five minutes. Review the exact issuer and subject. Confirmation invalidates earlier sessions and preserves your permissions.' },
       { title: 'Password changes', description: 'A password change requires the current password. Successful changes invalidate earlier sessions and rotate this browser’s session. Password values are never saved in browser storage.' }
     ],
@@ -241,8 +259,8 @@ export const helpPages: Record<string, HelpPage> = {
     introduction: ['Inspect a user profile, linked identities, group membership, and active sessions. Installation user permissions control these views and actions.'],
     concepts: [
       { title: 'Profile and sign-in', description: 'An enabled profile still needs a configured sign-in identity. Editing an email clears verification and does not change identity ownership.' },
-      { title: 'Account disabling', description: 'Disabling blocks sign-in and invalidates earlier sessions. Restoring the account does not revive them. The last usable installation administrator remains protected.' },
-      { title: 'Local credentials', description: 'Installation administrators can set or reset a local password with a reason. The account must change it at password sign-in. Resets preserve disabled state and invalidate earlier sessions. Refresh local credential before reopening a conflicted editor.' },
+      { title: 'Account disabling', description: 'Disabling blocks sign-in and invalidates earlier sessions. Restoring the account does not revive them. The last usable System Admin remains protected.' },
+      { title: 'Local credentials', description: 'System Admins can set or reset a local password with a reason. The account must change it at password sign-in. Resets preserve disabled state and invalidate earlier sessions. Refresh local credential before reopening a conflicted editor.' },
       { title: 'Session revocation', description: 'Revocation removes one session without ending other sessions. Revoking Current browser signs you out. Session credentials never appear in this view.' },
       { title: 'Revision conflicts', description: 'Edits and actions use the revision you opened. A conflict keeps your edits. Reload a profile explicitly; cancel and reopen stale lifecycle actions after refreshing.' }
     ],
@@ -255,12 +273,12 @@ export const helpPages: Record<string, HelpPage> = {
     id: 'groups', title: 'Groups',
     introduction: ['Manage installation groups or groups owned by the selected project. Each directory shows one permanent ownership scope.'],
     concepts: [
-      { title: 'Ownership scope', description: 'Installation groups and project groups use separate directories. Project administrators cannot reparent groups or change shared installation groups.' },
+      { title: 'Ownership scope', description: 'System groups and project groups use separate directories. Project administrators cannot reparent groups or change shared installation groups.' },
       { title: 'Membership source', description: 'Local groups permit authorized local membership edits. Externally managed membership is read-only and must change through its source provider.' },
       { title: 'Membership and access', description: 'Membership alone grants no project permissions. Role assignments and explicit grants determine access. Archive removes effective membership access while retaining records.' }
     ],
     tutorials: [
-      { title: 'Create a local group', steps: ['Choose Installation groups, or select a workspace and open Project groups.', 'Select + New group. Read the displayed ownership scope.', 'Enter a name, permanent identifier, and optional description.', 'Select Save group. Ownership cannot change after creation.', 'Open the group to manage permitted local membership.'] },
+      { title: 'Create a local group', steps: ['Choose System groups, or select a workspace and open Project groups.', 'Select + New group. Read the displayed ownership scope.', 'Enter a name, permanent identifier, and optional description.', 'Select Save group. Ownership cannot change after creation.', 'Open the group to manage permitted local membership.'] },
       { title: 'Find an archived or external group', steps: ['Read Membership source to distinguish local and external groups.', 'Select Include archived groups to find retained archived records.', 'Use More groups to continue a bounded scan.', 'Open a group for its state, source, membership, and available lifecycle actions.'] }
     ]
   },

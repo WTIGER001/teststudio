@@ -7,7 +7,7 @@ import { PasswordChangeComponent } from '../auth/password-change.component'
 @Component({
   standalone: true, imports: [DatePipe, PasswordChangeComponent, IdentityLinkComponent], providers: [AccountService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="page-heading"><div><span class="eyebrow">Personal settings</span><h1>Your account</h1><p class="muted">Your account applies across TestStudio. Project access is assigned separately.</p></div><button type="button" class="button secondary" [disabled]="service.loading()" (click)="service.refresh()">Refresh account</button></div>
+    <div class="page-heading"><div><span class="eyebrow">Personal settings</span><h1>Your account</h1><p class="muted">Your account applies across TestStudio. Project members is assigned separately.</p></div><button type="button" class="button secondary" [disabled]="service.loading()" (click)="service.refresh()">Refresh account</button></div>
     @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }
     @if (service.loading()) { <p role="status">Loading your account…</p> }
     @if (service.user(); as user) {

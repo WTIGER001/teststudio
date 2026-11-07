@@ -33,7 +33,9 @@ Project roles inherit into applications. Application-only membership requires se
 Existing narrow roles retain their permissions until reviewed conversion. New role names never silently broaden existing grants.
 The user requests API implementation on 2026-11-07. The five roles, scoped assignments and capabilities, application resource enforcement, Owner safeguards, and reviewed conversion APIs are implemented locally.
 API contract 0.37.0 generates the matching client. Focused SQLite and PostgreSQL checks cover the backend work for milestones 1 through 3.
-Application membership UI, its browser workflows, release publication, and target verification remain pending. The hosted release and existing memberships are unchanged.
+The user extends this request to membership UI, committing and pushing all branch commits, and MMDev deployment.
+Project and Application members, System labels, reviewed assignments and conversion recovery, inherited explanations, and page help now pass local UI compilation and the three targeted browser workflows.
+Version 0.3.0-dev is prepared. Publication and hosted permission verification are the active step. Existing hosted memberships stay unchanged until reviewed conversion.
 The acceptance count remains 50 verified of 57. This work refines 05, 07, 10, 12, 13, 14, 38, and 45 without closing the remaining cross-profile items.
 
 ## Completed user direction: HTTPS probes and visual help

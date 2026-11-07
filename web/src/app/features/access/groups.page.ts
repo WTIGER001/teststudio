@@ -10,7 +10,7 @@ import { groupRoute } from './access.utils'
 @Component({
   standalone: true, imports: [FormsModule, RouterLink, GroupEditorComponent], providers: [GroupsService, GroupEditorService, AccessActionService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="page-heading"><div><span class="eyebrow wrap-anywhere">{{ service.projectId() ? 'Project · ' + service.projectId() : 'Installation administration' }}</span><h1 id="groups-heading" tabindex="-1">{{ service.projectId() ? 'Project groups' : 'Installation groups' }}</h1><p class="muted">Manage groups within their permanent ownership scope.</p></div>@if (service.rights().manageGroups) { <button type="button" class="button primary" (click)="editor.open()">+ New group</button> }</div>
+    <div class="page-heading"><div><span class="eyebrow wrap-anywhere">{{ service.projectId() ? 'Project · ' + service.projectId() : 'System administration' }}</span><h1 id="groups-heading" tabindex="-1">{{ service.projectId() ? 'Project groups' : 'System groups' }}</h1><p class="muted">Manage groups within their permanent ownership scope.</p></div>@if (service.rights().manageGroups) { <button type="button" class="button primary" (click)="editor.open()">+ New group</button> }</div>
     @if (editor.opened()) { <ts-group-editor /> }
     @if (service.message()) { <p class="notice success" role="status">{{ service.message() }}</p> }
     @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }

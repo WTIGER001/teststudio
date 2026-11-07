@@ -17,6 +17,7 @@ export class PermissionExplanationService {
   private readonly workspace = inject(WorkspaceService)
   private readonly destroy = inject(DestroyRef)
   readonly projectId = signal('')
+  readonly applicationId = signal('')
   readonly permissions = signal<PermissionDefinition[]>([])
   readonly report = signal<PermissionExplanation | null>(null)
   readonly busy = signal(false)
@@ -31,7 +32,7 @@ export class PermissionExplanationService {
     this.form.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(() => this.clear())
     const route = inject(ActivatedRoute)
     combineLatest([route.paramMap, route.queryParamMap]).pipe(takeUntilDestroyed(this.destroy)).subscribe(([params, query]) => {
-      this.clear(); this.canInspectOthers.set(false); this.permissions.set([]); this.projectId.set(params.get('projectId') ?? '')
+      this.clear(); this.canInspectOthers.set(false); this.permissions.set([]); this.projectId.set(params.get('projectId') ?? ''); this.applicationId.set(params.get('applicationId') ?? '')
       this.form.reset({ userId: query.get('user') || this.ownId(), object: query.get('object') ?? '', permission: query.get('permission') || (this.projectId() ? 'teststudio.projects.read' : 'teststudio.system.read') }, { emitEvent: false })
       void this.initialize()
     })
@@ -57,7 +58,7 @@ export class PermissionExplanationService {
     const generation = ++this.generation, project = this.projectId(), user = fields.userId.trim()
     this.busy.set(true); if (!more) this.report.set(null)
     try {
-      const query = { project: project || undefined, object: fields.object.trim() || undefined, permission: fields.permission, limit: 30, cursor: more ? previous?.cursor : undefined }
+      const query = { project: project || undefined, application: this.applicationId() || undefined, object: fields.object.trim() || undefined, permission: fields.permission, limit: 30, cursor: more ? previous?.cursor : undefined }
       const report = user === this.ownId() ? await this.client.call('explainOwnPermission', { query }) : await this.client.call('explainUserPermission', { user, query })
       if (generation !== this.generation) return
       this.permissions.set(explanationPermissions(report.permissions, project)); this.canInspectOthers.set(report.canInspectOthers)

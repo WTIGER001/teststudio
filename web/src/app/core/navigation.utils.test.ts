@@ -5,7 +5,7 @@ import { navigationSections, projectNavigation } from './navigation.utils.ts'
 test('navigation separates daily testing from administration and opens the current scope', () => {
   const permissions = Object.fromEntries(['projects.read', 'catalog.read', 'sources.read', 'schedules.read', 'suites.read', 'notifications.read', 'members.read', 'permissions.read', 'groups.read', 'roles.read', 'users.read', 'providers.read'].map(permission => [`teststudio.${permission}`, true]))
   const catalog = navigationSections('demo', permissions, permissions, '/projects/demo/catalog')
-  assert.deepEqual(catalog.map(section => section.title), ['All application testing', 'Project overviews', 'Automation', 'Advanced testing', 'Project administration', 'Installation administration'])
+  assert.deepEqual(catalog.map(section => section.title), ['All application testing', 'Project overviews', 'Automation', 'Advanced testing', 'Project administration', 'System administration'])
   assert.deepEqual(catalog.filter(section => section.collapsible).map(section => section.active), [false, false, false, false])
   assert.deepEqual(catalog.find(section => section.id === 'testing')?.links.map(link => link.label), ['Suites', 'Test catalog', 'Test runs', 'Trends'])
   assert.deepEqual(catalog.find(section => section.id === 'automation')?.links.map(link => link.label), ['Schedules', 'Notifications'])
@@ -65,4 +65,12 @@ test('project management stands above scope and account access stays in the glob
   const sections = navigationSections('demo', {}, {}, '/projects/demo/catalog')
   assert(!sections.some(section => section.title === 'Workspace'))
   assert(!sections.flatMap(section => section.links).some(link => link.path === '/account'))
+})
+
+test('application management authority does not expose project or system management', () => {
+  const capabilities = { 'teststudio.members.read': true, 'teststudio.permissions.read': true, 'teststudio.roles.read': true }
+  const sections = navigationSections('demo', capabilities, {}, '/projects/demo/applications/shop/members', {})
+  const links = sections.flatMap(section => section.links)
+  assert(links.some(link => link.path === '/projects/demo/applications/shop/members' && link.active))
+  for (const path of ['/projects/demo/members', '/projects/demo/roles', '/projects/demo/configuration', '/settings/access']) assert(!links.some(link => link.path === path))
 })

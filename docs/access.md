@@ -99,6 +99,30 @@ Legacy Project administrator does not automatically become Contributor or Owner.
 Focused local API, permission-service, creator, conversion, and compatibility checks pass on SQLite and PostgreSQL.
 See [implementation verification](implementation.md) for the retained check totals and separate target acceptance.
 
+## Manage membership in the interface
+
+Open Project members under Project administration, or Application members under Application administration.
+System administration contains Users, System groups, System roles, and System access.
+System Admin manages the installation. Project and Application roles use Reader, Member, Developer, Contributor, and Owner.
+Group remains the shared collection of users; assigning a group grants its active members the selected scoped role.
+
+Select + Add role, choose User or Group, and enter its permanent registered identifier.
+Choose a role and enter an Assignment reason. Standard roles require Review assignment before Assign role.
+The review verifies an exact user name without exposing the System directory and displays the scope and new powers.
+Choose Member to run published tests, Developer to author and publish, or Contributor to delegate scoped management without deletion or Owner changes.
+Assign an Application role to limit new powers to that application. Project roles inherit into every application.
+
+Change role replaces one direct standard role after review. Remove role removes only the selected assignment.
+Application members shows readable inherited project assignments as read-only. Inspect access includes group paths and exact application context.
+A lower direct role does not reduce inherited access. Current server delegation determines which rows and choices can change.
+To transfer ownership, create another usable Owner first. Then change or remove the original assignment.
+
+Advanced roles retain compatibility and custom policies. Review conversion previews all predefined assignments replaced for that principal and scope.
+Inspect added and removed permissions, then apply the exact review. Custom roles and grants remain.
+Reload conversion receipt after an unconfirmed response. Advanced recovery prepares a new rollback review using current authority and Owner safeguards.
+Conflicts preserve form values and require inspection before reopening a changed assignment or preparing a new conversion.
+Help preserves edits. Leaving unfinished membership work requires confirmation.
+
 ## Grant acceptance coverage
 
 Acceptance 12 covers the same permission-service and managed API behavior on SQLite and local PostgreSQL.
@@ -176,14 +200,14 @@ Restore reactivates retained, unexpired membership. It can restore the associate
 
 ## Interface
 
-Open Users from the installation navigation to register profiles and inspect user details.
+Open Users from System administration to register profiles and inspect user details.
 User details show account state, email verification, linked identities, readable memberships, and active sessions.
 Use Edit profile to change permitted fields. Account actions use separate reason forms.
 Session revocation identifies the current browser before confirmation.
 
-Open Installation groups for shared groups owned by the installation.
+Open System groups for shared groups owned by the installation.
 Select a workspace and open Project groups for that project's directory.
-Installation navigation uses installation capabilities. Project navigation uses the selected project's capabilities.
+System navigation uses System capabilities. Project navigation uses the selected project's capabilities. Application navigation uses the exact selected application capabilities.
 The server still checks each requested resource.
 
 Group details show permanent ownership, lifecycle state, description, membership source, and member activity.

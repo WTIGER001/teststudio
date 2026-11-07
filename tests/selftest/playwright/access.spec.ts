@@ -70,7 +70,7 @@ test('Identity administration, scoped groups, and session controls', { tag: '@ST
   })
 
   await test.step('Create distinct installation and project groups with permanent scope', async () => {
-    await followNavigation(page, 'Installation groups')
+    await followNavigation(page, 'System groups')
     await page.getByRole('button', { name: '+ New group', exact: true }).click()
     await page.getByLabel('Group name', { exact: true }).fill('Shared reviewers')
     await page.getByLabel('Group identifier', { exact: true }).fill('shared-reviewers')
@@ -207,7 +207,7 @@ test('Identity administration, scoped groups, and session controls', { tag: '@ST
       const navigation = page.getByRole('navigation', { name: 'Main navigation' })
       await expect(await navigationLink(page, 'Project groups')).toBeVisible()
       await expect(navigation.getByRole('link', { name: 'Users', exact: true, includeHidden: true })).toHaveCount(0)
-      await expect(navigation.getByRole('link', { name: 'Installation groups', exact: true, includeHidden: true })).toHaveCount(0)
+      await expect(navigation.getByRole('link', { name: 'System groups', exact: true, includeHidden: true })).toHaveCount(0)
       expect((await page.request.get('/api/v1/users')).status()).toBe(403)
       expect((await page.request.get(`/api/v1/groups?project=${other.project}`)).status()).toBe(403)
       expect((await page.request.get('/api/v1/groups/shared-reviewers')).status()).toBe(403)

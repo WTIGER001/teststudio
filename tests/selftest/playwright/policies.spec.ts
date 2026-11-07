@@ -144,7 +144,7 @@ test('Custom policies, inherited assignment, access previews, and guarded editor
       await expect(page.getByRole('heading', { name: 'Composite reader', exact: true })).toBeVisible()
       await expect(page.getByRole('button', { name: 'Edit role policy', exact: true })).toHaveCount(0)
       await expect(page.getByRole('button', { name: 'Disable role', exact: true })).toHaveCount(0)
-      await expect(page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Installation roles', exact: true, includeHidden: true })).toHaveCount(0)
+      await expect(page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'System roles', exact: true, includeHidden: true })).toHaveCount(0)
       await page.goto('/settings/roles')
       await expect(page.getByRole('alert')).toContainText('Role read authority is required')
       await expect(page.getByRole('button', { name: '+ Create role', exact: true })).toHaveCount(0)

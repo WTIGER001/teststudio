@@ -37,5 +37,5 @@ export class SidebarComponent {
   readonly mobileOpen = signal(false)
   readonly showProjectPicker = computed(() => this.url().split(/[?#]/)[0] !== '/projects')
   readonly projectsLink = computed(() => projectNavigation(this.url()))
-  readonly sections = computed(() => navigationSections(this.workspace.projectId(), this.workspace.capabilities(), this.workspace.installationCapabilities(), this.url()))
+  readonly sections = computed(() => navigationSections(this.workspace.projectId(), this.workspace.capabilities(), this.workspace.installationCapabilities(), this.url(), this.workspace.projectCapabilities()))
 }

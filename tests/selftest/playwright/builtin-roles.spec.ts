@@ -123,7 +123,7 @@ test('Predefined role state, retained assignments, and installation administrati
 
   await test.step('Protect the final administrator and preserve theme and mobile layouts', async () => {
     await expect(card()).toBeVisible()
-    await expect(card('Installation administrator')).toBeVisible()
+    await expect(card('System Admin')).toBeVisible()
     await expect(page.getByText('Loading predefined roles…', { exact: true })).toHaveCount(0)
     await expect(page.getByRole('button', { name: 'Refresh roles', exact: true })).toBeEnabled()
     for (const theme of ['light', 'dark']) {
@@ -137,11 +137,11 @@ test('Predefined role state, retained assignments, and installation administrati
       await page.getByRole('button', { name: 'Cancel action', exact: true }).click()
     }
     await page.setViewportSize({ width: 1280, height: 900 })
-    await card('Installation administrator').getByRole('button', { name: 'Disable predefined role', exact: true }).click()
+    await card('System Admin').getByRole('button', { name: 'Disable predefined role', exact: true }).click()
     await page.getByLabel('Reason', { exact: true }).fill('Reject the final usable administrator change')
     await expectHTTPFailure(page, 'PUT', '/api/v1/predefined-roles/builtin.teststudio.installation-admin', 422, () => page.getByRole('button', { name: 'Confirm action', exact: true }).click())
     await expect(page.getByRole('alert')).toContainText('last usable installation administrator')
     await page.getByRole('button', { name: 'Cancel action', exact: true }).click()
-    await expect(card('Installation administrator')).toContainText('Enabled')
+    await expect(card('System Admin')).toContainText('Enabled')
   })
 })

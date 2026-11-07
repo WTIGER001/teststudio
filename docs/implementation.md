@@ -6,6 +6,30 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## Scoped membership interface — 2026-11-07
+
+Project members and Application members manage direct standard user and group assignments with explicit scope, exact user verification, role descriptions, review, atomic replacement, and revision recovery.
+System administration uses System access, System groups, System roles, and System Admin labels.
+Application members shows readable Project assignments as inherited and read-only. Exact application explanations retain group paths and binding provenance.
+Separate Project and Application capabilities prevent application-only managers from receiving Project or System controls.
+Contributor cannot select Owner or change an Owner row. Ownership status describes system-managed, owned, and unavailable scopes.
+Compatibility conversions preview replaced assignments and every added and removed action. Apply retains the receipt; Advanced recovery prepares a separately reviewed rollback.
+Dirty forms survive help and reject canceled navigation. Stale assignments and unconfirmed conversions preserve entries and require inspection.
+
+UI compilation and eleven selected utility checks pass. Normal local TestStudio execution verifies:
+
+| Selection | Passing duration | Retained run |
+| --- | --- | --- |
+| STUDIO-PERMISSIONS-001 | 3.544 seconds | 20261107T213449.698330000-6e07407bfed5ef10c8be3280 |
+| STUDIO-ROLES-001 | 5.798 seconds | 20261107T213603.668805000-61040884b373b5e972597e55 |
+| STUDIO-APPLICATION-ACCESS-001 | 4.731 seconds | 20261107T213818.546428000-9bad3740a6101e5f8ad1fb29 |
+
+The new workflow covers user and group assignment, atomic role change, inherited access, application explanations, canceled navigation, help, conversion and rollback, real application-only Contributor navigation, protected Owner rows, and sibling rejection.
+The initial checks expose an unnecessary registry request after authority withdrawal; the workspace now requests applications only for a readable parent context. Test corrections use exact role cells, current help text, and expected forbidden responses.
+Light desktop and dark mobile screenshots show contained layouts. All execution evidence is complete; owned controllers and containers exit. The user's port 8040 demo is preserved.
+Version 0.3.0-dev is prepared through the version helper. Release and target verification remain separate until recorded below.
+This advances the expanded scope of 10, 12, 13, 49, and 50. Acceptance stays **50 verified of 57**; broad cross-profile items remain open.
+
 ## Compact recent-check pills — 2026-11-07
 
 HTTPS probe history replaces checkmark tiles with narrow vertical pills in one responsive row.

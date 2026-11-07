@@ -73,7 +73,7 @@ This operator convenience changes no application release and closes no acceptanc
 
 ## Next implementation priorities
 
-### Latest request: System and role APIs
+### Latest request: scoped membership UI and MMDev release
 
 The user keeps Project and Group, selects System, and requests planning for Owner, Contributor, Developer, Member, and Reader on 2026-11-07.
 Member runs tests. Contributor sits directly below Owner, with scoped administration except resource deletion and adding, removing, or changing Owners. Guard indirect Owner changes through groups and custom policies too.
@@ -85,8 +85,10 @@ Standard roles use native permission-service evaluation with server-resolved App
 New ordinary project creators receive one Owner assignment. Existing role bundles and memberships stay unchanged until reviewed conversion.
 The [access guide](access.md#standard-project-and-application-roles) documents routes, previous-role revision guards, Owner safeguards, and migration recovery.
 The retained PostgreSQL selections pass 59 initial checks, 18 focused follow-up checks, and two final delegation/Owner guard checks. Matching SQLite and targeted race checks pass. Reuse these receipts under output/roles-api unless changed behavior requires another check.
-UI milestone 4 and release/target milestone 5 remain pending. No UI workflow, release publication, hosted membership conversion, or deployment runs for the API-only request.
-Choose the product release version before publishing. The hosted 0.2.0-dev release, private nine-probe schedules, and port 8040 demo remain unchanged.
+The user then requests the necessary membership UI, commit, push of all branch commits, and MMDev deployment.
+Project members and Application members now support reviewed standard-role creation and replacement, inherited access, Contributor restrictions, ownership status, conversion receipts, and reviewed rollback. System labels, exact application explanations, and contextual help are included.
+The UI build, eleven focused utility checks, STUDIO-ROLES-001, STUDIO-PERMISSIONS-001, and new STUDIO-APPLICATION-ACCESS-001 pass locally. The ledger records timings and retained runs. All owned controllers and execution containers exit.
+Version 0.3.0-dev is prepared for publication. Release/target milestone 5 remains active. Existing hosted memberships and the nine private schedules remain unchanged until explicit reviewed edits. Preserve the port 8040 demo.
 The count stays 50 verified of 57. The default AWS worker queue remains available after this planning request.
 
 ### Completed request: HTTPS probes features and help

@@ -232,7 +232,8 @@ Startup never repeats migration or restores revoked grants.
 
 The user authorizes API implementation on 2026-11-07. Backend work for milestones 1 through 3 now has focused SQLite and PostgreSQL evidence.
 The [access guide](access.md#standard-project-and-application-roles) describes the implemented endpoints and compatibility rules.
-Milestone 4 remains UI work. Milestone 5 remains release publication and target verification.
+The user also authorizes membership UI, committing and pushing all branch commits, and MMDev deployment.
+Milestone 4 now passes focused local browser checks. Milestone 5 is the active release and target-verification step.
 
 This planning milestone maps primarily to acceptance 10, 12, and 13, with follow-on coverage for 05, 07, 14, 18, 38, 45, 49, 50, 54, and 55.
 The authoritative ledger stays at 50 verified of 57. Scope changes require fresh targeted evidence before retaining the affected acceptance claims for the new behavior.
@@ -247,7 +248,7 @@ The authoritative ledger stays at 50 verified of 57. Scope changes require fresh
 
 Select individual existing browser IDs only when their behavior changes; STUDIO-ACCESS-001, STUDIO-POLICY-001, STUDIO-GRANTS-001, STUDIO-BUILTIN-001, and STUDIO-PROVIDERS-001 remain available for focused follow-up.
 Register the new application workflow before selecting it. Do not run the complete catalog by default.
-No UI build, browser run, hosted membership conversion, or cloud mutation is needed for the API-only implementation request.
+The original API-only boundary is superseded by the user's explicit UI and MMDev deployment request. Existing hosted memberships still require their own reviewed conversion.
 Choose the product version through the version helper before publishing the changed runtime. API contract version 0.37.0 remains separate.
 Preserve the user's port 8040 demo, database, history, and all unrelated workloads. Azure implementation and verification stay deferred.
 

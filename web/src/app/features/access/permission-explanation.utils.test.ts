@@ -13,6 +13,6 @@ test('Continuation cannot mix another context or a changed decision with an earl
   const first = { userId: 'member', projectId: 'alpha', object: 'suite/health', permission: 'teststudio.catalog.read', allowed: true, reason: 'allowed', cursor: 'opaque', items: [{ id: 'one' }] } as PermissionExplanation
   const next = { ...first, cursor: undefined, items: [{ id: 'one' }, { id: 'two' }] } as PermissionExplanation
   assert.deepEqual(appendExplanation(first, next).items.map(source => source.id), ['one', 'two'])
-  for (const change of [{ userId: 'another' }, { projectId: 'beta' }, { object: '' }, { permission: 'teststudio.catalog.edit' }, { allowed: false }, { reason: 'explicit-deny' }]) assert.throws(() => appendExplanation(first, { ...next, ...change } as PermissionExplanation), /changed during the scan/)
+  for (const change of [{ userId: 'another' }, { projectId: 'beta' }, { applicationId: 'sibling' }, { object: '' }, { permission: 'teststudio.catalog.edit' }, { allowed: false }, { reason: 'explicit-deny' }]) assert.throws(() => appendExplanation(first, { ...next, ...change } as PermissionExplanation), /changed during the scan/)
   assert.throws(() => appendExplanation({ ...first, cursor: undefined }, next), /changed during the scan/)
 })

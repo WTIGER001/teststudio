@@ -2,6 +2,7 @@
   "schemaVersion": "teststudio.selftest/v1",
   "source": "teststudio-selftests",
   "tests": [
+    {"id": "STUDIO-APPLICATION-ACCESS-001", "title": "Reviewed standard roles, inherited application access, conversion and scoped Contributor navigation", "selector": "@STUDIO-APPLICATION-ACCESS-001", "category": "Administration"},
     {"id": "STUDIO-PROBE-BULK-001", "title": "Reviewed bulk probe actions retain completed runs during a partial retry", "selector": "@STUDIO-PROBE-BULK-001", "category": "HTTPS probes"},
     {"id": "STUDIO-PROBE-SETUP-001", "title": "Nine generic probes save without execution and recover partial rows", "selector": "@STUDIO-PROBE-SETUP-001", "category": "HTTPS probes"},
     {"id": "STUDIO-PROBE-ACTIONS-001", "title": "Probe run and schedule handoff keep explicit selection and execution", "selector": "@STUDIO-PROBE-ACTIONS-001", "category": "HTTPS probes"},

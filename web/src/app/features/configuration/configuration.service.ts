@@ -20,7 +20,7 @@ export class ConfigurationService {
   readonly workspace = inject(WorkspaceService)
   readonly projectId = signal('')
   readonly kind = signal<Kind>('applications')
-  readonly canCreate = computed(() => this.workspace.can(this.kind() === 'applications' ? 'projects.manage' : this.kind() === 'suites' ? 'suites.manage' : 'environments.manage'))
+  readonly canCreate = computed(() => this.kind() === 'applications' ? this.workspace.projectCapabilities()['teststudio.projects.manage'] === true : this.workspace.can(this.kind() === 'suites' ? 'suites.manage' : 'environments.manage'))
   readonly applications = signal<RecordValue<Application>[]>([])
   readonly suites = signal<RecordValue<Suite>[]>([])
   readonly environments = signal<RecordValue<Environment>[]>([])
@@ -65,10 +65,10 @@ export class ConfigurationService {
     try {
       const base = `/api/v1/projects/${this.projectId()}`
       const [applications, suites, environments, references] = await Promise.all([
-        this.workspace.can('projects.read') ? this.api.request<Page<RecordValue<Application>>>(`${base}/applications`) : Promise.resolve({ items: [] }),
+        this.workspace.project() ? this.api.request<Page<RecordValue<Application>>>(`${base}/applications`) : Promise.resolve({ items: [] }),
         this.workspace.can('suites.read') ? this.api.request<Page<RecordValue<Suite>>>(`${base}/suites`) : Promise.resolve({ items: [] }),
         this.workspace.can('environments.read') ? this.api.request<Page<RecordValue<Environment>>>(`${base}/environments`) : Promise.resolve({ items: [] }),
-        this.workspace.can('environments.manage') ? this.api.request<{ items: CredentialReference[] }>(`${base}/api-credential-references`) : Promise.resolve({ items: [] })
+        this.workspace.projectCapabilities()['teststudio.environments.manage'] ? this.api.request<{ items: CredentialReference[] }>(`${base}/api-credential-references`) : Promise.resolve({ items: [] })
       ])
       if (generation !== this.generation) return
       this.applications.set(applications.items); this.suites.set(suites.items); this.environments.set(environments.items)

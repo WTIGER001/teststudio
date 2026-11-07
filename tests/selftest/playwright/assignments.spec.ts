@@ -1,6 +1,7 @@
 import { test, expect, expectHTTPFailure, followNavigation } from './fixtures'
 
 test('Scoped role assignments, delegation, and durable revocation controls', { tag: '@STUDIO-ROLES-001' }, async ({ page, api }, testInfo) => {
+  page.on('dialog', dialog => dialog.accept())
   const { project, path } = await api.scaffold(), other = await api.scaffold()
   const user = 'role-reviewer', group = 'role-reviewers', shared = 'shared-role-reviewers'
   const base = `${path}/role-assignments`, editorPath = `${base}/user/${user}/builtin.teststudio.editor`
@@ -27,7 +28,7 @@ test('Scoped role assignments, delegation, and durable revocation controls', { t
 
   await test.step('Assign user and group roles through the page and retain conflicted form entries', async () => {
     await page.goto(`/projects/${project}/members`)
-    await expect(page.getByRole('heading', { name: 'Project access', exact: true })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Project members', exact: true })).toBeVisible()
     await page.getByText('View permissions for Viewer', { exact: true }).click()
     await expect(page.getByText('teststudio.catalog.read', { exact: true }).first()).toBeVisible()
     await assign('user', user, 'editor')
@@ -72,7 +73,7 @@ test('Scoped role assignments, delegation, and durable revocation controls', { t
   await test.step('Keep help edits and render project and installation controls in both themes', async () => {
     await form('user', user, 'viewer', 'Unsaved scope review')
     await page.getByRole('button', { name: 'Help', exact: true }).click()
-    await expect(page.getByRole('dialog', { name: 'Project access help', exact: true })).toContainText('Delegation and group ownership')
+    await expect(page.getByRole('dialog', { name: 'Project members help', exact: true })).toContainText('Delegation and group ownership')
     await page.keyboard.press('Escape')
     await expect(page.getByLabel('Assignment reason', { exact: true })).toHaveValue('Unsaved scope review')
     for (const theme of ['light', 'dark']) {
@@ -82,24 +83,24 @@ test('Scoped role assignments, delegation, and durable revocation controls', { t
       await testInfo.attach(`project-access-${theme}`, { body: await page.screenshot({ fullPage: true, animations: 'disabled' }), contentType: 'image/png' })
     }
     await page.getByLabel('Project', { exact: true }).selectOption(other.project)
-    await followNavigation(page, 'Project access')
+    await followNavigation(page, 'Project members')
     await expect(page.getByRole('heading', { name: 'Add role assignment', exact: true })).toHaveCount(0)
     await expect(row(group, 'Operator')).toHaveCount(0)
-    await followNavigation(page, 'Installation access')
-    await expect(page.getByRole('heading', { name: 'Installation access', exact: true })).toBeVisible()
-    await expect(row('local-administrator', 'Installation administrator')).toContainText('Bootstrap or operator-managed')
+    await followNavigation(page, 'System access')
+    await expect(page.getByRole('heading', { name: 'System access', exact: true })).toBeVisible()
+    await expect(row('local-administrator', 'System Admin')).toContainText('Bootstrap or operator-managed')
     await assign('user', user, 'installation-admin')
-    await row(user, 'Installation administrator').getByRole('button', { name: 'Remove role', exact: true }).click()
+    await row(user, 'System Admin').getByRole('button', { name: 'Remove role', exact: true }).click()
     await confirm('Remove the temporary installation assignment')
-    await expect(row(user, 'Installation administrator')).toHaveCount(0)
-    await row('local-administrator', 'Installation administrator').getByRole('button', { name: 'Remove role', exact: true }).click()
+    await expect(row(user, 'System Admin')).toHaveCount(0)
+    await row('local-administrator', 'System Admin').getByRole('button', { name: 'Remove role', exact: true }).click()
     const rootPath = '/api/v1/role-assignments/user/local-administrator/builtin.teststudio.installation-admin'
     await page.getByLabel('Reason', { exact: true }).fill('Protect final administration')
     await expectHTTPFailure(page, 'DELETE', rootPath, 422, () => page.getByRole('button', { name: 'Confirm action', exact: true }).click())
     await expect(page.getByRole('alert')).toContainText('last usable installation administrator')
     await page.getByRole('button', { name: 'Cancel action', exact: true }).click()
     await page.getByRole('button', { name: 'Help', exact: true }).click()
-    await expect(page.getByRole('dialog', { name: 'Installation access help', exact: true })).toContainText('Retained access')
+    await expect(page.getByRole('dialog', { name: 'System access help', exact: true })).toContainText('Retained access')
     await page.keyboard.press('Escape')
     for (const theme of ['light', 'dark']) {
       await page.getByLabel('Color theme').selectOption(theme)
@@ -123,19 +124,19 @@ test('Scoped role assignments, delegation, and durable revocation controls', { t
     }
     try {
       await session(fixture.cookie)
-      await expect(nav().getByRole('link', { name: 'Installation access', exact: true, includeHidden: true })).toHaveCount(0)
+      await expect(nav().getByRole('link', { name: 'System access', exact: true, includeHidden: true })).toHaveCount(0)
       await expect(nav().getByRole('link', { name: 'Users', exact: true, includeHidden: true })).toHaveCount(0)
       await expect(row(shared, 'Publisher')).toContainText('Read only')
       await expect(row(shared, 'Publisher').getByRole('button', { name: 'Remove role', exact: true })).toHaveCount(0)
       await expect(row(group, 'Operator').getByRole('button', { name: 'Remove role', exact: true })).toBeVisible()
       await form('user', user, 'editor', 'Project owner approval')
-      await expect(page.getByLabel('Role to assign', { exact: true }).getByRole('option', { name: 'Installation administrator', exact: true })).toHaveCount(0)
+      await expect(page.getByLabel('Role to assign', { exact: true }).getByRole('option', { name: 'System Admin', exact: true })).toHaveCount(0)
       await page.getByRole('button', { name: 'Assign role', exact: true }).click()
       await expect(row(user, 'Catalog editor')).toBeVisible()
       await page.goto('/settings/access')
       await expect(page.getByRole('alert')).toContainText('Membership and permission read authority is required')
       await expect(page.getByRole('button', { name: '+ Add role', exact: true })).toHaveCount(0)
-      await expect(row('local-administrator', 'Installation administrator')).toHaveCount(0)
+      await expect(row('local-administrator', 'System Admin')).toHaveCount(0)
       await page.goto(`/projects/${other.project}/members`)
       await expect(page.getByRole('alert')).toContainText('Membership and permission read authority is required')
       await expect(table().getByRole('row')).toHaveCount(1)
@@ -147,7 +148,7 @@ test('Scoped role assignments, delegation, and durable revocation controls', { t
       await row(fixture.userId, 'Project administrator').getByRole('button', { name: 'Remove role', exact: true }).click()
       await confirm('End this project management assignment')
       await expect(page.getByRole('alert')).toContainText('Membership and permission read authority is required')
-      await expect(nav().getByRole('link', { name: 'Project access', exact: true, includeHidden: true })).toHaveCount(0)
+      await expect(nav().getByRole('link', { name: 'Project members', exact: true, includeHidden: true })).toHaveCount(0)
       await expect(table().getByRole('row')).toHaveCount(1)
       await expect(page.getByLabel('Project', { exact: true }).getByRole('option')).toHaveCount(1)
     } finally { await page.context().addCookies(original); await page.goto(`/projects/${project}/members`) }
