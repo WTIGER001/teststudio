@@ -8,7 +8,8 @@ Focus on implementation and targeted checks. The user now authorizes MMDev ECS d
 
 ## System and scoped role planning — 2026-11-07
 
-The user keeps Project and Group, selects System, and requests a plan for Owner, Developer, Contributor, and Reader.
+The user keeps Project and Group, selects System, and requests a plan for Owner, Contributor, Developer, Member, and Reader.
+The clarified order is Reader, Member, Developer, Contributor, then Owner. Member runs tests; Contributor manages the scope except resource deletion and adding, removing, or changing Owners, including indirect group and policy changes.
 The [role plan](roles-plan.md) defines cumulative Project and Application roles, separate System Admin authority, inheritance, delegation, group ownership, shared-resource isolation, and owner recovery.
 It preserves narrow existing roles until explicit reviewed conversion and separates application authorization from current display filters.
 Five implementation milestones map server scope enforcement, managed membership, migration, UI and help, and target verification to the stable acceptance numbers.

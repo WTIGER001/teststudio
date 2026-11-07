@@ -19,7 +19,8 @@ The full product scope remains required. This direction supersedes the testing s
 ## Latest user direction: System and scoped roles
 
 The user keeps Project and Group, selects System for installation terminology, and requests a role plan on 2026-11-07.
-The [role plan](roles-plan.md) proposes Reader, Contributor, Developer, and Owner at Project and Application scope, with System Admin separate.
+The [role plan](roles-plan.md) proposes Reader, Member, Developer, Contributor, and Owner at Project and Application scope, with System Admin separate.
+Member runs published tests and manages execution schedules. Contributor sits directly below Owner and can manage everything in scope except resource deletion and adding, removing, or changing Owners, including indirect changes through groups or policies.
 Project roles inherit into applications. Application-only membership requires server enforcement across shared suites, sources, runs, evidence, and automation before UI exposure.
 Existing narrow roles retain their permissions until reviewed conversion. New role names never silently broaden existing grants.
 This request delivers planning only. Its implementation milestones do not start application changes, migration, publication, or deployment.

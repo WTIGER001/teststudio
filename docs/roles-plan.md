@@ -3,7 +3,7 @@
 Status: Proposed on 2026-11-07. This request covers planning. Runtime permissions and existing assignments stay unchanged until implementation.
 
 Use System for the installation and keep Project, Application, and Group.
-Offer four cumulative roles at Project and Application scope: Reader, Contributor, Developer, and Owner.
+Offer five cumulative roles at Project and Application scope: Reader, Member, Developer, Contributor, and Owner.
 Keep System Admin separate. Show the source and scope of effective access wherever membership is managed.
 
 ## Structure and ownership
@@ -23,34 +23,41 @@ Use System in navigation and help. Preserve installation terminology in compatib
 ## Role definitions
 
 Reader views permitted tests, results, trends, schedules, and evidence.
-Contributor adds execution and scheduling of published tests.
+Member adds execution and scheduling of published tests.
 Developer adds test authoring, publication, and source and suite management within the permitted boundary.
-Owner adds settings and membership management for that boundary.
+Contributor adds settings and membership management, with every Owner capability except deleting resources and adding, removing, or changing Owners.
+Owner adds resource deletion and ownership management for that boundary.
 
-These roles are cumulative. A Developer includes Contributor and Reader capabilities. An Owner includes Developer capabilities.
+The hierarchy is Reader, Member, Developer, Contributor, then Owner. A Developer includes Member and Reader capabilities. An Owner includes Contributor capabilities.
 Explicit denies, disabled roles, inactive membership, target protections, and retention policy still constrain effective access.
 
-| Capability within the assigned scope | Reader | Contributor | Developer | Owner |
-| --- | --- | --- | --- | --- |
-| View tests, releases, results, trends, and schedule state | Yes | Yes | Yes | Yes |
-| View and download permitted run evidence | Yes | Yes | Yes | Yes |
-| Execute published tests and rerun failures | No | Yes | Yes | Yes |
-| Cancel runs and create, edit, pause, or archive execution schedules | No | Yes | Yes | Yes |
-| Create and edit test drafts, including HTTPS probes and recordings | No | No | Yes | Yes |
-| Import and export definitions, archive and restore tests | No | No | Yes | Yes |
-| Publish, activate, or roll back suite releases | No | No | Yes | Yes |
-| Manage suites, test sources, and repository synchronization | No | No | Yes | Yes |
-| Manage project or application settings, environments, and approved credential bindings | No | No | No | Yes |
-| Manage notification destinations and delivery settings | No | No | No | Yes |
-| Manage scoped members and assign standard roles | No | No | No | Yes |
-| Manage evidence pins and request evidence deletion under retention policy | No | No | No | Yes |
-| Permanently delete catalog definitions where supported | No | No | No | Yes |
+| Capability within the assigned scope | Reader | Member | Developer | Contributor | Owner |
+| --- | --- | --- | --- | --- | --- |
+| View tests, releases, results, trends, and schedule state | Yes | Yes | Yes | Yes | Yes |
+| View and download permitted run evidence | Yes | Yes | Yes | Yes | Yes |
+| Execute published tests and rerun failures | No | Yes | Yes | Yes | Yes |
+| Cancel runs and create, edit, pause, or archive execution schedules | No | Yes | Yes | Yes | Yes |
+| Create and edit test drafts, including HTTPS probes and recordings | No | No | Yes | Yes | Yes |
+| Import and export definitions, archive and restore tests | No | No | Yes | Yes | Yes |
+| Publish, activate, or roll back suite releases | No | No | Yes | Yes | Yes |
+| Manage suites, test sources, and repository synchronization | No | No | Yes | Yes | Yes |
+| Manage project or application settings, environments, and approved credential bindings | No | No | No | Yes | Yes |
+| Manage notification destinations and delivery settings | No | No | No | Yes | Yes |
+| Add, remove, or change Reader, Member, Developer, and Contributor assignments | No | No | No | Yes | Yes |
+| Add, remove, promote, or demote Owners and transfer ownership | No | No | No | No | Yes |
+| Manage evidence pins within retention policy | No | No | No | Yes | Yes |
+| Delete resources or evidence where supported and permitted by retention policy | No | No | No | No | Yes |
 
-Contributors operate any permitted run or execution schedule in their scope, including work created by another user.
+Members operate any permitted run or execution schedule in their scope, including work created by another user.
 Repository synchronization changes executable definitions, so its configuration and schedules require Developer access.
-Contributors can inspect notification delivery outcomes associated with permitted runs. Changing destinations, retrying deliveries, and stopping delivery work require Owner access.
+Members can inspect notification delivery outcomes associated with permitted runs. Changing destinations, retrying deliveries, and stopping delivery work require Contributor access.
 
-Protected execution and capture overrides remain separate Advanced permissions. None of the four standard roles grants them automatically.
+Deletion removes resource or evidence data. This restriction applies to every role below Owner, including schedule, source, environment, application, and project deletion where supported.
+Reversible archive and restore remain available at the role needed to manage that resource when they preserve retained data and ownership controls.
+Removing a non-Owner membership is an allowed Contributor action; it does not grant deletion authority over product resources.
+Any change that triggers immediate evidence deletion or uses retention settings to force deletion requires Owner authority.
+
+Protected execution and capture overrides remain separate Advanced permissions. None of the five standard roles grants them automatically.
 Owning an environment does not permit removing its protection or changing safety controls to bypass those permissions.
 Allow normal authoring with safe defaults. Require distinct policy-management authority to reduce protection, weaken safety criteria, expand approved origins, or override capture safeguards; test both old and proposed resource state.
 Granting these Advanced exceptions requires current authority over the action and scope. Owner alone cannot self-grant them through a custom role or direct rule.
@@ -70,8 +77,9 @@ Ordinary authorized creators receive one Project Owner assignment atomically wit
 System Admin creators keep the current behavior of using system authority without automatic project self-assignment.
 Their new projects show System-managed ownership until an explicit Project Owner is assigned. Ordinary creator projects adopt the Owner model in their creation transaction.
 New applications inherit Project roles and do not add separate creator grants.
-Creating applications requires Project Owner authority. Application Owner does not authorize creating siblings.
-Project Owners also manage project settings, private project images, and project groups. Application Owners manage only their own application settings and environments.
+Creating applications requires Project Contributor authority. Application Contributor or Owner does not authorize creating siblings.
+Project Contributors and Owners manage project settings, private project images, and project groups within the deletion and ownership restrictions.
+Application Contributors and Owners manage only their own application settings and environments.
 
 Project and Application roles grant no authority over system users, passwords, provider configuration, system groups, worker registration, or global role state.
 Successful local or OIDC sign-in grants no project or application membership.
@@ -96,12 +104,14 @@ Removing one assignment removes only that path. Explain any remaining inherited,
 | Website Reader only | Read Website and minimal parent context; no access to Admin or Search. |
 | Project Developer and Website Reader | Developer access still applies to Website through the Project. |
 | Website Owner only | Manage Website membership and settings; cannot manage its Project, sibling applications, or shared groups. |
-| Group Contributor on a Project | Active group members can operate permitted tests throughout that project. |
+| Group Member on a Project | Active group members can operate permitted tests throughout that project. |
+| Website Contributor only | Manage Website tests, settings, and non-Owner members; cannot delete resources or change Owners. |
 
 Do not add nested projects, nested groups, or application-owned groups in this delivery.
-Project Owners manage project groups. System group administration remains System-scoped.
-Application Owners may assign existing users directly. Assigning or revoking a role for a shared group also requires authority over that group's stored ownership scope, preserving the current guard.
-Group membership changes must evaluate every affected assignment. Application ownership never grants permission to add oneself to a project group.
+Project Contributors and Owners manage project groups subject to ownership and deletion restrictions. System group administration remains System-scoped.
+Application Contributors and Owners may assign existing users directly within their delegation limits. Assigning or revoking a role for a shared group also requires authority over that group's stored ownership scope, preserving the current guard.
+Group membership changes must evaluate every affected assignment. Application administration never grants permission to add oneself to a project group.
+Contributors cannot change membership, archive, or disable a group when that change would add, remove, or alter an Owner access path, even if another Owner path remains.
 Provider-owned membership remains read-only and expires through the existing provider rules.
 
 ## Resource boundaries
@@ -119,13 +129,13 @@ Apply the same boundary to direct object routes, exports, background jobs, callb
 | Run and evidence | Use frozen execution context and authorized test selection. Never grant a full mixed-application run or shared artifact because one test matches. |
 | Execution schedule or probe binding | Check the full target, selected tests, dependency closure, release policy, and current owner's authority. Block firing after access loss. |
 | Source or repository | Application Developers manage it only when all bound suites and preparation outputs stay in their application. Shared source changes require Project Developer authority. |
-| Notification channel | Application Owners manage application-only destinations and filters. Project-wide or mixed channels require Project Owner authority. |
+| Notification channel | Application Contributors manage application-only destinations and filters. Project-wide or mixed channels require Project Contributor authority. Deletion requires the corresponding Owner authority. |
 
 Keep existing filtered mixed-run views for users with Project authority.
 For application-only members, reject a mixed run's complete detail, logs, exports, and artifact routes in the initial delivery.
 Application history may show only authorized summary fields with no mixed-run identifiers or links until a separately authorized projection exists.
 Do not expose full shared suite source or release payloads through a filtered catalog view.
-Contributors can execute an authorized subset of a shared published suite only when its dependencies and target remain authorized.
+Members can execute an authorized subset of a shared published suite only when its dependencies and target remain authorized.
 
 Historical resource authorization uses retained application context, so later suite relinking cannot expose older results.
 Old runs without trustworthy application boundaries remain available to Project-authorized users and unavailable to application-only members.
@@ -139,10 +149,13 @@ Preserve additional custom-role and direct-grant paths under Advanced permission
 Role replacement is one revision-checked transaction; it must not temporarily remove or combine access during separate saves.
 Record scope, actor, principal, previous role, new role, reason, revision, and change time in the audit trail.
 
-Owners can assign Reader, Contributor, Developer, or Owner within their own scope.
-Project Owners can manage direct Application membership inside their project.
-Application Owners cannot modify Project membership or inherited assignments.
-Project Owners manage project custom roles and direct grants only within their current delegation authority. Application Owners delegate standard roles only in this delivery.
+Owners can assign Reader, Member, Developer, Contributor, or Owner within their own scope.
+Contributors can assign Reader, Member, Developer, or Contributor and change or revoke those assignments. They cannot change an existing Owner assignment or promote anyone, including themselves, to Owner.
+Project Contributors and Owners manage direct Application membership inside their project within these delegation limits.
+Application Contributors and Owners cannot modify Project membership or inherited assignments.
+Project Contributors and Owners manage project custom roles and direct grants only within their current delegation authority. Application Contributors and Owners delegate standard roles only in this delivery.
+Contributors cannot grant deletion or ownership powers through custom roles, inheritance, direct grants, or group changes. They cannot alter a policy or deny in a way that changes an Owner access path.
+Check the complete proposed permission change in the transaction, including every affected group assignment and inherited policy. Protect all Owner paths, beyond the last usable Owner safeguard.
 Disabled roles remain visible and cannot receive new assignments. Global role state changes require System authority.
 
 Preserve the existing last usable System administrator safeguard across assignments, groups, credentials, and provider changes.
@@ -158,7 +171,7 @@ Continue using github.com/wtiger001/go-permissions through permissions.Service f
 Extend TestStudio's managed assignment and resource-context model with explicit System, Project, and Application scope.
 Keep existing project team bindings. Derive application bindings and exact objects from route context and stored ownership.
 Prove the library representation for application inheritance, object denies, expiry, and revocation in the first implementation milestone before choosing its concrete grant encoding.
-Do not implement a second permission evaluator or treat the four role names as authorization shortcuts.
+Do not implement a second permission evaluator or treat the five role names as authorization shortcuts.
 
 Separate application read and management actions from today's project-wide projects.manage check.
 Create an explicit action-to-role manifest covering every registered action and scope, including safety controls and membership delegation.
@@ -182,11 +195,12 @@ Keep custom policies, exact grants, and compatibility assignments under named Ad
 
 Each member row shows principal, direct role, effective role or Custom access, source, scope, and current activity state.
 Distinguish Direct, From project, and From group. Explain why lowering or removing one role may leave access intact.
-Use server-provided management capabilities. Application Owners get an authorized existing-user selector without access to the system user directory.
+Use server-provided management capabilities. Application Contributors and Owners get an authorized existing-user selector without access to the system user directory.
+Keep the Member role distinct from the generic members list label. Show Contributor below Owner in role choices, and explain deletion and ownership restrictions in its description.
 Role changes review the affected scope and new powers before saving. Preserve unsaved values, revision conflicts, and uncertain-save reconciliation.
 
 Add Introduction, Concepts, and Tutorials to every changed membership, role, and access-explanation page.
-Tutorials cover adding a Reader, assigning Developer to one application, granting a group access, inspecting inheritance, and transferring ownership.
+Tutorials cover adding a Reader, granting Member execution access, assigning Developer to one application, delegating Contributor management, inspecting inheritance, and transferring ownership.
 Verify keyboard focus, light and dark themes, system theme, and narrow layouts. Help must preserve edits.
 
 ## Migration and compatibility
@@ -199,16 +213,16 @@ New projects use the standard roles after their scoped implementation passes; ex
 | Existing assignment | Conversion treatment |
 | --- | --- |
 | Viewer | Reader is a candidate when its complete effective permissions match. |
-| Operator | Contributor is a candidate when its complete effective permissions match. |
+| Operator | Member is a candidate after comparing every action. Preserve any existing schedule-delete authority until an explicit conversion removes it. Contributor would grant substantially broader administration. |
 | Catalog editor | Keep as a compatibility role; Developer would add running and publication. |
 | Publisher | Keep as a compatibility role; Developer would add authoring and execution. |
-| Project administrator | Keep as a compatibility role; Owner would add test and execution powers. |
+| Project administrator | Keep as a compatibility role; Contributor would add test and execution powers, and Owner would also add deletion and ownership powers. |
 | Current four-role creator bundle | Offer reviewed Owner conversion. Show every added and removed action; the new Owner definition includes additional management actions. |
 | Custom roles, direct grants, and provider mappings | Preserve exact scope and semantics. Convert only through an explicit reviewed operation. |
 
 Provide a bounded conversion preview per project with changed actions, affected principals, group paths, disabled policies, and schedules that could become blocked.
 An authorized owner or System Admin reviews and applies the exact preview with revisions and a reason.
-Legacy Project administrator delegation does not authorize granting the broader new Owner role. Require current authority over every added action or System Admin assistance for that conversion.
+Legacy Project administrator delegation does not authorize granting the broader new Contributor or Owner roles. Require current authority over every added action or System Admin assistance for that conversion.
 Treat every permission expansion as an explicit grant. Do not infer equivalence from role names or a sample of successful API calls.
 Commit each conversion atomically with its audit and owner-adoption state. Preserve request identity for uncertain responses and retry.
 Rollback restores recorded assignments only after showing any resulting access changes and validating current authority and owner safeguards.
@@ -221,9 +235,9 @@ The authoritative ledger stays at 50 verified of 57. Scope changes require fresh
 
 | Milestone | Deliverable and exit condition | Acceptance | Smallest useful local verification |
 | --- | --- | --- | --- |
-| 1 | Define the action manifest, cumulative roles, System labels, scoped assignment representation, and compatibility policy. Prove application scope through permissions.Service before exposing it. | 10, 12, 13 | Focused authorization and access checks for role inclusion, scope isolation, direct and inherited paths, denies, role disables, and expiry on SQLite and PostgreSQL. |
+| 1 | Define the action manifest, five cumulative roles, System labels, scoped assignment representation, and compatibility policy. Prove application scope through permissions.Service before exposing it. | 10, 12, 13 | Focused authorization and access checks for role inclusion, Member execution, Contributor management, Owner-only deletion and ownership, scope isolation, inherited paths, denies, role disables, and expiry on SQLite and PostgreSQL. |
 | 2 | Enforce Application boundaries across registries, authoring, source preparation, runs, evidence, schedules, probes, notifications, and dispatch. No application membership UI ships before this passes. | 12, 13, 14, 18, 38, 45 | Exact authorized and rejected API/service cases for application-only users, mixed resources, forged scope, relinking, dependency closure, revocation, artifact reuse, and next schedule firing. |
-| 3 | Deliver atomic scoped membership APIs, owner safeguards, creator Owner assignment, compatible migration preview and apply, and generated contracts. | 05, 07, 10, 12, 13, 14 | Focused access and creator checks on both databases, restart persistence, competing role changes, last-owner guards, conversion retries and rollback, and generated-client synchronization. |
+| 3 | Deliver atomic scoped membership APIs, owner safeguards, creator Owner assignment, compatible migration preview and apply, and generated contracts. | 05, 07, 10, 12, 13, 14 | Focused checks on both databases for Contributor changes to lower roles, rejected direct and indirect Owner changes, last-owner guards, restart persistence, competing changes, conversion retries and rollback, and generated-client synchronization. |
 | 4 | Deliver System labels, Project and Application members, inherited access explanations, Advanced compatibility controls, and contextual help. | 10, 49, 50 | UI build and the changed STUDIO-ROLES-001 and STUDIO-PERMISSIONS-001 workflows through normal local execution. Add a cataloged STUDIO-APPLICATION-ACCESS-001 workflow for application-only navigation and rejected sibling access. |
 | 5 | Update operator and feature guides, create a versioned release from committed source, and verify the selected target's identity and permission boundaries. | 54, 55 and affected scoped criteria | Reuse passing local evidence. On MMDev, verify one generic project with two applications, one inherited member, one application-only member, one group path, and evidence revocation. Keep cross-profile claims separate. |
 

@@ -67,7 +67,8 @@ This operator convenience changes no application release and closes no acceptanc
 
 ### Latest request: System and role planning
 
-The user keeps Project and Group, selects System, and requests planning for Owner, Developer, Contributor, and Reader on 2026-11-07.
+The user keeps Project and Group, selects System, and requests planning for Owner, Contributor, Developer, Member, and Reader on 2026-11-07.
+Member runs tests. Contributor sits directly below Owner, with scoped administration except resource deletion and adding, removing, or changing Owners. Guard indirect Owner changes through groups and custom policies too.
 The [role plan](roles-plan.md) defines cumulative Project and Application roles, a separate System Admin, inheritance, shared-resource boundaries, owner safeguards, and reviewed migration.
 Application-only roles require server authorization; existing application filters do not establish access isolation.
 The request covers planning only. No application permissions, assignments, release, or deployment change.
