@@ -7,10 +7,14 @@ import type { CreateProjectPage } from './features/projects/create-project.page'
 import type { ApplicationsPage } from './features/applications/applications.page'
 import type { CreateTestPage } from './features/catalog/create-test.page'
 import type { SourcesPage } from './features/sources/sources.page'
+import type { StatusEditorPage } from './features/status-pages/status-editor.page'
 import type { AssignmentsPage } from './features/access/assignments.page'
 import type { Routes } from '@angular/router'
 
 const projectRoutes: Routes = [
+ { path: 'projects/:projectId/status-pages/new', canDeactivate: [(page: StatusEditorPage) => page.canLeave()], data: { helpTopic: 'status-pages' }, loadComponent: () => import('./features/status-pages/status-editor.page').then(m => m.StatusEditorPage) },
+ { path: 'projects/:projectId/status-pages/:pageId', canDeactivate: [(page: StatusEditorPage) => page.canLeave()], data: { helpTopic: 'status-pages' }, loadComponent: () => import('./features/status-pages/status-editor.page').then(m => m.StatusEditorPage) },
+ { path: 'projects/:projectId/status-pages', data: { helpTopic: 'status-pages' }, loadComponent: () => import('./features/status-pages/status-pages.page').then(m => m.StatusPagesPage) },
   { path: 'projects/:projectId/applications/:applicationId/members', canDeactivate: [(page: AssignmentsPage) => page.canLeave()], data: { helpTopic: 'application-members' }, loadComponent: () => import('./features/access/assignments.page').then(m => m.AssignmentsPage) },
   { path: 'projects/:projectId/applications/:applicationId/explain-access', data: { helpTopic: 'effective-permissions' }, loadComponent: () => import('./features/access/permission-explanation.page').then(m => m.PermissionExplanationPage) },
   { path: 'projects/:projectId/probes/new', canDeactivate: [(page: ProbeSetupPage) => page.canLeave()], data: { helpTopic: 'https-probes' }, loadComponent: () => import('./features/probes/probe-setup.page').then(m => m.ProbeSetupPage) },
@@ -58,6 +62,7 @@ const projectRoutes: Routes = [
 ]
 
 export const routes: Routes = [
+ { path: 'status/:token', data: { helpTopic: 'public-status' }, loadComponent: () => import('./features/status-pages/public-status.page').then(m => m.PublicStatusPage) },
   ...projectRoutes.filter(route => /^projects\/:projectId\/(suites|catalog|runs|trends|tests)(\/|$)/.test(route.path ?? '')).map(route => ({ ...route, path: route.path!.replace('projects/:projectId/', 'projects/:projectId/applications/:applicationId/') })),
   ...projectRoutes
 ]

@@ -5,6 +5,7 @@ import { access, writeFile, unlink } from 'node:fs/promises'
 import { createOIDCFixture } from './oidc-fixture.mjs'
 
 const projectImagesWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-PROJECTS-001'
+const publicStatusWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-STATUS-PAGES-001'
 const historyWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-HISTORY-001'
 const apiAuthoringWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-API-AUTHOR-001'
 const privateTraceWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-TRACE-001'
@@ -28,6 +29,12 @@ const server = createServer(async (request, response) => {
   try {
     if (stopping) { response.writeHead(503).end(); return }
     if (oidcFixture && await oidcFixture(request, response)) return
+    if (publicStatusWorkflow && request.method === 'GET' && request.url.startsWith('/status-host/')) {
+      const statusToken = request.url.slice('/status-host/'.length)
+      if (!/^[a-f0-9]{40}$/.test(statusToken)) { response.writeHead(400).end(); return }
+      response.setHeader('Content-Type', 'text/html; charset=utf-8')
+      response.end('<!doctype html><html lang="en"><title>Independent embed host</title><h1>Customer dashboard</h1><iframe title="Embedded public status" src="http://127.0.0.1:8040/status/' + statusToken + '" style="width:100%;height:700px;border:0"></iframe></html>'); return
+    }
     if (request.method === 'GET' && request.url === '/state') {
       response.setHeader('Content-Type', 'application/json'); response.end(JSON.stringify({ requests })); return
     }

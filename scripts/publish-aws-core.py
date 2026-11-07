@@ -23,6 +23,7 @@ def main():
     parser.add_argument('--stack', required=True)
     parser.add_argument('--receipt', required=True)
     parser.add_argument('--image-receipt')
+    parser.add_argument('--public-status', action='store_true', help='Include the scoped public status framing policy and CloudFront behavior.')
     args = parser.parse_args()
     aws_base = ['aws', '--profile', args.profile, '--region', args.region, '--no-cli-pager']
 
@@ -65,8 +66,9 @@ def main():
         with tempfile.TemporaryDirectory(prefix='teststudio-release-parameters-') as directory:
             path = Path(directory) / 'parameters.json'
             path.write_text(json.dumps(parameters)); path.chmod(0o600)
-            result = aws('cloudformation', 'create-change-set', '--stack-name', args.stack, '--change-set-name', 'application-' + tag, '--change-set-type', 'UPDATE', '--use-previous-template', '--parameters', 'file://' + str(path), '--capabilities', 'CAPABILITY_IAM')
-        receipt = {**build, 'account': args.account, 'stack': args.stack, 'changeSet': result['Id'], 'registryDigest': details['imageDigest'], 'preparedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'outputs': outputs}
+            template = ['--template-body', 'file://deploy/aws/service.yaml'] if args.public_status else ['--use-previous-template']
+            result = aws('cloudformation', 'create-change-set', '--stack-name', args.stack, '--change-set-name', 'application-' + tag, '--change-set-type', 'UPDATE', *template, '--parameters', 'file://' + str(path), '--capabilities', 'CAPABILITY_IAM')
+        receipt = {**build, 'account': args.account, 'stack': args.stack, 'changeSet': result['Id'], 'registryDigest': details['imageDigest'], 'publicStatusPackage': args.public_status, 'preparedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'outputs': outputs}
         receipt_path.write_text(json.dumps(receipt, indent=2) + '\n')
         print(json.dumps({'changeSet': receipt['changeSet'], 'digest': receipt['registryDigest'], 'buildId': build['buildInfo']['buildId'], 'privateDockerConfigurationRemoved': True}))
         return
@@ -77,7 +79,10 @@ def main():
         summary = [{'action': v['ResourceChange']['Action'], 'resource': v['ResourceChange']['LogicalResourceId'], 'type': v['ResourceChange']['ResourceType'], 'replacement': v['ResourceChange'].get('Replacement')} for v in change.get('Changes', [])]
         assert change['Status'] == 'CREATE_COMPLETE', 'The change set is not ready'
         allowed = {'Task': 'AWS::ECS::TaskDefinition', 'Service': 'AWS::ECS::Service'}
-        assert summary and all(v['action'] == 'Modify' and allowed.get(v['resource']) == v['type'] for v in summary), 'Review unexpected resources separately'
+        if receipt.get('publicStatusPackage'):
+            allowed['UiDistribution'] = 'AWS::CloudFront::Distribution'
+            allowed['PublicStatusHeaders'] = 'AWS::CloudFront::ResponseHeadersPolicy'
+        assert summary and all(allowed.get(v['resource']) == v['type'] and (v['action'] == 'Modify' or receipt.get('publicStatusPackage') and v['resource'] == 'PublicStatusHeaders' and v['action'] == 'Add') for v in summary), 'Review unexpected resources separately'
         if args.action == 'review':
             receipt['reviewedChanges'] = summary
             receipt_path.write_text(json.dumps(receipt, indent=2) + '\n')
@@ -108,7 +113,7 @@ def main():
     if not receipt.get('uiPublishedAt'):
         command(aws_base + ['s3', 'sync', str(ui), 's3://' + outputs['UiBucketName'], '--exclude', 'index.html', '--cache-control', 'public,max-age=31536000,immutable', '--only-show-errors'])
         command(aws_base + ['s3', 'cp', str(ui / 'index.html'), 's3://' + outputs['UiBucketName'] + '/index.html', '--content-type', 'text/html', '--cache-control', 'no-cache', '--only-show-errors'])
-        invalidation = aws('cloudfront', 'create-invalidation', '--distribution-id', outputs['UiDistributionId'], '--paths', '/index.html', '/', '/projects*')['Invalidation']['Id']
+        invalidation = aws('cloudfront', 'create-invalidation', '--distribution-id', outputs['UiDistributionId'], '--paths', '/index.html', '/', '/projects*', '/status/*')['Invalidation']['Id']
         receipt['uiPublishedAt'] = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()); receipt['invalidation'] = invalidation
         receipt_path.write_text(json.dumps(receipt, indent=2) + '\n')
     print(json.dumps({'complete': True, 'buildId': receipt['buildInfo']['buildId'], 'uiPublishedAt': receipt['uiPublishedAt'], 'invalidation': receipt['invalidation']}))

@@ -23,7 +23,8 @@ export function navigationSections(project: string, capabilities: Capabilities, 
     ])
     add('overviews', 'Project overviews', false, [
       ...(allowed(capabilities, 'projects.read') ? [link('All applications', `${base}/applications`, '▦', true)] : []),
-      link('HTTPS probes', `${base}/probes`, '◎', true)
+      link('HTTPS probes', `${base}/probes`, '◎', true),
+      ...(allowed(projectCapabilities, 'statuspages.read') ? [link('Status pages', `${base}/status-pages`, '◉')] : [])
     ])
     add('automation', 'Automation', true, [
       ...(allowed(capabilities, 'schedules.read') ? [link('Schedules', `${base}/schedules`, '◷')] : []),

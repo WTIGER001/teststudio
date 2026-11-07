@@ -118,7 +118,8 @@ Archive probe removes the binding from the default overview and preserves tests,
 Review explicitly explains that archival does not stop monitoring. Pause its schedules separately.
 Restore probe leaves schedule state unchanged. Disable test is a separate catalog action.
 Optional notifications use existing project completion channels and filters. See [schedules](schedules.md) and [notifications](notifications.md).
-Incident escalation, maintenance windows, redirect following, and public status pages remain separate capabilities.
+Select Status pages under Project overviews to publish reviewed probe summaries without sign-in. See [public status pages](status-pages.md) for time-based availability, embedding, and withdrawal.
+Incident escalation, maintenance windows, and redirect following remain separate capabilities.
 
 ## Visual help
 

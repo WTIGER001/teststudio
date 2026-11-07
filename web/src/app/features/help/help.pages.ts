@@ -53,6 +53,31 @@ export const helpPages: Record<string, HelpPage> = {
     tutorials: [{ title: 'Sign in from the publisher CLI', steps: ['Run teststudio-publish login with --server and --browser. Use --no-open to copy the address manually.', 'Sign in through the browser when required. Review the displayed account and client name.', 'Enter Terminal code exactly as printed in your terminal, then select Approve CLI sign-in.', 'Return to the terminal. It saves its managed session privately. Run logout when that CLI session is no longer needed.'] }, { title: 'Reject a request', steps: ['Select Decline CLI sign-in when you do not want to connect this terminal.', 'Start a new request in your own terminal if the client name, account, or code is incorrect.', 'Use user session administration to revoke an issued CLI session when necessary.'] }]
   },
   'https-probes': probeHelp,
+  'status-pages': {
+    id: 'status-pages', title: 'Status pages',
+    introduction: ['Create project-owned public status pages from selected HTTP probes. Save drafts privately, review the public projection, and publish explicitly.'],
+    concepts: [
+      { title: 'Public projection', description: 'Only the chosen titles, descriptions, result states, observation times, and availability aggregates are public. Target URLs, credentials, run identifiers, diagnostics, and evidence stay private.' },
+      { title: 'Time-based availability', description: 'A result applies until the next result or its freshness limit. Availability is available time divided by known monitored time. The donut shows available, unavailable, and unknown durations; monitoring coverage explains missing history.' },
+      { title: 'Windows and freshness', description: 'One viewer selector changes every probe. Month means a rolling 30 days and year means 365 days. All time begins at the first retained observation. Advanced monitoring settings controls when old observations become unknown.' },
+      { title: 'Separate publication', description: 'Saving changes never updates the published snapshot. Review publication shows the saved draft. Confirm publish makes that snapshot public. Unpublish immediately withdraws the endpoint; loaded embeds refresh within a minute.' },
+      { title: 'Authority and recovery', description: 'Project Contributors and Owners can manage and publish. Only Owner can delete. Public reads recheck publisher and result authority. Conflicts preserve your work; reload and inspect before retrying an unconfirmed mutation.' }
+    ],
+    tutorials: [
+      { title: 'Create and publish', steps: ['Select Create status page. Enter Page title, Background color, and Default availability period.', 'Continue to Probes. Choose existing HTTP probes, edit public titles and optional descriptions, and arrange their order.', 'Continue to Review and select Save draft.', 'Select Review publication and inspect the preview. Select Confirm publish to authorize public access.'] },
+      { title: 'Embed or withdraw', steps: ['Copy Public URL for a standalone page, or copy Iframe embed code into another website.', 'Visitors select one availability period for all rows. Hover or focus a pill for its status and time.', 'To change content, edit and save the draft, then review and publish it separately.', 'Select Unpublish to withdraw public access. The draft, probes, and retained test history remain.'] }
+    ]
+  },
+  'public-status': {
+    id: 'public-status', title: 'Public status',
+    introduction: ['This published page shows selected HTTP probes without requiring sign-in. Viewing it runs no tests.'],
+    concepts: [
+      { title: 'Availability and coverage', description: 'The center percentage describes estimated available time during monitored periods. Green is available, red unavailable, and gray unknown. Coverage tells you how much of the period was monitored.' },
+      { title: 'Observation gaps', description: 'A result stops applying when another result arrives or its freshness limit expires. Missing history, stale checks, infrastructure failures, and changed targets are unknown.' },
+      { title: 'Shared period', description: 'The selector changes all rows together. Month is 30 days, year is 365 days, and all time begins with each probe’s first retained observation. The page refreshes every minute.' }
+    ],
+    tutorials: [{ title: 'Read a probe', steps: ['Choose Availability period for the whole page.', 'Read the public probe title, description, and current state.', 'Hover or focus a result pill to see its status and observation time.', 'Read availability together with monitored coverage. Unknown time is not successful uptime.'] }]
+  },
   'https-create': { ...probeHelp, id: 'https-create', title: 'Create HTTPS probe' },
   'create-test': {
     id: 'create-test', title: 'Create test',

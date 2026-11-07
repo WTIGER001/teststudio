@@ -6,6 +6,28 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## Public status pages: local implementation — 2026-11-07
+
+Projects can create independent status pages with saved drafts and separate published snapshots.
+The dedicated Appearance, Probes, and Review workflow configures title, background, default shared period, ordered HTTP probe references, public probe titles, and optional descriptions.
+Public URLs omit the authenticated shell and initialize no sign-in. Cross-origin iframe embedding uses the same minimal status view and explicit public response policy.
+Each row shows recent pills, hover and keyboard timestamps, current state, and a right-hand availability donut.
+Ranges cover rolling 24 hours, seven days, 30 days, 365 days, and all retained history. Availability uses monitored durations; unknown intervals remain separate and monitoring coverage stays visible.
+A freshness ceiling prevents missing checks from becoming uptime. Target and assertion changes, infrastructure failures, and denied observations cannot establish successful availability. Late older logical runs cannot replace newer results.
+The history scanner traverses retained records beyond the private overview's 1000-run limit. Native request-scoped permission reads reuse principal policy data without caching authority across requests, preserve exact run denies and frozen application scopes, and reject directory changes during calculation.
+Public reports contain no private URLs, resource identities, run links, diagnostics, credentials, or evidence. Publisher revocation and unpublishing withdraw anonymous reads.
+Project Contributor can manage and publish but cannot delete. Application-only authority cannot administer Project status pages. Mutations preserve revisions, audit records, drafts, and uncertain-save recovery.
+
+The focused Go calculations and HTTP cases pass on SQLite and race-enabled PostgreSQL, including history older than a year and more than 1000 runs, denied-result redaction, changed targets, publication conflicts, and revocation.
+The existing application-run and frozen-scope checks cover the shared scope helper. Eight selected UI utility checks pass. Canonical contract 0.38.0 generates the matching client.
+The UI build passes. STUDIO-STATUS-PAGES-001 passes through normal TestStudio execution in 2.843 seconds, run 20261107T223233.325865000-9897ae3890872520b06d7718.
+It verifies ordered rows, draft preservation, help, canceled navigation, explicit publication, anonymous viewing without authentication requests, real cross-origin iframe rendering, all windows, configured initial range, public privacy, independent dark pages, light desktop and narrow layouts, retained conflict inputs, recovery, and unpublishing.
+Screenshot review corrects initial select binding and very small coverage rounding. The final dark page selects its configured year and displays <0.1% monitored instead of zero.
+The local AWS package passes schema and eight packaging checks. Its separate /status/* behavior permits framing while the private UI remains denied.
+Owned browsers, controllers, database containers, and execution containers exit. The user's demo and existing project data remain unchanged.
+Version 0.4.0-dev is prepared. Publication and target verification remain separate until recorded below.
+This extends 12, 13, 34, 49, and 50. Acceptance remains **50 verified of 57**.
+
 ## Scoped roles MMDev release — 2026-11-07
 
 The user authorizes membership UI, committing and pushing all branch commits, and deployment to MMDev.

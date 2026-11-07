@@ -237,30 +237,7 @@ func (s *Service) ApplicationsForObject(ctx context.Context, project, object, pe
 			return data.Applications, nil
 		}
 	case "run":
-		app := data.Request.Application
-		if data.Environment != nil {
-			if app != "" && app != data.Environment.Application {
-				return nil, nil
-			}
-			app = data.Environment.Application
-		}
-		if app == "" && len(data.ApplicationIDs) == 1 {
-			app = data.ApplicationIDs[0]
-		}
-		if app == "" {
-			return nil, nil
-		}
-		for _, test := range data.Tests {
-			if test.Application != "" && test.Application != app {
-				return nil, nil
-			}
-		}
-		for _, test := range data.Release.Catalog.Tests {
-			if test.Application != "" && test.Application != app {
-				return nil, nil
-			}
-		}
-		return []string{app}, nil
+		return runApplications(data), nil
 	case "schedule":
 		app := data.Request.Application
 		if data.Request.Environment != "" {

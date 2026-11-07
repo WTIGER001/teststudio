@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.37.0"
+export const accessContractVersion = "0.38.0"
 
 export type APIAuthentication = { "binding": string; "header"?: string; "scheme": "bearer" | "basic" | "header" }
 export type APIRequestPolicy = { "authentication"?: APIAuthentication; "maxRequests": number; "maxResponseBytes": number; "redactFields"?: (string)[]; "rules": (APIRequestRule)[] }
@@ -190,6 +190,15 @@ export type SourceUploadPage = { "cursor"?: string; "items": (SourceUploadRecord
 export type SourceUploadPreview = { "plan"?: SourceCatalogImportPlan; "upload": SourceUploadRecord }
 export type SourceUploadRecord = { "data": SourceUpload; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
 export type StandardAssignmentReplacement = { "previousRoleId"?: string; "reason": string; "roleId": "builtin.teststudio.reader" | "builtin.teststudio.member" | "builtin.teststudio.developer" | "builtin.teststudio.contributor" | "builtin.teststudio.owner" }
+export type StatusPage = { "background": string; "defaultWindow": "24h" | "7d" | "1m" | "1y" | "all"; "id": string; "maxAgeSeconds": number; "probes": (StatusPageEntry)[]; "publicToken": string; "published"?: StatusPageDefinition; "publishedAt"?: string; "publisher"?: string; "title": string }
+export type StatusPageAvailability = { "coveragePercent": number; "downSeconds": number; "percent": number | null; "since": string; "unknownSeconds": number; "upSeconds": number }
+export type StatusPageDefinition = { "background": string; "defaultWindow": "24h" | "7d" | "1m" | "1y" | "all"; "id": string; "maxAgeSeconds": number; "probes": (StatusPageEntry)[]; "title": string }
+export type StatusPageEntry = { "description": string; "probeId": string; "title": string }
+export type StatusPageList = { "cursor"?: string; "items": (StatusPageRecord)[] }
+export type StatusPagePoint = { "at": string; "state": string }
+export type StatusPageRecord = { "data": StatusPage; "id": string; "projectId"?: string; "revision": number; "updatedAt"?: string }
+export type StatusPageReport = { "asOf": string; "background": string; "maxAgeSeconds": number; "probes": (StatusPageRow)[]; "title": string; "window": string }
+export type StatusPageRow = { "availability": StatusPageAvailability; "description": string; "history": (StatusPagePoint)[]; "state": string; "title": string }
 export type SuiteDefinition = { "activeReleaseId"?: string; "applications": (string)[] | null; "archived": boolean; "capture"?: SourceCapturePolicy; "description": string; "id": string; "name": string; "requiresTarget": boolean; "timing"?: SourceTimingPolicy }
 export type SuiteLifecycle = { "canManage": boolean; "revision": number; "schedules": (SuiteSchedule)[]; "suite": SuiteDefinition; "updatedAt": string }
 export type SuiteSchedule = { "enabled": boolean; "id": string; "name": string; "releaseId"?: string }
@@ -279,6 +288,13 @@ export interface AccessRequests {
   readProjectRoleConversion: { "project": string; "conversion": string }
   applyProjectRoleConversion: { "project": string; "conversion": string; revision: number }
   previewProjectRoleConversionRollback: { "project": string; "conversion": string; body: Reason }
+  listStatusPages: { "project": string; query?: { "cursor"?: string } }
+  deleteStatusPage: { "project": string; "page": string; revision: number }
+  readStatusPage: { "project": string; "page": string }
+  saveStatusPage: { "project": string; "page": string; revision: number; body: StatusPageDefinition }
+  previewStatusPage: { "project": string; "page": string; query?: { "window"?: string } }
+  publishStatusPage: { "project": string; "page": string; revision: number }
+  unpublishStatusPage: { "project": string; "page": string; revision: number }
   changeSuiteLifecycle: { "project": string; "suite": string; "action": "archive" | "restore"; revision: number }
   listBrowserRecordings: { "project": string; "suite": string; query?: { "cursor"?: string; "limit"?: number } }
   startBrowserRecording: { "project": string; "suite": string; body: BrowserRecordingInput }
@@ -340,6 +356,7 @@ export interface AccessRequests {
   listCatalogTestRevisions: { "project": string; "suite": string; "test": string }
   readTestRunHistory: { "project": string; "suite": string; "test": string; query?: { "environment"?: string; "location"?: string; "application"?: string; "cursor"?: string; "limit"?: number } }
   listProjectCatalog: { "project": string; query?: { "query"?: string; "suite"?: string; "application"?: string; "category"?: string; "tag"?: string; "owner"?: string; "type"?: string; "runner"?: string; "state"?: string; "safety"?: string; "source"?: string; "sort"?: string; "cursor"?: string; "descendants"?: boolean; "uncategorized"?: boolean; "limit"?: number } }
+  readPublicStatusPage: { "token": string; query?: { "window"?: string } }
   readRecordingCompanionControl: { "id": string; body: RecordingCompanionControlRequest }
   pairRecordingCompanion: { "id": string; body: RecordingCompanionPairRequest }
   submitRecordingCompanionSnapshot: { "id": string; body: RecordingCompanionSnapshotRequest }
@@ -457,6 +474,13 @@ export interface AccessResponses {
   readProjectRoleConversion: RoleConversionRecord
   applyProjectRoleConversion: RoleConversionRecord
   previewProjectRoleConversionRollback: RoleConversionRecord
+  listStatusPages: StatusPageList
+  deleteStatusPage: { "deleted": boolean }
+  readStatusPage: StatusPageRecord
+  saveStatusPage: StatusPageRecord
+  previewStatusPage: StatusPageReport
+  publishStatusPage: StatusPageRecord
+  unpublishStatusPage: StatusPageRecord
   changeSuiteLifecycle: SuiteLifecycle
   listBrowserRecordings: BrowserRecordingPage
   startBrowserRecording: BrowserRecordingRecord
@@ -518,6 +542,7 @@ export interface AccessResponses {
   listCatalogTestRevisions: CatalogRevisionPage
   readTestRunHistory: TestHistoryPage
   listProjectCatalog: CatalogListPage
+  readPublicStatusPage: StatusPageReport
   readRecordingCompanionControl: RecordingCompanionControl
   pairRecordingCompanion: RecordingCompanionPacket
   submitRecordingCompanionSnapshot: RecordingCompanionControl
@@ -635,6 +660,13 @@ export const accessOperations = {
   readProjectRoleConversion: { method: "GET", path: "/api/v1/projects/{project}/role-conversions/{conversion}" },
   applyProjectRoleConversion: { method: "POST", path: "/api/v1/projects/{project}/role-conversions/{conversion}/apply" },
   previewProjectRoleConversionRollback: { method: "POST", path: "/api/v1/projects/{project}/role-conversions/{conversion}/rollback-preview" },
+  listStatusPages: { method: "GET", path: "/api/v1/projects/{project}/status-pages" },
+  deleteStatusPage: { method: "DELETE", path: "/api/v1/projects/{project}/status-pages/{page}" },
+  readStatusPage: { method: "GET", path: "/api/v1/projects/{project}/status-pages/{page}" },
+  saveStatusPage: { method: "PUT", path: "/api/v1/projects/{project}/status-pages/{page}" },
+  previewStatusPage: { method: "POST", path: "/api/v1/projects/{project}/status-pages/{page}/preview" },
+  publishStatusPage: { method: "POST", path: "/api/v1/projects/{project}/status-pages/{page}/publish" },
+  unpublishStatusPage: { method: "POST", path: "/api/v1/projects/{project}/status-pages/{page}/unpublish" },
   changeSuiteLifecycle: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/actions/{action}" },
   listBrowserRecordings: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings" },
   startBrowserRecording: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings" },
@@ -696,6 +728,7 @@ export const accessOperations = {
   listCatalogTestRevisions: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/revisions" },
   readTestRunHistory: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/run-history" },
   listProjectCatalog: { method: "GET", path: "/api/v1/projects/{project}/tests" },
+  readPublicStatusPage: { method: "GET", path: "/api/v1/public/status-pages/{token}" },
   readRecordingCompanionControl: { method: "POST", path: "/api/v1/recording-companion/sessions/{id}/control" },
   pairRecordingCompanion: { method: "POST", path: "/api/v1/recording-companion/sessions/{id}/pair" },
   submitRecordingCompanionSnapshot: { method: "POST", path: "/api/v1/recording-companion/sessions/{id}/snapshots" },

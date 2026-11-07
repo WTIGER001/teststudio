@@ -52,7 +52,14 @@ def main():
     for distribution in [ui, artifact]:
         assert all(error['ErrorCachingMinTTL'] == 0 and 'ResponsePagePath' not in error and 'ResponseCode' not in error for error in distribution['CustomErrorResponses'])
         assert {error['ErrorCode'] for error in distribution['CustomErrorResponses']} == {400, 403, 404, 405, 414, 416, 500, 501, 502, 503, 504}
-    routes = ui['CacheBehaviors']
+    routes = [route for route in ui['CacheBehaviors'] if route['PathPattern'] != '/status/*']
+    public = next(route for route in ui['CacheBehaviors'] if route['PathPattern'] == '/status/*')
+    assert public['TargetOriginId'] == 'ui' and public['ResponseHeadersPolicyId'] == ref('PublicStatusHeaders') and public['CachePolicyId'] == ref('NoCache')
+    headers = properties(template, 'PublicStatusHeaders')['ResponseHeadersPolicyConfig']['SecurityHeadersConfig']
+    assert 'FrameOptions' not in headers and 'frame-ancestors *' in headers['ContentSecurityPolicy']['ContentSecurityPolicy']
+    private = properties(template, 'UiHeaders')['ResponseHeadersPolicyConfig']['SecurityHeadersConfig']
+    assert private['FrameOptions']['FrameOption'] == 'DENY' and "frame-ancestors 'none'" in private['ContentSecurityPolicy']['ContentSecurityPolicy']['Fn::Sub']
+    checks.append('Only public status documents permit embedding; private UI framing stays denied')
     assert {r['PathPattern'] for r in routes} == {'/api', '/api/*', '/auth', '/auth/*', '/healthz', '/livez'}
     assert all(r['TargetOriginId'] == 'api' and r['CachePolicyId'] == ref('NoCache') and 'FunctionAssociations' not in r for r in routes)
     assert artifact['DefaultCacheBehavior']['CachePolicyId'] == ref('NoCache')

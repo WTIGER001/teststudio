@@ -75,6 +75,20 @@ This operator convenience changes no application release and closes no acceptanc
 
 ## Next implementation priorities
 
+### Active request: public status pages
+
+The user approves public URLs with iframe embedding, private drafts followed by explicit Publish, and time-based availability on 2026-11-07.
+Follow [the status-page plan](status-pages-plan.md) and [feature guide](status-pages.md).
+The implementation adds project-owned pages, ordered public probe text, background color, shared range selection, recent pills, and availability donuts with explicit unknown coverage.
+New statuspages permissions keep administration at Project scope. Public projections contain no target addresses, private identifiers, diagnostics, or evidence.
+Focused SQLite and PostgreSQL checks cover duration calculations, complete retained history beyond 1000 runs, target changes, publication revisions, privacy, and revocation. UI and local AWS packaging compile and validate.
+STUDIO-STATUS-PAGES-001 passes in 2.843 seconds through normal local execution, including actual cross-origin embedding, all time windows, privacy, recovery, and light/dark narrow layouts. Eight UI utility checks pass.
+Committed versioned publication and target verification remain. Reuse the retained local evidence under output/selftest/20261107T223233.325865000-9897ae3890872520b06d7718.
+Version 0.4.0-dev is prepared. The current deployed release remains 0.3.0-dev until new target evidence is recorded.
+Use publish-aws-core.py prepare --public-status for the scoped CloudFront document behavior and response policy, then review the concrete change set. Ordinary image releases retain the image-only path.
+Preserve existing projects, probes, schedules, memberships, and the port 8040 demo.
+
+
 ### Completed request: scoped membership UI and MMDev release
 
 The user keeps Project and Group, selects System, and requests planning for Owner, Contributor, Developer, Member, and Reader on 2026-11-07.

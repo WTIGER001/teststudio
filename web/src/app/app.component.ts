@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
-import { RouterLink, RouterOutlet } from '@angular/router'
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core'
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
+import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router'
 import { ApplicationService } from './core/application.service'
 import { ThemeService } from './core/theme.service'
 import { ScopeContextComponent } from './core/scope-context.component'
@@ -16,6 +17,7 @@ import { HelpComponent } from './features/help/help.component'
   imports: [RouterLink, RouterOutlet, SidebarComponent, ScopeContextComponent, HelpComponent, PasswordSigninComponent, RequiredPasswordComponent, AuthFeedbackComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    @if (publicPage()) { <router-outlet /> } @else if (embedded()) { <main class="signin"><p>Open TestStudio in its own browser tab to sign in.</p></main> } @else {
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="topbar">
       <a class="brand" routerLink="/projects"><span class="brand-symbol" aria-hidden="true">✓</span><span>Test<span class="brand-light">Studio</span></span></a>
@@ -68,11 +70,20 @@ import { HelpComponent } from './features/help/help.component'
         </main>
       </div>
     }
+    }
   `
 })
 export class AppComponent {
   readonly authentication=inject(AuthNavigationService)
   readonly app = inject(ApplicationService)
   readonly theme = inject(ThemeService)
-  constructor() { void this.app.start() }
+  readonly publicPage = signal(location.pathname.startsWith('/status/'))
+  readonly embedded = signal(window.self !== window.top)
+  private started = false
+  constructor() {
+    const router = inject(Router)
+    const start = () => { if (!this.publicPage() && !this.embedded() && !this.started) { this.started = true; void this.app.start() } }
+    router.events.pipe(takeUntilDestroyed()).subscribe(event => { if (event instanceof NavigationEnd) { this.publicPage.set(event.urlAfterRedirects.split(/[?#]/)[0].startsWith('/status/')); start() } })
+    start()
+  }
 }

@@ -36,6 +36,7 @@ func PermissionNames() []string {
 		"evidence":     {"read", "download", "retain", "delete", "override-capture"},
 		"schedules":    {"read", "create", "update", "archive", "delete"},
 		"applications": {"read", "manage"},
+		"statuspages":  {"read", "manage", "publish", "delete"},
 		"policies":     {"manage"},
 		"environments": {"read", "manage"}, "sources": {"read", "manage"}, "suites": {"read", "manage"},
 		"credentials": {"read", "manage"}, "notifications": {"read", "manage"}, "projects": {"read", "create", "manage"},

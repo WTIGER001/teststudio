@@ -218,3 +218,12 @@ The generic roles-00135cfbf35a project retains one normal native HTTPS run and i
 Contributor cannot assign Owner. Revoking its assignment removes existing-session run access and invalidates the already-issued evidence URL while inherited Member access remains.
 Bootstrap OIDC and three independently provisioned local-password sessions use normal API authorization. All four sessions close and the three verification users are disabled.
 Receipts are output/aws-mmdev/roles-030. No existing membership conversion or probe execution is repeated. This focused native scope does not close complete AWS or provider-parity acceptance.
+
+### Public status-page packaging
+
+For the first public status-page release, pass --public-status to scripts/publish-aws-core.py prepare with the committed image receipt.
+This selects the maintained service template and adds the dedicated PublicStatusHeaders policy and /status/* CloudFront behavior.
+Only the public document behavior permits framing; UiHeaders continues to deny framing for the private UI. Public API responses remain no-store.
+Review permits the owned Service and Task modifications, UiDistribution modification, and PublicStatusHeaders addition or modification. Any other resource change stops publication for separate inspection.
+Review the concrete change set before execute. Finish still waits for the owned service digest and API build, publishes matching UI bytes, and invalidates public routes.
+The generic hosted verification should create private drafts, check anonymous rejection, publish an allowlisted snapshot, inspect all periods, verify framing headers, and unpublish its owned test pages. Preserve existing project configuration and schedules.
