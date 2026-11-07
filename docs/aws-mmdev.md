@@ -224,6 +224,7 @@ Receipts are output/aws-mmdev/roles-030. No existing membership conversion or pr
 For the first public status-page release, pass --public-status to scripts/publish-aws-core.py prepare with the committed image receipt.
 This selects the maintained service template and adds the dedicated PublicStatusHeaders policy and /status/* CloudFront behavior.
 Only the public document behavior permits framing; UiHeaders continues to deny framing for the private UI. Public API responses remain no-store.
-Review permits the owned Service and Task modifications, UiDistribution modification, and PublicStatusHeaders addition or modification. Any other resource change stops publication for separate inspection.
+Review permits the owned Service and Task modifications, UiDistribution modification, PublicStatusHeaders addition or modification, and the unchanged UI DNS alias dependency.
+The alias guard requires the existing hostname, no replacement, and only UiDistribution.DomainName as the change source. Any other resource change stops publication for separate inspection.
 Review the concrete change set before execute. Finish still waits for the owned service digest and API build, publishes matching UI bytes, and invalidates public routes.
 The generic hosted verification should create private drafts, check anonymous rejection, publish an allowlisted snapshot, inspect all periods, verify framing headers, and unpublish its owned test pages. Preserve existing project configuration and schedules.

@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import time
 import urllib.request
+import urllib.parse
 
 
 def command(args, **kwargs):
@@ -82,6 +83,11 @@ def main():
         if receipt.get('publicStatusPackage'):
             allowed['UiDistribution'] = 'AWS::CloudFront::Distribution'
             allowed['PublicStatusHeaders'] = 'AWS::CloudFront::ResponseHeadersPolicy'
+            allowed['UiRecord'] = 'AWS::Route53::RecordSet'
+            alias = next((entry['ResourceChange'] for entry in change.get('Changes', []) if entry['ResourceChange']['LogicalResourceId'] == 'UiRecord'), None)
+            if alias:
+                assert alias['Action'] == 'Modify' and alias.get('Replacement') == 'False' and alias.get('PhysicalResourceId') == urllib.parse.urlsplit(outputs['UiUrl']).hostname, 'Preserve the existing UI DNS alias'
+                assert alias.get('Details') and all(detail.get('ChangeSource') == 'ResourceAttribute' and detail.get('CausingEntity') == 'UiDistribution.DomainName' and detail.get('Target', {}).get('Name') == 'AliasTarget' and detail['Target'].get('RequiresRecreation') == 'Never' for detail in alias['Details']), 'Only the existing distribution alias dependency can refresh'
         assert summary and all(allowed.get(v['resource']) == v['type'] and (v['action'] == 'Modify' or receipt.get('publicStatusPackage') and v['resource'] == 'PublicStatusHeaders' and v['action'] == 'Add') for v in summary), 'Review unexpected resources separately'
         if args.action == 'review':
             receipt['reviewedChanges'] = summary

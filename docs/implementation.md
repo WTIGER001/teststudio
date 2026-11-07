@@ -25,7 +25,8 @@ It verifies ordered rows, draft preservation, help, canceled navigation, explici
 Screenshot review corrects initial select binding and very small coverage rounding. The final dark page selects its configured year and displays <0.1% monitored instead of zero.
 The local AWS package passes schema and eight packaging checks. Its separate /status/* behavior permits framing while the private UI remains denied.
 Owned browsers, controllers, database containers, and execution containers exit. The user's demo and existing project data remain unchanged.
-Version 0.4.0-dev is prepared. Publication and target verification remain separate until recorded below.
+Version 0.4.0-dev is committed as 3fc524f and pushed. The release change set also requires CloudFormation’s dependent update of the unchanged UI DNS alias. The operator guard verifies its existing hostname, no replacement, and sole UiDistribution.DomainName dependency.
+Publication and target verification remain separate until recorded below.
 This extends 12, 13, 34, 49, and 50. Acceptance remains **50 verified of 57**.
 
 ## Scoped roles MMDev release — 2026-11-07
