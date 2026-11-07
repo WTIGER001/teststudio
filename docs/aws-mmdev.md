@@ -37,9 +37,9 @@ The reviewed foundation change set adds 29 resources. The reviewed core change s
 Neither change set modifies existing resources. The core change set creates no cluster.
 ECS reports one desired and one running teststudioapi task with a completed rollout.
 Both API and artifact target groups report healthy. The existing testing-server remains at one running task.
-The ARM64 image is sha256:4bfcc4c6c4d8052a3a58126fcd90f12508ee54081526cb3b6197961ab7de4a7c.
-It is published in teststudioapi/service. The current release is 0.3.0-dev, displayed as 0.3.0.dev. Build 00135cfbf35a uses committed source 28be433.
-Its UTC build creation date is 2026-11-07T21:40:22.138Z. The task starts at 2026-11-07T21:42:34.514Z and UI publication occurs at 2026-11-07T21:46:35Z. The API, UI, and image labels share that immutable identity.
+The ARM64 image is sha256:c0d43724e049e75681280abd7b502aea46bfff3dee852cb12aee93efca0f56b1.
+It is published in teststudioapi/service. The current release is 0.4.0-dev, displayed as 0.4.0.dev. Build 8f7db1066f2e uses committed source 3fc524f.
+Its UTC build creation date is 2026-11-07T22:37:40.930Z. The task starts at 2026-11-07T22:42:06.853Z and UI publication occurs at 2026-11-07T22:46:28Z. The API, UI, and image labels share that immutable identity.
 The unchanged trace viewer is reused. Native image storage uses the existing private database. The image retains the reviewed public RDS trust bundle.
 
 Initial core verification retains actual Cognito sign-in, catalog publication, and one native HTTPS probe through the public installation.
@@ -228,3 +228,12 @@ Review permits the owned Service and Task modifications, UiDistribution modifica
 The alias guard requires the existing hostname, no replacement, and only UiDistribution.DomainName as the change source. Any other resource change stops publication for separate inspection.
 Review the concrete change set before execute. Finish still waits for the owned service digest and API build, publishes matching UI bytes, and invalidates public routes.
 The generic hosted verification should create private drafts, check anonymous rejection, publish an allowlisted snapshot, inspect all periods, verify framing headers, and unpublish its owned test pages. Preserve existing project configuration and schedules.
+
+### Public status-page delivery
+
+Release 0.4.0-dev / 8f7db1066f2e is deployed from committed implementation 3fc524f. The operator-only alias guard is committed separately as 617a390.
+The reviewed change set adds the public response policy and changes the existing distribution behavior, service, task, and unchanged alias dependency. The foundation and testing-server remain unchanged.
+The twelve local service-package checks and twenty-three hosted checks pass. The generic project status-8f7db1066f2e verifies two independent pages, all periods, unknown coverage, public-data boundaries, draft/public snapshot isolation, framing headers, and unpublishing.
+One generic native HTTPS run passes in 140.412653 ms with complete evidence. Both verification pages are unpublished and the owned session closes. No existing user probe configuration is made public.
+Public documents, primary assets, status bundles, and API metadata match. The stack reaches UPDATE_COMPLETE, both service rollouts are healthy, and CloudFront invalidation completes.
+Receipts are output/aws-mmdev/status-pages-040. The temporary verification helper is removed. This focused native feature does not close the remaining cross-profile requirements.

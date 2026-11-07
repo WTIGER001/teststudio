@@ -6,6 +6,25 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## Public status pages: MMDev delivery — 2026-11-07
+
+Release 0.4.0-dev uses committed implementation 3fc524feb23198590a6140c7f2192249d295fdbc, immutable build 8f7db1066f2e, created 2026-11-07T22:37:40.930Z with modified false.
+Its ARM64 registry digest is sha256:c0d43724e049e75681280abd7b502aea46bfff3dee852cb12aee93efca0f56b1. All implementation, operator, and final documentation commits are pushed.
+The twelve portable-service checks pass and remove their owned containers and volumes.
+The concrete reviewed change set adds PublicStatusHeaders and modifies Service, Task, UiDistribution, and the existing UiRecord alias dependency without replacement.
+The alias guard verifies the existing hostname and only UiDistribution.DomainName as its source. Foundation resources and testing-server are preserved.
+The selected healthy task starts at 2026-11-07T22:42:06.853Z. UI publication occurs at 2026-11-07T22:46:28Z. Build creation, task startup, and UI publication remain distinct.
+CloudFormation reaches UPDATE_COMPLETE. Both services have one desired, one running, zero pending tasks and completed rollouts. CloudFront invalidation completes.
+The public index, public document, primary assets, status-page bundles, and API version match the committed artifact.
+
+Twenty-three focused hosted checks pass with normal bootstrap OIDC and independent anonymous HTTP requests.
+The generic project status-8f7db1066f2e retains two independent page drafts, two explicit probe bindings, and one normal native HTTPS run.
+Run 20261107T224337.430760610-e79998b43e37461d9dd398e9 passes in 140.412653 ms with complete evidence.
+Checks cover anonymous draft rejection, preview allowlisting, published default range and background, available versus unknown coverage, private-data omission, no-store responses, all five periods, embedding headers, draft/published isolation, and immediate unpublishing.
+Private UI framing denial remains active. Both verification pages are unpublished; the owned session is revoked and temporary helper removed.
+Receipts are output/aws-mmdev/status-pages-040. Existing probes, schedules, memberships, the port 8040 demo, and unrelated workloads remain unchanged. No existing probe configuration is published automatically.
+This extends 12, 13, 34, 49, and 50. Acceptance remains **50 verified of 57**. Broad coded-worker and cross-profile criteria remain open.
+
 ## Public status pages: local implementation — 2026-11-07
 
 Projects can create independent status pages with saved drafts and separate published snapshots.
@@ -26,7 +45,7 @@ Screenshot review corrects initial select binding and very small coverage roundi
 The local AWS package passes schema and eight packaging checks. Its separate /status/* behavior permits framing while the private UI remains denied.
 Owned browsers, controllers, database containers, and execution containers exit. The user's demo and existing project data remain unchanged.
 Version 0.4.0-dev is committed as 3fc524f and pushed. The release change set also requires CloudFormation’s dependent update of the unchanged UI DNS alias. The operator guard verifies its existing hostname, no replacement, and sole UiDistribution.DomainName dependency.
-Publication and target verification remain separate until recorded below.
+Separate publication and target verification are recorded above.
 This extends 12, 13, 34, 49, and 50. Acceptance remains **50 verified of 57**.
 
 ## Scoped roles MMDev release — 2026-11-07

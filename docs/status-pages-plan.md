@@ -16,4 +16,6 @@ Preserve the port 8040 demo and existing projects, probes, schedules, and member
 The focused duration and HTTP cases pass on SQLite and PostgreSQL. Native permission reads retain scoped roles, exact denies, expiry, and revocation while reusing principal policy data within one report.
 The UI build, eight utility checks, and normal STUDIO-STATUS-PAGES-001 pass. Final browser duration is 2.843 seconds. Light and dark desktop and narrow screenshots pass review.
 The local AWS schema and eight packaging checks pass. The first release needs the scoped --public-status template update and a concrete change-set review.
-Version 0.4.0-dev is prepared; deployment and target checks remain separate.
+Version 0.4.0-dev is deployed from committed 3fc524f with matching build 8f7db1066f2e.
+The reviewed scoped change set, twelve service-package checks, and twenty-three hosted checks pass. Public framing is limited to status documents; private UI framing remains denied.
+Both temporary hosted pages are unpublished and the owned session closes. Existing user project configuration remains unchanged. The acceptance total stays 50 of 57.

@@ -1,7 +1,7 @@
 # Public status pages
 
 Each project can create separate status pages for different audiences. A page contains an ordered selection of current HTTP probe bindings.
-Each row has its own public title, optional description, recent result pills, and an availability donut.
+Each row has its own public title, optional description, recent result pills, and an availability donut. A page supports up to 100 probes; project page lists continue through pagination.
 The page title, background color, and default time range are configurable. One viewer selector changes every row together.
 Public pages have standalone URLs and support iframe embedding without sign-in.
 

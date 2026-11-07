@@ -16,12 +16,14 @@ Use the mm_dev profile and preserve existing services. Azure implementation and 
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
-## Active user direction: public status pages
+## Completed user direction: public status pages
 
 The user requests project-owned, anonymous, embeddable HTTP probe pages with configurable page title and background, ordered public probe text, recent pills, and right-hand availability donuts.
 The user approves public URLs plus iframe embedding, Save draft then Publish, and time-based availability.
 Follow [the status-page plan](status-pages-plan.md). Shared viewer periods cover 24 hours, seven days, 30 days, 365 days, and all retained history.
 Unknown monitoring coverage stays separate from uptime. Viewing a page never executes probes or initializes sign-in.
+Release 0.4.0-dev from committed 3fc524f is pushed and deployed to MMDev. The local browser workflow, focused SQLite and PostgreSQL cases, twelve package checks, and twenty-three hosted checks pass.
+Public documents permit embedding while the private UI retains framing denial. Temporary verification pages are unpublished and the owned session closes. Existing project configuration and workloads remain unchanged.
 The milestone refines 12, 13, 34, 49, and 50. The count remains 50 verified of 57. Keep local, release, and target evidence separate.
 
 ## Completed user direction: compact probe status bars

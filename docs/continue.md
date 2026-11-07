@@ -23,14 +23,14 @@ UI improvements refine existing accepted items. They do not close the remaining 
 | Item | Last verified value |
 | --- | --- |
 | Hosted UI | https://teststudio.devfoodmarketmaker.com |
-| Product version | 0.3.0-dev; footer displays 0.3.0.dev |
-| Build identifier | 00135cfbf35a |
-| Build creation | 2026-11-07T21:40:22.138Z |
-| Implementation commit | 28be433a24db4a90cab65aff30412115560e4896 |
+| Product version | 0.4.0-dev; footer displays 0.4.0.dev |
+| Build identifier | 8f7db1066f2e |
+| Build creation | 2026-11-07T22:37:40.930Z |
+| Implementation commit | 3fc524feb23198590a6140c7f2192249d295fdbc |
 | Source state at build | Committed source; modified is false |
-| Service image digest | sha256:4bfcc4c6c4d8052a3a58126fcd90f12508ee54081526cb3b6197961ab7de4a7c |
-| Task startup | 2026-11-07T21:42:34.514Z |
-| UI publication | 2026-11-07T21:46:35Z |
+| Service image digest | sha256:c0d43724e049e75681280abd7b502aea46bfff3dee852cb12aee93efca0f56b1 |
+| Task startup | 2026-11-07T22:42:06.853Z |
+| UI publication | 2026-11-07T22:46:28Z |
 | Live version metadata | GET /api/v1/version; public and no-store |
 
 Later documentation and operator-tooling commits do not change the deployed implementation commit or its immutable build date.
@@ -43,7 +43,7 @@ On 2026-11-07, HTTPS probe recent checks switch from checkmark tiles to compact 
 The patch is included in deployed 0.3.0-dev alongside scoped membership management. The release table above identifies the published artifact.
 The UI build and STUDIO-PROBE-OVERVIEW-001 pass. Run 20261107T153825.676380000-f359987ef19bbbc8498e69d0 verifies 30 checks, keyboard links, light and dark themes, and a 390-pixel layout.
 Evidence is complete, execution is cleaned, and owned processes exit. The total stays 50 verified of 57; items 34, 49, and 50 are refined.
-Project and Application members now support reviewed role changes and conversion recovery. Reuse the passing evidence below; do not repeat workflows merely to publish them.
+Project and Application members support reviewed role changes and conversion recovery. Project Status pages now provides public, embeddable probe summaries with reviewed publication and time-based availability. Reuse the passing evidence below.
 
 ## Recent completed work to preserve
 
@@ -75,7 +75,7 @@ This operator convenience changes no application release and closes no acceptanc
 
 ## Next implementation priorities
 
-### Active request: public status pages
+### Completed request: public status pages
 
 The user approves public URLs with iframe embedding, private drafts followed by explicit Publish, and time-based availability on 2026-11-07.
 Follow [the status-page plan](status-pages-plan.md) and [feature guide](status-pages.md).
@@ -83,8 +83,10 @@ The implementation adds project-owned pages, ordered public probe text, backgrou
 New statuspages permissions keep administration at Project scope. Public projections contain no target addresses, private identifiers, diagnostics, or evidence.
 Focused SQLite and PostgreSQL checks cover duration calculations, complete retained history beyond 1000 runs, target changes, publication revisions, privacy, and revocation. UI and local AWS packaging compile and validate.
 STUDIO-STATUS-PAGES-001 passes in 2.843 seconds through normal local execution, including actual cross-origin embedding, all time windows, privacy, recovery, and light/dark narrow layouts. Eight UI utility checks pass.
-Committed versioned publication and target verification remain. Reuse the retained local evidence under output/selftest/20261107T223233.325865000-9897ae3890872520b06d7718.
-Version 0.4.0-dev is prepared. The current deployed release remains 0.3.0-dev until new target evidence is recorded.
+Versioned publication and target verification now pass. Reuse the retained local evidence under output/selftest/20261107T223233.325865000-9897ae3890872520b06d7718.
+Version 0.4.0-dev is deployed from committed 3fc524f, build 8f7db1066f2e. All implementation and operator commits are pushed.
+The twelve service-package checks and twenty-three hosted checks pass. Two independent generic pages verify private drafts, explicit publication, snapshot isolation, all ranges, unknown coverage, privacy, framing headers, and immediate unpublishing. Their single native HTTPS run passes in 140.412653 ms.
+Both verification pages are unpublished, the owned session closes, and the temporary helper is removed. Public UI assets and API metadata match. CloudFront invalidation completes; the stack and both services have healthy completed rollouts. Receipts are output/aws-mmdev/status-pages-040.
 Use publish-aws-core.py prepare --public-status for the scoped CloudFront document behavior and response policy, then review the concrete change set. Ordinary image releases retain the image-only path.
 Preserve existing projects, probes, schedules, memberships, and the port 8040 demo.
 
