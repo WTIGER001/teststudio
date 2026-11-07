@@ -180,6 +180,11 @@ It does not establish complete AWS or cross-provider acceptance.
 ### Publish a reviewed application release
 
 Use the tracked scripts/publish-aws-core.py helper instead of workstation-only release snippets.
+The MarketMaker API checkout also provides deploy-teststudio-dev.py in its root as a launcher with MMDev defaults.
+It calls this maintained helper from the selected TestStudio checkout and stores release receipts there.
+Status is read-only. Prepare skips a runtime already published and preserves in-progress rollouts.
+For new committed releases, use prepare, review, execute, and finish in that order.
+Override the source checkout with --source or TESTSTUDIO_DIR. The API checkout's README documents receipt and image reuse.
 Build the portable service from committed source and retain its JSON output in a private ignored image receipt.
 Run prepare with profile, region, account, stack, image-receipt, and receipt arguments.
 It verifies the account and stack ownership, uses a temporary Docker login configuration, publishes the selected image, and creates an image-only change set.

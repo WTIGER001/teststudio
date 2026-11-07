@@ -1,6 +1,6 @@
 # Continue TestStudio implementation
 
-Last reviewed: 2026-11-06. These notes describe the last verified state, not a live infrastructure inventory.
+Last reviewed: 2026-11-07. These notes describe the last verified state, not a live infrastructure inventory.
 Read this guide before historical continuation commands elsewhere in the plan.
 
 ## Resume in this order
@@ -52,6 +52,16 @@ The local user demo is separate. Do not assume it runs the same release as the h
 - Requested project creation and existing-project access were granted through normal authorization. Do not repeat grants or infer access from sign-in.
 
 See [versioning](versioning.md), [project images](project-images.md), [first installation](first-installation.md), and [MMDev operation](aws-mmdev.md).
+
+## MarketMaker deployment entry point
+
+On 2026-11-07 the user selects /Users/johnbauer/Dev/MarketMaker/api for the deployment launcher.
+Its deploy-teststudio-dev.py pins mm_dev, account 253455159142, region us-west-2, stack teststudioapi, and cluster marketmaker-testing-dev.
+The launcher delegates to this checkout's maintained publish-aws-core.py. It supports a source override and works from another working directory.
+Six focused launcher checks pass. Its actual prepare invocation confirms 0.2.0-dev / 6caa2b0ca508 is already deployed with no newer runtime changes.
+The current stack is UPDATE_COMPLETE. Both teststudioapi and testing-server have completed healthy rollouts. No duplicate build or deployment starts.
+The README in the API checkout documents status, prepare, review, execute, finish, and per-release receipt selection.
+This operator convenience changes no application release and closes no acceptance criterion. Continue the default queue below when requested.
 
 ## Next implementation priorities
 

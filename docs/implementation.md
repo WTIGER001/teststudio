@@ -6,6 +6,18 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## MarketMaker MMDev deployment launcher — 2026-11-07
+
+The user selects the separate MarketMaker API checkout for a deployment entry point.
+Its root deploy-teststudio-dev.py delegates to TestStudio's maintained generic publisher with fixed MMDev account, region, stack, and cluster defaults.
+Source overrides and an explicit working directory preserve TestStudio's independence and permit invocation from another directory.
+Prepare requires committed implementation and a changed product version for new runtime behavior. Already-published runtime inputs skip rebuilding and redeployment.
+The explicit review, execute, and finish phases preserve concrete CloudFormation review and in-progress deployment recovery.
+The API README records the commands. Six focused offline checks verify account rejection, working-directory handling, version enforcement, uncommitted runtime rejection, already-current reuse, and in-progress preservation.
+An actual invocation from /tmp confirms 0.2.0-dev, build 6caa2b0ca508, is already deployed. No new image build, change set, or deployment is started.
+The selected account is 253455159142. The live version and health pass; the core stack is UPDATE_COMPLETE, and both TestStudio and testing-server retain completed healthy rollouts.
+This changes operator tooling only. The acceptance count remains 50 verified of 57, with the same seven broad items open.
+
 ## HTTPS probes release and private onboarding — 2026-11-06
 
 Milestone 6 completes the requested six-milestone HTTPS probes delivery.
