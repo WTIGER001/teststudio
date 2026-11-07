@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"github.com/wtiger001/teststudio/internal/authorization"
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/execution"
@@ -128,16 +129,17 @@ func matches(v Run, f Filter) bool {
 }
 
 func (s *Service) List(ctx context.Context, user, project string, filter Filter, cursor string, limit int) (Page, error) {
-	if err := s.Auth.Check(ctx, user, project, "", "runs.read"); err != nil {
+	if err := s.Auth.CheckCollection(ctx, user, project, "runs.read"); err != nil {
 		return Page{}, err
 	}
 	if limit < 1 || limit > 100 {
 		return Page{}, errors.New("run page limit must be between 1 and 100")
 	}
 	queryHash := fingerprint(struct {
+		User    string
 		Project string
 		Filter  Filter
-	}{project, filter})
+	}{user, project, filter})
 	storeCursor := ""
 	if cursor != "" {
 		data, err := base64.RawURLEncoding.DecodeString(cursor)
@@ -163,6 +165,11 @@ func (s *Service) List(ctx context.Context, user, project string, filter Filter,
 			result.Scanned++
 			v, err := storage.Decode[Run](row)
 			if err != nil {
+				return Page{}, err
+			}
+			if err := s.Auth.Check(ctx, user, project, "run/"+v.ID, "runs.read"); errors.Is(err, authorization.ErrForbidden) {
+				continue
+			} else if err != nil {
 				return Page{}, err
 			}
 			if matches(v, filter) {

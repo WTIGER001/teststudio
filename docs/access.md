@@ -1,7 +1,8 @@
 # Identity administration
 
-The proposed [System and scoped role plan](roles-plan.md) defines cumulative Project and Application roles and reviewed migration.
-It is a planning proposal. The current roles and behavior below remain in force until implementation.
+The backend implements the [System and scoped role plan](roles-plan.md) through API contract 0.37.0.
+This implementation is unreleased. The existing hosted release and membership screens remain unchanged.
+Use the standard role APIs below for new integrations. Legacy roles and custom permissions retain their stored assignments.
 
 TestStudio stores user profiles, external identity links, groups, and membership provenance in its selected database.
 The permission library evaluates access. The directory does not infer project authority from an email address or group name.
@@ -16,6 +17,87 @@ Identity provider screens manage sign-in configuration and exact group mappings.
 User-owned identity linking and project-owned pending access use explicit, audited workflows.
 The full acceptance ledger remains in [Implementation verification](implementation.md).
 The [OpenAPI contract](../contracts/openapi.yaml) describes identity, role policy, direct grants, permission catalog, and assignment routes. Other route families remain pending.
+
+## Standard Project and Application roles
+
+| Role identifier | Includes |
+| --- | --- |
+| builtin.teststudio.reader | Read permitted definitions, results, trends, schedules, and evidence. |
+| builtin.teststudio.member | Reader access plus published execution, cancellation, and execution schedule management. |
+| builtin.teststudio.developer | Member access plus test authoring, publication, suites, sources, and repository synchronization. |
+| builtin.teststudio.contributor | Developer access plus settings, environments, notifications, pins, and non-Owner membership management. |
+| builtin.teststudio.owner | Contributor access plus deletion and adding, removing, promoting, or demoting Owners. |
+
+Project roles inherit into every application in the project. Application roles apply to one application.
+Combine direct and group permissions through permissions.Service. Denies, role disables, current membership, and expiry still apply.
+A lower Application role does not reduce an inherited Project role.
+System Admin keeps the compatible builtin.teststudio.installation-admin identifier and System-wide authority.
+Standard roles grant neither System administration nor protected execution or capture overrides.
+Changing a protected environment to unprotected requires separate policies.manage authority.
+
+Contributor checks protect all Owner paths, including group membership and custom policies, even when another Owner remains usable.
+Contributors cannot delegate deletion or ownership through compatibility roles, custom role rules, or direct grants.
+Project group ownership and System group authority remain separate from Application membership administration.
+Owners still need authority over a shared group's stored scope before assigning it Application access.
+
+The server resolves stored resource context before evaluating Application roles.
+It filters project discovery, application and environment lists, catalogs, runs, trends, and automation by current access.
+Application-only members receive only the parent project's identifier and name, without project settings.
+Shared suites remain Project-owned. Filtered catalog reads expose authorized tests; complete source access, authoring, publication, activation, and link changes require Project authority.
+Full mixed-application run payloads and their logs, exports, and artifacts remain unavailable to Application-only members.
+Runs keep frozen application context. Later suite relinking cannot expand historical run access.
+Scheduled execution and artifact downloads recheck current authority. Removing a role rejects the next request from the existing session and blocks the next schedule firing.
+
+### Scoped membership endpoints
+
+Use /api/v1/projects/{project}/role-assignments for Project roles.
+Use /api/v1/projects/{project}/applications/{application}/role-assignments for Application roles.
+The Application family supports the five standard roles. Project routes also retain compatibility and custom roles.
+GET lists bounded direct assignments. Inherited sources appear through effective-permission explanations.
+POST assigns a role with principalKind, principalId, roleId, and reason.
+GET or DELETE /{kind}/{principal}/{role} inspects or revokes an exact assignment. Deletion requires its current If-Match revision and a reason.
+Routes derive bindings. Bodies cannot supply project, application, or binding overrides.
+
+PUT /{kind}/{principal} atomically replaces a standard role. Supply roleId, previousRoleId, reason, and the previous assignment's If-Match revision.
+Both the previous role and revision must match. Different role records can have the same numeric revision.
+To create the first standard role with PUT, use If-Match: 0 and omit previousRoleId.
+Only one direct standard role is allowed for each principal and exact scope. Custom and compatibility paths remain independent.
+Self changes are authorized against the complete proposed batch before committing. Concurrent replacements produce one winner and an explicit conflict.
+
+GET /api/v1/roles?project={project}&application={application} lists standard Application choices and current delegation capability.
+GET /api/v1/me/capabilities accepts the same optional application parameter.
+GET /api/v1/me/effective-permissions and the authorized user explanation endpoint also accept application.
+Explanation results include applicationId and readable assignmentApplication provenance. Cursors bind the complete selected context.
+
+GET /api/v1/projects/{project}/member-candidates/{user} returns an authorized exact user's identifier, display name, and disabled state.
+The Application equivalent sits under /applications/{application}. This lookup grants no System directory listing, email, credential, or identity-link access.
+GET ownership at either scope returns system-managed, owned, or owner-unavailable.
+A usable Owner needs an enabled account and role, current membership, an available sign-in path, and effective management authority.
+Application ownership can rely on a usable Project Owner.
+Guarded mutations preserve the last usable Owner. External expiry can still create an owner-unavailable state; System Admin can repair it through normal audited assignments.
+
+### Reviewed role conversion
+
+Use /api/v1/projects/{project}/role-conversions. The Application equivalent sits under /applications/{application}.
+POST /preview accepts the assignment definition and target standard role. It records the principal's current predefined assignments and potential added and removed role actions.
+These action lists describe the role definitions. Existing custom roles, direct grants, and denies still determine effective access.
+Preview changes no assignments. It expires after ten minutes and binds the actor, exact scope, directory revision, and prior assignment revisions.
+
+GET /{conversion} reads the actor's retained review or receipt.
+POST /{conversion}/apply uses the preview record's If-Match revision. Apply rechecks current authority and commits assignments, metadata, and audit records together.
+A changed directory, disabled target role, stale assignment, or expired review requires a new preview.
+Repeated successful apply requests return the receipt while the actor retains read authority.
+An actor who removes their own management access may need another authorized manager to inspect current membership.
+
+POST /{conversion}/rollback-preview with a reason prepares a new review that restores the original predefined role set.
+Apply that new review through its normal apply endpoint. Current delegation, revision, and usable-Owner safeguards still apply.
+A rollback that would remove the final usable Owner requires another usable Owner first.
+The conversion never removes custom roles or direct grants and never runs automatically at startup.
+Legacy Operator is a Member conversion candidate, but its schedule-delete action appears as a loss requiring review.
+Legacy Project administrator does not automatically become Contributor or Owner.
+
+Focused local API, permission-service, creator, conversion, and compatibility checks pass on SQLite and PostgreSQL.
+See [implementation verification](implementation.md) for the retained check totals and separate target acceptance.
 
 ## Grant acceptance coverage
 
@@ -420,15 +502,9 @@ All owned verification controllers exit after the check.
 ## Initial project creator access
 
 Creating a project requires installation-scoped projects.create permission.
-Ordinary creators receive four existing roles, bound only to the new project's identifier:
-
-- Project administrator manages the project's applications, targets, membership, and access.
-- Catalog editor creates and changes test definitions.
-- Publisher manages suites and sources and publishes releases.
-- Operator starts runs and manages schedules.
-
-The project and these managed assignments commit in one transaction with audit records.
-If a required role is disabled or an assignment fails, the project and partial access do not commit.
+Ordinary creators receive one managed Owner role, bound only to the new project's identifier.
+The project and its Owner assignment commit in one transaction with audit records.
+If Owner is disabled or the assignment fails, the project and partial access do not commit.
 The error identifies the unavailable role. An installation operator must repair that policy before another create attempt.
 Explicit denies remain effective. Initial assignments grant no installation privileges or protected-target execution permission.
 Assignment routes expose these records with their normal revisions, management timestamps, and revocation controls.
@@ -439,8 +515,8 @@ An actor with every installation permission already has complete installation ad
 Such actors keep their existing authority without automatic project self-assignment.
 They can assign explicit project roles before withdrawing installation administration when retained project access is required.
 Existing projects receive no automatic access changes during startup or upgrade.
-The Project administrator role itself still does not include editing, publishing, or running tests.
-Those capabilities come from the separate initial assignments and remain independently revocable.
+Existing four-role creator bundles stay unchanged until reviewed conversion.
+The legacy Project administrator role still excludes editing, publishing, and running tests.
 
 ### Project creation API
 
@@ -459,7 +535,7 @@ Use an existing user or group. Local and OIDC profiles use the same permanent in
 The API creates no credentials, identity links, or invitation messages.
 The project route determines the exact `team` binding. Request bodies cannot supply bindings or widen the scope.
 The installation route supports the installation administrator role.
-Project routes support viewer, operator, editor, publisher, and project administrator roles.
+Project routes support Reader, Member, Developer, Contributor, and Owner, plus legacy viewer, operator, editor, publisher, and project administrator roles.
 The same routes also accept managed custom roles in their exact owning scope.
 Their literal rule scopes require no caller-supplied bindings. Arbitrary object binding templates remain unavailable.
 

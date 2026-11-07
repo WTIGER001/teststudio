@@ -31,8 +31,10 @@ The [role plan](roles-plan.md) proposes Reader, Member, Developer, Contributor, 
 Member runs published tests and manages execution schedules. Contributor sits directly below Owner and can manage everything in scope except resource deletion and adding, removing, or changing Owners, including indirect changes through groups or policies.
 Project roles inherit into applications. Application-only membership requires server enforcement across shared suites, sources, runs, evidence, and automation before UI exposure.
 Existing narrow roles retain their permissions until reviewed conversion. New role names never silently broaden existing grants.
-This request delivers planning only. Its implementation milestones do not start application changes, migration, publication, or deployment.
-The acceptance count remains 50 verified of 57. Resume this design when the user requests implementation; otherwise retain the default worker queue.
+The user requests API implementation on 2026-11-07. The five roles, scoped assignments and capabilities, application resource enforcement, Owner safeguards, and reviewed conversion APIs are implemented locally.
+API contract 0.37.0 generates the matching client. Focused SQLite and PostgreSQL checks cover the backend work for milestones 1 through 3.
+Application membership UI, its browser workflows, release publication, and target verification remain pending. The hosted release and existing memberships are unchanged.
+The acceptance count remains 50 verified of 57. This work refines 05, 07, 10, 12, 13, 14, 38, and 45 without closing the remaining cross-profile items.
 
 ## Completed user direction: HTTPS probes and visual help
 

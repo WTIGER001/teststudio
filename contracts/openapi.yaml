@@ -1,8 +1,8 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio API"
-  "version": "0.36.0"
-  "description": "Implemented user, group, membership, current-profile, and session administration. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Includes optional client-identifier RP-initiated provider logout after local session revocation. Includes staged native JSON and YAML sources with atomic catalog publication and retained source provenance. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
+  "version": "0.37.0"
+  "description": "Implemented user, group, membership, current-profile, and session administration. Includes cumulative Reader, Member, Developer, Contributor, and Owner roles at Project and Application scope, System Admin naming, atomic standard-role replacement, usable-Owner safeguards, scoped capability and explanation queries, and reviewed role conversions with rollback previews. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Includes optional client-identifier RP-initiated provider logout after local session revocation. Includes staged native JSON and YAML sources with atomic catalog publication and retained source provenance. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
     "url": "/"
@@ -10,6 +10,1241 @@
   -
     "SessionCookie": []
 "paths":
+  "/api/v1/me/capabilities": {
+    "get": {
+      "operationId": "readCurrentCapabilities",
+      "parameters": [
+        {
+          "in": "query",
+          "name": "project",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "application",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Capabilities"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      }
+    }
+  }
+  "/api/v1/projects/{project}/applications/{application}": {
+    "get": {
+      "operationId": "readApplication",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "application",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplicationRecord"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      }
+    }
+  }
+  "/api/v1/projects/{project}/applications/{application}/member-candidates/{user}": {
+    "get": {
+      "operationId": "readApplicationMemberCandidate",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "application",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "user",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberCandidate"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      }
+    }
+  }
+  "/api/v1/projects/{project}/applications/{application}/ownership": {
+    "get": {
+      "operationId": "readApplicationOwnership",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "application",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OwnershipStatus"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      }
+    }
+  }
+  "/api/v1/projects/{project}/applications/{application}/role-assignments": {
+    "get": {
+      "operationId": "listApplicationAssignments",
+      "summary": "Scan a bounded assignment page in this scope. Filtered pages can be empty with a continuation cursor. Application scope accepts only the five standard roles. The server resolves project ownership and application scope.",
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/AssignmentProject"
+        },
+        {
+          "$ref": "#/components/parameters/Limit"
+        },
+        {
+          "$ref": "#/components/parameters/Cursor"
+        },
+        {
+          "in": "path",
+          "name": "application",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Operation completed.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentPage"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      }
+    },
+    "post": {
+      "operationId": "createApplicationAssignment",
+      "summary": "Assign a predefined or managed custom role to an existing user or group. The route determines exact bindings and validates delegation. A reason is required. Application scope accepts only the five standard roles. The server resolves project ownership and application scope.",
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/AssignmentProject"
+        },
+        {
+          "$ref": "#/components/parameters/Origin"
+        },
+        {
+          "in": "path",
+          "name": "application",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Operation completed.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentRecord"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      },
+      "security": [
+        {
+          "SessionCookie": [],
+          "CSRFToken": []
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AssignmentDefinition"
+            }
+          }
+        }
+      }
+    }
+  }
+  "/api/v1/projects/{project}/applications/{application}/role-assignments/{kind}/{principal}": {
+    "put": {
+      "operationId": "replaceApplicationStandardAssignment",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "application",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "kind",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "principal",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "$ref": "#/components/parameters/Revision"
+        },
+        {
+          "$ref": "#/components/parameters/Origin"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentRecord"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      },
+      "security": [
+        {
+          "SessionCookie": [],
+          "CSRFToken": []
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StandardAssignmentReplacement"
+            }
+          }
+        }
+      },
+      "summary": "Atomically replace one direct standard role. If-Match is the previous assignment revision and previousRoleId must match. Use revision zero and omit previousRoleId only when no standard role exists. Contributors cannot change Owners."
+    }
+  }
+  "/api/v1/projects/{project}/applications/{application}/role-assignments/{kind}/{principal}/{role}": {
+    "get": {
+      "operationId": "readApplicationAssignment",
+      "summary": "Read one exact role assignment, including legacy assignments created during bootstrap. Application scope accepts only the five standard roles. The server resolves project ownership and application scope.",
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/AssignmentProject"
+        },
+        {
+          "$ref": "#/components/parameters/PrincipalKind"
+        },
+        {
+          "$ref": "#/components/parameters/AssignmentPrincipal"
+        },
+        {
+          "$ref": "#/components/parameters/AssignmentRole"
+        },
+        {
+          "in": "path",
+          "name": "application",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Operation completed.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentRecord"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      }
+    },
+    "delete": {
+      "operationId": "revokeApplicationAssignment",
+      "summary": "Remove this exact role and binding combination using the current revision and a reason. Preserve the last usable installation administrator. Application scope accepts only the five standard roles. The server resolves project ownership and application scope.",
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/AssignmentProject"
+        },
+        {
+          "$ref": "#/components/parameters/PrincipalKind"
+        },
+        {
+          "$ref": "#/components/parameters/AssignmentPrincipal"
+        },
+        {
+          "$ref": "#/components/parameters/AssignmentRole"
+        },
+        {
+          "$ref": "#/components/parameters/Origin"
+        },
+        {
+          "$ref": "#/components/parameters/Revision"
+        },
+        {
+          "in": "path",
+          "name": "application",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Operation completed.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Revoked"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      },
+      "security": [
+        {
+          "SessionCookie": [],
+          "CSRFToken": []
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Reason"
+            }
+          }
+        }
+      }
+    }
+  }
+  "/api/v1/projects/{project}/applications/{application}/role-conversions/preview": {
+    "post": {
+      "operationId": "previewApplicationRoleConversion",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "application",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "$ref": "#/components/parameters/Origin"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleConversionRecord"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      },
+      "security": [
+        {
+          "SessionCookie": [],
+          "CSRFToken": []
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AssignmentDefinition"
+            }
+          }
+        }
+      },
+      "summary": "Preview replacement of the selected principal predefined roles with one standard role. Lists potential added and removed role actions. Keeps custom roles and direct grants. Preview expires after ten minutes and binds actor and directory revision."
+    }
+  }
+  "/api/v1/projects/{project}/applications/{application}/role-conversions/{conversion}": {
+    "get": {
+      "operationId": "readApplicationRoleConversion",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "application",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "conversion",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleConversionRecord"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      }
+    }
+  }
+  "/api/v1/projects/{project}/applications/{application}/role-conversions/{conversion}/apply": {
+    "post": {
+      "operationId": "applyApplicationRoleConversion",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "application",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "conversion",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "$ref": "#/components/parameters/Revision"
+        },
+        {
+          "$ref": "#/components/parameters/Origin"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleConversionRecord"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      },
+      "security": [
+        {
+          "SessionCookie": [],
+          "CSRFToken": []
+        }
+      ],
+      "summary": "Apply the exact reviewed conversion atomically. Rechecks current authority, assignments, role state, directory revision, and usable Owners. Repeated applied requests return the receipt when current read authority remains."
+    }
+  }
+  "/api/v1/projects/{project}/applications/{application}/role-conversions/{conversion}/rollback-preview": {
+    "post": {
+      "operationId": "previewApplicationRoleConversionRollback",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "application",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "conversion",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "$ref": "#/components/parameters/Origin"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleConversionRecord"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      },
+      "security": [
+        {
+          "SessionCookie": [],
+          "CSRFToken": []
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Reason"
+            }
+          }
+        }
+      }
+    }
+  }
+  "/api/v1/projects/{project}/member-candidates/{user}": {
+    "get": {
+      "operationId": "readProjectMemberCandidate",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "user",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MemberCandidate"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      }
+    }
+  }
+  "/api/v1/projects/{project}/ownership": {
+    "get": {
+      "operationId": "readProjectOwnership",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OwnershipStatus"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      }
+    }
+  }
+  "/api/v1/projects/{project}/role-assignments/{kind}/{principal}": {
+    "put": {
+      "operationId": "replaceProjectStandardAssignment",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "kind",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "principal",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "$ref": "#/components/parameters/Revision"
+        },
+        {
+          "$ref": "#/components/parameters/Origin"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentRecord"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      },
+      "security": [
+        {
+          "SessionCookie": [],
+          "CSRFToken": []
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/StandardAssignmentReplacement"
+            }
+          }
+        }
+      },
+      "summary": "Atomically replace one direct standard role. If-Match is the previous assignment revision and previousRoleId must match. Use revision zero and omit previousRoleId only when no standard role exists. Contributors cannot change Owners."
+    }
+  }
+  "/api/v1/projects/{project}/role-conversions/preview": {
+    "post": {
+      "operationId": "previewProjectRoleConversion",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "$ref": "#/components/parameters/Origin"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleConversionRecord"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      },
+      "security": [
+        {
+          "SessionCookie": [],
+          "CSRFToken": []
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/AssignmentDefinition"
+            }
+          }
+        }
+      },
+      "summary": "Preview replacement of the selected principal predefined roles with one standard role. Lists potential added and removed role actions. Keeps custom roles and direct grants. Preview expires after ten minutes and binds actor and directory revision."
+    }
+  }
+  "/api/v1/projects/{project}/role-conversions/{conversion}": {
+    "get": {
+      "operationId": "readProjectRoleConversion",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "conversion",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleConversionRecord"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      }
+    }
+  }
+  "/api/v1/projects/{project}/role-conversions/{conversion}/apply": {
+    "post": {
+      "operationId": "applyProjectRoleConversion",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "conversion",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "$ref": "#/components/parameters/Revision"
+        },
+        {
+          "$ref": "#/components/parameters/Origin"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleConversionRecord"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      },
+      "security": [
+        {
+          "SessionCookie": [],
+          "CSRFToken": []
+        }
+      ],
+      "summary": "Apply the exact reviewed conversion atomically. Rechecks current authority, assignments, role state, directory revision, and usable Owners. Repeated applied requests return the receipt when current read authority remains."
+    }
+  }
+  "/api/v1/projects/{project}/role-conversions/{conversion}/rollback-preview": {
+    "post": {
+      "operationId": "previewProjectRoleConversionRollback",
+      "parameters": [
+        {
+          "in": "path",
+          "name": "project",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "conversion",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "$ref": "#/components/parameters/Origin"
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current authorized result.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoleConversionRecord"
+              }
+            }
+          }
+        },
+        "401": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "403": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "404": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "409": {
+          "$ref": "#/components/responses/Problem"
+        },
+        "422": {
+          "$ref": "#/components/responses/Problem"
+        }
+      },
+      "security": [
+        {
+          "SessionCookie": [],
+          "CSRFToken": []
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Reason"
+            }
+          }
+        }
+      }
+    }
+  }
   "/api/v1/projects/{project}/probes": {
     "get": {
       "operationId": "listHTTPSProbes",
@@ -4630,63 +5865,104 @@
           "application/json":
             "schema":
               "$ref": "#/components/schemas/Reason"
-  "/api/v1/roles":
-    "get":
-      "operationId": "listRoles"
-      "summary": "List readable predefined roles for the exact scope. Managed custom roles use the separate bounded custom-role catalog."
-      "parameters":
-        -
+  "/api/v1/roles": {
+    "get": {
+      "operationId": "listRoles",
+      "summary": "List readable predefined roles for the exact scope. Managed custom roles use the separate bounded custom-role catalog. Optional application context includes project inheritance and exact application bindings.",
+      "parameters": [
+        {
           "$ref": "#/components/parameters/RoleProject"
-      "responses":
-        "200":
-          "description": "Operation completed."
-          "content":
-            "application/json":
-              "schema":
+        },
+        {
+          "in": "query",
+          "name": "application",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Operation completed.",
+          "content": {
+            "application/json": {
+              "schema": {
                 "$ref": "#/components/schemas/RolePage"
-        "401":
+              }
+            }
+          }
+        },
+        "401": {
           "$ref": "#/components/responses/Problem"
-        "403":
+        },
+        "403": {
           "$ref": "#/components/responses/Problem"
-        "404":
+        },
+        "404": {
           "$ref": "#/components/responses/Problem"
-        "409":
+        },
+        "409": {
           "$ref": "#/components/responses/Problem"
-        "422":
+        },
+        "422": {
           "$ref": "#/components/responses/Problem"
-    "post":
-      "operationId": "createRolePolicy"
-      "summary": "Create an authorized custom role with exact scoped rules and validated inheritance."
-      "parameters":
-        -
+        }
+      }
+    },
+    "post": {
+      "operationId": "createRolePolicy",
+      "summary": "Create an authorized custom role with exact scoped rules and validated inheritance.",
+      "parameters": [
+        {
           "$ref": "#/components/parameters/Origin"
-      "responses":
-        "200":
-          "description": "Operation completed."
-          "content":
-            "application/json":
-              "schema":
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Operation completed.",
+          "content": {
+            "application/json": {
+              "schema": {
                 "$ref": "#/components/schemas/RolePolicyRecord"
-        "401":
+              }
+            }
+          }
+        },
+        "401": {
           "$ref": "#/components/responses/Problem"
-        "403":
+        },
+        "403": {
           "$ref": "#/components/responses/Problem"
-        "404":
+        },
+        "404": {
           "$ref": "#/components/responses/Problem"
-        "409":
+        },
+        "409": {
           "$ref": "#/components/responses/Problem"
-        "422":
+        },
+        "422": {
           "$ref": "#/components/responses/Problem"
-      "security":
-        -
-          "SessionCookie": []
+        }
+      },
+      "security": [
+        {
+          "SessionCookie": [],
           "CSRFToken": []
-      "requestBody":
-        "required": true
-        "content":
-          "application/json":
-            "schema":
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
               "$ref": "#/components/schemas/RolePolicyMutation"
+            }
+          }
+        }
+      }
+    }
+  }
   "/api/v1/roles/custom":
     "get":
       "operationId": "listRolePolicies"
@@ -5785,99 +7061,157 @@
             "schema":
               "$ref": "#/components/schemas/PredefinedRoleUpdate"
 
-  "/api/v1/me/effective-permissions":
-    "get":
-      "operationId": "explainOwnPermission"
-      "summary": "Explain your own access in an authorized project or exact resource context. Decisions use the live permission service. Bounded policy paths include matching allows, denies, and retained expiry. Restricted source details remain redacted. A partial page can be empty. Cursors bind actor and context and reject changed policy state or expiry."
-      "parameters":
-        -
-          "name": "project"
-          "in": "query"
-          "schema":
+  "/api/v1/me/effective-permissions": {
+    "get": {
+      "operationId": "explainOwnPermission",
+      "summary": "Explain your own access in an authorized project or exact resource context. Decisions use the live permission service. Bounded policy paths include matching allows, denies, and retained expiry. Restricted source details remain redacted. A partial page can be empty. Cursors bind actor and context and reject changed policy state or expiry. Optional application context includes project inheritance and exact application bindings.",
+      "parameters": [
+        {
+          "name": "project",
+          "in": "query",
+          "schema": {
             "type": "string"
+          },
           "description": "Exact project context. Empty selects installation context."
-        -
-          "name": "object"
-          "in": "query"
-          "schema":
+        },
+        {
+          "name": "object",
+          "in": "query",
+          "schema": {
             "type": "string"
+          },
           "description": "An existing exact relative resource, or empty for the selected scope."
-        -
-          "name": "permission"
-          "in": "query"
-          "required": true
-          "schema":
+        },
+        {
+          "name": "permission",
+          "in": "query",
+          "required": true,
+          "schema": {
             "type": "string"
+          },
           "description": "One full registered teststudio permission identifier."
-        -
+        },
+        {
           "$ref": "#/components/parameters/Limit"
-        -
+        },
+        {
           "$ref": "#/components/parameters/Cursor"
-      "responses":
-        "200":
-          "description": "Current decision and a bounded policy-path scan."
-          "content":
-            "application/json":
-              "schema":
+        },
+        {
+          "in": "query",
+          "name": "application",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current decision and a bounded policy-path scan.",
+          "content": {
+            "application/json": {
+              "schema": {
                 "$ref": "#/components/schemas/PermissionExplanation"
-        "401":
+              }
+            }
+          }
+        },
+        "401": {
           "$ref": "#/components/responses/Problem"
-        "403":
+        },
+        "403": {
           "$ref": "#/components/responses/Problem"
-        "404":
+        },
+        "404": {
           "$ref": "#/components/responses/Problem"
-        "409":
+        },
+        "409": {
           "$ref": "#/components/responses/Problem"
-        "422":
+        },
+        "422": {
           "$ref": "#/components/responses/Problem"
-  "/api/v1/users/{user}/effective-permissions":
-    "get":
-      "operationId": "explainUserPermission"
-      "summary": "Explain another registered user only with scoped membership administration and permission inspection authority. Decisions use the live permission service. Bounded policy paths include matching allows, denies, and retained expiry. Restricted source details remain redacted. A partial page can be empty. Cursors bind actor and context and reject changed policy state or expiry."
-      "parameters":
-        -
+        }
+      }
+    }
+  }
+  "/api/v1/users/{user}/effective-permissions": {
+    "get": {
+      "operationId": "explainUserPermission",
+      "summary": "Explain another registered user only with scoped membership administration and permission inspection authority. Decisions use the live permission service. Bounded policy paths include matching allows, denies, and retained expiry. Restricted source details remain redacted. A partial page can be empty. Cursors bind actor and context and reject changed policy state or expiry. Optional application context includes project inheritance and exact application bindings.",
+      "parameters": [
+        {
           "$ref": "#/components/parameters/User"
-        -
-          "name": "project"
-          "in": "query"
-          "schema":
+        },
+        {
+          "name": "project",
+          "in": "query",
+          "schema": {
             "type": "string"
+          },
           "description": "Exact project context. Empty selects installation context."
-        -
-          "name": "object"
-          "in": "query"
-          "schema":
+        },
+        {
+          "name": "object",
+          "in": "query",
+          "schema": {
             "type": "string"
+          },
           "description": "An existing exact relative resource, or empty for the selected scope."
-        -
-          "name": "permission"
-          "in": "query"
-          "required": true
-          "schema":
+        },
+        {
+          "name": "permission",
+          "in": "query",
+          "required": true,
+          "schema": {
             "type": "string"
+          },
           "description": "One full registered teststudio permission identifier."
-        -
+        },
+        {
           "$ref": "#/components/parameters/Limit"
-        -
+        },
+        {
           "$ref": "#/components/parameters/Cursor"
-      "responses":
-        "200":
-          "description": "Current decision and a bounded policy-path scan."
-          "content":
-            "application/json":
-              "schema":
+        },
+        {
+          "in": "query",
+          "name": "application",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Current decision and a bounded policy-path scan.",
+          "content": {
+            "application/json": {
+              "schema": {
                 "$ref": "#/components/schemas/PermissionExplanation"
-        "401":
+              }
+            }
+          }
+        },
+        "401": {
           "$ref": "#/components/responses/Problem"
-        "403":
+        },
+        "403": {
           "$ref": "#/components/responses/Problem"
-        "404":
+        },
+        "404": {
           "$ref": "#/components/responses/Problem"
-        "409":
+        },
+        "409": {
           "$ref": "#/components/responses/Problem"
-        "422":
+        },
+        "422": {
           "$ref": "#/components/responses/Problem"
-
+        }
+      }
+    }
+  }
   "/api/v1/me/identity-linking":
     "get":
       "operationId": "identityLinkOptions"
@@ -7217,6 +8551,250 @@
           "schema":
             "$ref": "#/components/schemas/Problem"
   "schemas":
+    "Application": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description"
+      ]
+    }
+    "ApplicationRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "data": {
+          "$ref": "#/components/schemas/Application"
+        }
+      },
+      "required": [
+        "id",
+        "projectId",
+        "revision",
+        "updatedAt",
+        "data"
+      ]
+    }
+    "Capabilities": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "boolean"
+      }
+    }
+    "MemberCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "disabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "disabled"
+      ]
+    }
+    "OwnershipStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "projectId": {
+          "type": "string"
+        },
+        "applicationId": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "system-managed",
+            "owned",
+            "owner-unavailable"
+          ]
+        }
+      },
+      "required": [
+        "projectId",
+        "state"
+      ]
+    }
+    "RoleConversion": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "applicationId": {
+          "type": "string"
+        },
+        "principalKind": {
+          "type": "string",
+          "enum": [
+            "user",
+            "group"
+          ]
+        },
+        "principalId": {
+          "type": "string"
+        },
+        "targetRoleIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "before": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AssignmentRecord"
+          }
+        },
+        "addedPermissions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "removedPermissions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "applied": {
+          "type": "boolean"
+        },
+        "result": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AssignmentRecord"
+          }
+        },
+        "reason": {
+          "type": "string"
+        },
+        "actor": {
+          "type": "string"
+        },
+        "directoryRevision": {
+          "type": "integer"
+        },
+        "reverses": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "projectId",
+        "principalKind",
+        "principalId",
+        "targetRoleIds",
+        "before",
+        "addedPermissions",
+        "removedPermissions",
+        "expiresAt",
+        "applied",
+        "reason",
+        "actor",
+        "directoryRevision"
+      ]
+    }
+    "RoleConversionRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "data": {
+          "$ref": "#/components/schemas/RoleConversion"
+        }
+      },
+      "required": [
+        "id",
+        "revision",
+        "updatedAt",
+        "data"
+      ]
+    }
+    "StandardAssignmentReplacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "roleId": {
+          "type": "string",
+          "enum": [
+            "builtin.teststudio.reader",
+            "builtin.teststudio.member",
+            "builtin.teststudio.developer",
+            "builtin.teststudio.contributor",
+            "builtin.teststudio.owner"
+          ]
+        },
+        "previousRoleId": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      },
+      "required": [
+        "roleId",
+        "reason"
+      ]
+    }
     "ProbeBinding": {
       "type": "object",
       "properties": {
@@ -10852,13 +12430,19 @@
         - "principalId"
         - "roleId"
         - "reason"
-    "AssignmentBindings":
-      "type": "object"
-      "additionalProperties": false
-      "properties":
-        "team":
+    "AssignmentBindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "team": {
           "type": "string"
+        },
+        "application": {
+          "type": "string"
+        }
+      },
       "required": []
+    }
     "Assignment":
       "type": "object"
       "additionalProperties": false
@@ -10898,26 +12482,37 @@
         - "roleName"
         - "roleDisabled"
         - "managed"
-    "AssignmentRecord":
-      "type": "object"
-      "additionalProperties": false
-      "properties":
-        "id":
+    "AssignmentRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
           "type": "string"
-        "projectId":
+        },
+        "projectId": {
           "type": "string"
-        "revision":
-          "type": "integer"
+        },
+        "revision": {
+          "type": "integer",
           "minimum": 1
-        "updatedAt":
-          "type": "string"
+        },
+        "updatedAt": {
+          "type": "string",
           "format": "date-time"
-        "data":
+        },
+        "data": {
           "$ref": "#/components/schemas/Assignment"
-      "required":
-        - "id"
-        - "revision"
-        - "data"
+        },
+        "applicationId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "revision",
+        "data"
+      ]
+    }
     "AssignmentPage":
       "type": "object"
       "additionalProperties": false
@@ -10934,37 +12529,50 @@
       "required":
         - "items"
         - "partial"
-    "Role":
-      "type": "object"
-      "additionalProperties": false
-      "properties":
-        "id":
+    "Role": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
           "type": "string"
-        "name":
+        },
+        "name": {
           "type": "string"
-        "scope":
-          "type": "string"
-          "enum":
-            - "project"
-            - "installation"
-        "permissions":
-          "type": "array"
-          "items":
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "project",
+            "installation",
+            "application"
+          ]
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
             "type": "string"
-        "builtIn":
+          }
+        },
+        "builtIn": {
           "type": "boolean"
-        "disabled":
+        },
+        "disabled": {
           "type": "boolean"
-        "delegatable":
+        },
+        "delegatable": {
           "type": "boolean"
-      "required":
-        - "id"
-        - "name"
-        - "scope"
-        - "permissions"
-        - "builtIn"
-        - "disabled"
-        - "delegatable"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "scope",
+        "permissions",
+        "builtIn",
+        "disabled",
+        "delegatable"
+      ]
+    }
     "RolePage":
       "type": "object"
       "additionalProperties": false
@@ -11599,133 +13207,186 @@
         - "action"
         - "description"
         - "installationOnly"
-    "PermissionSource":
-      "type": "object"
-      "additionalProperties": false
-      "properties":
-        "id":
-          "type": "string"
-          "pattern": "^[a-f0-9]{64}$"
+    "PermissionSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
           "description": "Inspector-bound source identifier. It exposes no native grant identifier."
-        "principalId":
+        },
+        "principalId": {
           "type": "string"
-        "principalName":
+        },
+        "principalName": {
           "type": "string"
-        "roleId":
+        },
+        "roleId": {
           "type": "string"
-        "roleName":
+        },
+        "roleName": {
           "type": "string"
-        "assignedRoleId":
+        },
+        "assignedRoleId": {
           "type": "string"
-        "assignedRoleName":
+        },
+        "assignedRoleName": {
           "type": "string"
-        "grantId":
+        },
+        "grantId": {
           "type": "string"
-        "projectId":
+        },
+        "projectId": {
           "type": "string"
-        "teamScope":
-          "type": "string"
+        },
+        "teamScope": {
+          "type": "string",
           "description": "Configured native scope. A template remains a template. assignmentProject shows only a binding in the selected project."
-        "objectScope":
+        },
+        "objectScope": {
           "type": "string"
-        "assignmentProject":
+        },
+        "assignmentProject": {
           "type": "string"
-        "kind":
-          "type": "string"
-          "enum":
-            - "direct"
-            - "role"
-        "effect":
-          "type": "string"
-          "enum":
-            - "allow"
-            - "deny"
-        "status":
-          "type": "string"
-          "enum":
-            - "matching"
-            - "expired"
-        "restricted":
-          "type": "boolean"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "direct",
+            "role"
+          ]
+        },
+        "effect": {
+          "type": "string",
+          "enum": [
+            "allow",
+            "deny"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "matching",
+            "expired"
+          ]
+        },
+        "restricted": {
+          "type": "boolean",
           "description": "True hides principal, role, grant, scope, binding, expiry, and field details. The matching effect and source kind remain visible."
-        "scopeKnown":
+        },
+        "scopeKnown": {
           "type": "boolean"
-        "principalKind":
-          "type": "string"
-          "enum":
-            - "user"
-            - "group"
-        "expiresAt":
-          "type": "string"
+        },
+        "principalKind": {
+          "type": "string",
+          "enum": [
+            "user",
+            "group"
+          ]
+        },
+        "expiresAt": {
+          "type": "string",
           "format": "date-time"
-        "restrictedFields":
-          "type": "array"
-          "items":
+        },
+        "restrictedFields": {
+          "type": "array",
+          "items": {
             "type": "string"
-      "required":
-        - "id"
-        - "kind"
-        - "effect"
-        - "status"
-        - "restricted"
-        - "scopeKnown"
-    "PermissionExplanation":
-      "type": "object"
-      "additionalProperties": false
-      "properties":
-        "userId":
+          }
+        },
+        "assignmentApplication": {
           "type": "string"
-        "userName":
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "effect",
+        "status",
+        "restricted",
+        "scopeKnown"
+      ]
+    }
+    "PermissionExplanation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "userId": {
           "type": "string"
-        "projectId":
+        },
+        "userName": {
           "type": "string"
-        "object":
+        },
+        "projectId": {
           "type": "string"
-        "permission":
+        },
+        "object": {
           "type": "string"
-        "allowed":
+        },
+        "permission": {
+          "type": "string"
+        },
+        "allowed": {
           "type": "boolean"
-        "reason":
-          "type": "string"
-          "enum":
-            - "allowed"
-            - "explicit-deny"
-            - "no-matching-allow"
-            - "user-disabled"
-        "userDisabled":
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "allowed",
+            "explicit-deny",
+            "no-matching-allow",
+            "user-disabled"
+          ]
+        },
+        "userDisabled": {
           "type": "boolean"
-        "checkedAt":
-          "type": "string"
+        },
+        "checkedAt": {
+          "type": "string",
           "format": "date-time"
-        "items":
-          "type": "array"
-          "items":
+        },
+        "items": {
+          "type": "array",
+          "items": {
             "$ref": "#/components/schemas/PermissionSource"
-        "cursor":
+          }
+        },
+        "cursor": {
           "type": "string"
-        "partial":
+        },
+        "partial": {
           "type": "boolean"
-        "canInspectOthers":
+        },
+        "canInspectOthers": {
           "type": "boolean"
-        "permissions":
-          "type": "array"
-          "items":
+        },
+        "permissions": {
+          "type": "array",
+          "items": {
             "$ref": "#/components/schemas/PermissionDefinition"
-      "required":
-        - "userId"
-        - "userName"
-        - "projectId"
-        - "object"
-        - "permission"
-        - "allowed"
-        - "reason"
-        - "userDisabled"
-        - "checkedAt"
-        - "items"
-        - "partial"
-        - "canInspectOthers"
-        - "permissions"
-
+          }
+        },
+        "applicationId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "userId",
+        "userName",
+        "projectId",
+        "object",
+        "permission",
+        "allowed",
+        "reason",
+        "userDisabled",
+        "checkedAt",
+        "items",
+        "partial",
+        "canInspectOthers",
+        "permissions"
+      ]
+    }
     "ProviderMappings":
       "type": "object"
       "additionalProperties":

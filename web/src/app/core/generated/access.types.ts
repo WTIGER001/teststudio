@@ -1,13 +1,15 @@
-export const accessContractVersion = "0.36.0"
+export const accessContractVersion = "0.37.0"
 
 export type APIAuthentication = { "binding": string; "header"?: string; "scheme": "bearer" | "basic" | "header" }
 export type APIRequestPolicy = { "authentication"?: APIAuthentication; "maxRequests": number; "maxResponseBytes": number; "redactFields"?: (string)[]; "rules": (APIRequestRule)[] }
 export type APIRequestRule = { "maxBodyBytes"?: number; "method": "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | "DELETE"; "pathPrefix": string; "readOnly"?: boolean }
+export type Application = { "description": string; "id": string; "name": string }
+export type ApplicationRecord = { "data": Application; "id": string; "projectId": string; "revision": number; "updatedAt": string }
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
-export type AssignmentBindings = { "team"?: string }
+export type AssignmentBindings = { "application"?: string; "team"?: string }
 export type AssignmentDefinition = { "principalId": string; "principalKind": "user" | "group"; "reason": string; "roleId": string }
 export type AssignmentPage = { "cursor"?: string; "items": (AssignmentRecord)[]; "partial": boolean }
-export type AssignmentRecord = { "data": Assignment; "id": string; "projectId"?: string; "revision": number; "updatedAt"?: string }
+export type AssignmentRecord = { "applicationId"?: string; "data": Assignment; "id": string; "projectId"?: string; "revision": number; "updatedAt"?: string }
 export type BrowserRecording = { "actor": string; "code"?: string; "createdAt": string; "deadlineAt": string; "error"?: string; "id": string; "mode"?: "companion"; "projectId": string; "state": string; "suiteId": string; "testId": string; "title": string; "url": string }
 export type BrowserRecordingInput = { "id": string; "testId": string; "title": string; "url": string }
 export type BrowserRecordingOptions = { "durationLimitSeconds": number; "enabled": boolean; "mode": string }
@@ -20,6 +22,7 @@ export type CLIGrant = { "cookie": string; "csrfToken": string; "expiresAt": str
 export type CLIOptions = { "lifetimeSeconds": number; "pollSeconds": number; "serverTime": string }
 export type CLIProof = { "clientName": string; "requestId": string; "verifier": string }
 export type CLIView = { "clientName": string; "expiresAt": string; "id": string; "state": string }
+export type Capabilities = { [key: string]: boolean }
 export type CatalogBulkMetadata = { "category"?: string | null; "conditions"?: string | null; "description"?: string | null; "owner"?: string | null; "rationale"?: string | null; "safety"?: string | null; "tags"?: (string)[] | null; "title"?: string | null }
 export type CatalogBulkRequest = { "action": "metadata" | "disable" | "enable" | "archive" | "restore"; "metadata"?: CatalogBulkMetadata; "tests": (CatalogBulkTarget)[] }
 export type CatalogBulkTarget = { "id": string; "revision": number }
@@ -63,10 +66,12 @@ export type LocalCredential = { "canManage": boolean; "configured": boolean; "cr
 export type LocalCredentialRecord = { "data": LocalCredential; "id": string; "revision": number }
 export type LocalPasswordDefinition = { "password": string; "reason": string }
 export type LogoutResponse = { "providerLogout"?: ProviderLogoutOffer; "providerLogoutUnavailable"?: boolean; "signedOut": boolean }
+export type MemberCandidate = { "disabled": boolean; "id": string; "name": string }
 export type Membership = { "active": boolean; "expiresAt"?: string | null; "groupId": string; "groupName"?: string; "name": string; "projectId"?: string; "providerRevision"?: number; "readOnly": boolean; "source": string; "userId": string }
 export type MembershipDefinition = { "expiresAt"?: string | null }
 export type MembershipPage = { "cursor"?: string; "items": (MembershipRecord)[]; "partial": boolean }
 export type MembershipRecord = { "data": Membership; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type OwnershipStatus = { "applicationId"?: string; "projectId": string; "state": "system-managed" | "owned" | "owner-unavailable" }
 export type PasswordChange = { "currentPassword": string; "newPassword": string }
 export type PasswordChanged = { "changed": boolean }
 export type PasswordLogin = { "password": string; "userId": string }
@@ -81,8 +86,8 @@ export type PermissionCatalog = { "items": (PermissionChoice)[] }
 export type PermissionChoice = { "action": string; "area": string; "canGrant": boolean; "description": string; "id": string; "installationOnly": boolean }
 export type PermissionComparison = { "after": boolean; "before": boolean; "permission": string }
 export type PermissionDefinition = { "action": string; "area": string; "description": string; "id": string; "installationOnly": boolean }
-export type PermissionExplanation = { "allowed": boolean; "canInspectOthers": boolean; "checkedAt": string; "cursor"?: string; "items": (PermissionSource)[]; "object": string; "partial": boolean; "permission": string; "permissions": (PermissionDefinition)[]; "projectId": string; "reason": "allowed" | "explicit-deny" | "no-matching-allow" | "user-disabled"; "userDisabled": boolean; "userId": string; "userName": string }
-export type PermissionSource = { "assignedRoleId"?: string; "assignedRoleName"?: string; "assignmentProject"?: string; "effect": "allow" | "deny"; "expiresAt"?: string; "grantId"?: string; "id": string; "kind": "direct" | "role"; "objectScope"?: string; "principalId"?: string; "principalKind"?: "user" | "group"; "principalName"?: string; "projectId"?: string; "restricted": boolean; "restrictedFields"?: (string)[]; "roleId"?: string; "roleName"?: string; "scopeKnown": boolean; "status": "matching" | "expired"; "teamScope"?: string }
+export type PermissionExplanation = { "allowed": boolean; "applicationId"?: string; "canInspectOthers": boolean; "checkedAt": string; "cursor"?: string; "items": (PermissionSource)[]; "object": string; "partial": boolean; "permission": string; "permissions": (PermissionDefinition)[]; "projectId": string; "reason": "allowed" | "explicit-deny" | "no-matching-allow" | "user-disabled"; "userDisabled": boolean; "userId": string; "userName": string }
+export type PermissionSource = { "assignedRoleId"?: string; "assignedRoleName"?: string; "assignmentApplication"?: string; "assignmentProject"?: string; "effect": "allow" | "deny"; "expiresAt"?: string; "grantId"?: string; "id": string; "kind": "direct" | "role"; "objectScope"?: string; "principalId"?: string; "principalKind"?: "user" | "group"; "principalName"?: string; "projectId"?: string; "restricted": boolean; "restrictedFields"?: (string)[]; "roleId"?: string; "roleName"?: string; "scopeKnown": boolean; "status": "matching" | "expired"; "teamScope"?: string }
 export type PlaywrightDraft = { "files": (EditorFile)[]; "id": string; "manifestPath"?: string; "name": string; "targetUrl"?: string }
 export type PlaywrightDraftPage = { "cursor"?: string; "items": (PlaywrightDraftRecord)[] }
 export type PlaywrightDraftRecord = { "data": PlaywrightDraft; "id": string; "revision": number; "updatedAt": string }
@@ -120,8 +125,10 @@ export type ReleaseRegistry = { "activeReleaseId"?: string; "archived": boolean;
 export type RetainedTest = { "current": boolean; "lifecycle": string; "projectId": string; "revision": number; "suiteArchived": boolean; "suiteId": string; "suiteName": string; "test": SourceCatalogTest; "updatedAt": string }
 export type ReviewedPublicationInput = { "activate": boolean; "reviewId": string }
 export type Revoked = { "revoked": boolean }
-export type Role = { "builtIn": boolean; "delegatable": boolean; "disabled": boolean; "id": string; "name": string; "permissions": (string)[]; "scope": "project" | "installation" }
+export type Role = { "builtIn": boolean; "delegatable": boolean; "disabled": boolean; "id": string; "name": string; "permissions": (string)[]; "scope": "project" | "installation" | "application" }
 export type RoleChoicePage = { "cursor"?: string; "items": (Role)[]; "partial": boolean }
+export type RoleConversion = { "actor": string; "addedPermissions": (string)[]; "applicationId"?: string; "applied": boolean; "before": (AssignmentRecord)[]; "directoryRevision": number; "expiresAt": string; "id": string; "principalId": string; "principalKind": "user" | "group"; "projectId": string; "reason": string; "removedPermissions": (string)[]; "result"?: (AssignmentRecord)[]; "reverses"?: string; "targetRoleIds": (string)[] }
+export type RoleConversionRecord = { "data": RoleConversion; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
 export type RolePage = { "items": (Role)[] }
 export type RolePolicy = { "description": string; "disabled": boolean; "id": string; "inherits": (string)[]; "name": string; "projectId": string; "rules": (RoleRule)[] }
 export type RolePolicyDetail = { "canManage": boolean; "data": RolePolicy; "delegatable": boolean; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
@@ -182,6 +189,7 @@ export type SourceUploadInput = { "content": string; "format": "json" | "yaml"; 
 export type SourceUploadPage = { "cursor"?: string; "items": (SourceUploadRecord)[] }
 export type SourceUploadPreview = { "plan"?: SourceCatalogImportPlan; "upload": SourceUploadRecord }
 export type SourceUploadRecord = { "data": SourceUpload; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type StandardAssignmentReplacement = { "previousRoleId"?: string; "reason": string; "roleId": "builtin.teststudio.reader" | "builtin.teststudio.member" | "builtin.teststudio.developer" | "builtin.teststudio.contributor" | "builtin.teststudio.owner" }
 export type SuiteDefinition = { "activeReleaseId"?: string; "applications": (string)[] | null; "archived": boolean; "capture"?: SourceCapturePolicy; "description": string; "id": string; "name": string; "requiresTarget": boolean; "timing"?: SourceTimingPolicy }
 export type SuiteLifecycle = { "canManage": boolean; "revision": number; "schedules": (SuiteSchedule)[]; "suite": SuiteDefinition; "updatedAt": string }
 export type SuiteSchedule = { "enabled": boolean; "id": string; "name": string; "releaseId"?: string }
@@ -209,7 +217,8 @@ export interface AccessRequests {
   readIdentityProvider: { "provider": string }
   editIdentityProvider: { "provider": string; revision: number; body: ProviderMutation }
   currentProfile: { query?: { "limit"?: number; "cursor"?: string } }
-  explainOwnPermission: { query: { "project"?: string; "object"?: string; "permission": string; "limit"?: number; "cursor"?: string } }
+  readCurrentCapabilities: { query?: { "project"?: string; "application"?: string } }
+  explainOwnPermission: { query: { "project"?: string; "object"?: string; "permission": string; "limit"?: number; "cursor"?: string; "application"?: string } }
   identityLinkOptions: {  }
   startIdentityLink: { body: IdentityLinkStart }
   readIdentityLink: { "operation": string }
@@ -226,6 +235,20 @@ export interface AccessRequests {
   readPredefinedRole: { "role": string }
   setPredefinedRoleState: { "role": string; revision: number; body: PredefinedRoleUpdate }
   listAPICredentialReferences: { "project": string }
+  readApplication: { "project": string; "application": string }
+  readApplicationMemberCandidate: { "project": string; "application": string; "user": string }
+  readApplicationOwnership: { "project": string; "application": string }
+  listApplicationAssignments: { "project": string; "application": string; query?: { "limit"?: number; "cursor"?: string } }
+  createApplicationAssignment: { "project": string; "application": string; body: AssignmentDefinition }
+  replaceApplicationStandardAssignment: { "project": string; "application": string; "kind": string; "principal": string; revision: number; body: StandardAssignmentReplacement }
+  revokeApplicationAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string; revision: number; "application": string; body: Reason }
+  readApplicationAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string; "application": string }
+  previewApplicationRoleConversion: { "project": string; "application": string; body: AssignmentDefinition }
+  readApplicationRoleConversion: { "project": string; "application": string; "conversion": string }
+  applyApplicationRoleConversion: { "project": string; "application": string; "conversion": string; revision: number }
+  previewApplicationRoleConversionRollback: { "project": string; "application": string; "conversion": string; body: Reason }
+  readProjectMemberCandidate: { "project": string; "user": string }
+  readProjectOwnership: { "project": string }
   listPendingAccess: { "project": string; query?: { "limit"?: number; "cursor"?: string } }
   createPendingAccess: { "project": string; body: PendingAccessInput }
   pendingAccessProviders: { "project": string }
@@ -249,8 +272,13 @@ export interface AccessRequests {
   readRepositorySync: { "project": string; "source": string; "sync": string }
   listProjectAssignments: { "project": string; query?: { "limit"?: number; "cursor"?: string } }
   createProjectAssignment: { "project": string; body: AssignmentDefinition }
+  replaceProjectStandardAssignment: { "project": string; "kind": string; "principal": string; revision: number; body: StandardAssignmentReplacement }
   revokeProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
   readProjectAssignment: { "project": string; "kind": "user" | "group"; "principal": string; "role": string }
+  previewProjectRoleConversion: { "project": string; body: AssignmentDefinition }
+  readProjectRoleConversion: { "project": string; "conversion": string }
+  applyProjectRoleConversion: { "project": string; "conversion": string; revision: number }
+  previewProjectRoleConversionRollback: { "project": string; "conversion": string; body: Reason }
   changeSuiteLifecycle: { "project": string; "suite": string; "action": "archive" | "restore"; revision: number }
   listBrowserRecordings: { "project": string; "suite": string; query?: { "cursor"?: string; "limit"?: number } }
   startBrowserRecording: { "project": string; "suite": string; body: BrowserRecordingInput }
@@ -319,7 +347,7 @@ export interface AccessRequests {
   createInstallationAssignment: { body: AssignmentDefinition }
   revokeInstallationAssignment: { "kind": "user" | "group"; "principal": string; "role": string; revision: number; body: Reason }
   readInstallationAssignment: { "kind": "user" | "group"; "principal": string; "role": string }
-  listRoles: { query?: { "project"?: string } }
+  listRoles: { query?: { "project"?: string; "application"?: string } }
   createRolePolicy: { body: RolePolicyMutation }
   customRoleChoices: { query?: { "project"?: string; "limit"?: number; "cursor"?: string } }
   listRolePolicies: { query?: { "project"?: string; "limit"?: number; "cursor"?: string } }
@@ -331,7 +359,7 @@ export interface AccessRequests {
   readUser: { "user": string }
   editUser: { "user": string; revision: number; body: UserDefinition }
   disableUser: { "user": string; revision: number; body: Reason }
-  explainUserPermission: { "user": string; query: { "project"?: string; "object"?: string; "permission": string; "limit"?: number; "cursor"?: string } }
+  explainUserPermission: { "user": string; query: { "project"?: string; "object"?: string; "permission": string; "limit"?: number; "cursor"?: string; "application"?: string } }
   listUserIdentities: { "user": string; query?: { "limit"?: number; "cursor"?: string } }
   readLocalCredential: { "user": string }
   setLocalPassword: { "user": string; revision: number; body: LocalPasswordDefinition }
@@ -367,6 +395,7 @@ export interface AccessResponses {
   readIdentityProvider: ProviderRecord
   editIdentityProvider: ProviderRecord
   currentProfile: Profile
+  readCurrentCapabilities: Capabilities
   explainOwnPermission: PermissionExplanation
   identityLinkOptions: IdentityLinkOptions
   startIdentityLink: IdentityLinkOperation
@@ -384,6 +413,20 @@ export interface AccessResponses {
   readPredefinedRole: PredefinedRoleRecord
   setPredefinedRoleState: PredefinedRoleRecord
   listAPICredentialReferences: { "items": ({ "allowedOrigins"?: (string)[]; "id": string; "name": string })[] }
+  readApplication: ApplicationRecord
+  readApplicationMemberCandidate: MemberCandidate
+  readApplicationOwnership: OwnershipStatus
+  listApplicationAssignments: AssignmentPage
+  createApplicationAssignment: AssignmentRecord
+  replaceApplicationStandardAssignment: AssignmentRecord
+  revokeApplicationAssignment: Revoked
+  readApplicationAssignment: AssignmentRecord
+  previewApplicationRoleConversion: RoleConversionRecord
+  readApplicationRoleConversion: RoleConversionRecord
+  applyApplicationRoleConversion: RoleConversionRecord
+  previewApplicationRoleConversionRollback: RoleConversionRecord
+  readProjectMemberCandidate: MemberCandidate
+  readProjectOwnership: OwnershipStatus
   listPendingAccess: PendingAccessPage
   createPendingAccess: PendingAccessRecord
   pendingAccessProviders: PendingProviderChoices
@@ -407,8 +450,13 @@ export interface AccessResponses {
   readRepositorySync: SourceRepositorySyncRecord
   listProjectAssignments: AssignmentPage
   createProjectAssignment: AssignmentRecord
+  replaceProjectStandardAssignment: AssignmentRecord
   revokeProjectAssignment: Revoked
   readProjectAssignment: AssignmentRecord
+  previewProjectRoleConversion: RoleConversionRecord
+  readProjectRoleConversion: RoleConversionRecord
+  applyProjectRoleConversion: RoleConversionRecord
+  previewProjectRoleConversionRollback: RoleConversionRecord
   changeSuiteLifecycle: SuiteLifecycle
   listBrowserRecordings: BrowserRecordingPage
   startBrowserRecording: BrowserRecordingRecord
@@ -525,6 +573,7 @@ export const accessOperations = {
   readIdentityProvider: { method: "GET", path: "/api/v1/identity-providers/{provider}" },
   editIdentityProvider: { method: "PUT", path: "/api/v1/identity-providers/{provider}" },
   currentProfile: { method: "GET", path: "/api/v1/me" },
+  readCurrentCapabilities: { method: "GET", path: "/api/v1/me/capabilities" },
   explainOwnPermission: { method: "GET", path: "/api/v1/me/effective-permissions" },
   identityLinkOptions: { method: "GET", path: "/api/v1/me/identity-linking" },
   startIdentityLink: { method: "POST", path: "/api/v1/me/identity-links" },
@@ -542,6 +591,20 @@ export const accessOperations = {
   readPredefinedRole: { method: "GET", path: "/api/v1/predefined-roles/{role}" },
   setPredefinedRoleState: { method: "PUT", path: "/api/v1/predefined-roles/{role}" },
   listAPICredentialReferences: { method: "GET", path: "/api/v1/projects/{project}/api-credential-references" },
+  readApplication: { method: "GET", path: "/api/v1/projects/{project}/applications/{application}" },
+  readApplicationMemberCandidate: { method: "GET", path: "/api/v1/projects/{project}/applications/{application}/member-candidates/{user}" },
+  readApplicationOwnership: { method: "GET", path: "/api/v1/projects/{project}/applications/{application}/ownership" },
+  listApplicationAssignments: { method: "GET", path: "/api/v1/projects/{project}/applications/{application}/role-assignments" },
+  createApplicationAssignment: { method: "POST", path: "/api/v1/projects/{project}/applications/{application}/role-assignments" },
+  replaceApplicationStandardAssignment: { method: "PUT", path: "/api/v1/projects/{project}/applications/{application}/role-assignments/{kind}/{principal}" },
+  revokeApplicationAssignment: { method: "DELETE", path: "/api/v1/projects/{project}/applications/{application}/role-assignments/{kind}/{principal}/{role}" },
+  readApplicationAssignment: { method: "GET", path: "/api/v1/projects/{project}/applications/{application}/role-assignments/{kind}/{principal}/{role}" },
+  previewApplicationRoleConversion: { method: "POST", path: "/api/v1/projects/{project}/applications/{application}/role-conversions/preview" },
+  readApplicationRoleConversion: { method: "GET", path: "/api/v1/projects/{project}/applications/{application}/role-conversions/{conversion}" },
+  applyApplicationRoleConversion: { method: "POST", path: "/api/v1/projects/{project}/applications/{application}/role-conversions/{conversion}/apply" },
+  previewApplicationRoleConversionRollback: { method: "POST", path: "/api/v1/projects/{project}/applications/{application}/role-conversions/{conversion}/rollback-preview" },
+  readProjectMemberCandidate: { method: "GET", path: "/api/v1/projects/{project}/member-candidates/{user}" },
+  readProjectOwnership: { method: "GET", path: "/api/v1/projects/{project}/ownership" },
   listPendingAccess: { method: "GET", path: "/api/v1/projects/{project}/pending-access" },
   createPendingAccess: { method: "POST", path: "/api/v1/projects/{project}/pending-access" },
   pendingAccessProviders: { method: "GET", path: "/api/v1/projects/{project}/pending-access/providers" },
@@ -565,8 +628,13 @@ export const accessOperations = {
   readRepositorySync: { method: "GET", path: "/api/v1/projects/{project}/repository-sources/{source}/syncs/{sync}" },
   listProjectAssignments: { method: "GET", path: "/api/v1/projects/{project}/role-assignments" },
   createProjectAssignment: { method: "POST", path: "/api/v1/projects/{project}/role-assignments" },
+  replaceProjectStandardAssignment: { method: "PUT", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}" },
   revokeProjectAssignment: { method: "DELETE", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
   readProjectAssignment: { method: "GET", path: "/api/v1/projects/{project}/role-assignments/{kind}/{principal}/{role}" },
+  previewProjectRoleConversion: { method: "POST", path: "/api/v1/projects/{project}/role-conversions/preview" },
+  readProjectRoleConversion: { method: "GET", path: "/api/v1/projects/{project}/role-conversions/{conversion}" },
+  applyProjectRoleConversion: { method: "POST", path: "/api/v1/projects/{project}/role-conversions/{conversion}/apply" },
+  previewProjectRoleConversionRollback: { method: "POST", path: "/api/v1/projects/{project}/role-conversions/{conversion}/rollback-preview" },
   changeSuiteLifecycle: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/actions/{action}" },
   listBrowserRecordings: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings" },
   startBrowserRecording: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings" },

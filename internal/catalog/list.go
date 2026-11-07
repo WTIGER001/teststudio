@@ -35,7 +35,7 @@ func (s *Service) ListTests(ctx context.Context, user, project, routeSuite strin
 	if routeSuite != "" {
 		object = "suite/" + routeSuite
 	}
-	if err := s.Auth.Check(ctx, user, project, object, "catalog.read"); err != nil {
+	if err := s.listAuthority(ctx, user, project, object); err != nil {
 		return result, err
 	}
 	scopeData, _ := json.Marshal(q)
@@ -69,7 +69,7 @@ func (s *Service) ListTests(ctx context.Context, user, project, routeSuite strin
 			}
 			continue
 		}
-		if err := s.Auth.Check(ctx, user, project, "suite/"+suite.ID, "catalog.read"); errors.Is(err, authorization.ErrForbidden) && routeSuite == "" {
+		if err := s.Auth.CheckSuiteTestList(ctx, user, project, suite.ID); errors.Is(err, authorization.ErrForbidden) && routeSuite == "" {
 			continue
 		} else if err != nil {
 			return result, err

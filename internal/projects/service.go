@@ -36,6 +36,10 @@ func (s *Service) SaveProject(ctx context.Context, user string, p Project, revis
 	if revision == 0 {
 		return s.createProject(ctx, user, p)
 	}
+	ctx, authorityErr := s.Auth.BeginMutation(ctx)
+	if authorityErr != nil {
+		return authorityErr
+	}
 	if err := s.Auth.Check(ctx, user, p.ID, "", "projects.manage"); err != nil {
 		return err
 	}
@@ -49,8 +53,17 @@ func (s *Service) SaveProject(ctx context.Context, user string, p Project, revis
 }
 
 func (s *Service) SaveApplication(ctx context.Context, user, project string, a Application, revision int64) error {
+	ctx, authorityErr := s.Auth.BeginMutation(ctx)
+	if authorityErr != nil {
+		return authorityErr
+	}
 	if err := s.Auth.Check(ctx, user, project, "", "projects.manage"); err != nil {
-		return err
+		if revision == 0 {
+			return err
+		}
+		if err := s.Auth.CheckApplication(ctx, user, project, a.ID, "application/"+a.ID, "applications.manage"); err != nil {
+			return err
+		}
 	}
 	if !domain.ValidID(a.ID) || strings.TrimSpace(a.Name) == "" {
 		return errors.New("valid application identifier and name are required")
@@ -62,7 +75,11 @@ func (s *Service) SaveApplication(ctx context.Context, user, project string, a A
 }
 
 func (s *Service) SaveEnvironment(ctx context.Context, user, project string, e Environment, revision int64) error {
-	if err := s.Auth.Check(ctx, user, project, "", "environments.manage"); err != nil {
+	ctx, authorityErr := s.Auth.BeginMutation(ctx)
+	if authorityErr != nil {
+		return authorityErr
+	}
+	if err := s.Auth.CheckApplication(ctx, user, project, e.Application, "", "environments.manage"); err != nil {
 		return err
 	}
 	if !domain.ValidID(e.ID) || e.Name == "" || e.Stage == "" {
@@ -81,7 +98,10 @@ func (s *Service) SaveEnvironment(ctx context.Context, user, project string, e E
 		return errors.New("an environment supports at most 16 API credential bindings")
 	}
 	if len(e.Credentials) > 0 {
-		refs, err := s.CredentialReferences(ctx, user, project)
+		if s.Secrets == nil {
+			return errors.New("API credential references are unavailable")
+		}
+		refs, err := s.Secrets.References(ctx, project, secrets.APICredential)
 		if err != nil {
 			return err
 		}
@@ -115,6 +135,11 @@ func (s *Service) SaveEnvironment(ctx context.Context, user, project string, e E
 		if old.Application != e.Application {
 			return errors.New("environment application is permanent")
 		}
+		if old.Protected && !e.Protected {
+			if err := s.Auth.Check(ctx, user, project, "environment/"+e.ID, "policies.manage"); err != nil {
+				return err
+			}
+		}
 	}
 	return s.save(ctx, user, Bucket("environments", project), e.ID, project, revision, e)
 }
@@ -140,9 +165,18 @@ func (s *Service) SaveSuite(ctx context.Context, user, project string, value Sui
 }
 
 func (s *Service) saveSuite(ctx context.Context, user, project string, v Suite, revision int64) error {
+	ctx, authorityErr := s.Auth.BeginMutation(ctx)
+	if authorityErr != nil {
+		return authorityErr
+	}
 	for _, permission := range []string{"suites.read", "suites.manage"} {
 		if err := s.Auth.Check(ctx, user, project, "suite/"+v.ID, permission); err != nil {
-			return err
+			if revision != 0 || len(v.Applications) != 1 {
+				return err
+			}
+			if err := s.Auth.CheckApplication(ctx, user, project, v.Applications[0], "", permission); err != nil {
+				return err
+			}
 		}
 	}
 	if err := validSuiteSettings(v); err != nil {
@@ -177,6 +211,11 @@ func (s *Service) saveSuite(ctx context.Context, user, project string, v Suite, 
 			return err
 		}
 		v.ActiveRelease = old.ActiveRelease
+		if !slices.Equal(old.Applications, v.Applications) {
+			if err := s.Auth.Check(ctx, user, project, "", "suites.manage"); err != nil {
+				return err
+			}
+		}
 	} else {
 		v.ActiveRelease = ""
 	}
@@ -200,5 +239,5 @@ func (s *Service) save(ctx context.Context, user, bucket, id, project string, re
 	if err != nil {
 		return err
 	}
-	return s.Store.Commit(ctx, c, audit)
+	return s.Store.Commit(ctx, append([]storage.Change{c, audit}, authorization.AuthorityAssertions(ctx)...)...)
 }

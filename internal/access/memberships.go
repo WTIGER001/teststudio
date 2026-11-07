@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	permissions "github.com/wtiger001/go-permissions"
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/domain"
@@ -111,6 +112,12 @@ func (s *Service) SaveMember(ctx context.Context, actor, group, user string, exp
 	if g.ManagedBy != "" {
 		return errors.New("external membership is read-only; update its identity provider")
 	}
+	if err := s.protectOwnerPrincipal(ctx, actor, permissions.PrincipalRef{Kind: permissions.PrincipalGroup, ID: group}); err != nil {
+		return err
+	}
+	if err := s.protectGroupDelegation(ctx, actor, group); err != nil {
+		return err
+	}
 	if g.Archived {
 		return errors.New("restore the group before changing its membership")
 	}
@@ -167,6 +174,12 @@ func (s *Service) RemoveMember(ctx context.Context, actor, group, user, why stri
 	}
 	g, gr, err := s.group(ctx, actor, group, "groups.manage")
 	if err != nil {
+		return err
+	}
+	if err := s.protectOwnerPrincipal(ctx, actor, permissions.PrincipalRef{Kind: permissions.PrincipalGroup, ID: group}); err != nil {
+		return err
+	}
+	if err := s.protectGroupDelegation(ctx, actor, group); err != nil {
 		return err
 	}
 	if g.Project != "" {

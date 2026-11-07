@@ -131,12 +131,12 @@ func TestAccessAssignmentAPILimitsDelegationAndSharedGroupChanges(t *testing.T) 
 		t.Fatal("project administrator unexpectedly has editor actions", err)
 	}
 	roles := accessCall(t, c, "GET", "/api/v1/roles?project=alpha", nil, "", 200)
-	if len(roles["items"].([]any)) != 5 {
+	if len(roles["items"].([]any)) != 10 {
 		t.Fatal(roles)
 	}
 	for _, item := range roles["items"].([]any) {
 		role := item.(map[string]any)
-		if role["scope"] != "project" || role["delegatable"] != true {
+		if role["scope"] != "project" || role["delegatable"] != !authorization.StandardRole(role["id"].(string)) {
 			t.Fatal(role)
 		}
 	}

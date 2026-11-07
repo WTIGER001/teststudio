@@ -114,6 +114,13 @@ func (s *Service) checkPolicyObject(ctx context.Context, project, object string)
 
 func (s *Service) roleRulesAuthority(ctx context.Context, actor string, value RolePolicy, checkResources bool) error {
 	for _, rule := range value.Rules {
+		if value.Project != "" && s.hasStandardAssignment(ctx, actor, value.Project) && rule.Permission == "teststudio.permissions.grant" {
+			if err := s.Auth.Check(ctx, actor, value.Project, rule.Object, "members.owners"); err != nil {
+				return err
+			}
+		}
+	}
+	for _, rule := range value.Rules {
 		if checkResources {
 			if err := s.checkPolicyObject(ctx, value.Project, rule.Object); err != nil {
 				return err

@@ -95,7 +95,9 @@ func (s *Service) admitTimingRuntime(ctx context.Context, run Run, test catalog.
 }
 
 func (s *Service) Estimate(ctx context.Context, user, project string, req Request) (timing.Estimate, error) {
-	if err := s.Auth.Check(ctx, user, project, "", "runs.create"); err != nil {
+	var err error
+	ctx, err = s.AuthorizeRequest(ctx, user, project, req, "runs.create")
+	if err != nil {
 		return timing.Estimate{}, err
 	}
 	if req.TimeoutSeconds == 0 {
@@ -111,6 +113,9 @@ func (s *Service) Estimate(ctx context.Context, user, project string, req Reques
 		return timing.Estimate{}, errors.New("valid project and suite identifiers are required")
 	}
 	v, _, err := s.prepare(ctx, user, project, req)
+	if err == nil {
+		err = s.validateApplicationRun(ctx, user, v)
+	}
 	return v.Timing, err
 }
 

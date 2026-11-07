@@ -28,6 +28,12 @@ func (s *Service) RetainedTest(ctx context.Context, user, project, suite, id str
 		return result, errors.New("valid project, suite, and test identifiers are required")
 	}
 	for _, object := range []string{"suite/" + suite, "test/" + suite + "/" + id} {
+		if object == "suite/"+suite {
+			if err := s.Auth.CheckSuiteTestList(ctx, user, project, suite); err != nil {
+				return result, err
+			}
+			continue
+		}
 		if err := s.Auth.Check(ctx, user, project, object, "catalog.read"); err != nil {
 			return result, err
 		}

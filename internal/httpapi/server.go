@@ -173,6 +173,13 @@ func (s *Server) Handler() http.Handler {
 	s.trendRoutes(mux)
 	s.evidenceRetentionRoutes(mux)
 	mux.HandleFunc("GET /api/v1/me/capabilities", s.authorized(func(w http.ResponseWriter, r *http.Request) {
+		if app := r.URL.Query().Get("application"); app != "" {
+			if err := s.Auth.CheckApplication(r.Context(), actor(r), r.URL.Query().Get("project"), app, "", "projects.read"); err != nil {
+				problem(w, err)
+				return
+			}
+			r = r.WithContext(authorization.WithApplication(r.Context(), r.URL.Query().Get("project"), app))
+		}
 		caps, err := s.Auth.Capabilities(r.Context(), actor(r), r.URL.Query().Get("project"))
 		if err != nil {
 			problem(w, err)

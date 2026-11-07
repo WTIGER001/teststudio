@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -10,6 +11,14 @@ import (
 )
 
 func (s *Server) projectRoutes(m *http.ServeMux) {
+	m.HandleFunc("GET /api/v1/projects/{project}/applications/{application}", s.authorized(func(w http.ResponseWriter, r *http.Request) {
+		project, app := r.PathValue("project"), r.PathValue("application")
+		if err := s.Auth.Check(r.Context(), actor(r), project, "application/"+app, "projects.read"); err != nil {
+			problem(w, err)
+			return
+		}
+		s.record(w, r, projects.Bucket("applications", project), app)
+	}))
 	s.suiteLifecycleRoutes(m)
 	s.projectCoverRoutes(m)
 	m.HandleFunc("GET /api/v1/projects/{project}/api-credential-references", s.authorized(func(w http.ResponseWriter, r *http.Request) {
@@ -28,13 +37,24 @@ func (s *Server) projectRoutes(m *http.ServeMux) {
 		}
 		allowed := []storage.Record{}
 		for _, row := range rows {
-			err := s.Auth.Check(r.Context(), actor(r), row.ID, "", "projects.read")
+			err := s.Auth.CheckCollection(r.Context(), actor(r), row.ID, "projects.read")
 			if errors.Is(err, authorization.ErrForbidden) {
 				continue
 			}
 			if err != nil {
 				problem(w, err)
 				return
+			}
+			if s.Auth.Check(r.Context(), actor(r), row.ID, "", "projects.read") != nil {
+				var parent struct {
+					ID   string `json:"id"`
+					Name string `json:"name"`
+				}
+				if err := json.Unmarshal(row.Data, &parent); err != nil {
+					problem(w, err)
+					return
+				}
+				row.Data, _ = json.Marshal(parent)
 			}
 			allowed = append(allowed, row)
 		}
@@ -55,6 +75,24 @@ func (s *Server) projectRoutes(m *http.ServeMux) {
 	m.HandleFunc("GET /api/v1/projects/{project}", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		p := r.PathValue("project")
 		if err := s.Auth.Check(r.Context(), actor(r), p, "", "projects.read"); err != nil {
+			if errors.Is(err, authorization.ErrForbidden) && s.Auth.CheckCollection(r.Context(), actor(r), p, "projects.read") == nil {
+				row, err := s.Store.Get(r.Context(), "projects", p)
+				if err != nil {
+					problem(w, err)
+					return
+				}
+				var parent struct {
+					ID   string `json:"id"`
+					Name string `json:"name"`
+				}
+				if err := json.Unmarshal(row.Data, &parent); err != nil {
+					problem(w, err)
+					return
+				}
+				row.Data, _ = json.Marshal(parent)
+				JSON(w, 200, row)
+				return
+			}
 			problem(w, err)
 			return
 		}
@@ -92,7 +130,7 @@ func (s *Server) projectRoutes(m *http.ServeMux) {
 		}
 		m.HandleFunc("GET /api/v1/projects/{project}/"+kind, s.authorized(func(w http.ResponseWriter, r *http.Request) {
 			p := r.PathValue("project")
-			if err := s.Auth.Check(r.Context(), actor(r), p, "", permission); err != nil {
+			if err := s.Auth.CheckCollection(r.Context(), actor(r), p, permission); err != nil {
 				problem(w, err)
 				return
 			}
@@ -101,10 +139,11 @@ func (s *Server) projectRoutes(m *http.ServeMux) {
 				problem(w, err)
 				return
 			}
-			if kind == "suites" {
+			{
 				allowed := []storage.Record{}
 				for _, row := range rows {
-					if err := s.Auth.Check(r.Context(), actor(r), p, "suite/"+row.ID, permission); err == nil {
+					objectKind := map[string]string{"suites": "suite", "applications": "application", "environments": "environment"}[kind]
+					if err := s.Auth.Check(r.Context(), actor(r), p, objectKind+"/"+row.ID, permission); err == nil {
 						allowed = append(allowed, row)
 					} else if !errors.Is(err, authorization.ErrForbidden) {
 						problem(w, err)

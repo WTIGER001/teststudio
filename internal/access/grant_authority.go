@@ -35,6 +35,14 @@ func (s *Service) grantAuthority(ctx context.Context, actor string, value grantS
 		return err
 	}
 	if manage {
+		if value.Project != "" && s.hasStandardAssignment(ctx, actor, value.Project) && value.Permission == "teststudio.permissions.grant" {
+			if err := s.Auth.Check(ctx, actor, value.Project, value.Object, "members.owners"); err != nil {
+				return err
+			}
+		}
+		if err := s.protectOwnerPrincipal(ctx, actor, permissions.PrincipalRef{Kind: value.PrincipalKind, ID: value.PrincipalID}, value.Project); err != nil {
+			return err
+		}
 		return s.Auth.Check(ctx, actor, value.Project, value.Object, value.Permission)
 	}
 	return nil

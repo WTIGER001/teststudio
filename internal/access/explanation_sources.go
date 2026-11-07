@@ -214,6 +214,7 @@ func (s *Service) explanationSource(ctx context.Context, actor, user string, q E
 		if project, ok := proof.Path.Assignment.BindingValues["team"].(string); ok && domain.ValidID(project) {
 			value.AssignmentProject = project
 		}
+		value.AssignmentApplication, _ = proof.Path.Assignment.BindingValues["application"].(string)
 	}
 	return value, nil
 }

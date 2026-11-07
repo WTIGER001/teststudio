@@ -2,6 +2,11 @@
 
 ## Policy and run snapshots
 
+The unreleased role API supports optional applicationId on notification channel definitions.
+Application Contributors and Owners can manage channels in their application. Scope stays permanent after creation.
+Suite and environment filters must belong entirely to that application. An application channel never matches a sibling or mixed-application run.
+Project-wide destinations require Project Contributor authority. Existing project-wide channels retain their scope and permissions.
+
 Notification channels belong to one project.
 Each channel defines a transport, secret reference, enabled state, retry budget, and selection filters.
 A project supports at most 16 unarchived channels.

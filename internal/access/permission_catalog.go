@@ -30,6 +30,9 @@ func (s *Service) PermissionCatalog(ctx context.Context, actor, project, object 
 			continue
 		}
 		canGrant := true
+		if project != "" && s.hasStandardAssignment(ctx, actor, project) && definition.ID == "teststudio.permissions.grant" && s.Auth.Check(ctx, actor, project, object, "members.owners") != nil {
+			canGrant = false
+		}
 		for _, action := range []string{"permissions.grant", definition.ID} {
 			if err := s.Auth.Check(ctx, actor, project, object, action); err != nil {
 				if !errors.Is(err, authorization.ErrForbidden) {

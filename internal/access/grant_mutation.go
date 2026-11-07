@@ -88,6 +88,10 @@ func (s *Service) changeGrant(ctx context.Context, actor, project, id string, in
 			}
 		}
 		hadAdmin := false
+		ownerScopes, err := bound.ownerCheckpoint(ctx)
+		if err != nil {
+			return err
+		}
 		if project == "" {
 			hadAdmin, err = bound.hasUsableAdministrator(ctx)
 			if err != nil {
@@ -116,6 +120,9 @@ func (s *Service) changeGrant(ctx context.Context, actor, project, id string, in
 				return storage.ErrConflict
 			}
 			value.NativeID = native.ID
+		}
+		if err := bound.preserveOwners(ctx, ownerScopes); err != nil {
+			return err
 		}
 		if hadAdmin {
 			remains, err := bound.hasUsableAdministrator(ctx)

@@ -243,7 +243,7 @@ func (s *Service) execute(parent context.Context, run Run, worker string) {
 		if current.CancelRequested || ctx.Err() != nil {
 			break
 		}
-		if err := s.Auth.Check(ctx, run.Actor, run.Project, "", "runs.create"); err != nil {
+		if err := s.Auth.Check(ctx, run.Actor, run.Project, "run/"+run.ID, "runs.create"); err != nil {
 			executionError = "Execution permission was revoked."
 			break
 		}
@@ -563,7 +563,7 @@ func (s *Service) admitAttempt(ctx context.Context, run Run) error {
 	if current.CancelRequested {
 		return errors.New("run cancellation was requested")
 	}
-	if err := s.Auth.Check(ctx, run.Actor, run.Project, "", "runs.create"); err != nil {
+	if err := s.Auth.Check(ctx, run.Actor, run.Project, "run/"+run.ID, "runs.create"); err != nil {
 		return errors.New("execution permission was revoked")
 	}
 	if run.Request.Capture != nil {

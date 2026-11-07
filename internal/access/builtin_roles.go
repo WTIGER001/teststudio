@@ -164,12 +164,19 @@ func (s *Service) UpdateBuiltinRole(ctx context.Context, actor, id string, input
 		if err != nil {
 			return err
 		}
+		ownerScopes, err := bound.ownerCheckpoint(ctx)
+		if err != nil {
+			return err
+		}
 		if input.Disabled {
 			err = auth.Engine.DisableBuiltInRole(ctx, id)
 		} else {
 			err = auth.Engine.EnableBuiltInRole(ctx, id)
 		}
 		if err != nil {
+			return err
+		}
+		if err := bound.preserveOwners(ctx, ownerScopes); err != nil {
 			return err
 		}
 		if hadAdmin {

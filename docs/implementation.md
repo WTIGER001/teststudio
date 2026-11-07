@@ -17,6 +17,30 @@ Light desktop and dark mobile screenshots pass visual review. Evidence is comple
 The first check used programmatic focus while expecting a keyboard-only focus ring. The corrected check uses Tab and Shift+Tab; no product correction was needed.
 This refines 34, 49, and 50. The total remains 50 verified of 57. Target deployment is not checked or changed; the hosted release remains 0.2.0-dev.
 
+## System and scoped role APIs — 2026-11-07
+
+The user requests the API side of the role plan. Reader, Member, Developer, Contributor, and Owner now have cumulative native permission definitions alongside unchanged legacy role definitions.
+System Admin keeps its compatible identifier. New ordinary project creators receive one managed Owner assignment atomically with the project.
+Project roles inherit into applications. Server-resolved Application context controls assignments, registries, catalogs, sources, runs, evidence, trends, probes, schedules, and application-scoped notification channels.
+Application-only members cannot obtain complete mixed runs or shared source and mutation payloads. Historical run authorization uses frozen context.
+Contributor delegation excludes deletion and Owner changes, including indirect paths through groups, custom policies, direct grants, and legacy administration roles.
+Atomic standard-role replacement checks both the previous role identity and its revision. Concurrent replacements produce one winner.
+Usable-Owner guards cover assignment, group, user, credential, provider, role-policy, grant, and predefined-role changes. Ownership status exposes unavailable owners for authorized recovery.
+Actor-bound conversion previews record potential role action changes, current assignments, and directory revision. Apply and rollback previews preserve custom roles, direct grants, audits, and recovery guards.
+API contract 0.37.0 documents the new families and generates the matching identity client. The [access guide](access.md#standard-project-and-application-roles) records endpoints and compatibility behavior.
+
+The initial selected PostgreSQL run passes 59 checks. A focused follow-up passes 18 checks for persistence across connection restart, competing replacements, Owner safeguards, and provider compatibility.
+Two final PostgreSQL checks also verify delegation through legacy roles and preservation of the final group Owner path.
+Matching SQLite checks pass. Race-enabled SQLite selections cover the new scoped APIs and the final delegation and Owner guards.
+Actual local HTTP execution, evidence download, existing-session revocation, old artifact-URL rejection, automatic firing, and post-revocation schedule blocking pass through the normal API and services.
+The scheduler checks current execution authority before its overlap-skip decision. Rejected mutations retain their prior state.
+The generated-client synchronization check and documentation consistency checks pass. Private credentials and every owned database container are removed after verification.
+Retained local summaries are under output/roles-api. No browser, UI build, release publication, hosted membership conversion, or deployment runs.
+The user's port 8040 demo, hosted 0.2.0-dev release, existing memberships, and private schedules remain unchanged.
+
+This advances the backend scope of 05, 07, 10, 12, 13, 14, and 45. UI milestone 4 and release/target milestone 5 remain pending.
+The count stays 50 verified of 57. Open items remain 41, 46, 51, 53, 54, 56, and 57.
+
 ## System and scoped role planning — 2026-11-07
 
 The user keeps Project and Group, selects System, and requests a plan for Owner, Contributor, Developer, Member, and Reader.

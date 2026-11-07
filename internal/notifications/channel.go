@@ -55,7 +55,7 @@ func (s *Service) ReadChannel(ctx context.Context, user, project, id string) (Ch
 	return s.channel(ctx, project, id)
 }
 func (s *Service) ListChannels(ctx context.Context, user, project, cursor string, limit int, archived bool) (storage.Page, error) {
-	if err := s.Auth.Check(ctx, user, project, "", "notifications.read"); err != nil {
+	if err := s.Auth.CheckCollection(ctx, user, project, "notifications.read"); err != nil {
 		return storage.Page{}, err
 	}
 	if limit < 1 || limit > 100 {
@@ -130,7 +130,41 @@ func (s *Service) References(ctx context.Context, user, project string) ([]secre
 	return s.Secrets.References(ctx, project, secrets.NotificationWebhook)
 }
 func (s *Service) SaveChannel(ctx context.Context, user, project string, d Definition, revision int64) error {
-	if err := s.Auth.Check(ctx, user, project, "notification/"+d.ID, "notifications.manage"); err != nil {
+	ctx, authorityErr := s.Auth.BeginMutation(ctx)
+	if authorityErr != nil {
+		return authorityErr
+	}
+	if d.Application != "" {
+		if err := s.Auth.CheckApplication(ctx, user, project, d.Application, "", "notifications.manage"); err != nil {
+			return err
+		}
+		for _, env := range d.Environments {
+			apps, err := s.Auth.ApplicationsForObject(ctx, project, "environment/"+env, "environments.read")
+			if err != nil {
+				return err
+			}
+			if len(apps) != 1 || apps[0] != d.Application {
+				return authorization.ErrForbidden
+			}
+		}
+		for _, suite := range d.Suites {
+			apps, err := s.Auth.ApplicationsForObject(ctx, project, "suite/"+suite, "suites.read")
+			if err != nil {
+				return err
+			}
+			if len(apps) != 1 || apps[0] != d.Application {
+				return authorization.ErrForbidden
+			}
+		}
+		if revision == 0 {
+			if _, err := s.Store.Get(ctx, Channels(project), d.ID); err == nil {
+				return storage.ErrConflict
+			} else if !errors.Is(err, storage.ErrNotFound) {
+				return err
+			}
+		}
+	}
+	if err := s.Auth.Check(ctx, user, project, "notification/"+d.ID, "notifications.manage"); err != nil && (revision != 0 || d.Application == "") {
 		return err
 	}
 	d = normalize(d)
@@ -174,6 +208,9 @@ func (s *Service) SaveChannel(ctx context.Context, user, project string, d Defin
 	if old.Archived {
 		return errors.New("restore the archived channel before editing")
 	}
+	if revision > 0 && old.Application != d.Application {
+		return errors.New("notification application scope is permanent")
+	}
 	v := Channel{Definition: d, Project: project, Owner: user}
 	v.Epoch = max(1, old.Epoch)
 	if revision > 0 && ((old.Enabled && !d.Enabled) || old.Kind != d.Kind || old.Reference != d.Reference) {
@@ -191,7 +228,7 @@ func (s *Service) SaveChannel(ctx context.Context, user, project string, d Defin
 	if err != nil {
 		return err
 	}
-	return s.Store.Commit(ctx, c, index, audit, storage.Change{Record: pRow, Assert: true})
+	return s.Store.Commit(ctx, append([]storage.Change{c, index, audit, {Record: pRow, Assert: true}}, authorization.AuthorityAssertions(ctx)...)...)
 }
 
 func ValidateOrigin(origin string) error {

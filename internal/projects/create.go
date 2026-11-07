@@ -13,12 +13,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/timing"
 )
 
-var creatorRoles = []string{
-	"builtin.teststudio.project-admin",
-	"builtin.teststudio.editor",
-	"builtin.teststudio.publisher",
-	"builtin.teststudio.operator",
-}
+var creatorRoles = []string{authorization.OwnerRole}
 
 func (s *Service) createProject(ctx context.Context, actor string, project Project) error {
 	return s.Auth.WithAssignmentTransaction(ctx, func(auth *authorization.Service) error {

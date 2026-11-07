@@ -13,6 +13,8 @@ import (
 )
 
 type AssignmentDefinition struct {
+	PreviousRole  string                    `json:"-"`
+	Application   string                    `json:"-"`
 	PrincipalKind permissions.PrincipalKind `json:"principalKind"`
 	PrincipalID   string                    `json:"principalId"`
 	RoleID        string                    `json:"roleId"`
@@ -34,11 +36,12 @@ type AssignmentView struct {
 }
 
 type AssignmentRecord struct {
-	ID       string         `json:"id"`
-	Project  string         `json:"projectId,omitempty"`
-	Revision int64          `json:"revision"`
-	Updated  *time.Time     `json:"updatedAt,omitempty"`
-	Data     AssignmentView `json:"data"`
+	Application string         `json:"applicationId,omitempty"`
+	ID          string         `json:"id"`
+	Project     string         `json:"projectId,omitempty"`
+	Revision    int64          `json:"revision"`
+	Updated     *time.Time     `json:"updatedAt,omitempty"`
+	Data        AssignmentView `json:"data"`
 }
 
 type AssignmentsPage struct {
@@ -51,6 +54,9 @@ func assignmentKey(project string, d AssignmentDefinition) assignmentIdentity {
 	bindings := map[string]any{}
 	if project != "" {
 		bindings["team"] = project
+	}
+	if d.Application != "" {
+		bindings["application"] = d.Application
 	}
 	return assignmentIdentity{PrincipalKind: d.PrincipalKind, PrincipalID: d.PrincipalID, RoleID: d.RoleID, Bindings: bindings}
 }
@@ -105,7 +111,8 @@ func (s *Service) assignmentRecord(ctx context.Context, project string, key assi
 	if err != nil {
 		return AssignmentRecord{}, metadata, err
 	}
-	view := AssignmentRecord{ID: key.ID(), Project: project, Revision: revision, Data: AssignmentView{assignmentIdentity: key, PrincipalName: name, PrincipalActive: active, RoleName: role.Name, RoleDisabled: role.IsDisabled, Managed: managed}}
+	application, _ := key.Bindings["application"].(string)
+	view := AssignmentRecord{ID: key.ID(), Project: project, Application: application, Revision: revision, Data: AssignmentView{assignmentIdentity: key, PrincipalName: name, PrincipalActive: active, RoleName: role.Name, RoleDisabled: role.IsDisabled, Managed: managed}}
 	if managed {
 		view.Updated = &metadata.Updated
 	}
@@ -113,6 +120,7 @@ func (s *Service) assignmentRecord(ctx context.Context, project string, key assi
 }
 
 func (s *Service) ReadAssignment(ctx context.Context, actor, project string, d AssignmentDefinition) (AssignmentRecord, error) {
+	d.Application = authorization.ScopedApplication(ctx, project)
 	if _, err := s.assignmentScope(ctx, actor, project, "members.read"); err != nil {
 		return AssignmentRecord{}, err
 	}
@@ -144,6 +152,7 @@ func (s *Service) RemoveAssignment(ctx context.Context, actor, project string, d
 }
 
 func (s *Service) changeAssignment(ctx context.Context, actor, project string, d AssignmentDefinition, revision int64, remove bool) (AssignmentRecord, error) {
+	d.Application = authorization.ScopedApplication(ctx, project)
 	if err := reason(d.Reason); err != nil {
 		return AssignmentRecord{}, err
 	}
@@ -162,12 +171,35 @@ func (s *Service) changeAssignment(ctx context.Context, actor, project string, d
 
 func (s *Service) applyAssignment(ctx context.Context, actor, project string, d AssignmentDefinition, revision int64, remove bool) (AssignmentRecord, error) {
 	var result AssignmentRecord
-	projectRow, err := s.assignmentScope(ctx, actor, project, "members.manage")
+	allowed, _ := ctx.Value(assignmentAuthorizationKey{}).(map[string]bool)
+	preauthorized := allowed[assignmentKey(project, d).ID()]
+	var projectRow storage.Record
+	var err error
+	if preauthorized {
+		if project != "" {
+			projectRow, err = s.Store.Get(ctx, "projects", project)
+		}
+	} else {
+		projectRow, err = s.assignmentScope(ctx, actor, project, "members.manage")
+	}
 	if err != nil {
 		return AssignmentRecord{}, err
 	}
-	if err := s.assignmentAuthority(ctx, actor, project, d, true); err != nil {
-		return AssignmentRecord{}, err
+	if !preauthorized {
+		if err := s.assignmentAuthority(ctx, actor, project, d, true); err != nil {
+			return AssignmentRecord{}, err
+		}
+	}
+	if !remove && authorization.StandardRole(d.RoleID) {
+		assignments, err := s.Auth.Engine.RoleAssignmentsForPrincipal(ctx, permissions.PrincipalRef{Kind: d.PrincipalKind, ID: d.PrincipalID})
+		if err != nil {
+			return result, err
+		}
+		for _, assignment := range assignments {
+			if authorization.StandardRole(assignment.RoleID) && reflect.DeepEqual(assignment.BindingValues, assignmentKey(project, d).Bindings) {
+				return result, storage.ErrConflict
+			}
+		}
 	}
 	if !remove && projectRow.Revision > 0 {
 		p, err := storage.Decode[struct {
@@ -181,7 +213,7 @@ func (s *Service) applyAssignment(ctx context.Context, actor, project string, d 
 		}
 	}
 	key := assignmentKey(project, d)
-	if key.PrincipalKind == permissions.PrincipalGroup {
+	if key.PrincipalKind == permissions.PrincipalGroup && !preauthorized {
 		if _, _, err := s.group(ctx, actor, key.PrincipalID, "groups.manage"); err != nil {
 			return AssignmentRecord{}, err
 		}
@@ -217,6 +249,13 @@ func (s *Service) applyAssignment(ctx context.Context, actor, project string, d 
 		return AssignmentRecord{}, storage.ErrConflict
 	}
 	hadAdmin := false
+	ownerScopes := []authorization.ApplicationScope{}
+	if ctx.Value(replacingStandardRoleKey{}) != true {
+		ownerScopes, err = s.ownerCheckpoint(ctx)
+		if err != nil {
+			return result, err
+		}
+	}
 	if remove && project == "" {
 		hadAdmin, err = s.hasUsableAdministrator(ctx)
 		if err != nil {
@@ -230,6 +269,9 @@ func (s *Service) applyAssignment(ctx context.Context, actor, project string, d 
 	}
 	if err != nil {
 		return AssignmentRecord{}, err
+	}
+	if err := s.preserveOwners(ctx, ownerScopes); err != nil {
+		return result, err
 	}
 	if hadAdmin {
 		remains, err := s.hasUsableAdministrator(ctx)

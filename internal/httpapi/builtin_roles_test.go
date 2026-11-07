@@ -37,7 +37,7 @@ func TestBuiltinRoleAPIWithdrawsAndRestoresAccessAcrossProjectsAndInstances(t *t
 		t.Fatal(before)
 	}
 	catalog := accessCall(t, c, "GET", "/api/v1/predefined-roles", nil, "", 200)
-	if len(catalog["items"].([]any)) != 6 {
+	if len(catalog["items"].([]any)) != 11 {
 		t.Fatal(catalog)
 	}
 	disabled := accessCall(t, c, "PUT", path, builtinChange(true), assignmentRevision(before), 200)
@@ -119,7 +119,7 @@ func TestBuiltinRoleAPICannotWidenProjectOrRestrictedAuthority(t *testing.T) {
 	accessCall(t, c, "POST", "/api/v1/permissions/grants", directGrant("user", "admin", "roles.read", "role/builtin.teststudio.viewer", permissions.EffectDeny), "", 200)
 	accessCall(t, c, "GET", "/api/v1/predefined-roles/builtin.teststudio.viewer", nil, "", 403)
 	page := accessCall(t, c, "GET", "/api/v1/predefined-roles", nil, "", 200)
-	if len(page["items"].([]any)) != 5 {
+	if len(page["items"].([]any)) != 10 {
 		t.Fatal("hidden predefined role leaked", page)
 	}
 	accessCall(t, c, "POST", "/api/v1/permissions/grants", directGrant("user", "admin", "catalog.publish", "", permissions.EffectDeny), "", 200)

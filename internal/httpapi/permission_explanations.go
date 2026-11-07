@@ -23,7 +23,7 @@ func (s *Server) permissionExplanationRoutes(m *http.ServeMux) {
 			if user == "" {
 				user = actor(r)
 			}
-			result, err := a.ExplainPermission(r.Context(), actor(r), user, access.ExplanationQuery{Project: q.Get("project"), Object: q.Get("object"), Permission: q.Get("permission"), Cursor: q.Get("cursor"), Limit: limit})
+			result, err := a.ExplainPermission(r.Context(), actor(r), user, access.ExplanationQuery{Application: q.Get("application"), Project: q.Get("project"), Object: q.Get("object"), Permission: q.Get("permission"), Cursor: q.Get("cursor"), Limit: limit})
 			if err != nil {
 				permissionExplanationProblem(w, err)
 				return

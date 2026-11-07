@@ -22,7 +22,7 @@ func (s *Service) ListAssignments(ctx context.Context, actor, project, cursor st
 	if !ok {
 		return AssignmentsPage{}, errors.New("permission store does not support bounded assignment reads")
 	}
-	scope := queryScope(actor, "role-assignments", project, false)
+	scope := queryScope(actor, "role-assignments", project+"/"+authorization.ScopedApplication(ctx, project), false)
 	raw, err := s.openCursor(ctx, scope, cursor)
 	if err != nil {
 		return AssignmentsPage{}, err
@@ -51,7 +51,7 @@ func (s *Service) ListAssignments(ctx context.Context, actor, project, cursor st
 				return result, err
 			}
 		}
-		d := AssignmentDefinition{PrincipalKind: hit.Kind, PrincipalID: hit.ID, RoleID: hit.RoleID}
+		d := AssignmentDefinition{Application: authorization.ScopedApplication(ctx, project), PrincipalKind: hit.Kind, PrincipalID: hit.ID, RoleID: hit.RoleID}
 		key := assignmentKey(project, d)
 		bindings := hit.BindingValues
 		if bindings == nil {

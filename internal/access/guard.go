@@ -142,6 +142,13 @@ func (s *Service) administratorState(ctx context.Context) (*permissions.Service,
 }
 
 func (s *Service) preserveAdministrator(ctx context.Context, changes ...storage.Change) error {
+	ownerScopes, ownerErr := s.ownerCheckpoint(ctx)
+	if ownerErr != nil {
+		return ownerErr
+	}
+	if err := s.preserveOwners(ctx, ownerScopes, changes...); err != nil {
+		return err
+	}
 	engine, v, logins, err := s.administratorState(ctx)
 	if err != nil {
 		return err

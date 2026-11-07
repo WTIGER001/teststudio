@@ -36,11 +36,18 @@ func (s *Service) suite(ctx context.Context, project, id string) (projects.Suite
 }
 
 func (s *Service) SaveTest(ctx context.Context, user, project, suite string, t Test, revision int64) error {
+	ctx, authorityErr := s.Auth.BeginMutation(ctx)
+	if authorityErr != nil {
+		return authorityErr
+	}
 	permission := "catalog.update"
 	if revision == 0 {
 		permission = "catalog.create"
 	}
 	if err := s.Auth.Check(ctx, user, project, "test/"+suite+"/"+t.ID, permission); err != nil {
+		return err
+	}
+	if err := s.Auth.Check(ctx, user, project, "suite/"+suite, permission); err != nil {
 		return err
 	}
 	v, _, err := s.suite(ctx, project, suite)
@@ -111,6 +118,10 @@ func (s *Service) SaveTest(ctx context.Context, user, project, suite string, t T
 }
 
 func (s *Service) ChangeState(ctx context.Context, user, project, suite, id, state string, revision int64) error {
+	ctx, authorityErr := s.Auth.BeginMutation(ctx)
+	if authorityErr != nil {
+		return authorityErr
+	}
 	permission := "catalog.update"
 	if state == "archived" {
 		permission = "catalog.archive"
@@ -119,6 +130,9 @@ func (s *Service) ChangeState(ctx context.Context, user, project, suite, id, sta
 		permission = "catalog.restore"
 	}
 	if err := s.Auth.Check(ctx, user, project, "test/"+suite+"/"+id, permission); err != nil {
+		return err
+	}
+	if err := s.Auth.Check(ctx, user, project, "suite/"+suite, permission); err != nil {
 		return err
 	}
 	if state != "enabled" && state != "disabled" && state != "archived" {

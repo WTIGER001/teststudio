@@ -47,6 +47,23 @@ func (s *Service) Prepare(ctx context.Context, run runs.Run) ([]storage.Change, 
 	return changes, nil
 }
 func scopeMatches(d Definition, run runs.Run) bool {
+	if d.Application != "" {
+		app := run.Request.Application
+		if run.Environment != nil {
+			app = run.Environment.Application
+		}
+		if app == "" && len(run.Applications) == 1 {
+			app = run.Applications[0]
+		}
+		if app != d.Application {
+			return false
+		}
+		for _, test := range run.Tests {
+			if test.Application != "" && test.Application != app {
+				return false
+			}
+		}
+	}
 	stage := ""
 	if run.Environment != nil {
 		stage = run.Environment.Stage

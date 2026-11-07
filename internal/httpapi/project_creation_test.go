@@ -83,7 +83,7 @@ func TestProjectCreatorAPIRejectsUnusableBootstrapWithoutPartialRecords(t *testi
 	if err := c.api.Auth.Engine.CreateGrant(t.Context(), permissions.Grant{OwnerKind: permissions.PrincipalUser, OwnerID: "creator", PermissionName: "teststudio.projects.create", TeamScope: "*", Effect: permissions.EffectAllow}); err != nil {
 		t.Fatal(err)
 	}
-	if err := c.api.Auth.Engine.DisableBuiltInRole(t.Context(), "builtin.teststudio.operator"); err != nil {
+	if err := c.api.Auth.Engine.DisableBuiltInRole(t.Context(), authorization.OwnerRole); err != nil {
 		t.Fatal(err)
 	}
 	failure := accessCall(t, c, "POST", "/api/v1/projects", map[string]string{"id": "unusable", "name": "Unusable"}, "", 422)
@@ -101,7 +101,7 @@ func TestProjectCreatorAPIRejectsUnusableBootstrapWithoutPartialRecords(t *testi
 			}
 		}
 	}
-	if err := c.api.Auth.Engine.EnableBuiltInRole(t.Context(), "builtin.teststudio.operator"); err != nil {
+	if err := c.api.Auth.Engine.EnableBuiltInRole(t.Context(), authorization.OwnerRole); err != nil {
 		t.Fatal(err)
 	}
 	accessCall(t, c, "POST", "/api/v1/projects", map[string]string{"id": "unusable", "name": "Usable after policy repair"}, "", http.StatusOK)

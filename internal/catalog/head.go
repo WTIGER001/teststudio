@@ -3,6 +3,7 @@ package catalog
 import (
 	"context"
 	"errors"
+	"github.com/wtiger001/teststudio/internal/authorization"
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/storage"
@@ -29,5 +30,5 @@ func (s *Service) commitTests(ctx context.Context, project, suite string, change
 	if err != nil {
 		return err
 	}
-	return s.Store.Commit(ctx, append(changes, guard)...)
+	return s.Store.Commit(ctx, append(append(changes, guard), authorization.AuthorityAssertions(ctx)...)...)
 }

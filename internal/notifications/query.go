@@ -34,7 +34,7 @@ func (s *Service) ReadDelivery(ctx context.Context, user, project, id string) (D
 	return v, row, nil
 }
 func (s *Service) ListDeliveries(ctx context.Context, user, project, run, cursor string, limit int) (Page, error) {
-	if err := s.Auth.Check(ctx, user, project, "", "notifications.read"); err != nil {
+	if err := s.Auth.CheckCollection(ctx, user, project, "notifications.read"); err != nil {
 		return Page{}, err
 	}
 	if limit < 1 || limit > 100 || (run != "" && !domain.ValidID(run)) {

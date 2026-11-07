@@ -30,7 +30,7 @@ func (s *Service) List(ctx context.Context, user, project, cursor string, q Quer
 	if !domain.ValidID(project) || q.Limit < 1 || q.Limit > 100 || q.Hours < 1 || q.Hours > 720 {
 		return page, errors.New("valid project, page limit 1 through 100, and window 1 through 720 hours are required")
 	}
-	if err := s.Auth.Check(ctx, user, project, "", "catalog.read"); err != nil {
+	if err := s.Auth.CheckCollection(ctx, user, project, "catalog.read"); err != nil {
 		return page, err
 	}
 	page.Since = now.Add(-time.Duration(q.Hours) * time.Hour)
@@ -42,7 +42,7 @@ func (s *Service) List(ctx context.Context, user, project, cursor string, q Quer
 		return page, errors.New("probe configuration exceeds the 1000-row overview limit")
 	}
 	runPage := storage.Page{Items: []storage.Record{}}
-	canReadRuns := s.Auth.Check(ctx, user, project, "", "runs.read") == nil
+	canReadRuns := s.Auth.CheckCollection(ctx, user, project, "runs.read") == nil
 	if canReadRuns {
 		runPage, err = s.Store.ListNewest(ctx, "runs", project, "", 1000)
 		if err != nil {
@@ -70,7 +70,7 @@ func (s *Service) List(ctx context.Context, user, project, cursor string, q Quer
 	}
 	page.Partial = runPage.Cursor != ""
 	scheduleRows := []storage.Record{}
-	if s.Schedules != nil && s.Auth.Check(ctx, user, project, "", "schedules.read") == nil {
+	if s.Schedules != nil && s.Auth.CheckCollection(ctx, user, project, "schedules.read") == nil {
 		sp, e := s.Store.List(ctx, schedules.Bucket(project), project, "", 1000)
 		if e != nil {
 			return page, e

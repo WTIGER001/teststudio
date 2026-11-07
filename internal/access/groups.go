@@ -3,6 +3,7 @@ package access
 import (
 	"context"
 	"errors"
+	permissions "github.com/wtiger001/go-permissions"
 	"strings"
 
 	"github.com/wtiger001/teststudio/internal/authorization"
@@ -141,6 +142,12 @@ func (s *Service) GroupState(ctx context.Context, actor, id, why string, revisio
 	}
 	v, r, err := s.group(ctx, actor, id, "groups.manage")
 	if err != nil {
+		return err
+	}
+	if err := s.protectOwnerPrincipal(ctx, actor, permissions.PrincipalRef{Kind: permissions.PrincipalGroup, ID: id}); err != nil {
+		return err
+	}
+	if err := s.protectGroupDelegation(ctx, actor, id); err != nil {
 		return err
 	}
 	if revision < 1 || r.Revision != revision {

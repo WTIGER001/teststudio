@@ -59,7 +59,7 @@ func (s *Service) Read(ctx context.Context, user, project, id string) (Schedule,
 	return v, row, err
 }
 func (s *Service) List(ctx context.Context, user, project, cursor string, limit int, archived bool) (storage.Page, error) {
-	if err := s.Auth.Check(ctx, user, project, "", "schedules.read"); err != nil {
+	if err := s.Auth.CheckCollection(ctx, user, project, "schedules.read"); err != nil {
 		return storage.Page{}, err
 	}
 	if limit < 1 || limit > 100 {
@@ -108,6 +108,11 @@ func (s *Service) Preview(ctx context.Context, user, project string, d Definitio
 	} else if !errors.Is(err, storage.ErrNotFound) {
 		return Preview{}, err
 	}
+	var scopeErr error
+	ctx, scopeErr = s.Runs.AuthorizeRequest(ctx, user, project, d.Request, permission)
+	if scopeErr != nil {
+		return Preview{}, scopeErr
+	}
 	if err := s.Auth.Check(ctx, user, project, object, permission); err != nil {
 		return Preview{}, err
 	}
@@ -145,9 +150,18 @@ func (s *Service) retryConfiguration(ctx context.Context, project, id string, re
 	return storage.ErrConflict
 }
 func (s *Service) save(ctx context.Context, user, project string, d Definition, revision int64) error {
+	ctx, authorityErr := s.Auth.BeginMutation(ctx)
+	if authorityErr != nil {
+		return authorityErr
+	}
 	permission, object := "schedules.create", ""
 	if revision > 0 {
 		permission, object = "schedules.update", "schedule/"+d.ID
+	}
+	var scopeErr error
+	ctx, scopeErr = s.Runs.AuthorizeRequest(ctx, user, project, d.Request, permission)
+	if scopeErr != nil {
+		return scopeErr
 	}
 	if err := s.Auth.Check(ctx, user, project, object, permission); err != nil {
 		return err
@@ -221,6 +235,7 @@ func (s *Service) save(ctx context.Context, user, project string, d Definition, 
 		return err
 	}
 	changes := []storage.Change{c, audit, {Record: projectRow, Assert: true}}
+	changes = append(changes, authorization.AuthorityAssertions(ctx)...)
 	changes = append(changes, index...)
 	return s.Store.Commit(ctx, changes...)
 }
@@ -243,7 +258,14 @@ func (s *Service) Archive(ctx context.Context, user, project, id string, revisio
 	return s.retryConfiguration(ctx, project, id, revision, func() error { return s.archive(ctx, user, project, id, revision, archived) })
 }
 func (s *Service) archive(ctx context.Context, user, project, id string, revision int64, archived bool) error {
+	ctx, authorityErr := s.Auth.BeginMutation(ctx)
+	if authorityErr != nil {
+		return authorityErr
+	}
 	permission := "schedules.delete"
+	if archived && s.Auth.Check(ctx, user, project, "schedule/"+id, "schedules.archive") == nil {
+		permission = "schedules.archive"
+	}
 	if !archived {
 		permission = "schedules.update"
 	}
@@ -276,5 +298,5 @@ func (s *Service) archive(ctx context.Context, user, project, id string, revisio
 	if err != nil {
 		return err
 	}
-	return s.Store.Commit(ctx, append([]storage.Change{c, audit}, index...)...)
+	return s.Store.Commit(ctx, append(append([]storage.Change{c, audit}, index...), authorization.AuthorityAssertions(ctx)...)...)
 }

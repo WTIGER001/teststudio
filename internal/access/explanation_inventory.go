@@ -108,7 +108,7 @@ func (s *Service) explanationInventory(ctx context.Context, engine *permissions.
 }
 
 func explanationContext(user string, q ExplanationQuery) string {
-	value, _ := json.Marshal([]string{user, q.Project, q.Object, q.Permission})
+	value, _ := json.Marshal([]string{user, q.Project, q.Application, q.Object, q.Permission})
 	return string(value)
 }
 func explanationStamp(revision int64, inventory explanationInventory, result PermissionExplanation) (string, error) {

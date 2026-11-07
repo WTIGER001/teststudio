@@ -30,7 +30,15 @@ func PermissionDefinitions() []PermissionDefinition {
 		parts := strings.Split(id, ".")
 		area, action := parts[1], parts[2]
 		description := "Start tests in protected environments."
-		if action != "execute-protected" {
+		if area == "applications" {
+			areas[area] = "applications"
+		}
+		if area == "policies" {
+			areas[area] = "execution safety policies"
+		}
+		if action == "owners" {
+			description = "Add, remove, or change scoped Owners."
+		} else if action != "execute-protected" {
 			description = fmt.Sprintf(verbs[action], areas[area])
 		}
 		result = append(result, PermissionDefinition{ID: id, Area: area, Action: action, Description: description, InstallationOnly: InstallationPermission(id)})

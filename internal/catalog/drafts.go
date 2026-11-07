@@ -3,6 +3,7 @@ package catalog
 import (
 	"context"
 	"errors"
+	"github.com/wtiger001/teststudio/internal/authorization"
 	"reflect"
 
 	"github.com/wtiger001/teststudio/internal/capture"
@@ -41,6 +42,10 @@ func (s *Service) CreateDraft(ctx context.Context, user, project, suite string, 
 }
 
 func (s *Service) SaveDraft(ctx context.Context, user, project, suite string, d Draft, revision int64) error {
+	ctx, authorityErr := s.Auth.BeginMutation(ctx)
+	if authorityErr != nil {
+		return authorityErr
+	}
 	if err := s.Auth.Check(ctx, user, project, "suite/"+suite, "catalog.update"); err != nil {
 		return err
 	}
@@ -116,7 +121,7 @@ func (s *Service) SaveDraft(ctx context.Context, user, project, suite string, d 
 	if err != nil {
 		return err
 	}
-	return s.Store.Commit(ctx, c, audit)
+	return s.Store.Commit(ctx, append([]storage.Change{c, audit}, authorization.AuthorityAssertions(ctx)...)...)
 }
 
 func (s *Service) ValidateDraft(ctx context.Context, user, project, suite, id string) ([]Issue, error) {

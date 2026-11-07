@@ -89,7 +89,13 @@ func (s *Service) CreateScheduled(ctx context.Context, user, project string, req
 }
 
 func (s *Service) create(ctx context.Context, user, project string, req Request, key, trigger string, schedule *ScheduleTrigger, checkpoint func(Run) ([]storage.Change, error), retry int) (Run, error) {
-	if err := s.Auth.Check(ctx, user, project, "", "runs.create"); err != nil {
+	ctx, authorityErr := s.Auth.BeginMutation(ctx)
+	if authorityErr != nil {
+		return Run{}, authorityErr
+	}
+	var err error
+	ctx, err = s.AuthorizeRequest(ctx, user, project, req, "runs.create")
+	if err != nil {
 		return Run{}, err
 	}
 	if !domain.ValidID(project) || !domain.ValidID(req.Suite) || len(key) == 0 || len(key) > 128 {
@@ -115,12 +121,18 @@ func (s *Service) create(ctx context.Context, user, project string, req Request,
 			return Run{}, errors.New("idempotency key was reused for a different run request")
 		}
 		v, _, err := s.Get(ctx, project, old.RunID)
+		if err == nil {
+			err = s.Auth.Check(ctx, user, project, "run/"+v.ID, "runs.read")
+		}
 		return v, err
 	} else if !errors.Is(err, storage.ErrNotFound) {
 		return Run{}, err
 	}
 	v, admission, err := s.prepare(ctx, user, project, req)
 	if err != nil {
+		return Run{}, err
+	}
+	if err := s.validateApplicationRun(ctx, user, v); err != nil {
 		return Run{}, err
 	}
 	v.Trigger = trigger
@@ -149,6 +161,7 @@ func (s *Service) create(ctx context.Context, user, project string, req Request,
 		return v, err
 	}
 	changes := []storage.Change{run, queued, idempotency, audit}
+	changes = append(changes, authorization.AuthorityAssertions(ctx)...)
 	for _, row := range admission {
 		changes = append(changes, storage.Change{Record: row, Assert: true})
 	}

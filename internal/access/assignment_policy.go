@@ -55,6 +55,35 @@ func (s *Service) assignmentAuthority(ctx context.Context, actor, project string
 	if _, err := s.roleForScope(ctx, project, d.RoleID); err != nil {
 		return err
 	}
+	if authorization.ScopedApplication(ctx, project) != "" && !authorization.StandardRole(d.RoleID) {
+		return authorization.ErrForbidden
+	}
+	if manage {
+		if d.RoleID == authorization.OwnerRole {
+			if err := s.Auth.Check(ctx, actor, project, "", "members.owners"); err != nil {
+				return err
+			}
+			if err := s.Auth.Check(ctx, actor, project, "role/"+d.RoleID, "members.owners"); err != nil {
+				return err
+			}
+		}
+		if authorization.StandardRole(d.RoleID) || s.hasStandardAssignment(ctx, actor, project) {
+			for _, role := range authorization.BuiltInRoles() {
+				if role.ID == d.RoleID {
+					if !authorization.StandardRole(d.RoleID) && slices.Contains(role.Permissions, "teststudio.permissions.grant") {
+						if err := s.Auth.Check(ctx, actor, project, "", "members.owners"); err != nil {
+							return err
+						}
+					}
+					for _, action := range role.Permissions {
+						if err := s.Auth.Check(ctx, actor, project, "", action); err != nil {
+							return err
+						}
+					}
+				}
+			}
+		}
+	}
 	permission, membership := "permissions.read", "members.read"
 	if manage {
 		permission, membership = "permissions.grant", "members.manage"
@@ -124,6 +153,9 @@ func (s *Service) ListRoles(ctx context.Context, actor, project string) ([]RoleV
 		return nil, err
 	}
 	for _, definition := range authorization.BuiltInRoles() {
+		if authorization.ScopedApplication(ctx, project) != "" && !authorization.StandardRole(definition.ID) {
+			continue
+		}
 		if _, ok := builtinRole(project, definition.ID); !ok {
 			continue
 		}
@@ -141,6 +173,9 @@ func (s *Service) ListRoles(ctx context.Context, actor, project string) ([]RoleV
 		if project == "" {
 			scope = "installation"
 		}
+		if authorization.ScopedApplication(ctx, project) != "" {
+			scope = "application"
+		}
 		delegate := !role.IsDisabled
 		for _, permission := range []string{"permissions.grant", "members.manage"} {
 			if err := s.Auth.Check(ctx, actor, project, "role/"+definition.ID, permission); err != nil {
@@ -150,13 +185,20 @@ func (s *Service) ListRoles(ctx context.Context, actor, project string) ([]RoleV
 				delegate = false
 			}
 		}
+		if err := s.assignmentAuthority(ctx, actor, project, AssignmentDefinition{PrincipalKind: permissions.PrincipalUser, PrincipalID: actor, RoleID: definition.ID}, true); err != nil {
+			if !errors.Is(err, authorization.ErrForbidden) {
+				return nil, err
+			}
+			delegate = false
+		}
 		roles = append(roles, RoleView{ID: definition.ID, Name: definition.Name, Scope: scope, Permissions: slices.Clone(definition.Permissions), BuiltIn: true, Disabled: role.IsDisabled, Delegatable: delegate})
 	}
 	return roles, nil
 }
 
 func (s *Service) assignmentCapability(ctx context.Context, actor string, row AssignmentRecord) (AssignmentRecord, error) {
-	d := AssignmentDefinition{PrincipalKind: row.Data.PrincipalKind, PrincipalID: row.Data.PrincipalID, RoleID: row.Data.RoleID}
+	ctx = authorization.WithApplication(ctx, row.Project, row.Application)
+	d := AssignmentDefinition{Application: row.Application, PrincipalKind: row.Data.PrincipalKind, PrincipalID: row.Data.PrincipalID, RoleID: row.Data.RoleID}
 	err := s.assignmentAuthority(ctx, actor, row.Project, d, true)
 	if err == nil && d.PrincipalKind == permissions.PrincipalGroup {
 		_, _, err = s.group(ctx, actor, d.PrincipalID, "groups.manage")

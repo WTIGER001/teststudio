@@ -1,6 +1,6 @@
 # System project and application role plan
 
-Status: Proposed on 2026-11-07. This request covers planning. Runtime permissions and existing assignments stay unchanged until implementation.
+Status: Backend role and access APIs are implemented locally on 2026-11-07. API contract 0.37.0 and the generated client cover scoped assignments, replacement, explanations, and reviewed conversion. UI work and target deployment verification remain pending. The hosted release and existing assignments are unchanged.
 
 Use System for the installation and keep Project, Application, and Group.
 Offer five cumulative roles at Project and Application scope: Reader, Member, Developer, Contributor, and Owner.
@@ -230,6 +230,10 @@ Startup never repeats migration or restores revoked grants.
 
 ## Delivery milestones and verification
 
+The user authorizes API implementation on 2026-11-07. Backend work for milestones 1 through 3 now has focused SQLite and PostgreSQL evidence.
+The [access guide](access.md#standard-project-and-application-roles) describes the implemented endpoints and compatibility rules.
+Milestone 4 remains UI work. Milestone 5 remains release publication and target verification.
+
 This planning milestone maps primarily to acceptance 10, 12, and 13, with follow-on coverage for 05, 07, 14, 18, 38, 45, 49, 50, 54, and 55.
 The authoritative ledger stays at 50 verified of 57. Scope changes require fresh targeted evidence before retaining the affected acceptance claims for the new behavior.
 
@@ -243,7 +247,8 @@ The authoritative ledger stays at 50 verified of 57. Scope changes require fresh
 
 Select individual existing browser IDs only when their behavior changes; STUDIO-ACCESS-001, STUDIO-POLICY-001, STUDIO-GRANTS-001, STUDIO-BUILTIN-001, and STUDIO-PROVIDERS-001 remain available for focused follow-up.
 Register the new application workflow before selecting it. Do not run the complete catalog by default.
-No release bump, UI build, browser run, cloud mutation, or membership conversion is needed for this planning request.
+No UI build, browser run, hosted membership conversion, or cloud mutation is needed for the API-only implementation request.
+Choose the product version through the version helper before publishing the changed runtime. API contract version 0.37.0 remains separate.
 Preserve the user's port 8040 demo, database, history, and all unrelated workloads. Azure implementation and verification stay deferred.
 
 ## Workflow completion checklist

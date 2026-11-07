@@ -14,35 +14,38 @@ import (
 )
 
 type ExplanationQuery struct {
-	Project    string
-	Object     string
-	Permission string
-	Cursor     string
-	Limit      int
+	Application string
+	Project     string
+	Object      string
+	Permission  string
+	Cursor      string
+	Limit       int
 }
 type PermissionSource struct {
-	ScopeKnown        bool                      `json:"scopeKnown"`
-	ID                string                    `json:"id"`
-	Kind              string                    `json:"kind"`
-	Effect            permissions.Effect        `json:"effect"`
-	Status            string                    `json:"status"`
-	Restricted        bool                      `json:"restricted"`
-	PrincipalKind     permissions.PrincipalKind `json:"principalKind,omitempty"`
-	PrincipalID       string                    `json:"principalId,omitempty"`
-	PrincipalName     string                    `json:"principalName,omitempty"`
-	RoleID            string                    `json:"roleId,omitempty"`
-	RoleName          string                    `json:"roleName,omitempty"`
-	GrantID           string                    `json:"grantId,omitempty"`
-	AssignedRoleID    string                    `json:"assignedRoleId,omitempty"`
-	AssignedRoleName  string                    `json:"assignedRoleName,omitempty"`
-	Project           string                    `json:"projectId,omitempty"`
-	TeamScope         string                    `json:"teamScope,omitempty"`
-	ObjectScope       string                    `json:"objectScope,omitempty"`
-	AssignmentProject string                    `json:"assignmentProject,omitempty"`
-	ExpiresAt         *time.Time                `json:"expiresAt,omitempty"`
-	RestrictedFields  []string                  `json:"restrictedFields,omitempty"`
+	ScopeKnown            bool                      `json:"scopeKnown"`
+	ID                    string                    `json:"id"`
+	Kind                  string                    `json:"kind"`
+	Effect                permissions.Effect        `json:"effect"`
+	Status                string                    `json:"status"`
+	Restricted            bool                      `json:"restricted"`
+	PrincipalKind         permissions.PrincipalKind `json:"principalKind,omitempty"`
+	PrincipalID           string                    `json:"principalId,omitempty"`
+	PrincipalName         string                    `json:"principalName,omitempty"`
+	RoleID                string                    `json:"roleId,omitempty"`
+	RoleName              string                    `json:"roleName,omitempty"`
+	GrantID               string                    `json:"grantId,omitempty"`
+	AssignedRoleID        string                    `json:"assignedRoleId,omitempty"`
+	AssignedRoleName      string                    `json:"assignedRoleName,omitempty"`
+	Project               string                    `json:"projectId,omitempty"`
+	TeamScope             string                    `json:"teamScope,omitempty"`
+	ObjectScope           string                    `json:"objectScope,omitempty"`
+	AssignmentProject     string                    `json:"assignmentProject,omitempty"`
+	AssignmentApplication string                    `json:"assignmentApplication,omitempty"`
+	ExpiresAt             *time.Time                `json:"expiresAt,omitempty"`
+	RestrictedFields      []string                  `json:"restrictedFields,omitempty"`
 }
 type PermissionExplanation struct {
+	Application      string                               `json:"applicationId,omitempty"`
 	User             string                               `json:"userId"`
 	UserName         string                               `json:"userName"`
 	Project          string                               `json:"projectId"`
@@ -128,6 +131,20 @@ func (s *Service) explanationAuthority(ctx context.Context, actor, user string, 
 }
 
 func (s *Service) ExplainPermission(ctx context.Context, actor, user string, q ExplanationQuery) (PermissionExplanation, error) {
+	if q.Application != "" {
+		if err := s.Auth.CheckApplication(ctx, actor, q.Project, q.Application, "", "projects.read"); err != nil {
+			return PermissionExplanation{}, err
+		}
+		ctx = authorization.WithApplication(ctx, q.Project, q.Application)
+	} else if q.Object != "" {
+		contexts, err := s.Auth.PermissionContexts(ctx, q.Project, q.Object, q.Permission)
+		if err != nil {
+			return PermissionExplanation{}, err
+		}
+		if len(contexts) == 1 {
+			ctx = contexts[0]
+		}
+	}
 	if !domain.ValidID(user) || (q.Project != "" && !domain.ValidID(q.Project)) || !slices.Contains(authorization.PermissionNames(), q.Permission) || (q.Project != "" && authorization.InstallationPermission(q.Permission)) || (q.Object != "" && !validPolicyObject(q.Object)) {
 		return PermissionExplanation{}, errors.New("a registered user, permission, and exact supported context are required")
 	}
@@ -146,6 +163,7 @@ func (s *Service) ExplainPermission(ctx context.Context, actor, user string, q E
 		return PermissionExplanation{}, err
 	}
 	result := PermissionExplanation{User: user, UserName: u.Name, UserDisabled: u.Disabled, Project: q.Project, Object: q.Object, Permission: q.Permission, CheckedAt: time.Now().UTC(), Items: []PermissionSource{}, Permissions: []authorization.PermissionDefinition{}}
+	result.Application = authorization.ScopedApplication(ctx, q.Project)
 	for _, definition := range authorization.PermissionDefinitions() {
 		if q.Project == "" || !definition.InstallationOnly {
 			result.Permissions = append(result.Permissions, definition)

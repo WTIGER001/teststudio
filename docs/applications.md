@@ -89,11 +89,12 @@ Reloading ends the in-page continuation. Users can manage retained resources fro
 
 ## Project creator access
 
-Project creation now gives ordinary authorized creators project administration, test editing, publishing, and run roles for the new project.
+The unreleased role API gives ordinary authorized creators one Project Owner assignment.
+Owner includes project administration, test editing, publication, and execution. Existing creator role bundles remain unchanged until reviewed conversion.
 Creation saves the project and initial access together. It grants no installation administration.
-The project wizard explains this access on Review before creation.
+The hosted wizard retains its existing role explanation until the membership UI update is released.
 This lets a permitted creator complete the first application, target, and suite setup without an installation administrator session.
-If a required predefined role is disabled, creation fails without saving partial project access.
+If Owner is disabled, creation fails without saving partial project access.
 Existing installation administrators use their existing authority without automatic project self-assignment.
 Project edits do not restore revoked roles. Existing projects receive no automatic access changes.
 See [Initial creator access](access.md#initial-project-creator-access) for API behavior, policy, and recovery.

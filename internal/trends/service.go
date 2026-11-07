@@ -31,7 +31,7 @@ func (s *Service) Read(ctx context.Context, user, project string, filter Filter,
 	if _, err := s.Store.Get(ctx, "projects", project); err != nil {
 		return Report{}, err
 	}
-	if err := s.Auth.Check(ctx, user, project, "", "runs.read"); err != nil {
+	if err := s.Auth.CheckCollection(ctx, user, project, "runs.read"); err != nil {
 		return Report{}, err
 	}
 	if limit < 1 || limit > 500 {

@@ -131,6 +131,12 @@ func (s *Service) process(parent context.Context, job work, index storage.Record
 		defer cancel()
 		return s.Store.Commit(ctx, changes...)
 	}
+	if _, err := s.Runs.AuthorizeRequest(parent, v.Owner, v.Project, v.Request, "runs.create"); err != nil {
+		if parent.Err() != nil {
+			return parent.Err()
+		}
+		return finish("blocked", err.Error())
+	}
 	if v.Overlap == "skip" && v.LastRun != "" {
 		last, _, err := s.Runs.Get(parent, v.Project, v.LastRun)
 		if err != nil {

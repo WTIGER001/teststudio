@@ -59,7 +59,7 @@ func TestProjectCreatorGetsManagedScopedRolesAndRevocationStaysEffective(t *test
 	}
 	control := &access.Service{Store: s.Store, Auth: s.Auth}
 	rows, err := control.ListAssignments(t.Context(), "creator", "alpha", "", 100)
-	if err != nil || len(rows.Items) != 4 {
+	if err != nil || len(rows.Items) != 1 {
 		t.Fatal(rows, err)
 	}
 	for _, row := range rows.Items {
@@ -67,8 +67,7 @@ func TestProjectCreatorGetsManagedScopedRolesAndRevocationStaysEffective(t *test
 			t.Fatal("initial assignment metadata is incomplete", row)
 		}
 	}
-	definition := access.AssignmentDefinition{PrincipalKind: permissions.PrincipalUser, PrincipalID: "creator", RoleID: "builtin.teststudio.operator", Reason: "Withdraw run access"}
-	if err := control.RemoveAssignment(t.Context(), "creator", "alpha", definition, 2); err != nil {
+	if _, err := control.CreateGrant(t.Context(), "creator", "alpha", access.GrantDefinition{PrincipalKind: permissions.PrincipalUser, PrincipalID: "creator", Permission: "teststudio.runs.create", Effect: permissions.EffectDeny, Reason: "Withdraw run access"}); err != nil {
 		t.Fatal(err)
 	}
 	if err := s.SaveProject(t.Context(), "creator", projects.Project{ID: "alpha", Name: "Renamed"}, 1); err != nil {
@@ -91,14 +90,14 @@ func TestProjectCreatorGetsManagedScopedRolesAndRevocationStaysEffective(t *test
 
 func TestProjectCreatorDisabledRoleRollsBackProjectAssignmentsAuditAndClock(t *testing.T) {
 	s := creatorFixture(t)
-	if err := s.Auth.Engine.DisableBuiltInRole(t.Context(), "builtin.teststudio.operator"); err != nil {
+	if err := s.Auth.Engine.DisableBuiltInRole(t.Context(), authorization.OwnerRole); err != nil {
 		t.Fatal(err)
 	}
 	before, err := s.Auth.Directory.Revision(t.Context())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := s.SaveProject(t.Context(), "creator", projects.Project{ID: "alpha", Name: "Alpha"}, 0); err == nil || !strings.Contains(err.Error(), "enabled Operator") {
+	if err := s.SaveProject(t.Context(), "creator", projects.Project{ID: "alpha", Name: "Alpha"}, 0); err == nil || !strings.Contains(err.Error(), "enabled Owner") {
 		t.Fatal(err)
 	}
 	if _, err := s.Store.Get(t.Context(), "projects", "alpha"); !errors.Is(err, storage.ErrNotFound) {
@@ -141,7 +140,7 @@ func TestProjectCreatorRejectsUnauthorizedDuplicateAndDisabledActorsAndPreserves
 		t.Fatal("initial role bypassed explicit deny", err)
 	}
 	rows, err := s.Store.All(t.Context(), "audit", "alpha")
-	if err != nil || len(rows) != 5 {
+	if err != nil || len(rows) != 2 {
 		t.Fatal("duplicate create wrote audit or access", len(rows), err)
 	}
 	user, err := s.Auth.Directory.User(t.Context(), "creator")
@@ -193,7 +192,7 @@ func TestProjectCreatorConcurrentCreatesGiveAccessOnlyToTheWinner(t *testing.T) 
 		t.Fatal("expected one creator", wins)
 	}
 	rows, err := s.Store.All(t.Context(), "access-assignments", "contested")
-	if err != nil || len(rows) != 4 {
+	if err != nil || len(rows) != 1 {
 		t.Fatal("unexpected initial assignment count", len(rows), err)
 	}
 }

@@ -34,10 +34,12 @@ func PermissionNames() []string {
 		"catalog":      {"read", "create", "update", "import", "export", "publish", "archive", "restore", "delete"},
 		"runs":         {"read", "create", "cancel", "execute-protected"},
 		"evidence":     {"read", "download", "retain", "delete", "override-capture"},
-		"schedules":    {"read", "create", "update", "delete"},
+		"schedules":    {"read", "create", "update", "archive", "delete"},
+		"applications": {"read", "manage"},
+		"policies":     {"manage"},
 		"environments": {"read", "manage"}, "sources": {"read", "manage"}, "suites": {"read", "manage"},
 		"credentials": {"read", "manage"}, "notifications": {"read", "manage"}, "projects": {"read", "create", "manage"},
-		"members": {"read", "manage"}, "roles": {"read", "manage"}, "permissions": {"read", "grant"},
+		"members": {"read", "manage", "owners"}, "roles": {"read", "manage"}, "permissions": {"read", "grant"},
 		"users": {"read", "manage"}, "groups": {"read", "manage"}, "providers": {"read", "manage"},
 		"workers": {"read", "manage"}, "system": {"read", "manage"},
 	}
@@ -61,12 +63,13 @@ func BuiltInRoles() []RoleDefinition {
 		{ID: "builtin.teststudio.publisher", Name: "Publisher", Permissions: with("catalog.publish", "sources.manage", "suites.manage")},
 		{ID: "builtin.teststudio.project-admin", Name: "Project administrator", Permissions: with("projects.manage", "members.read", "members.manage", "groups.read", "groups.manage", "roles.read", "permissions.read", "permissions.grant", "environments.manage", "credentials.read", "credentials.manage", "notifications.read", "notifications.manage")},
 	}
+	roles = append(roles, standardRoles()...)
 	for i := range roles {
 		for j := range roles[i].Permissions {
 			roles[i].Permissions[j] = "teststudio." + roles[i].Permissions[j]
 		}
 	}
-	roles = append(roles, RoleDefinition{ID: "builtin.teststudio.installation-admin", Name: "Installation administrator", Permissions: PermissionNames()})
+	roles = append(roles, RoleDefinition{ID: "builtin.teststudio.installation-admin", Name: "System Admin", Permissions: PermissionNames()})
 	return roles
 }
 
@@ -130,18 +133,24 @@ func (s *Service) Check(ctx context.Context, user, project, object, name string)
 	if u.Disabled {
 		return ErrForbidden
 	}
+	contexts, err := s.PermissionContexts(ctx, project, object, name)
+	if err != nil {
+		return err
+	}
 	engine, err := s.CurrentEngine(ctx)
 	if err != nil {
 		return err
 	}
-	ok, err := engine.HasPermission(ctx, RequestFor(user, project, object, name))
-	if err != nil {
-		return err
+	for _, scope := range contexts {
+		ok, err := engine.HasPermission(scope, RequestFor(user, project, object, name))
+		if err != nil {
+			return err
+		}
+		if ok {
+			return nil
+		}
 	}
-	if !ok {
-		return ErrForbidden
-	}
-	return nil
+	return ErrForbidden
 }
 
 func (s *Service) Capabilities(ctx context.Context, user, project string) (map[string]bool, error) {

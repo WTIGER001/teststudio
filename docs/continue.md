@@ -73,14 +73,20 @@ This operator convenience changes no application release and closes no acceptanc
 
 ## Next implementation priorities
 
-### Latest request: System and role planning
+### Latest request: System and role APIs
 
 The user keeps Project and Group, selects System, and requests planning for Owner, Contributor, Developer, Member, and Reader on 2026-11-07.
 Member runs tests. Contributor sits directly below Owner, with scoped administration except resource deletion and adding, removing, or changing Owners. Guard indirect Owner changes through groups and custom policies too.
 The [role plan](roles-plan.md) defines cumulative Project and Application roles, a separate System Admin, inheritance, shared-resource boundaries, owner safeguards, and reviewed migration.
 Application-only roles require server authorization; existing application filters do not establish access isolation.
-The request covers planning only. No application permissions, assignments, release, or deployment change.
-When implementation is requested, start with milestone 1 and its permission-service scope checks. Preserve existing role semantics until reviewed conversion.
+The user requests API implementation. Backend milestones 1 through 3 are implemented locally with focused SQLite and PostgreSQL evidence.
+API contract 0.37.0 and the generated identity client cover scoped assignments, atomic standard-role replacement, capability and access explanations, owner status, exact user lookup, conversion previews, apply, and rollback previews.
+Standard roles use native permission-service evaluation with server-resolved Application context. Full mixed runs and shared source mutation remain restricted to Project authority.
+New ordinary project creators receive one Owner assignment. Existing role bundles and memberships stay unchanged until reviewed conversion.
+The [access guide](access.md#standard-project-and-application-roles) documents routes, previous-role revision guards, Owner safeguards, and migration recovery.
+The retained PostgreSQL selections pass 59 initial checks, 18 focused follow-up checks, and two final delegation/Owner guard checks. Matching SQLite and targeted race checks pass. Reuse these receipts under output/roles-api unless changed behavior requires another check.
+UI milestone 4 and release/target milestone 5 remain pending. No UI workflow, release publication, hosted membership conversion, or deployment runs for the API-only request.
+Choose the product release version before publishing. The hosted 0.2.0-dev release, private nine-probe schedules, and port 8040 demo remain unchanged.
 The count stays 50 verified of 57. The default AWS worker queue remains available after this planning request.
 
 ### Completed request: HTTPS probes features and help

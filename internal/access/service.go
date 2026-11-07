@@ -36,6 +36,13 @@ func reason(value string) error {
 }
 
 func (s *Service) commit(ctx context.Context, actor, project, action, resource, why string, before, after any, version storage.Record, changes ...storage.Change) error {
+	scopes, err := s.ownerCheckpoint(ctx)
+	if err != nil {
+		return err
+	}
+	if err := s.preserveOwners(ctx, scopes, changes...); err != nil {
+		return err
+	}
 	audit, err := domain.Audit(actor, project, action, resource, before, map[string]any{"value": after, "reason": why})
 	if err != nil {
 		return err
@@ -58,7 +65,7 @@ func (s *Service) group(ctx context.Context, actor, id, permission string) (iden
 	if g.Project != r.Project {
 		return g, r, storage.ErrNotFound
 	}
-	if err := s.Auth.Check(ctx, actor, g.Project, "group/"+id, permission); err != nil {
+	if err := s.Auth.Check(authorization.WithApplication(ctx, g.Project, ""), actor, g.Project, "group/"+id, permission); err != nil {
 		return identity.Group{}, storage.Record{}, err
 	}
 	return g, r, nil

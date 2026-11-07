@@ -31,6 +31,9 @@ func (s *Service) changeRolePolicy(ctx context.Context, actor string, input Role
 			return err
 		}
 		if row.Revision > 0 {
+			if err := bound.protectOwnerPolicy(ctx, actor, value.Project, value.ID); err != nil {
+				return err
+			}
 			if err := bound.rolePolicyAuthority(ctx, actor, prior, true); err != nil {
 				return err
 			}
@@ -75,6 +78,10 @@ func (s *Service) changeRolePolicy(ctx context.Context, actor string, input Role
 			}
 		}
 		hadAdmin := false
+		ownerScopes, err := bound.ownerCheckpoint(ctx)
+		if err != nil {
+			return err
+		}
 		if value.Project == "" {
 			hadAdmin, err = bound.hasUsableAdministrator(ctx)
 			if err != nil {
@@ -109,6 +116,9 @@ func (s *Service) changeRolePolicy(ctx context.Context, actor string, input Role
 			return err
 		}
 		if err := bound.materializeRoleInheritance(ctx, prior, value); err != nil {
+			return err
+		}
+		if err := bound.preserveOwners(ctx, ownerScopes); err != nil {
 			return err
 		}
 		if hadAdmin {

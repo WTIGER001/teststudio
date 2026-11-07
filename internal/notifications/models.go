@@ -8,6 +8,7 @@ import (
 )
 
 type Definition struct {
+	Application  string   `json:"applicationId,omitempty"`
 	ID           string   `json:"id"`
 	Name         string   `json:"name"`
 	Enabled      bool     `json:"enabled"`

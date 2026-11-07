@@ -46,6 +46,10 @@ func (s *Service) SaveProvider(ctx context.Context, actor string, input Provider
 		if err != nil {
 			return err
 		}
+		ownerScopes, err := bound.ownerCheckpoint(ctx)
+		if err != nil {
+			return err
+		}
 		change, err := storage.Put("providers", value.ID, "", revision, value)
 		if err != nil {
 			return err
@@ -55,6 +59,9 @@ func (s *Service) SaveProvider(ctx context.Context, actor string, input Provider
 			return err
 		}
 		if err := bound.Store.Commit(ctx, change, audit); err != nil {
+			return err
+		}
+		if err := bound.preserveOwners(ctx, ownerScopes); err != nil {
 			return err
 		}
 		if hadAdmin {

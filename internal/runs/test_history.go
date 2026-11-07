@@ -55,6 +55,18 @@ func (s *Service) ScopedTestHistory(ctx context.Context, user, project, suite, i
 		return result, errors.New("test history requires valid identifiers and a page limit from 1 through 100")
 	}
 	for _, check := range [][2]string{{"", "runs.read"}, {"suite/" + suite, "catalog.read"}, {"test/" + suite + "/" + id, "catalog.read"}} {
+		if check[0] == "" {
+			if err := s.Auth.CheckCollection(ctx, user, project, check[1]); err != nil {
+				return result, err
+			}
+			continue
+		}
+		if check[0] == "suite/"+suite {
+			if err := s.Auth.CheckSuiteTestList(ctx, user, project, suite); err != nil {
+				return result, err
+			}
+			continue
+		}
 		if err := s.Auth.Check(ctx, user, project, check[0], check[1]); err != nil {
 			return result, err
 		}

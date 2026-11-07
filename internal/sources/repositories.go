@@ -32,7 +32,7 @@ func (s *Service) ReadRepository(ctx context.Context, user, project, id string) 
 	return s.Store.Get(ctx, repositoryBucket(project), id)
 }
 func (s *Service) ListRepositories(ctx context.Context, user, project, cursor string, limit int) (storage.Page, error) {
-	if err := s.Auth.Check(ctx, user, project, "", "sources.read"); err != nil {
+	if err := s.Auth.CheckCollection(ctx, user, project, "sources.read"); err != nil {
 		return storage.Page{}, err
 	}
 	page, err := s.Store.List(ctx, repositoryBucket(project), project, cursor, limit)
@@ -51,9 +51,10 @@ func (s *Service) ListRepositories(ctx context.Context, user, project, cursor st
 	return page, nil
 }
 func (s *Service) SaveRepository(ctx context.Context, user, project, id string, input RepositoryConfig, revision int64) error {
-	if err := s.checkRepository(ctx, user, project, id, "manage"); err != nil {
+	if err := s.repositoryMutationAuthority(ctx, user, project, id, input, revision); err != nil {
 		return err
 	}
+
 	provider := s.Providers[input.Provider]
 	if provider == nil {
 		return errors.New("source provider is not enabled")
@@ -96,7 +97,7 @@ func (s *Service) SaveRepository(ctx context.Context, user, project, id string, 
 	}
 	return s.Auth.WithAssignmentTransaction(ctx, func(auth *authorization.Service) error {
 		bound := &Service{Store: auth.Directory.Store, Auth: auth, BundleRunners: s.BundleRunners, Location: s.Location}
-		if err := bound.checkRepository(ctx, user, project, id, "manage"); err != nil {
+		if err := bound.repositoryMutationAuthority(ctx, user, project, id, input, revision); err != nil {
 			return err
 		}
 		if err := bound.validateRepositoryBindings(ctx, user, project, input); err != nil {
@@ -189,7 +190,7 @@ type RepositoryOptions struct {
 
 func (s *Service) RepositoryOptions(ctx context.Context, user, project string) (RepositoryOptions, error) {
 	result := RepositoryOptions{Providers: []string{}, Credentials: []secrets.Reference{}, WebhookCredentials: []secrets.Reference{}}
-	if err := s.Auth.Check(ctx, user, project, "", "sources.read"); err != nil {
+	if err := s.Auth.CheckCollection(ctx, user, project, "sources.read"); err != nil {
 		return result, err
 	}
 	for provider := range s.Providers {
