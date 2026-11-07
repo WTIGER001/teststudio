@@ -6,6 +6,16 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## System and scoped role planning — 2026-11-07
+
+The user keeps Project and Group, selects System, and requests a plan for Owner, Developer, Contributor, and Reader.
+The [role plan](roles-plan.md) defines cumulative Project and Application roles, separate System Admin authority, inheritance, delegation, group ownership, shared-resource isolation, and owner recovery.
+It preserves narrow existing roles until explicit reviewed conversion and separates application authorization from current display filters.
+Five implementation milestones map server scope enforcement, managed membership, migration, UI and help, and target verification to the stable acceptance numbers.
+This delivery changes planning documentation only. Current application permissions, memberships, release identity, and deployment remain unchanged.
+Documentation consistency, relative links, and the 57-item acceptance count are checked before commit. No application build, browser execution, or deployment is needed.
+The count remains 50 verified of 57. Open items remain 41, 46, 51, 53, 54, 56, and 57.
+
 ## MarketMaker MMDev deployment launcher — 2026-11-07
 
 The user selects the separate MarketMaker API checkout for a deployment entry point.

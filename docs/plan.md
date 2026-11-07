@@ -16,7 +16,16 @@ Use the mm_dev profile and preserve existing services. Azure implementation and 
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
-## Latest user direction: HTTPS probes and visual help
+## Latest user direction: System and scoped roles
+
+The user keeps Project and Group, selects System for installation terminology, and requests a role plan on 2026-11-07.
+The [role plan](roles-plan.md) proposes Reader, Contributor, Developer, and Owner at Project and Application scope, with System Admin separate.
+Project roles inherit into applications. Application-only membership requires server enforcement across shared suites, sources, runs, evidence, and automation before UI exposure.
+Existing narrow roles retain their permissions until reviewed conversion. New role names never silently broaden existing grants.
+This request delivers planning only. Its implementation milestones do not start application changes, migration, publication, or deployment.
+The acceptance count remains 50 verified of 57. Resume this design when the user requests implementation; otherwise retain the default worker queue.
+
+## Completed user direction: HTTPS probes and visual help
 
 The user requests a complete HTTPS probes feature and help plan on 2026-11-06.
 Follow [the HTTPS probes plan](https-probes-plan.md) for this requested workflow before returning to the default AWS worker queue.

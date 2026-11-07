@@ -65,7 +65,16 @@ This operator convenience changes no application release and closes no acceptanc
 
 ## Next implementation priorities
 
-### Latest request: HTTPS probes features and help
+### Latest request: System and role planning
+
+The user keeps Project and Group, selects System, and requests planning for Owner, Developer, Contributor, and Reader on 2026-11-07.
+The [role plan](roles-plan.md) defines cumulative Project and Application roles, a separate System Admin, inheritance, shared-resource boundaries, owner safeguards, and reviewed migration.
+Application-only roles require server authorization; existing application filters do not establish access isolation.
+The request covers planning only. No application permissions, assignments, release, or deployment change.
+When implementation is requested, start with milestone 1 and its permission-service scope checks. Preserve existing role semantics until reviewed conversion.
+The count stays 50 verified of 57. The default AWS worker queue remains available after this planning request.
+
+### Completed request: HTTPS probes features and help
 
 The [HTTPS probes guide](https-probes.md) documents the delivered workflow. The [six-milestone plan](https-probes-plan.md) records implementation and verification evidence.
 Milestones 1 through 6 are complete for this request. Local workflows pass and release 0.2.0-dev is deployed from committed source 6d2444f with matching public UI and API assets.

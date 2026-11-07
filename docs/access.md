@@ -1,5 +1,8 @@
 # Identity administration
 
+The proposed [System and scoped role plan](roles-plan.md) defines cumulative Project and Application roles and reviewed migration.
+It is a planning proposal. The current roles and behavior below remain in force until implementation.
+
 TestStudio stores user profiles, external identity links, groups, and membership provenance in its selected database.
 The permission library evaluates access. The directory does not infer project authority from an email address or group name.
 
