@@ -16,6 +16,14 @@ Use the mm_dev profile and preserve existing services. Azure implementation and 
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
+## Completed user direction: compact probe status bars
+
+On 2026-11-07 the user requests vertical colored pills in place of recent-check tiles.
+HTTPS probe rows now keep up to 30 compact pills on one responsive line with existing run links, accessible labels, and shared status colors.
+The guide and page help explain their meaning. The UI build and STUDIO-PROBE-OVERVIEW-001 pass locally, including light desktop, dark mobile, and keyboard activation.
+Version 0.2.1-dev is prepared locally. Publication and target verification are separate; the hosted release stays 0.2.0-dev.
+This refines 34, 49, and 50. Acceptance stays 50 verified of 57. Preserve the role plan and default worker queue below.
+
 ## Latest user direction: System and scoped roles
 
 The user keeps Project and Group, selects System for installation terminology, and requests a role plan on 2026-11-07.

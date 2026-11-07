@@ -6,6 +6,17 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## Compact recent-check pills — 2026-11-07
+
+HTTPS probe history replaces checkmark tiles with narrow vertical pills in one responsive row.
+Passed, failed, timed-out, flaky, and other outcomes use the shared theme colors. Each pill retains its run link, readable label, timestamp, and previous-target or previous-definition details.
+The guide and page help explain the colors and interaction. The patch version is 0.2.1-dev.
+The UI build passes. STUDIO-PROBE-OVERVIEW-001 passes in 9.227 seconds through normal local TestStudio execution.
+Run 20261107T153825.676380000-f359987ef19bbbc8498e69d0 verifies 30 real observations, distinct pass/fail colors, keyboard focus and activation, retained history, and a single row at 390 pixels without document overflow.
+Light desktop and dark mobile screenshots pass visual review. Evidence is complete and execution is cleaned. Owned controllers and containers exit.
+The first check used programmatic focus while expecting a keyboard-only focus ring. The corrected check uses Tab and Shift+Tab; no product correction was needed.
+This refines 34, 49, and 50. The total remains 50 verified of 57. Target deployment is not checked or changed; the hosted release remains 0.2.0-dev.
+
 ## System and scoped role planning — 2026-11-07
 
 The user keeps Project and Group, selects System, and requests a plan for Owner, Contributor, Developer, Member, and Reader.

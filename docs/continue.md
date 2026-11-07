@@ -35,6 +35,14 @@ Later documentation and operator-tooling commits do not change the deployed impl
 The public API, UI bundle, and portable image labels match this release.
 The local user demo is separate. Do not assume it runs the same release as the hosted installation.
 
+## Latest local UI change
+
+On 2026-11-07, HTTPS probe recent checks switch from checkmark tiles to compact colored vertical pills.
+The local patch version is 0.2.1-dev. This change is not deployed; the hosted release table above remains authoritative for the last recorded publication.
+The UI build and STUDIO-PROBE-OVERVIEW-001 pass. Run 20261107T153825.676380000-f359987ef19bbbc8498e69d0 verifies 30 checks, keyboard links, light and dark themes, and a 390-pixel layout.
+Evidence is complete, execution is cleaned, and owned processes exit. The total stays 50 verified of 57; items 34, 49, and 50 are refined.
+Use the committed patch source if publication is requested. Do not repeat the passing workflow merely to publish it.
+
 ## Recent completed work to preserve
 
 - HTTPS probes now has target-specific results, reviewed single and bulk actions, explicit adoption, multiple-address setup, and shared-component visual help.

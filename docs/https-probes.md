@@ -65,7 +65,10 @@ Manual only makes no monitoring freshness guarantee. Paused schedules retain the
 For enabled schedules, overdue observations allow the frozen run budget and a 60-second reporting grace before becoming stale.
 Blocked firings remain visible. Missing checks never count as successes.
 
-The recent sequence contains up to 30 final logical observations in the selected window.
+The recent sequence shows up to 30 final logical observations as compact vertical pills in one row.
+Green means passed, red failed, blue timed out, amber flaky, and neutral other outcomes.
+Hover for the status and timestamp. Each pill has a screen-reader label and keyboard focus; select it to open its retained run.
+Previous target and Previous definition labels remain available in the pill details.
 Check success rate counts passed, failed, timed-out, and flaky outcomes once per logical run; only passed enters its numerator.
 Other outcomes are shown separately. Empty or partial history has no percentage.
 This is a sampled check success rate, not continuous uptime.
