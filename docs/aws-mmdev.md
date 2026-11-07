@@ -37,9 +37,9 @@ The reviewed foundation change set adds 29 resources. The reviewed core change s
 Neither change set modifies existing resources. The core change set creates no cluster.
 ECS reports one desired and one running teststudioapi task with a completed rollout.
 Both API and artifact target groups report healthy. The existing testing-server remains at one running task.
-The ARM64 image is sha256:eb8ff64d74fcdc9eb06f2c5127bb8b202ee2029d39a0126dd9e0fa70e1651fdb.
-It is published in teststudioapi/service. The versioned release is 0.2.0-dev, displayed as 0.2.0.dev. Build 6caa2b0ca508 uses committed source 6d2444f.
-Its UTC build creation date is 2026-11-06T16:02:07.885Z. The new task starts at 2026-11-06T16:06:11.177Z and UI publication occurs at 2026-11-06T16:09:03Z. The API, UI, and image labels share that immutable identity.
+The ARM64 image is sha256:4bfcc4c6c4d8052a3a58126fcd90f12508ee54081526cb3b6197961ab7de4a7c.
+It is published in teststudioapi/service. The current release is 0.3.0-dev, displayed as 0.3.0.dev. Build 00135cfbf35a uses committed source 28be433.
+Its UTC build creation date is 2026-11-07T21:40:22.138Z. The task starts at 2026-11-07T21:42:34.514Z and UI publication occurs at 2026-11-07T21:46:35Z. The API, UI, and image labels share that immutable identity.
 The unchanged trace viewer is reused. Native image storage uses the existing private database. The image retains the reviewed public RDS trust bundle.
 
 Initial core verification retains actual Cognito sign-in, catalog publication, and one native HTTPS probe through the public installation.
@@ -208,3 +208,13 @@ The existing requesting user has project-scoped management roles; installation a
 Five-minute schedules use the actual retained AWS execution location, normal owner checks, zero retries, and skipped overlaps.
 All nine first automatic firings pass with complete evidence. This native HTTP scope does not establish coded-worker readiness or full cross-profile acceptance.
 The tracked manage-https-probes.py verify action inspects overview identity, project roles, anonymous denial, and a private evidence checksum without another test execution.
+
+### Scoped roles release
+
+Release 0.3.0-dev includes the scoped role API, Project members, Application members, System labels, reviewed conversion and rollback, and compact probe status pills.
+The reviewed image-only change set modifies Service and Task. Foundation resources and testing-server remain unchanged.
+Twelve local package checks and fourteen hosted permission checks pass. The public index, primary assets, membership bundle, and API metadata match build 00135cfbf35a; CloudFront invalidation completes.
+The generic roles-00135cfbf35a project retains one normal native HTTPS run and its evidence. Project Member inherits into two applications; direct Application Member and group Developer stay confined to Alpha.
+Contributor cannot assign Owner. Revoking its assignment removes existing-session run access and invalidates the already-issued evidence URL while inherited Member access remains.
+Bootstrap OIDC and three independently provisioned local-password sessions use normal API authorization. All four sessions close and the three verification users are disabled.
+Receipts are output/aws-mmdev/roles-030. No existing membership conversion or probe execution is repeated. This focused native scope does not close complete AWS or provider-parity acceptance.

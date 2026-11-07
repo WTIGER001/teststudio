@@ -6,6 +6,26 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## Scoped roles MMDev release — 2026-11-07
+
+The user authorizes membership UI, committing and pushing all branch commits, and deployment to MMDev.
+Implementation 28be433 includes the previously committed API 96e1bb8 and compact probe pills 457a4c5. All branch history is pushed to origin/codex/implementation.
+Version 0.3.0-dev uses immutable build 00135cfbf35a, created 2026-11-07T21:40:22.138Z from committed source with modified false.
+The ARM64 registry digest is sha256:4bfcc4c6c4d8052a3a58126fcd90f12508ee54081526cb3b6197961ab7de4a7c.
+The twelve local portable-package checks pass. Owned package containers and volumes are removed.
+The reviewed CloudFormation change set modifies only Service and Task. No foundation or existing testing-server resource changes.
+The new task starts at 2026-11-07T21:42:34.514Z. UI publication occurs at 2026-11-07T21:46:35Z; these dates remain separate from build creation.
+The stack reaches UPDATE_COMPLETE. Both teststudioapi and testing-server have one desired, one running, zero pending tasks and completed rollouts. TestStudio's selected task is HEALTHY with the expected digest.
+CloudFront invalidation completes. Public index, primary scripts, stylesheet, membership bundle, and API version match the local committed artifact. Anonymous project access returns 401.
+
+Fourteen focused hosted permission checks use normal bootstrap OIDC and three independent local-password sessions on PostgreSQL.
+A generic project with Alpha and Beta applications verifies inherited Project Member execution, one-application Member execution, rejected sibling capabilities and reads, scoped group Developer authoring, and application explanation provenance.
+Application Member starts native HTTPS run 20261107T214431.750002628-170090d8728a73be1477c8ad. It passes in 98.745277 ms with complete evidence and a matching private-download checksum.
+After atomic promotion to Contributor, assigning Owner is rejected. Removing that assignment withdraws current-session run access and rejects its already-issued evidence URL. Independent inherited Member access remains.
+All four owned sessions close. Three verification users are disabled. The temporary helper is removed, and receipts remain under output/aws-mmdev/roles-030.
+Existing user memberships, nine private probes and schedules, the port 8040 demo, and unrelated workloads are preserved. No hosted compatibility conversion runs.
+This extends evidence for 10, 12, 13, 49, 50, 54, and 55. Acceptance remains **50 verified of 57**. Coded workers, complete provider parity, and other broad cross-profile requirements remain open.
+
 ## Scoped membership interface — 2026-11-07
 
 Project members and Application members manage direct standard user and group assignments with explicit scope, exact user verification, role descriptions, review, atomic replacement, and revision recovery.
@@ -27,7 +47,7 @@ UI compilation and eleven selected utility checks pass. Normal local TestStudio 
 The new workflow covers user and group assignment, atomic role change, inherited access, application explanations, canceled navigation, help, conversion and rollback, real application-only Contributor navigation, protected Owner rows, and sibling rejection.
 The initial checks expose an unnecessary registry request after authority withdrawal; the workspace now requests applications only for a readable parent context. Test corrections use exact role cells, current help text, and expected forbidden responses.
 Light desktop and dark mobile screenshots show contained layouts. All execution evidence is complete; owned controllers and containers exit. The user's port 8040 demo is preserved.
-Version 0.3.0-dev is prepared through the version helper. Release and target verification remain separate until recorded below.
+Version 0.3.0-dev is prepared through the version helper. The separate release and target verification are recorded above.
 This advances the expanded scope of 10, 12, 13, 49, and 50. Acceptance stays **50 verified of 57**; broad cross-profile items remain open.
 
 ## Compact recent-check pills — 2026-11-07

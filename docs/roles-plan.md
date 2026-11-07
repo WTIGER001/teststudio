@@ -233,7 +233,7 @@ Startup never repeats migration or restores revoked grants.
 The user authorizes API implementation on 2026-11-07. Backend work for milestones 1 through 3 now has focused SQLite and PostgreSQL evidence.
 The [access guide](access.md#standard-project-and-application-roles) describes the implemented endpoints and compatibility rules.
 The user also authorizes membership UI, committing and pushing all branch commits, and MMDev deployment.
-Milestone 4 now passes focused local browser checks. Milestone 5 is the active release and target-verification step.
+Milestone 4 now passes focused local browser checks. Milestone 5 publishes committed 0.3.0-dev to MMDev with matching UI and API identity, twelve package checks, and fourteen focused hosted permission checks.
 
 This planning milestone maps primarily to acceptance 10, 12, and 13, with follow-on coverage for 05, 07, 14, 18, 38, 45, 49, 50, 54, and 55.
 The authoritative ledger stays at 50 verified of 57. Scope changes require fresh targeted evidence before retaining the affected acceptance claims for the new behavior.

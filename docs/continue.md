@@ -23,25 +23,27 @@ UI improvements refine existing accepted items. They do not close the remaining 
 | Item | Last verified value |
 | --- | --- |
 | Hosted UI | https://teststudio.devfoodmarketmaker.com |
-| Product version | 0.2.0-dev; footer displays 0.2.0.dev |
-| Build identifier | 6caa2b0ca508 |
-| Build creation | 2026-11-06T16:02:07.885Z |
-| Implementation commit | 6d2444fcb27a0d03af68c258e36da173adc38b77 |
+| Product version | 0.3.0-dev; footer displays 0.3.0.dev |
+| Build identifier | 00135cfbf35a |
+| Build creation | 2026-11-07T21:40:22.138Z |
+| Implementation commit | 28be433a24db4a90cab65aff30412115560e4896 |
 | Source state at build | Committed source; modified is false |
-| Service image digest | sha256:eb8ff64d74fcdc9eb06f2c5127bb8b202ee2029d39a0126dd9e0fa70e1651fdb |
+| Service image digest | sha256:4bfcc4c6c4d8052a3a58126fcd90f12508ee54081526cb3b6197961ab7de4a7c |
+| Task startup | 2026-11-07T21:42:34.514Z |
+| UI publication | 2026-11-07T21:46:35Z |
 | Live version metadata | GET /api/v1/version; public and no-store |
 
 Later documentation and operator-tooling commits do not change the deployed implementation commit or its immutable build date.
 The public API, UI bundle, and portable image labels match this release.
 The local user demo is separate. Do not assume it runs the same release as the hosted installation.
 
-## Latest local UI change
+## Latest delivered UI changes
 
 On 2026-11-07, HTTPS probe recent checks switch from checkmark tiles to compact colored vertical pills.
-The local patch version is 0.2.1-dev. This change is not deployed; the hosted release table above remains authoritative for the last recorded publication.
+The patch is included in deployed 0.3.0-dev alongside scoped membership management. The release table above identifies the published artifact.
 The UI build and STUDIO-PROBE-OVERVIEW-001 pass. Run 20261107T153825.676380000-f359987ef19bbbc8498e69d0 verifies 30 checks, keyboard links, light and dark themes, and a 390-pixel layout.
 Evidence is complete, execution is cleaned, and owned processes exit. The total stays 50 verified of 57; items 34, 49, and 50 are refined.
-Use the committed patch source if publication is requested. Do not repeat the passing workflow merely to publish it.
+Project and Application members now support reviewed role changes and conversion recovery. Reuse the passing evidence below; do not repeat workflows merely to publish them.
 
 ## Recent completed work to preserve
 
@@ -73,7 +75,7 @@ This operator convenience changes no application release and closes no acceptanc
 
 ## Next implementation priorities
 
-### Latest request: scoped membership UI and MMDev release
+### Completed request: scoped membership UI and MMDev release
 
 The user keeps Project and Group, selects System, and requests planning for Owner, Contributor, Developer, Member, and Reader on 2026-11-07.
 Member runs tests. Contributor sits directly below Owner, with scoped administration except resource deletion and adding, removing, or changing Owners. Guard indirect Owner changes through groups and custom policies too.
@@ -88,8 +90,11 @@ The retained PostgreSQL selections pass 59 initial checks, 18 focused follow-up 
 The user then requests the necessary membership UI, commit, push of all branch commits, and MMDev deployment.
 Project members and Application members now support reviewed standard-role creation and replacement, inherited access, Contributor restrictions, ownership status, conversion receipts, and reviewed rollback. System labels, exact application explanations, and contextual help are included.
 The UI build, eleven focused utility checks, STUDIO-ROLES-001, STUDIO-PERMISSIONS-001, and new STUDIO-APPLICATION-ACCESS-001 pass locally. The ledger records timings and retained runs. All owned controllers and execution containers exit.
-Version 0.3.0-dev is prepared for publication. Release/target milestone 5 remains active. Existing hosted memberships and the nine private schedules remain unchanged until explicit reviewed edits. Preserve the port 8040 demo.
-The count stays 50 verified of 57. The default AWS worker queue remains available after this planning request.
+Version 0.3.0-dev is committed, pushed, and deployed through a reviewed Service-and-Task-only change set. Both services remain healthy and the stack is UPDATE_COMPLETE.
+Fourteen hosted permission checks pass, including actual local-password sessions, application-only execution, group access, Contributor Owner rejection, current-session revocation, and rejection of an already-issued evidence URL. One generic native HTTPS run passes in 98.745277 ms. All four owned sessions close and three verification users are disabled.
+The public index, primary assets, membership bundle, and API metadata match the committed artifact. CloudFront invalidation is complete. Receipts remain under output/aws-mmdev/roles-030.
+Existing hosted memberships and the nine private schedules are preserved. No hosted legacy conversion is performed. Preserve the port 8040 demo.
+The count stays 50 verified of 57. The default AWS worker queue remains available after this completed request.
 
 ### Completed request: HTTPS probes features and help
 

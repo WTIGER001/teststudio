@@ -21,10 +21,10 @@ The full product scope remains required. This direction supersedes the testing s
 On 2026-11-07 the user requests vertical colored pills in place of recent-check tiles.
 HTTPS probe rows now keep up to 30 compact pills on one responsive line with existing run links, accessible labels, and shared status colors.
 The guide and page help explain their meaning. The UI build and STUDIO-PROBE-OVERVIEW-001 pass locally, including light desktop, dark mobile, and keyboard activation.
-Version 0.2.1-dev is prepared locally. Publication and target verification are separate; the hosted release stays 0.2.0-dev.
+This patch is included in deployed 0.3.0-dev. Its passing local evidence is reused for publication.
 This refines 34, 49, and 50. Acceptance stays 50 verified of 57. Preserve the role plan and default worker queue below.
 
-## Latest user direction: System and scoped roles
+## Completed user direction: System and scoped roles
 
 The user keeps Project and Group, selects System for installation terminology, and requests a role plan on 2026-11-07.
 The [role plan](roles-plan.md) proposes Reader, Member, Developer, Contributor, and Owner at Project and Application scope, with System Admin separate.
@@ -35,7 +35,9 @@ The user requests API implementation on 2026-11-07. The five roles, scoped assig
 API contract 0.37.0 generates the matching client. Focused SQLite and PostgreSQL checks cover the backend work for milestones 1 through 3.
 The user extends this request to membership UI, committing and pushing all branch commits, and MMDev deployment.
 Project and Application members, System labels, reviewed assignments and conversion recovery, inherited explanations, and page help now pass local UI compilation and the three targeted browser workflows.
-Version 0.3.0-dev is prepared. Publication and hosted permission verification are the active step. Existing hosted memberships stay unchanged until reviewed conversion.
+Release 0.3.0-dev from committed source 28be433 is pushed and deployed to MMDev. A reviewed change set modifies only Service and Task.
+The twelve package checks and fourteen native hosted permission checks pass. Public UI assets and API metadata match build 00135cfbf35a. Both TestStudio and testing-server retain healthy completed rollouts.
+Existing memberships and private schedules are preserved. No legacy membership converts automatically. The default AWS worker queue remains next when requested.
 The acceptance count remains 50 verified of 57. This work refines 05, 07, 10, 12, 13, 14, 38, and 45 without closing the remaining cross-profile items.
 
 ## Completed user direction: HTTPS probes and visual help

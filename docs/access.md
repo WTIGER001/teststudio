@@ -156,7 +156,7 @@ go run ./cmd/teststudio-client --check
 ```
 
 Run these commands from the repository root.
-The generated module contains 63 identity and access operations, including providers, explanations, role state, grants, previews, and custom assignment choices.
+The generated module contains the identity and access operations, including providers, explanations, role state, grants, previews, and custom assignment choices.
 The shared client adapter supplies same-origin sessions, request-forgery protection, and revision headers.
 The client escapes path identifiers and preserves explicit query values.
 Generator checks reject stale output. Nullable expiry and required fields retain their contract types.
