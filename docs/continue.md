@@ -39,6 +39,8 @@ The local user demo is separate. Do not assume it runs the same release as the h
 
 ## Latest delivered UI changes
 
+The copy-button release used the managed checkout /Users/johnbauer/.codex/worktrees/status-sharing-copy/teststudio. The app retains it as this chat’s primary checkout and rejects archival. It is clean, has no owned processes, and has no temporary build data after evidence is copied here. Use /Users/johnbauer/Dev/Personal/teststudio explicitly to resume the shared codex/implementation branch and preserve its concurrent reliability edits.
+
 Release 0.5.1-dev adds Copy Public URL and Copy Iframe embed code beside the sharing fields. Both announce success or explain manual copying when browser clipboard access is unavailable. The normal local browser workflow passes in 6.709 seconds, run 20261108T025119.540693000-f97987f5b8ae0d58e4383b5e; sixteen hosted identity, asset, health, rollout, and invalidation checks pass. The requesting account sees both buttons. Its page remains unchanged and the temporary tab closes. Receipts are output/aws-mmdev/status-copy-051.
 
 Status-page details now have separate Edit and Review publication routes. Optional vanity names are unique across the installation and reserve on Save draft. Publication activates the saved name, while permanent generated URLs remain compatible. The deployed 0.5.0-dev release includes this workflow and shared guidance for pages, dialogs, and inline controls.

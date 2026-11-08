@@ -16,7 +16,7 @@ Release 0.5.1-dev uses committed 4e679d49a962d4f8803ed4669bdc7bc4301c7c27, build
 The reviewed CloudFormation change set modifies only TestStudio Service and Task. Task startup is 2026-11-08T02:54:03.467Z; matching UI publication is 2026-11-08T02:57:29Z.
 Sixteen hosted checks pass for API identity, exact published UI and component bytes, health, expected task digest, completed stack and service rollouts, and completed CloudFront invalidation. Both teststudioapi and testing-server retain their completed rollouts.
 The requesting account’s browser confirms both buttons beside its existing sharing fields on 0.5.1-dev. No page values or publication are changed. Its clipboard is not overwritten during the hosted inspection. The temporary tab closes and both original tabs remain.
-Receipts and screenshots are output/aws-mmdev/status-copy-051 and output/selftest/20261108T025119.540693000-f97987f5b8ae0d58e4383b5e. The temporary build checkout is cleaned after evidence is retained. The patch and release documentation are pushed; concurrent reliability edits remain separate.
+Receipts and screenshots are output/aws-mmdev/status-copy-051 and output/selftest/20261108T025119.540693000-f97987f5b8ae0d58e4383b5e. The temporary build checkout is cleaned after evidence is retained. The app keeps it as this chat’s primary checkout and rejects archival; use the original checkout explicitly for shared branch work. The patch and release documentation are pushed; concurrent reliability edits remain separate.
 This refines 49 and 50. Acceptance stays **50 verified of 57**, with the same seven broad requirements open. Existing projects, memberships, probes, schedules, and the port 8040 demo remain unchanged.
 
 ## Shared reliability history: approved scope — 2026-11-07
