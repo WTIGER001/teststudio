@@ -26,6 +26,9 @@ func Export(ctx context.Context, source *storage.Store, output io.Writer) (Stats
 		if busy {
 			return ErrBusy
 		}
+		if err := recordingWorkersDrained(ctx, tx); err != nil {
+			return err
+		}
 		recordings, err := tx.QueryContext(ctx, `SELECT payload FROM records WHERE bucket='browser-recordings'`)
 		if err != nil {
 			return err
@@ -43,7 +46,7 @@ func Export(ctx context.Context, source *storage.Store, output io.Writer) (Stats
 				recordings.Close()
 				return ErrInvalidArchive
 			}
-			if recording.State == "starting" || recording.State == "recording" {
+			if recording.State == "starting" || recording.State == "recording" || recording.State == "pairing" || recording.State == "stopping" {
 				recordings.Close()
 				return ErrBusy
 			}
@@ -124,7 +127,7 @@ func Export(ctx context.Context, source *storage.Store, output io.Writer) (Stats
 				rows.Close()
 				return err
 			}
-			if installstate.IsNativeBucket(row.Bucket) {
+			if installstate.IsNativeBucket(row.Bucket) || recordingRuntimeBucket(row.Bucket) {
 				continue
 			}
 			if err := write("record", row, true); err != nil {

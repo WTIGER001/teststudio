@@ -32,11 +32,17 @@ The local proof now captures a generic News click and visible-story check, shows
 Normal STUDIO-EMBEDDED-RECORDER-001 passes in 4.123 seconds, run 20261108T155702.239245000-2124450c8345cdca54c6958c. Its complete focused harness takes 19.87 seconds.
 Help, active and saved reload, uncertain input, lost save confirmation, Advanced source access, cancellation, focus, themes, narrow layout, and all eleven observed process shutdowns pass.
 Reuse receipts and screenshots under output/playwright/embedded-news-complete. Canonical OpenAPI 0.44.0 describes the local source; the hosted release remains 0.9.0-dev.
-The preview requires explicit loopback-only local configuration. It does not provide production browser isolation or a deployed hosted recorder.
-Continue with milestone 2: a separate isolated worker, authenticated private session transport, durable lease and cleanup recovery, bounded capacity, disconnect behavior, and reviewed target networking.
-Then complete the existing hosted preparation and execution installation and verify the actual News journey with an ordinary tester browser.
+The native preview remains loopback-only. Milestone 2 now implements a separate [private recording worker](recording-worker.md) with mutually authenticated TLS, durable capacity and cleanup leases, fenced restart recovery, current authority checks, and bounded idle behavior.
+The actual recording browser runs sandboxed in a non-root container with no direct networking, a private per-session gateway, fixed resource limits, and independent browser and gateway deadlines.
+Normal STUDIO-HOSTED-RECORDER-001 passes locally in 5.997 seconds, run 20261108T165640.285709000-e4e7e064e323488114590eb5; the complete harness takes 21.56 seconds.
+The same News, review, one-draft save, reload, input and save recovery, help, focus, themes, narrow layout, and cancellation checks pass. Both browsers, gateways, volumes, and all three observed host processes are removed.
+Reuse output/playwright/private-recording-worker. Targeted race checks pass for ownership, capacity, uncertain input, revoked authority, archive, idle, deadlines, TLS identities, API reconnect, and transfer exclusion. Actual PostgreSQL lease and recovery checks pass in 2.841 seconds.
+Docker policy and independent-deadline checks pass in 6.616 seconds. Standalone daemon configuration, private readiness, and clean shutdown checks pass in 0.385 seconds.
+The API selects --recording-worker-config or --recording-worker-config-env. The initial provider requires a dedicated Docker host and permits only the entered website origin; separate assets or sign-in origins remain a reviewed target extension.
+Continue with a concrete private-host deployment and API configuration, then verify the actual hosted recording and cleanup. No recording host is installed by the existing AWS templates.
+Then complete hosted preparation and execution and verify the actual News journey with an ordinary tester browser.
 Preserve the user's pending companion recording, project configuration, and port 8040 demo. No release, deployment, or push occurs for the local proof.
-The acceptance count remains 50 verified of 57. Items 21, 25, 49, and 50 are refined; broad worker and target acceptance remain open.
+The acceptance count remains 50 verified of 57. Items 12, 13, 21, 25, 45, 49, 50, and 51 are refined; broad worker and target acceptance remain open.
 
 ## Concurrent optional-logo delivery
 

@@ -53,8 +53,15 @@ func (d *observedEmbeddedRecorder) Read(ctx context.Context, id string) (recordi
 }
 
 func TestEmbeddedRecorderCompletesNewsRecordingAndDraftThroughStudioExecution(t *testing.T) {
+	if os.Getenv("TESTSTUDIO_EMBEDDED_RECORDING_UI") != "1" {
+		t.Skip("enable the focused native recording UI check")
+	}
+	runRecordingAuthoringUI(t, false)
+}
+
+func runRecordingAuthoringUI(t *testing.T, hosted bool) {
 	runtime, gateway, ui := os.Getenv("TESTSTUDIO_BROWSER_RUNTIME_IMAGE"), os.Getenv("TESTSTUDIO_BROWSER_GATEWAY_IMAGE"), os.Getenv("TESTSTUDIO_UI_DIRECTORY")
-	if os.Getenv("TESTSTUDIO_EMBEDDED_RECORDING_UI") != "1" || runtime == "" || gateway == "" || ui == "" {
+	if runtime == "" || gateway == "" || ui == "" {
 		t.Skip("enable the focused embedded recorder UI check with cached runtime, gateway, and built UI")
 	}
 	workspace, err := filepath.Abs("../..")
@@ -62,6 +69,9 @@ func TestEmbeddedRecorderCompletesNewsRecordingAndDraftThroughStudioExecution(t 
 		t.Fatal(err)
 	}
 	root := os.Getenv("TESTSTUDIO_EMBEDDED_UI_OUTPUT")
+	if hosted {
+		root = os.Getenv("TESTSTUDIO_HOSTED_UI_OUTPUT")
+	}
 	if root == "" {
 		root = t.TempDir()
 	}
@@ -75,27 +85,49 @@ func TestEmbeddedRecorderCompletesNewsRecordingAndDraftThroughStudioExecution(t 
 	s.Inspectors = map[string]preparation.ArtifactInspector{"playwright": &localcontainer.Executor{Runner: "playwright", AllowProjectImages: true, RequireProject: true}}
 	s.RecoveryInspectors = s.Inspectors
 	t.Cleanup(func() { cleanupRepositoryUIJobs(t, s, root) })
-	target := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	target := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 		io.WriteString(w, `<!doctype html><style>body{margin:0}a{display:block;padding:15px}h2{margin:20px}</style><nav><a href="/news">News</a></nav>`)
 		if r.URL.Path == "/news" {
 			io.WriteString(w, `<main><article><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></article></main>`)
 		}
 	}))
+	targetAddress := "127.0.0.1:0"
+	if hosted {
+		targetAddress = "0.0.0.0:0"
+	}
+	targetListener, err := net.Listen("tcp", targetAddress)
+	if err != nil {
+		t.Fatal(err)
+	}
+	target.Listener.Close()
+	target.Listener = targetListener
+	target.Start()
+	targetURL := target.URL
+	if hosted {
+		targetURL = fmt.Sprintf("http://host.docker.internal:%d", targetListener.Addr().(*net.TCPAddr).Port)
+	}
 	t.Cleanup(target.Close)
 	private := t.TempDir()
-	node, err := exec.LookPath("node")
-	if err != nil {
-		t.Fatal(err)
-	}
-	native, err := embeddedplaywright.New(t.Context(), node, filepath.Join(workspace, "runners/playwright/node_modules/playwright/cli.js"), filepath.Join(workspace, "scripts/record-browser-embedded.mjs"), filepath.Join(private, "captures"))
-	if err != nil {
-		t.Fatal(err)
-	}
 	observer := &observedRecorder{known: map[int]bool{}}
-	driver := &observedEmbeddedRecorder{Driver: native, observer: observer}
+	var driver recording.InteractiveDriver
+	var closeDriver func() error
+	if hosted {
+		client := newHostedRecordingClient(t, s, private, root, observer)
+		driver, closeDriver = client, client.Close
+	} else {
+		node, err := exec.LookPath("node")
+		if err != nil {
+			t.Fatal(err)
+		}
+		native, err := embeddedplaywright.New(t.Context(), node, filepath.Join(workspace, "runners/playwright/node_modules/playwright/cli.js"), filepath.Join(workspace, "scripts/record-browser-embedded.mjs"), filepath.Join(private, "captures"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		driver, closeDriver = &observedEmbeddedRecorder{Driver: native, observer: observer}, native.Close
+	}
 	t.Cleanup(func() {
-		if err := driver.Close(); err != nil {
+		if err := closeDriver(); err != nil {
 			t.Error(err)
 		}
 	})
@@ -132,7 +164,7 @@ func TestEmbeddedRecorderCompletesNewsRecordingAndDraftThroughStudioExecution(t 
 	if err != nil {
 		t.Fatal(err)
 	}
-	targetJSON, _ := json.Marshal(target.URL)
+	targetJSON, _ := json.Marshal(targetURL)
 	draft := sources.StarterDraft()
 	draft.ID, draft.Name, draft.TargetURL = "recorder-ui", "Embedded recorder authoring UI", origin
 	draft.Files[0] = sources.EditorFile{Path: "checks/embedded-recorder.spec.ts", Content: strings.ReplaceAll(strings.ReplaceAll(string(specification), "FIXTURE_SESSION_COOKIE", string(cookieJSON)), "FIXTURE_TARGET_URL", string(targetJSON))}
@@ -140,7 +172,12 @@ func TestEmbeddedRecorderCompletesNewsRecordingAndDraftThroughStudioExecution(t 
 	if err := json.Unmarshal([]byte(draft.Files[1].Content), &document); err != nil {
 		t.Fatal(err)
 	}
-	document.Tests[0].ID, document.Tests[0].Title, document.Tests[0].Selector = "STUDIO-EMBEDDED-RECORDER-001", "Embedded recorder authoring UI", "@STUDIO-EMBEDDED-RECORDER-001"
+	testID := "STUDIO-EMBEDDED-RECORDER-001"
+	if hosted {
+		testID = "STUDIO-HOSTED-RECORDER-001"
+		draft.Files[0].Content = strings.ReplaceAll(draft.Files[0].Content, "@STUDIO-EMBEDDED-RECORDER-001", "@"+testID)
+	}
+	document.Tests[0].ID, document.Tests[0].Title, document.Tests[0].Selector = testID, "Embedded recorder authoring UI", "@"+testID
 	document.Tests[0].Source, document.Tests[0].TimeoutSeconds = draft.Files[0].Path, 90
 	document.Tests[0].Capture.Trace = "off"
 	metadata, _ := json.Marshal(document)
@@ -181,7 +218,7 @@ func TestEmbeddedRecorderCompletesNewsRecordingAndDraftThroughStudioExecution(t 
 	server.Start()
 	t.Cleanup(server.Close)
 	t.Cleanup(func() {
-		if err := driver.Close(); err != nil {
+		if err := closeDriver(); err != nil {
 			t.Error(err)
 		}
 		deadline := time.Now().Add(5 * time.Second)

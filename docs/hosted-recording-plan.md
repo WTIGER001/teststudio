@@ -25,7 +25,8 @@ A future combined Save and run action must explain publication and execution and
 | 3. Hosted preparation and execution | 22, 42, 51, 56 | The saved recording prepares, publishes, runs against its reviewed environment, and exposes private results and evidence on MMDev. |
 | 4. Tester acceptance | 21, 49, 50, 56, 57 | A tester completes the selected News journey on the actual target from an ordinary browser with no installed companion or development tools. |
 
-Milestone 1 has local evidence. Later milestones remain open.
+Milestone 1 has local evidence. Milestone 2 is implemented and verified against the actual isolated Docker worker locally, including private TLS, PostgreSQL leases, and the normal News authoring workflow.
+Milestone 2 target deployment and verification remain open. Milestones 3 and 4 remain open.
 The ledger stays 50 verified of 57. These milestones refine stable criteria and do not close their broad cross-profile scope.
 Azure remains deferred.
 
@@ -61,6 +62,10 @@ Testers do not run this command or install any runtime.
 
 ## Hosted worker requirements
 
+The implemented [private worker](recording-worker.md) provides a dedicated daemon, mutually authenticated TLS transport, durable capacity and cleanup leases, fenced restart recovery, isolated browser containers, and a separate origin-restricted gateway.
+The API uses --recording-worker-config or --recording-worker-config-env. Existing in-page review and saving remain unchanged.
+The initial provider requires a dedicated Docker host. It is not installed by the current AWS templates.
+
 Keep recording outside the API service and outside other application workloads.
 Use one isolated browser per leased recording session, bounded capacity, a fixed lifetime, and an idle or disconnected-owner policy.
 Use authenticated private transport; never expose Chromium debugging, control sockets, or recording frames publicly.
@@ -71,6 +76,7 @@ Preserve captured code and steps after failure. Expired sessions cannot resume i
 Resolve a reviewed target before launch. Restrict network access through a trusted gateway and prevent access to metadata, internal control services, and unapproved origins.
 The local preview's unrestricted operator-host networking does not meet this hosted requirement.
 Record approved additional origins explicitly when a real target needs separate assets or sign-in origins.
+The implemented initial policy permits only the entered origin. Additional-origin configuration remains a target-specific extension; do not silently broaden the policy.
 Keep recording credentials separate from the test's execution credentials.
 
 Build the worker package from committed implementation source. Verify the selected MMDev account before mutations.
@@ -81,4 +87,7 @@ Core health does not prove recording, preparation, or execution readiness.
 
 Normal STUDIO-EMBEDDED-RECORDER-001 runs through TestStudio's source preparation, publication, environment-backed execution, and private evidence contracts.
 Its fixture records a fresh generic website. It creates no test against a user's website or new user run.
+Normal STUDIO-HOSTED-RECORDER-001 repeats that journey through the actual isolated runtime and private TLS worker.
+Run 20261108T165640.285709000-e4e7e064e323488114590eb5 passes in 5.997 seconds; the full focused harness takes 21.56 seconds.
+Two recording browsers, two gateways, their volumes, and all three observed host processes are removed. Receipts are output/playwright/private-recording-worker.
 See [self-testing](self-testing.md) for the focused harness and retained evidence.

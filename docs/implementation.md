@@ -16,6 +16,38 @@ Marketplace publication and billing remain deferred. The exact Azure target rema
 Preserve staged adapters, concurrent recording work, AWS workloads, and the port 8040 demo. Historical Azure inspector work remains deferred.
 This plans work under 41, 46, 51, 53, 54, 56, and 57. No acceptance item advances to verified; the total remains 50 of 57.
 
+## Private recording worker: local implementation — 2026-11-08
+
+The user requests the isolated server-side recording worker so testers can record inside TestStudio without installing tools.
+The new teststudio-recording-worker command provides a dedicated private TLS daemon backed by the installation's PostgreSQL database and permissions.Service.
+The API selects this backend with --recording-worker-config or --recording-worker-config-env. Existing in-page recording, plain-language review, save recovery, and explicit execution remain intact.
+Dedicated server and client certificates authenticate TLS 1.3 transport. Worker commands reject browser credentials and bind the original actor, project, suite, session, target, and deadline. View and input recheck current authority and archive state.
+
+Durable reservations precede external work. Capacity includes pending cleanup. Input intent persists before delivery; uncertain actions never replay automatically.
+API reconnect retains the same browser. Worker restart fences the previous process, verifies cleanup ownership, retains captured source, and never relaunches an old session.
+Idle, revoked, archived, expired, and shutting-down sessions stop. Failed cleanup retains its capacity and retries.
+Export refuses active ownership and pending cleanup; drained code transfers while private worker authority records remain excluded.
+
+Each session owns one non-root browser container, one gateway, and one private volume. Chromium sandboxing remains enabled with a checksum-pinned seccomp policy.
+The browser has no direct networking, a read-only root, no host capabilities, and fixed CPU, memory, process, and temporary-storage limits.
+Only the selected origin is permitted through its private Unix gateway. Public mode blocks metadata and private addresses. No API, TLS, or database credentials enter the browser or gateway.
+Both containers independently stop at the original deadline. The initial provider requires a dedicated Docker host; no hosted installation is changed.
+
+Normal STUDIO-HOSTED-RECORDER-001 passes in 5.997 seconds, run 20261108T165640.285709000-e4e7e064e323488114590eb5. The complete focused harness takes 21.56 seconds.
+It records News and a visible story against a fresh generic fixture, reviews and saves exactly one revision-1 draft, and checks reload, uncertain input, lost save confirmation, Advanced source, help, focus, themes, narrow layout, and cancellation.
+Both recording browsers, both gateways, both volumes, and all three observed host processes are removed. Normal authoring-test preparation and execution resources also close.
+Receipts and screenshots are output/playwright/private-recording-worker. No user website test or target run is created.
+
+The final targeted race checks pass for worker ownership and recovery in 3.206 seconds, private TLS and reconnect in 1.621 seconds, transfer exclusion in 1.314 seconds, and API role/configuration behavior in 2.698 seconds.
+Actual PostgreSQL worker lifecycle checks pass with race detection in 2.841 seconds.
+Docker checks pass in 6.616 seconds, including rejected foreign-origin traffic, blocked direct networking, fixed restrictions, independent browser and gateway deadlines, retained source, and verified owned cleanup.
+Standalone command checks pass in 0.385 seconds, including invalid settings before storage, actual private TLS readiness, no idle browser launch, graceful termination, and released ownership.
+
+See [operator setup](recording-worker.md) and [the delivery plan](hosted-recording-plan.md).
+Remaining work includes dedicated-host deployment and hosted recording verification, reviewed additional origins for real targets, hosted preparation and execution, full remote website accessibility, and ordinary tester acceptance.
+The hosted release remains 0.9.0-dev. No release, AWS mutation, push, or demo update occurs.
+This refines 12, 13, 21, 25, 45, 49, 50, and 51. Acceptance remains **50 verified of 57**; broad 51, 56, and 57 stay open.
+
 ## In-page browser recording: local proof — 2026-11-08
 
 The user selects an installation-free recording browser for testers who need simple guidance.

@@ -1,17 +1,18 @@
 # Browser recording
 
-## In-page recording preview
+## In-page recording
 
 The user selects browser recording without tester installation as the next delivery.
 The [hosted recording plan](hosted-recording-plan.md) separates the local proof, isolated hosted worker, preparation and execution, and actual tester acceptance.
-The first local preview displays the recording browser inside TestStudio.
+The recording browser appears inside TestStudio. Testers install no companion or development tools.
 Select Start recording, click News on a generic website, select Check something appears, and select a story.
 Finish recording opens a plain-language step review. Save test draft reuses the existing source draft service.
 Advanced source editing remains available. Saving does not prepare, publish, or execute.
 Help and page reload preserve the live session. Refresh browser view recovers an uncertain input without repeating it.
 Finish waits for queued input. Cancel closes the owned browser.
-This preview requires explicit loopback-only local configuration. It is not enabled in MMDev.
-The hosted worker and hosted browser execution remain separate work.
+Operators can select the separate [private recording worker](recording-worker.md) or the loopback-only local preview.
+The private worker has local isolation, transport, recovery, and full News authoring evidence. It is not enabled in MMDev.
+Deployment, hosted browser execution, and actual target acceptance remain separate work.
 
 ## Existing desktop recording
 
@@ -43,7 +44,8 @@ Recorded drafts use the separate [local website execution profile](browser-execu
 Review and save the source, prepare it, publish a release, then select a registered environment for execution.
 The offline starter retains its existing isolated profile. It cannot reach a website.
 The current native recorder requires a local desktop.
-Hosted recording uses the [desktop companion](recorder-companion.md) through the guided connection step.
+Installations configured for desktop recording use the [desktop companion](recorder-companion.md) through the guided connection step.
+Installations configured for the private worker use the in-page browser and omit desktop connection.
 The complete connection, native capture, stop, review, and draft workflow now passes one focused local TestStudio browser run.
 Standalone macOS ARM64 packaging and offline setup also pass. Live deployment verification remains separate.
 

@@ -11,10 +11,13 @@ import (
 
 func TestEmbeddedRecordingRequiresLocalAPIAndExclusiveRecorder(t *testing.T) {
 	for name, options := range map[string][]string{
-		"hosted":              {"--recording-embedded-cli=private-runtime-canary"},
-		"artifact":            {"--serve-role=artifacts", "--recording-embedded-cli=private-runtime-canary"},
-		"two local recorders": {"--local", "--recording-cli=private-runtime-canary", "--recording-embedded-cli=private-runtime-canary"},
-		"companion":           {"--local", "--recording-companion", "--recording-embedded-cli=private-runtime-canary"},
+		"hosted":               {"--recording-embedded-cli=private-runtime-canary"},
+		"artifact":             {"--serve-role=artifacts", "--recording-embedded-cli=private-runtime-canary"},
+		"two local recorders":  {"--local", "--recording-cli=private-runtime-canary", "--recording-embedded-cli=private-runtime-canary"},
+		"companion":            {"--local", "--recording-companion", "--recording-embedded-cli=private-runtime-canary"},
+		"worker and companion": {"--recording-worker-config=private-runtime-canary", "--recording-companion"},
+		"two worker settings":  {"--recording-worker-config=private-runtime-canary", "--recording-worker-config-env=PRIVATE_ENV_CANARY"},
+		"artifact worker":      {"--serve-role=artifacts", "--recording-worker-config-env=PRIVATE_ENV_CANARY"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			originalFlags, originalArgs := flag.CommandLine, os.Args

@@ -34,8 +34,23 @@ type process struct {
 
 type Driver struct {
 	runtime *localplaywright.Driver
+	launch  func(string, string) (*exec.Cmd, error)
 	mu      sync.Mutex
 	items   map[string]*process
+}
+
+func NewTransport(directory string, launch func(string, string) (*exec.Cmd, error)) (*Driver, error) {
+	if launch == nil {
+		return nil, errors.New("recording transport requires a trusted command factory")
+	}
+	if err := os.MkdirAll(directory, 0700); err != nil {
+		return nil, err
+	}
+	info, err := os.Lstat(directory)
+	if err != nil || !info.IsDir() || info.Mode().Perm()&0077 != 0 {
+		return nil, errors.New("recording transport requires a private regular directory")
+	}
+	return &Driver{runtime: &localplaywright.Driver{Directory: directory}, launch: launch, items: map[string]*process{}}, nil
 }
 
 func New(ctx context.Context, node, cli, helper, directory string) (*Driver, error) {
@@ -75,6 +90,12 @@ func (d *Driver) Start(ctx context.Context, id, address string) error {
 	}
 	defer log.Close()
 	command := exec.Command(d.runtime.Node, d.runtime.Helper, d.runtime.CLI, filepath.Join(directory, "source.spec.ts"), address)
+	if d.launch != nil {
+		command, err = d.launch(id, address)
+		if err != nil {
+			return err
+		}
+	}
 	command.Stderr = log
 	command.Env = []string{}
 	for _, name := range []string{"PATH", "HOME", "TMPDIR", "PLAYWRIGHT_BROWSERS_PATH", "SystemRoot", "LOCALAPPDATA"} {

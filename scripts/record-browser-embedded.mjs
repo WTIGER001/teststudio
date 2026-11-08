@@ -1,6 +1,7 @@
 import { createRequire } from 'node:module'
 import { writeFileSync } from 'node:fs'
 import { createInterface } from 'node:readline'
+import { recordingProxy } from './recording-proxy.mjs'
 
 const [cli, output, address] = process.argv.slice(2)
 if (!cli || !output || !address) throw new Error('Embedded recording requires a trusted runtime, private output, and start address')
@@ -10,8 +11,11 @@ const { server } = require('playwright-core/lib/coreBundle')
 if (require('playwright-core/package.json').version !== '1.64.1') throw new Error('The embedded recorder requires the pinned Playwright runtime')
 
 const width = 1280, height = 720
+const originalDeadline = process.env.TESTSTUDIO_RECORDING_DEADLINE ? Date.parse(process.env.TESTSTUDIO_RECORDING_DEADLINE) : Date.now() + 20 * 60 * 1000
+if (!Number.isFinite(originalDeadline) || originalDeadline <= Date.now() || originalDeadline > Date.now() + 20 * 60 * 1000) throw new Error('Recording requires a current bounded deadline')
+const proxy = process.env.TESTSTUDIO_RECORDING_GATEWAY_SOCKET ? await recordingProxy(process.env.TESTSTUDIO_RECORDING_GATEWAY_SOCKET) : undefined
 const browser = await playwright.chromium.launch({ headless: true, chromiumSandbox: true })
-const context = await browser.newContext({ viewport: { width, height }, serviceWorkers: 'block', acceptDownloads: false })
+const context = await browser.newContext({ viewport: { width, height }, serviceWorkers: 'block', acceptDownloads: false, ...(proxy ? { proxy: proxy.settings } : {}) })
 context.setDefaultTimeout(10000)
 context.setDefaultNavigationTimeout(15000)
 const page = await context.newPage()
@@ -58,9 +62,10 @@ async function stop() {
   clearTimeout(deadline)
   await context.close().catch(() => {})
   await browser.close().catch(() => {})
+  proxy?.close()
 }
 
-deadline = setTimeout(() => { void stop().finally(() => process.exit(0)) }, 20 * 60 * 1000)
+deadline = setTimeout(() => { void stop().finally(() => process.exit(0)) }, Math.max(1, originalDeadline - Date.now()))
 process.on('SIGTERM', () => { void stop().finally(() => process.exit(0)) })
 process.on('SIGINT', () => { void stop().finally(() => process.exit(0)) })
 const input = createInterface({ input: process.stdin, crlfDelay: Infinity })

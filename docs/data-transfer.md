@@ -23,11 +23,13 @@ Metadata version 1 archives remain readable. Unsupported versions fail before in
 
 1. Stop new run submissions and pause external publication or execution triggers.
 2. Wait for active runs, recordings, preparation jobs, and worker recovery to finish.
-3. Stop the source API, schedulers, notification workers, and preparation workers.
+3. Stop the source API, schedulers, notification workers, preparation workers, and private recording workers.
 4. Keep the destination service stopped. Prepare an empty destination database.
 5. Export metadata and copy its corresponding retained storage while the source remains stopped.
 
 Export refuses active run leases, execution recovery work, unfinished worker exchanges, preparation leases, and open browser recordings.
+It also refuses live private recording-worker ownership or pending browser-resource cleanup.
+Drained recording code and history transfer normally. Private recording-worker leases and resource references never transfer; import rejects those runtime authority records.
 The tool cannot stop other service instances. The operator keeps both installations offline during cutover.
 After import, start only the destination as the authoritative installation.
 Keep the source available for rollback without serving requests from both copies.

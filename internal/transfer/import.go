@@ -166,6 +166,9 @@ func entryOrder(kind string) int {
 }
 
 func validRecord(row Record) bool {
+	if recordingRuntimeBucket(row.Bucket) {
+		return false
+	}
 	if row.Bucket == "" || row.ID == "" || row.Revision < 1 || !json.Valid([]byte(row.Payload)) || installstate.IsNativeBucket(row.Bucket) || strings.ContainsRune(row.Bucket+row.ID+row.Project+row.Payload, 0) {
 		return false
 	}

@@ -26,7 +26,39 @@ All eleven observed owned processes exit. Receipts and screenshots are output/pl
 Reuse this evidence unless the behavior or pinned runtime changes.
 The standalone native adapter check uses TESTSTUDIO_EMBEDDED_RECORDING=1 with TestEmbeddedRecordingCapturesNewsAssertionAndClosesBrowser in adapters/recording/embeddedplaywright.
 It passes in 0.90 seconds and checks semantic locators, visibility assertions, exact input retries, changed-duplicate rejection, and owned shutdown.
-Hosted recording and browser-worker readiness remain unverified. See [the hosted recording plan](hosted-recording-plan.md).
+Hosted target deployment and browser execution remain unverified. See [the hosted recording plan](hosted-recording-plan.md).
+
+## Private recording worker
+
+STUDIO-HOSTED-RECORDER-001 uses the same News authoring flow through a mutually authenticated HTTPS worker and the actual sandboxed recording container and gateway.
+The worker uses an explicit private local fixture policy. This does not grant private-target access in hosted mode.
+Build the recording overlay once with scripts/build-recording-runtime.mjs and retain its immutable image and pinned seccomp profile.
+Use the current cached gateway and browser execution images and the existing built UI:
+
+```sh
+TESTSTUDIO_HOSTED_RECORDING_UI=1 \
+TESTSTUDIO_BROWSER_RUNTIME_IMAGE=IMMUTABLE_CACHED_EXECUTION_RUNTIME \
+TESTSTUDIO_BROWSER_GATEWAY_IMAGE=IMMUTABLE_CACHED_GATEWAY \
+TESTSTUDIO_RECORDING_IMAGE=IMMUTABLE_CACHED_RECORDING_RUNTIME \
+TESTSTUDIO_RECORDING_GATEWAY_IMAGE=IMMUTABLE_CACHED_GATEWAY \
+TESTSTUDIO_RECORDING_SECCOMP=ABSOLUTE_PINNED_SECCOMP_FILE \
+TESTSTUDIO_UI_DIRECTORY=ABSOLUTE_BUILT_UI_DIRECTORY \
+TESTSTUDIO_HOSTED_UI_OUTPUT=output/playwright/private-recording-worker \
+  go test ./internal/sources \
+  -run '^TestPrivateRecordingWorkerCompletesNewsRecordingThroughStudioExecution$' -count=1 -timeout=180s -v
+```
+
+Run 20261108T165640.285709000-e4e7e064e323488114590eb5 passes in 5.997 seconds inside the runner and 21.56 seconds for the full harness.
+It verifies News navigation, a visible story assertion, review, saving exactly one revision-1 draft, input and save recovery, reload, help, Advanced source, cancellation, focus, themes, and a 390-pixel layout.
+The receipt verifies removal of two recording browsers, two gateways, two volumes, and all three observed host processes. Normal preparation and execution resources also close.
+Reuse receipts and screenshots under output/playwright/private-recording-worker. The authored target draft is not executed on MMDev by this check.
+
+The three recording image and policy variables above enable TestIsolatedRecordingUsesSandboxGatewayAndOwnedCleanup and TestIsolatedRecordingStopsAtOriginalDeadlineWithoutController in adapters/recording/isolatedcontainer.
+They pass in 6.616 seconds, including origin rejection, blocked direct networking, fixed container restrictions, and independent browser and gateway expiry.
+The same variables enable TestRecordingWorkerCommandServesPrivateTLSAndShutsDown in cmd/teststudio-recording-worker; the focused command checks pass in 0.385 seconds.
+Targeted race checks cover internal/recordingworker, adapters/recording/workerhttp, internal/transfer, and the API role configuration.
+Actual PostgreSQL worker lease and recovery checks pass with race detection in 2.841 seconds through scripts/test-postgres.sh.
+See [operator setup](recording-worker.md) for installation boundaries and remaining target checks.
 
 ## Hosted recorder workflow
 

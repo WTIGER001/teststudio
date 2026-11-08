@@ -24,6 +24,15 @@ func main() {
 func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
+	if value := os.Getenv("TESTSTUDIO_GATEWAY_DEADLINE"); value != "" {
+		deadline, err := time.Parse(time.RFC3339Nano, value)
+		if err != nil || !time.Now().Before(deadline) || time.Until(deadline) > 21*time.Minute {
+			return errors.New("gateway deadline must be current and bounded")
+		}
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithDeadline(ctx, deadline)
+		defer cancel()
+	}
 	mode := ""
 	if len(os.Args) == 2 {
 		mode = os.Args[1]

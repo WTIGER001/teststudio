@@ -29,6 +29,7 @@ import (
 	"github.com/wtiger001/teststudio/adapters/notifications/webhook"
 	recordingembedded "github.com/wtiger001/teststudio/adapters/recording/embeddedplaywright"
 	recordinglocal "github.com/wtiger001/teststudio/adapters/recording/localplaywright"
+	recordinghttp "github.com/wtiger001/teststudio/adapters/recording/workerhttp"
 	localsecrets "github.com/wtiger001/teststudio/adapters/secrets/local"
 	githubsource "github.com/wtiger001/teststudio/adapters/sources/github"
 	workerhttp "github.com/wtiger001/teststudio/adapters/workerexchange/http"
@@ -107,6 +108,8 @@ func run() error {
 	recordingCLI := flag.String("recording-cli", "", "Trusted installed Playwright CLI path; enables native desktop recording with --local")
 	recordingEmbeddedCLI := flag.String("recording-embedded-cli", "", "Trusted Playwright CLI for the local embedded-browser recording preview")
 	recordingEmbeddedHelper := flag.String("recording-embedded-helper", "scripts/record-browser-embedded.mjs", "Trusted embedded-browser recording helper")
+	recordingWorkerConfig := flag.String("recording-worker-config", "", "Private HTTPS recording worker configuration file")
+	recordingWorkerEnvironment := flag.String("recording-worker-config-env", "", "Environment variable containing private recording worker settings")
 	recordingCompanion := flag.Bool("recording-companion", false, "Enable scoped desktop companion pairing for hosted browser recording")
 	recordingHelper := flag.String("recording-helper", "scripts/record-browser.mjs", "Trusted desktop recording helper script")
 	recordingDirectory := flag.String("recording-directory", ".data/recordings", "Private local browser recording directory")
@@ -152,6 +155,9 @@ func run() error {
 	}
 	if *recordingEmbeddedCLI != "" && *recordingCLI != "" {
 		return errors.New("choose one local browser recording mode")
+	}
+	if (*recordingWorkerConfig != "" || *recordingWorkerEnvironment != "") && (!role.API || *recordingCompanion || *recordingCLI != "" || *recordingEmbeddedCLI != "" || *recordingWorkerConfig != "" && *recordingWorkerEnvironment != "") {
+		return errors.New("recording-worker-config requires an API role and one exclusive recording backend")
 	}
 	if *recordingCompanion && (!role.API || *recordingCLI != "" || *recordingEmbeddedCLI != "") {
 		return errors.New("recording-companion requires an API role without a native desktop recorder")
@@ -403,6 +409,24 @@ func run() error {
 			return errors.New("embedded recording requires the operator-installed Node.js runtime")
 		}
 		driver, err := recordingembedded.New(ctx, node, *recordingEmbeddedCLI, *recordingEmbeddedHelper, *recordingDirectory)
+		if err != nil {
+			return err
+		}
+		defer driver.Close()
+		recordingService.Driver = driver
+	}
+	if *recordingWorkerConfig != "" || *recordingWorkerEnvironment != "" {
+		var settings recordinghttp.Settings
+		var err error
+		if *recordingWorkerEnvironment != "" {
+			settings, err = recordinghttp.LoadEnvironment(*recordingWorkerEnvironment)
+		} else {
+			settings, err = recordinghttp.Load(*recordingWorkerConfig)
+		}
+		if err != nil {
+			return err
+		}
+		driver, err := recordinghttp.New(settings, db)
 		if err != nil {
 			return err
 		}

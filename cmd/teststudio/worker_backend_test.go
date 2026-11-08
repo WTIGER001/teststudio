@@ -29,7 +29,7 @@ import (
 )
 
 func TestWorkerBackendRejectsUnrelatedConfigurationBeforeStartup(t *testing.T) {
-	for _, option := range []string{"local", "local-accounts", "oidc-config", "http-trust-bundles", "scheduler", "notification-worker", "execution-worker", "prepared-sources", "source-bundles", "github-sources", "ecs-workers-env", "kubernetes-workers-env", "recording-cli", "recording-embedded-cli", "recording-embedded-helper", "recording-companion", "go-images", "playwright-images", "addr", "ui", "artifact-addr", "public-url", "trace-viewer-directory"} {
+	for _, option := range []string{"local", "local-accounts", "oidc-config", "http-trust-bundles", "scheduler", "notification-worker", "execution-worker", "prepared-sources", "source-bundles", "github-sources", "ecs-workers-env", "kubernetes-workers-env", "recording-cli", "recording-worker-config", "recording-worker-config-env", "recording-embedded-cli", "recording-embedded-helper", "recording-companion", "go-images", "playwright-images", "addr", "ui", "artifact-addr", "public-url", "trace-viewer-directory"} {
 		flags := flag.NewFlagSet("worker", flag.ContinueOnError)
 		flags.String(option, "", "")
 		if err := flags.Parse([]string{"--" + option + "=private-configuration-canary"}); err != nil {

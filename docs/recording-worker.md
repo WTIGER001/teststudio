@@ -1,0 +1,114 @@
+# Private recording worker
+
+The recording worker runs the website browser outside the API service. Testers use the existing in-page recorder and install nothing.
+The implementation has local Docker, PostgreSQL, private TLS, and normal TestStudio browser evidence. It has not been deployed to MMDev.
+See [the delivery plan](hosted-recording-plan.md) for the separate hosted execution and tester acceptance milestones.
+
+## Installation boundary
+
+Run teststudio-recording-worker on a dedicated Linux Docker host. Keep this host separate from the API, database, preparation workers, execution workers, and other applications.
+The trusted worker controls its Docker daemon. Never mount that daemon into the API, recording browser, or gateway.
+The current provider uses Docker containers on this host. It does not launch ECS Fargate tasks or Azure Sandboxes.
+
+Allow private API-to-worker HTTPS and worker-to-PostgreSQL access. Permit gateway egress to approved public website addresses.
+Do not publish the recording worker through the public load balancer or CloudFront. Testers access only the ordinary managed-session API.
+The API and worker share the installation database and permissions. Hosted operation requires PostgreSQL.
+Use one stable worker identity and one private HTTPS endpoint per installation. Multiple API replicas can use that endpoint.
+Keep the same Docker host, private transport directory, and stable identity through worker restarts so cleanup can find reserved resources.
+Moving a worker to another host requires draining and verified cleanup first.
+
+## Build the runtime
+
+Use committed implementation source and a cached trusted Playwright 1.64.1 Linux runtime for the worker host architecture.
+The recording image adds only the fixed recording helper and private gateway relay. It contains no application test bundle.
+
+```sh
+node scripts/build-recording-runtime.mjs --image=sha256:CACHED_RUNTIME_DIGEST
+node scripts/build-browser-gateway.mjs
+CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -trimpath \
+  -o bin/teststudio-recording-worker ./cmd/teststudio-recording-worker
+```
+
+Select amd64 instead for an amd64 host. Transfer the selected immutable images, binary, and generated .data/recording-worker/seccomp.json through the installation's private artifact process.
+Use image digests on the host; mutable tags reject. Registry publication and installation are separate operator actions.
+The builder verifies the pinned upstream Playwright policy checksum and adds only chroot for Chromium's namespace sandbox with all host capabilities dropped.
+The worker verifies the derived policy checksum before accepting sessions. Keep Chromium sandboxing enabled.
+
+## Private identities and configuration
+
+Issue a dedicated worker server certificate with its private DNS name in its SAN and server authentication usage.
+Issue a dedicated API client certificate with teststudio-api.recording.internal in its DNS SAN and client authentication usage.
+Keep their private keys and CA references in protected operator storage. Ordinary application session cookies and bearer tokens cannot authenticate this transport.
+The worker requires TLS 1.3, a verified client certificate, and the configured API client identity.
+
+Start the worker with the shared database connection supplied through a protected environment variable:
+
+```sh
+bin/teststudio-recording-worker \
+  --addr=PRIVATE_WORKER_IP:8045 --worker-id=recording \
+  --database-env=TESTSTUDIO_DATABASE \
+  --tls-certificate=/run/teststudio/worker.crt \
+  --tls-key=/run/teststudio/worker.key \
+  --client-ca=/run/teststudio/api-client-ca.crt \
+  --runtime-image=REGISTRY/recording@sha256:RUNTIME_DIGEST \
+  --gateway-image=REGISTRY/gateway@sha256:GATEWAY_DIGEST \
+  --seccomp=/etc/teststudio/recording-seccomp.json \
+  --directory=/var/lib/teststudio-recording --capacity=2 --idle-limit=2m
+```
+
+The directory must be private, with mode 0700. Certificate private keys and API configuration files must have restricted operator access.
+Provide a private settings file to the API:
+
+```json
+{
+  "origin": "https://recording.private.example:8045",
+  "serverCAFile": "/run/teststudio/recording-server-ca.crt",
+  "clientCertificateFile": "/run/teststudio/recording-api.crt",
+  "clientKeyFile": "/run/teststudio/recording-api.key"
+}
+```
+
+Add --recording-worker-config=/run/teststudio/recording-worker.json to the API's existing installation arguments.
+The alternative --recording-worker-config-env accepts the name of an environment variable containing the same JSON settings.
+For secret-injected certificate material, replace each file field with serverCAEnvironment, clientCertificateEnvironment, or clientKeyEnvironment and the corresponding variable name.
+Each certificate input accepts exactly one file or environment reference. Never put certificate or database secret values in command arguments.
+Only the API role accepts this backend. It is exclusive with the companion and native recorder options.
+Do not enable --local on a hosted worker. That option permits private fixture targets and restricts its listener to numeric loopback for local verification.
+
+GET /healthz requires the same private TLS identity and checks current worker ownership. A healthy response alone does not prove browser readiness.
+Configuration or certificate changes require a controlled restart. Drain active recordings before rotating worker identities or runtime images.
+
+## Session behavior and recovery
+
+The worker reserves capacity and durable resource identities before launching a browser. Reservations bind the original actor, project, suite, session, website, deadline, image digests, and sandbox policy.
+Each recording owns one sandboxed non-root browser container, one gateway container, and one private volume.
+The browser has no network interface beyond loopback, a read-only root, no host capabilities, and fixed CPU, memory, process, and temporary-storage limits.
+Only its Unix-socket gateway can reach the selected website origin. Public mode rejects metadata, private addresses, and unapproved origins.
+The worker sends no database, API, or TLS credentials into these containers.
+
+The current policy permits only the entered website origin. Separate asset, authentication, or redirect origins reject and need an explicit reviewed policy extension before target acceptance.
+There is no execution storage-state transfer, popup, upload, download, or drag recording in this milestone.
+The visual frame also does not provide full semantic access to the remote website.
+
+View and input recheck current source authority and archive state. Frames are private, uncached responses and are never persisted in the database.
+Input reservations prevent uncertain actions from replaying. Exact retries retrieve a view; changed duplicates and sequence gaps reject.
+API restart can reconnect to the same worker without launching another browser. Worker restart fences the old process, removes reserved resources, and preserves the latest captured code and steps; it does not resume interactive control.
+The default capacity is two, with an operator range of one through sixteen. Cleanup failures continue to consume a slot until removal is verified.
+
+The original recording lifetime is twenty minutes. Browser and gateway independently stop at that original deadline.
+The default disconnected-owner limit is two minutes since the last successful view or input. Status reads do not extend it.
+Worker maintenance runs every five seconds and stops expired, idle, revoked, or archived recordings. Ownership renews on a ninety-second lease.
+Graceful shutdown captures available source and removes only resources whose names, labels, images, and binding match the saved reservation.
+Allow at least ninety seconds for service shutdown and recovery. Inspect pending cleanup before replacing the worker host.
+After an abrupt host failure, containers can remain stopped until the same host and stable worker identity recover cleanup.
+Installation export requires stopped workers and completed cleanup; private runtime ownership never transfers to another installation.
+
+## Verification and deployment
+
+See [self-testing](self-testing.md#private-recording-worker) for the exact focused harness and retained local evidence.
+The generic News journey passes through TestStudio's normal authoring-test execution and saves one revision-1 draft.
+This does not establish execution of that saved target test on MMDev.
+Before AWS mutations, follow [MMDev deployment](aws-mmdev.md), verify the selected account, and review a concrete TestStudio-only CloudFormation change set.
+No dedicated recording-host infrastructure is installed by the existing core or execution-worker templates.
+The next deployment must install the private host and identities, configure the API backend, and verify News recording and cleanup from the ordinary hosted UI.
+Keep hosted preparation, execution, and actual tester acceptance separately open.
