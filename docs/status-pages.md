@@ -46,7 +46,8 @@ Publishing and editing use revisions and audited mutations. A conflict preserves
 
 ## Embedding
 
-Copy the published URL or its iframe markup. The public page refreshes once per minute without executing probes.
+Use Copy Public URL or Copy Iframe embed code beside the sharing fields. Each button confirms when its value is copied. If browser clipboard access is unavailable, select and copy the visible read-only field.
+The public page refreshes once per minute without executing probes.
 Use the configured monitoring schedules to produce observations; viewing a page never runs a check.
 The public document permits framing. Signed-in TestStudio pages retain their framing protection.
 The AWS package includes a separate /status/* behavior and response policy for public documents. Existing private UI and evidence policies remain separate.

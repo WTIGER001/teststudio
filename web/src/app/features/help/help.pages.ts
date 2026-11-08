@@ -67,7 +67,7 @@ export const helpPages: Record<string, HelpPage> = {
     ],
     tutorials: [
       { title: 'Create and publish', steps: ['Select Create status page. Enter Page title, Background color, Default availability period, and an optional Vanity URL. Check its availability feedback.', 'Continue to Probes. Choose existing HTTP probes, edit public titles and optional descriptions, and arrange their order.', 'Continue to Review and select Save draft.', 'On the detail screen, select Review publication. Inspect the dedicated preview and address, then select Confirm publish to authorize public access.'] },
-      { title: 'Embed or withdraw', steps: ['Copy Public URL for a standalone page, or copy Iframe embed code into another website.', 'Visitors select one availability period for all rows. Hover or focus a pill for its status and time.', 'To change content or its vanity name, select Edit status page, save the draft, then review and publish it separately.', 'Select Unpublish to withdraw public access. The draft, probes, and retained test history remain.'] }
+      { title: 'Embed or withdraw', steps: ['Use Copy Public URL for a standalone page, or Copy Iframe embed code for another website. Copied feedback confirms success. If clipboard access is blocked, select and copy the visible field.', 'Visitors select one availability period for all rows. Hover or focus a pill for its status and time.', 'To change content or its vanity name, select Edit status page, save the draft, then review and publish it separately.', 'Select Unpublish to withdraw public access. The draft, probes, and retained test history remain.'] }
     ]
   },
   'public-status': {
