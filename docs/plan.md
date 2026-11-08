@@ -5,6 +5,10 @@ Track verified delivery in `implementation.md`.
 Start resumed work with [the continuation guide](continue.md). It summarizes the current release, remaining priorities, boundaries, and retained evidence.
 The user authorizes targeted tests and frequent feature commits. Remote pushes remain separate operations.
 
+## Completed delivery: individual reliability inspection in MMDev
+
+Release 0.9.0-dev combines the individual-check table and raw pagination with the current centered-page and logo behavior. Committed source 5468130 builds as 874f3a6eafce. Both focused browser workflows, fifteen hosted checks, and actual public pagination and pill drill-down pass. The reviewed deployment changes only Service and Task. The requesting browser loads the matching new version. See the latest ledger entry and continuation notes for receipts and navigation. This closes the earlier local-only deployment step and keeps broad acceptance at 50 verified of 57.
+
 ## Current execution direction
 
 The user resumes implementation on 2026-11-03.

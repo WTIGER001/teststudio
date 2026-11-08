@@ -26,6 +26,16 @@ Release 0.8.0-dev is deployed as build 2320bb94582b from dc558de. Both remote de
 
 Release 0.8.1-dev is deployed from 8c8a81a as build 3f0963838890. Both remote delivery branches include this release and its notes. The public status document and iframe omit Help, while management guidance remains. The browser workflow and seventeen hosted checks pass. Preserve separate local work and incorporate upstream before another deployment. Receipts and screenshot are output/aws-mmdev/status-no-help-081 in this checkout.
 
+## Centered status-page release
+
+Release 0.8.2-dev from d47c744 is deployed as build a3891c1ad13a and pushed to both remote delivery branches. Content uses a centered 72rem maximum with compact pills and full-viewport background. The local status workflow passes at 1920, 1280, and 390 pixels; eighteen hosted checks and equal-margin rendering on the requesting public page pass. Receipts are output/aws-mmdev/status-centered-082, with local browser evidence and the packed 0.2.1-dev library retained here. Preserve this checkout's separate reliability inspection work and incorporate upstream before another deployment. No user page configuration or port 8040 demo changes.
+
+## Current delivery: individual reliability inspection
+
+The user requests committing and deploying the inspection feature on 2026-11-08. Product 0.9.0-dev from 5468130, build 874f3a6eafce, now runs in MMDev. It combines the completed centered-page, logo-height, and public Help changes with Individual checks, paginated raw observations, and pill drill-down. API contract 0.43.0 and Angular library 0.3.0-dev describe the combined source.
+The two focused browser workflows, package and native API checks pass. Fifteen hosted checks and actual public table rendering, 50-to-100 pagination, and exact-day drill-down pass. The requesting private browser sees the matching new version. The generic verification page is unpublished, its session closes, temporary browser tabs close, and owned local resources are removed. No new target test execution or user configuration change occurs. Receipts are output/aws-mmdev/reliability-090.
+Open Project → Test catalog → History → Reliability history, then Individual checks. On published status pages use Individual checks or select a pill and Inspect period. Refresh an older tab to load the deployed UI. This supersedes the earlier local-only inspection checkpoint. Acceptance remains 50 verified of 57. Local commits are retained without a new push. Registry publication and broad cross-profile acceptance remain separate.
+
 ## Current product and release
 
 The application is usable locally and through the hosted UI. Complete product acceptance remains unfinished.
@@ -35,14 +45,14 @@ UI improvements refine existing accepted items. They do not close the remaining 
 | Item | Last verified value |
 | --- | --- |
 | Hosted UI | https://teststudio.devfoodmarketmaker.com |
-| Product version | 0.8.1-dev; footer displays 0.8.1.dev |
-| Build identifier | 3f0963838890 |
-| Build creation | 2026-11-08T04:11:18.093Z |
-| Implementation commit | 8c8a81aa1c8386f83770ba34008d85badcb663a9 |
+| Product version | 0.9.0-dev; footer displays 0.9.0.dev |
+| Build identifier | 874f3a6eafce |
+| Build creation | 2026-11-08T15:04:51.089Z |
+| Implementation commit | 546813094d3bbfd4dca8eeafa25b7c95909c7c1a |
 | Source state at build | Committed source; modified is false |
-| Service image digest | sha256:047b3680d5de6d61c210cdbd347a66a6b046480c67b78f192f88b5685cc45543 |
-| Task startup | 2026-11-08T11:16:48.779Z |
-| UI publication | 2026-11-08T12:11:39Z |
+| Service image digest | sha256:5745bc1925ff12f9f9efd6aec22407268139c302a4ce992a29736348295a5b9c |
+| Task startup | 2026-11-08T15:09:58.092Z |
+| UI publication | 2026-11-08T15:13:19Z |
 | Live version metadata | GET /api/v1/version; public and no-store |
 
 Later documentation and operator-tooling commits do not change the deployed implementation commit or its immutable build date.
@@ -53,7 +63,7 @@ The local user demo is separate. Do not assume it runs the same release as the h
 
 The status component now centers all content in a maximum width of 72rem, with --ts-status-content-width available to hosts. Background color fills the public viewport; automatic margins bound wide layouts without stretching pills. Existing responsive behavior and logo proportions remain.
 Normal STUDIO-STATUS-PAGES-001 passes in 7.131 seconds, run 20261108T145225.305888000-5d4d2bb3419d754f8564d43e, with cleaned execution. Checks cover centered widths at 1920, 1280, and 390 pixels, compact pills, no horizontal overflow, full-height background, and prior public/private workflows. The independent built consumer and SSR checks pass at library 0.2.1-dev.
-Release 0.8.2-dev is prepared. Commit and push the verified change, build from committed source, review the ordinary image-only MMDev change set, and verify the requesting public page. Publication and target checks remain pending. Reuse passing build caches; preserve user page configuration and the separate original-checkout work.
+Release 0.8.2-dev deploys before the inspection release and is preserved in the combined 0.9.0-dev delivery. Its centered-layout checks remain valid. Reuse passing evidence; preserve user page configuration and the separate demo.
 
 ## Completed delivery: remove public status Help
 
