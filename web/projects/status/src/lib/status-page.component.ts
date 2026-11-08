@@ -11,7 +11,7 @@ import { TestStudioStatusLogoComponent } from './status-logo.component'
   template: `
     <section class="status-page" [style.background-color]="background()" [style.color]="foreground()" aria-label="Status page">
       @if (current(); as value) {
-        @if (value.logo) { <teststudio-status-logo class="page-logo" [source]="value.logo" [description]="value.logoAlt || value.title + ' logo'" /> }
+        @if (value.logo) { <teststudio-status-logo class="page-logo" [height]="value.logoHeight || 0" [source]="value.logo" [description]="value.logoAlt || value.title + ' logo'" /> }
         <header><h1>{{ value.title }}</h1><label class="range">{{ periodLabel() }}<select [attr.aria-label]="periodLabel()" [value]="value.window" (change)="selectPeriod($any($event.target).value)">@for (period of periods; track period.id) { <option [value]="period.id" [selected]="period.id === value.window">{{ period.label }}</option> }</select></label></header>
         <p class="as-of">Updated {{ value.asOf | date:'medium':timezone():locale() }}</p>
         @for (row of value.probes; track $index) {

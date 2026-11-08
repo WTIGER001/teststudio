@@ -41,6 +41,13 @@ Later documentation and operator-tooling commits do not change the deployed impl
 The public API, UI bundle, and portable image labels match this release.
 The local user demo is separate. Do not assume it runs the same release as the hosted installation.
 
+## Active delivery: configurable logo height
+
+The user requests pixel height for optional status-page logos. Appearance adds Logo height (pixels), a live proportional preview, and blank automatic sizing. Values from 1 through 1024 persist through the existing draft and publication workflow. Narrow containers shrink the rendered image without distortion.
+The shared Angular library report and component expose the same option. The built independent consumer and SSR checks pass at library 0.2.0-dev. Product 0.8.0-dev includes the committed shared reliability/library integration bf9ab8a and preserves its released logo support.
+The focused SQLite check passes in 0.520 seconds and PostgreSQL with race detection in 3.046 seconds. Normal STUDIO-STATUS-PAGES-001 passes in 8.088 seconds, run 20261108T034657.315445000-1c34f428c409b3472bc67f77; its execution is cleaned. Reuse these local checks and screenshots.
+Canonical OpenAPI 0.42.0 generates the matching field. Commit and push the verified height change, build from committed source, inspect existing MMDev rollout state, review the ordinary image-only change set, then verify a public height and the requesting editor. Release and target checks remain pending; the table above still identifies 0.6.0-dev.
+
 ## Completed delivery: optional status-page logos
 
 The user requests an optional centered logo, either uploaded or referenced. Appearance supports both sources and removal. The API validates uploaded PNG/JPEG data and public HTTPS URLs without fetching them; uploaded UI files preserve transparency and become bounded PNGs. Published snapshots retain their logo independently of draft edits.

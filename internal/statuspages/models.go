@@ -17,6 +17,7 @@ type Entry struct {
 }
 type Definition struct {
 	Logo       string  `json:"logo,omitempty"`
+	LogoHeight int     `json:"logoHeight,omitempty"`
 	LogoAlt    string  `json:"logoAlt,omitempty"`
 	Slug       string  `json:"slug,omitempty"`
 	ID         string  `json:"id"`
@@ -61,6 +62,7 @@ type Row struct {
 }
 type Report struct {
 	Logo       string    `json:"logo,omitempty"`
+	LogoHeight int       `json:"logoHeight,omitempty"`
 	LogoAlt    string    `json:"logoAlt,omitempty"`
 	Title      string    `json:"title"`
 	Background string    `json:"background"`

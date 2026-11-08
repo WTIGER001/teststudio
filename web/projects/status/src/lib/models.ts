@@ -35,6 +35,7 @@ export interface StatusRow {
 export interface StatusReport {
 	logo?: string
 	logoAlt?: string
+  logoHeight?: number
   title: string
   background: string
   window: string

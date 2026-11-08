@@ -1,6 +1,6 @@
 # TestStudio Angular status components
 
-Version 0.1.0-dev provides standalone, OnPush Angular status components.
+Version 0.2.0-dev provides standalone, OnPush Angular status components.
 Angular 22.2.4 is the verified peer version. Other Angular versions remain unverified.
 The library uses Angular core, common, RxJS, and tslib. It requires no TestStudio application shell, router, global stylesheet, or iframe.
 
@@ -16,7 +16,7 @@ This builds the library, installs it into the independent example, checks compil
 Install that package in another Angular application:
 
 ```sh
-npm install ./wtiger001-teststudio-angular-0.1.0-dev.tgz
+npm install ./wtiger001-teststudio-angular-0.2.0-dev.tgz
 ```
 
 Package creation does not publish to an npm registry or deploy a site.
@@ -95,7 +95,7 @@ Supported status tokens are passed, failed, timeout, flaky, and unknown under th
 Use --ts-status-foreground and --ts-status-background for surfaces and text.
 The defaults inherit the host font and foreground, so light, dark, and system themes can supply their own values.
 Other tokens control padding, top padding, minimum height, radius, heading size, title size, description size, row spacing, summary width, option colors, and tooltip colors. Their names appear in the component styles under the same prefix.
-Optional logo and logoAlt report fields preserve uploaded images or public HTTPS references. The page centers the logo above its title, preserves proportions and transparency, and shows a readable fallback after an image load failure. Use --ts-status-logo-width and --ts-status-logo-height to adjust its bounds.
+Optional logo and logoAlt report fields preserve uploaded images or public HTTPS references. The page centers the logo above its title, preserves proportions and transparency, and shows a readable fallback after an image load failure. Optional logoHeight sets a height from 1 through 1024 CSS pixels. Zero or omission keeps automatic sizing through --ts-status-logo-width and --ts-status-logo-height. A positive height takes precedence over those automatic bounds, preserves proportions, and shrinks to fit its container.
 The page uses host styling by default. Set useReportBackground to true to honor the published background and choose contrasting text.
 Scoped styles require no private CSS selectors or deep overrides.
 Title, description, and selected-detail templates are available through titleTemplate, descriptionTemplate, and detailTemplate inputs on both components.

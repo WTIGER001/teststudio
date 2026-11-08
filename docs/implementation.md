@@ -24,6 +24,15 @@ STUDIO-STATUS-PAGES-001 passes after upstream logo integration with the new buck
 The user demo on port 8040 and unrelated workloads remain separate. Registry publication and hosted verification are not performed for this work. The parallel upstream logo implementation and release notes are integrated locally; shared components retain its optional fields and centered rendering while preserving the separately verified hosted release.
 This refines 12, 13, 34, 35, 36, 37, 39, 40, 41, 47, 49, and 50. The count stays **50 verified of 57**. Broad cross-profile criteria 41, 46, 51, 53, 54, 56, and 57 remain open.
 
+## Configurable logo height: local implementation — 2026-11-07
+
+Appearance now includes an optional Logo height (pixels) field with a live preview. Whole values from 1 through 1024 persist in private definitions and published snapshots. Blank or zero preserves existing automatic sizing. Removing the logo clears its unused height.
+Both the application preview and reusable Angular component calculate proportional width from the decoded image. The selected height applies when the container permits it; narrow layouts scale down proportionally. Centering, transparency, loading fallback, draft guards, and publication review are preserved.
+API contract 0.42.0 generates optional logoHeight fields. Angular library 0.2.0-dev exposes the same typed option and retains automatic CSS tokens. Its independently installed consumer builds and SSR passes. The consumer lock identifies the built 0.2.0-dev package.
+The focused SQLite case passes in 0.520 seconds. The matching race-enabled PostgreSQL case passes in 3.046 seconds. They verify persisted and published heights, draft isolation, boundaries, invalid values, automatic sizing, and removal.
+The UI builds. Normal STUDIO-STATUS-PAGES-001 passes in 8.088 seconds, run 20261108T034657.315445000-1c34f428c409b3472bc67f77. It verifies a 96-pixel desktop logo, unchanged proportions on mobile, a private height change, and a separately published 48-pixel reference, alongside the existing authoring and sharing flow. The execution is cleaned and owned processes and browsers exit.
+Product 0.8.0-dev includes the committed shared reliability/library work and previous released logos. Publication and hosted verification remain pending. This refines 12, 13, 49, and 50; acceptance stays **50 verified of 57**.
+
 ## Optional status-page logos: MMDev delivery — 2026-11-07
 
 Release 0.6.0-dev uses committed 3d13a08ca5a3690d085e265705104f91cab44a0c, build dca2ee3e4ddf, created 2026-11-08T03:15:30.865Z with modified false. Its ARM64 digest is sha256:35d7b1bb815c40df5b1eda33fdd719dbb7347ed129c74f5ef667cb5818b08347. Implementation and release notes are pushed to both origin/codex/status-page-logo and origin/codex/implementation.
