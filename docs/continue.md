@@ -73,6 +73,15 @@ The current stack is UPDATE_COMPLETE. Both teststudioapi and testing-server have
 The README in the API checkout documents status, prepare, review, execute, finish, and per-release receipt selection.
 This operator convenience changes no application release and closes no acceptance criterion. Continue the default queue below when requested.
 
+## Status-page access repair
+
+After the 0.4.0-dev release, the requesting account’s FoodMarketMaker sidebar omits Status pages because its four compatibility roles lack the new statuspages permissions.
+The exact signed-in internal account is confirmed from its account screen, without matching or merging by email.
+Normal audited APIs grant only statuspages.read, statuspages.manage, and statuspages.publish in foodmarketmaker. The original four assignments remain unchanged. Status-page deletion, System access, and status-page permissions in aws-core remain denied.
+The requesting browser now shows Status pages under Project overviews and its Create status page control. The tab is left on the requested project’s Status pages screen.
+Private before/after receipts and visual evidence are output/aws-mmdev/status-page-access. Owned administrator sessions close and temporary helpers are removed.
+This is a scoped configuration repair, with no application rebuild or redeployment. Release 0.4.0-dev remains unchanged. Future new-feature checks must include the requesting account’s compatibility-role capabilities, not only administrator verification.
+
 ## Next implementation priorities
 
 ### Completed request: public status pages

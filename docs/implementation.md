@@ -6,6 +6,16 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## Status-page sidebar access repair — 2026-11-07
+
+The requesting FoodMarketMaker account runs the current 0.4.0-dev UI but retains the earlier Project administrator, Catalog editor, Publisher, and Operator bundle.
+Its effective statuspages.read, statuspages.manage, and statuspages.publish permissions are absent, so the capability-gated sidebar correctly omits the feature. The release verification missed this compatibility-role onboarding gap.
+After confirming the signed-in internal account in the user’s browser, normal audited APIs add these three permissions only in foodmarketmaker. No role conversion occurs.
+Effective permission checks verify all three are allowed in that project while statuspages.delete remains denied. All status-page permissions remain denied in aws-core and System scope. Original role assignments are verified unchanged.
+The actual requesting browser shows Status pages under Project overviews, opens the project’s Status pages route, and displays Create status page. No page is created or published during this repair.
+Owned operator sessions close and temporary helpers are removed. Private receipts and screenshot are output/aws-mmdev/status-page-access.
+This refines 10, 12, and 13. Acceptance stays **50 verified of 57**. The application version, deployed artifact, probes, schedules, and local demo remain unchanged. Documentation-only consistency and link checks pass; no build, browser suite, or deployment is repeated.
+
 ## Public status pages: MMDev delivery — 2026-11-07
 
 Release 0.4.0-dev uses committed implementation 3fc524feb23198590a6140c7f2192249d295fdbc, immutable build 8f7db1066f2e, created 2026-11-07T22:37:40.930Z with modified false.

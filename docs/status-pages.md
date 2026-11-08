@@ -28,6 +28,7 @@ It contains no target URLs, project or user identifiers, run links, request data
 Hover or focus a pill for its status and local timestamp. Public pills do not link to private runs.
 
 Reader and higher project roles can inspect status-page configuration. Contributor and Owner can manage and publish; only Owner can delete.
+Existing compatibility role bundles predate these permissions and do not acquire them automatically. If Status pages is missing, inspect the selected project’s effective statuspages permissions. An authorized administrator can grant statuspages.read, statuspages.manage, and statuspages.publish explicitly for that project without converting the account to Owner or changing its existing roles.
 System Admin retains management and recovery authority. Application-only membership does not grant project status-page administration.
 Public reads recheck the publisher's current authority, referenced probes, and per-run access. Disabling or revoking the publisher withdraws the page until an authorized publisher publishes again.
 Unpublish withdraws the public URL immediately. An already loaded embed clears its display on its next refresh, normally within sixty seconds.
