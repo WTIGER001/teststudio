@@ -2,6 +2,7 @@ package httpapi_test
 
 import (
 	"net/http"
+	"net/url"
 	"testing"
 	"time"
 
@@ -23,6 +24,13 @@ func TestReliabilityReportRequiresSourceAuthorityAndExplicitMonitoring(t *testin
 		time.Sleep(10 * time.Millisecond)
 	}
 	base := "/api/v1/projects/example/suites/health/tests/HEALTH-1/reliability"
+	checks := base + "/checks?environment=local&since=" + url.QueryEscape(time.Now().Add(-time.Hour).UTC().Format(time.RFC3339Nano)) + "&until=" + url.QueryEscape(time.Now().UTC().Format(time.RFC3339Nano))
+	individual := accessCall(t, c, "GET", checks, nil, "", 200)["items"].([]any)
+	if len(individual) != 1 || individual[0].(map[string]any)["runId"] != run || individual[0].(map[string]any)["state"] != "passed" {
+		t.Fatal("missing individual execution", individual)
+	}
+	accessCall(t, c, "GET", base+"/checks", nil, "", 422)
+	accessCall(t, c, "GET", checks+"&limit=101", nil, "", 422)
 	report := accessCall(t, c, "GET", base+"?environment=local&window=1m", nil, "", 200)
 	row := report["probes"].([]any)[0].(map[string]any)
 	counts := row["totals"].(map[string]any)["counts"].(map[string]any)
@@ -39,6 +47,7 @@ func TestReliabilityReportRequiresSourceAuthorityAndExplicitMonitoring(t *testin
 	anon := *c
 	anon.http = &http.Client{}
 	accessCall(t, &anon, "GET", base, nil, "", 401)
+	accessCall(t, &anon, "GET", checks, nil, "", 401)
 	envRow, err := c.api.Store.Get(t.Context(), projects.Bucket("environments", "example"), "local")
 	if err != nil {
 		t.Fatal(err)
@@ -58,6 +67,9 @@ func TestReliabilityReportRequiresSourceAuthorityAndExplicitMonitoring(t *testin
 	object := "example/run/" + run
 	if err := c.api.Auth.Engine.CreateGrant(t.Context(), permissions.Grant{OwnerKind: permissions.PrincipalUser, OwnerID: "admin", TeamScope: "example", ObjectScope: &object, PermissionName: "teststudio.runs.read", Effect: permissions.EffectDeny}); err != nil {
 		t.Fatal(err)
+	}
+	if items := accessCall(t, c, "GET", checks, nil, "", 200)["items"].([]any); len(items) != 0 {
+		t.Fatal("denied individual results leaked", len(items))
 	}
 	denied := accessCall(t, c, "GET", base+"?environment=local&window=1m", nil, "", 200)["probes"].([]any)[0].(map[string]any)
 	if denied["totals"].(map[string]any)["counts"].(map[string]any)["passed"] != float64(0) || denied["passRate"] != nil || len(denied["history"].([]any)) != 0 {

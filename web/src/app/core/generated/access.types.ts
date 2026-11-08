@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.41.0"
+export const accessContractVersion = "0.42.0"
 
 export type APIAuthentication = { "binding": string; "header"?: string; "scheme": "bearer" | "basic" | "header" }
 export type APIRequestPolicy = { "authentication"?: APIAuthentication; "maxRequests": number; "maxResponseBytes": number; "redactFields"?: (string)[]; "rules": (APIRequestRule)[] }
@@ -123,6 +123,8 @@ export type RecordingCompanionSnapshot = { "code"?: string; "failure"?: "recorde
 export type RecordingCompanionSnapshotRequest = { "instance": string; "snapshot": RecordingCompanionSnapshot }
 export type ReleaseRegistry = { "activeReleaseId"?: string; "archived": boolean; "canActivate": boolean; "items": (SourceCatalogRelease)[]; "suiteId": string; "suiteName": string; "suiteRevision": number }
 export type ReliabilityBucket = { "availability": StatusPageAvailability | null; "partial": boolean; "passRate": number | null; "since": string; "state": string; "totals": ReliabilityTotals; "until": string }
+export type ReliabilityCheck = { "at": string; "censored": boolean; "durationMs": number | null; "runId"?: string; "state": string }
+export type ReliabilityCheckPage = { "cursor"?: string; "items": (ReliabilityCheck)[]; "partial": boolean }
 export type ReliabilityCounts = { "failed": number; "flaky": number; "passed": number; "skipped": number; "timedOut": number; "unknown": number }
 export type ReliabilityTotals = { "censoredCount": number; "counts": ReliabilityCounts; "downSeconds": number; "durationSampleCount": number; "durationSumMs": number; "durationUnavailableCount": number; "unknownSeconds": number; "upSeconds": number }
 export type RetainedTest = { "current": boolean; "lifecycle": string; "projectId": string; "revision": number; "suiteArchived": boolean; "suiteId": string; "suiteName": string; "test": SourceCatalogTest; "updatedAt": string }
@@ -358,11 +360,13 @@ export interface AccessRequests {
   duplicateCatalogTest: { "project": string; "suite": string; "test": string; revision: number; body: CatalogDuplicateInput }
   changeCatalogTestState: { "project": string; "suite": string; "test": string; "action": "disable" | "enable" | "archive" | "restore"; revision: number }
   readTestReliability: { "project": string; "suite": string; "test": string; query?: { "environment"?: string; "location"?: string; "window"?: string; "resolution"?: string; "since"?: string; "until"?: string; "maxAgeSeconds"?: number } }
+  readTestReliabilityChecks: { "project": string; "suite": string; "test": string; query: { "environment"?: string; "location"?: string; "since": string; "until": string; "cursor"?: string; "limit"?: number } }
   readRetainedTest: { "project": string; "suite": string; "test": string }
   listCatalogTestRevisions: { "project": string; "suite": string; "test": string }
   readTestRunHistory: { "project": string; "suite": string; "test": string; query?: { "environment"?: string; "location"?: string; "application"?: string; "cursor"?: string; "limit"?: number } }
   listProjectCatalog: { "project": string; query?: { "query"?: string; "suite"?: string; "application"?: string; "category"?: string; "tag"?: string; "owner"?: string; "type"?: string; "runner"?: string; "state"?: string; "safety"?: string; "source"?: string; "sort"?: string; "cursor"?: string; "descendants"?: boolean; "uncategorized"?: boolean; "limit"?: number } }
   readPublicStatusPage: { "token": string; query?: { "window"?: string } }
+  readPublicStatusChecks: { "token": string; query: { "row": number; "since": string; "until": string; "cursor"?: string; "limit"?: number } }
   readRecordingCompanionControl: { "id": string; body: RecordingCompanionControlRequest }
   pairRecordingCompanion: { "id": string; body: RecordingCompanionPairRequest }
   submitRecordingCompanionSnapshot: { "id": string; body: RecordingCompanionSnapshotRequest }
@@ -546,11 +550,13 @@ export interface AccessResponses {
   duplicateCatalogTest: CatalogTestRecord
   changeCatalogTestState: CatalogTestRecord
   readTestReliability: StatusPageReport
+  readTestReliabilityChecks: ReliabilityCheckPage
   readRetainedTest: RetainedTest
   listCatalogTestRevisions: CatalogRevisionPage
   readTestRunHistory: TestHistoryPage
   listProjectCatalog: CatalogListPage
   readPublicStatusPage: StatusPageReport
+  readPublicStatusChecks: ReliabilityCheckPage
   readRecordingCompanionControl: RecordingCompanionControl
   pairRecordingCompanion: RecordingCompanionPacket
   submitRecordingCompanionSnapshot: RecordingCompanionControl
@@ -734,11 +740,13 @@ export const accessOperations = {
   duplicateCatalogTest: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/actions/duplicate" },
   changeCatalogTestState: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/actions/{action}" },
   readTestReliability: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/reliability" },
+  readTestReliabilityChecks: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/reliability/checks" },
   readRetainedTest: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/retained" },
   listCatalogTestRevisions: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/revisions" },
   readTestRunHistory: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/run-history" },
   listProjectCatalog: { method: "GET", path: "/api/v1/projects/{project}/tests" },
   readPublicStatusPage: { method: "GET", path: "/api/v1/public/status-pages/{token}" },
+  readPublicStatusChecks: { method: "GET", path: "/api/v1/public/status-pages/{token}/checks" },
   readRecordingCompanionControl: { method: "POST", path: "/api/v1/recording-companion/sessions/{id}/control" },
   pairRecordingCompanion: { method: "POST", path: "/api/v1/recording-companion/sessions/{id}/pair" },
   submitRecordingCompanionSnapshot: { method: "POST", path: "/api/v1/recording-companion/sessions/{id}/snapshots" },

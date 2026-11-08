@@ -147,7 +147,7 @@ Use monthly or yearly display buckets for longer ranges while bounding the visib
 Keep empty intervals visible. Distinguish no executions from monitored unknown time, and mark unfinished buckets as partial.
 Keep current status separate from historical bucket status. A successful latest result must not erase an earlier failure in the bucket.
 Preserve any unsuccessful observation or unavailable duration in the bucket details and visible status indication. Show monitoring gaps even when downtime also occurs.
-Expose boundaries, outcome counts, downtime, availability where applicable, and coverage through keyboard and pointer details. Drill into finer retained periods before opening authorized run details.
+Expose boundaries, outcome counts, downtime, availability where applicable, and coverage through keyboard and pointer details. Keep an Individual checks table available for the whole selected period. Inspect period opens individual results inside the selected pill. Never combine multiple executions into a table row. Page through older checks without limiting access to a fixed three-hour or six-hour window. Private Inspect check opens the authorized saved run and its attempts.
 Private drill-down retains normal run permissions. Public projections retain their allowlist and never expose private runs or evidence.
 Use the same underlying totals for pills, donuts, accessible values, and exports. Retain stacked area charts for result-state trends.
 
@@ -209,9 +209,16 @@ Any object-specific grant or deny uses per-run provenance instead. Grant expiry,
 Aggregation backlogs return 503 with retry guidance. They never return a partial percentage as complete.
 Database metadata version 2 includes all six reliability tables in installation export and import. See [database transfer](data-transfer.md).
 
-Open a test's Test history page for Reliability history. Select the environment and period, inspect a pill, and use Inspect period to narrow the range.
+Open a test's Test history page for Reliability history. Select the environment and period. Individual checks opens the unaggregated table for that period. Select a pill and Inspect period to open only its results. Return to full period restores the table range; Load older checks continues paged results.
 Advanced reliability settings controls location and an explicit monitoring policy. These controls never dispatch work.
 The existing per-run history and stacked area trends remain available for investigation.
 
 Run STUDIO-RELIABILITY-001 for private history and the independent Angular consumer, and STUDIO-STATUS-PAGES-001 for public publication and iframe compatibility.
 The retained local receipts and performance measurements are recorded in the [acceptance ledger](implementation.md).
+
+### Individual check API
+
+GET /api/v1/projects/{project}/suites/{suite}/tests/{test}/reliability/checks reads retained final logical observations directly, without rollups. Supply environment and location as for the summary, explicit since and until timestamps, and an optional limit from 1 through 100. Boundaries are half-open and order is newest completion first, with stable ties. Each row retains outcome, measured duration or null, censoring, and the private run identifier. Attempts remain inside the saved run.
+GET /api/v1/public/status-pages/{token}/checks uses the published row index through row=0, the same boundaries, and optional limit and cursor. It permits credential-free CORS reads. Only completion time, final outcome, measured duration, and censoring are public. It excludes run identifiers, targets, configuration fingerprints, source metadata, and evidence. Publisher authority and current run access are checked on every page; withdrawal blocks subsequent reads.
+Follow cursor while present, even after an empty filtered page. Each request scans at most 500 observations. Cursors expire after 15 minutes and bind the scope, boundaries, reader or publication, and page limit. Restart from the report when a cursor expires or publication changes. Private table rows preserve recorded executions across configuration changes. Public monitored rows retain the summary’s active definition and target matching. Tables never extrapolate uptime or convert missing checks into passes.
+Compact observations have no automatic expiry. Summaries can outlive fine detail if an operator removes it; an empty table never reconstructs checks from aggregates. Evidence retention remains separate. No fixed three-hour or six-hour limit controls access to individual results.

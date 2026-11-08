@@ -1,6 +1,6 @@
 import { DatePipe, isPlatformBrowser } from '@angular/common'
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, PLATFORM_ID, signal, TemplateRef } from '@angular/core'
-import { StatusLoadError, StatusReport, StatusSelection, StatusSource, statusPeriods } from './models'
+import { StatusLoadError, StatusReport, StatusSelection, StatusSource, statusPeriods, StatusCheck, StatusCheckLoader } from './models'
 import { TestStudioStatusBarComponent } from './status-bar.component'
 import { TestStudioStatusSummaryComponent } from './status-summary.component'
 import { TestStudioStatusClient } from './status-client.service'
@@ -16,7 +16,7 @@ import { TestStudioStatusLogoComponent } from './status-logo.component'
         <p class="as-of">Updated {{ value.asOf | date:'medium':timezone():locale() }}</p>
         @for (row of value.probes; track $index) {
           <article class="status-row" [attr.aria-label]="row.title">
-            <teststudio-status-bar [row]="row" [locale]="locale()" [timezone]="timezone()" [titleTemplate]="titleTemplate()" [descriptionTemplate]="descriptionTemplate()" [detailTemplate]="detailTemplate()" (bucketSelected)="bucketSelected.emit($event)" (drilldownRequested)="drilldownRequested.emit($event)" />
+            <teststudio-status-bar [row]="row" [checksSource]="checksSource() || source()" [checkLoader]="checkLoader()" [rowIndex]="$index" [inspectableChecks]="inspectableChecks()" (checkRequested)="checkRequested.emit($event)" [locale]="locale()" [timezone]="timezone()" [titleTemplate]="titleTemplate()" [descriptionTemplate]="descriptionTemplate()" [detailTemplate]="detailTemplate()" (bucketSelected)="bucketSelected.emit($event)" (drilldownRequested)="drilldownRequested.emit($event)" />
             @if (showSummaries()) { <teststudio-status-summary [row]="row" [locale]="locale()" /> }
           </article>
         }
@@ -28,6 +28,10 @@ import { TestStudioStatusLogoComponent } from './status-logo.component'
 export class TestStudioStatusPageComponent {
   readonly report = input<StatusReport | null>(null)
   readonly source = input<StatusSource | null>(null)
+  readonly checksSource = input<StatusSource | null>(null)
+  readonly checkLoader = input<StatusCheckLoader | null>(null)
+  readonly inspectableChecks = input(false)
+  readonly checkRequested = output<StatusCheck>()
   readonly period = input('')
   readonly periodLabel = input('Report period')
   readonly locale = input('en-US')

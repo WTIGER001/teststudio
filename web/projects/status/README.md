@@ -113,3 +113,23 @@ Native controls, keyboard focus, accessible bucket details, and touch targets re
 Unknown monitoring coverage remains visible alongside downtime. Historical bucket state remains separate from the current result.
 
 The independent example lives in examples/angular-status. STUDIO-RELIABILITY-001 verifies it through normal TestStudio execution.
+
+## Individual checks without aggregation
+
+Source-driven public pages include Individual checks on every row. Select a pill and Inspect period for the individual results inside it, or use Individual checks for the whole report period. Return to full period clears the pill filter. Load older checks fetches the next page. The table preserves completion time, outcome, duration, and censoring. It never groups executions or extrapolates uptime.
+
+Host-data bars and pages accept a checkLoader input. It receives since, until, row, limit, and an optional opaque cursor, and returns Promise<StatusCheckPage>. Use your normal authenticated service for private requests. For example:
+
+```ts
+readonly loadChecks: StatusCheckLoader = query =>
+  this.history.readChecks(this.testId, query)
+```
+
+```html
+<teststudio-status-page [report]="report()" [checkLoader]="loadChecks"
+  [inspectableChecks]="true" (checkRequested)="openRun($event.runId)" />
+```
+
+The host owns openRun and rechecks private run access on navigation. Public requests never return runId or evidence. A standalone bar can use checksSource with the public report URL and rowIndex for its published row. A host-data page can also supply checksSource while retaining host-managed report loading. Both modes bypass host authentication interceptors for public reads.
+The exported teststudio-status-checks component supports a standalone table with range, source or loader, row, locale, and timezone inputs. Its checkRequested and resetRange outputs leave navigation to the host. Table requests stop on component destruction; late host-promise results are ignored. Server rendering starts no detail requests.
+The API returns at most 100 results per page and bounds filtered scans. Follow cursor even when a page has no readable matches. Cursors expire after 15 minutes; retry from the report if one expires. Compact observations have no automatic expiry, but summaries can outlive removed detail. The table reports missing fine detail without inventing rows. Three-hour and six-hour summary sizes do not restrict individual history.

@@ -1,9 +1,10 @@
 import { DatePipe, NgTemplateOutlet } from '@angular/common'
 import { ChangeDetectionStrategy, Component, computed, input, output, signal, TemplateRef } from '@angular/core'
-import { StatusBucket, StatusRow, StatusSelection, statusLabel } from './models'
+import { StatusBucket, StatusRow, StatusSelection, statusLabel, StatusCheck, StatusCheckLoader, StatusCheckRange, StatusSource } from './models'
+import { TestStudioStatusChecksComponent } from './status-checks.component'
 
 @Component({
-  selector: 'teststudio-status-bar', standalone: true, imports: [DatePipe, NgTemplateOutlet], changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'teststudio-status-bar', standalone: true, imports: [DatePipe, NgTemplateOutlet, TestStudioStatusChecksComponent], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section [attr.aria-label]="row().title">
       @if (showHeading()) { @if (titleTemplate(); as template) { <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="{ $implicit: row() }" /> } @else { <h2>{{ row().title }}</h2> } }
@@ -18,8 +19,12 @@ import { StatusBucket, StatusRow, StatusSelection, statusLabel } from './models'
       </div>
       @if (selected(); as bucket) {
         <div class="selected" role="status">@if (detailTemplate(); as template) { <ng-container [ngTemplateOutlet]="template" [ngTemplateOutletContext]="{ $implicit: bucket, row: row() }" /> } @else { {{ details(bucket) }} }
-          <button type="button" (click)="drilldownRequested.emit({ row: row(), bucket })">Inspect period</button>
+          <button type="button" (click)="inspectPeriod(bucket)">Inspect period</button>
         </div>
+      }
+      @if (checkLoader() || checksSource()) {
+        <button class="checks-toggle" type="button" [attr.aria-expanded]="showChecks()" (click)="toggleChecks()">{{ showChecks() ? 'Hide individual checks' : 'Individual checks' }}</button>
+        @if (showChecks()) { <teststudio-status-checks [range]="individualRange()" [row]="rowIndex()" [source]="checksSource()" [loader]="checkLoader()" [narrowed]="checkRange() !== null" [inspectable]="inspectableChecks()" [locale]="locale()" [timezone]="timezone()" (resetRange)="resetChecks()" (checkRequested)="checkRequested.emit($event)" /> }
       }
     </section>`,
   styleUrl: './status-bar.css'
@@ -34,6 +39,21 @@ export class TestStudioStatusBarComponent {
   readonly detailTemplate = input<TemplateRef<unknown> | null>(null)
   readonly bucketSelected = output<StatusSelection>()
   readonly drilldownRequested = output<StatusSelection>()
+  readonly checksSource = input<StatusSource | null>(null)
+  readonly checkLoader = input<StatusCheckLoader | null>(null)
+  readonly rowIndex = input(0)
+  readonly inspectableChecks = input(false)
+  readonly checkRequested = output<StatusCheck>()
+  readonly showChecks = signal(false)
+  private readonly checkSelection = signal<{ row: StatusRow; range: StatusCheckRange } | null>(null)
+  readonly checkRange = computed(() => this.checkSelection()?.row === this.row() ? this.checkSelection()!.range : null)
+  readonly individualRange = computed(() => this.checkRange() || { since: this.row().availability.since, until: this.buckets().at(-1)?.until || this.row().availability.since })
+  resetChecks(): void { this.checkSelection.set(null) }
+  toggleChecks(): void { if (!this.showChecks()) this.resetChecks(); this.showChecks.set(!this.showChecks()) }
+  inspectPeriod(bucket: StatusBucket): void {
+    this.checkSelection.set({ row: this.row(), range: { since: bucket.since, until: bucket.until } }); this.showChecks.set(true)
+    this.drilldownRequested.emit({ row: this.row(), bucket })
+  }
   private readonly selection = signal<{ row: StatusRow; bucket: StatusBucket } | null>(null)
   readonly selected = computed(() => this.selection()?.row === this.row() ? this.selection()!.bucket : null)
   readonly buckets = computed<StatusBucket[]>(() => this.row().buckets ?? this.row().history.map(point => ({ since: point.at, until: point.at, state: point.state, partial: false, totals: { counts: { passed: 0, failed: 0, timedOut: 0, flaky: 0, skipped: 0, unknown: 0 }, upSeconds: 0, downSeconds: 0, unknownSeconds: 0, durationSumMs: 0, durationSampleCount: 0, censoredCount: 0, durationUnavailableCount: 0 }, availability: null, passRate: null })))

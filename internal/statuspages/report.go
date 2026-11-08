@@ -12,38 +12,45 @@ import (
 )
 
 func (s *Service) Public(ctx context.Context, token, window string) (Report, error) {
+	page, project, err := s.publishedPage(ctx, token)
+	if err != nil {
+		return Report{}, err
+	}
+	return s.Report(ctx, page.Publisher, project, *page.Published, window)
+}
+func (s *Service) publishedPage(ctx context.Context, token string) (Page, string, error) {
 	token = strings.ToLower(token)
 	bucket := "public-status-pages"
 	vanity := !tokenPattern.MatchString(token)
 	if vanity {
 		if value, err := NormalizeSlug(token); err != nil || value == "" {
-			return Report{}, storage.ErrNotFound
+			return Page{}, "", storage.ErrNotFound
 		}
 		bucket = "status-page-slugs"
 	}
 	link, err := s.Store.Get(ctx, bucket, token)
 	if err != nil {
-		return Report{}, storage.ErrNotFound
+		return Page{}, "", storage.ErrNotFound
 	}
 	key, err := storage.Decode[slugLink](link)
 	if err != nil {
-		return Report{}, storage.ErrNotFound
+		return Page{}, "", storage.ErrNotFound
 	}
 	row, err := s.Store.Get(ctx, Bucket(link.Project), key.ID)
 	if err != nil {
-		return Report{}, storage.ErrNotFound
+		return Page{}, "", storage.ErrNotFound
 	}
 	page, err := storage.Decode[Page](row)
 	if err != nil || page.Published == nil || (!vanity && page.Token != token) || (vanity && (page.Published.Slug != token || key.Token != page.Token)) {
-		return Report{}, storage.ErrNotFound
+		return Page{}, "", storage.ErrNotFound
 	}
 	if err = s.authority(ctx, page.Publisher, link.Project, key.ID, "read"); err != nil {
-		return Report{}, storage.ErrNotFound
+		return Page{}, "", storage.ErrNotFound
 	}
 	if err = s.authority(ctx, page.Publisher, link.Project, key.ID, "publish"); err != nil {
-		return Report{}, storage.ErrNotFound
+		return Page{}, "", storage.ErrNotFound
 	}
-	return s.Report(ctx, page.Publisher, link.Project, *page.Published, window)
+	return page, link.Project, nil
 }
 func (s *Service) Report(ctx context.Context, user, project string, d Definition, window string) (Report, error) {
 	now := time.Now().UTC()

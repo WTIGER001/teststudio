@@ -24,6 +24,11 @@ The focused SQLite and race-enabled PostgreSQL checks pass, including publicatio
 Release 0.6.0-dev from committed 3d13a08 is pushed and deployed as build dca2ee3e4ddf. Nine local AWS package checks and thirty-five hosted checks pass. The reviewed change set modifies only Service, Task, UiHeaders, and PublicStatusHeaders. The public browser decodes and centers the logo; the requesting editor shows the controls. The owned page is unpublished and owned sessions and tabs close.
 This refines 12, 13, 49, and 50. Acceptance stays 50 verified of 57. Preserve the separate reliability implementation in the original checkout.
 
+## Local delivery: individual reliability checks
+
+Every report period retains an Individual checks table with one final logical execution per row and no aggregation. Inspect period opens the selected pill’s results. Pagination replaces a fixed three-hour or six-hour ceiling. Private rows open authorized saved runs; public rows remain allowlisted and respect publication, source authority, and active monitoring configuration.
+The shared Angular bar and page use the same exported table, with a host loader or public source. Focused SQLite/PostgreSQL, independent-consumer/SSR, and STUDIO-RELIABILITY-001 checks pass. See the latest ledger entry for receipts. This refines 34–37, 39–40, 47, 49, and 50 without changing 50 verified of 57. Publishing and target verification remain separate.
+
 ## Local delivery: shared reliability history and Angular components
 
 The approved [shared reliability design](trends.md#shared-reliability-capture) now has common durable capture for all runners, safe replay and backfill, hourly and daily summaries, bounded long-range reports, explicit monitoring policy, and preserved native authorization.

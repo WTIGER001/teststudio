@@ -8,9 +8,10 @@ import type { StatusPageReport } from '../../core/generated/access.types'
 export class PublicStatusService {
   private readonly route = inject(ActivatedRoute); private readonly router = inject(Router); private readonly destroy = inject(DestroyRef)
   readonly report = signal<StatusPageReport | null>(null); readonly error = signal(''); readonly busy = signal(false)
+  readonly checksSource = signal<{ url: string } | null>(null)
   private token = ''; private window = ''; private request?: AbortController; private timer?: ReturnType<typeof setTimeout>; private generation = 0
   constructor() {
-    combineLatest([this.route.paramMap, this.route.queryParamMap]).pipe(takeUntilDestroyed(this.destroy)).subscribe(([params, query]) => { this.token = params.get('token') || ''; this.window = query.get('window') || ''; void this.refresh() })
+    combineLatest([this.route.paramMap, this.route.queryParamMap]).pipe(takeUntilDestroyed(this.destroy)).subscribe(([params, query]) => { this.token = params.get('token') || ''; this.checksSource.set({ url: '/api/v1/public/status-pages/' + encodeURIComponent(this.token) }); this.window = query.get('window') || ''; void this.refresh() })
     this.destroy.onDestroy(() => { this.generation++; this.request?.abort(); clearTimeout(this.timer) })
   }
   select(window: string): void { void this.router.navigate([], { relativeTo: this.route, queryParams: { window }, replaceUrl: true }) }

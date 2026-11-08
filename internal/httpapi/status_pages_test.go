@@ -33,6 +33,18 @@ func TestStatusPagesDraftPublicationPrivacyAndRevocation(t *testing.T) {
 	accessCall(t, &anon, "GET", base, nil, "", 401)
 	published := accessCall(t, c, "POST", base+"/publish", nil, "1", 200)
 	report := accessCall(t, &anon, "GET", public, nil, "", 200)
+	checks := public + "/checks?row=0&since=" + url.QueryEscape(time.Now().Add(-time.Hour).UTC().Format(time.RFC3339Nano)) + "&until=" + url.QueryEscape(time.Now().UTC().Format(time.RFC3339Nano))
+	detail := accessCall(t, &anon, "GET", checks, nil, "", 200)
+	if len(detail["items"].([]any)) != 1 {
+		t.Fatal("missing public individual check")
+	}
+	rawChecks, _ := json.Marshal(detail)
+	for _, private := range []string{run, "runId", "projectId", "environmentId", "source", "http://", "https://"} {
+		if strings.Contains(string(rawChecks), private) {
+			t.Fatal("private individual check field leaked", private)
+		}
+	}
+	accessCall(t, &anon, "GET", strings.Replace(checks, "row=0", "row=1", 1), nil, "", 404)
 	raw, _ := json.Marshal(report)
 	for _, secret := range []string{binding.ID, run, "http://", "https://", "projectId", "environmentId", "userId", "runId", "HTTP", "publicToken"} {
 		if strings.Contains(string(raw), secret) {
@@ -54,6 +66,7 @@ func TestStatusPagesDraftPublicationPrivacyAndRevocation(t *testing.T) {
 	}
 	accessCall(t, c, "POST", base+"/publish", nil, "1", 409)
 	accessCall(t, c, "POST", base+"/unpublish", nil, "3", 200)
+	accessCall(t, &anon, "GET", checks, nil, "", 404)
 	accessCall(t, &anon, "GET", public, nil, "", 404)
 	accessCall(t, c, "POST", base+"/publish", nil, "4", 200)
 	if accessCall(t, &anon, "GET", public, nil, "", 200)["title"] != "Unpublished changes" {
@@ -66,10 +79,26 @@ func TestStatusPagesDraftPublicationPrivacyAndRevocation(t *testing.T) {
 	definition.Background = "#ffffff"
 	definition.Probes = append(definition.Probes, definition.Probes[0])
 	accessCall(t, c, "PUT", base, definition, "5", 422)
+	envRecord, err := c.api.Store.Get(t.Context(), projects.Bucket("environments", "example"), binding.Environment)
+	if err != nil {
+		t.Fatal(err)
+	}
+	environment, err := storage.Decode[projects.Environment](envRecord)
+	if err != nil {
+		t.Fatal(err)
+	}
+	environment.Endpoints["api"] = "https://new-target.example.test"
+	if err = c.api.Projects.SaveEnvironment(t.Context(), "admin", "example", environment, envRecord.Revision); err != nil {
+		t.Fatal(err)
+	}
+	if results := accessCall(t, &anon, "GET", checks, nil, "", 200)["items"].([]any); len(results) != 0 {
+		t.Fatal("old target leaked into public individual checks")
+	}
 	if err := c.api.Auth.Engine.CreateGrant(t.Context(), permissions.Grant{OwnerKind: permissions.PrincipalUser, OwnerID: "admin", TeamScope: "example", PermissionName: "teststudio.statuspages.publish", Effect: permissions.EffectDeny}); err != nil {
 		t.Fatal(err)
 	}
 	accessCall(t, &anon, "GET", public, nil, "", 404)
+	accessCall(t, &anon, "GET", checks, nil, "", 404)
 }
 func TestStatusPagesContributorManagementDoesNotGrantDeletion(t *testing.T) {
 	c, _, binding := probeFixture(t)

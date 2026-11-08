@@ -9,6 +9,7 @@ import (
 )
 
 func (s *Server) reliabilityRoutes(m *http.ServeMux) {
+	s.reliabilityCheckRoutes(m)
 	m.HandleFunc("GET /api/v1/projects/{project}/suites/{suite}/tests/{test}/reliability", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()
 		q := reliability.Query{Scope: reliability.Scope{Project: r.PathValue("project"), Suite: r.PathValue("suite"), Test: r.PathValue("test"), Environment: params.Get("environment"), Location: params.Get("location")}, Resolution: params.Get("resolution")}

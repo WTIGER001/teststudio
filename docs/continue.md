@@ -111,9 +111,14 @@ The requesting account’s actual browser verifies the saved detail page and ded
 The approved [shared reliability design](trends.md#shared-reliability-capture) is implemented locally across native HTTP, Go, browser, and API result paths, including unknown terminal selections, atomic capture, safe replay, retained-history backfill, hourly and daily summaries, and bounded display buckets.
 Time-based availability requires an explicit reporting policy and current definition/target matching. Ordinary tests retain outcome and timing history without implied uptime.
 The [Angular library](../web/projects/status/README.md), @wtiger001/teststudio-angular 0.1.0-dev, supplies a stylable bar, page, and optional public client. TestStudio reuses it. An independently installed Angular 22.2.4 consumer verifies styling, cross-origin data, withdrawal, cleanup, and server rendering.
-Product 0.7.0-dev is prepared locally. API contract 0.41.0 and database metadata version 2 cover this delivery. Compact reliability data has no automatic expiry; evidence retention remains separate. Installation export/import preserves all reliability tables and pending jobs.
+Product 0.7.0-dev is prepared locally. API contract 0.42.0 and database metadata version 2 cover this delivery. Compact reliability data has no automatic expiry; evidence retention remains separate. Installation export/import preserves all reliability tables and pending jobs.
 The ledger records focused SQLite/PostgreSQL checks, the normal browser receipts, and dense-year and multi-year measurements. Acceptance remains 50 verified of 57.
 Registry publication and target deployment remain pending. The upstream logo implementation is integrated locally and its separately verified hosted release remains intact.
+
+## Local follow-up: individual reliability checks
+
+The latest request adds Individual checks for any report period and Inspect period for each pill. The shared table reads compact observations directly, pages through older results without aggregation, and opens authorized saved runs privately. Public native and independent Angular pages expose only time, outcome, duration, and censoring, and preserve source authority, target matching, and withdrawal.
+Focused SQLite/PostgreSQL and normal STUDIO-RELIABILITY-001 pass; final UI run 20261108T035846.711583000-448fee9fed024a3d2b99416e retains complete evidence and cleaned execution state. The built package consumer and SSR pass. The ledger records exact scope and limits. Acceptance remains 50 verified of 57. This follow-up is local and does not deploy or supersede the concurrent height release. Incorporate that upstream delivery before publishing a later combined release.
 
 ## Next implementation priorities
 

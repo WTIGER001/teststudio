@@ -1,8 +1,8 @@
 import { isPlatformBrowser } from '@angular/common'
 import { HttpBackend, HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { inject, Injectable, PLATFORM_ID } from '@angular/core'
-import { catchError, finalize, map, Observable, of, shareReplay, startWith, switchMap, timer } from 'rxjs'
-import type { StatusLoadError, StatusReport, StatusSource } from './models'
+import { catchError, finalize, map, Observable, of, shareReplay, startWith, switchMap, timer, throwError } from 'rxjs'
+import type { StatusLoadError, StatusReport, StatusSource, StatusCheckPage, StatusCheckQuery } from './models'
 
 export interface StatusLoadState { report: StatusReport | null; loading: boolean; error: StatusLoadError | null }
 
@@ -13,6 +13,18 @@ export class TestStudioStatusClient {
   private readonly browser = isPlatformBrowser(inject(PLATFORM_ID))
   private readonly requests = new Map<string, Observable<StatusLoadState>>()
   publicURL(baseURL: string, page: string): string { return baseURL.replace(/\/$/, '') + '/api/v1/public/status-pages/' + encodeURIComponent(page) }
+  checks(source: StatusSource, query: StatusCheckQuery): Observable<StatusCheckPage> {
+    if (!this.browser) return of({ items: [], partial: false })
+    if (!this.http) return throwError(() => new Error('Provide Angular HttpClient or a host check loader.'))
+    try {
+      const url = new URL(source.url, 'http://teststudio.invalid')
+      if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || !/\/api\/v1\/public\/status-pages\/[a-zA-Z0-9-]+$/.test(url.pathname)) throw new Error('Use a public TestStudio status report URL.')
+      url.pathname += '/checks'; url.search = ''
+      for (const [name, value] of Object.entries(query)) if (value !== undefined) url.searchParams.set(name, String(value))
+      const target = url.origin === 'http://teststudio.invalid' ? url.pathname + url.search : url.toString()
+      return this.http.get<StatusCheckPage>(target, { withCredentials: false, credentials: 'omit' })
+    } catch (error) { return throwError(() => error) }
+  }
   watch(source: StatusSource, period = ''): Observable<StatusLoadState> {
     if (!this.browser) return of({ report: null, loading: false, error: null })
     let url: string

@@ -78,3 +78,8 @@ Execution outcomes are the default for direct tests. Report this test as a monit
 Review shows the metric for every row before saving. Publishing remains a separate reviewed action.
 Hour, six-hour, daily, weekly, monthly, and yearly pills keep long histories compact. A successful latest result cannot hide an unsuccessful observation earlier in the bucket.
 Monitoring definitions and source/target changes retain separate contexts. Old configurations do not establish current availability.
+
+## Inspect individual checks
+
+Published pages retain the bucketed overview and offer Individual checks on each row. The table shows one final logical result per execution, with completion time, outcome, and measured duration. It does not aggregate results or infer uptime between them. Select a pill and Inspect period to inspect that interval; Return to full period restores the table range. Load older checks continues through retained detail with no fixed three-hour or six-hour restriction.
+Public tables omit private run identities, targets, diagnostics, and evidence. Private Test history offers Inspect check under current run authority. The shared Angular components support the same table. See [individual check APIs](trends.md#individual-check-api) for boundaries, pagination, and retention.

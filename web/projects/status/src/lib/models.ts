@@ -53,3 +53,9 @@ export function statusLabel(state: StatusState, metric = 'availability'): string
 }
 
 export function monitoredLabel(value: number): string { return value > 0 && value < .1 ? '<0.1%' : value.toFixed(1) + '%' }
+
+export interface StatusCheck { at: string; state: StatusState; durationMs: number | null; censored: boolean; runId?: string }
+export interface StatusCheckPage { items: StatusCheck[]; cursor?: string; partial: boolean }
+export interface StatusCheckRange { since: string; until: string }
+export interface StatusCheckQuery extends StatusCheckRange { row: number; cursor?: string; limit: number }
+export type StatusCheckLoader = (query: StatusCheckQuery) => Promise<StatusCheckPage>
