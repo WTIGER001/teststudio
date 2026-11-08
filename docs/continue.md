@@ -31,7 +31,7 @@ Follow [the hosted recording plan](hosted-recording-plan.md). This direction sup
 The local proof now captures a generic News click and visible-story check, shows plain-language review, and saves through the existing source draft service.
 Normal STUDIO-EMBEDDED-RECORDER-001 passes in 4.123 seconds, run 20261108T155702.239245000-2124450c8345cdca54c6958c. Its complete focused harness takes 19.87 seconds.
 Help, active and saved reload, uncertain input, lost save confirmation, Advanced source access, cancellation, focus, themes, narrow layout, and all eleven observed process shutdowns pass.
-Reuse receipts and screenshots under output/playwright/embedded-news-complete. Canonical OpenAPI 0.44.0 describes the local source; the hosted release remains 0.9.0-dev.
+Reuse receipts and screenshots under output/playwright/embedded-news-complete. Canonical OpenAPI 0.44.0 describes this source; product 0.10.0-dev is now deployed.
 The native preview remains loopback-only. Milestone 2 now implements a separate [private recording worker](recording-worker.md) with mutually authenticated TLS, durable capacity and cleanup leases, fenced restart recovery, current authority checks, and bounded idle behavior.
 The actual recording browser runs sandboxed in a non-root container with no direct networking, a private per-session gateway, fixed resource limits, and independent browser and gateway deadlines.
 Normal STUDIO-HOSTED-RECORDER-001 passes locally in 5.997 seconds, run 20261108T165640.285709000-e4e7e064e323488114590eb5; the complete harness takes 21.56 seconds.
@@ -39,10 +39,13 @@ The same News, review, one-draft save, reload, input and save recovery, help, fo
 Reuse output/playwright/private-recording-worker. Targeted race checks pass for ownership, capacity, uncertain input, revoked authority, archive, idle, deadlines, TLS identities, API reconnect, and transfer exclusion. Actual PostgreSQL lease and recovery checks pass in 2.841 seconds.
 Docker policy and independent-deadline checks pass in 6.616 seconds. Standalone daemon configuration, private readiness, and clean shutdown checks pass in 0.385 seconds.
 The API selects --recording-worker-config or --recording-worker-config-env. The initial provider requires a dedicated Docker host and permits only the entered website origin; separate assets or sign-in origins remain a reviewed target extension.
-The user now authorizes deployment. The concrete private host uses deploy/aws/recording.yaml and scripts/deploy-aws-recording.py, with checkpoint output/aws-mmdev/recording-0100/host.json. Inspect this change set and any in-progress stack before continuing. API startup secrets use the dedicated RecordingWorkerSecretArn parameter. Product 0.10.0-dev is prepared; hosted recording and cleanup still require target evidence.
+The authorized MMDev deployment completes. Product 0.10.0-dev from committed 7f1a023 runs as build 852ce753cf8b. The reviewed dedicated-host change set adds thirteen resources; the core change set modifies only ExecutionRole, Task, and Service. Both stacks and both existing services have completed healthy rollouts. API and UI build identities match.
+The hosted browser records News and a visible story on an independently authored generic fixture, saves exactly one revision-1 draft, and cancels a second recording. No target test runs. Actual host inspection verifies the browser has no direct networking, a read-only root, dropped capabilities, resource bounds, and no Docker socket. Both browser and gateway pairs and their volumes are removed.
+Twelve hosted deployment checks pass. Reuse output/aws-mmdev/recording-0100 and screenshots under output/playwright/aws-recording-0100. The fixture is removed, its verification project is archived, the owned application session closes, and the owned Edge automation browser stops.
+The private t4g.medium host is i-001e74196a83b4693 in stack teststudioapi-recording, with one concurrent recording slot. Use deploy/aws/recording.yaml and scripts/deploy-aws-recording.py; preserve host.json and release.json checkpoints instead of starting duplicate deployments. API startup secrets use RecordingWorkerSecretArn. Rotate the dedicated transport CA and both leaf certificates before 2027-02-06. Keep the same host and worker identity for cleanup recovery.
 Then complete hosted preparation and execution and verify the actual News journey with an ordinary tester browser.
-Preserve the user's pending companion recording, project configuration, and port 8040 demo. No release, deployment, or push occurs for the local proof.
-The acceptance count remains 50 verified of 57. Items 12, 13, 21, 25, 45, 49, 50, and 51 are refined; broad worker and target acceptance remain open.
+Existing recording history, user project configuration, native schedules, and the port 8040 demo are preserved. No remote Git push occurs.
+The acceptance count remains 50 verified of 57. Items 12, 13, 21, 25, 45, 49, 50, 51, and 57 are refined; broad worker and target acceptance remain open.
 
 ## Concurrent optional-logo delivery
 
@@ -75,14 +78,14 @@ UI improvements refine existing accepted items. They do not close the remaining 
 | Item | Last verified value |
 | --- | --- |
 | Hosted UI | https://teststudio.devfoodmarketmaker.com |
-| Product version | 0.9.0-dev; footer displays 0.9.0.dev |
-| Build identifier | 874f3a6eafce |
-| Build creation | 2026-11-08T15:04:51.089Z |
-| Implementation commit | 546813094d3bbfd4dca8eeafa25b7c95909c7c1a |
+| Product version | 0.10.0-dev; footer displays 0.10.0.dev |
+| Build identifier | 852ce753cf8b |
+| Build creation | 2026-11-08T17:21:34.720Z |
+| Implementation commit | 7f1a02364f7d46f9a20ccc96010a7a0abf234d00 |
 | Source state at build | Committed source; modified is false |
-| Service image digest | sha256:5745bc1925ff12f9f9efd6aec22407268139c302a4ce992a29736348295a5b9c |
-| Task startup | 2026-11-08T15:09:58.092Z |
-| UI publication | 2026-11-08T15:13:19Z |
+| Service image digest | sha256:95bb6d55f466c7b8daa0fab2fda41eed0dadc90153eeac7f89d2bc858483afac |
+| Task startup | 2026-11-08T17:28:40.737Z |
+| UI publication | 2026-11-08T17:31:37Z |
 | Live version metadata | GET /api/v1/version; public and no-store |
 
 Later documentation and operator-tooling commits do not change the deployed implementation commit or its immutable build date.

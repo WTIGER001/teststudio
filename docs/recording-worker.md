@@ -1,7 +1,7 @@
 # Private recording worker
 
 The recording worker runs the website browser outside the API service. Testers use the existing in-page recorder and install nothing.
-The implementation has local Docker, PostgreSQL, private TLS, and normal TestStudio browser evidence. It has not been deployed to MMDev.
+The implementation has local Docker, PostgreSQL, private TLS, and normal TestStudio browser evidence. MMDev now runs it in release 0.10.0-dev, build 852ce753cf8b, with a dedicated private host and one browser slot.
 See [the delivery plan](hosted-recording-plan.md) for the separate hosted execution and tester acceptance milestones.
 
 ## Installation boundary
@@ -110,5 +110,6 @@ The generic News journey passes through TestStudio's normal authoring-test execu
 This does not establish execution of that saved target test on MMDev.
 Before AWS mutations, follow [MMDev deployment](aws-mmdev.md), verify the selected account, and review a concrete TestStudio-only CloudFormation change set.
 The dedicated AWS installation uses deploy/aws/recording.yaml and scripts/deploy-aws-recording.py; see the private recording section in the MMDev guide. The core and execution-worker templates remain separate.
-The next deployment must install the private host and identities, configure the API backend, and verify News recording and cleanup from the ordinary hosted UI.
+MMDev verifies News recording, a visible-story assertion, review, one saved revision-1 draft, second-session cancellation, and complete container and volume cleanup through the hosted UI. Actual host inspection confirms the fixed browser isolation profile. Twelve hosted deployment checks pass. Receipts are output/aws-mmdev/recording-0100 and screenshots are output/playwright/aws-recording-0100.
+The private host and API use dedicated transport certificates expiring on 2027-02-06. Rotate the CA and both leaf certificates through a controlled drain before that date.
 Keep hosted preparation, execution, and actual tester acceptance separately open.

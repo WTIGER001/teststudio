@@ -21,10 +21,10 @@ Milestone 1 implements the local in-page proof: a real News click and story visi
 Milestone 2 now implements the separate private TLS worker, durable ownership and cleanup, isolated browser and gateway containers, capacity, disconnect policy, and current authority enforcement.
 Normal STUDIO-HOSTED-RECORDER-001 passes locally through the actual worker in 5.997 seconds, including News, review, draft recovery, accessibility controls, and complete owned-resource cleanup.
 PostgreSQL leases, fenced restart, private TLS identities, network restrictions, independent deadlines, and standalone daemon shutdown have focused local evidence.
-See [operator setup](recording-worker.md). Dedicated worker-host deployment and hosted recording verification remain open; the existing AWS templates do not install this host.
+See [operator setup](recording-worker.md). The dedicated private host and API backend are deployed in MMDev as 0.10.0-dev, build 852ce753cf8b from committed 7f1a023. The actual hosted News capture, story assertion, review, one revision-1 draft, second-session cancellation, isolation inspection, and complete browser-resource cleanup pass. Twelve hosted checks verify the artifact, private topology, access denial, and preserved services. The generic fixture is removed, its project is archived, and the owned browser and application session close. Reuse output/aws-mmdev/recording-0100 and output/playwright/aws-recording-0100.
 Hosted preparation and execution and actual tester acceptance remain separate milestones.
 Preserve the existing desktop recorder, scoped permissions, explicit execution, private history, the user's pending recording, and port 8040 demo.
-Acceptance stays 50 verified of 57. Refine 12, 13, 21, 25, 45, 49, 50, and 51 without closing broad hosted or cross-profile requirements.
+Acceptance stays 50 verified of 57. Refine 12, 13, 21, 25, 45, 49, 50, 51, and 57 without closing broad hosted or cross-profile requirements.
 
 ## Completed delivery: individual reliability inspection in MMDev
 

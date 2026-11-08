@@ -16,6 +16,28 @@ Marketplace publication and billing remain deferred. The exact Azure target rema
 Preserve staged adapters, concurrent recording work, AWS workloads, and the port 8040 demo. Historical Azure inspector work remains deferred.
 This plans work under 41, 46, 51, 53, 54, 56, and 57. No acceptance item advances to verified; the total remains 50 of 57.
 
+## Private recording worker: MMDev deployment — 2026-11-08
+
+The user authorizes deployment of the isolated in-page recorder. Product 0.10.0-dev from committed 7f1a023 builds as 852ce753cf8b and is deployed in MMDev.
+Build creation is 2026-11-08T17:21:34.720Z, task startup is 2026-11-08T17:28:40.737Z, and UI publication is 2026-11-08T17:31:37Z. API, UI, and image labels share that immutable identity.
+The portable ARM64 service digest is sha256:95bb6d55f466c7b8daa0fab2fda41eed0dadc90153eeac7f89d2bc858483afac.
+
+The concrete dedicated-host change set adds thirteen TestStudio resources. It installs a private t4g.medium host, encrypted disk, private DNS, scoped database access, private image repositories and package storage, and separate transport identities.
+The concrete core change set modifies only ExecutionRole, Task, and Service. The API receives its client identity through startup-only secret references and selects the private backend. New desktop pairing is disabled; existing recording history is preserved.
+The worker has one concurrent browser slot. It has no public address or SSH rule. Its private listener accepts the API security group and requires the dedicated TLS client identity.
+Both stacks complete. TestStudio and testing-server each retain one desired healthy task and a completed rollout. No unrelated service, user configuration, schedule, or port 8040 demo changes.
+
+Local CloudFormation schema and recorder packaging checks pass, including four injected private identity fields, startup-only secret permission, and rejection of simultaneous companion and worker selection. The portable service passes twelve local package checks.
+Twelve hosted checks pass for completed stacks, service preservation, immutable digest, matching API and UI bytes, readiness, anonymous denial, private topology, disk encryption, scoped ingress, private package storage, and recording cleanup.
+The actual hosted UI records a News click and checks a visible story against a fresh generic static fixture. Review shows the captured steps. Saving retains exactly one source draft at revision 1. A second recording starts and cancels successfully. No test executes.
+Actual host inspection observes both containers running non-root with read-only roots, dropped capabilities, fixed memory limits, and no Docker socket. The browser has network mode none; the gateway has its separate bridge. Finish and cancel remove both browser/gateway pairs and all owned volumes.
+
+Receipts are output/aws-mmdev/recording-0100. Hosted screenshots and snapshots are output/playwright/aws-recording-0100.
+The temporary fixture is removed, its verification project is archived, the owned application session is revoked, and the owned Edge automation browser closes. Private temporary signing material and registry credentials are removed. No remote Git push occurs.
+The installed transport certificates expire on 2027-02-06. Rotate the CA and both leaves through a controlled drain before that date. The initial dedicated-host provider has no automatic replacement or scaling.
+Hosted source preparation and coded execution remain separately uninstalled. Real-application additional origins, ordinary tester acceptance, and broad target lifecycle and cross-profile criteria remain open.
+This advances 12, 13, 21, 25, 45, 49, 50, 51, and 57. Acceptance remains **50 verified of 57**.
+
 ## Private recording worker: local implementation — 2026-11-08
 
 The user requests the isolated server-side recording worker so testers can record inside TestStudio without installing tools.

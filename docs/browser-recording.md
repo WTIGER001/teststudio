@@ -11,8 +11,8 @@ Advanced source editing remains available. Saving does not prepare, publish, or 
 Help and page reload preserve the live session. Refresh browser view recovers an uncertain input without repeating it.
 Finish waits for queued input. Cancel closes the owned browser.
 Operators can select the separate [private recording worker](recording-worker.md) or the loopback-only local preview.
-The private worker has local isolation, transport, recovery, and full News authoring evidence. It is not enabled in MMDev.
-Deployment, hosted browser execution, and actual target acceptance remain separate work.
+The private worker is enabled in MMDev release 0.10.0-dev. Hosted News capture, story assertion, review, saving, cancellation, and owned cleanup pass.
+Hosted browser test execution and actual application acceptance remain separate work.
 
 ## Existing desktop recording
 

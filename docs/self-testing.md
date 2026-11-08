@@ -26,7 +26,7 @@ All eleven observed owned processes exit. Receipts and screenshots are output/pl
 Reuse this evidence unless the behavior or pinned runtime changes.
 The standalone native adapter check uses TESTSTUDIO_EMBEDDED_RECORDING=1 with TestEmbeddedRecordingCapturesNewsAssertionAndClosesBrowser in adapters/recording/embeddedplaywright.
 It passes in 0.90 seconds and checks semantic locators, visibility assertions, exact input retries, changed-duplicate rejection, and owned shutdown.
-Hosted target deployment and browser execution remain unverified. See [the hosted recording plan](hosted-recording-plan.md).
+Hosted recording deployment now has the focused evidence below. Browser test execution remains a separate installation. See [the hosted recording plan](hosted-recording-plan.md).
 
 ## Private recording worker
 
@@ -58,6 +58,7 @@ They pass in 6.616 seconds, including origin rejection, blocked direct networkin
 The same variables enable TestRecordingWorkerCommandServesPrivateTLSAndShutsDown in cmd/teststudio-recording-worker; the focused command checks pass in 0.385 seconds.
 Targeted race checks cover internal/recordingworker, adapters/recording/workerhttp, internal/transfer, and the API role configuration.
 Actual PostgreSQL worker lease and recovery checks pass with race detection in 2.841 seconds through scripts/test-postgres.sh.
+MMDev release 0.10.0-dev also passes the actual hosted News recording, assertion, review, save, and second-session cancellation journey. Twelve deployment checks verify artifact identity, private host topology, anonymous denial, preserved service health, and complete recording cleanup. The generic fixture is removed, its project is archived, and the owned session and Edge automation browser close. Reuse output/aws-mmdev/recording-0100 and screenshots under output/playwright/aws-recording-0100. This does not execute the saved target test.
 See [operator setup](recording-worker.md) for installation boundaries and remaining target checks.
 
 ## Hosted recorder workflow

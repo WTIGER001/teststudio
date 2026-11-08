@@ -26,9 +26,9 @@ A future combined Save and run action must explain publication and execution and
 | 4. Tester acceptance | 21, 49, 50, 56, 57 | A tester completes the selected News journey on the actual target from an ordinary browser with no installed companion or development tools. |
 
 Milestone 1 has local evidence. Milestone 2 is implemented and verified against the actual isolated Docker worker locally, including private TLS, PostgreSQL leases, and the normal News authoring workflow.
-Milestone 2 target deployment and verification remain open. Milestones 3 and 4 remain open.
+Milestone 2 is deployed to MMDev in 0.10.0-dev. The hosted News recording, assertion, review, draft saving, cancellation, actual isolation, and cleanup pass. The broader lifecycle checks retain their focused local evidence. Milestones 3 and 4 remain open.
 The ledger stays 50 verified of 57. These milestones refine stable criteria and do not close their broad cross-profile scope.
-Azure remains deferred.
+Azure remains deferred. The generic hosted check does not establish ordinary tester acceptance on the selected application.
 
 ## Local proof
 
@@ -91,3 +91,5 @@ Normal STUDIO-HOSTED-RECORDER-001 repeats that journey through the actual isolat
 Run 20261108T165640.285709000-e4e7e064e323488114590eb5 passes in 5.997 seconds; the full focused harness takes 21.56 seconds.
 Two recording browsers, two gateways, their volumes, and all three observed host processes are removed. Receipts are output/playwright/private-recording-worker.
 See [self-testing](self-testing.md) for the focused harness and retained evidence.
+
+MMDev deployment receipts are output/aws-mmdev/recording-0100. Hosted browser screenshots are output/playwright/aws-recording-0100. Both owned sessions stop; exactly one revision-1 draft remains in the archived verification project. The fixture is removed and no target test executes.
