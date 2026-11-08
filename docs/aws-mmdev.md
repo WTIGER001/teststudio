@@ -255,3 +255,24 @@ Release 0.8.1-dev removes Help from public status documents and embeds, with man
 ### Individual reliability inspection release
 
 Release 0.9.0-dev deploys the shared individual-check table and paginated observation API while retaining the completed centered-layout and logo releases. The ordinary reviewed change set modifies only Service and Task. Fifteen hosted checks cover authenticated and public history, exact observations, CORS, privacy, publication withdrawal, artifact identity, and healthy rollouts. The public browser verifies 50-to-100 pagination and exact-day pill inspection. Receipts and screenshots are output/aws-mmdev/reliability-090. The generic verification page is unpublished, its session closes, and no new target run or user configuration change occurs. The full acceptance count remains 50 of 57; coded workers and other profiles retain their separate open criteria.
+
+### Private in-page recording worker
+
+The recording host package uses deploy/aws/recording.yaml and scripts/deploy-aws-recording.py.
+It creates a dedicated private ARM64 t4g.medium host, encrypted disk, private DNS, scoped database ingress, two immutable ECR repositories, a private versioned package bucket, and separate server and API transport secrets.
+There is no public address, SSH rule, public recording listener, or Docker socket in the API. Systems Manager provides operator access.
+The pilot has one concurrent browser slot. The existing NAT gateway supplies website egress; recording does not install a second execution profile.
+
+Use the helper's prepare, review, and execute actions with explicit profile, region, account, core-stack, stack, and output arguments.
+For MMDev these are mm_dev, us-west-2, 253455159142, teststudioapi, teststudioapi-recording, and output/aws-mmdev/recording-0100.
+Review requires exactly the thirteen owned additions in the concrete change set. Status preserves an existing deployment and checks Systems Manager connectivity.
+Install requires committed source plus --runtime-image, --gateway-image, and --seccomp selecting the already verified local artifacts.
+It provisions dedicated ninety-day TLS certificates, publishes immutable runtime images, transfers a checksum-verified private worker package, and starts the service through a checkpointed Systems Manager command.
+Certificate private material stays in Secrets Manager and protected host files. The signing key is removed after initial issuance. Rotate the transport CA and both leaves through a controlled drain before certificate expiry.
+The host receives only its server identity and shared database secret. The API receives only its client identity. Runtime browsers and gateways receive neither.
+
+Use publish-aws-core.py prepare --recording-worker-secret-arn with the new stack's ApiSecretArn and the committed service-image receipt.
+That package selects the private backend, disables new desktop pairing, injects four startup secret fields, and allows the concrete ExecutionRole, Task, and Service modifications.
+Review the change set before execution. Finish verifies the selected digest and API build identity before publishing its matching UI.
+Preserve existing recording history and the user's pending session. Saving a recording remains separate from source preparation and execution.
+The current host has no automatic replacement or scaling. Drain and verify cleanup before host replacement or runtime changes.

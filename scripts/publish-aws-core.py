@@ -26,6 +26,7 @@ def main():
     parser.add_argument('--image-receipt')
     parser.add_argument('--public-status', action='store_true', help='Include the scoped public status framing policy and CloudFront behavior.')
     parser.add_argument('--status-logos', action='store_true', help='Include HTTPS and uploaded logo image sources in the UI and public status response policies.')
+    parser.add_argument('--recording-worker-secret-arn', help='Select the dedicated private recording transport identity and disable desktop pairing.')
     args = parser.parse_args()
     aws_base = ['aws', '--profile', args.profile, '--region', args.region, '--no-cli-pager']
 
@@ -65,12 +66,18 @@ def main():
             command(docker + ['push', registry + '/' + repository + ':' + tag])
         details = aws('ecr', 'describe-images', '--repository-name', repository, '--image-ids', 'imageTag=' + tag)['imageDetails'][0]
         parameters = [{'ParameterKey': v['ParameterKey'], 'ParameterValue': details['imageDigest']} if v['ParameterKey'] == 'ServiceImageDigest' else {'ParameterKey': v['ParameterKey'], 'UsePreviousValue': True} for v in stack['Parameters']]
+        if args.recording_worker_secret_arn:
+            assert args.recording_worker_secret_arn.startswith('arn:aws:secretsmanager:' + args.region + ':' + args.account + ':secret:'), 'The recording transport secret must belong to the selected installation account'
+            secret = aws('secretsmanager', 'describe-secret', '--secret-id', args.recording_worker_secret_arn)
+            assert any(v == {'Key': 'Application', 'Value': 'TestStudio'} for v in secret.get('Tags', [])), 'The recording identity must be TestStudio-owned'
+            parameters = [v for v in parameters if v['ParameterKey'] not in ['RecordingCompanion', 'RecordingWorkerSecretArn']]
+            parameters.extend([{'ParameterKey': 'RecordingCompanion', 'ParameterValue': 'false'}, {'ParameterKey': 'RecordingWorkerSecretArn', 'ParameterValue': args.recording_worker_secret_arn}])
         with tempfile.TemporaryDirectory(prefix='teststudio-release-parameters-') as directory:
             path = Path(directory) / 'parameters.json'
             path.write_text(json.dumps(parameters)); path.chmod(0o600)
-            template = ['--template-body', 'file://deploy/aws/service.yaml'] if args.public_status or args.status_logos else ['--use-previous-template']
+            template = ['--template-body', 'file://deploy/aws/service.yaml'] if args.public_status or args.status_logos or args.recording_worker_secret_arn else ['--use-previous-template']
             result = aws('cloudformation', 'create-change-set', '--stack-name', args.stack, '--change-set-name', 'application-' + tag, '--change-set-type', 'UPDATE', *template, '--parameters', 'file://' + str(path), '--capabilities', 'CAPABILITY_IAM')
-        receipt = {**build, 'account': args.account, 'stack': args.stack, 'changeSet': result['Id'], 'registryDigest': details['imageDigest'], 'publicStatusPackage': args.public_status or args.status_logos, 'statusLogosPackage': args.status_logos, 'preparedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'outputs': outputs}
+        receipt = {**build, 'account': args.account, 'stack': args.stack, 'changeSet': result['Id'], 'registryDigest': details['imageDigest'], 'publicStatusPackage': args.public_status or args.status_logos, 'statusLogosPackage': args.status_logos, 'recordingWorkerPackage': bool(args.recording_worker_secret_arn), 'preparedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'outputs': outputs}
         receipt_path.write_text(json.dumps(receipt, indent=2) + '\n')
         print(json.dumps({'changeSet': receipt['changeSet'], 'digest': receipt['registryDigest'], 'buildId': build['buildInfo']['buildId'], 'privateDockerConfigurationRemoved': True}))
         return
@@ -81,6 +88,8 @@ def main():
         summary = [{'action': v['ResourceChange']['Action'], 'resource': v['ResourceChange']['LogicalResourceId'], 'type': v['ResourceChange']['ResourceType'], 'replacement': v['ResourceChange'].get('Replacement')} for v in change.get('Changes', [])]
         assert change['Status'] == 'CREATE_COMPLETE', 'The change set is not ready'
         allowed = {'Task': 'AWS::ECS::TaskDefinition', 'Service': 'AWS::ECS::Service'}
+        if receipt.get('recordingWorkerPackage'):
+            allowed['ExecutionRole'] = 'AWS::IAM::Role'
         if receipt.get('statusLogosPackage'):
             allowed['UiHeaders'] = 'AWS::CloudFront::ResponseHeadersPolicy'
         if receipt.get('publicStatusPackage'):

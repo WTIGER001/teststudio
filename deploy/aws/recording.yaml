@@ -1,0 +1,194 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Dedicated private TestStudio recording host and transport identities
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+  PrivateSubnet:
+    Type: AWS::EC2::Subnet::Id
+  ApiSecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+  DatabaseSecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+  DatabaseSecretArn:
+    Type: String
+    AllowedPattern: '^arn:aws:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[A-Za-z0-9/_+=.@-]+$'
+  ImageId:
+    Type: AWS::EC2::Image::Id
+  InstanceType:
+    Type: String
+    Default: t4g.medium
+    AllowedValues: [t4g.medium, t4g.large]
+Resources:
+  PackageBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      OwnershipControls:
+        Rules: [{ObjectOwnership: BucketOwnerEnforced}]
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}
+      VersioningConfiguration: {Status: Enabled}
+  PackagePolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref PackageBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource: [!GetAtt PackageBucket.Arn, !Sub '${PackageBucket.Arn}/*']
+            Condition:
+              Bool: {aws:SecureTransport: 'false'}
+  BrowserRepository:
+    Type: AWS::ECR::Repository
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      ImageTagMutability: IMMUTABLE
+      EncryptionConfiguration: {EncryptionType: AES256}
+      ImageScanningConfiguration: {ScanOnPush: true}
+  GatewayRepository:
+    Type: AWS::ECR::Repository
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      ImageTagMutability: IMMUTABLE
+      EncryptionConfiguration: {EncryptionType: AES256}
+      ImageScanningConfiguration: {ScanOnPush: true}
+  ServerIdentity:
+    Type: AWS::SecretsManager::Secret
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Description: Dedicated TestStudio recording worker server identity
+  ApiIdentity:
+    Type: AWS::SecretsManager::Secret
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Description: Dedicated TestStudio API recording transport identity
+  WorkerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Private TestStudio recording transport from its API only
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8045
+          ToPort: 8045
+          SourceSecurityGroupId: !Ref ApiSecurityGroup
+      SecurityGroupEgress:
+        - {IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 0.0.0.0/0}
+        - {IpProtocol: tcp, FromPort: 80, ToPort: 80, CidrIp: 0.0.0.0/0}
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          DestinationSecurityGroupId: !Ref DatabaseSecurityGroup
+  DatabaseAccess:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref DatabaseSecurityGroup
+      IpProtocol: tcp
+      FromPort: 5432
+      ToPort: 5432
+      SourceSecurityGroupId: !Ref WorkerSecurityGroup
+  WorkerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: ec2.amazonaws.com}
+            Action: sts:AssumeRole
+      ManagedPolicyArns: [!Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore']
+      Policies:
+        - PolicyName: recording-installation
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub '${PackageBucket.Arn}/packages/*'
+              - Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: [!Ref ServerIdentity, !Ref DatabaseSecretArn]
+              - Effect: Allow
+                Action: ecr:GetAuthorizationToken
+                Resource: '*'
+              - Effect: Allow
+                Action: [ecr:BatchCheckLayerAvailability, ecr:GetDownloadUrlForLayer, ecr:BatchGetImage]
+                Resource: [!GetAtt BrowserRepository.Arn, !GetAtt GatewayRepository.Arn]
+  WorkerProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles: [!Ref WorkerRole]
+  PrivateZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: teststudio-recording.internal
+      VPCs:
+        - VPCId: !Ref VpcId
+          VPCRegion: !Ref 'AWS::Region'
+  Worker:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref ImageId
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: !Ref WorkerProfile
+      SubnetId: !Ref PrivateSubnet
+      SecurityGroupIds: [!Ref WorkerSecurityGroup]
+      MetadataOptions:
+        HttpTokens: required
+        HttpPutResponseHopLimit: 1
+        HttpEndpoint: enabled
+        InstanceMetadataTags: disabled
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs: {Encrypted: true, VolumeSize: 40, VolumeType: gp3, DeleteOnTermination: true}
+      Tags:
+        - {Key: Name, Value: teststudio-recording}
+        - {Key: Application, Value: TestStudio}
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          set -eu
+          dnf install -y docker python3
+          systemctl enable --now docker
+          useradd --system --create-home --groups docker teststudio-recording
+          install -d -o teststudio-recording -g teststudio-recording -m 0700 /var/lib/teststudio-recording
+          install -d -m 0700 /etc/teststudio-recording
+          install -d -m 0755 /opt/teststudio-recording
+          iptables -I DOCKER-USER -d 169.254.0.0/16 -j REJECT
+  PrivateRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref PrivateZone
+      Name: worker.teststudio-recording.internal
+      Type: A
+      TTL: '30'
+      ResourceRecords: [!GetAtt Worker.PrivateIp]
+Outputs:
+  InstanceId:
+    Value: !Ref Worker
+  WorkerOrigin:
+    Value: https://worker.teststudio-recording.internal:8045
+  ServerSecretArn:
+    Value: !Ref ServerIdentity
+  ApiSecretArn:
+    Value: !Ref ApiIdentity
+  PackageBucket:
+    Value: !Ref PackageBucket
+  BrowserRepository:
+    Value: !GetAtt BrowserRepository.RepositoryUri
+  GatewayRepository:
+    Value: !GetAtt GatewayRepository.RepositoryUri

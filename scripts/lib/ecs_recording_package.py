@@ -40,6 +40,22 @@ def check_recording(template, output):
         else:
             raise AssertionError('Invalid recording enable value accepted')
     distribution = template['Resources']['UiDistribution']['Properties']['DistributionConfig']
+    secret = 'arn:aws:secretsmanager:us-east-1:123456789012:secret:recording-fixture'
+    private = Preview(template, {**settings, 'RecordingWorkerSecretArn': secret}, references, attributes)
+    task = private.properties('Task')['ContainerDefinitions'][0]
+    assert '--recording-worker-config-env=TESTSTUDIO_RECORDING_SETTINGS' in task['Command']
+    assert not any('companion' in arg or arg == '--local' for arg in task['Command'])
+    transport = {v['Name']: v['ValueFrom'] for v in task['Secrets'] if v['Name'].startswith('TESTSTUDIO_RECORDING_')}
+    assert transport == {name: secret + ':' + field + '::' for name, field in [('TESTSTUDIO_RECORDING_SETTINGS', 'configuration'), ('TESTSTUDIO_RECORDING_CA', 'serverCA'), ('TESTSTUDIO_RECORDING_CERTIFICATE', 'clientCertificate'), ('TESTSTUDIO_RECORDING_KEY', 'clientKey')]}
+    startup = private.properties('ExecutionRole')['Policies'][0]['PolicyDocument']['Statement']
+    assert any(v.get('Action') == 'secretsmanager:GetSecretValue' and secret in v['Resource'] for v in startup)
+    assert 'secretsmanager' not in json.dumps(template['Resources']['TaskRole'])
+    try:
+        Preview(template, {**settings, 'RecordingWorkerSecretArn': secret, 'RecordingCompanion': 'true'}, references, attributes)
+    except ValueError:
+        rejected.append('simultaneous-private-worker-and-companion')
+    else:
+        raise AssertionError('Conflicting recording backends accepted')
     route = next(item for item in distribution['CacheBehaviors'] if item['PathPattern'] == '/api/*')
     assert route['TargetOriginId'] == 'api' and route['ViewerProtocolPolicy'] == 'https-only' and 'POST' in route['AllowedMethods']
     assert route['CachePolicyId'] == {'Ref': 'NoCache'} and route['OriginRequestPolicyId'] == {'Ref': 'ForwardRequest'} and 'FunctionAssociations' not in route
@@ -48,4 +64,4 @@ def check_recording(template, output):
     cache = template['Resources']['NoCache']['Properties']['CachePolicyConfig']
     assert cache['MinTTL'] == cache['DefaultTTL'] == cache['MaxTTL'] == 0
     (output / 'recording-profiles.json').write_text(json.dumps(profiles, indent=2) + '\n')
-    return {'profiles': len(profiles), 'rejectedConfigurations': len(rejected), 'defaultDisabled': True, 'taskChanges': 'API argument only', 'httpsRouting': True, 'authorizationForwarded': True, 'responseCaching': False}
+    return {'profiles': len(profiles), 'rejectedConfigurations': len(rejected), 'defaultDisabled': True, 'companionTaskChanges': 'API argument only', 'privateWorkerSecrets': len(transport), 'privateWorkerStartupOnly': True, 'httpsRouting': True, 'authorizationForwarded': True, 'responseCaching': False}

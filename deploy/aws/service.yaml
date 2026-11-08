@@ -84,6 +84,10 @@ Parameters:
     Default: 'false'
     AllowedValues: ['false', 'true']
     Description: Enable owner-scoped desktop recorder pairing after distributing the trusted companion package
+  RecordingWorkerSecretArn:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|^arn:aws:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[A-Za-z0-9/_+=.@-]+$'
   WorkerSettingsSecretArn:
     Type: String
     Default: ''
@@ -106,6 +110,11 @@ Parameters:
     MinValue: 1
     MaxValue: 10
 Rules:
+  ExclusiveRecorder:
+    RuleCondition: !Not [!Equals [!Ref RecordingWorkerSecretArn, '']]
+    Assertions:
+      - Assert: !Equals [!Ref RecordingCompanion, 'false']
+        AssertDescription: Choose the private recording worker or the desktop companion
   WorkerReferencesTogether:
     Assertions:
       - Assert: !Or [!And [!Equals [!Ref WorkerSettingsSecretArn, ''], !Equals [!Ref WorkerTargetGroupArn, '']], !And [!Not [!Equals [!Ref WorkerSettingsSecretArn, '']], !Not [!Equals [!Ref WorkerTargetGroupArn, '']]]]
@@ -128,6 +137,7 @@ Conditions:
   NamedService: !Not [!Equals [!Ref ServiceName, '']]
   DatabaseIngress: !Not [!Equals [!Ref DatabaseSecurityGroupId, '']]
   DesktopCompanion: !Equals [!Ref RecordingCompanion, 'true']
+  RecordingWorker: !Not [!Equals [!Ref RecordingWorkerSecretArn, '']]
   Workers: !Not [!Equals [!Ref WorkerSettingsSecretArn, '']]
   NewWorkerSources: !And [!Not [!Equals [!Ref WorkerSettingsSecretArn, '']], !Equals [!Ref WorkerNewSources, 'true']]
   ClientOne: !Not [!Equals [!Ref OidcClientOneSecretArn, '']]
@@ -361,6 +371,7 @@ Resources:
                 Resource:
                   - !Ref DatabaseSecretArn
                   - !Ref OidcConfigurationSecretArn
+                  - !If [RecordingWorker, !Ref RecordingWorkerSecretArn, !Ref 'AWS::NoValue']
                   - !If [Workers, !Ref WorkerSettingsSecretArn, !Ref 'AWS::NoValue']
                   - !If [ClientOne, !Ref OidcClientOneSecretArn, !Ref 'AWS::NoValue']
                   - !If [ClientTwo, !Ref OidcClientTwoSecretArn, !Ref 'AWS::NoValue']
@@ -439,6 +450,7 @@ Resources:
             - !If [NewWorkerSources, !Sub '--source-bundle-runners=${WorkerSourceRunners}', !Ref 'AWS::NoValue']
             - !Sub '--local-accounts=${LocalAccounts}'
             - !If [DesktopCompanion, --recording-companion=true, !Ref 'AWS::NoValue']
+            - !If [RecordingWorker, --recording-worker-config-env=TESTSTUDIO_RECORDING_SETTINGS, !Ref 'AWS::NoValue']
             - !Sub '--bootstrap-issuer=${BootstrapIssuer}'
             - !Sub '--bootstrap-subject=${BootstrapSubject}'
             - !Join
@@ -452,6 +464,10 @@ Resources:
           Secrets:
             - {Name: TESTSTUDIO_DATABASE, ValueFrom: !Ref DatabaseSecretArn}
             - {Name: TESTSTUDIO_OIDC_CONFIGURATION, ValueFrom: !Ref OidcConfigurationSecretArn}
+            - !If [RecordingWorker, {Name: TESTSTUDIO_RECORDING_SETTINGS, ValueFrom: !Sub '${RecordingWorkerSecretArn}:configuration::'}, !Ref 'AWS::NoValue']
+            - !If [RecordingWorker, {Name: TESTSTUDIO_RECORDING_CA, ValueFrom: !Sub '${RecordingWorkerSecretArn}:serverCA::'}, !Ref 'AWS::NoValue']
+            - !If [RecordingWorker, {Name: TESTSTUDIO_RECORDING_CERTIFICATE, ValueFrom: !Sub '${RecordingWorkerSecretArn}:clientCertificate::'}, !Ref 'AWS::NoValue']
+            - !If [RecordingWorker, {Name: TESTSTUDIO_RECORDING_KEY, ValueFrom: !Sub '${RecordingWorkerSecretArn}:clientKey::'}, !Ref 'AWS::NoValue']
             - !If [Workers, {Name: TESTSTUDIO_ECS_CONFIGURATION, ValueFrom: !Ref WorkerSettingsSecretArn}, !Ref 'AWS::NoValue']
             - !If
               - ClientOne

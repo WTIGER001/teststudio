@@ -109,6 +109,6 @@ See [self-testing](self-testing.md#private-recording-worker) for the exact focus
 The generic News journey passes through TestStudio's normal authoring-test execution and saves one revision-1 draft.
 This does not establish execution of that saved target test on MMDev.
 Before AWS mutations, follow [MMDev deployment](aws-mmdev.md), verify the selected account, and review a concrete TestStudio-only CloudFormation change set.
-No dedicated recording-host infrastructure is installed by the existing core or execution-worker templates.
+The dedicated AWS installation uses deploy/aws/recording.yaml and scripts/deploy-aws-recording.py; see the private recording section in the MMDev guide. The core and execution-worker templates remain separate.
 The next deployment must install the private host and identities, configure the API backend, and verify News recording and cleanup from the ordinary hosted UI.
 Keep hosted preparation, execution, and actual tester acceptance separately open.
