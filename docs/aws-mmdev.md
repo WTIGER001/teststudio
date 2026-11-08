@@ -37,9 +37,9 @@ The reviewed foundation change set adds 29 resources. The reviewed core change s
 Neither change set modifies existing resources. The core change set creates no cluster.
 ECS reports one desired and one running teststudioapi task with a completed rollout.
 Both API and artifact target groups report healthy. The existing testing-server remains at one running task.
-The ARM64 image is sha256:028d062e99ea4d1cef0d84fe6d1ac44b7cb9eb10bc245e76fabb3db260052987.
-It is published in teststudioapi/service. The current release is 0.10.2-dev, displayed as 0.10.2.dev. Build c9d8e9d2d4b2 uses committed source 000ed2b.
-Its UTC build creation date is 2026-11-08T18:11:27.580Z. The task starts at 2026-11-08T19:16:28.126Z and UI publication occurs at 2026-11-08T19:19:26Z. The API, UI, and image labels share that immutable identity.
+The ARM64 image is sha256:c5afadae11ecc5bf59df12eb77a653d1c47c66f0054bfbca0be7f4c124bb4636.
+It is published in teststudioapi/service. The current release is 0.11.1-dev, displayed as 0.11.1.dev. Build 8106a41d6681 uses committed source e904b05.
+Its UTC build creation date is 2026-11-08T20:41:03.467Z. The task starts at 2026-11-08T20:43:45.124Z and UI publication occurs at 2026-11-08T20:48:06Z. The API, UI, and image labels share that immutable identity.
 Release 0.5.0-dev adds focused status-page management and installation-wide vanity names. Its ordinary image-only change set modifies Service and Task; the existing public CloudFront policy is reused. Twelve package checks and thirty-four hosted checks pass. The owned generic verification page is unpublished and its session closes. Receipts are output/aws-mmdev/status-vanity-050.
 Patch 0.5.1-dev adds status-page sharing copy buttons. The focused browser workflow and sixteen hosted identity, asset, health, rollout, and invalidation checks pass. The image-only change set preserves the existing public response policy. Receipts are output/aws-mmdev/status-copy-051.
 The unchanged trace viewer is reused. Native image storage uses the existing private database. The image retains the reviewed public RDS trust bundle.
@@ -54,6 +54,8 @@ The corrected check reuses that draft and creates one measured run. Future invoc
 The public index and main JavaScript match the built UI bytes. Anonymous project access returns 401.
 The evidence bucket reports AES256 encryption and all four public-access blocks enabled.
 No browser, coded worker, or unrelated service is started or modified by these checks.
+
+Release 0.11.1-dev adds count, text, and address assertions, a resizable recording dialog, a separate recording route, and real viewport controls. Its fresh-session startup correction passes on the actual hosted installation. The selected News journey captures at least one and exactly 100 stories, headline text, page address, and a 390 × 844 viewport. Saving from both tabs retains one revision-1 draft. Fifteen hosted checks pass, including unchanged infrastructure, matching artifacts, private access, worker policy, and complete owned-resource cleanup. Reuse output/aws-mmdev/recording-workspace-0111. The separately upgraded worker retains source 5ba5d66 and its complete private origin policy. Its package checkpoint is output/aws-mmdev/recording-workspace-0110/worker-upgrade.json. The UI explains that hosted preparation and coded execution still need installation. No target test executes in this verification.
 
 Complete AWS acceptance remains open. Isolated coded workers, preparation, two-provider permission parity, lifecycle, and storage-policy scenarios require further work.
 The full cross-profile ledger remains 50 verified of 57. This milestone advances 41, 46, 54, 56, and 57 without closing them.
