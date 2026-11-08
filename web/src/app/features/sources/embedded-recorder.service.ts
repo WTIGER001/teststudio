@@ -35,6 +35,7 @@ export class EmbeddedRecorderService {
       if (id === this.recordingId) return
       this.generation++; this.error.set(''); this.uncertain.set(false); this.channel?.close(); this.channel = null
       this.recordingId = id
+      this.reading = false; this.queue = []; this.pending.set(false); this.view.set(null); this.recorder.sources.recordingInputPending.set(false)
       this.external.set(false)
       if (id) {
         if (typeof BroadcastChannel !== 'undefined') {
@@ -56,7 +57,7 @@ export class EmbeddedRecorderService {
   }
 
   async refresh(): Promise<void> {
-    if (this.reading || this.pending() || this.recorder.selected()?.data.mode !== 'embedded' || this.recorder.selected()?.data.state !== 'recording') return
+    if (this.reading || this.pending() || !this.recordingId || this.recorder.selected()?.id !== this.recordingId || this.recorder.selected()?.data.mode !== 'embedded' || this.recorder.selected()?.data.state !== 'recording') return
     const generation = this.generation
     this.reading = true
     try {

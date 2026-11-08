@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -85,12 +86,13 @@ func runRecordingAuthoringUI(t *testing.T, hosted bool) {
 	s.Inspectors = map[string]preparation.ArtifactInspector{"playwright": &localcontainer.Executor{Runner: "playwright", AllowProjectImages: true, RequireProject: true}}
 	s.RecoveryInspectors = s.Inspectors
 	t.Cleanup(func() { cleanupRepositoryUIJobs(t, s, root) })
+	var fixtureReady atomic.Int64
 	dependencyOrigin := ""
 	if hosted {
 		dependency := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "text/javascript")
 			w.Header().Set("Access-Control-Allow-Origin", "*")
-			io.WriteString(w, `document.querySelector('#application').innerHTML='<nav><a href="/news">News</a></nav>'+(location.pathname==='/news'?'<main><article><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></article><article><h2>Second independent story</h2></article></main>':'');`)
+			io.WriteString(w, `document.querySelector('#application').innerHTML='<nav><a href="/news">News</a></nav>'+(location.pathname==='/news'?'<main><article><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></article><article><h2>Second independent story</h2></article></main>':'');fetch('/fixture-ready',{method:'POST'});`)
 		}))
 		listener, err := net.Listen("tcp", "0.0.0.0:0")
 		if err != nil {
@@ -103,11 +105,17 @@ func runRecordingAuthoringUI(t *testing.T, hosted bool) {
 		dependencyOrigin = fmt.Sprintf("http://host.docker.internal:%d", listener.Addr().(*net.TCPAddr).Port)
 	}
 	target := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/fixture-ready" && r.Method == http.MethodPost {
+			fixtureReady.Add(1)
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
 		w.Header().Set("Content-Type", "text/html")
 		if hosted {
 			fmt.Fprintf(w, `<!doctype html><style>body{margin:0}a{display:block;padding:15px}h2{margin:20px}</style><div id="application">Loading the independent News application...</div><script type="module" src="%s/bootstrap.js"></script>`, dependencyOrigin)
 			return
 		}
+		fixtureReady.Add(1)
 		io.WriteString(w, `<!doctype html><style>body{margin:0}a{display:block;padding:15px}h2{margin:20px}</style><nav><a href="/news">News</a></nav>`)
 		if r.URL.Path == "/news" {
 			io.WriteString(w, `<main><article><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></article><article><h2>Second independent story</h2></article></main>`)
@@ -233,7 +241,15 @@ func runRecordingAuthoringUI(t *testing.T, hosted bool) {
 	runService := &runs.Service{Store: s.Store, Auth: s.Auth, Catalog: c, Evidence: &evidence.Service{Store: s.Store, Blobs: blobs}, Location: "local", PollInterval: 20 * time.Millisecond, Browser: &localcontainer.Executor{Runner: "playwright", Environment: true, GatewayImage: gateway, ApproveArtifact: s.ApproveArtifact}}
 	recordings := &recording.Service{Store: s.Store, Auth: s.Auth, Driver: driver}
 	api := &httpapi.Server{Store: s.Store, Auth: s.Auth, Projects: projectService, Catalog: c, Sources: s, Runs: runService, Evidence: runService.Evidence, Sessions: sessionService, Recordings: recordings, UI: ui}
-	server := httptest.NewUnstartedServer(api.Handler())
+	handler := api.Handler()
+	server := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/_fixture/recording-ready" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]int64{"loaded": fixtureReady.Load()})
+			return
+		}
+		handler.ServeHTTP(w, r)
+	}))
 	server.Listener.Close()
 	server.Listener = listener
 	server.Start()
@@ -306,5 +322,8 @@ func runRecordingAuthoringUI(t *testing.T, hosted bool) {
 	}
 	data, _ = json.MarshalIndent(map[string]any{"run": run, "recordingId": captured.ID, "recordingState": captured.State, "savedDrafts": len(drafts.Items)}, "", "  ")
 	os.WriteFile(filepath.Join(root, "summary.json"), data, 0600)
-	t.Logf("UI run=%s embedded recording=%s; reviewed source saved without a target test run", run.ID, captured.ID)
+	if os.Getenv("TESTSTUDIO_REPLAY_RECORDED_CHECKS") == "1" {
+		replayRecordedChecks(t, s, runService, captured, root)
+	}
+	t.Logf("UI run=%s embedded recording=%s; reviewed source saved without an automatic target test run", run.ID, captured.ID)
 }

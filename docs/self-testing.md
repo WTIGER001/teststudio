@@ -33,6 +33,8 @@ Hosted recording deployment now has the focused evidence below. Browser test exe
 The current STUDIO-HOSTED-RECORDER-001 also checks at-least and exact counts, selected text, page address, real viewport presets and custom sizes, invalid bounds, a resizable dialog, two-way tab control, and direct saved-draft preparation. It retains the existing recovery and accessibility checks.
 Reuse output/playwright/recording-workspace-final. The normal run is 20261108T202929.895786000-ce5dafcce2edbb0965d8a874 and its complete harness takes 27.52 seconds. All owned resources close. Select this exact test after changing these workflows.
 
+Set TESTSTUDIO_REPLAY_RECORDED_CHECKS=1 with the same focused hosted-recorder command to explicitly prepare, publish, and execute the saved recording against a second local News environment. This verifies actual count and text assertions, address rebinding, viewport steps, and private evidence. The fixture retains its group structure while changing the second headline. Reuse output/playwright/recorded-checks-replay-verified: the combined harness takes 46.90 seconds and the selected recorded test passes in 198 ms. This is local execution evidence; hosted execution remains separate.
+
 ## Private recording worker
 
 STUDIO-HOSTED-RECORDER-001 uses the same News authoring flow through a mutually authenticated HTTPS worker and the actual sandboxed recording container and gateway.

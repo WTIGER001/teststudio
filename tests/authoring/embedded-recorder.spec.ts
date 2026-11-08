@@ -28,6 +28,7 @@ test('Record News and a visible story inside TestStudio without desktop setup', 
   await page.getByLabel('Color theme', { exact: true }).selectOption('light')
   await recorder.getByLabel('Recorded test title', { exact: true }).fill('News lists stories')
   await recorder.getByLabel('Recording start address', { exact: true }).fill(FIXTURE_TARGET_URL)
+  await page.route('**/browser-recordings', async route => { if (route.request().method() === 'POST') { const response = await route.fetch(); await new Promise(resolve => setTimeout(resolve, 750)); await route.fulfill({ response }) } else await route.continue() }, { times: 1 })
   await recorder.getByRole('button', { name: 'Start recording', exact: true }).click()
   const live = recorder.getByRole('region', { name: 'Live recording browser', exact: true })
   const browser = live.getByRole('group', { name: 'Recording browser', exact: true })
@@ -39,6 +40,7 @@ test('Record News and a visible story inside TestStudio without desktop setup', 
     if (!bounds) throw new Error('The recording browser is missing')
     await browser.click({ position: { x: 2 + x * (bounds.width - 4) / Number(await browser.getAttribute('width')), y: 2 + y * (bounds.height - 4) / Number(await browser.getAttribute('height')) } })
   }
+  await expect.poll(async () => (await (await page.request.get('/_fixture/recording-ready')).json()).loaded).toBeGreaterThanOrEqual(1)
   await clickWebsite(35, 25)
   await expect(live.locator('.browser-address')).toHaveText(FIXTURE_TARGET_URL + '/news')
   await expect(live.getByRole('list', { name: 'Captured steps', exact: true })).toContainText('Click “News”')
@@ -46,6 +48,7 @@ test('Record News and a visible story inside TestStudio without desktop setup', 
   await expect(page.getByRole('dialog', { name: 'Create test help', exact: true })).toBeVisible()
   await page.keyboard.press('Escape')
   await expect(browser).toBeVisible()
+  await expect.poll(async () => (await (await page.request.get('/_fixture/recording-ready')).json()).loaded).toBeGreaterThanOrEqual(2)
   await live.getByRole('button', { name: 'Check something appears', exact: true }).click()
   await expect(live.getByRole('status')).toContainText('Click the item that should appear')
   await clickWebsite(120, 85)
