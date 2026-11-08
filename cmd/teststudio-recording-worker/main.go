@@ -44,17 +44,30 @@ func run() error {
 	image := flag.String("runtime-image", "", "Immutable isolated recording runtime image")
 	gateway := flag.String("gateway-image", "", "Immutable trusted gateway image")
 	seccomp := flag.String("seccomp", "", "Pinned Chromium sandbox syscall policy")
+	originPolicyFile := flag.String("origin-policy", "", "Reviewed exact additional origins for each recording website")
+	validateOriginPolicy := flag.Bool("validate-origin-policy", false, "Validate the selected origin policy and exit without storage or browsers")
 	directory := flag.String("directory", "", "Private worker transport directory")
 	capacity := flag.Int("capacity", 2, "Concurrent recording browser capacity from 1 through 16")
 	idle := flag.Duration("idle-limit", 2*time.Minute, "Disconnected browser limit from 15 seconds through 5 minutes")
 	local := flag.Bool("local", false, "Enable loopback-only local verification and private fixture targets")
 	flag.Parse()
+	if *validateOriginPolicy {
+		if *originPolicyFile == "" || flag.NArg() != 0 {
+			return errors.New("select one origin policy file to validate")
+		}
+		_, err := recordingworker.LoadOriginPolicy(*originPolicyFile)
+		return err
+	}
 	if flag.NArg() != 0 || *directory == "" || *capacity < 1 || *capacity > 16 || *idle < 15*time.Second || *idle > 5*time.Minute {
 		return errors.New("recording worker requires explicit private storage and no positional arguments")
 	}
 	host, _, err := net.SplitHostPort(*addr)
 	if err != nil || *local && (net.ParseIP(host) == nil || !net.ParseIP(host).IsLoopback()) {
 		return errors.New("local recording worker verification requires a numeric loopback address")
+	}
+	originPolicy, err := recordingworker.LoadOriginPolicy(*originPolicyFile)
+	if err != nil {
+		return err
 	}
 	connection, err := runtimeconfig.DatabaseConnection(*database, *databaseEnv, runtimeconfig.ExplicitFlag(flag.CommandLine, "database"), os.LookupEnv)
 	if err != nil {
@@ -87,7 +100,7 @@ func run() error {
 	if err != nil {
 		return errors.New("recording worker authorization could not initialize")
 	}
-	worker := &recordingworker.Worker{Store: db, Auth: auth, ID: *id, Instance: domain.NewID(), Capacity: *capacity, IdleLimit: *idle, AllowPrivate: *local, Runtime: &isolatedcontainer.Runtime{Image: *image, GatewayImage: *gateway, Seccomp: *seccomp, Directory: *directory}}
+	worker := &recordingworker.Worker{Store: db, Auth: auth, ID: *id, Instance: domain.NewID(), Capacity: *capacity, IdleLimit: *idle, AllowPrivate: *local, Origins: originPolicy, Runtime: &isolatedcontainer.Runtime{Image: *image, GatewayImage: *gateway, Seccomp: *seccomp, Directory: *directory}}
 	if err := worker.Open(ctx); err != nil {
 		return err
 	}

@@ -47,7 +47,7 @@ def identities():
 
 def main():
     parser = argparse.ArgumentParser(description='Deploy only the dedicated private TestStudio recording host.')
-    parser.add_argument('action', choices=['prepare', 'review', 'execute', 'status', 'install'])
+    parser.add_argument('action', choices=['prepare', 'review', 'execute', 'status', 'install', 'upgrade'])
     parser.add_argument('--profile', required=True)
     parser.add_argument('--region', required=True)
     parser.add_argument('--account', required=True)
@@ -57,6 +57,8 @@ def main():
     parser.add_argument('--runtime-image')
     parser.add_argument('--gateway-image')
     parser.add_argument('--seccomp', type=Path)
+    parser.add_argument('--origin-policy', type=Path)
+    parser.add_argument('--package-receipt', type=Path)
     args = parser.parse_args()
     os.chdir(ROOT)
     session = boto3.Session(profile_name=args.profile, region_name=args.region)
@@ -119,6 +121,12 @@ def main():
         return
     assert stack['StackStatus'] == 'CREATE_COMPLETE', 'The recording host must finish creation before installation'
     outputs = {v['OutputKey']: v['OutputValue'] for v in stack['Outputs']}
+    package_receipt = receipt_path
+    if args.action == 'upgrade':
+        assert args.package_receipt and args.package_receipt != receipt_path and args.origin_policy, 'Upgrade requires a separate checkpoint and explicit reviewed origin policy'
+        package_receipt = args.package_receipt
+        receipt = json.loads(package_receipt.read_text()) if package_receipt.exists() else {'account': args.account, 'stack': args.stack, 'outputs': outputs}
+        assert receipt['account'] == args.account and receipt['stack'] == args.stack and receipt['outputs']['InstanceId'] == outputs['InstanceId'], 'Upgrade checkpoint ownership does not match'
     if receipt.get('installCommand'):
         result = ssm.get_command_invocation(CommandId=receipt['installCommand'], InstanceId=outputs['InstanceId'])
         print(json.dumps({'installCommand': receipt['installCommand'], 'status': result['Status'], 'summary': result.get('StandardOutputContent', '')[-2000:]}))
@@ -126,6 +134,8 @@ def main():
     assert command(['git', 'status', '--porcelain']) == '', 'Commit implementation before building the installation package'
     commit = command(['git', 'rev-parse', 'HEAD'])
     assert args.runtime_image and args.gateway_image and args.seccomp, 'Select the verified immutable runtime, gateway, and sandbox policy'
+    if args.origin_policy:
+        command(['go', 'run', './cmd/teststudio-recording-worker', '--validate-origin-policy', '--origin-policy=' + str(args.origin_policy.resolve())], env={**os.environ, 'GOWORK': 'off'})
     current = []
     for name in ['ServerSecretArn', 'ApiSecretArn']:
         current.append(bool(secrets.describe_secret(SecretId=outputs[name]).get('VersionIdsToStages')))
@@ -166,7 +176,9 @@ def main():
             (root / name).write_bytes((ROOT / 'deploy/recording' / name).read_bytes())
         (root / 'seccomp.json').write_bytes(args.seccomp.read_bytes())
         (root / 'rds-ca-bundle.pem').write_bytes((ROOT / 'deploy/service/rds-ca-bundle.pem').read_bytes())
-        manifest = {'sourceCommit': commit, 'region': args.region, 'capacity': 1, 'runtimeImage': runtime, 'gatewayImage': gateway, 'serverSecret': outputs['ServerSecretArn'], 'databaseSecret': values['DatabaseSecretArn']}
+        origin_policy = json.loads(args.origin_policy.read_text()) if args.origin_policy else {}
+        assert isinstance(origin_policy, dict) and len(origin_policy) <= 64 and all(isinstance(k, str) and isinstance(v, list) and len(v) <= 16 and all(isinstance(origin, str) for origin in v) for k, v in origin_policy.items()), 'Origin policy requires a bounded map of reviewed exact website origins'
+        manifest = {'sourceCommit': commit, 'region': args.region, 'capacity': 1, 'runtimeImage': runtime, 'gatewayImage': gateway, 'serverSecret': outputs['ServerSecretArn'], 'databaseSecret': values['DatabaseSecretArn'], 'originPolicy': origin_policy}
         write(root / 'manifest.json', manifest)
         package = root / 'package.tar.gz'
         with tarfile.open(package, 'w:gz') as archive:
@@ -176,10 +188,11 @@ def main():
         sha = hashlib.sha256(package.read_bytes()).hexdigest()
         key = 'packages/' + sha + '.tar.gz'
         session.client('s3').upload_file(str(package), outputs['PackageBucket'], key, ExtraArgs={'ServerSideEncryption': 'AES256'})
-    script = 'set -eu\ncloud-init status --wait >/dev/null\nprivate=$(mktemp -d /var/tmp/teststudio-recording.XXXXXX)\ntrap \'rm -rf "$private"\' EXIT\naws s3 cp s3://' + outputs['PackageBucket'] + '/' + key + ' "$private/package.tar.gz" --region ' + args.region + ' --only-show-errors\necho "' + sha + '  $private/package.tar.gz" | sha256sum --check --status\ntar -xzf "$private/package.tar.gz" -C "$private"\npython3 "$private/install.py"\nsystemctl is-active teststudio-recording.service\n'
+    drain = 'systemctl stop teststudio-recording.service\n' if args.action == 'upgrade' else ''
+    script = 'set -eu\ncloud-init status --wait >/dev/null\nprivate=$(mktemp -d /var/tmp/teststudio-recording.XXXXXX)\ntrap \'rm -rf "$private"\' EXIT\naws s3 cp s3://' + outputs['PackageBucket'] + '/' + key + ' "$private/package.tar.gz" --region ' + args.region + ' --only-show-errors\necho "' + sha + '  $private/package.tar.gz" | sha256sum --check --status\ntar -xzf "$private/package.tar.gz" -C "$private"\n' + drain + 'python3 "$private/install.py"\nsystemctl is-active teststudio-recording.service\n'
     result = ssm.send_command(InstanceIds=[outputs['InstanceId']], DocumentName='AWS-RunShellScript', Parameters={'commands': [script], 'executionTimeout': ['1200']}, TimeoutSeconds=1200, Comment='Install committed private TestStudio recording worker')
     receipt.update(outputs=outputs, packageSHA256=sha, packageKey=key, runtimeImage=runtime, gatewayImage=gateway, sourceCommit=commit, installCommand=result['Command']['CommandId'])
-    write(receipt_path, receipt)
+    write(package_receipt, receipt)
     print(json.dumps({'installCommand': receipt['installCommand'], 'sourceCommit': commit, 'packageSHA256': sha}))
 
 

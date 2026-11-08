@@ -16,6 +16,20 @@ Marketplace publication and billing remain deferred. The exact Azure target rema
 Preserve staged adapters, concurrent recording work, AWS workloads, and the port 8040 demo. Historical Azure inspector work remains deferred.
 This plans work under 41, 46, 51, 53, 54, 56, and 57. No acceptance item advances to verified; the total remains 50 of 57.
 
+## Recording website startup origins — 2026-11-08
+
+The selected website loads its Angular scripts from the starting origin but waits for a separate API during initialization. Its News navigation appears in ordinary browsing and remains absent through the original single-origin gateway. A reviewed exact dependency policy restores News through the gateway.
+Application-specific addresses remain in private operator configuration outside Git. Product code and fixtures stay generic.
+The worker accepts a bounded origin-policy file mapping each canonical starting origin to approved exact resource origins. New reservations freeze the complete target and include its hash in resource ownership. Existing reservations never silently adopt later policy changes. Legacy resource references remain valid for owned cleanup.
+Public-address validation still applies to every destination. Unreviewed origins and ports fail. Metadata and private addresses remain blocked, even when listed. Credential-bearing API policies reject additional origins.
+
+The normal authoring fixture now needs a JavaScript module on a second origin before its News interface exists. STUDIO-HOSTED-RECORDER-001 passes in 6.832 seconds, run 20261108T180700.089537000-9c8b68de823daef06540d2ba. The full harness takes 26.76 seconds.
+News capture, visibility assertion, review, one revision-1 draft, source and input recovery, reload, help, themes, alignment, narrow layout, keyboard behavior, and cancellation remain verified. All owned browser containers, gateways, volumes, and three observed host processes close.
+Focused race checks pass for gateway origin scope, worker policy persistence, old-reference cleanup, browser target validation, and private transport. The actual PostgreSQL policy check passes in 1.507 seconds. Docker isolation and independent deadline checks pass in 7.727 seconds; standalone command checks pass in 0.393 seconds.
+Receipts are output/playwright/recording-cross-origin and output/playwright/recording-site-loading. The initial HTTP CONNECT regression is corrected while preserving existing tunnel behavior.
+The worker deployment helper validates the concrete policy before publication and uses a separate checkpoint for a controlled same-host package upgrade. Product 0.10.2-dev is prepared; target installation and actual News recording remain pending.
+This refines 12, 13, 21, 45, 51, 56, and 57. Acceptance remains **50 verified of 57**.
+
 ## Shared form field alignment — 2026-11-08
 
 The user reports descriptions shifting adjacent form controls and changing their heights. Shared .field grids now use align-content: start so labels, controls, and helper text keep their natural sizes and order.

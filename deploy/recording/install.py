@@ -45,6 +45,7 @@ def install():
     private('client-ca.crt', identity['clientCA'])
     private('database', database_url)
     private('settings.json', json.dumps(manifest))
+    private('origins.json', json.dumps(manifest.get('originPolicy', {})))
     root = Path('/opt/teststudio-recording')
     for name in ['teststudio-recording-worker', 'start.py', 'seccomp.json', 'rds-ca-bundle.pem']:
         data = (source / name).read_bytes()

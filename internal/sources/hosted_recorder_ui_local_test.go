@@ -49,14 +49,14 @@ func TestPrivateRecordingWorkerCompletesNewsRecordingThroughStudioExecution(t *t
 	runRecordingAuthoringUI(t, true)
 }
 
-func newHostedRecordingClient(t *testing.T, source *sources.Service, private, output string, observer *observedRecorder) *observedHostedClient {
+func newHostedRecordingClient(t *testing.T, source *sources.Service, private, output string, observer *observedRecorder, origin, dependency string) *observedHostedClient {
 	t.Helper()
 	image, gateway, seccomp := os.Getenv("TESTSTUDIO_RECORDING_IMAGE"), os.Getenv("TESTSTUDIO_RECORDING_GATEWAY_IMAGE"), os.Getenv("TESTSTUDIO_RECORDING_SECCOMP")
 	if image == "" || gateway == "" || seccomp == "" {
 		t.Fatal("the private worker check requires current immutable recording and gateway images and the pinned sandbox policy")
 	}
 	runtime := &isolatedcontainer.Runtime{Image: image, GatewayImage: gateway, Seccomp: seccomp, Directory: filepath.Join(private, "isolated")}
-	worker := &recordingworker.Worker{Store: source.Store, Auth: source.Auth, Runtime: runtime, ID: "authoring-recorder", Instance: domain.NewID(), Capacity: 2, IdleLimit: time.Minute, AllowPrivate: true}
+	worker := &recordingworker.Worker{Store: source.Store, Auth: source.Auth, Runtime: runtime, ID: "authoring-recorder", Instance: domain.NewID(), Capacity: 2, IdleLimit: time.Minute, AllowPrivate: true, Origins: recordingworker.OriginPolicy{origin: []string{dependency}}}
 	if err := worker.Open(t.Context()); err != nil {
 		t.Fatal(err)
 	}

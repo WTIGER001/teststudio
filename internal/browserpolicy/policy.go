@@ -20,6 +20,7 @@ type Target struct {
 	Authenticated       bool            `json:"authenticated,omitempty"`
 	AllowCredentialHTTP bool            `json:"allowCredentialHttp,omitempty"`
 	Origin              string          `json:"origin"`
+	AdditionalOrigins   []string        `json:"additionalOrigins,omitempty"`
 	AllowPrivate        bool            `json:"allowPrivateNetwork,omitempty"`
 	Requests            *apipolicy.Spec `json:"requests,omitempty"`
 }
@@ -38,6 +39,9 @@ func Origin(address string) (string, error) {
 	u, err := url.Parse(address)
 	if err != nil || u == nil || (u.Scheme != "https" && u.Scheme != "http") || u.Hostname() == "" || u.User != nil || (u.Path != "" && u.Path != "/") || u.RawPath != "" || u.RawQuery != "" || u.ForceQuery || u.Fragment != "" || strings.ContainsAny(address, "\\\r\n\t#") {
 		return "", errors.New("browser target requires an exact credential-free HTTP or HTTPS origin")
+	}
+	if strings.Contains(u.Hostname(), "*") {
+		return "", errors.New("browser target requires an exact hostname")
 	}
 	port := u.Port()
 	if port == "" {
@@ -64,6 +68,16 @@ func Origin(address string) (string, error) {
 }
 
 func ValidateTarget(target Target) error {
+	if len(target.AdditionalOrigins) > 16 || len(target.AdditionalOrigins) > 0 && (target.Authenticated || target.Requests != nil) {
+		return errors.New("additional browser origins require a bounded unauthenticated website policy")
+	}
+	seen := map[string]bool{target.Origin: true}
+	for _, address := range target.AdditionalOrigins {
+		if seen[address] || ValidateTarget(Target{Origin: address, AllowPrivate: target.AllowPrivate}) != nil {
+			return errors.New("additional browser origins must be distinct exact canonical HTTP or HTTPS origins")
+		}
+		seen[address] = true
+	}
 	if err := apipolicy.Validate(target.Requests); err != nil {
 		return err
 	}

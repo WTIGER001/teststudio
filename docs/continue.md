@@ -14,6 +14,15 @@ Read this guide before historical continuation commands elsewhere in the plan.
 Do not restart completed setup or broad acceptance matrices merely because this is a new session.
 Missing ignored receipts require focused inspection or recovery. They do not prove the feature needs reimplementation.
 
+## Current correction: recording website startup dependencies
+
+The selected website stalls on its loading screen because its separate startup API is blocked by the recorder's single-origin policy. Direct browsing loads News; reproducing the recorder policy blocks initialization; an exact approved dependency list restores News.
+The worker now supports a generic operator origin-policy file, frozen network targets and resource fingerprints, and compatible cleanup of older leases. Credentials, metadata protection, private-address restrictions, and exact origin and port enforcement remain intact.
+The normal STUDIO-HOSTED-RECORDER-001 fixture now requires a module from a second origin to construct its News interface. The focused workflow passes in a 26.76-second harness and closes all owned resources. Reuse output/playwright/recording-cross-origin.
+Go race checks, actual PostgreSQL policy persistence, container isolation and deadlines, command startup, and source-retaining shutdown pass locally.
+Product 0.10.2-dev is prepared. The selected website's concrete origin map remains outside Git in private operator configuration. Deploy the gateway and worker update through scripts/deploy-aws-recording.py upgrade using a separate package receipt and explicit origin policy. The worker drains before replacement and retains captured source; start a fresh recording afterward.
+Hosted target confirmation remains pending. This refines 12, 13, 21, 45, 51, 56, and 57; acceptance remains 50 verified of 57.
+
 ## Current correction: shared form field alignment
 
 Descriptions caused shared grid fields to stretch their labels and controls to match a taller neighbor. The shared .field layout now starts its content at the top and retains normal control heights.

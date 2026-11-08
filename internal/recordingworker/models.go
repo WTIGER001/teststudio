@@ -43,26 +43,28 @@ type Reference struct {
 	RuntimeImage string `json:"runtimeImage"`
 	GatewayImage string `json:"gatewayImage"`
 	PolicyHash   string `json:"policyHash"`
+	NetworkHash  string `json:"networkHash,omitempty"`
 }
 
 type Runtime interface {
-	Plan(Binding) (Reference, error)
+	Plan(Binding, browserpolicy.Target) (Reference, error)
 	Start(context.Context, Binding, Reference, browserpolicy.Target) (recording.InteractiveDriver, error)
 	Cleanup(context.Context, Binding, Reference) error
 }
 
 type Lease struct {
-	Binding        Binding            `json:"binding"`
-	Worker         string             `json:"worker"`
-	Instance       string             `json:"instance"`
-	Reference      Reference          `json:"reference"`
-	Snapshot       recording.Snapshot `json:"snapshot"`
-	LastSeen       time.Time          `json:"lastSeenAt"`
-	Sequence       int                `json:"sequence"`
-	InputHash      string             `json:"inputHash,omitempty"`
-	Pending        bool               `json:"pending,omitempty"`
-	CleanupPending bool               `json:"cleanupPending"`
-	Closing        bool               `json:"closing,omitempty"`
+	Binding        Binding              `json:"binding"`
+	Worker         string               `json:"worker"`
+	Instance       string               `json:"instance"`
+	Reference      Reference            `json:"reference"`
+	Target         browserpolicy.Target `json:"target,omitempty"`
+	Snapshot       recording.Snapshot   `json:"snapshot"`
+	LastSeen       time.Time            `json:"lastSeenAt"`
+	Sequence       int                  `json:"sequence"`
+	InputHash      string               `json:"inputHash,omitempty"`
+	Pending        bool                 `json:"pending,omitempty"`
+	CleanupPending bool                 `json:"cleanupPending"`
+	Closing        bool                 `json:"closing,omitempty"`
 }
 
 type Pool struct {

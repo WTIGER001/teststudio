@@ -23,6 +23,7 @@ type Gateway struct {
 	origin     string
 	authority  string
 	scheme     string
+	origins    map[string]string
 	dial       func(context.Context, string, string) (net.Conn, error)
 	transport  *http.Transport
 	slots      chan struct{}
@@ -58,6 +59,18 @@ func NewAuthenticated(target browserpolicy.Target, credential *apicredential.Val
 		scope = networkguard.Public
 	}
 	g := &Gateway{origin: target.Origin, authority: net.JoinHostPort(u.Hostname(), port), scheme: u.Scheme, dial: networkguard.Dial(scope), slots: make(chan struct{}, 64), requests: target.Requests}
+	g.origins = map[string]string{target.Origin: g.authority}
+	for _, origin := range target.AdditionalOrigins {
+		parsed, _ := url.Parse(origin)
+		port := parsed.Port()
+		if port == "" {
+			port = "443"
+			if parsed.Scheme == "http" {
+				port = "80"
+			}
+		}
+		g.origins[origin] = net.JoinHostPort(parsed.Hostname(), port)
+	}
 	if credential != nil {
 		copy := *credential
 		g.credential = &copy
@@ -91,7 +104,7 @@ func (g *Gateway) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	origin, err := browserpolicy.Origin(r.URL.Scheme + "://" + r.URL.Host)
-	if err != nil || origin != g.origin || g.scheme != "http" || r.URL.User != nil || r.URL.Opaque != "" || r.URL.Fragment != "" || r.Header.Get("Upgrade") != "" {
+	if err != nil || g.origins[origin] == "" || r.URL.Scheme != "http" || r.URL.User != nil || r.URL.Opaque != "" || r.URL.Fragment != "" || r.Header.Get("Upgrade") != "" {
 		http.Error(w, "Origin is outside the selected browser target", http.StatusForbidden)
 		return
 	}
@@ -126,17 +139,20 @@ func stripHopHeaders(header http.Header) {
 }
 
 func (g *Gateway) tunnel(w http.ResponseWriter, r *http.Request) {
-	u, err := url.Parse(g.scheme + "://" + r.Host)
+	u, err := url.Parse("https://" + r.Host)
 	if err != nil || u.User != nil || u.Path != "" || u.RawQuery != "" || u.Fragment != "" || u.Port() == "" {
 		http.Error(w, "Invalid browser tunnel", http.StatusForbidden)
 		return
 	}
-	origin, err := browserpolicy.Origin(g.scheme + "://" + r.Host)
-	if err != nil || origin != g.origin {
+	origin, err := browserpolicy.Origin("https://" + r.Host)
+	if err == nil && g.origins[origin] == "" {
+		origin, err = browserpolicy.Origin("http://" + r.Host)
+	}
+	if err != nil || g.origins[origin] == "" {
 		http.Error(w, "Origin is outside the selected browser target", http.StatusForbidden)
 		return
 	}
-	upstream, err := g.dial(r.Context(), "tcp", g.authority)
+	upstream, err := g.dial(r.Context(), "tcp", g.origins[origin])
 	if err != nil {
 		http.Error(w, "Selected browser target is unreachable", http.StatusBadGateway)
 		return

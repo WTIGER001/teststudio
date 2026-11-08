@@ -85,8 +85,29 @@ func runRecordingAuthoringUI(t *testing.T, hosted bool) {
 	s.Inspectors = map[string]preparation.ArtifactInspector{"playwright": &localcontainer.Executor{Runner: "playwright", AllowProjectImages: true, RequireProject: true}}
 	s.RecoveryInspectors = s.Inspectors
 	t.Cleanup(func() { cleanupRepositoryUIJobs(t, s, root) })
+	dependencyOrigin := ""
+	if hosted {
+		dependency := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "text/javascript")
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			io.WriteString(w, `document.querySelector('#application').innerHTML='<nav><a href="/news">News</a></nav>'+(location.pathname==='/news'?'<main><article><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></article></main>':'');`)
+		}))
+		listener, err := net.Listen("tcp", "0.0.0.0:0")
+		if err != nil {
+			t.Fatal(err)
+		}
+		dependency.Listener.Close()
+		dependency.Listener = listener
+		dependency.Start()
+		t.Cleanup(dependency.Close)
+		dependencyOrigin = fmt.Sprintf("http://host.docker.internal:%d", listener.Addr().(*net.TCPAddr).Port)
+	}
 	target := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
+		if hosted {
+			fmt.Fprintf(w, `<!doctype html><style>body{margin:0}a{display:block;padding:15px}h2{margin:20px}</style><div id="application">Loading the independent News application...</div><script type="module" src="%s/bootstrap.js"></script>`, dependencyOrigin)
+			return
+		}
 		io.WriteString(w, `<!doctype html><style>body{margin:0}a{display:block;padding:15px}h2{margin:20px}</style><nav><a href="/news">News</a></nav>`)
 		if r.URL.Path == "/news" {
 			io.WriteString(w, `<main><article><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></article></main>`)
@@ -113,7 +134,7 @@ func runRecordingAuthoringUI(t *testing.T, hosted bool) {
 	var driver recording.InteractiveDriver
 	var closeDriver func() error
 	if hosted {
-		client := newHostedRecordingClient(t, s, private, root, observer)
+		client := newHostedRecordingClient(t, s, private, root, observer, targetURL, dependencyOrigin)
 		driver, closeDriver = client, client.Close
 	} else {
 		node, err := exec.LookPath("node")

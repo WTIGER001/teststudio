@@ -50,7 +50,7 @@ func (d *fixtureDriver) Interact(ctx context.Context, id string, action recordin
 	}
 	return d.View(ctx, id)
 }
-func (r *fixtureRuntime) Plan(b Binding) (Reference, error) {
+func (r *fixtureRuntime) Plan(b Binding, target browserpolicy.Target) (Reference, error) {
 	return Reference{Provider: "fixture", Container: b.ID, Fingerprint: b.Fingerprint()}, nil
 }
 func (r *fixtureRuntime) Start(ctx context.Context, b Binding, ref Reference, target browserpolicy.Target) (recording.InteractiveDriver, error) {

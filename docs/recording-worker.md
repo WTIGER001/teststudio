@@ -86,7 +86,22 @@ The browser has no network interface beyond loopback, a read-only root, no host 
 Only its Unix-socket gateway can reach the selected website origin. Public mode rejects metadata, private addresses, and unapproved origins.
 The worker sends no database, API, or TLS credentials into these containers.
 
-The current policy permits only the entered website origin. Separate asset, authentication, or redirect origins reject and need an explicit reviewed policy extension before target acceptance.
+The default policy permits only the entered website origin. Operators can approve exact additional origins for a selected starting origin through --origin-policy=PRIVATE_JSON_FILE.
+The file maps each starting origin to an array of approved resource origins:
+
+```json
+{
+  "https://website.example": ["https://api.example", "https://assets.example"]
+}
+```
+
+Use canonical HTTP or HTTPS origins without paths, credentials, or wildcards. Each starting origin permits at most sixteen distinct additions; the file permits at most sixty-four starting origins and 64 KiB.
+Validate the file before installation with teststudio-recording-worker --validate-origin-policy --origin-policy=PRIVATE_JSON_FILE. Validation opens no database or browser.
+The worker freezes the complete network target in its durable reservation. Its resource fingerprint includes the network-policy hash. Changing a policy never silently expands an existing browser's access.
+Additional origins still use public-address validation and cannot reach metadata or private networks. Credential-bearing API request policies cannot add origins.
+Approve only observed dependencies needed for the selected website. A script or startup API on another origin can otherwise leave an application on its loading screen even when its main Angular scripts load successfully.
+Restart the worker through a controlled drain to change its policy. Captured source remains in history; interactive browser control requires a fresh session after restart.
+Recording approvals do not change the separate execution profile or automatically grant a saved test the same network access.
 There is no execution storage-state transfer, popup, upload, download, or drag recording in this milestone.
 The visual frame also does not provide full semantic access to the remote website.
 

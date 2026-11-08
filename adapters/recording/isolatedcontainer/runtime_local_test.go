@@ -66,7 +66,7 @@ func TestIsolatedRecordingUsesSandboxGatewayAndOwnedCleanup(t *testing.T) {
 	origin := fmt.Sprintf("http://host.docker.internal:%d", listener.Addr().(*net.TCPAddr).Port)
 	b := recordingworker.Binding{ID: domain.NewID(), Actor: "tester", Project: "fixture", Suite: "browser", URL: origin, Deadline: time.Now().Add(2 * time.Minute).UTC()}
 	runtime := &Runtime{Image: image, GatewayImage: gateway, Seccomp: seccomp, Directory: t.TempDir()}
-	ref, err := runtime.Plan(b)
+	ref, err := runtime.Plan(b, browserpolicy.Target{Origin: origin, AllowPrivate: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -162,7 +162,7 @@ func TestIsolatedRecordingStopsAtOriginalDeadlineWithoutController(t *testing.T)
 	origin := fmt.Sprintf("http://host.docker.internal:%d", listener.Addr().(*net.TCPAddr).Port)
 	b := recordingworker.Binding{ID: domain.NewID(), Actor: "tester", Project: "fixture", Suite: "browser", URL: origin, Deadline: time.Now().Add(5 * time.Second).UTC()}
 	runtime := &Runtime{Image: image, GatewayImage: gateway, Seccomp: seccomp, Directory: t.TempDir()}
-	ref, err := runtime.Plan(b)
+	ref, err := runtime.Plan(b, browserpolicy.Target{Origin: origin, AllowPrivate: true})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -23,6 +23,7 @@ import (
 const SeccompHash = "c4fef485853f4abe05f74b8a5bb8ded0f0df029d463886c1e3b3175976fefb58"
 
 var immutable = regexp.MustCompile(`^(sha256:[a-f0-9]{64}|[A-Za-z0-9][A-Za-z0-9._:/-]*@sha256:[a-f0-9]{64})$`)
+var networkDigest = regexp.MustCompile(`^[a-f0-9]{64}$`)
 
 type Runtime struct {
 	Docker       string
@@ -40,12 +41,19 @@ func (r *Runtime) binary() string {
 }
 
 func fingerprint(b recordingworker.Binding, ref recordingworker.Reference) string {
-	data, _ := json.Marshal([]string{b.Fingerprint(), ref.RuntimeImage, ref.GatewayImage, ref.PolicyHash})
+	values := []string{b.Fingerprint(), ref.RuntimeImage, ref.GatewayImage, ref.PolicyHash}
+	if ref.NetworkHash != "" {
+		values = append(values, ref.NetworkHash)
+	}
+	data, _ := json.Marshal(values)
 	sum := sha256.Sum256(data)
 	return hex.EncodeToString(sum[:])
 }
 
-func (r *Runtime) Plan(b recordingworker.Binding) (recordingworker.Reference, error) {
+func (r *Runtime) Plan(b recordingworker.Binding, target browserpolicy.Target) (recordingworker.Reference, error) {
+	if err := browserpolicy.ValidateTarget(target); err != nil {
+		return recordingworker.Reference{}, err
+	}
 	if !immutable.MatchString(r.Image) || !immutable.MatchString(r.GatewayImage) {
 		return recordingworker.Reference{}, errors.New("isolated recording requires immutable browser and gateway images")
 	}
@@ -58,6 +66,9 @@ func (r *Runtime) Plan(b recordingworker.Binding) (recordingworker.Reference, er
 		return recordingworker.Reference{}, errors.New("recording sandbox profile does not match the pinned policy")
 	}
 	ref := recordingworker.Reference{Provider: "docker-recording/v1", RuntimeImage: r.Image, GatewayImage: r.GatewayImage, PolicyHash: SeccompHash}
+	network, _ := json.Marshal(target)
+	networkHash := sha256.Sum256(network)
+	ref.NetworkHash = hex.EncodeToString(networkHash[:])
 	ref.Fingerprint = fingerprint(b, ref)
 	prefix := "ts-recording-" + ref.Fingerprint[:32]
 	ref.Container, ref.Gateway, ref.Volume = prefix+"-browser", prefix+"-gateway", prefix+"-output"
@@ -65,7 +76,7 @@ func (r *Runtime) Plan(b recordingworker.Binding) (recordingworker.Reference, er
 }
 
 func validReference(b recordingworker.Binding, ref recordingworker.Reference) bool {
-	if ref.Provider != "docker-recording/v1" || ref.PolicyHash != SeccompHash || !immutable.MatchString(ref.RuntimeImage) || !immutable.MatchString(ref.GatewayImage) || ref.Fingerprint != fingerprint(b, ref) {
+	if ref.Provider != "docker-recording/v1" || ref.PolicyHash != SeccompHash || !immutable.MatchString(ref.RuntimeImage) || !immutable.MatchString(ref.GatewayImage) || ref.NetworkHash != "" && !networkDigest.MatchString(ref.NetworkHash) || ref.Fingerprint != fingerprint(b, ref) {
 		return false
 	}
 	prefix := "ts-recording-" + ref.Fingerprint[:32]
@@ -92,7 +103,7 @@ func (r *Runtime) run(ctx context.Context, args ...string) error {
 }
 
 func (r *Runtime) Start(ctx context.Context, b recordingworker.Binding, ref recordingworker.Reference, target browserpolicy.Target) (recording.InteractiveDriver, error) {
-	expected, err := r.Plan(b)
+	expected, err := r.Plan(b, target)
 	if err != nil || expected != ref || !validReference(b, ref) {
 		return nil, errors.New("recording resources do not match their durable reservation")
 	}

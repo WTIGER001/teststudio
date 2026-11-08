@@ -8,12 +8,13 @@ import (
 	"os/exec"
 	"time"
 
+	"github.com/wtiger001/teststudio/internal/browserpolicy"
 	"github.com/wtiger001/teststudio/internal/recording"
 	"github.com/wtiger001/teststudio/internal/recordingworker"
 )
 
 func (r *Runtime) Preflight(ctx context.Context) error {
-	if _, err := r.Plan(recordingworker.Binding{}); err != nil {
+	if _, err := r.Plan(recordingworker.Binding{}, browserpolicy.Target{Origin: "https://preflight.invalid"}); err != nil {
 		return err
 	}
 	if r.Directory == "" {

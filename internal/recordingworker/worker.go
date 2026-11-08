@@ -24,6 +24,7 @@ type Worker struct {
 	Capacity     int
 	IdleLimit    time.Duration
 	AllowPrivate bool
+	Origins      OriginPolicy
 	Now          func() time.Time
 	mu           sync.Mutex
 	drivers      map[string]recording.InteractiveDriver
@@ -49,6 +50,9 @@ func (w *Worker) Open(ctx context.Context) error {
 		if err := runtime.Preflight(ctx); err != nil {
 			return err
 		}
+	}
+	if err := w.Origins.Validate(); err != nil {
+		return err
 	}
 	row, err := w.Store.Get(ctx, PoolBucket, w.ID)
 	if err != nil && !errors.Is(err, storage.ErrNotFound) {
@@ -199,6 +203,6 @@ func (w *Worker) target(b Binding) (browserpolicy.Target, error) {
 	if err != nil {
 		return browserpolicy.Target{}, err
 	}
-	target := browserpolicy.Target{Origin: origin, AllowPrivate: w.AllowPrivate}
+	target := browserpolicy.Target{Origin: origin, AllowPrivate: w.AllowPrivate, AdditionalOrigins: w.Origins.additional(origin)}
 	return target, browserpolicy.ValidateTarget(target)
 }

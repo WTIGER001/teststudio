@@ -17,6 +17,7 @@ arguments = [
     '--runtime-image=' + settings['runtimeImage'],
     '--gateway-image=' + settings['gatewayImage'],
     '--seccomp=/opt/teststudio-recording/seccomp.json',
+    '--origin-policy=' + str(root / 'origins.json'),
     '--directory=/var/lib/teststudio-recording',
     '--capacity=' + str(settings['capacity']), '--idle-limit=2m',
 ]

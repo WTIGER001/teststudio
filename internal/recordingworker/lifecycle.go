@@ -86,11 +86,11 @@ func (w *Worker) start(ctx context.Context, b Binding) (Response, error) {
 	} else if !errors.Is(err, storage.ErrNotFound) {
 		return Response{}, err
 	}
-	ref, err := w.Runtime.Plan(b)
+	ref, err := w.Runtime.Plan(b, target)
 	if err != nil {
 		return Response{}, err
 	}
-	lease := Lease{Binding: b, Worker: w.ID, Instance: w.Instance, Reference: ref, LastSeen: w.now(), CleanupPending: true, Snapshot: recording.Snapshot{State: "starting"}}
+	lease := Lease{Binding: b, Worker: w.ID, Instance: w.Instance, Reference: ref, Target: target, LastSeen: w.now(), CleanupPending: true, Snapshot: recording.Snapshot{State: "starting"}}
 	var row storage.Record
 	err = w.Store.Transaction(ctx, func(store *storage.Store, _ *sql.Tx) error {
 		poolRow, err := store.Get(ctx, PoolBucket, w.ID)

@@ -31,7 +31,7 @@ type transportRuntime struct {
 	sequence       int
 }
 
-func (r *transportRuntime) Plan(b recordingworker.Binding) (recordingworker.Reference, error) {
+func (r *transportRuntime) Plan(b recordingworker.Binding, target browserpolicy.Target) (recordingworker.Reference, error) {
 	return recordingworker.Reference{Fingerprint: b.Fingerprint()}, nil
 }
 func (r *transportRuntime) Start(context.Context, recordingworker.Binding, recordingworker.Reference, browserpolicy.Target) (recording.InteractiveDriver, error) {

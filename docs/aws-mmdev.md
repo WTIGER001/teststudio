@@ -277,6 +277,11 @@ Review the change set before execution. Finish verifies the selected digest and 
 Preserve existing recording history and the user's pending session. Saving a recording remains separate from source preparation and execution.
 The current host has no automatic replacement or scaling. Drain and verify cleanup before host replacement or runtime changes.
 
+Use deploy-aws-recording.py upgrade with the original owned --output directory, a new --package-receipt, immutable runtime and gateway images, pinned seccomp, and --origin-policy selecting the reviewed private JSON map.
+The helper validates that map through the worker command before publication. It preserves the original infrastructure receipt and records a separate checkpoint for the package update.
+It downloads and verifies the committed package before stopping the worker, captures available source during graceful shutdown, installs the replacement, and restarts the same host and worker identity.
+An interrupted command is inspected through its saved Systems Manager identifier rather than repeated. Existing interactive browsers close during the drain; their recorded source remains private in history.
+
 The 0.10.0-dev installation is complete. The host change set adds thirteen owned resources; the core change set modifies only ExecutionRole, Task, and Service. Twelve hosted checks and the actual News record, visible-story check, review, save, and cancel workflow pass. Source preparation and coded execution remain separately uninstalled.
 The worker host is i-001e74196a83b4693. It has no public address; port 8045 accepts only the API security group and still requires mutual TLS. Browser and gateway inspection confirms the selected isolation profile, and all owned recording containers and volumes are removed after finish and cancel.
 Reuse output/aws-mmdev/recording-0100 and output/playwright/aws-recording-0100. The verification fixture is removed, the project is archived, and the owned session and automation browser close. The transport certificates expire on 2027-02-06. No existing project, test, schedule, or recording history is replaced; no remote Git push occurs. Acceptance remains 50 verified of 57.
