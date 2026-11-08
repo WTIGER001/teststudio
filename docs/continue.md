@@ -27,25 +27,25 @@ UI improvements refine existing accepted items. They do not close the remaining 
 | Item | Last verified value |
 | --- | --- |
 | Hosted UI | https://teststudio.devfoodmarketmaker.com |
-| Product version | 0.8.1-dev; footer displays 0.8.1.dev |
-| Build identifier | 3f0963838890 |
-| Build creation | 2026-11-08T04:11:18.093Z |
-| Implementation commit | 8c8a81aa1c8386f83770ba34008d85badcb663a9 |
+| Product version | 0.8.2-dev; footer displays 0.8.2.dev |
+| Build identifier | a3891c1ad13a |
+| Build creation | 2026-11-08T14:54:38.744Z |
+| Implementation commit | d47c74423f9fca7c40455672b78dfa2957a47e08 |
 | Source state at build | Committed source; modified is false |
-| Service image digest | sha256:047b3680d5de6d61c210cdbd347a66a6b046480c67b78f192f88b5685cc45543 |
-| Task startup | 2026-11-08T11:16:48.779Z |
-| UI publication | 2026-11-08T12:11:39Z |
+| Service image digest | sha256:951e475480d521bc4b903f28c36aff801cb97d14de996ddb73dbea2d23e042a8 |
+| Task startup | 2026-11-08T14:59:52.599Z |
+| UI publication | 2026-11-08T15:04:05Z |
 | Live version metadata | GET /api/v1/version; public and no-store |
 
 Later documentation and operator-tooling commits do not change the deployed implementation commit or its immutable build date.
 The public API, UI bundle, and portable image labels match this release.
 The local user demo is separate. Do not assume it runs the same release as the hosted installation.
 
-## Active delivery: centered status-page content
+## Completed delivery: centered status-page content
 
 The status component now centers all content in a maximum width of 72rem, with --ts-status-content-width available to hosts. Background color fills the public viewport; automatic margins bound wide layouts without stretching pills. Existing responsive behavior and logo proportions remain.
 Normal STUDIO-STATUS-PAGES-001 passes in 7.131 seconds, run 20261108T145225.305888000-5d4d2bb3419d754f8564d43e, with cleaned execution. Checks cover centered widths at 1920, 1280, and 390 pixels, compact pills, no horizontal overflow, full-height background, and prior public/private workflows. The independent built consumer and SSR checks pass at library 0.2.1-dev.
-Release 0.8.2-dev is prepared. Commit and push the verified change, build from committed source, review the ordinary image-only MMDev change set, and verify the requesting public page. Publication and target checks remain pending. Reuse passing build caches; preserve user page configuration and the separate original-checkout work.
+Release 0.8.2-dev from committed d47c744 is pushed and deployed as build a3891c1ad13a. The reviewed change set modifies only Service and Task. Eighteen hosted checks pass for API/UI identity, centered component bytes, health, completed rollouts, selected digest, and invalidation. The requesting public page measures 1152 pixels wide with equal 56.5-pixel margins; its background fills the viewport and Help stays absent. No page configuration changes. Receipts and screenshot are output/aws-mmdev/status-centered-082. Library 0.2.1-dev is packed locally under output/angular-status; registry publication remains separate. Owned tabs, test servers, and temporary databases close; passing build caches remain reusable. Preserve the separate original-checkout work and port 8040 demo.
 
 ## Completed delivery: remove public status Help
 
