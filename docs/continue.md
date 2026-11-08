@@ -20,8 +20,10 @@ The selected website stalls on its loading screen because its separate startup A
 The worker now supports a generic operator origin-policy file, frozen network targets and resource fingerprints, and compatible cleanup of older leases. Credentials, metadata protection, private-address restrictions, and exact origin and port enforcement remain intact.
 The normal STUDIO-HOSTED-RECORDER-001 fixture now requires a module from a second origin to construct its News interface. The focused workflow passes in a 26.76-second harness and closes all owned resources. Reuse output/playwright/recording-cross-origin.
 Go race checks, actual PostgreSQL policy persistence, container isolation and deadlines, command startup, and source-retaining shutdown pass locally.
-Product 0.10.2-dev is prepared. The selected website's concrete origin map remains outside Git in private operator configuration. Deploy the gateway and worker update through scripts/deploy-aws-recording.py upgrade using a separate package receipt and explicit origin policy. The worker drains before replacement and retains captured source; start a fresh recording afterward.
-Hosted target confirmation remains pending. This refines 12, 13, 21, 45, 51, 56, and 57; acceptance remains 50 verified of 57.
+Product 0.10.2-dev from committed 000ed2b is deployed as build c9d8e9d2d4b2. The worker upgrade uses a separate package checkpoint and preserves the same private host and transport identities. The reviewed core change set modifies only Service and Task. Both services retain healthy completed rollouts.
+The actual selected website now loads inside the hosted recorder. News navigation reveals real stories; a story visibility check records, reviews, and saves exactly one revision-1 draft. No target test executes. Ten hosted checks verify the matching artifact, upgraded worker policy, private access, preserved services, and complete recording cleanup.
+Reuse output/aws-mmdev/recording-origins-0102 and screenshots under output/playwright/recording-site-loading. The verification project is archived, its session and automation browser close, and temporary credential state is removed. The private operator map remains .data/recording-site-loading/origins.json; it contains one starting website and four reviewed public dependency origins. Its installed hash is d28ed1bf5cdc71fe9d5bef9088f147065fd0fe0595da0a435d446347e1b2f345.
+Preserve the original infrastructure receipt and worker-upgrade.json. Future worker updates use scripts/deploy-aws-recording.py upgrade with an explicit complete origin map and a new package checkpoint. Graceful shutdown retains captured source; start a fresh recording afterward. This refines 12, 13, 21, 45, 51, 56, and 57; acceptance remains 50 verified of 57.
 
 ## Current correction: shared form field alignment
 
@@ -50,7 +52,7 @@ Follow [the hosted recording plan](hosted-recording-plan.md). This direction sup
 The local proof now captures a generic News click and visible-story check, shows plain-language review, and saves through the existing source draft service.
 Normal STUDIO-EMBEDDED-RECORDER-001 passes in 4.123 seconds, run 20261108T155702.239245000-2124450c8345cdca54c6958c. Its complete focused harness takes 19.87 seconds.
 Help, active and saved reload, uncertain input, lost save confirmation, Advanced source access, cancellation, focus, themes, narrow layout, and all eleven observed process shutdowns pass.
-Reuse receipts and screenshots under output/playwright/embedded-news-complete. Canonical OpenAPI 0.44.0 describes this source; the current hosted patch is 0.10.1-dev.
+Reuse receipts and screenshots under output/playwright/embedded-news-complete. Canonical OpenAPI 0.44.0 describes this source; the current hosted patch is 0.10.2-dev.
 The native preview remains loopback-only. Milestone 2 now implements a separate [private recording worker](recording-worker.md) with mutually authenticated TLS, durable capacity and cleanup leases, fenced restart recovery, current authority checks, and bounded idle behavior.
 The actual recording browser runs sandboxed in a non-root container with no direct networking, a private per-session gateway, fixed resource limits, and independent browser and gateway deadlines.
 Normal STUDIO-HOSTED-RECORDER-001 passes locally in 5.997 seconds, run 20261108T165640.285709000-e4e7e064e323488114590eb5; the complete harness takes 21.56 seconds.
@@ -97,14 +99,14 @@ UI improvements refine existing accepted items. They do not close the remaining 
 | Item | Last verified value |
 | --- | --- |
 | Hosted UI | https://teststudio.devfoodmarketmaker.com |
-| Product version | 0.10.1-dev; footer displays 0.10.1.dev |
-| Build identifier | 6c6cec452746 |
-| Build creation | 2026-11-08T17:43:29.126Z |
-| Implementation commit | fe99e8aad3c5bb9ab122c4b3441080562be81cd9 |
+| Product version | 0.10.2-dev; footer displays 0.10.2.dev |
+| Build identifier | c9d8e9d2d4b2 |
+| Build creation | 2026-11-08T18:11:27.580Z |
+| Implementation commit | 000ed2b4e81576d8b618ca221c7039ddaf41322c |
 | Source state at build | Committed source; modified is false |
-| Service image digest | sha256:86e2b96bc5ba5d4fc67b0edc055b02ddeef77be881b19ba8ca3df81e4d811887 |
-| Task startup | 2026-11-08T17:46:35.443Z |
-| UI publication | 2026-11-08T17:49:37Z |
+| Service image digest | sha256:028d062e99ea4d1cef0d84fe6d1ac44b7cb9eb10bc245e76fabb3db260052987 |
+| Task startup | 2026-11-08T19:16:28.126Z |
+| UI publication | 2026-11-08T19:19:26Z |
 | Live version metadata | GET /api/v1/version; public and no-store |
 
 Later documentation and operator-tooling commits do not change the deployed implementation commit or its immutable build date.

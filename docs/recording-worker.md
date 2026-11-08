@@ -1,7 +1,7 @@
 # Private recording worker
 
 The recording worker runs the website browser outside the API service. Testers use the existing in-page recorder and install nothing.
-The implementation has local Docker, PostgreSQL, private TLS, and normal TestStudio browser evidence. MMDev runs it with a dedicated private host and one browser slot. The current API and UI release is 0.10.1-dev, build 6c6cec452746; its alignment patch preserves the original worker installation.
+The implementation has local Docker, PostgreSQL, private TLS, and normal TestStudio browser evidence. MMDev runs it with a dedicated private host and one browser slot. The current API and UI release is 0.10.2-dev, build c9d8e9d2d4b2. The worker uses the same private host with a reviewed origin policy and frozen network references.
 See [the delivery plan](hosted-recording-plan.md) for the separate hosted execution and tester acceptance milestones.
 
 ## Installation boundary
@@ -128,3 +128,5 @@ The dedicated AWS installation uses deploy/aws/recording.yaml and scripts/deploy
 MMDev verifies News recording, a visible-story assertion, review, one saved revision-1 draft, second-session cancellation, and complete container and volume cleanup through the hosted UI. Actual host inspection confirms the fixed browser isolation profile. Twelve hosted deployment checks pass. Receipts are output/aws-mmdev/recording-0100 and screenshots are output/playwright/aws-recording-0100.
 The private host and API use dedicated transport certificates expiring on 2027-02-06. Rotate the CA and both leaf certificates through a controlled drain before that date.
 Keep hosted preparation, execution, and actual tester acceptance separately open.
+
+Release 0.10.2-dev verifies a real selected application whose startup API is hosted separately. Its homepage and News stories render inside the hosted recorder, and the captured News click and story visibility check save as one revision-1 draft. Ten hosted checks pass. Receipts are output/aws-mmdev/recording-origins-0102 and screenshots are output/playwright/recording-site-loading. No target test executes.

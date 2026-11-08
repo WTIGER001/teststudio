@@ -5,6 +5,13 @@ Track verified delivery in `implementation.md`.
 Start resumed work with [the continuation guide](continue.md). It summarizes the current release, remaining priorities, boundaries, and retained evidence.
 The user authorizes targeted tests and frequent feature commits. Remote pushes remain separate operations.
 
+## Recording startup dependency correction
+
+The worker now accepts a reviewed exact-origin map for website startup APIs and assets, freezes it in each lease and resource fingerprint, and preserves cleanup of earlier references. Public-address and metadata guards remain enforced; credential-bearing API policies cannot expand origins.
+The generic authoring fixture requires a cross-origin module and passes the normal News recording and saved-draft workflow. Product 0.10.2-dev from 000ed2b is deployed as build c9d8e9d2d4b2 on the existing private worker host.
+The actual selected website now renders its homepage and News articles inside the hosted recorder. News capture, a story visibility assertion, review, and saving one revision-1 draft pass. Ten hosted checks verify installation, matching artifacts, scope, healthy services, and complete browser cleanup. No target test executes.
+Reuse output/playwright/recording-cross-origin, output/playwright/recording-site-loading, and output/aws-mmdev/recording-origins-0102. The selected operator map remains private and outside product source. The verification project is archived and owned sessions close. This refines 12, 13, 21, 45, 51, 56, and 57; acceptance stays 50 verified of 57.
+
 ## Shared form alignment correction
 
 Descriptions no longer stretch adjacent labels and controls. The shared field layout aligns content at its natural start, preserving normal control heights.
