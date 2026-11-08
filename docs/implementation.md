@@ -6,6 +6,19 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## Status-page sharing copy buttons — 2026-11-07
+
+Public URL and Iframe embed code now have their own copy buttons. A shared clipboard service performs the write; the shared button owns local busy and accessible success or fallback feedback. Visible read-only fields remain available for manual copying.
+Page help and the feature guide describe the controls. The current published URL and exact displayed iframe markup are copied, including an active vanity name.
+The UI compiles. STUDIO-STATUS-PAGES-001 passes in 6.709 seconds through normal local execution, run 20261108T025119.540693000-f97987f5b8ae0d58e4383b5e. It verifies real clipboard contents for both values, keyboard activation, denied clipboard access, visible fallback, successful retry, and desktop and 390-pixel sharing layouts, alongside the existing publication workflow.
+The execution is cleaned and owned controllers and browsers exit. A separate clean checkout builds committed source without concurrent reliability changes. Unchanged packaging evidence from 0.5.0-dev is reused; no Go behavior or package configuration changes.
+Release 0.5.1-dev uses committed 4e679d49a962d4f8803ed4669bdc7bc4301c7c27, build 969aad6abb87, created 2026-11-08T02:50:41.631Z with modified false. The ARM64 digest is sha256:309d4ee08088bd21c9cf6fcc121aefcea4b6d7b8f437feef8d08b1ca987baa63.
+The reviewed CloudFormation change set modifies only TestStudio Service and Task. Task startup is 2026-11-08T02:54:03.467Z; matching UI publication is 2026-11-08T02:57:29Z.
+Sixteen hosted checks pass for API identity, exact published UI and component bytes, health, expected task digest, completed stack and service rollouts, and completed CloudFront invalidation. Both teststudioapi and testing-server retain their completed rollouts.
+The requesting account’s browser confirms both buttons beside its existing sharing fields on 0.5.1-dev. No page values or publication are changed. Its clipboard is not overwritten during the hosted inspection. The temporary tab closes and both original tabs remain.
+Receipts and screenshots are output/aws-mmdev/status-copy-051 and output/selftest/20261108T025119.540693000-f97987f5b8ae0d58e4383b5e. The temporary build checkout is cleaned after evidence is retained. The patch and release documentation are pushed; concurrent reliability edits remain separate.
+This refines 49 and 50. Acceptance stays **50 verified of 57**, with the same seven broad requirements open. Existing projects, memberships, probes, schedules, and the port 8040 demo remain unchanged.
+
 ## Shared reliability history: approved scope — 2026-11-07
 
 The user approves the rollup and bucketed-pill approach for every existing and future probe and test type as part of common result capture.

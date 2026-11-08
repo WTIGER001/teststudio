@@ -37,10 +37,11 @@ The reviewed foundation change set adds 29 resources. The reviewed core change s
 Neither change set modifies existing resources. The core change set creates no cluster.
 ECS reports one desired and one running teststudioapi task with a completed rollout.
 Both API and artifact target groups report healthy. The existing testing-server remains at one running task.
-The ARM64 image is sha256:e801ea09f23c383293fb79be86aea36c429ef417a47c1a9fcb166162521942e3.
-It is published in teststudioapi/service. The current release is 0.5.0-dev, displayed as 0.5.0.dev. Build a21537b24309 uses committed source 29f5400.
-Its UTC build creation date is 2026-11-08T02:38:53.301Z. The task starts at 2026-11-08T02:41:02.341Z and UI publication occurs at 2026-11-08T02:44:15Z. The API, UI, and image labels share that immutable identity.
+The ARM64 image is sha256:309d4ee08088bd21c9cf6fcc121aefcea4b6d7b8f437feef8d08b1ca987baa63.
+It is published in teststudioapi/service. The current release is 0.5.1-dev, displayed as 0.5.1.dev. Build 969aad6abb87 uses committed source 4e679d4.
+Its UTC build creation date is 2026-11-08T02:50:41.631Z. The task starts at 2026-11-08T02:54:03.467Z and UI publication occurs at 2026-11-08T02:57:29Z. The API, UI, and image labels share that immutable identity.
 Release 0.5.0-dev adds focused status-page management and installation-wide vanity names. Its ordinary image-only change set modifies Service and Task; the existing public CloudFront policy is reused. Twelve package checks and thirty-four hosted checks pass. The owned generic verification page is unpublished and its session closes. Receipts are output/aws-mmdev/status-vanity-050.
+Patch 0.5.1-dev adds status-page sharing copy buttons. The focused browser workflow and sixteen hosted identity, asset, health, rollout, and invalidation checks pass. The image-only change set preserves the existing public response policy. Receipts are output/aws-mmdev/status-copy-051.
 The unchanged trace viewer is reused. Native image storage uses the existing private database. The image retains the reviewed public RDS trust bundle.
 
 Initial core verification retains actual Cognito sign-in, catalog publication, and one native HTTPS probe through the public installation.

@@ -23,14 +23,14 @@ UI improvements refine existing accepted items. They do not close the remaining 
 | Item | Last verified value |
 | --- | --- |
 | Hosted UI | https://teststudio.devfoodmarketmaker.com |
-| Product version | 0.5.0-dev; footer displays 0.5.0.dev |
-| Build identifier | a21537b24309 |
-| Build creation | 2026-11-08T02:38:53.301Z |
-| Implementation commit | 29f540058510e5646d59b202b94094907a95355f |
+| Product version | 0.5.1-dev; footer displays 0.5.1.dev |
+| Build identifier | 969aad6abb87 |
+| Build creation | 2026-11-08T02:50:41.631Z |
+| Implementation commit | 4e679d49a962d4f8803ed4669bdc7bc4301c7c27 |
 | Source state at build | Committed source; modified is false |
-| Service image digest | sha256:e801ea09f23c383293fb79be86aea36c429ef417a47c1a9fcb166162521942e3 |
-| Task startup | 2026-11-08T02:41:02.341Z |
-| UI publication | 2026-11-08T02:44:15Z |
+| Service image digest | sha256:309d4ee08088bd21c9cf6fcc121aefcea4b6d7b8f437feef8d08b1ca987baa63 |
+| Task startup | 2026-11-08T02:54:03.467Z |
+| UI publication | 2026-11-08T02:57:29Z |
 | Live version metadata | GET /api/v1/version; public and no-store |
 
 Later documentation and operator-tooling commits do not change the deployed implementation commit or its immutable build date.
@@ -38,6 +38,8 @@ The public API, UI bundle, and portable image labels match this release.
 The local user demo is separate. Do not assume it runs the same release as the hosted installation.
 
 ## Latest delivered UI changes
+
+Release 0.5.1-dev adds Copy Public URL and Copy Iframe embed code beside the sharing fields. Both announce success or explain manual copying when browser clipboard access is unavailable. The normal local browser workflow passes in 6.709 seconds, run 20261108T025119.540693000-f97987f5b8ae0d58e4383b5e; sixteen hosted identity, asset, health, rollout, and invalidation checks pass. The requesting account sees both buttons. Its page remains unchanged and the temporary tab closes. Receipts are output/aws-mmdev/status-copy-051.
 
 Status-page details now have separate Edit and Review publication routes. Optional vanity names are unique across the installation and reserve on Save draft. Publication activates the saved name, while permanent generated URLs remain compatible. The deployed 0.5.0-dev release includes this workflow and shared guidance for pages, dialogs, and inline controls.
 

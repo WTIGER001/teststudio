@@ -28,6 +28,13 @@ The first implementation milestone is shared durable capture and summary primiti
 This documentation milestone records scope and delivery steps only. It extends 34, 35, 36, 37, 39, 40, 41, and 47, with supporting access and UI requirements. The total stays 50 verified of 57.
 Keep the pending status-page release below separate. This plan does not change its artifact, publication state, or retained evidence.
 
+## Completed user direction: status-page sharing copy buttons
+
+Public URL and Iframe embed code now have adjacent copy buttons, accessible success feedback, and manual-copy guidance when the clipboard is unavailable. Read-only sharing values remain selectable.
+The shared clipboard service and button preserve the current published address. The browser workflow verifies actual clipboard contents, keyboard activation, denied access, retry, and narrow layout in 6.709 seconds.
+Release 0.5.1-dev from committed 4e679d4 is pushed and deployed as build 969aad6abb87. Sixteen hosted checks and the actual requesting browser confirm the matching release and visible controls. The isolated build excludes concurrent reliability work; existing page configuration and user tabs are preserved.
+This refines 49 and 50. Acceptance stays 50 verified of 57. Preserve the separate reliability work in progress.
+
 ## Completed user direction: focused status-page management and vanity URLs
 
 Use Create project as the shared model for substantial create and edit workflows. The detail page summarizes configuration and sharing; dedicated create, edit, and publication-review routes preserve clear back and cancel paths. The shared [UI rules](ui.md#choose-a-page-dialog-or-inline-control) distinguish pages, bounded dialogs, and small inline controls.
