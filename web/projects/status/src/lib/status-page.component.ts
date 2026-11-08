@@ -10,6 +10,7 @@ import { TestStudioStatusLogoComponent } from './status-logo.component'
   selector: 'teststudio-status-page', standalone: true, imports: [DatePipe, TestStudioStatusBarComponent, TestStudioStatusSummaryComponent, TestStudioStatusLogoComponent], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="status-page" [style.background-color]="background()" [style.color]="foreground()" aria-label="Status page">
+      <div class="status-content">
       @if (current(); as value) {
         @if (value.logo) { <teststudio-status-logo class="page-logo" [height]="value.logoHeight || 0" [source]="value.logo" [description]="value.logoAlt || value.title + ' logo'" /> }
         <header><h1>{{ value.title }}</h1><label class="range">{{ periodLabel() }}<select [attr.aria-label]="periodLabel()" [value]="value.window" (change)="selectPeriod($any($event.target).value)">@for (period of periods; track period.id) { <option [value]="period.id" [selected]="period.id === value.window">{{ period.label }}</option> }</select></label></header>
@@ -22,6 +23,7 @@ import { TestStudioStatusLogoComponent } from './status-logo.component'
         }
         <footer><span class="legend up-key">Passed / available</span><span class="legend down-key">Unsuccessful / unavailable</span><span class="legend unknown-key">Unknown</span><p>Availability estimates monitored time. Pass rates count completed outcomes and exclude skipped and unknown results. Missing or stale monitoring is unknown.</p></footer>
       } @else { <h1>Service status</h1>@if (loading()) { <p role="status">Loading status…</p> } @else if (error(); as value) { <p role="alert">{{ value.message }}</p> } @else { <p>No report supplied.</p> } }
+      </div>
     </section>`,
   styleUrl: './status-page.css'
 })

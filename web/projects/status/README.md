@@ -1,6 +1,6 @@
 # TestStudio Angular status components
 
-Version 0.2.0-dev provides standalone, OnPush Angular status components.
+Version 0.2.1-dev provides standalone, OnPush Angular status components.
 Angular 22.2.4 is the verified peer version. Other Angular versions remain unverified.
 The library uses Angular core, common, RxJS, and tslib. It requires no TestStudio application shell, router, global stylesheet, or iframe.
 
@@ -16,7 +16,7 @@ This builds the library, installs it into the independent example, checks compil
 Install that package in another Angular application:
 
 ```sh
-npm install ./wtiger001-teststudio-angular-0.2.0-dev.tgz
+npm install ./wtiger001-teststudio-angular-0.2.1-dev.tgz
 ```
 
 Package creation does not publish to an npm registry or deploy a site.
@@ -112,3 +112,5 @@ Native controls, keyboard focus, accessible bucket details, and touch targets re
 Unknown monitoring coverage remains visible alongside downtime. Historical bucket state remains separate from the current result.
 
 The independent example lives in examples/angular-status. STUDIO-RELIABILITY-001 verifies it through normal TestStudio execution.
+
+The page centers its contents inside a maximum width of 72rem while retaining its configured full-width background. Set --ts-status-content-width on the component to override that bound for a host layout. Pill widths stay controlled by --ts-status-pill-width; a wide container does not stretch them.

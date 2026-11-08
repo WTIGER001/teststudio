@@ -3,6 +3,7 @@
 Each project can create separate status pages for different audiences. A page contains an ordered selection of current HTTP probe bindings or direct test references.
 Each row has its own public title, optional description, bucketed history pills, and an availability donut or outcome summary. A page supports up to 100 probes; project page lists continue through pagination.
 The page title, optional centered logo, background color, and default time range are configurable. One viewer selector changes every row together. Outcome rows show pass rate and excluded skipped/unknown counts; explicitly monitored rows show time-based availability.
+Page content centers in a maximum width of 72rem, with automatic side margins on wide displays. Narrow pages and iframes use their available width. Pills stay compact rather than stretching across the page. The configured background still spans the page.
 Public pages have standalone URLs and support iframe embedding without sign-in. They omit the application Help button and drawer. Authenticated management screens retain contextual help.
 
 ## Optional logo

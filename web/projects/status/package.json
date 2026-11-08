@@ -1,6 +1,6 @@
 {
   "name": "@wtiger001/teststudio-angular",
-  "version": "0.2.0-dev",
+  "version": "0.2.1-dev",
   "description": "Stylable TestStudio reliability status bars and pages for Angular",
   "license": "UNLICENSED",
   "sideEffects": false,

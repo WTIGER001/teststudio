@@ -41,6 +41,12 @@ Later documentation and operator-tooling commits do not change the deployed impl
 The public API, UI bundle, and portable image labels match this release.
 The local user demo is separate. Do not assume it runs the same release as the hosted installation.
 
+## Active delivery: centered status-page content
+
+The status component now centers all content in a maximum width of 72rem, with --ts-status-content-width available to hosts. Background color fills the public viewport; automatic margins bound wide layouts without stretching pills. Existing responsive behavior and logo proportions remain.
+Normal STUDIO-STATUS-PAGES-001 passes in 7.131 seconds, run 20261108T145225.305888000-5d4d2bb3419d754f8564d43e, with cleaned execution. Checks cover centered widths at 1920, 1280, and 390 pixels, compact pills, no horizontal overflow, full-height background, and prior public/private workflows. The independent built consumer and SSR checks pass at library 0.2.1-dev.
+Release 0.8.2-dev is prepared. Commit and push the verified change, build from committed source, review the ordinary image-only MMDev change set, and verify the requesting public page. Publication and target checks remain pending. Reuse passing build caches; preserve user page configuration and the separate original-checkout work.
+
 ## Completed delivery: remove public status Help
 
 The public status component and route no longer render Help or configure a help topic. Standalone documents, embeds, loading, and error states share the minimal shell. Management Help remains available. The explicit public-document exception is recorded in UI guidance and acceptance 50.

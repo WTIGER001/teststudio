@@ -128,9 +128,14 @@ test('Public status draft publication, embeds, private-data boundaries and avail
       await expect(visitor.getByLabel('Availability period', { exact: true })).toHaveValue(window)
       await expect(visitor.getByRole('article')).toHaveCount(2)
     }
-    for (const size of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
+    for (const size of [{ width: 1920, height: 1080 }, { width: 1280, height: 900 }, { width: 390, height: 844 }]) {
       await visitor.setViewportSize(size)
       expect(await visitor.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+      expect((await visitor.locator('.status-page').boundingBox())!.height).toBeGreaterThanOrEqual(size.height)
+      const contentBounds = (await visitor.locator('.status-content').boundingBox())!
+      expect(contentBounds.width).toBeLessThanOrEqual(1152.5)
+      expect(Math.abs(contentBounds.x - (size.width - contentBounds.x - contentBounds.width))).toBeLessThan(2)
+      if (size.width === 1920) expect((await visitor.locator('.pill').first().boundingBox())!.width).toBeLessThanOrEqual(8.5)
       const sizeLogo = (await visitor.getByRole('img', { name: 'Example brand', exact: true }).boundingBox())!
       expect(sizeLogo.height).toBeLessThanOrEqual(96)
       expect(sizeLogo.width / sizeLogo.height).toBeCloseTo(4, 1)

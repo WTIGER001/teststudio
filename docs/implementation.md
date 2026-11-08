@@ -24,6 +24,13 @@ STUDIO-STATUS-PAGES-001 passes after upstream logo integration with the new buck
 The user demo on port 8040 and unrelated workloads remain separate. Registry publication and hosted verification are not performed for this work. The parallel upstream logo implementation and release notes are integrated locally; shared components retain its optional fields and centered rendering while preserving the separately verified hosted release.
 This refines 12, 13, 34, 35, 36, 37, 39, 40, 41, 47, 49, and 50. The count stays **50 verified of 57**. Broad cross-profile criteria 41, 46, 51, 53, 54, 56, and 57 remain open.
 
+## Centered status-page content: local implementation — 2026-11-08
+
+The shared page now places logo, heading, selector, rows, donuts, and legend inside a centered maximum width of 72rem. Automatic side margins balance wide displays; smaller containers retain their available width. Pill sizes remain compact and do not grow to fill the page. The host token --ts-status-content-width permits a different bound.
+Public documents pass the viewport-height token into the shared page and use border-box sizing, so the configured background also fills short pages. Private previews and external component behavior remain responsive.
+The UI builds. Normal STUDIO-STATUS-PAGES-001 passes in 7.131 seconds, run 20261108T145225.305888000-5d4d2bb3419d754f8564d43e. It verifies equal side margins and width bounds at 1920, 1280, and 390 pixels, compact desktop pills, full-viewport background, no horizontal overflow, proportional logo height, public Help omission, and the existing publishing and sharing flow. Its execution is cleaned and owned processes and browsers exit.
+The independently built Angular consumer and SSR checks pass with library 0.2.1-dev. No Go or API behavior changes. Product 0.8.2-dev publication and hosted verification remain pending. This refines 49 and 50; acceptance stays **50 verified of 57**.
+
 ## Public status pages without Help: MMDev delivery — 2026-11-08
 
 Release 0.8.1-dev uses committed 8c8a81aa1c8386f83770ba34008d85badcb663a9, build 3f0963838890, created 2026-11-08T04:11:18.093Z with modified false. Its ARM64 digest is sha256:047b3680d5de6d61c210cdbd347a66a6b046480c67b78f192f88b5685cc45543. The implementation and notes are pushed to both delivery branches.

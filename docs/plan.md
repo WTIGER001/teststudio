@@ -16,6 +16,12 @@ Use the mm_dev profile and preserve existing services. Azure implementation and 
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
+## Current delivery: centered status-page content
+
+Center the logo, heading, period selector, rows, summaries, and legend in a maximum width of 72rem with automatic side margins. Preserve the configured full-viewport background and existing compact pill widths. Narrow pages and frames use their available width. Hosts can override --ts-status-content-width.
+STUDIO-STATUS-PAGES-001 passes in 7.131 seconds, run 20261108T145225.305888000-5d4d2bb3419d754f8564d43e, at 1920, 1280, and 390 pixels. It checks equal side margins, width bounds, compact pills, full-height background, existing logo sizing, sharing, help omission, and publication behavior. The independent consumer and SSR checks pass with library 0.2.1-dev.
+Release 0.8.2-dev publication and hosted checks remain pending. This refines 49 and 50; acceptance stays 50 verified of 57.
+
 ## Completed delivery: remove public status Help
 
 The user requests a clean public status document without the application Help control. Remove it from standalone and iframe views while retaining management help. Record this explicit exception in the UI rules and acceptance 50.
