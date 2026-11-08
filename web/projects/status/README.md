@@ -1,6 +1,6 @@
 # TestStudio Angular status components
 
-Version 0.2.1-dev provides standalone, OnPush Angular status components.
+Version 0.3.0-dev provides standalone, OnPush Angular status components.
 Angular 22.2.4 is the verified peer version. Other Angular versions remain unverified.
 The library uses Angular core, common, RxJS, and tslib. It requires no TestStudio application shell, router, global stylesheet, or iframe.
 
@@ -16,7 +16,7 @@ This builds the library, installs it into the independent example, checks compil
 Install that package in another Angular application:
 
 ```sh
-npm install ./wtiger001-teststudio-angular-0.2.1-dev.tgz
+npm install ./wtiger001-teststudio-angular-0.3.0-dev.tgz
 ```
 
 Package creation does not publish to an npm registry or deploy a site.
