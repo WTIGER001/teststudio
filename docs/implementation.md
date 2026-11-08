@@ -33,6 +33,48 @@ STUDIO-STATUS-PAGES-001 passes after upstream logo integration with the new buck
 The user demo on port 8040 and unrelated workloads remain separate. Registry publication and hosted verification are not performed for this work. The parallel upstream logo implementation and release notes are integrated locally; shared components retain its optional fields and centered rendering while preserving the separately verified hosted release.
 This refines 12, 13, 34, 35, 36, 37, 39, 40, 41, 47, 49, and 50. The count stays **50 verified of 57**. Broad cross-profile criteria 41, 46, 51, 53, 54, 56, and 57 remain open.
 
+## Centered status-page content: local implementation — 2026-11-08
+
+The shared page now places logo, heading, selector, rows, donuts, and legend inside a centered maximum width of 72rem. Automatic side margins balance wide displays; smaller containers retain their available width. Pill sizes remain compact and do not grow to fill the page. The host token --ts-status-content-width permits a different bound.
+Public documents pass the viewport-height token into the shared page and use border-box sizing, so the configured background also fills short pages. Private previews and external component behavior remain responsive.
+The UI builds. Normal STUDIO-STATUS-PAGES-001 passes in 7.131 seconds, run 20261108T145225.305888000-5d4d2bb3419d754f8564d43e. It verifies equal side margins and width bounds at 1920, 1280, and 390 pixels, compact desktop pills, full-viewport background, no horizontal overflow, proportional logo height, public Help omission, and the existing publishing and sharing flow. Its execution is cleaned and owned processes and browsers exit.
+The independently built Angular consumer and SSR checks pass with library 0.2.1-dev. No Go or API behavior changes. Product 0.8.2-dev publication and hosted verification remain pending. This refines 49 and 50; acceptance stays **50 verified of 57**.
+
+## Public status pages without Help: MMDev delivery — 2026-11-08
+
+Release 0.8.1-dev uses committed 8c8a81aa1c8386f83770ba34008d85badcb663a9, build 3f0963838890, created 2026-11-08T04:11:18.093Z with modified false. Its ARM64 digest is sha256:047b3680d5de6d61c210cdbd347a66a6b046480c67b78f192f88b5685cc45543. The implementation and notes are pushed to both delivery branches.
+The reviewed ordinary change set modifies only TestStudio Service and Task. Task startup is 2026-11-08T11:16:48.779Z; matching UI publication is 2026-11-08T12:11:39Z. Build creation, task startup, and publication remain distinct.
+Seventeen hosted checks pass for public API identity, exact published index and public-component bytes, HTTP health, selected task digest, completed stack and service rollouts, and completed CloudFront invalidation. Both services remain healthy.
+The actual requesting public document renders its logo, title, selected month, probe rows, and donuts without a Help button or help dialog. The temporary tab closes and both original user tabs remain. No application page, probe, schedule, permission, or membership configuration changes.
+Retained receipts and screenshot are output/aws-mmdev/status-no-help-081. Owned processes and temporary helpers are cleaned; passing ignored build caches are retained for reuse. The port 8040 demo and unrelated workloads are preserved.
+This refines 49 and 50. Acceptance stays **50 verified of 57**. The public Help omission is the explicit user-requested exception; broad worker and cross-profile criteria remain open.
+
+## Public status pages without Help: local implementation — 2026-11-07
+
+At the user’s request, anonymous status documents and iframe embeds omit the application Help button and drawer. Public loading and error views use the same minimal shell. Authenticated creation, editing, and management screens retain their current guidance.
+The public route no longer declares a help topic, and its component no longer imports or renders Help or its overlay styling. The UI guide records the explicit exception to the per-page help requirement; acceptance 50 keeps its stable number and reflects the requested public-document scope.
+The UI builds. Normal STUDIO-STATUS-PAGES-001 passes in 8.062 seconds, run 20261108T040919.382666000-2f47d1bdf79142a6b2ff8132. It verifies no public Help button or dialog, no Help in the actual cross-origin iframe, dark-page absence, and retained management help, along with the existing status workflow. The execution is cleaned and owned processes and browsers exit.
+No API, permission, data, or shared-library behavior changes. Separate release and hosted verification appear above. This refines 49 and 50; acceptance stays **50 verified of 57**.
+
+## Configurable logo height: MMDev delivery — 2026-11-07
+
+Release 0.8.0-dev uses committed dc558de572571eb14517d0cd259468711eb8c498, immutable build 2320bb94582b, created 2026-11-08T03:52:01.670Z with modified false. The ARM64 digest is sha256:1601cee035b451d8135381dd143d74b2584460eb12e568a6d3d3657de351dc5d. Image labels match the selected version, commit, and build identifier. Both remote delivery branches contain the commits.
+The reviewed ordinary change set modifies only TestStudio Service and Task. Task startup is 2026-11-08T03:56:08.765Z; UI publication is 2026-11-08T03:59:30Z. The stack reaches UPDATE_COMPLETE, both services retain completed healthy rollouts, and CloudFront invalidation completes.
+Twenty-eight hosted checks pass for API identity, exact published UI and height-component bytes, retained probe reuse, published and draft height isolation, replacement, restoring automatic sizing, withdrawal, and final deployment health. No new test execution occurs.
+The actual public browser decodes and centers a 192 by 192 pixel logo, verifying heights above the old 128-pixel cap. The requesting account sees Logo height (pixels) with its existing uploaded logo and automatic value. No user configuration or publication is changed.
+The generic verification page is unpublished, both owned administrator sessions close, temporary browser tabs close, and the original two user tabs remain. The temporary helper is removed. Receipts and screenshots are output/aws-mmdev/status-height-080.
+The independently built library 0.2.0-dev is packed locally under output/angular-status. Package registry publication remains separate. The release includes the committed shared reliability/library source; height checks do not close its broader worker or cross-profile acceptance.
+This refines 12, 13, 49, and 50. Acceptance stays **50 verified of 57**. Existing memberships, probes, schedules, the demo, and unrelated workloads are preserved.
+
+## Configurable logo height: local implementation — 2026-11-07
+
+Appearance now includes an optional Logo height (pixels) field with a live preview. Whole values from 1 through 1024 persist in private definitions and published snapshots. Blank or zero preserves existing automatic sizing. Removing the logo clears its unused height.
+Both the application preview and reusable Angular component calculate proportional width from the decoded image. The selected height applies when the container permits it; narrow layouts scale down proportionally. Centering, transparency, loading fallback, draft guards, and publication review are preserved.
+API contract 0.42.0 generates optional logoHeight fields. Angular library 0.2.0-dev exposes the same typed option and retains automatic CSS tokens. Its independently installed consumer builds and SSR passes. The consumer lock identifies the built 0.2.0-dev package.
+The focused SQLite case passes in 0.520 seconds. The matching race-enabled PostgreSQL case passes in 3.046 seconds. They verify persisted and published heights, draft isolation, boundaries, invalid values, automatic sizing, and removal.
+The UI builds. Normal STUDIO-STATUS-PAGES-001 passes in 8.088 seconds, run 20261108T034657.315445000-1c34f428c409b3472bc67f77. It verifies a 96-pixel desktop logo, unchanged proportions on mobile, a private height change, and a separately published 48-pixel reference, alongside the existing authoring and sharing flow. The execution is cleaned and owned processes and browsers exit.
+Product 0.8.0-dev includes the committed shared reliability/library work and previous released logos. Separate publication and hosted verification are recorded above. This refines 12, 13, 49, and 50; acceptance stays **50 verified of 57**.
+
 ## Optional status-page logos: MMDev delivery — 2026-11-07
 
 Release 0.6.0-dev uses committed 3d13a08ca5a3690d085e265705104f91cab44a0c, build dca2ee3e4ddf, created 2026-11-08T03:15:30.865Z with modified false. Its ARM64 digest is sha256:35d7b1bb815c40df5b1eda33fdd719dbb7347ed129c74f5ef667cb5818b08347. Implementation and release notes are pushed to both origin/codex/status-page-logo and origin/codex/implementation.
@@ -989,7 +1031,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **47.** Result-state trends use stacked area charts with consistent state colors, final logical counts, accessible values, and visible missing-history gaps.
 - [x] **48.** Manual and scheduled notifications use the same configured completion path.
 - [x] **49.** Light, dark, and system modes pass browser workflow and keyboard checks.
-- [x] **50.** Every current page provides a contextual help drawer with Introduction, Concepts, Tutorials, and verified keyboard and mobile behavior.
+- [x] **50.** Every current application page except public status documents provides a contextual help drawer with Introduction, Concepts, Tutorials, and verified keyboard and mobile behavior.
 - [ ] **51.** Provider adapters support execution status, cancellation, deadlines, artifacts, and recovery consistently.
 - [x] **52.** Replica failover creates no duplicate logical run. Notification retries retain their documented at-least-once behavior.
 - [ ] **53.** Local, Kubernetes, and Azure installations operate without AWS services or credentials.

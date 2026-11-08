@@ -85,6 +85,9 @@ func (s *Service) validate(ctx context.Context, user, project string, d Definiti
 	if err := validateLogo(d.Logo); err != nil {
 		return nil, err
 	}
+	if d.LogoHeight < 0 || d.LogoHeight > 1024 {
+		return nil, errors.New("logo height must be a whole number from 1 through 1024 pixels, or 0 for automatic sizing")
+	}
 	if len(d.LogoAlt) > 256 {
 		return nil, errors.New("logo alternative text must be at most 256 bytes")
 	}
@@ -145,6 +148,7 @@ func (s *Service) Save(ctx context.Context, user, project string, d Definition, 
 	d.LogoAlt = strings.TrimSpace(d.LogoAlt)
 	if d.Logo == "" {
 		d.LogoAlt = ""
+		d.LogoHeight = 0
 	}
 	d.Slug, err = NormalizeSlug(d.Slug)
 	if err != nil {

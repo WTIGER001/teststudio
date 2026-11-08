@@ -1,6 +1,6 @@
 {
   "name": "teststudio-web",
-  "version": "0.7.0-dev",
+  "version": "0.8.2-dev",
   "private": true,
   "type": "module",
   "scripts": {

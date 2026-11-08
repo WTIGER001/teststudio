@@ -21,6 +21,8 @@ test('Public status draft publication, embeds, private-data boundaries and avail
   await expect(page.getByRole('heading', { name: 'Page appearance', exact: true })).toBeVisible()
   await page.getByLabel('Upload logo', { exact: true }).setInputFiles({ name: 'example-logo.png', mimeType: 'image/png', buffer: logoBytes })
   await page.getByLabel('Logo alternative text (optional)', { exact: true }).fill('Example brand')
+  await page.getByLabel('Logo height (pixels)', { exact: true }).fill('96')
+  await expect.poll(async () => Math.round((await page.getByRole('img', { name: 'Example brand', exact: true }).boundingBox())!.height)).toBe(96)
   await expect(page.getByRole('img', { name: 'Example brand', exact: true })).toBeVisible()
   await expect(page.getByRole('alert')).toHaveCount(0)
   await page.getByRole('button', { name: 'Help', exact: true }).click()
@@ -109,7 +111,10 @@ test('Public status draft publication, embeds, private-data boundaries and avail
     const logoBounds = (await logo.boundingBox())!, pageBounds = (await visitor.locator('.status-page').boundingBox())!
     expect(Math.abs(logoBounds.x + logoBounds.width / 2 - pageBounds.x - pageBounds.width / 2)).toBeLessThan(2)
     expect(logoBounds.width / logoBounds.height).toBeCloseTo(4, 1)
+    expect(logoBounds.height).toBeCloseTo(96, 0)
     await expect(visitor.getByRole('article')).toHaveCount(2)
+    await expect(visitor.getByRole('button', { name: 'Help', exact: true, includeHidden: true })).toHaveCount(0)
+    await expect(visitor.getByRole('dialog')).toHaveCount(0)
     await expect(visitor.getByRole('article', { name: 'Public website', exact: true })).toContainText('100.00%')
     await expect(visitor.getByRole('article', { name: 'Secondary service', exact: true })).toContainText('No data')
     await expect(visitor.getByRole('navigation', { name: 'Main navigation', includeHidden: true })).toHaveCount(0)
@@ -123,9 +128,17 @@ test('Public status draft publication, embeds, private-data boundaries and avail
       await expect(visitor.getByLabel('Availability period', { exact: true })).toHaveValue(window)
       await expect(visitor.getByRole('article')).toHaveCount(2)
     }
-    for (const size of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
+    for (const size of [{ width: 1920, height: 1080 }, { width: 1280, height: 900 }, { width: 390, height: 844 }]) {
       await visitor.setViewportSize(size)
       expect(await visitor.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+      expect((await visitor.locator('.status-page').boundingBox())!.height).toBeGreaterThanOrEqual(size.height)
+      const contentBounds = (await visitor.locator('.status-content').boundingBox())!
+      expect(contentBounds.width).toBeLessThanOrEqual(1152.5)
+      expect(Math.abs(contentBounds.x - (size.width - contentBounds.x - contentBounds.width))).toBeLessThan(2)
+      if (size.width === 1920) expect((await visitor.locator('.pill').first().boundingBox())!.width).toBeLessThanOrEqual(8.5)
+      const sizeLogo = (await visitor.getByRole('img', { name: 'Example brand', exact: true }).boundingBox())!
+      expect(sizeLogo.height).toBeLessThanOrEqual(96)
+      expect(sizeLogo.width / sizeLogo.height).toBeCloseTo(4, 1)
       await testInfo.attach(`public-status-${size.width}`, { body: await visitor.screenshot({ fullPage: true, animations: 'disabled' }), contentType: 'image/png' })
     }
     const host = await anonymous.newPage()
@@ -133,12 +146,14 @@ test('Public status draft publication, embeds, private-data boundaries and avail
       await host.goto('http://127.0.0.1:8050/status-host/' + token)
       await expect(host.frameLocator('iframe[title="Embedded public status"]').getByRole('heading', { name: 'Customer service status', exact: true })).toBeVisible()
       await expect(host.frameLocator('iframe[title="Embedded public status"]').getByRole('article')).toHaveCount(2)
+      await expect(host.frameLocator('iframe[title="Embedded public status"]').getByRole('button', { name: 'Help', exact: true, includeHidden: true })).toHaveCount(0)
     } finally { await host.close() }
     const darkDefinition = { id: 'dark-status', title: 'Dark service status', background: '#101827', defaultWindow: '1y', maxAgeSeconds: 900, probes: [{ probeId: probe.id, title: 'Public website', description: 'Customer website availability' }] }
     await api.call('PUT', `${path}/status-pages/dark-status`, darkDefinition, 0)
     const darkPage = await api.call('POST', `${path}/status-pages/dark-status/publish`, undefined, 1)
     await visitor.goto('http://127.0.0.1:8040/status/' + darkPage.data.publicToken)
     await expect(visitor.getByRole('heading', { name: 'Dark service status', exact: true })).toBeVisible()
+    await expect(visitor.getByRole('button', { name: 'Help', exact: true, includeHidden: true })).toHaveCount(0)
     await expect(visitor.getByRole('img')).toHaveCount(0)
     await expect(visitor.getByLabel('Availability period', { exact: true })).toHaveValue('1y')
     await expect(visitor.getByRole('article')).toContainText('<0.1% monitored')
@@ -158,11 +173,14 @@ test('Public status draft publication, embeds, private-data boundaries and avail
     await page.getByLabel('Logo source', { exact: true }).selectOption('url')
     await page.getByLabel('Logo image URL', { exact: true }).fill('https://logos.example.test/brand.png')
     await page.getByLabel('Logo alternative text (optional)', { exact: true }).fill('Referenced brand')
+    await page.getByLabel('Logo height (pixels)', { exact: true }).fill('48')
     await page.getByRole('button', { name: 'Continue', exact: true }).click(); await page.getByRole('button', { name: 'Continue', exact: true }).click()
     await page.getByRole('button', { name: 'Save draft', exact: true }).click()
     await expect.poll(async () => (await api.call('GET', base)).data.title).toBe('Private changed title')
     await visitor.goto(url)
     await expect(visitor.getByRole('heading', { name: 'Customer service status', exact: true })).toBeVisible()
+    const draftIsolated = await (await anonymous.request.get('http://127.0.0.1:8040' + publicPath)).json()
+    expect(draftIsolated.logoHeight).toBe(96)
     await page.getByRole('link', { name: 'Review publication', exact: true }).click()
     await expect(page.getByText('The vanity URL changes on publication.', { exact: false })).toBeVisible()
     await expect(page.getByRole('img', { name: 'Referenced brand', exact: true })).toBeVisible()
@@ -174,6 +192,7 @@ test('Public status draft publication, embeds, private-data boundaries and avail
     await expect(visitor.getByRole('heading', { name: 'Private changed title', exact: true })).toBeVisible()
     await expect(visitor.getByRole('img', { name: 'Referenced brand', exact: true })).toBeVisible()
     await expect.poll(() => visitor.getByRole('img', { name: 'Referenced brand', exact: true }).evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true)
+    await expect.poll(async () => Math.round((await visitor.getByRole('img', { name: 'Referenced brand', exact: true }).boundingBox())!.height)).toBe(48)
     await page.getByRole('link', { name: 'Edit status page', exact: true }).click()
     await page.getByLabel('Page title', { exact: true }).fill('Retained conflict input')
     const current = await api.call('GET', base)

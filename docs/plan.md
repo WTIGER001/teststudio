@@ -16,6 +16,25 @@ Use the mm_dev profile and preserve existing services. Azure implementation and 
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
+## Current delivery: centered status-page content
+
+Center the logo, heading, period selector, rows, summaries, and legend in a maximum width of 72rem with automatic side margins. Preserve the configured full-viewport background and existing compact pill widths. Narrow pages and frames use their available width. Hosts can override --ts-status-content-width.
+STUDIO-STATUS-PAGES-001 passes in 7.131 seconds, run 20261108T145225.305888000-5d4d2bb3419d754f8564d43e, at 1920, 1280, and 390 pixels. It checks equal side margins, width bounds, compact pills, full-height background, existing logo sizing, sharing, help omission, and publication behavior. The independent consumer and SSR checks pass with library 0.2.1-dev.
+Release 0.8.2-dev publication and hosted checks remain pending. This refines 49 and 50; acceptance stays 50 verified of 57.
+
+## Completed delivery: remove public status Help
+
+The user requests a clean public status document without the application Help control. Remove it from standalone and iframe views while retaining management help. Record this explicit exception in the UI rules and acceptance 50.
+STUDIO-STATUS-PAGES-001 passes locally in 8.062 seconds, run 20261108T040919.382666000-2f47d1bdf79142a6b2ff8132, including the public URL, cross-origin iframe, dark document, and private management guidance. Release 0.8.1-dev from committed 8c8a81a is pushed and deployed as build 3f0963838890. Seventeen hosted identity, asset, health, rollout, and invalidation checks pass; the requesting public document visibly has no Help control.
+This refines 49 and 50; acceptance stays 50 verified of 57. Preserve existing status-page configuration.
+
+## Completed delivery: configurable logo height
+
+Add an optional Logo height (pixels) field in Appearance. A whole value from 1 through 1024 controls editor preview and published rendering; blank or API zero retains automatic bounds. Preserve proportions and shrink wide logos to fit their container.
+The shared Angular report and logo component use the same height contract. SQLite validation and publication isolation pass in 0.520 seconds; PostgreSQL passes with race detection in 3.046 seconds. STUDIO-STATUS-PAGES-001 passes in 8.088 seconds, run 20261108T034657.315445000-1c34f428c409b3472bc67f77, including exact desktop height, proportional narrow rendering, and published snapshot isolation.
+The independent package consumer and SSR checks pass with library 0.2.0-dev. Release 0.8.0-dev incorporates the committed shared reliability/library work and prior logo release. API contract 0.42.0 generates the new optional height field. Release 0.8.0-dev from committed dc558de is pushed and deployed as build 2320bb94582b. Twenty-eight hosted checks pass. The actual public logo renders at 192 pixels, and the requesting editor shows the field. The owned verification page is unpublished and owned sessions and temporary tabs close.
+This refines 12, 13, 49, and 50; acceptance stays 50 verified of 57.
+
 ## Completed delivery: optional status-page logos
 
 Appearance supports No logo, Upload image, and public HTTPS Image URL. Center the logo above the title, preserve proportions and uploaded transparency, and keep configuration changes in private drafts until publication.

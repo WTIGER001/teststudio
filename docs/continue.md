@@ -1,6 +1,6 @@
 # Continue TestStudio implementation
 
-Last reviewed: 2026-11-07. These notes describe the last verified state, not a live infrastructure inventory.
+Last reviewed: 2026-11-08. These notes describe the last verified state, not a live infrastructure inventory.
 Read this guide before historical continuation commands elsewhere in the plan.
 
 ## Resume in this order
@@ -16,7 +16,7 @@ Missing ignored receipts require focused inspection or recovery. They do not pro
 
 ## Concurrent optional-logo delivery
 
-Release 0.6.0-dev is deployed as build dca2ee3e4ddf from verified logo implementation 3d13a08. Both remote implementation and status-page-logo branches contain the implementation and final release notes. The local reliability delivery incorporates the upstream logo implementation and release notes. Its shared Angular model retains logo fields and centered rendering. Product 0.7.0-dev remains local and does not change the hosted artifact. Receipts and screenshots are output/aws-mmdev/status-logo-060 in this original checkout. The generic verification page is unpublished, owned sessions and tabs close, and no user page is edited.
+Release 0.6.0-dev is deployed as build dca2ee3e4ddf from verified logo implementation 3d13a08. Both remote implementation and status-page-logo branches contain the implementation and final release notes. The local reliability delivery incorporates the upstream logo implementation and release notes. Its shared Angular model retains logo fields and centered rendering. That shared source is now included in deployed 0.8.0-dev. Keep its broader target acceptance separate from the height verification. Receipts and screenshots are output/aws-mmdev/status-logo-060 in this original checkout. The generic verification page is unpublished, owned sessions and tabs close, and no user page is edited.
 
 ## Concurrent height delivery
 
@@ -49,12 +49,32 @@ Later documentation and operator-tooling commits do not change the deployed impl
 The public API, UI bundle, and portable image labels match this release.
 The local user demo is separate. Do not assume it runs the same release as the hosted installation.
 
+## Active delivery: centered status-page content
+
+The status component now centers all content in a maximum width of 72rem, with --ts-status-content-width available to hosts. Background color fills the public viewport; automatic margins bound wide layouts without stretching pills. Existing responsive behavior and logo proportions remain.
+Normal STUDIO-STATUS-PAGES-001 passes in 7.131 seconds, run 20261108T145225.305888000-5d4d2bb3419d754f8564d43e, with cleaned execution. Checks cover centered widths at 1920, 1280, and 390 pixels, compact pills, no horizontal overflow, full-height background, and prior public/private workflows. The independent built consumer and SSR checks pass at library 0.2.1-dev.
+Release 0.8.2-dev is prepared. Commit and push the verified change, build from committed source, review the ordinary image-only MMDev change set, and verify the requesting public page. Publication and target checks remain pending. Reuse passing build caches; preserve user page configuration and the separate original-checkout work.
+
+## Completed delivery: remove public status Help
+
+The public status component and route no longer render Help or configure a help topic. Standalone documents, embeds, loading, and error states share the minimal shell. Management Help remains available. The explicit public-document exception is recorded in UI guidance and acceptance 50.
+The UI build and normal STUDIO-STATUS-PAGES-001 pass. Run 20261108T040919.382666000-2f47d1bdf79142a6b2ff8132 completes in 8.062 seconds with cleaned execution and passing public, iframe, dark, and private-help checks.
+Release 0.8.1-dev from committed 8c8a81a is pushed and deployed as build 3f0963838890. The reviewed change set modifies only Service and Task. Seventeen hosted checks pass for API/UI identity, public component bytes, health, completed rollouts, and invalidation. The requesting public page visibly renders without Help. Temporary browser tabs close; no page configuration changes. Receipts are output/aws-mmdev/status-no-help-081.
+Retain passing ignored self-test, service, UI, and dependency caches in this managed checkout for later changes. Owned test servers and browsers are stopped; temporary helpers and verification databases are removed after evidence is copied to the original checkout. Preserve the original checkout’s separate work and the user’s demo and page configuration.
+
+## Completed delivery: configurable logo height
+
+The user requests pixel height for optional status-page logos. Appearance adds Logo height (pixels), a live proportional preview, and blank automatic sizing. Values from 1 through 1024 persist through the existing draft and publication workflow. Narrow containers shrink the rendered image without distortion.
+The shared Angular library report and component expose the same option. The built independent consumer and SSR checks pass at library 0.2.0-dev. Product 0.8.0-dev includes the committed shared reliability/library integration bf9ab8a and preserves its released logo support.
+The focused SQLite check passes in 0.520 seconds and PostgreSQL with race detection in 3.046 seconds. Normal STUDIO-STATUS-PAGES-001 passes in 8.088 seconds, run 20261108T034657.315445000-1c34f428c409b3472bc67f77; its execution is cleaned. Reuse these local checks and screenshots.
+Canonical OpenAPI 0.42.0 generates the matching field. Release 0.8.0-dev from committed dc558de, build 2320bb94582b, is pushed and deployed. The reviewed change set modifies only Service and Task. Twenty-eight hosted checks pass; the public browser measures the logo at exactly 192 by 192 pixels and centered. The requesting editor shows the height control with its existing logo and automatic value. No user page values or publication change. The generic verification page is unpublished, owned sessions and tabs close, and the helper is removed. Receipts are output/aws-mmdev/status-height-080. Library 0.2.0-dev is packed locally under output/angular-status; registry publication is separate.
+
 ## Completed delivery: optional status-page logos
 
 The user requests an optional centered logo, either uploaded or referenced. Appearance supports both sources and removal. The API validates uploaded PNG/JPEG data and public HTTPS URLs without fetching them; uploaded UI files preserve transparency and become bounded PNGs. Published snapshots retain their logo independently of draft edits.
 The UI build, focused SQLite cases, race-enabled PostgreSQL cases, generated client synchronization, and normal STUDIO-STATUS-PAGES-001 pass. The final browser run is 20261108T031201.518911000-baa5d1135a9b9ec9387d2f92, 7.171 seconds. Review retained screenshots rather than repeating these checks.
 Release 0.6.0-dev and canonical OpenAPI 0.40.0 are committed and pushed. Build dca2ee3e4ddf from 3d13a08 is deployed to MMDev. Nine local AWS schema/package checks and thirty-five hosted checks pass. The actual public image decodes at 256 by 64 pixels and centers correctly; the requesting account sees Logo source in Appearance. Its expired application session resumes through its existing organization/Google SSO without credential entry. No page values or publication are changed.
-Continue in this clean managed checkout on codex/status-page-logo. The original checkout has overlapping reliability and Angular library edits; preserve them. Both origin/codex/status-page-logo and origin/codex/implementation contain the logo release. The original local implementation branch is behind those remote commits; preserve its edits and incorporate upstream before another deployment. Include logo fields and rendering when merging the pending Angular library. Hosted receipts and screenshots are output/aws-mmdev/status-logo-060. The owned verification page is unpublished, owned sessions and temporary tabs close, and the helper is removed.
+Continue in this managed checkout on codex/status-page-logo. Both remote branches include the merged reliability/library source, logos, and configurable height. Preserve any work in the original checkout and incorporate upstream before another deployment. Hosted receipts and screenshots are output/aws-mmdev/status-logo-060. The owned verification page is unpublished, owned sessions and temporary tabs close, and the helper is removed.
 
 ## Latest delivered UI changes
 

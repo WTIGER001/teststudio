@@ -6,6 +6,10 @@ This document is the shared design reference for current and future TestStudio p
 Apply these rules when adding or changing a workflow. Reuse the existing components and feature services.
 Record exceptions, their reason, and remaining work in the implementation ledger.
 
+### Public status documents
+
+Public status URLs and their iframe embeds show status content without an application Help button or help drawer, as requested by the user. Keep contextual Introduction, Concepts, and Tutorials on authenticated status-page creation, editing, and management screens. This is the explicit exception to the per-page help rule.
+
 ### Design for tester tasks
 
 Lead with the task: create a test, run it, understand its result, or inspect its evidence.

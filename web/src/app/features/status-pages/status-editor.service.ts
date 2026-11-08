@@ -33,12 +33,12 @@ export class StatusEditorService {
   readonly embed = computed(() => '<iframe src="' + this.publicURL() + '" title="Service status" style="width:100%;height:600px;border:0" loading="lazy" referrerpolicy="no-referrer"></iframe>')
   readonly logoMode = signal<'none' | 'upload' | 'url'>('none'); readonly logoUploading = signal(false); readonly logoError = signal('')
   private readonly logoProcessing = inject(StatusLogoProcessingService)
-  readonly form = new FormGroup({ logo: new FormControl('', { nonNullable: true }), logoAlt: new FormControl('', { nonNullable: true }), slug: new FormControl('', { nonNullable: true }), title: new FormControl('', { nonNullable: true }), background: new FormControl('#ffffff', { nonNullable: true }), defaultWindow: new FormControl('24h', { nonNullable: true }), maxAgeSeconds: new FormControl(900, { nonNullable: true }) })
+  readonly form = new FormGroup({ logoHeight: new FormControl<number | null>(null), logo: new FormControl('', { nonNullable: true }), logoAlt: new FormControl('', { nonNullable: true }), slug: new FormControl('', { nonNullable: true }), title: new FormControl('', { nonNullable: true }), background: new FormControl('#ffffff', { nonNullable: true }), defaultWindow: new FormControl('24h', { nonNullable: true }), maxAgeSeconds: new FormControl(900, { nonNullable: true }) })
   readonly flow = new WizardController(3, step => this.validate(step))
   private generation = 0; private entriesDirty = false; private attempted = false; private slugGeneration = 0; private logoGeneration = 0
   constructor() {
     const route = inject(ActivatedRoute); this.mode.set(route.snapshot.data['mode'] || 'view')
-    route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => { this.checksLoaded=false; this.checks.set([]); this.checksCursor.set(''); this.environments.set([]); this.project.set(params.get('projectId') || ''); this.id.set(params.get('pageId') || randomId()); this.record.set(null); this.preview.set(null); this.entries.set([]); this.flow.reset(); this.entriesDirty = false; this.attempted = false; this.logoMode.set('none'); this.logoError.set(''); this.form.reset({ logo: '', logoAlt: '', slug: '', title: '', background: '#ffffff', defaultWindow: '24h', maxAgeSeconds: 900 }); void this.load(params.has('pageId')) })
+    route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => { this.checksLoaded=false; this.checks.set([]); this.checksCursor.set(''); this.environments.set([]); this.project.set(params.get('projectId') || ''); this.id.set(params.get('pageId') || randomId()); this.record.set(null); this.preview.set(null); this.entries.set([]); this.flow.reset(); this.entriesDirty = false; this.attempted = false; this.logoMode.set('none'); this.logoError.set(''); this.form.reset({ logoHeight: null, logo: '', logoAlt: '', slug: '', title: '', background: '#ffffff', defaultWindow: '24h', maxAgeSeconds: 900 }); void this.load(params.has('pageId')) })
     this.form.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(() => { this.preview.set(null) })
     this.form.controls.slug.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(() => { this.slugGeneration++; this.slugState.set('idle'); this.slugMessage.set(''); if (this.error().toLowerCase().includes('vanity url')) this.error.set('') })
     this.form.controls.slug.valueChanges.pipe(debounceTime(300), takeUntilDestroyed(this.destroy)).subscribe(() => { void this.checkSlug() })
@@ -46,7 +46,7 @@ export class StatusEditorService {
     this.destroy.onDestroy(() => { this.generation++; this.slugGeneration++; this.logoGeneration++ })
   }
   logoPreview(): string { const value = this.form.controls.logo.value; if (value.startsWith('data:image/png;base64,') || value.startsWith('data:image/jpeg;base64,')) return value; try { const url = new URL(value); return url.protocol === 'https:' && !url.username && !url.password ? value : '' } catch { return '' } }
-  logoSource(mode: 'none' | 'upload' | 'url'): void { this.logoGeneration++; this.logoUploading.set(false); this.logoMode.set(mode); this.logoError.set(''); this.form.controls.logo.setValue(''); if (mode === 'none') this.form.controls.logoAlt.setValue(''); this.form.markAsDirty() }
+  logoSource(mode: 'none' | 'upload' | 'url'): void { this.logoGeneration++; this.logoUploading.set(false); this.logoMode.set(mode); this.logoError.set(''); this.form.controls.logo.setValue(''); if (mode === 'none') { this.form.controls.logoAlt.setValue(''); this.form.controls.logoHeight.setValue(null) }; this.form.markAsDirty() }
   async uploadLogo(file: File): Promise<void> {
     if (this.logoUploading() || this.busy() || this.locked() || !this.canManage()) return
     const generation = ++this.logoGeneration; this.logoUploading.set(true); this.logoError.set(''); this.form.markAsDirty()
@@ -55,12 +55,13 @@ export class StatusEditorService {
     finally { if (generation === this.logoGeneration) this.logoUploading.set(false) }
   }
   dirty(): boolean { return this.form.dirty || this.entriesDirty }
-  definition(): StatusPageDefinition { return { id: this.id(), ...this.form.getRawValue(), slug: this.normalizedSlug(), defaultWindow: this.form.controls.defaultWindow.value as StatusPageDefinition['defaultWindow'], title: this.form.controls.title.value.trim(), maxAgeSeconds: Number(this.form.controls.maxAgeSeconds.value), probes: this.entries() } }
+  definition(): StatusPageDefinition { return { id: this.id(), ...this.form.getRawValue(), logoHeight: this.form.controls.logoHeight.value ?? 0, slug: this.normalizedSlug(), defaultWindow: this.form.controls.defaultWindow.value as StatusPageDefinition['defaultWindow'], title: this.form.controls.title.value.trim(), maxAgeSeconds: Number(this.form.controls.maxAgeSeconds.value), probes: this.entries() } }
   validate(step: number): boolean {
     const value = this.definition(); let error = ''
     if (step === 0 && (!value.title || !/^#[a-fA-F0-9]{6}$/.test(value.background) || value.maxAgeSeconds < 60 || value.maxAgeSeconds > 86400)) error = 'Enter a title, valid background, and freshness from 60 through 86400 seconds.'
     if (step === 0 && this.normalizedSlug() && (!/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(this.normalizedSlug()) || /^[a-f0-9]{40}$/.test(this.normalizedSlug()))) error = 'Use 1–63 letters, numbers, or hyphens for the vanity URL.'
     if (step === 0 && this.slugState() === 'taken') error = 'That vanity URL is already reserved. Choose another.'
+    if (step === 0 && this.form.controls.logoHeight.value !== null && (!Number.isInteger(this.form.controls.logoHeight.value) || Number(this.form.controls.logoHeight.value) < 1 || Number(this.form.controls.logoHeight.value) > 1024)) error = 'Enter a whole logo height from 1 through 1024 pixels, or leave it blank for automatic sizing.'
     if (step === 0 && this.logoError()) error = this.logoError()
     if (step === 0 && this.logoUploading()) error = 'Wait for the logo to finish processing.'
     if (step === 0 && this.logoMode() !== 'none' && !value.logo?.trim()) error = 'Choose a logo image or select No logo.'
