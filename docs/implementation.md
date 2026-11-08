@@ -24,6 +24,16 @@ STUDIO-STATUS-PAGES-001 passes after upstream logo integration with the new buck
 The user demo on port 8040 and unrelated workloads remain separate. Registry publication and hosted verification are not performed for this work. The parallel upstream logo implementation and release notes are integrated locally; shared components retain its optional fields and centered rendering while preserving the separately verified hosted release.
 This refines 12, 13, 34, 35, 36, 37, 39, 40, 41, 47, 49, and 50. The count stays **50 verified of 57**. Broad cross-profile criteria 41, 46, 51, 53, 54, 56, and 57 remain open.
 
+## Configurable logo height: MMDev delivery — 2026-11-07
+
+Release 0.8.0-dev uses committed dc558de572571eb14517d0cd259468711eb8c498, immutable build 2320bb94582b, created 2026-11-08T03:52:01.670Z with modified false. The ARM64 digest is sha256:1601cee035b451d8135381dd143d74b2584460eb12e568a6d3d3657de351dc5d. Image labels match the selected version, commit, and build identifier. Both remote delivery branches contain the commits.
+The reviewed ordinary change set modifies only TestStudio Service and Task. Task startup is 2026-11-08T03:56:08.765Z; UI publication is 2026-11-08T03:59:30Z. The stack reaches UPDATE_COMPLETE, both services retain completed healthy rollouts, and CloudFront invalidation completes.
+Twenty-eight hosted checks pass for API identity, exact published UI and height-component bytes, retained probe reuse, published and draft height isolation, replacement, restoring automatic sizing, withdrawal, and final deployment health. No new test execution occurs.
+The actual public browser decodes and centers a 192 by 192 pixel logo, verifying heights above the old 128-pixel cap. The requesting account sees Logo height (pixels) with its existing uploaded logo and automatic value. No user configuration or publication is changed.
+The generic verification page is unpublished, both owned administrator sessions close, temporary browser tabs close, and the original two user tabs remain. The temporary helper is removed. Receipts and screenshots are output/aws-mmdev/status-height-080.
+The independently built library 0.2.0-dev is packed locally under output/angular-status. Package registry publication remains separate. The release includes the committed shared reliability/library source; height checks do not close its broader worker or cross-profile acceptance.
+This refines 12, 13, 49, and 50. Acceptance stays **50 verified of 57**. Existing memberships, probes, schedules, the demo, and unrelated workloads are preserved.
+
 ## Configurable logo height: local implementation — 2026-11-07
 
 Appearance now includes an optional Logo height (pixels) field with a live preview. Whole values from 1 through 1024 persist in private definitions and published snapshots. Blank or zero preserves existing automatic sizing. Removing the logo clears its unused height.
@@ -31,7 +41,7 @@ Both the application preview and reusable Angular component calculate proportion
 API contract 0.42.0 generates optional logoHeight fields. Angular library 0.2.0-dev exposes the same typed option and retains automatic CSS tokens. Its independently installed consumer builds and SSR passes. The consumer lock identifies the built 0.2.0-dev package.
 The focused SQLite case passes in 0.520 seconds. The matching race-enabled PostgreSQL case passes in 3.046 seconds. They verify persisted and published heights, draft isolation, boundaries, invalid values, automatic sizing, and removal.
 The UI builds. Normal STUDIO-STATUS-PAGES-001 passes in 8.088 seconds, run 20261108T034657.315445000-1c34f428c409b3472bc67f77. It verifies a 96-pixel desktop logo, unchanged proportions on mobile, a private height change, and a separately published 48-pixel reference, alongside the existing authoring and sharing flow. The execution is cleaned and owned processes and browsers exit.
-Product 0.8.0-dev includes the committed shared reliability/library work and previous released logos. Publication and hosted verification remain pending. This refines 12, 13, 49, and 50; acceptance stays **50 verified of 57**.
+Product 0.8.0-dev includes the committed shared reliability/library work and previous released logos. Separate publication and hosted verification are recorded above. This refines 12, 13, 49, and 50; acceptance stays **50 verified of 57**.
 
 ## Optional status-page logos: MMDev delivery — 2026-11-07
 

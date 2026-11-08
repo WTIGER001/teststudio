@@ -16,7 +16,7 @@ Missing ignored receipts require focused inspection or recovery. They do not pro
 
 ## Concurrent optional-logo delivery
 
-Release 0.6.0-dev is deployed as build dca2ee3e4ddf from verified logo implementation 3d13a08. Both remote implementation and status-page-logo branches contain the implementation and final release notes. The local reliability delivery incorporates the upstream logo implementation and release notes. Its shared Angular model retains logo fields and centered rendering. Product 0.7.0-dev remains local and does not change the hosted artifact. Receipts and screenshots are output/aws-mmdev/status-logo-060 in this original checkout. The generic verification page is unpublished, owned sessions and tabs close, and no user page is edited.
+Release 0.6.0-dev is deployed as build dca2ee3e4ddf from verified logo implementation 3d13a08. Both remote implementation and status-page-logo branches contain the implementation and final release notes. The local reliability delivery incorporates the upstream logo implementation and release notes. Its shared Angular model retains logo fields and centered rendering. That shared source is now included in deployed 0.8.0-dev. Keep its broader target acceptance separate from the height verification. Receipts and screenshots are output/aws-mmdev/status-logo-060 in this original checkout. The generic verification page is unpublished, owned sessions and tabs close, and no user page is edited.
 
 ## Current product and release
 
@@ -27,33 +27,33 @@ UI improvements refine existing accepted items. They do not close the remaining 
 | Item | Last verified value |
 | --- | --- |
 | Hosted UI | https://teststudio.devfoodmarketmaker.com |
-| Product version | 0.6.0-dev; footer displays 0.6.0.dev |
-| Build identifier | dca2ee3e4ddf |
-| Build creation | 2026-11-08T03:15:30.865Z |
-| Implementation commit | 3d13a08ca5a3690d085e265705104f91cab44a0c |
+| Product version | 0.8.0-dev; footer displays 0.8.0.dev |
+| Build identifier | 2320bb94582b |
+| Build creation | 2026-11-08T03:52:01.670Z |
+| Implementation commit | dc558de572571eb14517d0cd259468711eb8c498 |
 | Source state at build | Committed source; modified is false |
-| Service image digest | sha256:35d7b1bb815c40df5b1eda33fdd719dbb7347ed129c74f5ef667cb5818b08347 |
-| Task startup | 2026-11-08T03:19:19.550Z |
-| UI publication | 2026-11-08T03:22:49Z |
+| Service image digest | sha256:1601cee035b451d8135381dd143d74b2584460eb12e568a6d3d3657de351dc5d |
+| Task startup | 2026-11-08T03:56:08.765Z |
+| UI publication | 2026-11-08T03:59:30Z |
 | Live version metadata | GET /api/v1/version; public and no-store |
 
 Later documentation and operator-tooling commits do not change the deployed implementation commit or its immutable build date.
 The public API, UI bundle, and portable image labels match this release.
 The local user demo is separate. Do not assume it runs the same release as the hosted installation.
 
-## Active delivery: configurable logo height
+## Completed delivery: configurable logo height
 
 The user requests pixel height for optional status-page logos. Appearance adds Logo height (pixels), a live proportional preview, and blank automatic sizing. Values from 1 through 1024 persist through the existing draft and publication workflow. Narrow containers shrink the rendered image without distortion.
 The shared Angular library report and component expose the same option. The built independent consumer and SSR checks pass at library 0.2.0-dev. Product 0.8.0-dev includes the committed shared reliability/library integration bf9ab8a and preserves its released logo support.
 The focused SQLite check passes in 0.520 seconds and PostgreSQL with race detection in 3.046 seconds. Normal STUDIO-STATUS-PAGES-001 passes in 8.088 seconds, run 20261108T034657.315445000-1c34f428c409b3472bc67f77; its execution is cleaned. Reuse these local checks and screenshots.
-Canonical OpenAPI 0.42.0 generates the matching field. Commit and push the verified height change, build from committed source, inspect existing MMDev rollout state, review the ordinary image-only change set, then verify a public height and the requesting editor. Release and target checks remain pending; the table above still identifies 0.6.0-dev.
+Canonical OpenAPI 0.42.0 generates the matching field. Release 0.8.0-dev from committed dc558de, build 2320bb94582b, is pushed and deployed. The reviewed change set modifies only Service and Task. Twenty-eight hosted checks pass; the public browser measures the logo at exactly 192 by 192 pixels and centered. The requesting editor shows the height control with its existing logo and automatic value. No user page values or publication change. The generic verification page is unpublished, owned sessions and tabs close, and the helper is removed. Receipts are output/aws-mmdev/status-height-080. Library 0.2.0-dev is packed locally under output/angular-status; registry publication is separate.
 
 ## Completed delivery: optional status-page logos
 
 The user requests an optional centered logo, either uploaded or referenced. Appearance supports both sources and removal. The API validates uploaded PNG/JPEG data and public HTTPS URLs without fetching them; uploaded UI files preserve transparency and become bounded PNGs. Published snapshots retain their logo independently of draft edits.
 The UI build, focused SQLite cases, race-enabled PostgreSQL cases, generated client synchronization, and normal STUDIO-STATUS-PAGES-001 pass. The final browser run is 20261108T031201.518911000-baa5d1135a9b9ec9387d2f92, 7.171 seconds. Review retained screenshots rather than repeating these checks.
 Release 0.6.0-dev and canonical OpenAPI 0.40.0 are committed and pushed. Build dca2ee3e4ddf from 3d13a08 is deployed to MMDev. Nine local AWS schema/package checks and thirty-five hosted checks pass. The actual public image decodes at 256 by 64 pixels and centers correctly; the requesting account sees Logo source in Appearance. Its expired application session resumes through its existing organization/Google SSO without credential entry. No page values or publication are changed.
-Continue in this clean managed checkout on codex/status-page-logo. The original checkout has overlapping reliability and Angular library edits; preserve them. Both origin/codex/status-page-logo and origin/codex/implementation contain the logo release. The original local implementation branch is behind those remote commits; preserve its edits and incorporate upstream before another deployment. Include logo fields and rendering when merging the pending Angular library. Hosted receipts and screenshots are output/aws-mmdev/status-logo-060. The owned verification page is unpublished, owned sessions and temporary tabs close, and the helper is removed.
+Continue in this managed checkout on codex/status-page-logo. Both remote branches include the merged reliability/library source, logos, and configurable height. Preserve any work in the original checkout and incorporate upstream before another deployment. Hosted receipts and screenshots are output/aws-mmdev/status-logo-060. The owned verification page is unpublished, owned sessions and temporary tabs close, and the helper is removed.
 
 ## Latest delivered UI changes
 

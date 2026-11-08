@@ -16,11 +16,11 @@ Use the mm_dev profile and preserve existing services. Azure implementation and 
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
-## Current delivery: configurable logo height
+## Completed delivery: configurable logo height
 
 Add an optional Logo height (pixels) field in Appearance. A whole value from 1 through 1024 controls editor preview and published rendering; blank or API zero retains automatic bounds. Preserve proportions and shrink wide logos to fit their container.
 The shared Angular report and logo component use the same height contract. SQLite validation and publication isolation pass in 0.520 seconds; PostgreSQL passes with race detection in 3.046 seconds. STUDIO-STATUS-PAGES-001 passes in 8.088 seconds, run 20261108T034657.315445000-1c34f428c409b3472bc67f77, including exact desktop height, proportional narrow rendering, and published snapshot isolation.
-The independent package consumer and SSR checks pass with library 0.2.0-dev. Release 0.8.0-dev incorporates the committed shared reliability/library work and prior logo release. API contract 0.42.0 generates the new optional height field. Publication and target checks remain pending.
+The independent package consumer and SSR checks pass with library 0.2.0-dev. Release 0.8.0-dev incorporates the committed shared reliability/library work and prior logo release. API contract 0.42.0 generates the new optional height field. Release 0.8.0-dev from committed dc558de is pushed and deployed as build 2320bb94582b. Twenty-eight hosted checks pass. The actual public logo renders at 192 pixels, and the requesting editor shows the field. The owned verification page is unpublished and owned sessions and temporary tabs close.
 This refines 12, 13, 49, and 50; acceptance stays 50 verified of 57.
 
 ## Completed delivery: optional status-page logos
