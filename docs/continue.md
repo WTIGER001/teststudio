@@ -14,6 +14,20 @@ Read this guide before historical continuation commands elsewhere in the plan.
 Do not restart completed setup or broad acceptance matrices merely because this is a new session.
 Missing ignored receipts require focused inspection or recovery. They do not prove the feature needs reimplementation.
 
+## Current priority: recording without tester installation
+
+The user approves an in-page recording browser for testers who need simple guidance and no developer setup.
+Follow [the hosted recording plan](hosted-recording-plan.md). This direction supersedes desktop-companion packaging as the main tester onboarding path.
+The local proof now captures a generic News click and visible-story check, shows plain-language review, and saves through the existing source draft service.
+Normal STUDIO-EMBEDDED-RECORDER-001 passes in 4.123 seconds, run 20261108T155702.239245000-2124450c8345cdca54c6958c. Its complete focused harness takes 19.87 seconds.
+Help, active and saved reload, uncertain input, lost save confirmation, Advanced source access, cancellation, focus, themes, narrow layout, and all eleven observed process shutdowns pass.
+Reuse receipts and screenshots under output/playwright/embedded-news-complete. Canonical OpenAPI 0.44.0 describes the local source; the hosted release remains 0.9.0-dev.
+The preview requires explicit loopback-only local configuration. It does not provide production browser isolation or a deployed hosted recorder.
+Continue with milestone 2: a separate isolated worker, authenticated private session transport, durable lease and cleanup recovery, bounded capacity, disconnect behavior, and reviewed target networking.
+Then complete the existing hosted preparation and execution installation and verify the actual News journey with an ordinary tester browser.
+Preserve the user's pending companion recording, project configuration, and port 8040 demo. No release, deployment, or push occurs for the local proof.
+The acceptance count remains 50 verified of 57. Items 21, 25, 49, and 50 are refined; broad worker and target acceptance remain open.
+
 ## Concurrent optional-logo delivery
 
 Release 0.6.0-dev is deployed as build dca2ee3e4ddf from verified logo implementation 3d13a08. Both remote implementation and status-page-logo branches contain the implementation and final release notes. The local reliability delivery incorporates the upstream logo implementation and release notes. Its shared Angular model retains logo fields and centered rendering. That shared source is now included in deployed 0.8.0-dev. Keep its broader target acceptance separate from the height verification. Receipts and screenshots are output/aws-mmdev/status-logo-060 in this original checkout. The generic verification page is unpublished, owned sessions and tabs close, and no user page is edited.

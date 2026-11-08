@@ -5,6 +5,15 @@ Track verified delivery in `implementation.md`.
 Start resumed work with [the continuation guide](continue.md). It summarizes the current release, remaining priorities, boundaries, and retained evidence.
 The user authorizes targeted tests and frequent feature commits. Remote pushes remain separate operations.
 
+## Current priority: recording without tester installation
+
+The user approves a browser inside TestStudio for testers who need simple instructions and no developer setup.
+Follow [the hosted recording plan](hosted-recording-plan.md). It supersedes desktop-companion packaging as the main tester onboarding direction.
+Milestone 1 implements the local in-page proof: a real News click and story visibility check, plain-language review, and saving through the existing draft service.
+The isolated hosted worker, hosted preparation and execution, and actual tester acceptance remain separate milestones.
+Preserve the existing desktop recorder, scoped permissions, explicit execution, private history, the user's pending recording, and port 8040 demo.
+Acceptance stays 50 verified of 57. Refine 21, 49, and 50 without closing broad hosted or cross-profile requirements.
+
 ## Completed delivery: individual reliability inspection in MMDev
 
 Release 0.9.0-dev combines the individual-check table and raw pagination with the current centered-page and logo behavior. Committed source 5468130 builds as 874f3a6eafce. Both focused browser workflows, fifteen hosted checks, and actual public pagination and pill drill-down pass. The reviewed deployment changes only Service and Task. The requesting browser loads the matching new version. See the latest ledger entry and continuation notes for receipts and navigation. This closes the earlier local-only deployment step and keeps broad acceptance at 50 verified of 57.

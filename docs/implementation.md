@@ -6,6 +6,30 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## In-page browser recording: local proof — 2026-11-08
+
+The user selects an installation-free recording browser for testers who need simple guidance.
+The local preview uses the pinned Playwright recorder in sandboxed headless Chromium and shows private browser frames inside TestStudio.
+Start recording, Check something appears, Finish recording, and Save test draft capture a generic News journey with a visible story assertion.
+Plain-language steps lead review. Advanced source editing retains the existing source editor and revision handling.
+The saved draft uses the recording identifier. Reload reopens its retained version, and a lost save confirmation recovers the exact saved document without a second draft or revision.
+Input uses bounded sequenced commands. Exact retries do not repeat actions; changed duplicates fail. An uncertain response requires a refreshed browser view. Finish waits for queued input.
+Owner, current source authority, suite archive, lifetime, and CSRF checks protect live frames and input. Responses remain private and uncached.
+The preview requires explicit loopback-only local configuration and permits one browser per API process. It is not the isolated hosted worker.
+
+Normal STUDIO-EMBEDDED-RECORDER-001 passes in 4.123 seconds, run 20261108T155702.239245000-2124450c8345cdca54c6958c. The complete focused harness takes 19.87 seconds.
+It uses real native recording and TestStudio's normal source preparation, publication, execution, timing, and private evidence for the authoring test.
+News navigation, story visibility, help preservation, active reload, uncertain input recovery, lost save acknowledgement, saved reload, Advanced source access, cancellation, keyboard exit, light, dark, and 390-pixel layout pass.
+Exactly one draft remains at revision 1. No user website test or user run is created. Both recording browsers stop. All eleven observed owned processes exit.
+Receipts and screenshots are output/playwright/embedded-news-complete. The earlier failed navigation frame is superseded by the final check; no temporary target or server remains.
+The focused native engine check passes in 0.90 seconds. The two recording API checks pass with race detection in 2.575 seconds. Lifetime and revoked-authority maintenance pass in 0.273 seconds.
+Recorder-role gating, generated client checks, preserved navigation rebinding, the Angular build, documentation links, and the stable 57-item count pass.
+Canonical OpenAPI is 0.44.0 for this local source. Product and hosted release remain 0.9.0-dev; no release artifact, deployment, or Git push occurs.
+
+See [the hosted recording plan](hosted-recording-plan.md). Remaining work is isolated worker transport and leases, network and target policy, hosted preparation and execution, complete remote website accessibility, and actual tester acceptance on MMDev.
+The user's pending hosted recording, project configuration, other services, and port 8040 demo remain unchanged.
+This refines 21, 25, 49, and 50. Acceptance stays **50 verified of 57**. No broad hosted or cross-profile criterion closes.
+
 ## Individual reliability checks: MMDev delivery — 2026-11-08
 
 Release 0.9.0-dev uses committed 546813094d3bbfd4dca8eeafa25b7c95909c7c1a, build 874f3a6eafce, created 2026-11-08T15:04:51.089Z with modified false. Its ARM64 digest is sha256:5745bc1925ff12f9f9efd6aec22407268139c302a4ce992a29736348295a5b9c. This delivery integrates the newer logo sizing, public Help omission, and centered content changes before publishing individual inspection. Angular library 0.3.0-dev is packed locally; npm registry publication remains separate. Canonical OpenAPI is 0.43.0.

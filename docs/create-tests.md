@@ -17,6 +17,11 @@ Empty installations show a suite setup link after selecting a type.
 
 ## Playwright browser tests
 
+The local in-page recording preview offers Start recording, Check something appears, Finish recording, and Save test draft.
+Its plain-language review keeps source editing under Advanced source editing.
+It requires operator configuration, and the isolated hosted worker remains pending. See [the hosted recording plan](hosted-recording-plan.md).
+The existing configured desktop paths below remain available.
+
 Choose a destination suite. Enter the recording address, permanent test identifier, and title.
 Select Start browser recording.
 The trusted local recorder opens a browser and Playwright Inspector on the server desktop.

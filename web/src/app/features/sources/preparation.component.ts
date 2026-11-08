@@ -11,7 +11,7 @@ import { preparationStateLabel } from './preparation-label'
 @Component({
   selector: 'ts-source-preparation', standalone: true, imports: [DatePipe, ReactiveFormsModule, BundleUploadComponent, PlaywrightEditorComponent, BrowserRecorderComponent], providers: [PreparationService, PlaywrightEditorService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (mode() === 'all' || mode() === 'playwright') { <ts-browser-recorder /><ts-playwright-editor /> }
+    @if (mode() === 'all' || mode() === 'playwright') { <ts-browser-recorder />@if (service.sources.recordingMode() === 'embedded') { <details [open]="service.sources.sourceEditingOpen()" (toggle)="service.sources.sourceEditingOpen.set($any($event.target).open)"><summary>Advanced source editing</summary><ts-playwright-editor /></details> } @else { <ts-playwright-editor /> } }
     @if (mode() === 'api') { <ts-playwright-editor [api]="true" /> }
     @if (mode() !== 'playwright' && mode() !== 'api' && service.bundleRunners().length && service.sources.workspace.can('sources.manage') && service.sources.workspace.can('catalog.import')) { <ts-source-bundle /> }
     <section class="panel" aria-labelledby="preparation-title">

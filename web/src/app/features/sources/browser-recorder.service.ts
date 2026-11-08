@@ -23,6 +23,7 @@ export class BrowserRecorderService {
   readonly cursor = signal('')
   readonly pairing = signal<BrowserRecordingPairing | null>(null)
   readonly copied = signal('')
+  readonly savedRecording = signal(false)
   readonly now = signal(Date.now())
   readonly flow = computed(() => recordingFlow(this.mode(), this.selected()?.data.state))
   readonly pairingExpired = computed(() => recordingPairingExpired(this.pairing(), this.now()))
@@ -34,12 +35,13 @@ export class BrowserRecorderService {
     title: new FormControl('Recorded browser flow', { nonNullable: true, validators: [Validators.required, Validators.maxLength(120)] })
   })
   private generation = 0
+  private recordingDraftId = ''
   private requestId = randomId()
   private reading = false
 
   constructor() {
     const destroy = inject(DestroyRef)
-    this.sources.form.controls.suite.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.selected.set(null); this.pairing.set(null); this.copied.set(''); this.sources.creationDirty.set(false); this.reading = false; this.requestId = randomId(); void this.load() })
+    this.sources.form.controls.suite.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.selected.set(null); this.pairing.set(null); this.copied.set(''); this.savedRecording.set(false); this.recordingDraftId = ''; this.sources.creationDirty.set(false); this.reading = false; this.requestId = randomId(); void this.load() })
     this.form.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.requestId = randomId(); this.sources.creationDirty.set(true) })
     const timer = setInterval(() => { this.now.set(Date.now()); const row = this.selected(); if (row && recordingActive(row.data.state) && !this.busy() && !this.reading) void this.read(row.id) }, 1500)
     destroy.onDestroy(() => { this.generation++; this.pairing.set(null); this.sources.creationDirty.set(false); clearInterval(timer) })
@@ -55,7 +57,7 @@ export class BrowserRecorderService {
     try {
       const [options, page] = await Promise.all([this.client.call('readBrowserRecordingOptions', this.scope()), this.client.call('listBrowserRecordings', { ...this.scope(), query: { limit: 30, cursor: more ? this.cursor() : undefined } })])
       if (generation !== this.generation) return
-      this.enabled.set(options.enabled); this.mode.set(options.mode); this.items.set(more ? [...this.items(), ...page.items] : page.items); this.cursor.set(page.cursor ?? '')
+      this.enabled.set(options.enabled); this.mode.set(options.mode); this.sources.recordingMode.set(options.mode); this.items.set(more ? [...this.items(), ...page.items] : page.items); this.cursor.set(page.cursor ?? '')
       if (!this.selected()) { const active = page.items.find(row => recordingActive(row.data.state)); if (active) { this.accept(active); void this.read(active.id) } }
     } catch (error) { if (generation === this.generation) this.fail(error) }
     finally { if (generation === this.generation) this.busy.set(false) }
@@ -70,6 +72,28 @@ export class BrowserRecorderService {
       if (generation === this.generation) { this.sources.creationDirty.set(false); this.accept(row); if (row.data.state === 'pairing') await this.issuePairing(row.id, generation) }
     } catch (error) { if (generation === this.generation) this.fail(error) }
     finally { if (generation === this.generation) this.busy.set(false) }
+  }
+
+  async saveRecording(): Promise<void> {
+    const row = this.selected()
+    if (!row || row.data.state !== 'ready' || this.editor.busy() || this.savedRecording()) return
+    if (this.sources.draftDirty() && !this.recordingDraftId) { this.error.set('Save or discard the open source draft before saving this recording.'); return }
+    if (!this.recordingDraftId) {
+      await this.editor.importRecording(row.id)
+      if (!this.editor.error()) this.recordingDraftId = this.editor.document()?.id ?? ''
+    }
+    if (this.editor.document()?.id !== this.recordingDraftId) { this.error.set('Reopen this recording before saving its draft.'); return }
+    if (!this.editor.document()) return
+    if (this.editor.saved()?.id === this.recordingDraftId && !this.sources.draftDirty()) { this.savedRecording.set(true); return }
+    await this.editor.save(true)
+    if (!this.editor.error() && this.editor.saved()) this.savedRecording.set(true)
+  }
+
+  async reviewSource(id: string): Promise<void> {
+    this.sources.sourceEditingOpen.set(true)
+    if (this.savedRecording() && this.editor.document()?.id === this.recordingDraftId) return
+    await this.editor.importRecording(id)
+    if (!this.editor.error() && this.selected()?.data.mode === 'embedded') this.recordingDraftId = this.editor.document()?.id ?? ''
   }
 
   active(): boolean { return recordingActive(this.selected()?.data.state) }
@@ -102,9 +126,10 @@ export class BrowserRecorderService {
     if (this.active() || this.busy() || this.sources.draftDirty()) return
     const previous = this.selected()?.data
     this.generation++; this.requestId = randomId(); this.reading = false
+    this.recordingDraftId = ''
     this.form.reset({ url: previous?.url ?? '', title: previous?.title ?? 'Recorded browser flow', testId: `REC-${randomId().slice(0, 8)}` }, { emitEvent: false })
     this.sources.creationDirty.set(false)
-    this.selected.set(null); this.pairing.set(null); this.copied.set(''); this.error.set('')
+    this.selected.set(null); this.pairing.set(null); this.copied.set(''); this.error.set(''); this.savedRecording.set(false)
   }
 
   resetConfiguration(): void {
@@ -137,7 +162,11 @@ export class BrowserRecorderService {
     finally { if (generation === this.generation) this.busy.set(false) }
   }
 
-  private accept(row: BrowserRecordingRecord): void { if (row.data.state !== 'pairing' || this.selected()?.id !== row.id) { this.pairing.set(null); this.copied.set('') }; this.selected.set(row); this.items.update(items => recordingRows(items, row)) }
+  private accept(row: BrowserRecordingRecord): void {
+    if (this.selected()?.id !== row.id) { this.savedRecording.set(false); this.recordingDraftId = '' }
+    if (row.data.state !== 'pairing' || this.selected()?.id !== row.id) { this.pairing.set(null); this.copied.set('') }
+    this.selected.set(row); this.items.update(items => recordingRows(items, row))
+  }
   private fail(error: unknown): void {
     this.error.set(error instanceof Error ? error.message : 'The browser recorder request failed.')
     if (error instanceof ApiError && (error.status === 401 || error.status === 403)) { this.selected.set(null); this.pairing.set(null); this.copied.set(''); this.items.set([]); this.enabled.set(false) }

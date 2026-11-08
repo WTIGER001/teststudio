@@ -97,4 +97,5 @@ func (s *Server) recordingRoutes(m *http.ServeMux) {
 		JSON(w, 200, draft)
 	}))
 	s.companionRoutes(m, service)
+	s.interactiveRecordingRoutes(m, service)
 }

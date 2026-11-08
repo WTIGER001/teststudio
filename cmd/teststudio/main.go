@@ -27,6 +27,7 @@ import (
 	"github.com/wtiger001/teststudio/adapters/execution/localplaywright"
 	httptrust "github.com/wtiger001/teststudio/adapters/httptrust/filesystem"
 	"github.com/wtiger001/teststudio/adapters/notifications/webhook"
+	recordingembedded "github.com/wtiger001/teststudio/adapters/recording/embeddedplaywright"
 	recordinglocal "github.com/wtiger001/teststudio/adapters/recording/localplaywright"
 	localsecrets "github.com/wtiger001/teststudio/adapters/secrets/local"
 	githubsource "github.com/wtiger001/teststudio/adapters/sources/github"
@@ -104,6 +105,8 @@ func run() error {
 	bootstrapIssuer := flag.String("bootstrap-issuer", "", "OIDC issuer for the initial installation administrator")
 	bootstrapSubject := flag.String("bootstrap-subject", "", "Exact OIDC subject for the initial installation administrator")
 	recordingCLI := flag.String("recording-cli", "", "Trusted installed Playwright CLI path; enables native desktop recording with --local")
+	recordingEmbeddedCLI := flag.String("recording-embedded-cli", "", "Trusted Playwright CLI for the local embedded-browser recording preview")
+	recordingEmbeddedHelper := flag.String("recording-embedded-helper", "scripts/record-browser-embedded.mjs", "Trusted embedded-browser recording helper")
 	recordingCompanion := flag.Bool("recording-companion", false, "Enable scoped desktop companion pairing for hosted browser recording")
 	recordingHelper := flag.String("recording-helper", "scripts/record-browser.mjs", "Trusted desktop recording helper script")
 	recordingDirectory := flag.String("recording-directory", ".data/recordings", "Private local browser recording directory")
@@ -118,7 +121,7 @@ func run() error {
 	if !role.Worker && (*workerOrigin != "" || *workerCertificate != "" || *workerKey != "") {
 		return errors.New("direct worker TLS settings require the worker service role")
 	}
-	if !role.API && !role.Worker && !role.Controller && (*workerAddr != "" || *local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *oidcCAFile != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *recordingCompanion || *preparedSources || *sourceBundles || *githubSources || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
+	if !role.API && !role.Worker && !role.Controller && (*workerAddr != "" || *local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *oidcCAFile != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *recordingEmbeddedCLI != "" || *recordingCompanion || *preparedSources || *sourceBundles || *githubSources || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
 		return errors.New("the artifact service role cannot configure identity bootstrap, sign-in, source preparation, recording, execution, or private worker transport")
 	}
 	if !role.API && !role.Worker && !role.Controller && (*kubernetesConfiguration != "" || *kubernetesEnvironment != "" || *ecsConfiguration != "" || *ecsEnvironment != "") {
@@ -144,10 +147,13 @@ func run() error {
 	if err := runtimeconfig.ValidateDatabaseHost(connection, *databaseHost, os.Environ()); err != nil {
 		return err
 	}
-	if *recordingCLI != "" && !*local {
+	if (*recordingCLI != "" || *recordingEmbeddedCLI != "") && (!*local || !role.API) {
 		return errors.New("native browser recording requires explicit loopback-only local mode")
 	}
-	if *recordingCompanion && (!role.API || *recordingCLI != "") {
+	if *recordingEmbeddedCLI != "" && *recordingCLI != "" {
+		return errors.New("choose one local browser recording mode")
+	}
+	if *recordingCompanion && (!role.API || *recordingCLI != "" || *recordingEmbeddedCLI != "") {
 		return errors.New("recording-companion requires an API role without a native desktop recorder")
 	}
 	if *recoverLocal && !*local {
@@ -385,6 +391,18 @@ func run() error {
 			return errors.New("native browser recording requires Node.js")
 		}
 		driver, err := recordinglocal.New(ctx, node, *recordingCLI, *recordingHelper, *recordingDirectory)
+		if err != nil {
+			return err
+		}
+		defer driver.Close()
+		recordingService.Driver = driver
+	}
+	if *recordingEmbeddedCLI != "" {
+		node, err := exec.LookPath("node")
+		if err != nil {
+			return errors.New("embedded recording requires the operator-installed Node.js runtime")
+		}
+		driver, err := recordingembedded.New(ctx, node, *recordingEmbeddedCLI, *recordingEmbeddedHelper, *recordingDirectory)
 		if err != nil {
 			return err
 		}

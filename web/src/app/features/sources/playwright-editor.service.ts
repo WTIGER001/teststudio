@@ -92,6 +92,13 @@ export class PlaywrightEditorService {
     try {
       const document = await this.client.call('readBrowserRecordingSource', { ...this.scope(), id })
       if (generation !== this.generation) return
+      if (document.id === id) {
+        try {
+          const retained = await this.client.call('readPlaywrightDraft', { ...this.scope(), id })
+          if (generation === this.generation) { this.accept(retained); this.message.set('This recording already has a saved draft. Its saved version is open.') }
+          return
+        } catch (error) { if (!(error instanceof ApiError) || error.status !== 404) throw error }
+      }
       this.saved.set(null); this.document.set(document); this.selectedPath.set(document.files[0]?.path ?? ''); this.sources.draftDirty.set(true)
       this.message.set('Recording opened for review. Save the draft to keep this version. Start-origin navigation is bound to the selected environment in the visible source. The original recording stays in your history. Its catalog starts with a needs-review safety label.')
     } catch (error) { if (generation === this.generation) this.fail(error) }
@@ -130,7 +137,7 @@ export class PlaywrightEditorService {
     this.edit({ ...value, files }); this.selectedPath.set(files[0]?.path ?? '')
   }
 
-  async save(): Promise<void> {
+  async save(recoverIdentical = false): Promise<void> {
     const document = this.document()
     if (!document || this.busy() || !document.name.trim()) return
     const generation = ++this.generation
@@ -141,7 +148,15 @@ export class PlaywrightEditorService {
       if (generation !== this.generation) return
       this.accept(row); this.selectedPath.set(path)
       this.message.set(`Draft saved at revision ${row.revision}. No tests were started.`)
-    } catch (error) { if (generation === this.generation) this.fail(error) }
+    } catch (error) {
+      if (recoverIdentical && !(error instanceof ApiError && (error.status === 401 || error.status === 403))) {
+        try {
+          const retained = await this.client.call('readPlaywrightDraft', { ...this.scope(), id: document.id })
+          if (generation === this.generation && JSON.stringify(retained.data) === JSON.stringify(document)) { this.accept(retained); this.message.set('The draft was saved. Its confirmation was recovered. No tests were started.'); return }
+        } catch {}
+      }
+      if (generation === this.generation) this.fail(error)
+    }
     finally { if (generation === this.generation) this.busy.set(false) }
   }
 

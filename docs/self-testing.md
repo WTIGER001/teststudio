@@ -4,6 +4,30 @@ TestStudio owns a new Playwright suite in `tests/selftest/playwright`.
 The suite runs through the normal catalog, publication, execution, timing, and evidence APIs.
 It copies no tests or configuration from another application.
 
+## In-page browser recording
+
+The focused harness packages exactly STUDIO-EMBEDDED-RECORDER-001 and executes it through TestStudio's normal source preparation, publication, environment-backed runner, timing, and private evidence.
+It drives a real headless recording browser against a new generic News fixture. It does not modify a user website or create a user run.
+Provide the current cached immutable browser runtime and gateway image identifiers and the built UI directory:
+
+```sh
+TESTSTUDIO_EMBEDDED_RECORDING_UI=1 \
+TESTSTUDIO_BROWSER_RUNTIME_IMAGE=IMMUTABLE_CACHED_RUNTIME \
+TESTSTUDIO_BROWSER_GATEWAY_IMAGE=IMMUTABLE_CACHED_GATEWAY \
+TESTSTUDIO_UI_DIRECTORY=ABSOLUTE_BUILT_UI_DIRECTORY \
+TESTSTUDIO_EMBEDDED_UI_OUTPUT=output/playwright/embedded-news-complete \
+  go test ./internal/sources \
+  -run '^TestEmbeddedRecorderCompletesNewsRecordingAndDraftThroughStudioExecution$' -count=1 -timeout=180s -v
+```
+
+The final test takes 4.123 seconds inside the runner and 19.87 seconds for the complete harness.
+It verifies News navigation, a visible story, plain-language review, saving without a code editor, help, reload, uncertain input recovery, lost save confirmation, one retained revision, Advanced source access, cancellation, focus, themes, and narrow layout.
+All eleven observed owned processes exit. Receipts and screenshots are output/playwright/embedded-news-complete.
+Reuse this evidence unless the behavior or pinned runtime changes.
+The standalone native adapter check uses TESTSTUDIO_EMBEDDED_RECORDING=1 with TestEmbeddedRecordingCapturesNewsAssertionAndClosesBrowser in adapters/recording/embeddedplaywright.
+It passes in 0.90 seconds and checks semantic locators, visibility assertions, exact input retries, changed-duplicate rejection, and owned shutdown.
+Hosted recording and browser-worker readiness remain unverified. See [the hosted recording plan](hosted-recording-plan.md).
+
 ## Hosted recorder workflow
 
 The opt-in TestHostedRecorderCompanionCompletesGuidedUIAndNativeCapture check prepares and executes one new Playwright authoring test through TestStudio.

@@ -1,5 +1,20 @@
 # Browser recording
 
+## In-page recording preview
+
+The user selects browser recording without tester installation as the next delivery.
+The [hosted recording plan](hosted-recording-plan.md) separates the local proof, isolated hosted worker, preparation and execution, and actual tester acceptance.
+The first local preview displays the recording browser inside TestStudio.
+Select Start recording, click News on a generic website, select Check something appears, and select a story.
+Finish recording opens a plain-language step review. Save test draft reuses the existing source draft service.
+Advanced source editing remains available. Saving does not prepare, publish, or execute.
+Help and page reload preserve the live session. Refresh browser view recovers an uncertain input without repeating it.
+Finish waits for queued input. Cancel closes the owned browser.
+This preview requires explicit loopback-only local configuration. It is not enabled in MMDev.
+The hosted worker and hosted browser execution remain separate work.
+
+## Existing desktop recording
+
 The local recorder uses Playwright codegen to capture browser actions and assertions.
 Open Create test, select Playwright browser test, and choose a suite.
 Enter a title and an HTTP or HTTPS start address without embedded credentials.

@@ -3,6 +3,7 @@ package recording
 import (
 	"context"
 	"errors"
+	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -47,6 +48,9 @@ func (s *Service) Available(ctx context.Context, user, project, suite string) (b
 
 func (s *Service) Mode() string {
 	if s.Driver != nil {
+		if _, ok := s.Driver.(InteractiveDriver); ok {
+			return "embedded"
+		}
 		return "local-desktop"
 	}
 	if s.CompanionEnabled {
@@ -92,7 +96,11 @@ func (s *Service) Start(ctx context.Context, user, project, suite string, input 
 	}
 	s.operation.Lock()
 	defer s.operation.Unlock()
-	row, err := s.reserve(ctx, user, project, suite, input, "")
+	mode := ""
+	if s.Mode() == "embedded" {
+		mode = "embedded"
+	}
+	row, err := s.reserve(ctx, user, project, suite, input, mode)
 	if err != nil {
 		return row, err
 	}
@@ -176,6 +184,7 @@ func (s *Service) Stop(ctx context.Context, user, project, suite, id string, can
 func (s *Service) finish(ctx context.Context, row storage.Record, value Session, snapshot Snapshot) (storage.Record, error) {
 	if snapshot.State == "failed" && snapshot.Code == "" {
 		snapshot.Code = value.Code
+		snapshot.Steps = value.Steps
 	}
 	if len(snapshot.Code) > ContentLimit || !utf8.ValidString(snapshot.Code) {
 		return storage.Record{}, errors.New("recorded code exceeds its UTF-8 text limit")
@@ -183,10 +192,14 @@ func (s *Service) finish(ctx context.Context, row storage.Record, value Session,
 	if snapshot.State != "recording" && snapshot.State != "ready" && snapshot.State != "cancelled" && snapshot.State != "failed" {
 		return storage.Record{}, errors.New("invalid recorder state")
 	}
-	if value.State == snapshot.State && value.Code == snapshot.Code && value.Error == snapshot.Error {
+	if len(snapshot.Steps) > 500 {
+		return storage.Record{}, errors.New("recording exceeds its 500 step limit")
+	}
+	if value.State == snapshot.State && value.Code == snapshot.Code && value.Error == snapshot.Error && reflect.DeepEqual(value.Steps, snapshot.Steps) {
 		return row, nil
 	}
 	value.State, value.Code, value.Error = snapshot.State, snapshot.Code, snapshot.Error
+	value.Steps = snapshot.Steps
 	result, err := s.save(ctx, row, value)
 	if errors.Is(err, storage.ErrConflict) {
 		return s.Store.Get(ctx, row.Bucket, row.ID)

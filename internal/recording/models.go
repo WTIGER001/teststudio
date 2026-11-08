@@ -30,6 +30,7 @@ type Session struct {
 	Actor      string    `json:"actor"`
 	State      string    `json:"state"`
 	Code       string    `json:"code,omitempty"`
+	Steps      []Step    `json:"steps,omitempty"`
 	Error      string    `json:"error,omitempty"`
 	CreatedAt  time.Time `json:"createdAt"`
 	DeadlineAt time.Time `json:"deadlineAt"`
@@ -39,6 +40,7 @@ type Snapshot struct {
 	State string
 	Code  string
 	Error string
+	Steps []Step
 }
 
 type Driver interface {

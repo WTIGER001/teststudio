@@ -28,7 +28,7 @@ import (
 )
 
 func TestControllerRejectsApplicationAndWorkerFlagsBeforeCreatingState(t *testing.T) {
-	for _, option := range []string{"local", "local-accounts", "recover-local-admin", "oidc-config", "bootstrap-subject", "worker-addr", "prepared-sources", "source-bundles", "go-images", "recording-cli", "recording-companion", "artifact-addr", "ui", "scheduler", "execution-worker"} {
+	for _, option := range []string{"local", "local-accounts", "recover-local-admin", "oidc-config", "bootstrap-subject", "worker-addr", "prepared-sources", "source-bundles", "go-images", "recording-cli", "recording-embedded-cli", "recording-embedded-helper", "recording-companion", "artifact-addr", "ui", "scheduler", "execution-worker"} {
 		t.Run(option, func(t *testing.T) {
 			originalFlags, originalArgs := flag.CommandLine, os.Args
 			t.Cleanup(func() { flag.CommandLine, os.Args = originalFlags, originalArgs })

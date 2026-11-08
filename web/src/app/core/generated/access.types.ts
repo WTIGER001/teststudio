@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.43.0"
+export const accessContractVersion = "0.44.0"
 
 export type APIAuthentication = { "binding": string; "header"?: string; "scheme": "bearer" | "basic" | "header" }
 export type APIRequestPolicy = { "authentication"?: APIAuthentication; "maxRequests": number; "maxResponseBytes": number; "redactFields"?: (string)[]; "rules": (APIRequestRule)[] }
@@ -10,12 +10,15 @@ export type AssignmentBindings = { "application"?: string; "team"?: string }
 export type AssignmentDefinition = { "principalId": string; "principalKind": "user" | "group"; "reason": string; "roleId": string }
 export type AssignmentPage = { "cursor"?: string; "items": (AssignmentRecord)[]; "partial": boolean }
 export type AssignmentRecord = { "applicationId"?: string; "data": Assignment; "id": string; "projectId"?: string; "revision": number; "updatedAt"?: string }
-export type BrowserRecording = { "actor": string; "code"?: string; "createdAt": string; "deadlineAt": string; "error"?: string; "id": string; "mode"?: "companion"; "projectId": string; "state": string; "suiteId": string; "testId": string; "title": string; "url": string }
+export type BrowserRecording = { "actor": string; "code"?: string; "createdAt": string; "deadlineAt": string; "error"?: string; "id": string; "mode"?: "companion" | "embedded"; "projectId": string; "state": string; "steps"?: (BrowserRecordingStep)[]; "suiteId": string; "testId": string; "title": string; "url": string }
+export type BrowserRecordingAction = { "action": "click" | "text" | "key" | "scroll" | "assert-visible" | "record"; "key"?: string; "sequence": number; "text"?: string; "x"?: number; "y"?: number }
 export type BrowserRecordingInput = { "id": string; "testId": string; "title": string; "url": string }
 export type BrowserRecordingOptions = { "durationLimitSeconds": number; "enabled": boolean; "mode": string }
 export type BrowserRecordingPage = { "cursor"?: string; "items": (BrowserRecordingRecord)[] }
 export type BrowserRecordingPairing = { "expiresAt": string; "id": string; "token": string }
 export type BrowserRecordingRecord = { "data": BrowserRecording; "id": string; "revision": number; "updatedAt": string }
+export type BrowserRecordingStep = { "description": string; "kind": string }
+export type BrowserRecordingView = { "height": number; "image": string; "mode": string; "sequence": number; "steps": (BrowserRecordingStep)[]; "url": string; "width": number }
 export type CLIConfirmation = { "approve": boolean; "clientName": string; "code": string }
 export type CLIExchange = { "session"?: CLIGrant; "state": string }
 export type CLIGrant = { "cookie": string; "csrfToken": string; "expiresAt": string }
@@ -308,8 +311,10 @@ export interface AccessRequests {
   readBrowserRecordingOptions: { "project": string; "suite": string }
   readBrowserRecording: { "project": string; "suite": string; "id": string }
   changeBrowserRecordingState: { "project": string; "suite": string; "id": string; "action": string }
+  sendBrowserRecordingInput: { "project": string; "suite": string; "id": string; body: BrowserRecordingAction }
   createBrowserRecordingPairing: { "project": string; "suite": string; "id": string }
   readBrowserRecordingSource: { "project": string; "suite": string; "id": string }
+  readBrowserRecordingView: { "project": string; "suite": string; "id": string }
   listCatalogDrafts: { "project": string; "suite": string }
   createCatalogDraft: { "project": string; "suite": string; body: SourceCatalogArtifact }
   readCatalogDraft: { "project": string; "suite": string; "id": string }
@@ -498,8 +503,10 @@ export interface AccessResponses {
   readBrowserRecordingOptions: BrowserRecordingOptions
   readBrowserRecording: BrowserRecordingRecord
   changeBrowserRecordingState: BrowserRecordingRecord
+  sendBrowserRecordingInput: BrowserRecordingView
   createBrowserRecordingPairing: BrowserRecordingPairing
   readBrowserRecordingSource: PlaywrightDraft
+  readBrowserRecordingView: BrowserRecordingView
   listCatalogDrafts: CatalogDraftPage
   createCatalogDraft: CatalogDraftRecord
   readCatalogDraft: CatalogDraftRecord
@@ -688,8 +695,10 @@ export const accessOperations = {
   readBrowserRecordingOptions: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/options" },
   readBrowserRecording: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}" },
   changeBrowserRecordingState: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/actions/{action}" },
+  sendBrowserRecordingInput: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/input" },
   createBrowserRecordingPairing: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/pairing" },
   readBrowserRecordingSource: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/source" },
+  readBrowserRecordingView: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/view" },
   listCatalogDrafts: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/catalog-drafts" },
   createCatalogDraft: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/catalog-drafts" },
   readCatalogDraft: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/catalog-drafts/{id}" },

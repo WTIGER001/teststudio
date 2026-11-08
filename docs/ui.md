@@ -381,6 +381,14 @@ Keep cancellation and retained-source access available through their existing pe
 
 ### Browser recording
 
+The user selects an in-page recording browser for testers who need simple guidance and no installation.
+Its local proof uses Configure, Record, and Review. Label primary actions Start recording, Check something appears, Finish recording, and Save test draft.
+Show plain-language captured steps and preserve the existing draft-saving service. Keep the source editor in Advanced source editing.
+Keep help, focus, current project and suite, private history, explicit publication and execution, and recovery intact.
+After uncertain input, refresh the view before further actions. Never repeat a click automatically.
+Finish waits for queued input. Local evidence does not establish the hosted worker or complete remote-website accessibility.
+See [the hosted recording plan](hosted-recording-plan.md).
+
 Local recording uses Configure, Record, and Review. Hosted recording adds Connect desktop.
 Use the shared stepper and focusable heading. Progress follows server state; completed recording steps do not replay browser creation.
 Keep the title and start address visible. Generate the permanent identifier under Advanced recording details.
