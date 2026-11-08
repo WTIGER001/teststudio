@@ -14,6 +14,15 @@ Read this guide before historical continuation commands elsewhere in the plan.
 Do not restart completed setup or broad acceptance matrices merely because this is a new session.
 Missing ignored receipts require focused inspection or recovery. They do not prove the feature needs reimplementation.
 
+## Current correction: shared form field alignment
+
+Descriptions caused shared grid fields to stretch their labels and controls to match a taller neighbor. The shared .field layout now starts its content at the top and retains normal control heights.
+Normal STUDIO-HOSTED-RECORDER-001 passes at 1280, 900, and 390 pixels with wrapped help, light and dark themes, and the existing recording, review, recovery, saving, cancellation, help, and keyboard workflow.
+Run 20261108T174217.731170000-0c6c67ceb614d9e3f4b3361f takes 9.863 seconds; the focused harness takes 38.64 seconds. All owned browser containers, gateways, volumes, and three observed host processes close.
+Reuse output/playwright/form-field-alignment. The initial failed check used an incorrect description locator and is superseded by this passing run.
+Patch 0.10.1-dev is prepared for MMDev publication. Inspect its release receipt before starting another deployment. The private recording host is unchanged.
+This refines 49 and 50. Acceptance remains 50 verified of 57.
+
 ## Azure planning: direct installation first
 
 On 2026-11-08 the user selects an installation into their own Azure subscription before Marketplace delivery.

@@ -62,6 +62,13 @@ It uses native UUID generation when available and secure random bytes otherwise.
 Do not call crypto.randomUUID directly from feature code. Ordinary HTTP origins can omit that method.
 Missing secure randomness produces an explicit error. Never substitute weak random values.
 
+### Keep form fields aligned
+
+Keep labels, controls, descriptions, and validation messages in their natural vertical order inside the shared field layout.
+Align field content to the start. A neighboring description must not stretch another label or control to fill its height.
+Side-by-side controls with single-line labels keep matching top edges and normal control heights, including when help text wraps.
+Keep descriptions and errors below their own control. On narrow screens, stack complete fields without overlapping text or widening the page.
+
 ### Preserve work and explain recovery
 
 Back and completed step navigation preserve values. Lookup refreshes and help must not reset edits.

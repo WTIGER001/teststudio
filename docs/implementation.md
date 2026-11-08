@@ -16,6 +16,16 @@ Marketplace publication and billing remain deferred. The exact Azure target rema
 Preserve staged adapters, concurrent recording work, AWS workloads, and the port 8040 demo. Historical Azure inspector work remains deferred.
 This plans work under 41, 46, 51, 53, 54, 56, and 57. No acceptance item advances to verified; the total remains 50 of 57.
 
+## Shared form field alignment — 2026-11-08
+
+The user reports descriptions shifting adjacent form controls and changing their heights. Shared .field grids now use align-content: start so labels, controls, and helper text keep their natural sizes and order.
+The rule applies across forms, including the browser recorder. It retains descriptions below their own control without empty helper placeholders or fixed field heights. Shared UI guidance records this requirement.
+The Angular build passes. Normal STUDIO-HOSTED-RECORDER-001 verifies matching input top edges and heights at 1280 and 900 pixels, wrapped description text, a stacked 390-pixel layout, light and dark themes, and no horizontal overflow.
+It also retains the News recording, visible story, review, one revision-1 draft, reload, input and save recovery, help, keyboard, and cancellation checks.
+Run 20261108T174217.731170000-0c6c67ceb614d9e3f4b3361f passes in 9.863 seconds. The complete harness takes 38.64 seconds. Both recording containers, gateways, their volumes, and all three observed host processes close.
+Receipts and screenshots are output/playwright/form-field-alignment. The earlier failed description-selector check is superseded by the final passing run.
+Product 0.10.1-dev is prepared for publication. Target deployment remains separate from this local evidence. This refines 49 and 50; acceptance remains **50 verified of 57**.
+
 ## Private recording worker: MMDev deployment — 2026-11-08
 
 The user authorizes deployment of the isolated in-page recorder. Product 0.10.0-dev from committed 7f1a023 builds as 852ce753cf8b and is deployed in MMDev.
