@@ -95,6 +95,7 @@ Supported status tokens are passed, failed, timeout, flaky, and unknown under th
 Use --ts-status-foreground and --ts-status-background for surfaces and text.
 The defaults inherit the host font and foreground, so light, dark, and system themes can supply their own values.
 Other tokens control padding, top padding, minimum height, radius, heading size, title size, description size, row spacing, summary width, option colors, and tooltip colors. Their names appear in the component styles under the same prefix.
+Optional logo and logoAlt report fields preserve uploaded images or public HTTPS references. The page centers the logo above its title, preserves proportions and transparency, and shows a readable fallback after an image load failure. Use --ts-status-logo-width and --ts-status-logo-height to adjust its bounds.
 The page uses host styling by default. Set useReportBackground to true to honor the published background and choose contrasting text.
 Scoped styles require no private CSS selectors or deep overrides.
 Title, description, and selected-detail templates are available through titleTemplate, descriptionTemplate, and detailTemplate inputs on both components.

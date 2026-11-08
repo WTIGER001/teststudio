@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.40.0"
+export const accessContractVersion = "0.41.0"
 
 export type APIAuthentication = { "binding": string; "header"?: string; "scheme": "bearer" | "basic" | "header" }
 export type APIRequestPolicy = { "authentication"?: APIAuthentication; "maxRequests": number; "maxResponseBytes": number; "redactFields"?: (string)[]; "rules": (APIRequestRule)[] }
@@ -193,14 +193,14 @@ export type SourceUploadPage = { "cursor"?: string; "items": (SourceUploadRecord
 export type SourceUploadPreview = { "plan"?: SourceCatalogImportPlan; "upload": SourceUploadRecord }
 export type SourceUploadRecord = { "data": SourceUpload; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
 export type StandardAssignmentReplacement = { "previousRoleId"?: string; "reason": string; "roleId": "builtin.teststudio.reader" | "builtin.teststudio.member" | "builtin.teststudio.developer" | "builtin.teststudio.contributor" | "builtin.teststudio.owner" }
-export type StatusPage = { "background": string; "defaultWindow": "24h" | "7d" | "1m" | "1y" | "all"; "id": string; "maxAgeSeconds": number; "probes": (StatusPageEntry)[]; "publicToken": string; "published"?: StatusPageDefinition; "publishedAt"?: string; "publisher"?: string; "slug"?: string; "title": string }
+export type StatusPage = { "background": string; "defaultWindow": "24h" | "7d" | "1m" | "1y" | "all"; "id": string; "logo"?: string; "logoAlt"?: string; "maxAgeSeconds": number; "probes": (StatusPageEntry)[]; "publicToken": string; "published"?: StatusPageDefinition; "publishedAt"?: string; "publisher"?: string; "slug"?: string; "title": string }
 export type StatusPageAvailability = { "coveragePercent": number; "downSeconds": number; "percent": number | null; "since": string; "unknownSeconds": number; "upSeconds": number }
-export type StatusPageDefinition = { "background": string; "defaultWindow": "24h" | "7d" | "1m" | "1y" | "all"; "id": string; "maxAgeSeconds": number; "probes": (StatusPageEntry)[]; "slug"?: string; "title": string }
+export type StatusPageDefinition = { "background": string; "defaultWindow": "24h" | "7d" | "1m" | "1y" | "all"; "id": string; "logo"?: string; "logoAlt"?: string; "maxAgeSeconds": number; "probes": (StatusPageEntry)[]; "slug"?: string; "title": string }
 export type StatusPageEntry = { "description": string; "environmentId"?: string; "executionLocation"?: string; "monitor"?: boolean; "probeId"?: string; "suiteId"?: string; "testId"?: string; "title": string }
 export type StatusPageList = { "cursor"?: string; "items": (StatusPageRecord)[] }
 export type StatusPagePoint = { "at": string; "state": string }
 export type StatusPageRecord = { "data": StatusPage; "id": string; "projectId"?: string; "revision": number; "updatedAt"?: string }
-export type StatusPageReport = { "asOf": string; "background": string; "maxAgeSeconds": number; "probes": (StatusPageRow)[]; "title": string; "window": string }
+export type StatusPageReport = { "asOf": string; "background": string; "logo"?: string; "logoAlt"?: string; "maxAgeSeconds": number; "probes": (StatusPageRow)[]; "title": string; "window": string }
 export type StatusPageRow = { "availability": StatusPageAvailability; "buckets": (ReliabilityBucket)[]; "contextCount": number; "description": string; "history": (StatusPagePoint)[]; "metric": "availability" | "outcomes"; "passRate": number | null; "state": string; "title": string; "totals": ReliabilityTotals }
 export type StatusPageSlugAvailability = { "available": boolean; "slug": string }
 export type SuiteDefinition = { "activeReleaseId"?: string; "applications": (string)[] | null; "archived": boolean; "capture"?: SourceCapturePolicy; "description": string; "id": string; "name": string; "requiresTarget": boolean; "timing"?: SourceTimingPolicy }

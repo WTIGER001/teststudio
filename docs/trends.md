@@ -187,7 +187,7 @@ Keep browser-dependent behavior safe for server rendering and hydration. Do not 
 5. Check representative multi-year data volumes and bounded refresh work. Record query cost and freshness, then verify deployment profiles separately. Add coarser stored summaries only when measured workloads justify them.
 
 Local implementation and focused verification refine acceptance 34, 35, 36, 37, 39, 40, 41, and 47, with supporting access, UI, and help scope under 12, 13, 49, and 50.
-Cross-profile evidence remains under 56 and 57. The count remains 50 verified of 57. Target publication and upstream logo integration remain separate from these local checks.
+Cross-profile evidence remains under 56 and 57. The count remains 50 verified of 57. Target publication remains separate from these local checks. The upstream logo implementation is integrated locally and its fields and centered rendering are preserved.
 
 ### Reliability API and operation
 

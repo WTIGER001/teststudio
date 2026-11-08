@@ -5,7 +5,7 @@ Read this guide before historical continuation commands elsewhere in the plan.
 
 ## Resume in this order
 
-1. Read AGENTS.md and check the branch and working tree. The active branch is codex/implementation.
+1. Read AGENTS.md and check the branch and working tree. The logo delivery branch is codex/status-page-logo. The original checkout retains codex/implementation and concurrent reliability edits.
 2. Read the active delivery sections at the start of [the plan](plan.md).
 3. Read the Acceptance criteria section in [the ledger](implementation.md). It contains the authoritative 57 checkboxes.
 4. Continue the latest user request first. Otherwise select one next milestone below and read its implementation before changing it.
@@ -16,7 +16,7 @@ Missing ignored receipts require focused inspection or recovery. They do not pro
 
 ## Concurrent optional-logo delivery
 
-Release 0.6.0-dev is deployed as build dca2ee3e4ddf from verified logo implementation 3d13a08. Both remote implementation and status-page-logo branches contain the implementation and final release notes. The original checkout retains its older local branch base and uncommitted reliability/library edits. Preserve those edits and incorporate upstream before pushing or deploying. Preserve logo fields and centered rendering when adopting the Angular library. Receipts and screenshots are output/aws-mmdev/status-logo-060 in this original checkout. The generic verification page is unpublished, owned sessions and tabs close, and no user page is edited.
+Release 0.6.0-dev is deployed as build dca2ee3e4ddf from verified logo implementation 3d13a08. Both remote implementation and status-page-logo branches contain the implementation and final release notes. The local reliability delivery incorporates the upstream logo implementation and release notes. Its shared Angular model retains logo fields and centered rendering. Product 0.7.0-dev remains local and does not change the hosted artifact. Receipts and screenshots are output/aws-mmdev/status-logo-060 in this original checkout. The generic verification page is unpublished, owned sessions and tabs close, and no user page is edited.
 
 ## Current product and release
 
@@ -41,9 +41,16 @@ Later documentation and operator-tooling commits do not change the deployed impl
 The public API, UI bundle, and portable image labels match this release.
 The local user demo is separate. Do not assume it runs the same release as the hosted installation.
 
+## Completed delivery: optional status-page logos
+
+The user requests an optional centered logo, either uploaded or referenced. Appearance supports both sources and removal. The API validates uploaded PNG/JPEG data and public HTTPS URLs without fetching them; uploaded UI files preserve transparency and become bounded PNGs. Published snapshots retain their logo independently of draft edits.
+The UI build, focused SQLite cases, race-enabled PostgreSQL cases, generated client synchronization, and normal STUDIO-STATUS-PAGES-001 pass. The final browser run is 20261108T031201.518911000-baa5d1135a9b9ec9387d2f92, 7.171 seconds. Review retained screenshots rather than repeating these checks.
+Release 0.6.0-dev and canonical OpenAPI 0.40.0 are committed and pushed. Build dca2ee3e4ddf from 3d13a08 is deployed to MMDev. Nine local AWS schema/package checks and thirty-five hosted checks pass. The actual public image decodes at 256 by 64 pixels and centers correctly; the requesting account sees Logo source in Appearance. Its expired application session resumes through its existing organization/Google SSO without credential entry. No page values or publication are changed.
+Continue in this clean managed checkout on codex/status-page-logo. The original checkout has overlapping reliability and Angular library edits; preserve them. Both origin/codex/status-page-logo and origin/codex/implementation contain the logo release. The original local implementation branch is behind those remote commits; preserve its edits and incorporate upstream before another deployment. Include logo fields and rendering when merging the pending Angular library. Hosted receipts and screenshots are output/aws-mmdev/status-logo-060. The owned verification page is unpublished, owned sessions and temporary tabs close, and the helper is removed.
+
 ## Latest delivered UI changes
 
-The copy-button release used the managed checkout /Users/johnbauer/.codex/worktrees/status-sharing-copy/teststudio. The app retains it as this chat’s primary checkout and rejects archival. It is clean, has no owned processes, and has no temporary build data after evidence is copied here. Use /Users/johnbauer/Dev/Personal/teststudio explicitly to resume the shared codex/implementation branch and preserve its concurrent reliability edits.
+The logo and copy-button releases use this managed checkout. The app retains it as this chat’s primary checkout and rejects archival. Evidence is retained in the original checkout; owned temporary build data and processes are cleaned. Keep logo work here on codex/status-page-logo. Preserve and update the separate shared implementation branch before continuing its reliability work.
 
 Release 0.5.1-dev adds Copy Public URL and Copy Iframe embed code beside the sharing fields. Both announce success or explain manual copying when browser clipboard access is unavailable. The normal local browser workflow passes in 6.709 seconds, run 20261108T025119.540693000-f97987f5b8ae0d58e4383b5e; sixteen hosted identity, asset, health, rollout, and invalidation checks pass. The requesting account sees both buttons. Its page remains unchanged and the temporary tab closes. Receipts are output/aws-mmdev/status-copy-051.
 
@@ -104,9 +111,9 @@ The requesting account’s actual browser verifies the saved detail page and ded
 The approved [shared reliability design](trends.md#shared-reliability-capture) is implemented locally across native HTTP, Go, browser, and API result paths, including unknown terminal selections, atomic capture, safe replay, retained-history backfill, hourly and daily summaries, and bounded display buckets.
 Time-based availability requires an explicit reporting policy and current definition/target matching. Ordinary tests retain outcome and timing history without implied uptime.
 The [Angular library](../web/projects/status/README.md), @wtiger001/teststudio-angular 0.1.0-dev, supplies a stylable bar, page, and optional public client. TestStudio reuses it. An independently installed Angular 22.2.4 consumer verifies styling, cross-origin data, withdrawal, cleanup, and server rendering.
-Product 0.7.0-dev is prepared locally. API contract 0.40.0 and database metadata version 2 cover this delivery. Compact reliability data has no automatic expiry; evidence retention remains separate. Installation export/import preserves all reliability tables and pending jobs.
+Product 0.7.0-dev is prepared locally. API contract 0.41.0 and database metadata version 2 cover this delivery. Compact reliability data has no automatic expiry; evidence retention remains separate. Installation export/import preserves all reliability tables and pending jobs.
 The ledger records focused SQLite/PostgreSQL checks, the normal browser receipts, and dense-year and multi-year measurements. Acceptance remains 50 verified of 57.
-Registry publication and target deployment remain pending. Preserve the concurrent logo release described above; incorporate its upstream implementation and centered logo rendering before publishing or deploying this checkout. The local Angular package does not replace that integration gate.
+Registry publication and target deployment remain pending. The upstream logo implementation is integrated locally and its separately verified hosted release remains intact.
 
 ## Next implementation priorities
 

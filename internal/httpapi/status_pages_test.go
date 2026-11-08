@@ -173,10 +173,10 @@ func TestStatusPagesHistoryIsCompleteAndTargetSpecific(t *testing.T) {
 		response.Body.Close()
 		policy := response.Header.Get("Content-Security-Policy")
 		if strings.HasPrefix(path, "/status/") {
-			if !strings.Contains(policy, "frame-ancestors *") {
+			if !strings.Contains(policy, "frame-ancestors *") || !strings.Contains(policy, "img-src 'self' data: https:") {
 				t.Fatal(policy)
 			}
-		} else if !strings.Contains(policy, "frame-ancestors 'none'") {
+		} else if !strings.Contains(policy, "frame-ancestors 'none'") || !strings.Contains(policy, "img-src 'self' data: blob: https:") {
 			t.Fatal(policy)
 		}
 	}

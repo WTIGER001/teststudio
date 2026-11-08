@@ -16,15 +16,23 @@ Use the mm_dev profile and preserve existing services. Azure implementation and 
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
+## Completed delivery: optional status-page logos
+
+Appearance supports No logo, Upload image, and public HTTPS Image URL. Center the logo above the title, preserve proportions and uploaded transparency, and keep configuration changes in private drafts until publication.
+Validate bounded uploaded PNG/JPEG data and image URLs through existing Project status-page authority. Expose only the published logo and alternative text. Never fetch a referenced image from the service. Private Project covers stay separate.
+The focused SQLite and race-enabled PostgreSQL checks pass, including publication isolation and invalid images. STUDIO-STATUS-PAGES-001 passes in 7.171 seconds, run 20261108T031201.518911000-baa5d1135a9b9ec9387d2f92, with real image decoding, centering, reference loading across origins, optional absence, removal, and existing copy/share flows.
+Release 0.6.0-dev from committed 3d13a08 is pushed and deployed as build dca2ee3e4ddf. Nine local AWS package checks and thirty-five hosted checks pass. The reviewed change set modifies only Service, Task, UiHeaders, and PublicStatusHeaders. The public browser decodes and centers the logo; the requesting editor shows the controls. The owned page is unpublished and owned sessions and tabs close.
+This refines 12, 13, 49, and 50. Acceptance stays 50 verified of 57. Preserve the separate reliability implementation in the original checkout.
+
 ## Local delivery: shared reliability history and Angular components
 
 The approved [shared reliability design](trends.md#shared-reliability-capture) now has common durable capture for all runners, safe replay and backfill, hourly and daily summaries, bounded long-range reports, explicit monitoring policy, and preserved native authorization.
 Public status pages and private Test history use the same Angular status components. Direct test references support outcome rows or explicit monitoring alongside existing HTTP probe bindings.
 The [Angular library](trends.md#reusable-angular-components) builds as @wtiger001/teststudio-angular 0.1.0-dev. Its independent consumer verifies host styling, public-source reads, withdrawal, lifecycle cleanup, keyboard and narrow layouts, and server rendering on Angular 22.2.4.
-Product 0.7.0-dev is prepared locally. API contract 0.40.0 and database metadata version 2 describe the new behavior. Installation transfer includes compact history, summaries, policies, provenance, and pending work.
+Product 0.7.0-dev is prepared locally. API contract 0.41.0 and database metadata version 2 describe the new behavior. Installation transfer includes compact history, summaries, policies, provenance, and pending work.
 Focused SQLite and PostgreSQL checks pass. Normal STUDIO-RELIABILITY-001 and the updated public status workflow provide local browser evidence. The ledger records exact receipts and timings.
 This refines 12, 13, 34–37, 39–41, 47, 49, and 50. Acceptance remains 50 verified of 57. Target deployment and the remaining cross-profile criteria stay separate.
-Before publishing this checkout, incorporate the concurrent upstream logo release and preserve its fields and centered rendering in the shared component. Keep its deployment and evidence intact. No push or deployment is part of this local delivery.
+The upstream logo implementation and release notes are integrated locally. Shared components preserve the optional logo fields, centered rendering, image failure state, and publication boundaries. No push or deployment is part of this local delivery.
 
 ## Completed user direction: status-page sharing copy buttons
 

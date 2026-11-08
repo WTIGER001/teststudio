@@ -54,7 +54,7 @@ func (s *Service) Report(ctx context.Context, user, project string, d Definition
 	if err != nil {
 		return Report{}, err
 	}
-	report := Report{Title: d.Title, Background: d.Background, Window: window, MaxAge: d.MaxAge, At: now, Probes: []Row{}}
+	report := Report{Logo: d.Logo, LogoAlt: d.LogoAlt, Title: d.Title, Background: d.Background, Window: window, MaxAge: d.MaxAge, At: now, Probes: []Row{}}
 	projectRow, err := s.Store.Get(ctx, "projects", project)
 	if err != nil {
 		return report, err

@@ -33,6 +33,8 @@ export interface StatusRow {
   contextCount?: number
 }
 export interface StatusReport {
+	logo?: string
+	logoAlt?: string
   title: string
   background: string
   window: string
