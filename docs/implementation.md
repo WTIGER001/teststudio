@@ -24,6 +24,13 @@ STUDIO-STATUS-PAGES-001 passes after upstream logo integration with the new buck
 The user demo on port 8040 and unrelated workloads remain separate. Registry publication and hosted verification are not performed for this work. The parallel upstream logo implementation and release notes are integrated locally; shared components retain its optional fields and centered rendering while preserving the separately verified hosted release.
 This refines 12, 13, 34, 35, 36, 37, 39, 40, 41, 47, 49, and 50. The count stays **50 verified of 57**. Broad cross-profile criteria 41, 46, 51, 53, 54, 56, and 57 remain open.
 
+## Public status pages without Help: local implementation — 2026-11-07
+
+At the user’s request, anonymous status documents and iframe embeds omit the application Help button and drawer. Public loading and error views use the same minimal shell. Authenticated creation, editing, and management screens retain their current guidance.
+The public route no longer declares a help topic, and its component no longer imports or renders Help or its overlay styling. The UI guide records the explicit exception to the per-page help requirement; acceptance 50 keeps its stable number and reflects the requested public-document scope.
+The UI builds. Normal STUDIO-STATUS-PAGES-001 passes in 8.062 seconds, run 20261108T040919.382666000-2f47d1bdf79142a6b2ff8132. It verifies no public Help button or dialog, no Help in the actual cross-origin iframe, dark-page absence, and retained management help, along with the existing status workflow. The execution is cleaned and owned processes and browsers exit.
+Release 0.8.1-dev is prepared. No API, permission, data, or shared-library behavior changes. Publication and hosted verification remain pending. This refines 49 and 50; acceptance stays **50 verified of 57**.
+
 ## Configurable logo height: MMDev delivery — 2026-11-07
 
 Release 0.8.0-dev uses committed dc558de572571eb14517d0cd259468711eb8c498, immutable build 2320bb94582b, created 2026-11-08T03:52:01.670Z with modified false. The ARM64 digest is sha256:1601cee035b451d8135381dd143d74b2584460eb12e568a6d3d3657de351dc5d. Image labels match the selected version, commit, and build identifier. Both remote delivery branches contain the commits.
@@ -999,7 +1006,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [x] **47.** Result-state trends use stacked area charts with consistent state colors, final logical counts, accessible values, and visible missing-history gaps.
 - [x] **48.** Manual and scheduled notifications use the same configured completion path.
 - [x] **49.** Light, dark, and system modes pass browser workflow and keyboard checks.
-- [x] **50.** Every current page provides a contextual help drawer with Introduction, Concepts, Tutorials, and verified keyboard and mobile behavior.
+- [x] **50.** Every current application page except public status documents provides a contextual help drawer with Introduction, Concepts, Tutorials, and verified keyboard and mobile behavior.
 - [ ] **51.** Provider adapters support execution status, cancellation, deadlines, artifacts, and recovery consistently.
 - [x] **52.** Replica failover creates no duplicate logical run. Notification retries retain their documented at-least-once behavior.
 - [ ] **53.** Local, Kubernetes, and Azure installations operate without AWS services or credentials.

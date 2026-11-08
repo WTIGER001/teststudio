@@ -64,7 +64,7 @@ const projectRoutes: Routes = [
 ]
 
 export const routes: Routes = [
- { path: 'status/:token', data: { helpTopic: 'public-status' }, loadComponent: () => import('./features/status-pages/public-status.page').then(m => m.PublicStatusPage) },
+ { path: 'status/:token', loadComponent: () => import('./features/status-pages/public-status.page').then(m => m.PublicStatusPage) },
   ...projectRoutes.filter(route => /^projects\/:projectId\/(suites|catalog|runs|trends|tests)(\/|$)/.test(route.path ?? '')).map(route => ({ ...route, path: route.path!.replace('projects/:projectId/', 'projects/:projectId/applications/:applicationId/') })),
   ...projectRoutes
 ]

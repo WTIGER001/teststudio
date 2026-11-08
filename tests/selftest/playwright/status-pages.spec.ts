@@ -113,6 +113,8 @@ test('Public status draft publication, embeds, private-data boundaries and avail
     expect(logoBounds.width / logoBounds.height).toBeCloseTo(4, 1)
     expect(logoBounds.height).toBeCloseTo(96, 0)
     await expect(visitor.getByRole('article')).toHaveCount(2)
+    await expect(visitor.getByRole('button', { name: 'Help', exact: true, includeHidden: true })).toHaveCount(0)
+    await expect(visitor.getByRole('dialog')).toHaveCount(0)
     await expect(visitor.getByRole('article', { name: 'Public website', exact: true })).toContainText('100.00%')
     await expect(visitor.getByRole('article', { name: 'Secondary service', exact: true })).toContainText('No data')
     await expect(visitor.getByRole('navigation', { name: 'Main navigation', includeHidden: true })).toHaveCount(0)
@@ -139,12 +141,14 @@ test('Public status draft publication, embeds, private-data boundaries and avail
       await host.goto('http://127.0.0.1:8050/status-host/' + token)
       await expect(host.frameLocator('iframe[title="Embedded public status"]').getByRole('heading', { name: 'Customer service status', exact: true })).toBeVisible()
       await expect(host.frameLocator('iframe[title="Embedded public status"]').getByRole('article')).toHaveCount(2)
+      await expect(host.frameLocator('iframe[title="Embedded public status"]').getByRole('button', { name: 'Help', exact: true, includeHidden: true })).toHaveCount(0)
     } finally { await host.close() }
     const darkDefinition = { id: 'dark-status', title: 'Dark service status', background: '#101827', defaultWindow: '1y', maxAgeSeconds: 900, probes: [{ probeId: probe.id, title: 'Public website', description: 'Customer website availability' }] }
     await api.call('PUT', `${path}/status-pages/dark-status`, darkDefinition, 0)
     const darkPage = await api.call('POST', `${path}/status-pages/dark-status/publish`, undefined, 1)
     await visitor.goto('http://127.0.0.1:8040/status/' + darkPage.data.publicToken)
     await expect(visitor.getByRole('heading', { name: 'Dark service status', exact: true })).toBeVisible()
+    await expect(visitor.getByRole('button', { name: 'Help', exact: true, includeHidden: true })).toHaveCount(0)
     await expect(visitor.getByRole('img')).toHaveCount(0)
     await expect(visitor.getByLabel('Availability period', { exact: true })).toHaveValue('1y')
     await expect(visitor.getByRole('article')).toContainText('<0.1% monitored')

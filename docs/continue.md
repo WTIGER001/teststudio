@@ -41,6 +41,13 @@ Later documentation and operator-tooling commits do not change the deployed impl
 The public API, UI bundle, and portable image labels match this release.
 The local user demo is separate. Do not assume it runs the same release as the hosted installation.
 
+## Active delivery: remove public status Help
+
+The public status component and route no longer render Help or configure a help topic. Standalone documents, embeds, loading, and error states share the minimal shell. Management Help remains available. The explicit public-document exception is recorded in UI guidance and acceptance 50.
+The UI build and normal STUDIO-STATUS-PAGES-001 pass. Run 20261108T040919.382666000-2f47d1bdf79142a6b2ff8132 completes in 8.062 seconds with cleaned execution and passing public, iframe, dark, and private-help checks.
+Release 0.8.1-dev is prepared. Commit and push this verified change, build from committed source, inspect the existing MMDev rollout, review the ordinary Service/Task change set, and verify the actual public document. Publication and target checks remain pending; the release table still identifies hosted 0.8.0-dev.
+Reuse passing build caches in this managed checkout. Preserve the original checkout’s separate work and the user’s demo and page configuration.
+
 ## Completed delivery: configurable logo height
 
 The user requests pixel height for optional status-page logos. Appearance adds Logo height (pixels), a live proportional preview, and blank automatic sizing. Values from 1 through 1024 persist through the existing draft and publication workflow. Narrow containers shrink the rendered image without distortion.
