@@ -18,6 +18,14 @@ Missing ignored receipts require focused inspection or recovery. They do not pro
 
 Release 0.6.0-dev is deployed as build dca2ee3e4ddf from verified logo implementation 3d13a08. Both remote implementation and status-page-logo branches contain the implementation and final release notes. The local reliability delivery incorporates the upstream logo implementation and release notes. Its shared Angular model retains logo fields and centered rendering. Product 0.7.0-dev remains local and does not change the hosted artifact. Receipts and screenshots are output/aws-mmdev/status-logo-060 in this original checkout. The generic verification page is unpublished, owned sessions and tabs close, and no user page is edited.
 
+## Concurrent height delivery
+
+Release 0.8.0-dev is deployed as build 2320bb94582b from dc558de. Both remote delivery branches contain the height implementation and final notes. This release includes the committed shared reliability/library integration bf9ab8a. Preserve any newer local work in this checkout and incorporate upstream before another deployment. Library 0.2.0-dev and its packed artifact include logoHeight. Twenty-eight hosted checks and actual 192-pixel rendering pass. The requesting page is unchanged; the generic verification page is unpublished. Receipts and screenshots are output/aws-mmdev/status-height-080 here.
+
+## Public Help removal release
+
+Release 0.8.1-dev is deployed from 8c8a81a as build 3f0963838890. Both remote delivery branches include this release and its notes. The public status document and iframe omit Help, while management guidance remains. The browser workflow and seventeen hosted checks pass. Preserve separate local work and incorporate upstream before another deployment. Receipts and screenshot are output/aws-mmdev/status-no-help-081 in this checkout.
+
 ## Current product and release
 
 The application is usable locally and through the hosted UI. Complete product acceptance remains unfinished.
@@ -27,14 +35,14 @@ UI improvements refine existing accepted items. They do not close the remaining 
 | Item | Last verified value |
 | --- | --- |
 | Hosted UI | https://teststudio.devfoodmarketmaker.com |
-| Product version | 0.6.0-dev; footer displays 0.6.0.dev |
-| Build identifier | dca2ee3e4ddf |
-| Build creation | 2026-11-08T03:15:30.865Z |
-| Implementation commit | 3d13a08ca5a3690d085e265705104f91cab44a0c |
+| Product version | 0.8.1-dev; footer displays 0.8.1.dev |
+| Build identifier | 3f0963838890 |
+| Build creation | 2026-11-08T04:11:18.093Z |
+| Implementation commit | 8c8a81aa1c8386f83770ba34008d85badcb663a9 |
 | Source state at build | Committed source; modified is false |
-| Service image digest | sha256:35d7b1bb815c40df5b1eda33fdd719dbb7347ed129c74f5ef667cb5818b08347 |
-| Task startup | 2026-11-08T03:19:19.550Z |
-| UI publication | 2026-11-08T03:22:49Z |
+| Service image digest | sha256:047b3680d5de6d61c210cdbd347a66a6b046480c67b78f192f88b5685cc45543 |
+| Task startup | 2026-11-08T11:16:48.779Z |
+| UI publication | 2026-11-08T12:11:39Z |
 | Live version metadata | GET /api/v1/version; public and no-store |
 
 Later documentation and operator-tooling commits do not change the deployed implementation commit or its immutable build date.
