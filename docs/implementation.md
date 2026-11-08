@@ -4,7 +4,15 @@ The full plan remains required scope. Check an item only after its implementatio
 
 Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
-Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
+Focus on implementation and targeted checks. The user authorizes MMDev ECS deployment and now plans a first installation into their own Azure subscription.
+
+## Azure delivery planning: own subscription first — 2026-11-08
+
+The user selects direct Azure installation before Marketplace delivery.
+The [deployment plan](azure-deployment-plan.md) records core services, isolated sandbox workers, installation milestones, cost boundaries, and future Managed Application compatibility.
+Marketplace publication and billing remain deferred. The exact Azure target remains unselected; no live Azure operation occurs in this planning pass.
+Preserve staged adapters, concurrent recording work, AWS workloads, and the port 8040 demo. Historical Azure inspector work remains deferred.
+This plans work under 41, 46, 51, 53, 54, 56, and 57. No acceptance item advances to verified; the total remains 50 of 57.
 
 ## In-page browser recording: local proof — 2026-11-08
 

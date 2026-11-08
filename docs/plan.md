@@ -5,6 +5,13 @@ Track verified delivery in `implementation.md`.
 Start resumed work with [the continuation guide](continue.md). It summarizes the current release, remaining priorities, boundaries, and retained evidence.
 The user authorizes targeted tests and frequent feature commits. Remote pushes remain separate operations.
 
+## Azure delivery direction: direct installation first
+
+The user selects their own Azure subscription for the first installation on 2026-11-08.
+Follow [the Azure deployment plan](azure-deployment-plan.md). Preserve a future Managed Application delivery without implementing Marketplace publication or billing now.
+This establishes planning scope; the exact Azure target and budget remain unselected. Historical inspector work stays deferred.
+The existing recording work below remains separate. Acceptance stays 50 verified of 57.
+
 ## Current priority: recording without tester installation
 
 The user approves a browser inside TestStudio for testers who need simple instructions and no developer setup.

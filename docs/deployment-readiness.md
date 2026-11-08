@@ -6,7 +6,8 @@ The current ledger has 50 verified items and seven open items.
 This audit checks the remaining criteria against current code, deployment packages, and retained local evidence.
 It adds no test runs, cloud connections, or new acceptance numbers.
 The product remains unfinished. Some open work requires implementation, while other work requires deployment verification.
-Azure implementation and verification remain deferred. A later Azure deployment script requires the user's request.
+The user now plans a direct installation into their own Azure subscription. Follow [the Azure deployment plan](azure-deployment-plan.md).
+The target and implementation milestones remain pending. Historical Azure inspector work and Marketplace delivery stay deferred.
 
 ## Current profile coverage
 
@@ -15,7 +16,7 @@ Azure implementation and verification remain deferred. A later Azure deployment 
 | Local server | SQLite durability, managed identity, environment-backed browser and API execution, desktop recording, source publication, timing, evidence, and UI workflows. | This does not establish cloud deployment behavior. |
 | Kubernetes | Actual local k3s installation, PostgreSQL, private evidence, two OIDC providers, source preparation, offline suites, environment-backed browser and authenticated HTTPS API suites, gateway lifecycle, deadlines, controller failover, and the desktop recorder handoff now pass. | The owned local cluster does not establish another installation's routing, storage, runtime, or desktop trust configuration. |
 | AWS ECS and CloudFront | Actual MMDev core deployment, PostgreSQL TLS, Cognito sign-in, one measured native HTTPS probe, private S3 evidence, and matching public UI assets now pass. Worker and gateway packages retain local contract evidence. | Actual coded workers, preparation, lifecycle, two-provider permission parity, storage policies, and recorder handoff remain unverified. |
-| Azure | Core service and assembly packages, staged execution and sandbox adapters, and previously retained local protocol evidence. | Native coded execution and discovery wiring remain unfinished. The user defers this work and account verification. |
+| Azure | Core service and assembly packages, staged execution and sandbox adapters, and previously retained local protocol evidence. | Direct installation planning is selected. The target remains unselected; native coded execution and discovery wiring remain unfinished. |
 
 Local coverage is documented in [browser execution](browser-execution.md), [API tests](api-testing.md), and [browser recording](browser-recording.md).
 Actual Kubernetes coverage is documented in [source execution](local-kubernetes-source-execution.md), [lifecycle](local-kubernetes-lifecycle.md), [failover](local-kubernetes-controllers.md), and [hosted identity](local-kubernetes-identity.md).

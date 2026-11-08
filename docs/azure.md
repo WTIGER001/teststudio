@@ -1,6 +1,8 @@
 # Azure core service profile
 
-Azure implementation and verification remain deferred at the user's request.
+The user selects a direct installation into their own Azure subscription as the first delivery on 2026-11-08.
+Follow [the deployment plan](azure-deployment-plan.md). The target selection, implementation, and live verification remain pending.
+Keep a future Managed Application viable. Marketplace publication and billing remain deferred.
 This guide describes staged implementation. It does not establish deployed acceptance.
 
 The Azure package runs TestStudio in two Container Apps.
@@ -51,7 +53,7 @@ Local packaging checks do not close Azure deployment acceptance.
 
 ## Staged component references
 
-These references preserve implementation details for a later Azure phase. They do not authorize deployment or further Azure work.
+These references preserve staged implementation details. Use the current deployment plan to select work; do not restart historical inspector work.
 
 The [Azure worker admission guide](azure-worker-network.md) links the network, endpoint, and registry service checks under development.
 The [standalone worker relay](worker-relay.md) supplies a bounded frontend without installation credentials, [pinned backend readiness](worker-relay-readiness.md), and a UI-independent image builder. Provider service wiring remains unfinished.

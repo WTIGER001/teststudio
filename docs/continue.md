@@ -14,6 +14,15 @@ Read this guide before historical continuation commands elsewhere in the plan.
 Do not restart completed setup or broad acceptance matrices merely because this is a new session.
 Missing ignored receipts require focused inspection or recovery. They do not prove the feature needs reimplementation.
 
+## Azure planning: direct installation first
+
+On 2026-11-08 the user selects an installation into their own Azure subscription before Marketplace delivery.
+Follow [the Azure deployment plan](azure-deployment-plan.md). Container Apps and isolated Sandboxes remain the intended direction; AKS is excluded.
+Keep the future Managed Application option viable through reusable infrastructure and installation parameters. Marketplace publication and billing remain deferred.
+The exact tenant, subscription, region, identity settings, and budget remain unselected. No Azure deployment or target verification has occurred in this planning pass.
+Preserve staged Azure code and concurrent recording work. Do not restart historical inspector work.
+Acceptance stays 50 verified of 57; no item closes from planning.
+
 ## Current priority: recording without tester installation
 
 The user approves an in-page recording browser for testers who need simple guidance and no developer setup.
