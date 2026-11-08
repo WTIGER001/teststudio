@@ -8,6 +8,8 @@ type Entry struct {
 	Description string `json:"description"`
 }
 type Definition struct {
+	Logo       string  `json:"logo,omitempty"`
+	LogoAlt    string  `json:"logoAlt,omitempty"`
 	Slug       string  `json:"slug,omitempty"`
 	ID         string  `json:"id"`
 	Title      string  `json:"title"`
@@ -45,6 +47,8 @@ type Row struct {
 	Availability Availability `json:"availability"`
 }
 type Report struct {
+	Logo       string    `json:"logo,omitempty"`
+	LogoAlt    string    `json:"logoAlt,omitempty"`
 	Title      string    `json:"title"`
 	Background string    `json:"background"`
 	Window     string    `json:"window"`

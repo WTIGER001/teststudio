@@ -82,6 +82,12 @@ func (s *Service) validate(ctx context.Context, user, project string, d Definiti
 	if _, err := WindowStart(d.Window, time.Now()); err != nil {
 		return nil, err
 	}
+	if err := validateLogo(d.Logo); err != nil {
+		return nil, err
+	}
+	if len(d.LogoAlt) > 256 {
+		return nil, errors.New("logo alternative text must be at most 256 bytes")
+	}
 	seen := map[string]bool{}
 	changes := []storage.Change{}
 	for _, entry := range d.Probes {
@@ -114,6 +120,11 @@ func (s *Service) Save(ctx context.Context, user, project string, d Definition, 
 	ctx, err := s.Auth.BeginMutation(ctx)
 	if err != nil {
 		return storage.Record{}, err
+	}
+	d.Logo = strings.TrimSpace(d.Logo)
+	d.LogoAlt = strings.TrimSpace(d.LogoAlt)
+	if d.Logo == "" {
+		d.LogoAlt = ""
 	}
 	d.Slug, err = NormalizeSlug(d.Slug)
 	if err != nil {

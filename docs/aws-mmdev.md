@@ -239,3 +239,9 @@ The twelve local service-package checks and twenty-three hosted checks pass. The
 One generic native HTTPS run passes in 140.412653 ms with complete evidence. Both verification pages are unpublished and the owned session closes. No existing user probe configuration is made public.
 Public documents, primary assets, status bundles, and API metadata match. The stack reaches UPDATE_COMPLETE, both service rollouts are healthy, and CloudFront invalidation completes.
 Receipts are output/aws-mmdev/status-pages-040. The temporary verification helper is removed. This focused native feature does not close the remaining cross-profile requirements.
+
+### Status-page logo response policies
+
+For the first logo-capable release, use publish-aws-core.py prepare --status-logos with the committed image receipt, then review the concrete change set before execution. This permits only the scoped UI and public status response-policy updates alongside the normal TestStudio task and service update.
+Both document policies allow uploaded data images and HTTPS image references. Script, connection, object, and private framing restrictions stay in place. Public status documents retain iframe embedding. The image URL is loaded by the viewer; the service performs no remote-image fetch.
+Later image-only releases reuse the installed policies. Keep core health, logo rendering, and broader worker readiness evidence separate.

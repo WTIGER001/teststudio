@@ -555,7 +555,7 @@ Resources:
           StrictTransportSecurity: {AccessControlMaxAgeSec: 31536000, Override: true}
           ContentSecurityPolicy:
             Override: true
-            ContentSecurityPolicy: !Sub "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://${ArtifactHostname}; media-src 'self' https://${ArtifactHostname}; connect-src 'self' https://${ArtifactHostname}; frame-src https://${ArtifactHostname}; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
+            ContentSecurityPolicy: !Sub "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' https://${ArtifactHostname}; connect-src 'self' https://${ArtifactHostname}; frame-src https://${ArtifactHostname}; object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
   PublicStatusHeaders:
     Type: AWS::CloudFront::ResponseHeadersPolicy
     Properties:
@@ -567,7 +567,7 @@ Resources:
           StrictTransportSecurity: {AccessControlMaxAgeSec: 31536000, Override: true}
           ContentSecurityPolicy:
             Override: true
-            ContentSecurityPolicy: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors *"
+            ContentSecurityPolicy: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors *"
   UiRoutes:
     Type: AWS::CloudFront::Function
     Properties:

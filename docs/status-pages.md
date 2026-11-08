@@ -2,8 +2,18 @@
 
 Each project can create separate status pages for different audiences. A page contains an ordered selection of current HTTP probe bindings.
 Each row has its own public title, optional description, recent result pills, and an availability donut. A page supports up to 100 probes; project page lists continue through pagination.
-The page title, background color, and default time range are configurable. One viewer selector changes every row together.
+The page title, optional centered logo, background color, and default time range are configurable. One viewer selector changes every row together.
 Public pages have standalone URLs and support iframe embedding without sign-in.
+
+## Optional logo
+
+Choose Logo source on the Appearance step: No logo, Upload image, or Image URL.
+Uploads accept PNG, JPEG, and WebP files up to 10 MB. The browser preserves transparency, removes source metadata, and resizes the image to fit 800 by 320 pixels, reducing it further when needed to keep the stored PNG data URL within 256 KiB.
+The API also accepts validated PNG or JPEG data URLs within 256 KiB and 1600 by 1600 pixels. Logo alternative text supports up to 256 UTF-8 bytes; the viewer defaults to the page title plus “logo”.
+References require a public HTTPS image URL up to 2048 bytes, without embedded credentials. The service never fetches the URL. Viewers load the image directly from its host without sending the status-page address as a referrer. A referenced file must stay publicly reachable; changing that file changes what viewers see without a new TestStudio publication. Upload an image when the published logo must remain fixed.
+The logo centers above the title, preserves its proportions, and fits within 320 by 128 CSS pixels. Missing logos add no header space. An image that cannot load shows Logo unavailable while probe status remains visible.
+Choose Remove logo or No logo to clear it from the draft. Saving, replacing, and removing a logo remain private until reviewed publication. Unpublishing withdraws the page report; it cannot withdraw an independently hosted image or copies already received by a viewer.
+Uploaded logos are public page content after Publish. Private Project cover images stay separate and are never selected automatically.
 
 ## Vanity URLs
 

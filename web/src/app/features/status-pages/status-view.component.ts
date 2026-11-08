@@ -1,4 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common'
+import { StatusLogoComponent } from './status-logo.component'
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core'
 import type { StatusPageReport, StatusPageRow } from '../../core/generated/access.types'
 
@@ -6,9 +7,10 @@ import { statusWindows, statusTextColor, monitoredLabel } from './status.utils'
 export { statusWindows, statusTextColor, monitoredLabel } from './status.utils'
 
 @Component({
-  selector: 'ts-status-view', standalone: true, imports: [DatePipe, DecimalPipe], changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'ts-status-view', standalone: true, imports: [DatePipe, DecimalPipe, StatusLogoComponent], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="status-view" [style.background-color]="report().background" [style.color]="textColor(report().background)" aria-label="Status page">
+      @if (report().logo) { <ts-status-logo class="page-logo" [source]="report().logo!" [description]="report().logoAlt || report().title + ' logo'" /> }
       <header><h1>{{ report().title }}</h1><div class="range"><label for="status-range">Availability period</label><select id="status-range" [value]="report().window" (change)="windowChanged.emit($any($event.target).value)">@for (window of windows; track window.id) { <option [value]="window.id" [selected]="window.id === report().window">{{ window.label }}</option> }</select></div></header>
       <p class="as-of">Updated {{ report().asOf | date:'medium' }} · Refreshes every minute</p>
       @for (row of report().probes; track $index; let index = $index) {

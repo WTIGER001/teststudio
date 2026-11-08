@@ -60,6 +60,9 @@ def main():
     private = properties(template, 'UiHeaders')['ResponseHeadersPolicyConfig']['SecurityHeadersConfig']
     assert private['FrameOptions']['FrameOption'] == 'DENY' and "frame-ancestors 'none'" in private['ContentSecurityPolicy']['ContentSecurityPolicy']['Fn::Sub']
     checks.append('Only public status documents permit embedding; private UI framing stays denied')
+    assert "img-src 'self' data: https:" in headers['ContentSecurityPolicy']['ContentSecurityPolicy']
+    assert "img-src 'self' data: blob: https:" in private['ContentSecurityPolicy']['ContentSecurityPolicy']['Fn::Sub']
+    checks.append('Public and private status previews allow uploaded and HTTPS logo images')
     assert {r['PathPattern'] for r in routes} == {'/api', '/api/*', '/auth', '/auth/*', '/healthz', '/livez'}
     assert all(r['TargetOriginId'] == 'api' and r['CachePolicyId'] == ref('NoCache') and 'FunctionAssociations' not in r for r in routes)
     assert artifact['DefaultCacheBehavior']['CachePolicyId'] == ref('NoCache')

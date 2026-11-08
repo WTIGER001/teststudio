@@ -5,7 +5,7 @@ Read this guide before historical continuation commands elsewhere in the plan.
 
 ## Resume in this order
 
-1. Read AGENTS.md and check the branch and working tree. The active branch is codex/implementation.
+1. Read AGENTS.md and check the branch and working tree. The logo delivery branch is codex/status-page-logo. The original checkout retains codex/implementation and concurrent reliability edits.
 2. Read the active delivery sections at the start of [the plan](plan.md).
 3. Read the Acceptance criteria section in [the ledger](implementation.md). It contains the authoritative 57 checkboxes.
 4. Continue the latest user request first. Otherwise select one next milestone below and read its implementation before changing it.
@@ -36,6 +36,13 @@ UI improvements refine existing accepted items. They do not close the remaining 
 Later documentation and operator-tooling commits do not change the deployed implementation commit or its immutable build date.
 The public API, UI bundle, and portable image labels match this release.
 The local user demo is separate. Do not assume it runs the same release as the hosted installation.
+
+## Active delivery: optional status-page logos
+
+The user requests an optional centered logo, either uploaded or referenced. Appearance supports both sources and removal. The API validates uploaded PNG/JPEG data and public HTTPS URLs without fetching them; uploaded UI files preserve transparency and become bounded PNGs. Published snapshots retain their logo independently of draft edits.
+The UI build, focused SQLite cases, race-enabled PostgreSQL cases, generated client synchronization, and normal STUDIO-STATUS-PAGES-001 pass. The final browser run is 20261108T031201.518911000-baa5d1135a9b9ec9387d2f92, 7.171 seconds. Review retained screenshots rather than repeating these checks.
+Release 0.6.0-dev and canonical OpenAPI 0.40.0 are prepared. Commit and publish the verified implementation, review the scoped --status-logos change set, and verify the actual hosted image and requesting account. The release table above still identifies the deployed 0.5.1-dev artifact.
+Continue in this clean managed checkout on codex/status-page-logo. The original checkout has overlapping reliability and Angular library edits; preserve them. A later deployment from that checkout must incorporate the logo commit before publication.
 
 ## Latest delivered UI changes
 

@@ -6,6 +6,17 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## Optional status-page logos: local implementation — 2026-11-07
+
+Appearance supports an optional logo upload or public HTTPS image reference, alternative text, preview, and removal. Public and private previews center the image above the title without stretching; pages without a logo retain their existing header. Failed references show an unavailable label without hiding probe results.
+The browser preserves transparency, resizes raster uploads, and strips source metadata. The API validates bounded PNG/JPEG payloads, complete image decoding and dimensions, URL scheme and credentials, and alternative-text length under existing Project page permissions. It performs no server image fetch.
+Draft saves, publication snapshots, replacement, removal, revisions, and withdrawal preserve existing behavior. Only explicitly published logo fields enter public reports. Private Project images remain separate.
+Canonical OpenAPI 0.40.0 generates optional logo fields. The UI guide and page help describe sources, limits, publication, and the dynamic behavior of independently hosted image URLs. Native and AWS document image policies admit data and HTTPS images while keeping script, connection, object, and framing rules.
+The focused SQLite HTTP selection passes in 0.647 seconds. The matching race-enabled PostgreSQL selection passes in 6.357 seconds, covering valid PNG and JPEG images, malformed and oversized content, publication isolation, removal, no server fetch, and native response policies.
+The UI builds. STUDIO-STATUS-PAGES-001 passes in 7.171 seconds, run 20261108T031201.518911000-baa5d1135a9b9ec9387d2f92. It verifies rejected uploads and recovery, real decoded image uploads, centered proportional rendering, references across origins, private/public isolation, optional absence, removal, themes, narrow layouts, copy buttons, and the prior publication workflow.
+The final screenshots are retained under output/selftest/20261108T031201.518911000-baa5d1135a9b9ec9387d2f92. The execution is cleaned and owned controllers, database containers, execution containers, and browsers exit. Existing data, schedules, and the demo are unchanged.
+Release 0.6.0-dev is prepared. Hosted publication and target acceptance remain pending. This refines 12, 13, 49, and 50; acceptance stays **50 verified of 57**.
+
 ## Status-page sharing copy buttons — 2026-11-07
 
 Public URL and Iframe embed code now have their own copy buttons. A shared clipboard service performs the write; the shared button owns local busy and accessible success or fallback feedback. Visible read-only fields remain available for manual copying.

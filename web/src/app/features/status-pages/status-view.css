@@ -26,3 +26,5 @@ circle { fill:none; stroke-width:9; transform:rotate(-90deg); transform-origin:5
 figcaption { font-size:11px; margin-top:4px; }
 footer { padding-top:24px; }.legend { display:inline-flex; gap:5px; align-items:center; margin-right:16px; }.legend::before { content:''; width:8px; height:8px; border-radius:50%; }.up-key::before { background:#16854b; }.down-key::before { background:#dc3545; }.unknown-key::before { background:#8993a5; }
 @media(max-width:450px) { .status-row { grid-template-columns:minmax(0,1fr) 108px; gap:12px; }.availability { width:108px; }svg { width:104px; height:104px; }.donut-label { top:36px; }.donut-label strong { font-size:16px; } }
+
+.page-logo {margin-bottom:24px;}

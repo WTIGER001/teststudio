@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { ReactiveFormsModule } from '@angular/forms'
+import { StatusLogoEditorComponent } from './status-logo-editor.component'
 import { StatusEditorService } from './status-editor.service'
 import { statusWindows } from './status.utils'
 import { WizardStepperComponent } from '../../shared/wizard/wizard-stepper.component'
@@ -7,14 +8,15 @@ import { WizardHeadingComponent } from '../../shared/wizard/wizard-heading.compo
 import { WizardFormDirective } from '../../shared/wizard/wizard-form.directive'
 
 @Component({
- selector: 'ts-status-form', standalone: true, imports: [ReactiveFormsModule, WizardStepperComponent, WizardHeadingComponent, WizardFormDirective], changeDetection: ChangeDetectionStrategy.OnPush,
+ selector: 'ts-status-form', standalone: true, imports: [StatusLogoEditorComponent, ReactiveFormsModule, WizardStepperComponent, WizardHeadingComponent, WizardFormDirective], changeDetection: ChangeDetectionStrategy.OnPush,
  template: `    <section class="panel" aria-label="Status page setup"><ts-wizard-stepper [singleRow]="true" [steps]="['Appearance', 'Probes', 'Review']" [current]="service.flow.step()" [reached]="service.flow.reached()" [disabled]="service.busy()" (selected)="service.flow.go($event)" />
       <form [formGroup]="service.form" tsWizardForm #feedback="tsWizardForm" (ngSubmit)="advance(); feedback.reveal()"><ts-wizard-heading [title]="['Page appearance', 'Choose public probes', 'Review private draft'][service.flow.step()]" [step]="service.flow.step()" />
-      <fieldset [disabled]="service.busy() || service.locked() || !service.canManage()">
+      <fieldset [disabled]="service.busy() || service.logoUploading() || service.locked() || !service.canManage()">
         @switch (service.flow.step()) {
           @case (0) {
             <div class="field"><label for="status-title">Page title</label><input id="status-title" formControlName="title" maxlength="256" required></div>
             <div class="field"><label for="status-slug">Vanity URL (optional)</label><div class="vanity-input"><span>{{ service.origin }}/status/</span><input id="status-slug" formControlName="slug" maxlength="63" autocomplete="off" spellcheck="false" placeholder="customer-health" aria-describedby="slug-guidance slug-feedback"></div><p id="slug-guidance" class="small muted">Unique across TestStudio. Letters, numbers, and hyphens; names ignore case. A draft reserves its name. Publish to activate it.</p><p id="slug-feedback" class="small" role="status" [class.error]="service.slugState() === 'taken'">{{ service.slugMessage() }}</p></div>
+            <ts-status-logo-editor />
             <div class="form-grid"><div class="field"><label for="status-background">Background color</label><input id="status-background" type="color" formControlName="background"></div><div class="field"><label for="status-default-window">Default availability period</label><select id="status-default-window" formControlName="defaultWindow">@for (window of windows; track window.id) { <option [value]="window.id">{{ window.label }}</option> }</select></div></div>
             <details><summary>Advanced monitoring settings</summary><div class="field"><label for="status-freshness">Mark observations stale after (seconds)</label><input id="status-freshness" type="number" min="60" max="86400" formControlName="maxAgeSeconds"><p class="small muted">Default: 900 seconds (15 minutes). After this, time without another observation is unknown. Match this to your monitoring cadence.</p></div></details>
           }
@@ -28,7 +30,7 @@ import { WizardFormDirective } from '../../shared/wizard/wizard-form.directive'
             }
           }
           @case (2) {
-            <h3>{{ service.form.controls.title.value }}</h3><p>Background: {{ service.form.controls.background.value }} · Default period: {{ service.form.controls.defaultWindow.value }} · Freshness: {{ service.form.controls.maxAgeSeconds.value }} seconds</p><ol>@for (entry of service.entries(); track entry.probeId) { <li><strong>{{ entry.title }}</strong>@if (entry.description) { <p>{{ entry.description }}</p> }</li> }</ol>
+            <h3>{{ service.form.controls.title.value }}</h3><p>Logo: {{ service.logoMode() === 'none' ? 'None' : service.logoMode() === 'upload' ? 'Uploaded image' : service.form.controls.logo.value }}</p><p>Background: {{ service.form.controls.background.value }} · Default period: {{ service.form.controls.defaultWindow.value }} · Freshness: {{ service.form.controls.maxAgeSeconds.value }} seconds</p><ol>@for (entry of service.entries(); track entry.probeId) { <li><strong>{{ entry.title }}</strong>@if (entry.description) { <p>{{ entry.description }}</p> }</li> }</ol>
             <p><strong>Public address after publication:</strong> {{ service.origin }}/status/{{ service.normalizedSlug() || service.record()?.data?.publicToken || 'generated-on-save' }}</p><p class="notice">Save draft stores this configuration privately. Publish is a separate reviewed action. The public page will show these titles, descriptions, statuses, observation times, and availability aggregates to anyone with its URL.</p>
           }
         }

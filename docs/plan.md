@@ -16,6 +16,14 @@ Use the mm_dev profile and preserve existing services. Azure implementation and 
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
+## Current delivery: optional status-page logos
+
+Appearance supports No logo, Upload image, and public HTTPS Image URL. Center the logo above the title, preserve proportions and uploaded transparency, and keep configuration changes in private drafts until publication.
+Validate bounded uploaded PNG/JPEG data and image URLs through existing Project status-page authority. Expose only the published logo and alternative text. Never fetch a referenced image from the service. Private Project covers stay separate.
+The focused SQLite and race-enabled PostgreSQL checks pass, including publication isolation and invalid images. STUDIO-STATUS-PAGES-001 passes in 7.171 seconds, run 20261108T031201.518911000-baa5d1135a9b9ec9387d2f92, with real image decoding, centering, reference loading across origins, optional absence, removal, and existing copy/share flows.
+Prepare 0.6.0-dev from committed source, review the --status-logos response-policy change set, then verify the hosted public image and requesting editor. Release and target checks remain pending.
+This refines 12, 13, 49, and 50. Acceptance stays 50 verified of 57. Preserve the separate reliability implementation in the original checkout.
+
 ## Current user direction: shared reliability history for all checks
 
 On 2026-11-07 the user approves hourly and daily summaries, longer-range bucketed pills, and shared reliability reporting for all existing and future probe and test types.
