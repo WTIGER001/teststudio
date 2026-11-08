@@ -1,6 +1,6 @@
 # Continue TestStudio implementation
 
-Last reviewed: 2026-11-07. These notes describe the last verified state, not a live infrastructure inventory.
+Last reviewed: 2026-11-08. These notes describe the last verified state, not a live infrastructure inventory.
 Read this guide before historical continuation commands elsewhere in the plan.
 
 ## Resume in this order
@@ -27,26 +27,26 @@ UI improvements refine existing accepted items. They do not close the remaining 
 | Item | Last verified value |
 | --- | --- |
 | Hosted UI | https://teststudio.devfoodmarketmaker.com |
-| Product version | 0.8.0-dev; footer displays 0.8.0.dev |
-| Build identifier | 2320bb94582b |
-| Build creation | 2026-11-08T03:52:01.670Z |
-| Implementation commit | dc558de572571eb14517d0cd259468711eb8c498 |
+| Product version | 0.8.1-dev; footer displays 0.8.1.dev |
+| Build identifier | 3f0963838890 |
+| Build creation | 2026-11-08T04:11:18.093Z |
+| Implementation commit | 8c8a81aa1c8386f83770ba34008d85badcb663a9 |
 | Source state at build | Committed source; modified is false |
-| Service image digest | sha256:1601cee035b451d8135381dd143d74b2584460eb12e568a6d3d3657de351dc5d |
-| Task startup | 2026-11-08T03:56:08.765Z |
-| UI publication | 2026-11-08T03:59:30Z |
+| Service image digest | sha256:047b3680d5de6d61c210cdbd347a66a6b046480c67b78f192f88b5685cc45543 |
+| Task startup | 2026-11-08T11:16:48.779Z |
+| UI publication | 2026-11-08T12:11:39Z |
 | Live version metadata | GET /api/v1/version; public and no-store |
 
 Later documentation and operator-tooling commits do not change the deployed implementation commit or its immutable build date.
 The public API, UI bundle, and portable image labels match this release.
 The local user demo is separate. Do not assume it runs the same release as the hosted installation.
 
-## Active delivery: remove public status Help
+## Completed delivery: remove public status Help
 
 The public status component and route no longer render Help or configure a help topic. Standalone documents, embeds, loading, and error states share the minimal shell. Management Help remains available. The explicit public-document exception is recorded in UI guidance and acceptance 50.
 The UI build and normal STUDIO-STATUS-PAGES-001 pass. Run 20261108T040919.382666000-2f47d1bdf79142a6b2ff8132 completes in 8.062 seconds with cleaned execution and passing public, iframe, dark, and private-help checks.
-Release 0.8.1-dev is prepared. Commit and push this verified change, build from committed source, inspect the existing MMDev rollout, review the ordinary Service/Task change set, and verify the actual public document. Publication and target checks remain pending; the release table still identifies hosted 0.8.0-dev.
-Reuse passing build caches in this managed checkout. Preserve the original checkout’s separate work and the user’s demo and page configuration.
+Release 0.8.1-dev from committed 8c8a81a is pushed and deployed as build 3f0963838890. The reviewed change set modifies only Service and Task. Seventeen hosted checks pass for API/UI identity, public component bytes, health, completed rollouts, and invalidation. The requesting public page visibly renders without Help. Temporary browser tabs close; no page configuration changes. Receipts are output/aws-mmdev/status-no-help-081.
+Retain passing ignored self-test, service, UI, and dependency caches in this managed checkout for later changes. Owned test servers and browsers are stopped; temporary helpers and verification databases are removed after evidence is copied to the original checkout. Preserve the original checkout’s separate work and the user’s demo and page configuration.
 
 ## Completed delivery: configurable logo height
 

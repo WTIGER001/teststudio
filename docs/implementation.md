@@ -24,12 +24,21 @@ STUDIO-STATUS-PAGES-001 passes after upstream logo integration with the new buck
 The user demo on port 8040 and unrelated workloads remain separate. Registry publication and hosted verification are not performed for this work. The parallel upstream logo implementation and release notes are integrated locally; shared components retain its optional fields and centered rendering while preserving the separately verified hosted release.
 This refines 12, 13, 34, 35, 36, 37, 39, 40, 41, 47, 49, and 50. The count stays **50 verified of 57**. Broad cross-profile criteria 41, 46, 51, 53, 54, 56, and 57 remain open.
 
+## Public status pages without Help: MMDev delivery — 2026-11-08
+
+Release 0.8.1-dev uses committed 8c8a81aa1c8386f83770ba34008d85badcb663a9, build 3f0963838890, created 2026-11-08T04:11:18.093Z with modified false. Its ARM64 digest is sha256:047b3680d5de6d61c210cdbd347a66a6b046480c67b78f192f88b5685cc45543. The implementation and notes are pushed to both delivery branches.
+The reviewed ordinary change set modifies only TestStudio Service and Task. Task startup is 2026-11-08T11:16:48.779Z; matching UI publication is 2026-11-08T12:11:39Z. Build creation, task startup, and publication remain distinct.
+Seventeen hosted checks pass for public API identity, exact published index and public-component bytes, HTTP health, selected task digest, completed stack and service rollouts, and completed CloudFront invalidation. Both services remain healthy.
+The actual requesting public document renders its logo, title, selected month, probe rows, and donuts without a Help button or help dialog. The temporary tab closes and both original user tabs remain. No application page, probe, schedule, permission, or membership configuration changes.
+Retained receipts and screenshot are output/aws-mmdev/status-no-help-081. Owned processes and temporary helpers are cleaned; passing ignored build caches are retained for reuse. The port 8040 demo and unrelated workloads are preserved.
+This refines 49 and 50. Acceptance stays **50 verified of 57**. The public Help omission is the explicit user-requested exception; broad worker and cross-profile criteria remain open.
+
 ## Public status pages without Help: local implementation — 2026-11-07
 
 At the user’s request, anonymous status documents and iframe embeds omit the application Help button and drawer. Public loading and error views use the same minimal shell. Authenticated creation, editing, and management screens retain their current guidance.
 The public route no longer declares a help topic, and its component no longer imports or renders Help or its overlay styling. The UI guide records the explicit exception to the per-page help requirement; acceptance 50 keeps its stable number and reflects the requested public-document scope.
 The UI builds. Normal STUDIO-STATUS-PAGES-001 passes in 8.062 seconds, run 20261108T040919.382666000-2f47d1bdf79142a6b2ff8132. It verifies no public Help button or dialog, no Help in the actual cross-origin iframe, dark-page absence, and retained management help, along with the existing status workflow. The execution is cleaned and owned processes and browsers exit.
-Release 0.8.1-dev is prepared. No API, permission, data, or shared-library behavior changes. Publication and hosted verification remain pending. This refines 49 and 50; acceptance stays **50 verified of 57**.
+No API, permission, data, or shared-library behavior changes. Separate release and hosted verification appear above. This refines 49 and 50; acceptance stays **50 verified of 57**.
 
 ## Configurable logo height: MMDev delivery — 2026-11-07
 

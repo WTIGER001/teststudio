@@ -16,10 +16,10 @@ Use the mm_dev profile and preserve existing services. Azure implementation and 
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
-## Current delivery: remove public status Help
+## Completed delivery: remove public status Help
 
 The user requests a clean public status document without the application Help control. Remove it from standalone and iframe views while retaining management help. Record this explicit exception in the UI rules and acceptance 50.
-STUDIO-STATUS-PAGES-001 passes locally in 8.062 seconds, run 20261108T040919.382666000-2f47d1bdf79142a6b2ff8132, including the public URL, cross-origin iframe, dark document, and private management guidance. Release 0.8.1-dev publication and target checks remain pending.
+STUDIO-STATUS-PAGES-001 passes locally in 8.062 seconds, run 20261108T040919.382666000-2f47d1bdf79142a6b2ff8132, including the public URL, cross-origin iframe, dark document, and private management guidance. Release 0.8.1-dev from committed 8c8a81a is pushed and deployed as build 3f0963838890. Seventeen hosted identity, asset, health, rollout, and invalidation checks pass; the requesting public document visibly has no Help control.
 This refines 49 and 50; acceptance stays 50 verified of 57. Preserve existing status-page configuration.
 
 ## Completed delivery: configurable logo height

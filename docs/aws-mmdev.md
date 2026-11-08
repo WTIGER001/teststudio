@@ -37,9 +37,9 @@ The reviewed foundation change set adds 29 resources. The reviewed core change s
 Neither change set modifies existing resources. The core change set creates no cluster.
 ECS reports one desired and one running teststudioapi task with a completed rollout.
 Both API and artifact target groups report healthy. The existing testing-server remains at one running task.
-The ARM64 image is sha256:1601cee035b451d8135381dd143d74b2584460eb12e568a6d3d3657de351dc5d.
-It is published in teststudioapi/service. The current release is 0.8.0-dev, displayed as 0.8.0.dev. Build 2320bb94582b uses committed source dc558de.
-Its UTC build creation date is 2026-11-08T03:52:01.670Z. The task starts at 2026-11-08T03:56:08.765Z and UI publication occurs at 2026-11-08T03:59:30Z. The API, UI, and image labels share that immutable identity.
+The ARM64 image is sha256:047b3680d5de6d61c210cdbd347a66a6b046480c67b78f192f88b5685cc45543.
+It is published in teststudioapi/service. The current release is 0.8.1-dev, displayed as 0.8.1.dev. Build 3f0963838890 uses committed source 8c8a81a.
+Its UTC build creation date is 2026-11-08T04:11:18.093Z. The task starts at 2026-11-08T11:16:48.779Z and UI publication occurs at 2026-11-08T12:11:39Z. The API, UI, and image labels share that immutable identity.
 Release 0.5.0-dev adds focused status-page management and installation-wide vanity names. Its ordinary image-only change set modifies Service and Task; the existing public CloudFront policy is reused. Twelve package checks and thirty-four hosted checks pass. The owned generic verification page is unpublished and its session closes. Receipts are output/aws-mmdev/status-vanity-050.
 Patch 0.5.1-dev adds status-page sharing copy buttons. The focused browser workflow and sixteen hosted identity, asset, health, rollout, and invalidation checks pass. The image-only change set preserves the existing public response policy. Receipts are output/aws-mmdev/status-copy-051.
 The unchanged trace viewer is reused. Native image storage uses the existing private database. The image retains the reviewed public RDS trust bundle.
@@ -249,3 +249,5 @@ Later image-only releases reuse the installed policies. Keep core health, logo r
 Logo release 0.6.0-dev is deployed as build dca2ee3e4ddf. The reviewed four-resource change set, nine local AWS checks, thirty-five hosted checks, and actual public-image rendering pass. Both services and the stack are healthy, invalidation completes, and the generic verification page is unpublished. Receipts are output/aws-mmdev/status-logo-060.
 
 Release 0.8.0-dev adds configurable logo height and incorporates the committed shared reliability and Angular library source. Its ordinary Service/Task change set reuses the installed logo policies. Twenty-eight height/release checks and actual 192-pixel public rendering pass; the requesting editor is verified, the owned page is unpublished, and sessions close. Receipts are output/aws-mmdev/status-height-080. Broader reliability and worker acceptance remains separate.
+
+Release 0.8.1-dev removes Help from public status documents and embeds, with management guidance retained. The local browser workflow and seventeen hosted release checks pass. Its reviewed image-only change set modifies Service and Task; no response policy or user page configuration changes. Receipts are output/aws-mmdev/status-no-help-081.
