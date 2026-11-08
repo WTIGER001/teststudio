@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.44.0"
+export const accessContractVersion = "0.45.0"
 
 export type APIAuthentication = { "binding": string; "header"?: string; "scheme": "bearer" | "basic" | "header" }
 export type APIRequestPolicy = { "authentication"?: APIAuthentication; "maxRequests": number; "maxResponseBytes": number; "redactFields"?: (string)[]; "rules": (APIRequestRule)[] }
@@ -11,14 +11,15 @@ export type AssignmentDefinition = { "principalId": string; "principalKind": "us
 export type AssignmentPage = { "cursor"?: string; "items": (AssignmentRecord)[]; "partial": boolean }
 export type AssignmentRecord = { "applicationId"?: string; "data": Assignment; "id": string; "projectId"?: string; "revision": number; "updatedAt"?: string }
 export type BrowserRecording = { "actor": string; "code"?: string; "createdAt": string; "deadlineAt": string; "error"?: string; "id": string; "mode"?: "companion" | "embedded"; "projectId": string; "state": string; "steps"?: (BrowserRecordingStep)[]; "suiteId": string; "testId": string; "title": string; "url": string }
-export type BrowserRecordingAction = { "action": "click" | "text" | "key" | "scroll" | "assert-visible" | "record"; "key"?: string; "sequence": number; "text"?: string; "x"?: number; "y"?: number }
+export type BrowserRecordingAction = { "action": "click" | "text" | "key" | "scroll" | "assert-visible" | "assert-pick" | "assert-add" | "assert-url" | "resize" | "record"; "count"?: number; "height"?: number; "key"?: string; "sequence": number; "text"?: string; "width"?: number; "x"?: number; "y"?: number }
 export type BrowserRecordingInput = { "id": string; "testId": string; "title": string; "url": string }
 export type BrowserRecordingOptions = { "durationLimitSeconds": number; "enabled": boolean; "mode": string }
 export type BrowserRecordingPage = { "cursor"?: string; "items": (BrowserRecordingRecord)[] }
 export type BrowserRecordingPairing = { "expiresAt": string; "id": string; "token": string }
 export type BrowserRecordingRecord = { "data": BrowserRecording; "id": string; "revision": number; "updatedAt": string }
 export type BrowserRecordingStep = { "description": string; "kind": string }
-export type BrowserRecordingView = { "height": number; "image": string; "mode": string; "sequence": number; "steps": (BrowserRecordingStep)[]; "url": string; "width": number }
+export type BrowserRecordingTarget = { "label": string; "matches": number; "text": string }
+export type BrowserRecordingView = { "height": number; "image": string; "message"?: string; "mode": string; "sequence": number; "steps": (BrowserRecordingStep)[]; "target"?: BrowserRecordingTarget; "url": string; "width": number }
 export type CLIConfirmation = { "approve": boolean; "clientName": string; "code": string }
 export type CLIExchange = { "session"?: CLIGrant; "state": string }
 export type CLIGrant = { "cookie": string; "csrfToken": string; "expiresAt": string }

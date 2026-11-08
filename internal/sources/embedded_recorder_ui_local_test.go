@@ -90,7 +90,7 @@ func runRecordingAuthoringUI(t *testing.T, hosted bool) {
 		dependency := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "text/javascript")
 			w.Header().Set("Access-Control-Allow-Origin", "*")
-			io.WriteString(w, `document.querySelector('#application').innerHTML='<nav><a href="/news">News</a></nav>'+(location.pathname==='/news'?'<main><article><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></article></main>':'');`)
+			io.WriteString(w, `document.querySelector('#application').innerHTML='<nav><a href="/news">News</a></nav>'+(location.pathname==='/news'?'<main><article><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></article><article><h2>Second independent story</h2></article></main>':'');`)
 		}))
 		listener, err := net.Listen("tcp", "0.0.0.0:0")
 		if err != nil {
@@ -110,7 +110,7 @@ func runRecordingAuthoringUI(t *testing.T, hosted bool) {
 		}
 		io.WriteString(w, `<!doctype html><style>body{margin:0}a{display:block;padding:15px}h2{margin:20px}</style><nav><a href="/news">News</a></nav>`)
 		if r.URL.Path == "/news" {
-			io.WriteString(w, `<main><article><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></article></main>`)
+			io.WriteString(w, `<main><article><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></article><article><h2>Second independent story</h2></article></main>`)
 		}
 	}))
 	targetAddress := "127.0.0.1:0"

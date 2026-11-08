@@ -8,13 +8,21 @@ The desktop companion remains available where explicitly configured.
 
 1. Choose a suite and enter the test title and website address.
 2. Select Start recording. Use the website shown inside TestStudio.
-3. Select Check something appears, then select an expected story or other item.
+3. Select Check something appears for visibility. Use Check count or text to select a story, review matching items, and add At least, Exactly, or Contains text. Check page address captures the current address.
 4. Select Finish recording. Review the plain-language captured steps.
 5. Select Save test draft. Advanced source editing remains available.
-6. Prepare the draft, review its publication and target, then explicitly run it.
+6. Select Prepare saved test when available. Review its publication and target, then explicitly run it. A missing worker is explained beside the saved draft.
 
 Saving does not publish or execute. Preserve review, revision conflicts, and partial-save recovery.
 A future combined Save and run action must explain publication and execution and retain successful intermediate receipts.
+
+## Recording workspace
+
+Open recording dialog enlarges the workspace in a resizable native dialog. Escape or Return to page restores the page without stopping the recording.
+Open recording in new tab uses a dedicated TestStudio route for the same private session. Only the controlling tab sends input. Control recording here explicitly brings it back. Closing a tab keeps captured source until the original deadline.
+Browser window size offers desktop, large desktop, tablet, phone, and custom dimensions. Width is 320–1920 and height is 240–1200 whole pixels. These change the real browser viewport and become ordered source steps. The preview fits the available space without upscaling a small viewport.
+Count selection prefers an article, list item, or table row and groups matching siblings under their parent. Review the displayed count before adding the assertion. The selected text check retains its specific locator. A future website structure can require updating that locator or group.
+The adapter uses bounded internal generator extension actions for ordered count assertions and viewport changes. No extension marker enters the saved source. Runtime upgrades must repeat the focused recorder checks.
 
 ## Milestones
 

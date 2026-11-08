@@ -3,6 +3,13 @@
 Last reviewed: 2026-11-08. These notes describe the last verified state, not a live infrastructure inventory.
 Read this guide before historical continuation commands elsewhere in the plan.
 
+## Current delivery: recording checks and workspace
+
+The requested assertions and recording windows are implemented. Testers can add at-least and exact counts, text and address checks, use a dialog or separate tab, and record actual viewport changes. Saved drafts offer preparation directly or explain a missing worker. Existing review, recovery, private ownership, help, and explicit execution remain intact.
+Normal STUDIO-HOSTED-RECORDER-001 passes through the actual isolated local worker, including two-way tab control and saved preparation. Reuse output/playwright/recording-workspace-final, run 20261108T202929.895786000-ce5dafcce2edbb0965d8a874. The harness takes 27.52 seconds and closes all owned resources. Native adapter, bounded actions, environment rebinding, generated contract, and UI compilation checks pass.
+API contract 0.45.0 describes the added fields and actions. Product deployment is pending. Package the verified recording overlay sha256:0b4dcc083882cfe31c28a132de9457fcecec3d1236f15f43f053370a30cbffcf with the existing gateway and complete private origin map. Preserve the host, original infrastructure receipt, and transport identities. Upgrade the private worker before publishing the new UI.
+This refines 21, 22, 25, 49, 50, and 51. Acceptance stays 50 verified of 57. Hosted preparation and execution remain the next substantial gap; Azure remains deferred. Preserve the demo and unrelated workloads.
+
 ## Resume in this order
 
 1. Read AGENTS.md and check the branch and working tree. The logo delivery branch is codex/status-page-logo. The original checkout retains codex/implementation and concurrent reliability edits.

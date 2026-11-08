@@ -1,3 +1,4 @@
+import { ActivatedRoute } from '@angular/router'
 import { randomId } from '../../core/random-id'
 import { DOCUMENT } from '@angular/common'
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core'
@@ -34,6 +35,8 @@ export class BrowserRecorderService {
     testId: new FormControl(`REC-${randomId().slice(0, 8)}`, { nonNullable: true, validators: [Validators.required, Validators.pattern(/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/)] }),
     title: new FormControl('Recorded browser flow', { nonNullable: true, validators: [Validators.required, Validators.maxLength(120)] })
   })
+  private readonly route = inject(ActivatedRoute)
+  private requested = this.route.snapshot.paramMap.get('recordingId') ?? this.route.snapshot.queryParamMap.get('recording') ?? ''
   private generation = 0
   private recordingDraftId = ''
   private requestId = randomId()
@@ -58,7 +61,12 @@ export class BrowserRecorderService {
       const [options, page] = await Promise.all([this.client.call('readBrowserRecordingOptions', this.scope()), this.client.call('listBrowserRecordings', { ...this.scope(), query: { limit: 30, cursor: more ? this.cursor() : undefined } })])
       if (generation !== this.generation) return
       this.enabled.set(options.enabled); this.mode.set(options.mode); this.sources.recordingMode.set(options.mode); this.items.set(more ? [...this.items(), ...page.items] : page.items); this.cursor.set(page.cursor ?? '')
-      if (!this.selected()) { const active = page.items.find(row => recordingActive(row.data.state)); if (active) { this.accept(active); void this.read(active.id) } }
+      if (!this.selected()) {
+        const requested = this.requested; this.requested = ''
+        const active = page.items.find(row => requested ? row.id === requested : recordingActive(row.data.state))
+        if (active) { this.accept(active); void this.read(active.id) }
+        else if (requested) await this.read(requested)
+      }
     } catch (error) { if (generation === this.generation) this.fail(error) }
     finally { if (generation === this.generation) this.busy.set(false) }
   }
@@ -87,6 +95,12 @@ export class BrowserRecorderService {
     if (this.editor.saved()?.id === this.recordingDraftId && !this.sources.draftDirty()) { this.savedRecording.set(true); return }
     await this.editor.save(true)
     if (!this.editor.error() && this.editor.saved()) this.savedRecording.set(true)
+  }
+
+  async prepareRecording(): Promise<void> {
+    if (!this.savedRecording() || !this.editor.preparation.bundleRunners().includes('playwright') || !this.sources.workspace.can('catalog.import')) return
+    await this.editor.prepare()
+    if (!this.editor.error() && this.editor.preparation.selected()) document.getElementById('preparation-title')?.focus()
   }
 
   async reviewSource(id: string): Promise<void> {

@@ -6,6 +6,17 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user authorizes MMDev ECS deployment and now plans a first installation into their own Azure subscription.
 
+## Recording checks and workspace — 2026-11-08
+
+The recorder adds At least, Exactly, Contains text, and current page-address checks. Testers select an item, review its matching group and count, then add the assertion. Article grouping counts stories independently of their headlines. A mismatched expected count stays in review for correction.
+A resizable native dialog and a dedicated recording route share the existing session, source review, and draft workflow. A separate tab claims interactive control; the original page offers explicit return of control. Closing a tab preserves captured steps. The route retains contextual help and unsaved-edit protection.
+Desktop, tablet, phone, and custom browser dimensions change the actual viewport within 320–1920 by 240–1200 pixels. The generated test records each size change in order. Preview scaling does not change those dimensions. Invalid sizes cannot send input.
+Saved recordings expose Prepare saved test without requiring the source editor. Missing preparation workers produce a clear saved-draft notice. Preparation, publication, and execution stay separate. Address assertions bind to the selected execution environment alongside navigation; foreign origins stay explicit.
+
+Normal STUDIO-HOSTED-RECORDER-001 passes in 9.018 seconds for the first expanded workflow. The final workflow includes two-way tab control, dialog Escape and focus, phone and custom viewports, invalid dimensions and counts, all new assertions, saved preparation, reload, help, keyboard access, input and save-confirmation recovery, light, dark, narrow layouts, one revision-1 draft, and cancellation. The final normal run takes 9.334 seconds and its harness takes 27.52 seconds. Reuse output/playwright/recording-workspace-final, run 20261108T202929.895786000-ce5dafcce2edbb0965d8a874. All owned recording browsers, gateways, volumes, and three observed host processes close.
+The focused native adapter passes in 1.373 seconds, including semantic grouping, dimensions, generated source, retry deduplication, and shutdown. Focused race checks pass for action bounds, environment binding, and generated OpenAPI synchronization. UI compilation passes. The canonical API contract is 0.45.0.
+This refines 21, 22, 25, 49, 50, and 51. Acceptance remains 50 verified of 57. Hosted source preparation and execution and broad cross-profile acceptance remain open. Deployment is pending for this change.
+
 ## Azure delivery planning: own subscription first — 2026-11-08
 
 The user selects direct Azure installation before Marketplace delivery.

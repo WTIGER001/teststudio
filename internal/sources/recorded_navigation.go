@@ -11,7 +11,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/browserpolicy"
 )
 
-var recordedNavigation = regexp.MustCompile(`page\.goto\(('(?:[^'\\\r\n]|\\.)*'|"(?:[^"\\\r\n]|\\.)*")`)
+var recordedNavigation = regexp.MustCompile(`(?:page\.goto\(|expect\(page\)\.toHaveURL\()('(?:[^'\\\r\n]|\\.)*'|"(?:[^"\\\r\n]|\\.)*")`)
 
 func bindRecordedNavigation(code, address string) (string, error) {
 	start, err := url.Parse(address)
@@ -45,8 +45,10 @@ func bindRecordedNavigation(code, address string) (string, error) {
 		}
 		encoded, _ := json.Marshal(path)
 		replacement := "new URL(" + string(encoded) + ", process.env.TESTSTUDIO_BASE_URL).href"
+		if strings.HasPrefix(code[match[0]:match[1]], "page.goto(") {
+			bound++
+		}
 		code = code[:match[2]] + replacement + code[match[3]:]
-		bound++
 	}
 	if bound == 0 {
 		return "", errors.New("the recording has no supported start-origin navigation; keep the retained code and add explicit target binding in the source editor")

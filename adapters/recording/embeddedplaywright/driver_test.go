@@ -39,7 +39,7 @@ func TestEmbeddedRecordingCapturesNewsAssertionAndClosesBrowser(t *testing.T) {
 		w.Header().Set("Content-Type", "text/html")
 		_, _ = w.Write([]byte(`<!doctype html><style>body{margin:0}a{display:block;padding:15px}h2{margin:20px}</style><nav><a href="/news">News</a></nav>`))
 		if r.URL.Path == "/news" {
-			_, _ = w.Write([]byte(`<main><article><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></article></main>`))
+			_, _ = w.Write([]byte(`<main><article><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></article><article><h2>Second independent story</h2></article></main>`))
 		}
 	}))
 	t.Cleanup(target.Close)
@@ -89,6 +89,35 @@ func TestEmbeddedRecordingCapturesNewsAssertionAndClosesBrowser(t *testing.T) {
 	if _, err := driver.Interact(ctx, "news", recording.Action{Sequence: 3, Action: "click", X: 35, Y: 25}); err == nil {
 		t.Fatal("changed duplicate action was accepted")
 	}
+
+	actions := []recording.Action{
+		{Action: "resize", Width: 390, Height: 844},
+		{Action: "assert-pick"}, {Action: "click", X: 120, Y: 85},
+		{Action: "assert-add", Key: "at-least", Count: 3},
+		{Action: "assert-add", Key: "at-least", Count: 1},
+		{Action: "assert-pick"}, {Action: "click", X: 120, Y: 85},
+		{Action: "assert-add", Key: "exactly", Count: 2},
+		{Action: "assert-pick"}, {Action: "click", X: 120, Y: 85},
+		{Action: "assert-add", Key: "text", Text: "Regional harvest"},
+		{Action: "assert-url"},
+	}
+	for index, action := range actions {
+		action.Sequence = index + 4
+		view, err = driver.Interact(ctx, "news", action)
+		if err != nil {
+			t.Fatalf("action %s: %v", action.Action, err)
+		}
+		if view.Width != 390 || view.Height != 844 {
+			t.Fatal("actual viewport dimensions were not retained")
+		}
+		if action.Action == "click" && (view.Target == nil || view.Target.Matches != 2) {
+			t.Fatalf("article grouping failed: %+v", view.Target)
+		}
+		if action.Count == 3 && view.Message == "" {
+			t.Fatal("mismatched count was not explained")
+		}
+	}
+
 	snapshot, err := driver.Stop(ctx, "news")
 	if err != nil {
 		t.Fatal(err)
@@ -96,6 +125,16 @@ func TestEmbeddedRecordingCapturesNewsAssertionAndClosesBrowser(t *testing.T) {
 	if snapshot.State != "ready" || !strings.Contains(snapshot.Code, "name: 'News'") || !strings.Contains(snapshot.Code, "toBeVisible()") || len(snapshot.Steps) < 3 {
 		t.Fatalf("recorded outcome state=%s steps=%+v code=%s", snapshot.State, snapshot.Steps, snapshot.Code)
 	}
+
+	for _, expected := range []string{"setViewportSize({ width: 390, height: 844 })", "toBeGreaterThanOrEqual(1)", "toHaveCount(2)", "toContainText(\"Regional harvest\")", "toHaveURL("} {
+		if !strings.Contains(snapshot.Code, expected) {
+			t.Fatalf("missing generated assertion %s: %s", expected, snapshot.Code)
+		}
+	}
+	if strings.Contains(snapshot.Code, "teststudio_") {
+		t.Fatal("internal extension marker escaped into source")
+	}
+
 	item, _ := driver.item("news")
 	select {
 	case <-item.done:

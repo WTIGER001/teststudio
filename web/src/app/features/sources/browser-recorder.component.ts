@@ -1,20 +1,21 @@
 import { DatePipe } from '@angular/common'
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core'
 import { ReactiveFormsModule } from '@angular/forms'
 import { WizardStepperComponent } from '../../shared/wizard/wizard-stepper.component'
 import { WizardHeadingComponent } from '../../shared/wizard/wizard-heading.component'
 import { WizardFormDirective } from '../../shared/wizard/wizard-form.directive'
 import { BrowserRecorderService } from './browser-recorder.service'
 import { RecorderConnectionComponent } from './recorder-connection.component'
+import { EmbeddedRecorderService } from './embedded-recorder.service'
 import { EmbeddedRecorderComponent } from './embedded-recorder.component'
 
 @Component({
-  selector: 'ts-browser-recorder', standalone: true, imports: [ReactiveFormsModule, DatePipe, WizardStepperComponent, WizardHeadingComponent, WizardFormDirective, RecorderConnectionComponent, EmbeddedRecorderComponent], providers: [BrowserRecorderService], changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'ts-browser-recorder', standalone: true, imports: [ReactiveFormsModule, DatePipe, WizardStepperComponent, WizardHeadingComponent, WizardFormDirective, RecorderConnectionComponent, EmbeddedRecorderComponent], providers: [BrowserRecorderService, EmbeddedRecorderService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="panel" aria-labelledby="browser-recorder-title">
       <h2 id="browser-recorder-title">Record a browser test</h2>
       <p class="muted">Configure the test, record actions and assertions, then review the generated source before saving a draft.</p>
-      @if (!service.enabled() && !service.busy()) { <p class="notice">Browser recording is unavailable on this installation. Ask your operator to enable the desktop companion or the local desktop recorder. You can still use the source editor below.</p> }
+      @if (!service.enabled() && !service.busy()) { <p class="notice">Browser recording is unavailable on this installation. Ask your operator to enable a recording worker or desktop recorder. You can still use the source editor below.</p> }
       @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }
       @if (service.enabled()) {
         <ts-wizard-stepper [steps]="service.flow().steps" [current]="service.flow().current" [interactive]="false" label="Browser recording progress" />
@@ -33,14 +34,14 @@ import { EmbeddedRecorderComponent } from './embedded-recorder.component'
           <p role="status">{{ service.stateLabel(row.data.state) }} · {{ row.data.testId }}</p><p class="small muted wrap-anywhere">Start address: {{ row.data.url }} · Session ends {{ row.data.deadlineAt | date:'short':'UTC' }} UTC.</p>
           @if (row.data.error) { <p class="notice warning">{{ row.data.error }}</p> }
           @if (row.data.state === 'pairing') { <ts-recorder-connection /> }
-          @if (row.data.mode === 'embedded' && row.data.state === 'recording') { <ts-embedded-recorder /> }
+          @if (row.data.mode === 'embedded' && row.data.state === 'recording') { <ts-embedded-recorder [workspace]="workspace()" /> }
           @else if (row.data.state === 'starting' || row.data.state === 'recording') { <p>Use the dedicated browser and Playwright Inspector to record clicks and assertions. Return here when the flow is complete.</p> }
           @if (row.data.state === 'stopping') { <p class="notice">Waiting for the recorder to close and send its final captured steps. Keep this session open to see the result.</p> }
-          @if (row.data.state === 'ready' && row.data.mode === 'embedded') { <h4>Review your test</h4><ol aria-label="Recorded test steps">@for (step of row.data.steps; track $index) { <li>{{ step.description }}</li> }</ol><p>Save this draft to keep the recorded steps. Review its target and safety before publishing or running.</p>@if (service.savedRecording()) { <p role="status">Test draft saved. No tests were started.</p> }@if (service.editor.error()) { <p role="alert" class="notice error">{{ service.editor.error() }}</p> } }
+          @if (row.data.state === 'ready' && row.data.mode === 'embedded') { <h4>Review your test</h4><ol aria-label="Recorded test steps">@for (step of row.data.steps; track $index) { <li>{{ step.description }}</li> }</ol><p>Save this draft to keep the recorded steps. Review its target and safety before publishing or running.</p>@if (service.savedRecording()) { <p role="status">Test draft saved. No tests were started.</p><section aria-label="Next step for saved recording"><h4>Next: prepare your test</h4><p>Preparation checks this saved revision and discovers its test. You will review publication and choose when to run it.</p>@if (service.editor.preparation.bundleRunners().includes('playwright')) { <button type="button" class="button primary" [disabled]="service.editor.busy() || service.editor.preparation.busy() || service.sources.draftDirty() || !service.sources.workspace.can('catalog.import')" (click)="service.prepareRecording()">Prepare saved test</button>@if (service.editor.message()) { <p role="status">{{ service.editor.message() }}</p> } } @else { <p class="notice">Your recording is saved. This installation needs a Playwright preparation worker before it can prepare or run browser tests. Ask your operator to finish that setup.</p> }</section> }@if (service.editor.error()) { <p role="alert" class="notice error">{{ service.editor.error() }}</p> } }
           @else if (row.data.state === 'ready') { <p>Review the generated code, assertions, environment target, and safety label. Save a source draft in the editor below. Preparing, publishing, and running remain separate actions.</p> }
           @if (row.data.state === 'cancelled') { <p>This recording was cancelled. Its private history remains available.</p> }
           <div class="row-actions wrap-actions">
-            @if (row.data.state === 'starting' || row.data.state === 'recording') { <button type="button" class="button primary" [disabled]="service.busy() || service.sources.recordingInputPending()" (click)="service.stop()">{{ row.data.mode === 'embedded' ? 'Finish recording' : 'Stop and keep recording' }}</button> }
+            @if (row.data.state === 'starting' || row.data.state === 'recording') { <button type="button" class="button primary" [disabled]="service.busy() || service.sources.recordingInputPending() || embedded.external() || embedded.uncertain()" (click)="service.stop()">{{ row.data.mode === 'embedded' ? 'Finish recording' : 'Stop and keep recording' }}</button> }
             @if (service.active()) { <button type="button" class="button secondary" [disabled]="service.busy()" (click)="service.stop(true)">Cancel recording</button> }
             @if (row.data.state === 'ready' && row.data.mode === 'embedded') { <button type="button" class="button primary" [disabled]="service.editor.busy() || service.savedRecording()" (click)="service.saveRecording()">Save test draft</button> }
             @if (row.data.state === 'ready') { <button type="button" class="button secondary" [disabled]="service.editor.busy() || service.sources.draftDirty()" (click)="service.reviewSource(row.id)">{{ row.data.mode === 'embedded' ? 'Advanced: review source' : 'Review recorded test' }}</button> }
@@ -56,4 +57,4 @@ import { EmbeddedRecorderComponent } from './embedded-recorder.component'
   `,
   styles: [`fieldset { border: 0; padding: 0; margin: 1rem 0; min-width: 0; } article { margin: 1rem 0; } .row-actions { margin: .75rem 0; } details { margin: 1rem 0; } pre { max-height: 22rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12px; } li { margin: .5rem 0; }`]
 })
-export class BrowserRecorderComponent { readonly service = inject(BrowserRecorderService) }
+export class BrowserRecorderComponent { readonly workspace = input(false); readonly service = inject(BrowserRecorderService); readonly embedded = inject(EmbeddedRecorderService) }

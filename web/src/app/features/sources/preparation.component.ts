@@ -11,11 +11,11 @@ import { preparationStateLabel } from './preparation-label'
 @Component({
   selector: 'ts-source-preparation', standalone: true, imports: [DatePipe, ReactiveFormsModule, BundleUploadComponent, PlaywrightEditorComponent, BrowserRecorderComponent], providers: [PreparationService, PlaywrightEditorService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (mode() === 'all' || mode() === 'playwright') { <ts-browser-recorder />@if (service.sources.recordingMode() === 'embedded') { <details [open]="service.sources.sourceEditingOpen()" (toggle)="service.sources.sourceEditingOpen.set($any($event.target).open)"><summary>Advanced source editing</summary><ts-playwright-editor /></details> } @else { <ts-playwright-editor /> } }
+    @if (mode() === 'all' || mode() === 'playwright') { <ts-browser-recorder [workspace]="workspace()" />@if (service.sources.recordingMode() === 'embedded') { <details [open]="service.sources.sourceEditingOpen()" (toggle)="service.sources.sourceEditingOpen.set($any($event.target).open)"><summary>Advanced source editing</summary><ts-playwright-editor /></details> } @else { <ts-playwright-editor /> } }
     @if (mode() === 'api') { <ts-playwright-editor [api]="true" /> }
     @if (mode() !== 'playwright' && mode() !== 'api' && service.bundleRunners().length && service.sources.workspace.can('sources.manage') && service.sources.workspace.can('catalog.import')) { <ts-source-bundle /> }
     <section class="panel" aria-labelledby="preparation-title">
-      <div class="section-top"><h2 id="preparation-title">Suite preparation</h2><button class="button secondary" type="button" [disabled]="service.busy()" (click)="service.load()">Refresh preparations</button></div>
+      <div class="section-top"><h2 id="preparation-title" tabindex="-1">Suite preparation</h2><button class="button secondary" type="button" [disabled]="service.busy()" (click)="service.load()">Refresh preparations</button></div>
       <p class="muted">Follow a source bundle build or inspect an immutable Go or Playwright image. Review its discovered catalog before publication. Preparation does not start a test run.</p>
       @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }
       @if (mode() !== 'playwright' && mode() !== 'api' && service.runners().length && service.sources.workspace.can('sources.manage') && service.sources.workspace.can('catalog.import')) {
@@ -50,6 +50,7 @@ import { preparationStateLabel } from './preparation-label'
 })
 export class PreparationComponent {
   readonly preparationStateLabel = preparationStateLabel
+  readonly workspace = input(false)
   readonly mode = input<'all' | 'playwright' | 'go' | 'api'>('all')
   readonly service = inject(PreparationService)
   readonly editor = inject(PlaywrightEditorService)

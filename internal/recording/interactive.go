@@ -17,17 +17,28 @@ type Step struct {
 	Description string `json:"description"`
 }
 
+type CheckTarget struct {
+	Label   string `json:"label"`
+	Matches int    `json:"matches"`
+	Text    string `json:"text"`
+}
+
 type View struct {
-	Image    string `json:"image"`
-	Width    int    `json:"width"`
-	Height   int    `json:"height"`
-	URL      string `json:"url"`
-	Mode     string `json:"mode"`
-	Sequence int    `json:"sequence"`
-	Steps    []Step `json:"steps"`
+	Target   *CheckTarget `json:"target,omitempty"`
+	Message  string       `json:"message,omitempty"`
+	Image    string       `json:"image"`
+	Width    int          `json:"width"`
+	Height   int          `json:"height"`
+	URL      string       `json:"url"`
+	Mode     string       `json:"mode"`
+	Sequence int          `json:"sequence"`
+	Steps    []Step       `json:"steps"`
 }
 
 type Action struct {
+	Width    int     `json:"width,omitempty"`
+	Height   int     `json:"height,omitempty"`
+	Count    int     `json:"count,omitempty"`
 	Sequence int     `json:"sequence"`
 	Action   string  `json:"action"`
 	X        float64 `json:"x,omitempty"`
@@ -46,16 +57,23 @@ func (a Action) Valid() bool {
 	if a.Sequence < 1 || a.Sequence > 10000 || math.IsNaN(a.X) || math.IsNaN(a.Y) || math.IsInf(a.X, 0) || math.IsInf(a.Y, 0) {
 		return false
 	}
+	if a.Action != "resize" && (a.Width != 0 || a.Height != 0) || a.Action != "assert-add" && a.Count != 0 {
+		return false
+	}
 	switch a.Action {
 	case "click":
-		return a.X >= 0 && a.X < 1280 && a.Y >= 0 && a.Y < 720 && a.Text == "" && a.Key == ""
+		return a.X >= 0 && a.X < 1920 && a.Y >= 0 && a.Y < 1200 && a.Text == "" && a.Key == ""
 	case "text":
 		return a.X == 0 && a.Y == 0 && len(a.Text) > 0 && len(a.Text) <= 2048 && utf8.ValidString(a.Text) && a.Key == ""
 	case "key":
 		return a.X == 0 && a.Y == 0 && a.Text == "" && slices.Contains([]string{"Enter", "Tab", "Shift+Tab", "Backspace", "Delete", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Home", "End", "Escape", "ControlOrMeta+A"}, a.Key)
 	case "scroll":
 		return a.X == 0 && math.Abs(a.Y) <= 1000 && a.Text == "" && a.Key == ""
-	case "assert-visible", "record":
+	case "resize":
+		return a.Width >= 320 && a.Width <= 1920 && a.Height >= 240 && a.Height <= 1200 && a.X == 0 && a.Y == 0 && a.Text == "" && a.Key == ""
+	case "assert-add":
+		return a.X == 0 && a.Y == 0 && (a.Key == "text" && a.Count == 0 && len(a.Text) > 0 && len(a.Text) <= 2048 && utf8.ValidString(a.Text) || a.Text == "" && (a.Key == "at-least" && a.Count >= 1 || a.Key == "exactly" && a.Count >= 0) && a.Count <= 10000)
+	case "assert-visible", "assert-pick", "assert-url", "record":
 		return a.X == 0 && a.Y == 0 && a.Text == "" && a.Key == ""
 	}
 	return false

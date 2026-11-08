@@ -1,0 +1,49 @@
+<section aria-label="Live recording browser">
+  @if (service.external()) {
+    <p class="notice" role="status">Recording is controlled in another tab. Your captured steps stay saved here.</p>
+    <button type="button" class="button primary" [disabled]="service.pending()" (click)="service.useHere()">Control recording here</button>
+  } @else {
+    <div class="row-actions wrap-actions">
+      <button type="button" class="button secondary" [disabled]="service.pending()" (click)="open(dialog)">Open recording dialog</button>
+      @if (!workspace()) { <button type="button" class="button secondary" [disabled]="service.pending() || service.uncertain()" (click)="service.openTab()">Open recording in new tab</button> }
+    </div>
+    @if (!expanded()) { <ng-container [ngTemplateOutlet]="controls" /> }
+  }
+  <dialog #dialog aria-labelledby="recording-dialog-title" (cancel)="expanded.set(false)" (close)="expanded.set(false)">
+    <div class="section-top"><h2 id="recording-dialog-title">Recording workspace</h2><button type="button" class="button secondary" (click)="close(dialog)">Return to page</button></div>
+    @if (expanded() && !service.external()) { <ng-container [ngTemplateOutlet]="controls" /> }
+    <button type="button" class="button primary" [disabled]="service.pending() || service.uncertain() || service.external()" (click)="close(dialog); service.recorder.stop()">Finish recording</button>
+  </dialog>
+  <ng-template #controls>
+    <p>Use the website below as you normally would. Add a check to describe what a passing test should find.</p>
+    <fieldset [disabled]="service.uncertain()">
+      <div class="row-actions wrap-actions"><button type="button" class="button secondary" [disabled]="!service.view()" (click)="service.send({ action: 'assert-visible' })">Check something appears</button><button type="button" class="button secondary" (click)="service.chooseCheck()">Check count or text</button><button type="button" class="button secondary" (click)="service.send({ action: 'assert-url' })">Check page address</button>@if (service.checking()) { <button type="button" class="button secondary" (click)="service.send({ action: 'record' })">Continue recording</button> }</div>
+    </fieldset>
+    <button type="button" class="button secondary" [disabled]="service.pending()" (click)="service.refresh()">Refresh browser view</button>
+    @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }} Review the captured steps, then use Refresh browser view to reconnect. Actions are not repeated automatically.</p> }
+    @if (service.view()?.mode === 'assertingVisibility') { <p role="status" class="notice">Click the item that should appear. This adds a visibility check.</p> }
+    @if (service.view()?.mode === 'inspecting') {
+      <p role="status" class="notice">Click a story or other item on the website, then review the check below. Selecting it does not follow its link.</p>
+      @if (service.view()?.target; as target) {
+        <section class="panel check-review" aria-label="Review new check">
+          <p>{{ target.label }}: <strong>{{ target.matches }} matching items</strong>. Counts use the selected item's group, so changing a headline does not remove a story from the count.</p>
+          <div class="form-grid"><div class="field"><label for="recording-check-kind">Check type</label><select id="recording-check-kind" [ngModel]="service.checkKind()" (ngModelChange)="service.checkKind.set($event)"><option value="at-least">At least this many items</option><option value="exactly">Exactly this many items</option><option value="text">Selected item contains text</option></select></div>
+          @if (service.checkKind() === 'text') { <div class="field"><label for="recording-expected-text">Expected text</label><input id="recording-expected-text" maxlength="2048" [ngModel]="service.expectedText()" (ngModelChange)="service.expectedText.set($event)"><small>Current text: {{ target.text }}</small></div> }
+          @else { <div class="field"><label for="recording-expected-count">Expected item count</label><input id="recording-expected-count" type="number" [min]="service.checkKind() === 'at-least' ? 1 : 0" max="10000" step="1" [ngModel]="service.count()" (ngModelChange)="service.count.set($event)"></div> }</div>
+          @if (service.view()?.message) { <p class="notice warning" role="status">{{ service.view()?.message }}</p> }
+          <button type="button" class="button primary" [disabled]="service.pending() || service.uncertain() || (service.checkKind() === 'text' ? !service.expectedText() : !validCount())" (click)="service.addCheck()">Add check</button>
+        </section>
+      }
+    }
+    <details><summary>Browser window size</summary><p>These dimensions change the website's actual viewport and are saved in the test. The preview fits the available space.</p><fieldset [disabled]="service.pending() || service.uncertain()"><div class="field"><label for="recording-size-preset">Window preset</label><select id="recording-size-preset" [ngModel]="service.presetSelection()" (change)="service.preset($any($event.target).value)"><option value="custom" disabled>Custom dimensions</option><option value="1280x720">Desktop · 1280 × 720</option><option value="1920x1080">Large desktop · 1920 × 1080</option><option value="768x1024">Tablet · 768 × 1024</option><option value="390x844">Phone · 390 × 844</option></select></div><div class="form-grid"><div class="field"><label for="recording-width">Browser width (pixels)</label><input id="recording-width" type="number" min="320" max="1920" step="1" [ngModel]="service.width()" (ngModelChange)="service.width.set($event)"></div><div class="field"><label for="recording-height">Browser height (pixels)</label><input id="recording-height" type="number" min="240" max="1200" step="1" [ngModel]="service.height()" (ngModelChange)="service.height.set($event)"></div></div><button type="button" class="button secondary" (click)="service.resize()">Apply browser size</button></fieldset>@if (service.sizeError()) { <p role="alert" class="notice error">{{ service.sizeError() }}</p> }</details>
+    @if (service.view(); as view) {
+      <p class="small muted browser-address">{{ view.url }}</p><p class="small muted">Browser viewport: {{ view.width }} × {{ view.height }}</p>
+      <img class="browser-view" [src]="'data:image/jpeg;base64,' + view.image" [width]="view.width" [height]="view.height" [style.max-width.px]="view.width" tabindex="0" role="group" aria-label="Recording browser" aria-describedby="recording-browser-keyboard" draggable="false" (click)="service.point($event)" (keydown)="service.key($event)" (paste)="service.paste($event)">
+      <p id="recording-browser-keyboard" class="small muted">Click inside the browser to type. Tab moves to TestStudio controls. Use Next website field below to move within the website.</p>
+      <fieldset [disabled]="service.uncertain()"><div class="row-actions wrap-actions"><button type="button" class="button secondary" (click)="service.send({ action: 'scroll', y: -500 })">Scroll up</button><button type="button" class="button secondary" (click)="service.send({ action: 'scroll', y: 500 })">Scroll down</button><button type="button" class="button secondary" (click)="service.send({ action: 'key', key: 'Tab' })">Next website field</button><button type="button" class="button secondary" (click)="service.send({ action: 'key', key: 'Enter' })">Press Enter on website</button></div>
+      <details><summary>Keyboard entry</summary><div class="field"><label for="recording-text">Text for the selected website field</label><input id="recording-text" maxlength="2048" [ngModel]="service.text()" (ngModelChange)="service.text.set($event)"><button type="button" class="button secondary" [disabled]="!service.text()" (click)="service.enterText()">Enter text on website</button></div></details></fieldset>
+      <h4>Captured steps</h4><ol aria-label="Captured steps">@for (step of view.steps; track $index) { <li>{{ step.description }}</li> }</ol>
+      @if (!view.steps.length) { <p class="muted">Your steps will appear here as you use the website.</p> }
+    } @else { <p role="status">Connecting to the recording browser…</p> }
+  </ng-template>
+</section>

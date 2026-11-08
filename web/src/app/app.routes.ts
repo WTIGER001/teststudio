@@ -1,3 +1,4 @@
+import type { RecordingWorkspacePage } from './features/sources/recording-workspace.page'
 import type { ProbeOverviewPage } from './features/probes/probe-overview.page'
 import type { ProbeSetupPage } from './features/probes/probe-setup.page'
 import type { CatalogPage } from './features/catalog/catalog.page'
@@ -12,6 +13,7 @@ import type { AssignmentsPage } from './features/access/assignments.page'
 import type { Routes } from '@angular/router'
 
 const projectRoutes: Routes = [
+ { path: 'projects/:projectId/tests/recording/:suiteId/:recordingId', canDeactivate: [(page: RecordingWorkspacePage) => page.canLeave()], data: { helpTopic: 'create-test' }, loadComponent: () => import('./features/sources/recording-workspace.page').then(m => m.RecordingWorkspacePage) },
  { path: 'projects/:projectId/status-pages/new', canDeactivate: [(page: StatusEditorPage) => page.canLeave()], data: { helpTopic: 'status-pages', mode: 'create' }, loadComponent: () => import('./features/status-pages/status-editor.page').then(m => m.StatusEditorPage) },
  { path: 'projects/:projectId/status-pages/:pageId/edit', canDeactivate: [(page: StatusEditorPage) => page.canLeave()], data: { helpTopic: 'status-pages', mode: 'edit' }, loadComponent: () => import('./features/status-pages/status-editor.page').then(m => m.StatusEditorPage) },
  { path: 'projects/:projectId/status-pages/:pageId/publish', data: { helpTopic: 'status-pages', mode: 'publish' }, loadComponent: () => import('./features/status-pages/status-editor.page').then(m => m.StatusEditorPage) },

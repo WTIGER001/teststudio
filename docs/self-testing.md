@@ -28,6 +28,11 @@ The standalone native adapter check uses TESTSTUDIO_EMBEDDED_RECORDING=1 with Te
 It passes in 0.90 seconds and checks semantic locators, visibility assertions, exact input retries, changed-duplicate rejection, and owned shutdown.
 Hosted recording deployment now has the focused evidence below. Browser test execution remains a separate installation. See [the hosted recording plan](hosted-recording-plan.md).
 
+## Expanded recording workspace
+
+The current STUDIO-HOSTED-RECORDER-001 also checks at-least and exact counts, selected text, page address, real viewport presets and custom sizes, invalid bounds, a resizable dialog, two-way tab control, and direct saved-draft preparation. It retains the existing recovery and accessibility checks.
+Reuse output/playwright/recording-workspace-final. The normal run is 20261108T202929.895786000-ce5dafcce2edbb0965d8a874 and its complete harness takes 27.52 seconds. All owned resources close. Select this exact test after changing these workflows.
+
 ## Private recording worker
 
 STUDIO-HOSTED-RECORDER-001 uses the same News authoring flow through a mutually authenticated HTTPS worker and the actual sandboxed recording container and gateway.
