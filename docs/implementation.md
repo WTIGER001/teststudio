@@ -6,6 +6,17 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## Optional status-page logos: MMDev delivery — 2026-11-07
+
+Release 0.6.0-dev uses committed 3d13a08ca5a3690d085e265705104f91cab44a0c, build dca2ee3e4ddf, created 2026-11-08T03:15:30.865Z with modified false. Its ARM64 digest is sha256:35d7b1bb815c40df5b1eda33fdd719dbb7347ed129c74f5ef667cb5818b08347. Implementation and release notes are pushed to both origin/codex/status-page-logo and origin/codex/implementation.
+Nine local AWS schema and package checks pass. The concrete reviewed change set modifies Service, Task, UiHeaders, and PublicStatusHeaders. No foundation or testing-server resource changes.
+Task startup is 2026-11-08T03:19:19.550Z; UI publication is 2026-11-08T03:22:49Z. The stack reaches UPDATE_COMPLETE, both services retain completed healthy rollouts, and CloudFront invalidation completes.
+Thirty-five hosted checks verify matching API/UI and logo asset bytes, uploaded image publication, private replacement and removal, HTTPS reference publication, image response policies, private framing denial, public embedding, and immediate withdrawal. The service performs no new probe execution.
+The actual public browser decodes the generic transparent upload at 256 by 64 pixels, preserves its ratio, and centers it within two pixels. The requesting account resumes its existing organization SSO and sees the optional logo controls with its saved title, background, and range. No user page values or publication are changed.
+The generic verification page is unpublished. Both owned administrator sessions and temporary browser tabs close; the original two user tabs remain. The helper is removed. Receipts and screenshots are output/aws-mmdev/status-logo-060.
+The managed checkout remains clean after evidence is retained in the original checkout. That original checkout preserves its uncommitted reliability/library work and has an older local branch base; incorporate the upstream logo changes, including library model fields and rendering, before another release.
+This refines 12, 13, 49, and 50. Acceptance stays **50 verified of 57**; broad worker and cross-profile requirements remain open. Existing memberships, probes, schedules, and the port 8040 demo are preserved.
+
 ## Optional status-page logos: local implementation — 2026-11-07
 
 Appearance supports an optional logo upload or public HTTPS image reference, alternative text, preview, and removal. Public and private previews center the image above the title without stretching; pages without a logo retain their existing header. Failed references show an unavailable label without hiding probe results.
@@ -15,7 +26,7 @@ Canonical OpenAPI 0.40.0 generates optional logo fields. The UI guide and page h
 The focused SQLite HTTP selection passes in 0.647 seconds. The matching race-enabled PostgreSQL selection passes in 6.357 seconds, covering valid PNG and JPEG images, malformed and oversized content, publication isolation, removal, no server fetch, and native response policies.
 The UI builds. STUDIO-STATUS-PAGES-001 passes in 7.171 seconds, run 20261108T031201.518911000-baa5d1135a9b9ec9387d2f92. It verifies rejected uploads and recovery, real decoded image uploads, centered proportional rendering, references across origins, private/public isolation, optional absence, removal, themes, narrow layouts, copy buttons, and the prior publication workflow.
 The final screenshots are retained under output/selftest/20261108T031201.518911000-baa5d1135a9b9ec9387d2f92. The execution is cleaned and owned controllers, database containers, execution containers, and browsers exit. Existing data, schedules, and the demo are unchanged.
-Release 0.6.0-dev is prepared. Hosted publication and target acceptance remain pending. This refines 12, 13, 49, and 50; acceptance stays **50 verified of 57**.
+Separate release and hosted verification are recorded above. This refines 12, 13, 49, and 50; acceptance stays **50 verified of 57**.
 
 ## Status-page sharing copy buttons — 2026-11-07
 
