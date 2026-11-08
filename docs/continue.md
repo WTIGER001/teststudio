@@ -20,6 +20,7 @@ On 2026-11-08 the user selects an installation into their own Azure subscription
 Follow [the Azure deployment plan](azure-deployment-plan.md). Container Apps and isolated Sandboxes remain the intended direction; AKS is excluded.
 Keep the future Managed Application option viable through reusable infrastructure and installation parameters. Marketplace publication and billing remain deferred.
 The exact tenant, subscription, region, identity settings, and budget remain unselected. No Azure deployment or target verification has occurred in this planning pass.
+The user reports new-account free-service benefits and permits alternative databases, including Azure SQL. Evaluate the free pilot choices in the deployment plan first; PostgreSQL and SQLite are the only current adapters.
 Preserve staged Azure code and concurrent recording work. Do not restart historical inspector work.
 Acceptance stays 50 verified of 57; no item closes from planning.
 

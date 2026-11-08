@@ -9,6 +9,8 @@ Focus on implementation and targeted checks. The user authorizes MMDev ECS deplo
 ## Azure delivery planning: own subscription first — 2026-11-08
 
 The user selects direct Azure installation before Marketplace delivery.
+The user reports new-account free-service benefits and permits Azure SQL or other databases for initial testing.
+The plan now distinguishes free allowances, on-demand operation, continuous scheduling, and database adapter work. PostgreSQL and SQLite remain the implemented engines.
 The [deployment plan](azure-deployment-plan.md) records core services, isolated sandbox workers, installation milestones, cost boundaries, and future Managed Application compatibility.
 Marketplace publication and billing remain deferred. The exact Azure target remains unselected; no live Azure operation occurs in this planning pass.
 Preserve staged adapters, concurrent recording work, AWS workloads, and the port 8040 demo. Historical Azure inspector work remains deferred.

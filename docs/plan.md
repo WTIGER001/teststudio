@@ -10,6 +10,7 @@ The user authorizes targeted tests and frequent feature commits. Remote pushes r
 The user selects their own Azure subscription for the first installation on 2026-11-08.
 Follow [the Azure deployment plan](azure-deployment-plan.md). Preserve a future Managed Application delivery without implementing Marketplace publication or billing now.
 This establishes planning scope; the exact Azure target and budget remain unselected. Historical inspector work stays deferred.
+Prioritize the reported new-account free allowances and an on-demand pilot. Azure SQL and other databases are permitted candidates; implementation and authority parity remain required before switching.
 The existing recording work below remains separate. Acceptance stays 50 verified of 57.
 
 ## Current priority: recording without tester installation
