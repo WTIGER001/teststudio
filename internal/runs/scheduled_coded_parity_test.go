@@ -11,6 +11,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/evidence"
 	"github.com/wtiger001/teststudio/internal/execution"
+	"github.com/wtiger001/teststudio/internal/reliability"
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/schedules"
 	"github.com/wtiger001/teststudio/internal/storage"
@@ -172,6 +173,20 @@ func TestTargetlessCodedManualAndScheduledRunsKeepIdenticalLogicalContracts(t *t
 				trend, err := (&trends.Service{Store: service.Store, Auth: service.Auth}).Read(t.Context(), "admin", "project", trends.Filter{Suite: "health", Since: time.Now().Add(-time.Hour), Until: time.Now().Add(time.Minute)}, "", 10)
 				if err != nil || trend.Totals.Total != 2 || len(trend.Points) != 2 {
 					t.Fatal("children or attempts inflate trends", err, trend.Totals)
+				}
+				report, err := service.ReliabilityReport(t.Context(), "admin", reliability.Query{Scope: reliability.Scope{Project: "project", Suite: "health", Test: "HEALTH-1", Location: "local"}}, "24h")
+				if err != nil {
+					t.Fatal(err)
+				}
+				row := report.Probes[0]
+				if row.Metric != "outcomes" || row.Totals.Counts.Total() != 2 || row.Availability.Percent != nil {
+					t.Fatal("runner reliability contract", row)
+				}
+				if state == "timed-out" && (row.Totals.Counts.TimedOut != 2 || row.Totals.Censored != 2) {
+					t.Fatal("timeouts lost their distinct state or censoring", row)
+				}
+				if state == "flaky" && row.Totals.Counts.Flaky != 2 {
+					t.Fatal("retries inflated final observations", row)
 				}
 			})
 		}

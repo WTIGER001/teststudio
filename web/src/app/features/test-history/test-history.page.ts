@@ -3,9 +3,10 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
 import { RouterLink } from '@angular/router'
 import { TestRevisionsComponent } from '../catalog/test-revisions.component'
 import { TestHistoryService } from './test-history.service'
+import { ReliabilityHistoryComponent } from './reliability-history.component'
 
 @Component({
-  standalone: true, imports: [DatePipe, DecimalPipe, JsonPipe, RouterLink, TestRevisionsComponent], providers: [TestHistoryService], changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true, imports: [DatePipe, DecimalPipe, JsonPipe, RouterLink, TestRevisionsComponent, ReliabilityHistoryComponent], providers: [TestHistoryService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Test history</h1><p class="muted">Follow this permanent test identity through its saved runs and definitions.</p></div><button type="button" class="button secondary" [disabled]="service.loading()" (click)="service.load()">Refresh history</button></div>
     <div class="row-actions history-links"><a [routerLink]="service.workspace.path('catalog')" [queryParams]="{ suite: service.suite() }">Test catalog</a><a [routerLink]="['/projects', service.project(), 'releases']" [queryParams]="{ suiteId: service.suite() }">Suite releases</a>@if (service.returnRun()) { <a [routerLink]="service.workspace.path('runs', service.returnRun())" [queryParams]="{ test: service.test() }">Return to run</a> }</div>
@@ -19,6 +20,7 @@ import { TestHistoryService } from './test-history.service'
         <dl class="detail-grid"><dt>Type / runner</dt><dd>{{ context.test.type }} · {{ context.test.runner }}</dd><dt>Category</dt><dd>{{ context.test.category || 'Uncategorized' }}</dd><dt>Safety</dt><dd>{{ context.test.safety }} · {{ context.test.rationale }}</dd>@if (context.test.conditions) { <dt>Conditions</dt><dd>{{ context.test.conditions }}</dd> }<dt>Last saved</dt><dd>{{ context.updatedAt | date:'medium' }}</dd></dl>
         <details><summary>Advanced definition</summary><pre class="log-view">{{ context.test | json }}</pre></details>
       </section>
+      @if (service.runAccess()) { <ts-reliability-history [project]="service.project()" [suite]="service.suite()" [test]="service.test()" [environment]="service.environment()" [location]="service.location()" /> }
       <section class="panel" aria-labelledby="test-runs-title"><div class="section-top"><h2 id="test-runs-title">Runs containing this test</h2>@if (service.runAccess()) { <a [routerLink]="service.workspace.path('trends')" [queryParams]="{ suite: service.suite(), test: service.test() }">Test trends</a> }</div>
         <p class="small muted">Run titles, results, release, and timing come from saved run snapshots. Evidence follows its normal access and retention rules.</p>
         @if (!service.runAccess()) { <p class="notice">Run history requires permission to read project runs.</p> }

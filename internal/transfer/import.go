@@ -50,7 +50,7 @@ func Import(ctx context.Context, destination *storage.Store, input io.Reader) (S
 					return ErrInvalidArchive
 				}
 				header, err = installstate.Decode[Header](item.Data)
-				if err != nil || header.Schema != Schema || header.PermissionVersion != PermissionVersion || header.MetadataVersion != 1 || (header.Source != "sqlite" && header.Source != "postgres") || header.CreatedAt.IsZero() || header.GrantSequence < 0 {
+				if err != nil || header.Schema != Schema || header.PermissionVersion != PermissionVersion || (header.MetadataVersion != 1 && header.MetadataVersion != 2) || (header.Source != "sqlite" && header.Source != "postgres") || header.CreatedAt.IsZero() || header.GrantSequence < 0 {
 					return ErrInvalidArchive
 				}
 				sequence = header.GrantSequence
@@ -69,6 +69,18 @@ func Import(ctx context.Context, destination *storage.Store, input io.Reader) (S
 				}
 				phase = order
 				switch item.Kind {
+				case "reliability":
+					if header.MetadataVersion < 2 {
+						return ErrInvalidArchive
+					}
+					row, err := installstate.Decode[reliabilityEntry](item.Data)
+					if err != nil {
+						return ErrInvalidArchive
+					}
+					if err = importReliability(ctx, tx, row); err != nil {
+						return err
+					}
+					stats.Reliability++
 				case "record":
 					row, err := installstate.Decode[Record](item.Data)
 					if err != nil || !validRecord(row) {
@@ -147,6 +159,8 @@ func entryOrder(kind string) int {
 		return 6
 	case "counter":
 		return 7
+	case "reliability":
+		return 8
 	}
 	return 0
 }
@@ -161,7 +175,7 @@ func validRecord(row Record) bool {
 
 func emptyDestination(ctx context.Context, db *storage.Store, tx *sql.Tx) error {
 	if db.Dialect == "postgres" {
-		if _, err := tx.ExecContext(ctx, `LOCK TABLE records,counters,teststudio_permissions.roles,teststudio_permissions.permission_grants,teststudio_permissions.principal_roles,teststudio_permissions.role_inheritance,teststudio_permissions.role_closure,teststudio_permissions.disabled_builtin_roles IN ACCESS EXCLUSIVE MODE`); err != nil {
+		if _, err := tx.ExecContext(ctx, `LOCK TABLE records,counters,reliability_series,reliability_authorities,reliability_observations,reliability_jobs,reliability_policies,reliability_summaries,teststudio_permissions.roles,teststudio_permissions.permission_grants,teststudio_permissions.principal_roles,teststudio_permissions.role_inheritance,teststudio_permissions.role_closure,teststudio_permissions.disabled_builtin_roles IN ACCESS EXCLUSIVE MODE`); err != nil {
 			return errors.New("destination permission schema is unavailable")
 		}
 		empty, err := permissionpg.EmptyState(ctx, tx)
@@ -176,7 +190,7 @@ func emptyDestination(ctx context.Context, db *storage.Store, tx *sql.Tx) error 
 	if err := tx.QueryRowContext(ctx, `SELECT coalesce(max(version),0) FROM schema_migrations`).Scan(&version); err != nil {
 		return err
 	}
-	if version != 1 {
+	if version != 2 {
 		return ErrInvalidArchive
 	}
 	var present bool
@@ -185,6 +199,14 @@ func emptyDestination(ctx context.Context, db *storage.Store, tx *sql.Tx) error 
 	}
 	if present {
 		return ErrNotEmpty
+	}
+	for _, table := range reliabilityTables {
+		if err := tx.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM "+table.name+")").Scan(&present); err != nil {
+			return err
+		}
+		if present {
+			return ErrNotEmpty
+		}
 	}
 	return nil
 }

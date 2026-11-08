@@ -32,7 +32,11 @@ func (s *Service) mutate(ctx context.Context, project, id string, change func(*R
 			}
 			changes = append(changes, notifications...)
 		}
-		if err := s.Store.Commit(ctx, changes...); errors.Is(err, storage.ErrConflict) {
+		commit := func() error { return s.Store.Commit(ctx, changes...) }
+		if !wasTerminal && Terminal(v.State) {
+			commit = func() error { return s.commitReliability(ctx, v, v.Results, true, changes...) }
+		}
+		if err := commit(); errors.Is(err, storage.ErrConflict) {
 			continue
 		} else {
 			return v, err

@@ -11,6 +11,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/projects"
+	"github.com/wtiger001/teststudio/internal/reliability"
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
@@ -112,6 +113,13 @@ func TestCodedTimingUsesFrozenAdaptiveBudgetAndKeepsRetriesOutsideBaseline(t *te
 			estimate, err := s.Estimate(t.Context(), "admin", "project", req)
 			if err != nil || estimate.Tests["HEALTH-1"].Samples != 5 || *estimate.ExpectedMs != 1000 {
 				t.Fatal("retry trained history or included worker preparation", estimate, err)
+			}
+			report, err := s.ReliabilityReport(t.Context(), "admin", reliability.Query{Scope: reliability.Scope{Project: "project", Suite: "health", Test: "HEALTH-1", Location: "local"}}, "24h")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if report.Probes[0].Totals.Counts.Flaky != 1 || report.Probes[0].Totals.Counts.Total() != 1 || report.Probes[0].Totals.DurationSum != 3100 {
+				t.Fatal("coded API/browser/Go reliability changed timing or logical counts", report)
 			}
 		})
 	}

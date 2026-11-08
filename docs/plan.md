@@ -16,17 +16,15 @@ Use the mm_dev profile and preserve existing services. Azure implementation and 
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
-## Current user direction: shared reliability history for all checks
+## Local delivery: shared reliability history and Angular components
 
-On 2026-11-07 the user approves hourly and daily summaries, longer-range bucketed pills, and shared reliability reporting for all existing and future probe and test types.
-Follow [the shared reliability design](trends.md#planned-shared-reliability-capture). Capture canonical logical observations through the common result lifecycle, then process durable aggregation work with safe replay.
-Every runner supports outcome and timing history. Time-based availability additionally requires an explicit monitoring policy; occasional tests do not imply continuous uptime.
-Start with hourly and daily storage, combine durations and counts for larger periods, preserve unknown coverage and configuration boundaries, and retain authorization through summaries and caches.
-The user also requests reusable Angular components. Deliver a versioned library with a stylable status bar and complete status page, typed report inputs, an optional reporting client, host-owned navigation, and scoped styling tokens. Use those components inside TestStudio too. Follow [the component contract](trends.md#reusable-angular-components).
-Verify a built package in an independent Angular consumer, including host styling, multiple instances, public cross-origin reads, authenticated data supplied by the host, revocation, and refresh cleanup. Package publication remains a separate delivery step.
-The first implementation milestone is shared durable capture and summary primitives across HTTP, Go, browser, and API paths. Its smallest meaningful checks compare direct results and rollups on SQLite and PostgreSQL, including duplicate delivery and distinct timeout outcomes.
-This documentation milestone records scope and delivery steps only. It extends 34, 35, 36, 37, 39, 40, 41, and 47, with supporting access and UI requirements. The total stays 50 verified of 57.
-Keep the pending status-page release below separate. This plan does not change its artifact, publication state, or retained evidence.
+The approved [shared reliability design](trends.md#shared-reliability-capture) now has common durable capture for all runners, safe replay and backfill, hourly and daily summaries, bounded long-range reports, explicit monitoring policy, and preserved native authorization.
+Public status pages and private Test history use the same Angular status components. Direct test references support outcome rows or explicit monitoring alongside existing HTTP probe bindings.
+The [Angular library](trends.md#reusable-angular-components) builds as @wtiger001/teststudio-angular 0.1.0-dev. Its independent consumer verifies host styling, public-source reads, withdrawal, lifecycle cleanup, keyboard and narrow layouts, and server rendering on Angular 22.2.4.
+Product 0.7.0-dev is prepared locally. API contract 0.40.0 and database metadata version 2 describe the new behavior. Installation transfer includes compact history, summaries, policies, provenance, and pending work.
+Focused SQLite and PostgreSQL checks pass. Normal STUDIO-RELIABILITY-001 and the updated public status workflow provide local browser evidence. The ledger records exact receipts and timings.
+This refines 12, 13, 34–37, 39–41, 47, 49, and 50. Acceptance remains 50 verified of 57. Target deployment and the remaining cross-profile criteria stay separate.
+Before publishing this checkout, incorporate the concurrent upstream logo release and preserve its fields and centered rendering in the shared component. Keep its deployment and evidence intact. No push or deployment is part of this local delivery.
 
 ## Completed user direction: status-page sharing copy buttons
 

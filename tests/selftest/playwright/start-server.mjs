@@ -1,11 +1,12 @@
 import { createServer } from 'node:http'
 import { execFile, spawn } from 'node:child_process'
 import { randomBytes } from 'node:crypto'
-import { access, writeFile, unlink } from 'node:fs/promises'
+import { access, writeFile, unlink, readFile } from 'node:fs/promises'
 import { createOIDCFixture } from './oidc-fixture.mjs'
 
 const projectImagesWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-PROJECTS-001'
-const publicStatusWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-STATUS-PAGES-001'
+const reliabilityWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-RELIABILITY-001'
+const publicStatusWorkflow = reliabilityWorkflow || JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-STATUS-PAGES-001'
 const historyWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-HISTORY-001'
 const apiAuthoringWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-API-AUTHOR-001'
 const privateTraceWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-TRACE-001'
@@ -29,6 +30,12 @@ const server = createServer(async (request, response) => {
   try {
     if (stopping) { response.writeHead(503).end(); return }
     if (oidcFixture && await oidcFixture(request, response)) return
+    if (reliabilityWorkflow && request.method === 'GET' && request.url.startsWith('/angular-status/')) {
+      const name = request.url.split('?')[0].slice('/angular-status/'.length) || 'index.html'
+      if (!/^[a-zA-Z0-9._-]+$/.test(name) || name.includes('..')) { response.writeHead(404).end(); return }
+      try { const data = await readFile('/app/status-consumer/' + name); response.setHeader('Content-Type', name.endsWith('.js') ? 'text/javascript' : name.endsWith('.css') ? 'text/css' : 'text/html'); response.end(data) } catch { response.writeHead(404).end() }
+      return
+    }
     if (publicStatusWorkflow && request.method === 'GET' && request.url.startsWith('/status-host/')) {
       const statusToken = request.url.slice('/status-host/'.length)
       if (!/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(statusToken)) { response.writeHead(400).end(); return }

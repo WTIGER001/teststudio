@@ -1,0 +1,8 @@
+body {font-family:system-ui,sans-serif;margin:0;color:#162132;background:#f7f8fb;}
+main {max-width:960px;margin:auto;padding:20px;}
+.controls {display:flex;gap:16px;align-items:end;flex-wrap:wrap;margin:20px 0;}
+label {display:grid;gap:5px;} select,button {font:inherit;padding:8px;max-width:100%;}
+.host {padding:16px;background:#fff;min-width:0;--ts-status-foreground:#162132;}
+.dark {background:#101827;--ts-status-foreground:#fff;--ts-status-passed:#31b86b;}
+.brand {--ts-status-passed:#7544c7;--ts-status-pill-width:12px;--ts-status-pill-height:36px;--ts-status-pill-radius:3px;--ts-status-gap:6px;--ts-status-font:Georgia,serif;}
+@media(max-width:450px) {main {padding:12px;}.host {padding:8px;}select {width:100%;}}

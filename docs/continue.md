@@ -14,6 +14,10 @@ Read this guide before historical continuation commands elsewhere in the plan.
 Do not restart completed setup or broad acceptance matrices merely because this is a new session.
 Missing ignored receipts require focused inspection or recovery. They do not prove the feature needs reimplementation.
 
+## Concurrent optional-logo delivery
+
+Release 0.6.0-dev is deployed as build dca2ee3e4ddf from verified logo implementation 3d13a08. Both remote implementation and status-page-logo branches contain the implementation and final release notes. The original checkout retains its older local branch base and uncommitted reliability/library edits. Preserve those edits and incorporate upstream before pushing or deploying. Preserve logo fields and centered rendering when adopting the Angular library. Receipts and screenshots are output/aws-mmdev/status-logo-060 in this original checkout. The generic verification page is unpublished, owned sessions and tabs close, and no user page is edited.
+
 ## Current product and release
 
 The application is usable locally and through the hosted UI. Complete product acceptance remains unfinished.
@@ -23,14 +27,14 @@ UI improvements refine existing accepted items. They do not close the remaining 
 | Item | Last verified value |
 | --- | --- |
 | Hosted UI | https://teststudio.devfoodmarketmaker.com |
-| Product version | 0.5.1-dev; footer displays 0.5.1.dev |
-| Build identifier | 969aad6abb87 |
-| Build creation | 2026-11-08T02:50:41.631Z |
-| Implementation commit | 4e679d49a962d4f8803ed4669bdc7bc4301c7c27 |
+| Product version | 0.6.0-dev; footer displays 0.6.0.dev |
+| Build identifier | dca2ee3e4ddf |
+| Build creation | 2026-11-08T03:15:30.865Z |
+| Implementation commit | 3d13a08ca5a3690d085e265705104f91cab44a0c |
 | Source state at build | Committed source; modified is false |
-| Service image digest | sha256:309d4ee08088bd21c9cf6fcc121aefcea4b6d7b8f437feef8d08b1ca987baa63 |
-| Task startup | 2026-11-08T02:54:03.467Z |
-| UI publication | 2026-11-08T02:57:29Z |
+| Service image digest | sha256:35d7b1bb815c40df5b1eda33fdd719dbb7347ed129c74f5ef667cb5818b08347 |
+| Task startup | 2026-11-08T03:19:19.550Z |
+| UI publication | 2026-11-08T03:22:49Z |
 | Live version metadata | GET /api/v1/version; public and no-store |
 
 Later documentation and operator-tooling commits do not change the deployed implementation commit or its immutable build date.
@@ -95,14 +99,14 @@ Vanity names are optional, normalized, globally reserved on save, and activated 
 The final changed browser workflow passes in 6.497 seconds, run 20261108T023727.088360000-03fb9e6133bcc031ea0886d4. It covers duplicate-name feedback, correction, narrow authoring screens, reviewed publication, rename snapshots, permanent-link compatibility, revision recovery, anonymous embedding, themes, and unpublishing. Release 0.5.0-dev is committed, pushed, and deployed as build a21537b24309. Twelve package checks and thirty-four hosted checks pass. The API and published UI match; CloudFront invalidation completes. Both services have healthy completed rollouts. Private receipts are output/aws-mmdev/status-vanity-050.
 The requesting account’s actual browser verifies the saved detail page and dedicated editor with an optional vanity field. No existing page is edited or republished. The temporary tab closes, leaving both user tabs intact. The owned generic verification page is unpublished, no new probe run executes, the owned session closes, and the helper is removed. Preserve the current scoped grants and page configuration.
 
-## Planned request: shared reliability history for all checks
+## Local delivery: shared reliability history for all checks
 
-On 2026-11-07 the user approves making [reliability capture and rollups](trends.md#planned-shared-reliability-capture) a common contract for all existing and future probes and tests.
-Keep one canonical observation per logical test, durable aggregation work, hourly and daily summaries, larger display buckets, explicit unknown coverage, and safe replay.
-All checks support outcome and timing history. Time-based availability requires an explicit monitoring policy; ad hoc executions do not imply continuous uptime.
-The requested [Angular library](trends.md#reusable-angular-components) provides a stylable status bar and complete page for external Angular sites. Reuse it inside TestStudio, expose typed data and an optional client, preserve host styling and navigation, and verify an independently installed consumer before claiming compatibility.
-Start implementation at the shared result-acceptance lifecycle, then verify HTTP, Go, browser, and API paths with focused SQLite and PostgreSQL checks. Preserve retries, timeout states, frozen timing criteria, access boundaries, and existing stacked area trends.
-This request is planned, not implemented or deployed. The count remains 50 verified of 57. Preserve the separate pending vanity-URL release and its evidence.
+The approved [shared reliability design](trends.md#shared-reliability-capture) is implemented locally across native HTTP, Go, browser, and API result paths, including unknown terminal selections, atomic capture, safe replay, retained-history backfill, hourly and daily summaries, and bounded display buckets.
+Time-based availability requires an explicit reporting policy and current definition/target matching. Ordinary tests retain outcome and timing history without implied uptime.
+The [Angular library](../web/projects/status/README.md), @wtiger001/teststudio-angular 0.1.0-dev, supplies a stylable bar, page, and optional public client. TestStudio reuses it. An independently installed Angular 22.2.4 consumer verifies styling, cross-origin data, withdrawal, cleanup, and server rendering.
+Product 0.7.0-dev is prepared locally. API contract 0.40.0 and database metadata version 2 cover this delivery. Compact reliability data has no automatic expiry; evidence retention remains separate. Installation export/import preserves all reliability tables and pending jobs.
+The ledger records focused SQLite/PostgreSQL checks, the normal browser receipts, and dense-year and multi-year measurements. Acceptance remains 50 verified of 57.
+Registry publication and target deployment remain pending. Preserve the concurrent logo release described above; incorporate its upstream implementation and centered logo rendering before publishing or deploying this checkout. The local Angular package does not replace that integration gate.
 
 ## Next implementation priorities
 

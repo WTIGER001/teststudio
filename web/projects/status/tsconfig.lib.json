@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../../dist/status-ts",
+    "declaration": true,
+    "declarationMap": true,
+    "inlineSources": true,
+    "types": [],
+    "module": "ES2022"
+  },
+  "angularCompilerOptions": { "compilationMode": "partial" },
+  "files": ["src/public-api.ts"],
+  "include": ["src/**/*.ts"],
+  "exclude": ["**/*.test.ts"]
+}

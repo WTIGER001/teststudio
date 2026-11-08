@@ -20,7 +20,7 @@ function fingerprint(roots, omitGoTests = false, omitTypeScriptTests = false) {
     if (!fs.existsSync(filename)) return
     const stat = fs.lstatSync(filename)
     if (stat.isSymbolicLink()) throw new Error(`Self-test build input must not be a symbolic link: ${filename}`)
-    if (stat.isDirectory()) { if (path.basename(filename) === 'node_modules') return; for (const name of fs.readdirSync(filename).sort()) visit(path.join(filename, name)); return }
+    if (stat.isDirectory()) { if (['node_modules', '.angular'].includes(path.basename(filename))) return; for (const name of fs.readdirSync(filename).sort()) visit(path.join(filename, name)); return }
     if (!stat.isFile() || omitGoTests && filename.endsWith('_test.go') || omitTypeScriptTests && /\.(?:test|spec)\.ts$/.test(filename)) return
     hash.update(filename + '\0'); hash.update(fs.readFileSync(filename)); hash.update('\0')
   }
@@ -53,7 +53,7 @@ if (!localOnly) {
 }
 
 const buildInfo = JSON.parse(execFileSync(process.execPath, ['scripts/build-info.mjs'], { encoding: 'utf8' }))
-const uiKey = fingerprint(['web/src', 'web/public', 'web/angular.json', 'web/tsconfig.json', 'web/tsconfig.app.json', 'web/package.json', 'web/package-lock.json'], false, true)
+const uiKey = fingerprint(['web/src', 'web/projects', 'web/public', 'web/angular.json', 'web/tsconfig.json', 'web/tsconfig.app.json', 'web/package.json', 'web/package-lock.json'], false, true)
 const uiDirectory = 'web/dist/web/browser'
 let uiOutput = fs.existsSync(`${uiDirectory}/index.html`) ? fingerprint([uiDirectory]) : ''
 if (cache.uiKey !== uiKey || !uiOutput || cache.uiOutput !== uiOutput) {
@@ -62,6 +62,13 @@ if (cache.uiKey !== uiKey || !uiOutput || cache.uiOutput !== uiOutput) {
   uiOutput = fingerprint([uiDirectory]); cache.uiKey = uiKey; cache.uiOutput = uiOutput
   save()
 } else console.error('Reusing the unchanged self-test UI build.')
+
+const statusConsumerKey = fingerprint(['web/projects/status', 'examples/angular-status', 'scripts/build-status-library.mjs'], false, true)
+if (cache.statusConsumerKey !== statusConsumerKey || !fs.existsSync('web/dist/status-consumer/browser/index.html')) {
+  run(process.execPath, ['scripts/build-status-library.mjs', '--consumer'])
+  cache.statusConsumerKey = statusConsumerKey
+  save()
+} else console.error('Reusing the unchanged independent Angular status consumer.')
 
 const traceViewer = execFileSync(process.execPath, ['scripts/build-trace-viewer.mjs'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 2] }).trim()
 const traceOutput = fingerprint([traceViewer])
@@ -92,7 +99,7 @@ if (localOnly) {
   console.log(JSON.stringify({ server: path.resolve(directory, 'controller'), preparation: path.resolve(directory, 'preparation-worker'), traceViewer, ui: path.resolve(uiDirectory) }))
   process.exit(0)
 }
-const imageKey = digest([baseImage, architecture, uiOutput, traceOutput, cache.binaries.teststudio.hash, cache.binaries['access-fixture'].hash, cache.binaries['teststudio-publish'].hash, fingerprint(['tests/selftest/Dockerfile', 'tests/selftest/playwright', 'runners/playwright'])])
+const imageKey = digest([baseImage, architecture, uiOutput, traceOutput, fingerprint(['web/dist/status-consumer/browser']), cache.binaries.teststudio.hash, cache.binaries['access-fixture'].hash, cache.binaries['teststudio-publish'].hash, fingerprint(['tests/selftest/Dockerfile', 'tests/selftest/playwright', 'runners/playwright'])])
 if (cache.imageKey !== imageKey || !cache.image || !inspect(cache.image)) {
   run('docker', ['build', '--pull=false', '--build-arg', `TARGETARCH=${architecture}`, '-q', '-f', 'tests/selftest/Dockerfile', '-t', 'teststudio/selftests:local', '.'])
   const image = inspect('teststudio/selftests:local')?.[0]

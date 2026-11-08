@@ -116,6 +116,16 @@ func TestStatusPagesHistoryIsCompleteAndTargetSpecific(t *testing.T) {
 	if err = c.api.Store.CommitAll(t.Context(), changes...); err != nil {
 		t.Fatal(err)
 	}
+	if checkpoint, err := c.api.Store.Get(t.Context(), "reliability-backfill", "v1"); err == nil {
+		if err = c.api.Store.Commit(t.Context(), storage.Change{Record: checkpoint, Delete: true}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for range 12 {
+		if err = c.api.Runs.BackfillReliability(t.Context(), 100); err != nil {
+			t.Fatal(err)
+		}
+	}
 	d := statuspages.Definition{ID: "history-page", Title: "History", Background: "#ffffff", Window: "all", MaxAge: 900, Probes: []statuspages.Entry{{Probe: binding.ID, Title: "Website"}}}
 	base := "/api/v1/projects/example/status-pages/history-page"
 	accessCall(t, c, "PUT", base, d, "0", 200)

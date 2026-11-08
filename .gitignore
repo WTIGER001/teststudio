@@ -1,6 +1,7 @@
 node_modules/
 web/dist/
 web/.angular/
+examples/angular-status/.angular/
 .data/
 .env
 .env.*

@@ -5,7 +5,8 @@ import { FormControl, FormGroup } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
 import { AccessClientService } from '../../core/access-client.service'
 import { ApiError, ApiService } from '../../core/api.service'
-import type { StatusPageEntry, StatusPageRecord, StatusPageReport, StatusPageDefinition } from '../../core/generated/access.types'
+import type { StatusPageEntry, StatusPageRecord, StatusPageReport, StatusPageDefinition, CatalogListEntry } from '../../core/generated/access.types'
+import type { Page, RecordValue } from '../../core/api.service'
 import { WorkspaceService } from '../../core/workspace.service'
 import { randomId } from '../../core/random-id'
 import { WizardController } from '../../shared/wizard/wizard-controller'
@@ -16,6 +17,8 @@ export class StatusEditorService {
   private readonly client = inject(AccessClientService); private readonly api = inject(ApiService); private readonly router = inject(Router); private readonly workspace = inject(WorkspaceService); private readonly destroy = inject(DestroyRef)
   readonly project = signal(''); readonly id = signal(''); readonly record = signal<StatusPageRecord | null>(null); readonly probes = signal<ProbeSummary[]>([]); readonly entries = signal<StatusPageEntry[]>([])
   readonly preview = signal<StatusPageReport | null>(null); readonly busy = signal(false); readonly error = signal(''); readonly message = signal(''); readonly locked = signal(false)
+  readonly checks = signal<CatalogListEntry[]>([]); readonly environments = signal<{ id: string; name: string }[]>([]); readonly checksError = signal(''); readonly checksLoading = signal(false); readonly checksCursor = signal('')
+  private checksLoaded = false
   readonly canManage = computed(() => this.workspace.projectCapabilities()['teststudio.statuspages.manage'] === true)
   readonly canPublish = computed(() => this.workspace.projectCapabilities()['teststudio.statuspages.publish'] === true)
   readonly canDelete = computed(() => this.workspace.projectCapabilities()['teststudio.statuspages.delete'] === true)
@@ -32,7 +35,7 @@ export class StatusEditorService {
   private generation = 0; private entriesDirty = false; private attempted = false; private slugGeneration = 0
   constructor() {
     const route = inject(ActivatedRoute); this.mode.set(route.snapshot.data['mode'] || 'view')
-    route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => { this.project.set(params.get('projectId') || ''); this.id.set(params.get('pageId') || randomId()); this.record.set(null); this.preview.set(null); this.entries.set([]); this.flow.reset(); this.entriesDirty = false; this.attempted = false; this.form.reset({ slug: '', title: '', background: '#ffffff', defaultWindow: '24h', maxAgeSeconds: 900 }); void this.load(params.has('pageId')) })
+    route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => { this.checksLoaded=false; this.checks.set([]); this.checksCursor.set(''); this.environments.set([]); this.project.set(params.get('projectId') || ''); this.id.set(params.get('pageId') || randomId()); this.record.set(null); this.preview.set(null); this.entries.set([]); this.flow.reset(); this.entriesDirty = false; this.attempted = false; this.form.reset({ slug: '', title: '', background: '#ffffff', defaultWindow: '24h', maxAgeSeconds: 900 }); void this.load(params.has('pageId')) })
     this.form.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(() => { this.preview.set(null) })
     this.form.controls.slug.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(() => { this.slugGeneration++; this.slugState.set('idle'); this.slugMessage.set(''); if (this.error().toLowerCase().includes('vanity url')) this.error.set('') })
     this.form.controls.slug.valueChanges.pipe(debounceTime(300), takeUntilDestroyed(this.destroy)).subscribe(() => { void this.checkSlug() })
@@ -45,7 +48,7 @@ export class StatusEditorService {
     if (step === 0 && (!value.title || !/^#[a-fA-F0-9]{6}$/.test(value.background) || value.maxAgeSeconds < 60 || value.maxAgeSeconds > 86400)) error = 'Enter a title, valid background, and freshness from 60 through 86400 seconds.'
     if (step === 0 && this.normalizedSlug() && (!/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(this.normalizedSlug()) || /^[a-f0-9]{40}$/.test(this.normalizedSlug()))) error = 'Use 1–63 letters, numbers, or hyphens for the vanity URL.'
     if (step === 0 && this.slugState() === 'taken') error = 'That vanity URL is already reserved. Choose another.'
-    if (step === 1 && (!value.probes.length || value.probes.length > 100 || value.probes.some(entry => !entry.title.trim()))) error = 'Select 1–100 probes and give each a public title.'
+    if (step === 1 && (!value.probes.length || value.probes.length > 100 || value.probes.some(entry => !entry.title.trim()))) error = 'Select 1–100 checks and give each a public title.'
     this.error.set(error); return !error
   }
   choose(probe: ProbeSummary): void { if (this.entries().some(entry => entry.probeId === probe.id)) return; this.entries.update(rows => [...rows, { probeId: probe.id, title: probe.name, description: '' }]); this.changed() }
@@ -53,6 +56,24 @@ export class StatusEditorService {
   edit(index: number, field: 'title' | 'description', value: string): void { this.entries.update(rows => rows.map((entry, position) => position === index ? { ...entry, [field]: value } : entry)); this.changed() }
   move(index: number, direction: number): void { const rows = [...this.entries()], target = index + direction; if (target < 0 || target >= rows.length) return; [rows[index], rows[target]] = [rows[target], rows[index]]; this.entries.set(rows); this.changed() }
   selected(id: string): boolean { return this.entries().some(entry => entry.probeId === id) }
+  entryKey(entry: StatusPageEntry): string { return entry.probeId || [entry.suiteId, entry.testId, entry.environmentId, entry.executionLocation].join('/') }
+  chooseCheck(key: string, environmentId: string, executionLocation: string, monitor: boolean): void {
+    const check = this.checks().find(row => row.suiteId + '/' + row.id === key)
+    if (!check) return
+    const entry: StatusPageEntry = { suiteId: check.suiteId, testId: check.id, environmentId, executionLocation, monitor, title: check.data.title, description: '' }
+    if (this.entries().some(row => this.entryKey(row) === this.entryKey(entry))) return
+    this.entries.update(rows => [...rows, entry]); this.changed()
+  }
+  async loadChecks(open: boolean, more = false): Promise<void> {
+    if (!open || this.checksLoading() || this.checksLoaded && !more) return
+    const generation = this.generation; this.checksLoading.set(true); this.checksError.set('')
+    try {
+      const [page, environments] = await Promise.all([this.client.call('listProjectCatalog', { project: this.project(), query: { limit: 100, state: 'enabled', cursor: more ? this.checksCursor() : undefined } }), this.api.request<Page<RecordValue<{ id: string; name: string }>>>('/api/v1/projects/' + this.project() + '/environments')])
+      if (generation !== this.generation) return
+      this.checks.set(more ? [...this.checks(), ...page.items] : page.items); this.checksCursor.set(page.cursor || ''); this.environments.set(environments.items.map(row => row.data)); this.checksLoaded = true
+    } catch (error) { if (generation === this.generation) this.checksError.set(error instanceof Error ? error.message : 'Checks could not be loaded.') }
+    finally { if (generation === this.generation) this.checksLoading.set(false) }
+  }
   private changed(): void { this.entriesDirty = true; this.preview.set(null) }
   async load(existing = true): Promise<void> {
     const generation = ++this.generation; this.busy.set(true); this.error.set(''); this.locked.set(false)

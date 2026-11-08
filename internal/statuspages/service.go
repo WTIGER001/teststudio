@@ -85,10 +85,30 @@ func (s *Service) validate(ctx context.Context, user, project string, d Definiti
 	seen := map[string]bool{}
 	changes := []storage.Change{}
 	for _, entry := range d.Probes {
-		if seen[entry.Probe] || strings.TrimSpace(entry.Title) == "" || len(entry.Title) > 256 || len(entry.Description) > 2048 {
+		key := entry.Probe
+		if key == "" {
+			key = entry.Suite + "/" + entry.Test + "/" + entry.Environment + "/" + entry.Location
+		}
+		if seen[key] || strings.TrimSpace(entry.Title) == "" || len(entry.Title) > 256 || len(entry.Description) > 2048 {
 			return nil, errors.New("choose unique probes with public titles up to 256 bytes and descriptions up to 2048 bytes")
 		}
-		seen[entry.Probe] = true
+		seen[key] = true
+		if entry.Probe == "" {
+			_, _, _, disabled, err := s.resolve(ctx, user, project, entry)
+			if err != nil {
+				return nil, err
+			}
+			if disabled {
+				return nil, errors.New("select a current enabled check")
+			}
+			if err = s.Auth.Check(ctx, user, project, "", "runs.read"); err != nil {
+				return nil, err
+			}
+			continue
+		}
+		if entry.Suite != "" || entry.Test != "" || entry.Environment != "" || entry.Location != "" {
+			return nil, errors.New("choose either a probe or a direct test reference")
+		}
 		binding, row, err := s.Probes.Read(ctx, user, project, entry.Probe)
 		if err != nil {
 			return nil, err

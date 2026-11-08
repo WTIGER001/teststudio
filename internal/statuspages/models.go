@@ -1,11 +1,19 @@
 package statuspages
 
-import "time"
+import (
+	"github.com/wtiger001/teststudio/internal/reliability"
+	"time"
+)
 
 type Entry struct {
 	Probe       string `json:"probeId"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
+	Suite       string `json:"suiteId,omitempty"`
+	Test        string `json:"testId,omitempty"`
+	Environment string `json:"environmentId,omitempty"`
+	Location    string `json:"executionLocation,omitempty"`
+	Monitor     bool   `json:"monitor,omitempty"`
 }
 type Definition struct {
 	Slug       string  `json:"slug,omitempty"`
@@ -38,11 +46,16 @@ type Availability struct {
 	Since    time.Time `json:"since"`
 }
 type Row struct {
-	Title        string       `json:"title"`
-	Description  string       `json:"description"`
-	State        string       `json:"state"`
-	History      []Point      `json:"history"`
-	Availability Availability `json:"availability"`
+	Title        string               `json:"title"`
+	Description  string               `json:"description"`
+	State        string               `json:"state"`
+	History      []Point              `json:"history"`
+	Availability Availability         `json:"availability"`
+	Metric       string               `json:"metric"`
+	Buckets      []reliability.Bucket `json:"buckets"`
+	Totals       reliability.Totals   `json:"totals"`
+	PassRate     *float64             `json:"passRate"`
+	Contexts     int                  `json:"contextCount"`
 }
 type Report struct {
 	Title      string    `json:"title"`

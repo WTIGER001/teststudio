@@ -57,7 +57,7 @@ func Export(ctx context.Context, source *storage.Store, output io.Writer) (Stats
 		if err := tx.QueryRowContext(ctx, `SELECT coalesce(max(version),0) FROM schema_migrations`).Scan(&version); err != nil {
 			return err
 		}
-		if version != 1 {
+		if version != 1 && version != 2 {
 			return ErrInvalidArchive
 		}
 		var sequence int64
@@ -158,6 +158,17 @@ func Export(ctx context.Context, source *storage.Store, output io.Writer) (Stats
 		rows.Close()
 		if err != nil {
 			return err
+		}
+		if version >= 2 {
+			if err := exportReliability(ctx, tx, func(value reliabilityEntry) error {
+				if err := write("reliability", value, true); err != nil {
+					return err
+				}
+				stats.Reliability++
+				return nil
+			}); err != nil {
+				return err
+			}
 		}
 		return write("footer", footer{Stats: stats, Checksum: hex.EncodeToString(hash.Sum(nil))}, false)
 	})

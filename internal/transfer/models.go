@@ -28,6 +28,7 @@ type Stats struct {
 	Records     int64            `json:"records"`
 	Counters    int64            `json:"counters"`
 	Permissions map[string]int64 `json:"permissions"`
+	Reliability int64            `json:"reliability,omitempty"`
 }
 
 type Entry struct {

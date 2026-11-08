@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.39.0"
+export const accessContractVersion = "0.40.0"
 
 export type APIAuthentication = { "binding": string; "header"?: string; "scheme": "bearer" | "basic" | "header" }
 export type APIRequestPolicy = { "authentication"?: APIAuthentication; "maxRequests": number; "maxResponseBytes": number; "redactFields"?: (string)[]; "rules": (APIRequestRule)[] }
@@ -122,6 +122,9 @@ export type RecordingCompanionPairRequest = { "deviceToken": string; "instance":
 export type RecordingCompanionSnapshot = { "code"?: string; "failure"?: "recorder" | "capture" | "transport"; "sequence": number; "state": "recording" | "ready" | "failed" }
 export type RecordingCompanionSnapshotRequest = { "instance": string; "snapshot": RecordingCompanionSnapshot }
 export type ReleaseRegistry = { "activeReleaseId"?: string; "archived": boolean; "canActivate": boolean; "items": (SourceCatalogRelease)[]; "suiteId": string; "suiteName": string; "suiteRevision": number }
+export type ReliabilityBucket = { "availability": StatusPageAvailability | null; "partial": boolean; "passRate": number | null; "since": string; "state": string; "totals": ReliabilityTotals; "until": string }
+export type ReliabilityCounts = { "failed": number; "flaky": number; "passed": number; "skipped": number; "timedOut": number; "unknown": number }
+export type ReliabilityTotals = { "censoredCount": number; "counts": ReliabilityCounts; "downSeconds": number; "durationSampleCount": number; "durationSumMs": number; "durationUnavailableCount": number; "unknownSeconds": number; "upSeconds": number }
 export type RetainedTest = { "current": boolean; "lifecycle": string; "projectId": string; "revision": number; "suiteArchived": boolean; "suiteId": string; "suiteName": string; "test": SourceCatalogTest; "updatedAt": string }
 export type ReviewedPublicationInput = { "activate": boolean; "reviewId": string }
 export type Revoked = { "revoked": boolean }
@@ -193,12 +196,12 @@ export type StandardAssignmentReplacement = { "previousRoleId"?: string; "reason
 export type StatusPage = { "background": string; "defaultWindow": "24h" | "7d" | "1m" | "1y" | "all"; "id": string; "maxAgeSeconds": number; "probes": (StatusPageEntry)[]; "publicToken": string; "published"?: StatusPageDefinition; "publishedAt"?: string; "publisher"?: string; "slug"?: string; "title": string }
 export type StatusPageAvailability = { "coveragePercent": number; "downSeconds": number; "percent": number | null; "since": string; "unknownSeconds": number; "upSeconds": number }
 export type StatusPageDefinition = { "background": string; "defaultWindow": "24h" | "7d" | "1m" | "1y" | "all"; "id": string; "maxAgeSeconds": number; "probes": (StatusPageEntry)[]; "slug"?: string; "title": string }
-export type StatusPageEntry = { "description": string; "probeId": string; "title": string }
+export type StatusPageEntry = { "description": string; "environmentId"?: string; "executionLocation"?: string; "monitor"?: boolean; "probeId"?: string; "suiteId"?: string; "testId"?: string; "title": string }
 export type StatusPageList = { "cursor"?: string; "items": (StatusPageRecord)[] }
 export type StatusPagePoint = { "at": string; "state": string }
 export type StatusPageRecord = { "data": StatusPage; "id": string; "projectId"?: string; "revision": number; "updatedAt"?: string }
 export type StatusPageReport = { "asOf": string; "background": string; "maxAgeSeconds": number; "probes": (StatusPageRow)[]; "title": string; "window": string }
-export type StatusPageRow = { "availability": StatusPageAvailability; "description": string; "history": (StatusPagePoint)[]; "state": string; "title": string }
+export type StatusPageRow = { "availability": StatusPageAvailability; "buckets": (ReliabilityBucket)[]; "contextCount": number; "description": string; "history": (StatusPagePoint)[]; "metric": "availability" | "outcomes"; "passRate": number | null; "state": string; "title": string; "totals": ReliabilityTotals }
 export type StatusPageSlugAvailability = { "available": boolean; "slug": string }
 export type SuiteDefinition = { "activeReleaseId"?: string; "applications": (string)[] | null; "archived": boolean; "capture"?: SourceCapturePolicy; "description": string; "id": string; "name": string; "requiresTarget": boolean; "timing"?: SourceTimingPolicy }
 export type SuiteLifecycle = { "canManage": boolean; "revision": number; "schedules": (SuiteSchedule)[]; "suite": SuiteDefinition; "updatedAt": string }
@@ -354,6 +357,7 @@ export interface AccessRequests {
   updateCatalogTest: { "project": string; "suite": string; "test": string; revision: number; body: SourceCatalogTest }
   duplicateCatalogTest: { "project": string; "suite": string; "test": string; revision: number; body: CatalogDuplicateInput }
   changeCatalogTestState: { "project": string; "suite": string; "test": string; "action": "disable" | "enable" | "archive" | "restore"; revision: number }
+  readTestReliability: { "project": string; "suite": string; "test": string; query?: { "environment"?: string; "location"?: string; "window"?: string; "resolution"?: string; "since"?: string; "until"?: string; "maxAgeSeconds"?: number } }
   readRetainedTest: { "project": string; "suite": string; "test": string }
   listCatalogTestRevisions: { "project": string; "suite": string; "test": string }
   readTestRunHistory: { "project": string; "suite": string; "test": string; query?: { "environment"?: string; "location"?: string; "application"?: string; "cursor"?: string; "limit"?: number } }
@@ -541,6 +545,7 @@ export interface AccessResponses {
   updateCatalogTest: CatalogTestRecord
   duplicateCatalogTest: CatalogTestRecord
   changeCatalogTestState: CatalogTestRecord
+  readTestReliability: StatusPageReport
   readRetainedTest: RetainedTest
   listCatalogTestRevisions: CatalogRevisionPage
   readTestRunHistory: TestHistoryPage
@@ -728,6 +733,7 @@ export const accessOperations = {
   updateCatalogTest: { method: "PUT", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}" },
   duplicateCatalogTest: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/actions/duplicate" },
   changeCatalogTestState: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/actions/{action}" },
+  readTestReliability: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/reliability" },
   readRetainedTest: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/retained" },
   listCatalogTestRevisions: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/revisions" },
   readTestRunHistory: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/run-history" },

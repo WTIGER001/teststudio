@@ -1,8 +1,8 @@
 # Public status pages
 
-Each project can create separate status pages for different audiences. A page contains an ordered selection of current HTTP probe bindings.
-Each row has its own public title, optional description, recent result pills, and an availability donut. A page supports up to 100 probes; project page lists continue through pagination.
-The page title, background color, and default time range are configurable. One viewer selector changes every row together.
+Each project can create separate status pages for different audiences. A page contains an ordered selection of current HTTP probe bindings or direct test references.
+Each row has its own public title, optional description, bucketed history pills, and an availability donut or outcome summary. A page supports up to 100 probes; project page lists continue through pagination.
+The page title, background color, and default time range are configurable. One viewer selector changes every row together. Outcome rows show pass rate and excluded skipped/unknown counts; explicitly monitored rows show time-based availability.
 Public pages have standalone URLs and support iframe embedding without sign-in.
 
 ## Vanity URLs
@@ -26,16 +26,16 @@ Late completion of an older logical run cannot replace a newer observation.
 Ranges are rolling 24 hours, seven days, one month (30 days), one year (365 days), and all retained history.
 All time starts at that probe's first retained observation. No data has no percentage.
 A result just before a range boundary can contribute until it becomes stale or is replaced.
-The history calculation traverses retained project history without the private overview's 1000-run limit. A request that cannot finish returns unavailable rather than a misleading partial percentage.
+Shared result capture maintains compact observations and hourly and daily summaries for all runner types. Reports combine saved durations and counts with exact partial edges, without scanning complete project runs on each refresh. Aggregation that cannot finish returns unavailable rather than a misleading partial percentage.
 
 ## Publishing
 
-Create a private draft on the dedicated setup page. Choose appearance, ordered probes and public text, then review and save. Saving returns to the status-page detail screen. Use Edit status page for the focused editing workflow.
+Create a private draft on the dedicated setup page. Choose appearance, ordered checks and public text, then review and save. Saving returns to the status-page detail screen. Use Edit status page for the focused editing workflow.
 Review publication opens a separate preview and confirmation page. The detail screen stays focused on configuration summary, sharing, and saved preview.
 Preview the saved draft before Publish. Publishing makes only the reviewed snapshot public; later draft edits stay private until published.
 The public projection contains public titles, descriptions, statuses, observation times, and duration aggregates.
 It contains no target URLs, project or user identifiers, run links, request data, diagnostics, credentials, or private evidence.
-Hover or focus a pill for its status and local timestamp. Public pills do not link to private runs.
+Hover or focus a pill for its interval, result counts, downtime, and unknown coverage. Select it to inspect details. Public pills do not link to private runs.
 
 Reader and higher project roles can inspect status-page configuration. Contributor and Owner can manage and publish; only Owner can delete.
 Existing compatibility role bundles predate these permissions and do not acquire them automatically. If Status pages is missing, inspect the selected project’s effective statuspages permissions. An authorized administrator can grant statuspages.read, statuspages.manage, and statuspages.publish explicitly for that project without converting the account to Owner or changing its existing roles.
@@ -51,3 +51,20 @@ The public page refreshes once per minute without executing probes.
 Use the configured monitoring schedules to produce observations; viewing a page never runs a check.
 The public document permits framing. Signed-in TestStudio pages retain their framing protection.
 The AWS package includes a separate /status/* behavior and response policy for public documents. Existing private UI and evidence policies remain separate.
+
+### Native Angular embedding
+
+The reusable [Angular library](../web/projects/status/README.md) provides teststudio-status-bar and teststudio-status-page for external Angular sites.
+Hosts can supply typed report data or use the optional public reporting client. Styling tokens and templates support host appearance while preserving accessible states and unknown coverage.
+Public reads retain explicit publication and withdrawal. The public API permits credential-free cross-origin reads; private endpoints retain their own restrictions.
+Private hosts supply reports through their normal authenticated services. Component installation does not publish a test or grant access.
+The public URL and iframe remain supported alongside native Angular embedding.
+
+## Include other test types
+
+On Checks, use Add HTTP probe for an existing binding or expand Other test types for any registered test.
+Choose its environment and execution location. Leave the location blank for the installation default. Use No target for targetless tests.
+Execution outcomes are the default for direct tests. Report this test as a monitor uses the page freshness limit; it creates no schedule and runs no tests.
+Review shows the metric for every row before saving. Publishing remains a separate reviewed action.
+Hour, six-hour, daily, weekly, monthly, and yearly pills keep long histories compact. A successful latest result cannot hide an unsuccessful observation earlier in the bucket.
+Monitoring definitions and source/target changes retain separate contexts. Old configurations do not establish current availability.

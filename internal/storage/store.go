@@ -105,12 +105,15 @@ func (s *Store) migrate(ctx context.Context) error {
 		`CREATE INDEX IF NOT EXISTS records_project ON records (project, bucket, id)`,
 		`CREATE TABLE IF NOT EXISTS counters (name TEXT PRIMARY KEY, value BIGINT NOT NULL)`,
 	}
-	for _, statement := range statements {
+	for _, statement := range append(statements, reliabilitySchema...) {
 		if _, err := tx.ExecContext(ctx, statement); err != nil {
 			return fmt.Errorf("migrate storage: %w", err)
 		}
 	}
 	if _, err := tx.ExecContext(ctx, `INSERT INTO schema_migrations (version, applied_at) VALUES (1, $1) ON CONFLICT (version) DO NOTHING`, time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `INSERT INTO schema_migrations (version,applied_at) VALUES (2,$1) ON CONFLICT(version) DO NOTHING`, time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
 		return err
 	}
 	return tx.Commit()

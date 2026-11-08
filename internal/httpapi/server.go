@@ -22,6 +22,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/passwords"
 	"github.com/wtiger001/teststudio/internal/projects"
 	"github.com/wtiger001/teststudio/internal/recording"
+	"github.com/wtiger001/teststudio/internal/reliability"
 	"github.com/wtiger001/teststudio/internal/runs"
 	"github.com/wtiger001/teststudio/internal/schedules"
 	"github.com/wtiger001/teststudio/internal/sessions"
@@ -65,6 +66,10 @@ func JSON(w http.ResponseWriter, status int, value any) {
 
 func problem(w http.ResponseWriter, err error) {
 	status := http.StatusUnprocessableEntity
+	if errors.Is(err, reliability.ErrPending) {
+		status = http.StatusServiceUnavailable
+		w.Header().Set("Retry-After", "5")
+	}
 	if errors.Is(err, passwords.ErrBusy) {
 		status = http.StatusTooManyRequests
 	}
@@ -172,6 +177,7 @@ func (s *Server) Handler() http.Handler {
 	s.notificationRoutes(mux)
 	s.timingRoutes(mux)
 	s.trendRoutes(mux)
+	s.reliabilityRoutes(mux)
 	s.evidenceRetentionRoutes(mux)
 	mux.HandleFunc("GET /api/v1/me/capabilities", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		if app := r.URL.Query().Get("application"); app != "" {

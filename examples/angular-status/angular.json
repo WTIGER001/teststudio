@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "cli": { "analytics": false },
+  "projects": {
+    "status-consumer": {
+      "projectType": "application", "root": "", "sourceRoot": "src",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "src/main.ts", "index": "src/index.html", "tsConfig": "tsconfig.json",
+            "outputPath": "../../web/dist/status-consumer", "styles": ["src/styles.css"], "baseHref": "/angular-status/",
+            "optimization": { "scripts": true, "styles": true, "fonts": false }, "outputHashing": "all"
+          }
+        }
+      }
+    }
+  }
+}

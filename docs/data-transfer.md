@@ -16,8 +16,8 @@ bin/teststudio-data --help
 ```
 
 Use the same TestStudio version for export and import.
-The current format is teststudio.installation/v1 with metadata version 1 and the pinned go-permissions/v0.0.31 adapter format.
-Unsupported versions fail before installation data commits.
+The current format is teststudio.installation/v1 with metadata version 2 and the pinned go-permissions/v0.0.31 adapter format.
+Metadata version 1 archives remain readable. Unsupported versions fail before installation data commits. Version 2 includes compact reliability observations, authorization provenance, monitoring-policy caches, hourly/daily summaries, and pending aggregation work. Older exporters remain usable against unchanged version 1 source databases.
 
 ## Prepare a cutover
 

@@ -22,6 +22,7 @@ export const helpPages: Record<string, HelpPage> = {
     introduction: ['Follow a permanent test identity through its saved runs, definitions, and retained evidence. The test or suite can be archived.'],
     concepts: [
       { title: 'Active application', description: 'The sidebar Application switcher scopes Suites, Test catalog, Test runs, and Trends. The context above the page shows the active application. Choose All applications for project-wide work. Project overviews contains All applications and HTTPS probes. Switching applications keeps the main destination and clears the previous filters.' },
+      { title: 'Reliability history', description: 'All check types share hourly and daily rollups. Choose a target and report period to inspect bucketed pills. Select a pill and Inspect period to narrow history. Pass rates exclude skipped and unknown outcomes. Advanced reliability settings can estimate availability with an explicit freshness policy; this creates no schedule or execution.' },
       { title: 'Permanent identity', description: 'The project, suite, and test identifier define this history. Identical test identifiers in other suites keep separate histories.' },
       { title: 'Saved runs', description: 'Run titles, release, outcomes, and durations come from saved snapshots. Editing or archiving a test does not rewrite them. A missing test result displays not-recorded, never a passing result.' },
       { title: 'Archived and removed definitions', description: 'Archived tests and suites keep their history. If the working definition is missing, the last saved revision provides context. History does not restore a definition or enable execution.' },
@@ -55,10 +56,12 @@ export const helpPages: Record<string, HelpPage> = {
   'https-probes': probeHelp,
   'status-pages': {
     id: 'status-pages', title: 'Status pages',
-    introduction: ['Create project-owned public status pages from selected HTTP probes. Save drafts privately, review the public projection, and publish explicitly.'],
+    introduction: ['Create project-owned public status pages from selected probes and tests. Save drafts privately, review the public projection, and publish explicitly.'],
     concepts: [
       { title: 'Public projection', description: 'Only the chosen titles, descriptions, result states, observation times, and availability aggregates are public. Target URLs, credentials, run identifiers, diagnostics, and evidence stay private.' },
       { title: 'Time-based availability', description: 'A result applies until the next result or its freshness limit. Availability is available time divided by known monitored time. The donut shows available, unavailable, and unknown durations; monitoring coverage explains missing history.' },
+      { title: 'All test types', description: 'Other test types adds a registered check with its environment and execution location. Outcome history is the default. Report this test as a monitor opts into time-based availability using this page’s freshness limit. Inspect the metric on Review before publication.' },
+      { title: 'Bucketed history', description: 'Pills represent hours, six-hour intervals, days, weeks, months, or years as the range grows. Any unsuccessful result stays visible. Select a pill for counts, downtime, unknown coverage, and boundaries. Current state describes the latest observation separately.' },
       { title: 'Windows and freshness', description: 'One viewer selector changes every probe. Month means a rolling 30 days and year means 365 days. All time begins at the first retained observation. Advanced monitoring settings controls when old observations become unknown.' },
       { title: 'Vanity URLs', description: 'Set an optional name on Appearance for /status/your-name. Names ignore case and are unique across TestStudio. Saving reserves the name; publishing activates it. Renaming retires the previous vanity address when published. The permanent generated URL keeps working. Retired names cannot move to another page.' },
       { title: 'Focused pages', description: 'The detail screen summarizes configuration and sharing. Edit status page opens a dedicated wizard. Saving returns to details. Review publication opens its own preview and confirmation page.' },
@@ -66,13 +69,13 @@ export const helpPages: Record<string, HelpPage> = {
       { title: 'Authority and recovery', description: 'Project Contributors and Owners can manage and publish. Only Owner can delete. Public reads recheck publisher and result authority. Conflicts preserve your work; reload and inspect before retrying an unconfirmed mutation.' }
     ],
     tutorials: [
-      { title: 'Create and publish', steps: ['Select Create status page. Enter Page title, Background color, Default availability period, and an optional Vanity URL. Check its availability feedback.', 'Continue to Probes. Choose existing HTTP probes, edit public titles and optional descriptions, and arrange their order.', 'Continue to Review and select Save draft.', 'On the detail screen, select Review publication. Inspect the dedicated preview and address, then select Confirm publish to authorize public access.'] },
+      { title: 'Create and publish', steps: ['Select Create status page. Enter Page title, Background color, Default availability period, and an optional Vanity URL. Check its availability feedback.', 'Continue to Checks. Choose existing HTTP probes or use Other test types, edit public titles and optional descriptions, and arrange their order.', 'Continue to Review and select Save draft.', 'On the detail screen, select Review publication. Inspect the dedicated preview and address, then select Confirm publish to authorize public access.'] },
       { title: 'Embed or withdraw', steps: ['Use Copy Public URL for a standalone page, or Copy Iframe embed code for another website. Copied feedback confirms success. If clipboard access is blocked, select and copy the visible field.', 'Visitors select one availability period for all rows. Hover or focus a pill for its status and time.', 'To change content or its vanity name, select Edit status page, save the draft, then review and publish it separately.', 'Select Unpublish to withdraw public access. The draft, probes, and retained test history remain.'] }
     ]
   },
   'public-status': {
     id: 'public-status', title: 'Public status',
-    introduction: ['This published page shows selected HTTP probes without requiring sign-in. Viewing it runs no tests.'],
+    introduction: ['This published page shows selected probes and tests without requiring sign-in. Viewing it runs no tests.'],
     concepts: [
       { title: 'Availability and coverage', description: 'The center percentage describes estimated available time during monitored periods. Green is available, red unavailable, and gray unknown. Coverage tells you how much of the period was monitored.' },
       { title: 'Observation gaps', description: 'A result stops applying when another result arrives or its freshness limit expires. Missing history, stale checks, infrastructure failures, and changed targets are unknown.' },

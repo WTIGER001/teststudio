@@ -105,6 +105,8 @@ func (s *Server) statusPageRoutes(m *http.ServeMux) {
 		JSON(w, 200, report)
 	}))
 	m.HandleFunc("GET /api/v1/public/status-pages/{token}", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
 		if address := r.PathValue("token"); len(address) < 1 || len(address) > 63 || strings.ContainsAny(address, "/\\") {
 			JSON(w, 404, map[string]string{"message": "This status page is unavailable."})
 			return
@@ -139,5 +141,11 @@ func (s *Server) statusPageRoutes(m *http.ServeMux) {
 			return
 		}
 		JSON(w, 200, report)
+	})
+	m.HandleFunc("OPTIONS /api/v1/public/status-pages/{token}", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS")
+		w.Header().Set("Access-Control-Max-Age", "600")
+		w.WriteHeader(http.StatusNoContent)
 	})
 }

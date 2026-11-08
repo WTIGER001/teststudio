@@ -338,6 +338,21 @@ func TestSQLiteInstallationArchivePreservesAccessHistoryAndArtifactReferences(t 
 		t.Fatal("import failed", restored, err)
 	}
 	verifyInstallation(t, source, destination, permissionsqlite.New(destination))
+	if stats.Reliability == 0 {
+		t.Fatal("reliability tables were omitted from the archive")
+	}
+	for _, table := range []string{"reliability_observations", "reliability_series", "reliability_authorities", "reliability_policies", "reliability_jobs", "reliability_summaries"} {
+		var before, after int
+		if err := source.db.DB.QueryRowContext(t.Context(), "SELECT count(*) FROM "+table).Scan(&before); err != nil {
+			t.Fatal(err)
+		}
+		if err := destination.DB.QueryRowContext(t.Context(), "SELECT count(*) FROM "+table).Scan(&after); err != nil {
+			t.Fatal(err)
+		}
+		if before != after {
+			t.Fatal("reliability history changed during transfer", table, before, after)
+		}
+	}
 	if _, err := transfer.Import(t.Context(), destination, bytes.NewReader(before)); !errors.Is(err, transfer.ErrNotEmpty) {
 		t.Fatal("nonempty destination accepted", err)
 	}

@@ -25,6 +25,7 @@ func (s *Service) Start(ctx context.Context) <-chan struct{} {
 		concurrency = 2
 	}
 	var workers sync.WaitGroup
+	workers.Go(func() { s.reliabilityLoop(ctx) })
 	if s.managedDriver() != nil {
 		workers.Go(func() { s.reconciliationLoop(ctx) })
 	}
@@ -114,7 +115,11 @@ func (s *Service) claim(ctx context.Context, entry storage.Record, worker string
 		}
 		changes = append(changes, notifications...)
 	}
-	err = s.Store.Commit(ctx, changes...)
+	if Terminal(v.State) {
+		err = s.commitReliability(ctx, v, v.Results, true, changes...)
+	} else {
+		err = s.Store.Commit(ctx, changes...)
+	}
 	return v, err == nil && v.State == "running", err
 }
 

@@ -175,7 +175,7 @@ func (s *Service) finalResult(ctx context.Context, run Run, worker string, resul
 			}
 			changes = append(changes, samples...)
 		}
-		err = s.Store.Commit(ctx, changes...)
+		err = s.commitReliability(ctx, v, []execution.Result{result}, false, changes...)
 		if !errors.Is(err, storage.ErrConflict) {
 			return err
 		}

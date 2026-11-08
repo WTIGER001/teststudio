@@ -1,6 +1,6 @@
 {
   "name": "teststudio-web",
-  "version": "0.5.1-dev",
+  "version": "0.7.0-dev",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,7 +10,8 @@
     "postbuild": "node ../scripts/build-trace-viewer.mjs",
     "prebuild": "node ../scripts/build-info.mjs",
     "prestart": "node ../scripts/build-info.mjs",
-    "precheck": "node ../scripts/build-info.mjs"
+    "precheck": "node ../scripts/build-info.mjs",
+    "build:status": "ng-packagr -p projects/status/ng-package.json -c projects/status/tsconfig.lib.json"
   },
   "dependencies": {
     "@angular/common": "22.2.4",
@@ -33,6 +34,8 @@
     "@angular/build": "22.2.4",
     "@angular/cli": "22.2.4",
     "@angular/compiler-cli": "22.2.4",
+    "@angular/platform-server": "22.2.4",
+    "ng-packagr": "22.2.4",
     "playwright-core": "1.64.1",
     "typescript": "~6.0.0"
   }

@@ -2,6 +2,7 @@
   "schemaVersion": "teststudio.selftest/v1",
   "source": "teststudio-selftests",
   "tests": [
+    {"id":"STUDIO-RELIABILITY-001","title":"Shared reliability rollups and independent stylable Angular status components","selector":"@STUDIO-RELIABILITY-001","category":"Reliability"},
     {"id":"STUDIO-STATUS-PAGES-001","title":"Public status draft publication, anonymous embeds, time ranges and private-data boundaries","selector":"@STUDIO-STATUS-PAGES-001","category":"Public status"},
     {"id": "STUDIO-APPLICATION-ACCESS-001", "title": "Reviewed standard roles, inherited application access, conversion and scoped Contributor navigation", "selector": "@STUDIO-APPLICATION-ACCESS-001", "category": "Administration"},
     {"id": "STUDIO-PROBE-BULK-001", "title": "Reviewed bulk probe actions retain completed runs during a partial retry", "selector": "@STUDIO-PROBE-BULK-001", "category": "HTTPS probes"},
