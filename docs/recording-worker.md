@@ -1,7 +1,7 @@
 # Private recording worker
 
 The recording worker runs the website browser outside the API service. Testers use the existing in-page recorder and install nothing.
-The implementation has local Docker, PostgreSQL, private TLS, and normal TestStudio browser evidence. MMDev now runs it in release 0.10.0-dev, build 852ce753cf8b, with a dedicated private host and one browser slot.
+The implementation has local Docker, PostgreSQL, private TLS, and normal TestStudio browser evidence. MMDev runs it with a dedicated private host and one browser slot. The current API and UI release is 0.10.1-dev, build 6c6cec452746; its alignment patch preserves the original worker installation.
 See [the delivery plan](hosted-recording-plan.md) for the separate hosted execution and tester acceptance milestones.
 
 ## Installation boundary

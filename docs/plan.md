@@ -5,6 +5,13 @@ Track verified delivery in `implementation.md`.
 Start resumed work with [the continuation guide](continue.md). It summarizes the current release, remaining priorities, boundaries, and retained evidence.
 The user authorizes targeted tests and frequent feature commits. Remote pushes remain separate operations.
 
+## Shared form alignment correction
+
+Descriptions no longer stretch adjacent labels and controls. The shared field layout aligns content at its natural start, preserving normal control heights.
+Normal STUDIO-HOSTED-RECORDER-001 passes at 1280, 900, and 390 pixels with wrapped descriptions, themes, and the existing full recording workflow.
+Patch 0.10.1-dev from fe99e8a is deployed as build 6c6cec452746. Nine hosted checks verify the matching artifact, stylesheet, actual field geometry, healthy services, and unchanged recording host. Verification starts no recording or target run and closes its owned session and browser.
+Reuse output/playwright/form-field-alignment, output/aws-mmdev/form-alignment-0101, and output/playwright/hosted-form-alignment-0101. This refines 49 and 50; acceptance remains 50 verified of 57.
+
 ## Azure delivery direction: direct installation first
 
 The user selects their own Azure subscription for the first installation on 2026-11-08.

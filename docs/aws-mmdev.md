@@ -37,9 +37,9 @@ The reviewed foundation change set adds 29 resources. The reviewed core change s
 Neither change set modifies existing resources. The core change set creates no cluster.
 ECS reports one desired and one running teststudioapi task with a completed rollout.
 Both API and artifact target groups report healthy. The existing testing-server remains at one running task.
-The ARM64 image is sha256:95bb6d55f466c7b8daa0fab2fda41eed0dadc90153eeac7f89d2bc858483afac.
-It is published in teststudioapi/service. The current release is 0.10.0-dev, displayed as 0.10.0.dev. Build 852ce753cf8b uses committed source 7f1a023.
-Its UTC build creation date is 2026-11-08T17:21:34.720Z. The task starts at 2026-11-08T17:28:40.737Z and UI publication occurs at 2026-11-08T17:31:37Z. The API, UI, and image labels share that immutable identity.
+The ARM64 image is sha256:86e2b96bc5ba5d4fc67b0edc055b02ddeef77be881b19ba8ca3df81e4d811887.
+It is published in teststudioapi/service. The current release is 0.10.1-dev, displayed as 0.10.1.dev. Build 6c6cec452746 uses committed source fe99e8a.
+Its UTC build creation date is 2026-11-08T17:43:29.126Z. The task starts at 2026-11-08T17:46:35.443Z and UI publication occurs at 2026-11-08T17:49:37Z. The API, UI, and image labels share that immutable identity.
 Release 0.5.0-dev adds focused status-page management and installation-wide vanity names. Its ordinary image-only change set modifies Service and Task; the existing public CloudFront policy is reused. Twelve package checks and thirty-four hosted checks pass. The owned generic verification page is unpublished and its session closes. Receipts are output/aws-mmdev/status-vanity-050.
 Patch 0.5.1-dev adds status-page sharing copy buttons. The focused browser workflow and sixteen hosted identity, asset, health, rollout, and invalidation checks pass. The image-only change set preserves the existing public response policy. Receipts are output/aws-mmdev/status-copy-051.
 The unchanged trace viewer is reused. Native image storage uses the existing private database. The image retains the reviewed public RDS trust bundle.
@@ -280,3 +280,8 @@ The current host has no automatic replacement or scaling. Drain and verify clean
 The 0.10.0-dev installation is complete. The host change set adds thirteen owned resources; the core change set modifies only ExecutionRole, Task, and Service. Twelve hosted checks and the actual News record, visible-story check, review, save, and cancel workflow pass. Source preparation and coded execution remain separately uninstalled.
 The worker host is i-001e74196a83b4693. It has no public address; port 8045 accepts only the API security group and still requires mutual TLS. Browser and gateway inspection confirms the selected isolation profile, and all owned recording containers and volumes are removed after finish and cancel.
 Reuse output/aws-mmdev/recording-0100 and output/playwright/aws-recording-0100. The verification fixture is removed, the project is archived, and the owned session and automation browser close. The transport certificates expire on 2027-02-06. No existing project, test, schedule, or recording history is replaced; no remote Git push occurs. Acceptance remains 50 verified of 57.
+
+### Shared form alignment patch
+
+Patch 0.10.1-dev keeps adjacent shared form controls aligned when descriptions wrap. The reviewed change set modifies only Service and Task. Nine hosted checks verify artifact and stylesheet identity, service health, private access, unchanged recording host, and actual field alignment at 1280, 900, and 390 pixels in light and dark themes.
+Receipts are output/aws-mmdev/form-alignment-0101 and screenshots are output/playwright/hosted-form-alignment-0101. The verification project is archived, its session and automation browser close, and no recording or target test starts. Acceptance remains 50 verified of 57.

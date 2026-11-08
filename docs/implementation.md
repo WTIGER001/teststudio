@@ -24,7 +24,10 @@ The Angular build passes. Normal STUDIO-HOSTED-RECORDER-001 verifies matching in
 It also retains the News recording, visible story, review, one revision-1 draft, reload, input and save recovery, help, keyboard, and cancellation checks.
 Run 20261108T174217.731170000-0c6c67ceb614d9e3f4b3361f passes in 9.863 seconds. The complete harness takes 38.64 seconds. Both recording containers, gateways, their volumes, and all three observed host processes close.
 Receipts and screenshots are output/playwright/form-field-alignment. The earlier failed description-selector check is superseded by the final passing run.
-Product 0.10.1-dev is prepared for publication. Target deployment remains separate from this local evidence. This refines 49 and 50; acceptance remains **50 verified of 57**.
+Product 0.10.1-dev from committed fe99e8a deploys as build 6c6cec452746. Build creation is 2026-11-08T17:43:29.126Z, task startup is 2026-11-08T17:46:35.443Z, and UI publication is 2026-11-08T17:49:37Z. The reviewed change set modifies only Service and Task.
+Nine hosted checks pass. API and UI identities and stylesheet bytes match the selected artifact. Actual Edge measurements show equal control heights and top edges at 1280 and 900 pixels, wrapped descriptions, and stacked 390-pixel controls in light and dark themes. The private recording host is unchanged, and both services retain healthy completed rollouts.
+Receipts are output/aws-mmdev/form-alignment-0101 and screenshots are output/playwright/hosted-form-alignment-0101. The verification project is archived, the owned session is revoked, temporary private state is removed, and the owned browser closes. No recording or target test starts. Existing configuration and the port 8040 demo remain unchanged. No remote Git push occurs.
+This refines 49 and 50; acceptance remains **50 verified of 57**.
 
 ## Private recording worker: MMDev deployment — 2026-11-08
 

@@ -20,7 +20,8 @@ Descriptions caused shared grid fields to stretch their labels and controls to m
 Normal STUDIO-HOSTED-RECORDER-001 passes at 1280, 900, and 390 pixels with wrapped help, light and dark themes, and the existing recording, review, recovery, saving, cancellation, help, and keyboard workflow.
 Run 20261108T174217.731170000-0c6c67ceb614d9e3f4b3361f takes 9.863 seconds; the focused harness takes 38.64 seconds. All owned browser containers, gateways, volumes, and three observed host processes close.
 Reuse output/playwright/form-field-alignment. The initial failed check used an incorrect description locator and is superseded by this passing run.
-Patch 0.10.1-dev is prepared for MMDev publication. Inspect its release receipt before starting another deployment. The private recording host is unchanged.
+Patch 0.10.1-dev from committed fe99e8a is deployed as build 6c6cec452746. The reviewed change set modifies only Service and Task. Nine hosted checks verify matching API, UI, stylesheet, service health, private access, unchanged recording host, and actual field geometry at all three widths.
+Reuse output/aws-mmdev/form-alignment-0101 and screenshots under output/playwright/hosted-form-alignment-0101. The verification project is archived, its owned session closes, and the owned Edge browser stops. No recording or test run starts. The private recording host is unchanged.
 This refines 49 and 50. Acceptance remains 50 verified of 57.
 
 ## Azure planning: direct installation first
@@ -40,7 +41,7 @@ Follow [the hosted recording plan](hosted-recording-plan.md). This direction sup
 The local proof now captures a generic News click and visible-story check, shows plain-language review, and saves through the existing source draft service.
 Normal STUDIO-EMBEDDED-RECORDER-001 passes in 4.123 seconds, run 20261108T155702.239245000-2124450c8345cdca54c6958c. Its complete focused harness takes 19.87 seconds.
 Help, active and saved reload, uncertain input, lost save confirmation, Advanced source access, cancellation, focus, themes, narrow layout, and all eleven observed process shutdowns pass.
-Reuse receipts and screenshots under output/playwright/embedded-news-complete. Canonical OpenAPI 0.44.0 describes this source; product 0.10.0-dev is now deployed.
+Reuse receipts and screenshots under output/playwright/embedded-news-complete. Canonical OpenAPI 0.44.0 describes this source; the current hosted patch is 0.10.1-dev.
 The native preview remains loopback-only. Milestone 2 now implements a separate [private recording worker](recording-worker.md) with mutually authenticated TLS, durable capacity and cleanup leases, fenced restart recovery, current authority checks, and bounded idle behavior.
 The actual recording browser runs sandboxed in a non-root container with no direct networking, a private per-session gateway, fixed resource limits, and independent browser and gateway deadlines.
 Normal STUDIO-HOSTED-RECORDER-001 passes locally in 5.997 seconds, run 20261108T165640.285709000-e4e7e064e323488114590eb5; the complete harness takes 21.56 seconds.
@@ -48,7 +49,7 @@ The same News, review, one-draft save, reload, input and save recovery, help, fo
 Reuse output/playwright/private-recording-worker. Targeted race checks pass for ownership, capacity, uncertain input, revoked authority, archive, idle, deadlines, TLS identities, API reconnect, and transfer exclusion. Actual PostgreSQL lease and recovery checks pass in 2.841 seconds.
 Docker policy and independent-deadline checks pass in 6.616 seconds. Standalone daemon configuration, private readiness, and clean shutdown checks pass in 0.385 seconds.
 The API selects --recording-worker-config or --recording-worker-config-env. The initial provider requires a dedicated Docker host and permits only the entered website origin; separate assets or sign-in origins remain a reviewed target extension.
-The authorized MMDev deployment completes. Product 0.10.0-dev from committed 7f1a023 runs as build 852ce753cf8b. The reviewed dedicated-host change set adds thirteen resources; the core change set modifies only ExecutionRole, Task, and Service. Both stacks and both existing services have completed healthy rollouts. API and UI build identities match.
+The original authorized recording deployment completes in 0.10.0-dev from committed 7f1a023, build 852ce753cf8b. The current 0.10.1-dev patch retains that worker installation. The reviewed dedicated-host change set adds thirteen resources; the core change set modifies only ExecutionRole, Task, and Service. Both stacks and both existing services have completed healthy rollouts. API and UI build identities match.
 The hosted browser records News and a visible story on an independently authored generic fixture, saves exactly one revision-1 draft, and cancels a second recording. No target test runs. Actual host inspection verifies the browser has no direct networking, a read-only root, dropped capabilities, resource bounds, and no Docker socket. Both browser and gateway pairs and their volumes are removed.
 Twelve hosted deployment checks pass. Reuse output/aws-mmdev/recording-0100 and screenshots under output/playwright/aws-recording-0100. The fixture is removed, its verification project is archived, the owned application session closes, and the owned Edge automation browser stops.
 The private t4g.medium host is i-001e74196a83b4693 in stack teststudioapi-recording, with one concurrent recording slot. Use deploy/aws/recording.yaml and scripts/deploy-aws-recording.py; preserve host.json and release.json checkpoints instead of starting duplicate deployments. API startup secrets use RecordingWorkerSecretArn. Rotate the dedicated transport CA and both leaf certificates before 2027-02-06. Keep the same host and worker identity for cleanup recovery.
@@ -87,14 +88,14 @@ UI improvements refine existing accepted items. They do not close the remaining 
 | Item | Last verified value |
 | --- | --- |
 | Hosted UI | https://teststudio.devfoodmarketmaker.com |
-| Product version | 0.10.0-dev; footer displays 0.10.0.dev |
-| Build identifier | 852ce753cf8b |
-| Build creation | 2026-11-08T17:21:34.720Z |
-| Implementation commit | 7f1a02364f7d46f9a20ccc96010a7a0abf234d00 |
+| Product version | 0.10.1-dev; footer displays 0.10.1.dev |
+| Build identifier | 6c6cec452746 |
+| Build creation | 2026-11-08T17:43:29.126Z |
+| Implementation commit | fe99e8aad3c5bb9ab122c4b3441080562be81cd9 |
 | Source state at build | Committed source; modified is false |
-| Service image digest | sha256:95bb6d55f466c7b8daa0fab2fda41eed0dadc90153eeac7f89d2bc858483afac |
-| Task startup | 2026-11-08T17:28:40.737Z |
-| UI publication | 2026-11-08T17:31:37Z |
+| Service image digest | sha256:86e2b96bc5ba5d4fc67b0edc055b02ddeef77be881b19ba8ca3df81e4d811887 |
+| Task startup | 2026-11-08T17:46:35.443Z |
+| UI publication | 2026-11-08T17:49:37Z |
 | Live version metadata | GET /api/v1/version; public and no-store |
 
 Later documentation and operator-tooling commits do not change the deployed implementation commit or its immutable build date.
