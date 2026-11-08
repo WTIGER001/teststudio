@@ -16,6 +16,13 @@ Use the mm_dev profile and preserve existing services. Azure implementation and 
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
+## Current user direction: focused status-page management and vanity URLs
+
+Use Create project as the shared model for substantial create and edit workflows. The detail page summarizes configuration and sharing; dedicated create, edit, and publication-review routes preserve clear back and cancel paths. The shared [UI rules](ui.md#choose-a-page-dialog-or-inline-control) distinguish pages, bounded dialogs, and small inline controls.
+Status pages can reserve an optional installation-wide vanity name. Normalize case, reject duplicate reservations atomically, and activate only the published snapshot. Keep permanent generated links working. Retire old vanity addresses without allowing another page to take over their links.
+The focused API checks pass on SQLite and PostgreSQL. STUDIO-STATUS-PAGES-001 passes in 6.497 seconds, including duplicate feedback and narrow authoring screens. Release 0.5.0-dev is prepared; publication and MMDev verification remain pending.
+This milestone refines 05, 12, 13, 25, 49, and 50. Acceptance stays 50 verified of 57.
+
 ## Completed user direction: public status pages
 
 The user requests project-owned, anonymous, embeddable HTTP probe pages with configurable page title and background, ordered public probe text, recent pills, and right-hand availability donuts.

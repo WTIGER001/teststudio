@@ -115,6 +115,10 @@ func (s *Service) Save(ctx context.Context, user, project string, d Definition, 
 	if err != nil {
 		return storage.Record{}, err
 	}
+	d.Slug, err = NormalizeSlug(d.Slug)
+	if err != nil {
+		return storage.Record{}, err
+	}
 	if err = s.authority(ctx, user, project, d.ID, "manage"); err != nil {
 		return storage.Record{}, err
 	}
@@ -136,6 +140,11 @@ func (s *Service) Save(ctx context.Context, user, project string, d Definition, 
 	} else if !errors.Is(err, storage.ErrNotFound) || revision != 0 {
 		return storage.Record{}, err
 	}
+	reservation, err := s.slugReservation(ctx, project, page)
+	if err != nil {
+		return storage.Record{}, err
+	}
+	assertions = append(assertions, reservation...)
 	change, err := storage.Put(Bucket(project), d.ID, project, revision, page)
 	if err != nil {
 		return storage.Record{}, err
@@ -155,6 +164,12 @@ func (s *Service) Save(ctx context.Context, user, project string, d Definition, 
 	}
 	assertions = append(assertions, storage.Change{Record: projectRow, Assert: true}, change, audit)
 	if err = s.Store.CommitAll(ctx, assertions...); err != nil {
+		if errors.Is(err, storage.ErrConflict) && page.Slug != "" {
+			row, e := s.Store.Get(ctx, "status-page-slugs", page.Slug)
+			if e == nil && !ownsSlug(row, project, page.ID, page.Token) {
+				return storage.Record{}, ErrSlugTaken
+			}
+		}
 		return storage.Record{}, err
 	}
 	return s.Store.Get(ctx, Bucket(project), d.ID)
@@ -180,6 +195,11 @@ func (s *Service) Publish(ctx context.Context, user, project, id string, revisio
 		if err != nil {
 			return storage.Record{}, err
 		}
+		reservation, e := s.slugReservation(ctx, project, page)
+		if e != nil {
+			return before, e
+		}
+		assertions = append(assertions, reservation...)
 		now := time.Now().UTC()
 		snapshot := page.Definition
 		page.Published = &snapshot

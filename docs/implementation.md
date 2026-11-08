@@ -6,6 +6,21 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## Focused status-page management and vanity URLs: local delivery — 2026-11-07
+
+Status-page details now summarize configuration, publication, sharing, and a saved draft preview. Dedicated create, edit, and publication-review routes follow Create project, with back and cancel destinations, step validation, preserved edits, and revision recovery.
+The shared UI guide now defines when to use dedicated pages, short dialogs, and small inline controls. Page help and the status-page guide describe the current controls.
+Optional vanity names normalize case and reserve globally in the same transaction as the page and audit. A competing save returns an explicit conflict. The advisory availability endpoint reveals only whether a name is available.
+Publication activates the saved alias; draft renames preserve the current published address. Republishing retires the old alias. Permanent generated links remain compatible. Reservations bind the original page token, so deletion and recreation cannot take over old links.
+Canonical OpenAPI 0.39.0 and the generated client describe the optional name and availability endpoint. Product release 0.5.0-dev is prepared for publication.
+
+The focused SQLite HTTP cases pass. The same PostgreSQL cases pass with race detection in 3.360 seconds, including concurrent claims with one winner, global duplicates, normalization, invalid names, draft and publication isolation, generated-link compatibility, and deleted-page takeover rejection.
+The UI build and client synchronization check pass. STUDIO-STATUS-PAGES-001 passes through normal local execution in 6.497 seconds, run 20261108T023727.088360000-03fb9e6133bcc031ea0886d4.
+It covers duplicate-name feedback and correction, dedicated authoring and publication routes, saved draft details, a 390-pixel authoring view, help and unsaved navigation, independent anonymous pages, actual cross-origin embedding, all availability periods, privacy, themes, rename activation, permanent links, revision conflicts, recovery, and unpublishing.
+Screenshot review corrects stale duplicate feedback after a valid replacement. Owned local controllers, database containers, execution containers, and browsers exit; the port 8040 demo and user data remain unchanged.
+Retained evidence is output/selftest/20261108T023727.088360000-03fb9e6133bcc031ea0886d4. Release publication and hosted acceptance remain pending.
+This refines 05, 12, 13, 25, 49, and 50. Acceptance stays **50 verified of 57**; the seven broad open criteria remain unchanged.
+
 ## Status-page sidebar access repair — 2026-11-07
 
 The requesting FoodMarketMaker account runs the current 0.4.0-dev UI but retains the earlier Project administrator, Catalog editor, Publisher, and Operator bundle.

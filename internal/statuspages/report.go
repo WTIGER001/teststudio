@@ -5,6 +5,7 @@ import (
 	"errors"
 	"reflect"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/authorization"
@@ -23,13 +24,20 @@ type source struct {
 }
 
 func (s *Service) Public(ctx context.Context, token, window string) (Report, error) {
-	link, err := s.Store.Get(ctx, "public-status-pages", token)
+	token = strings.ToLower(token)
+	bucket := "public-status-pages"
+	vanity := !tokenPattern.MatchString(token)
+	if vanity {
+		if value, err := NormalizeSlug(token); err != nil || value == "" {
+			return Report{}, storage.ErrNotFound
+		}
+		bucket = "status-page-slugs"
+	}
+	link, err := s.Store.Get(ctx, bucket, token)
 	if err != nil {
 		return Report{}, storage.ErrNotFound
 	}
-	key, err := storage.Decode[struct {
-		ID string `json:"pageId"`
-	}](link)
+	key, err := storage.Decode[slugLink](link)
 	if err != nil {
 		return Report{}, storage.ErrNotFound
 	}
@@ -38,7 +46,7 @@ func (s *Service) Public(ctx context.Context, token, window string) (Report, err
 		return Report{}, storage.ErrNotFound
 	}
 	page, err := storage.Decode[Page](row)
-	if err != nil || page.Published == nil || page.Token != token {
+	if err != nil || page.Published == nil || (!vanity && page.Token != token) || (vanity && (page.Published.Slug != token || key.Token != page.Token)) {
 		return Report{}, storage.ErrNotFound
 	}
 	if err = s.authority(ctx, page.Publisher, link.Project, key.ID, "read"); err != nil {

@@ -31,7 +31,7 @@ const server = createServer(async (request, response) => {
     if (oidcFixture && await oidcFixture(request, response)) return
     if (publicStatusWorkflow && request.method === 'GET' && request.url.startsWith('/status-host/')) {
       const statusToken = request.url.slice('/status-host/'.length)
-      if (!/^[a-f0-9]{40}$/.test(statusToken)) { response.writeHead(400).end(); return }
+      if (!/^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/.test(statusToken)) { response.writeHead(400).end(); return }
       response.setHeader('Content-Type', 'text/html; charset=utf-8')
       response.end('<!doctype html><html lang="en"><title>Independent embed host</title><h1>Customer dashboard</h1><iframe title="Embedded public status" src="http://127.0.0.1:8040/status/' + statusToken + '" style="width:100%;height:700px;border:0"></iframe></html>'); return
     }

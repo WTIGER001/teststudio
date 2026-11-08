@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.38.0"
+export const accessContractVersion = "0.39.0"
 
 export type APIAuthentication = { "binding": string; "header"?: string; "scheme": "bearer" | "basic" | "header" }
 export type APIRequestPolicy = { "authentication"?: APIAuthentication; "maxRequests": number; "maxResponseBytes": number; "redactFields"?: (string)[]; "rules": (APIRequestRule)[] }
@@ -190,15 +190,16 @@ export type SourceUploadPage = { "cursor"?: string; "items": (SourceUploadRecord
 export type SourceUploadPreview = { "plan"?: SourceCatalogImportPlan; "upload": SourceUploadRecord }
 export type SourceUploadRecord = { "data": SourceUpload; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
 export type StandardAssignmentReplacement = { "previousRoleId"?: string; "reason": string; "roleId": "builtin.teststudio.reader" | "builtin.teststudio.member" | "builtin.teststudio.developer" | "builtin.teststudio.contributor" | "builtin.teststudio.owner" }
-export type StatusPage = { "background": string; "defaultWindow": "24h" | "7d" | "1m" | "1y" | "all"; "id": string; "maxAgeSeconds": number; "probes": (StatusPageEntry)[]; "publicToken": string; "published"?: StatusPageDefinition; "publishedAt"?: string; "publisher"?: string; "title": string }
+export type StatusPage = { "background": string; "defaultWindow": "24h" | "7d" | "1m" | "1y" | "all"; "id": string; "maxAgeSeconds": number; "probes": (StatusPageEntry)[]; "publicToken": string; "published"?: StatusPageDefinition; "publishedAt"?: string; "publisher"?: string; "slug"?: string; "title": string }
 export type StatusPageAvailability = { "coveragePercent": number; "downSeconds": number; "percent": number | null; "since": string; "unknownSeconds": number; "upSeconds": number }
-export type StatusPageDefinition = { "background": string; "defaultWindow": "24h" | "7d" | "1m" | "1y" | "all"; "id": string; "maxAgeSeconds": number; "probes": (StatusPageEntry)[]; "title": string }
+export type StatusPageDefinition = { "background": string; "defaultWindow": "24h" | "7d" | "1m" | "1y" | "all"; "id": string; "maxAgeSeconds": number; "probes": (StatusPageEntry)[]; "slug"?: string; "title": string }
 export type StatusPageEntry = { "description": string; "probeId": string; "title": string }
 export type StatusPageList = { "cursor"?: string; "items": (StatusPageRecord)[] }
 export type StatusPagePoint = { "at": string; "state": string }
 export type StatusPageRecord = { "data": StatusPage; "id": string; "projectId"?: string; "revision": number; "updatedAt"?: string }
 export type StatusPageReport = { "asOf": string; "background": string; "maxAgeSeconds": number; "probes": (StatusPageRow)[]; "title": string; "window": string }
 export type StatusPageRow = { "availability": StatusPageAvailability; "description": string; "history": (StatusPagePoint)[]; "state": string; "title": string }
+export type StatusPageSlugAvailability = { "available": boolean; "slug": string }
 export type SuiteDefinition = { "activeReleaseId"?: string; "applications": (string)[] | null; "archived": boolean; "capture"?: SourceCapturePolicy; "description": string; "id": string; "name": string; "requiresTarget": boolean; "timing"?: SourceTimingPolicy }
 export type SuiteLifecycle = { "canManage": boolean; "revision": number; "schedules": (SuiteSchedule)[]; "suite": SuiteDefinition; "updatedAt": string }
 export type SuiteSchedule = { "enabled": boolean; "id": string; "name": string; "releaseId"?: string }
@@ -288,6 +289,7 @@ export interface AccessRequests {
   readProjectRoleConversion: { "project": string; "conversion": string }
   applyProjectRoleConversion: { "project": string; "conversion": string; revision: number }
   previewProjectRoleConversionRollback: { "project": string; "conversion": string; body: Reason }
+  checkStatusPageSlug: { "project": string; "slug": string; query?: { "pageId"?: string } }
   listStatusPages: { "project": string; query?: { "cursor"?: string } }
   deleteStatusPage: { "project": string; "page": string; revision: number }
   readStatusPage: { "project": string; "page": string }
@@ -474,6 +476,7 @@ export interface AccessResponses {
   readProjectRoleConversion: RoleConversionRecord
   applyProjectRoleConversion: RoleConversionRecord
   previewProjectRoleConversionRollback: RoleConversionRecord
+  checkStatusPageSlug: StatusPageSlugAvailability
   listStatusPages: StatusPageList
   deleteStatusPage: { "deleted": boolean }
   readStatusPage: StatusPageRecord
@@ -660,6 +663,7 @@ export const accessOperations = {
   readProjectRoleConversion: { method: "GET", path: "/api/v1/projects/{project}/role-conversions/{conversion}" },
   applyProjectRoleConversion: { method: "POST", path: "/api/v1/projects/{project}/role-conversions/{conversion}/apply" },
   previewProjectRoleConversionRollback: { method: "POST", path: "/api/v1/projects/{project}/role-conversions/{conversion}/rollback-preview" },
+  checkStatusPageSlug: { method: "GET", path: "/api/v1/projects/{project}/status-page-slugs/{slug}" },
   listStatusPages: { method: "GET", path: "/api/v1/projects/{project}/status-pages" },
   deleteStatusPage: { method: "DELETE", path: "/api/v1/projects/{project}/status-pages/{page}" },
   readStatusPage: { method: "GET", path: "/api/v1/projects/{project}/status-pages/{page}" },

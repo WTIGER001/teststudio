@@ -8,6 +8,7 @@ type Entry struct {
 	Description string `json:"description"`
 }
 type Definition struct {
+	Slug       string  `json:"slug,omitempty"`
 	ID         string  `json:"id"`
 	Title      string  `json:"title"`
 	Background string  `json:"background"`

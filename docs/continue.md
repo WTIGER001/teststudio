@@ -82,6 +82,13 @@ The requesting browser now shows Status pages under Project overviews and its Cr
 Private before/after receipts and visual evidence are output/aws-mmdev/status-page-access. Owned administrator sessions close and temporary helpers are removed.
 This is a scoped configuration repair, with no application rebuild or redeployment. Release 0.4.0-dev remains unchanged. Future new-feature checks must include the requesting account’s compatibility-role capabilities, not only administrator verification.
 
+## Active request: focused management and vanity status URLs
+
+The user requests clearer status-page workflows and duplicate-safe vanity URLs. Implementation uses separate create, edit, detail, and publication-review routes. Shared UI guidance follows Create project and distinguishes dedicated pages, short dialogs, and inline controls.
+Vanity names are optional, normalized, globally reserved on save, and activated on publication. SQLite and PostgreSQL verify competing claims produce one winner. Existing generated URLs remain compatible. Renamed or deleted aliases cannot be claimed by another page.
+The final changed browser workflow passes in 6.497 seconds, run 20261108T023727.088360000-03fb9e6133bcc031ea0886d4. It covers duplicate-name feedback, correction, narrow authoring screens, reviewed publication, rename snapshots, permanent-link compatibility, revision recovery, anonymous embedding, themes, and unpublishing. Release 0.5.0-dev is prepared. Publication and target checks remain pending; the release table above still identifies the hosted artifact.
+Preserve the requesting account’s scoped grants and its existing status-page draft. Use independent owned data for deployment verification.
+
 ## Next implementation priorities
 
 ### Completed request: public status pages

@@ -17,6 +17,14 @@ Generate identifiers and retain sensible defaults. Keep identifier editing under
 Accept familiar input directly. A quick HTTPS check accepts a complete URL without requiring separate setup pages.
 Empty states explain the next available action. Access failures and unavailable data must not look like empty registries.
 
+### Choose a page, dialog, or inline control
+
+Use a dedicated route for creation or editing that spans several decisions, needs a review, or has meaningful unsaved work. Follow Create project: a focused page up to 56rem wide, a labeled stepper, a clear Back destination, and Cancel setup or Cancel editing.
+A detail page summarizes the resource and its current state. It provides explicit Edit and relevant actions. Do not leave its full creation wizard permanently expanded below the heading.
+Save returns to the resource detail page. Saving a draft and publishing remain separate. A publication review that contains a substantial preview uses its own route, with one primary confirmation and an obvious cancel destination.
+Use a dialog for a short bounded action or confirmation with one clear target and impact. Use inline controls only for small local changes such as ordering or toggling selected rows. Help drawers explain the current task and preserve its state.
+Keep one primary action at each step. Hide uncommon settings under named Advanced sections. Preserve values across steps, guard unfinished navigation, focus new headings, and keep revision and uncertain-response recovery available.
+
 ### Release identity
 
 The sidebar footer shows Major.Minor.Patch.Tag, build identifier, and UTC build creation date.

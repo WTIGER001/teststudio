@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"regexp"
+	"strings"
 	"time"
 
 	"github.com/wtiger001/teststudio/internal/statuspages"
@@ -15,11 +15,17 @@ func (s *Server) statusPageService() *statuspages.Service {
 	return &statuspages.Service{Store: s.Store, Auth: s.Auth, Probes: s.probeService()}
 }
 
-var publicStatusToken = regexp.MustCompile(`^[a-f0-9]{40}$`)
-
 func (s *Server) statusPageRoutes(m *http.ServeMux) {
 	slots := make(chan struct{}, 4)
 	base := "/api/v1/projects/{project}/status-pages"
+	m.HandleFunc("GET /api/v1/projects/{project}/status-page-slugs/{slug}", s.authorized(func(w http.ResponseWriter, r *http.Request) {
+		result, err := s.statusPageService().SlugAvailable(r.Context(), actor(r), r.PathValue("project"), r.PathValue("slug"), r.URL.Query().Get("pageId"))
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		JSON(w, 200, result)
+	}))
 	m.HandleFunc("GET "+base, s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		page, err := s.statusPageService().List(r.Context(), actor(r), r.PathValue("project"), r.URL.Query().Get("cursor"))
 		if err != nil {
@@ -99,7 +105,7 @@ func (s *Server) statusPageRoutes(m *http.ServeMux) {
 		JSON(w, 200, report)
 	}))
 	m.HandleFunc("GET /api/v1/public/status-pages/{token}", func(w http.ResponseWriter, r *http.Request) {
-		if !publicStatusToken.MatchString(r.PathValue("token")) {
+		if address := r.PathValue("token"); len(address) < 1 || len(address) > 63 || strings.ContainsAny(address, "/\\") {
 			JSON(w, 404, map[string]string{"message": "This status page is unavailable."})
 			return
 		}

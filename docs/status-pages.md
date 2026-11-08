@@ -5,6 +5,15 @@ Each row has its own public title, optional description, recent result pills, an
 The page title, background color, and default time range are configurable. One viewer selector changes every row together.
 Public pages have standalone URLs and support iframe embedding without sign-in.
 
+## Vanity URLs
+
+Set Vanity URL on the Appearance step to use an address such as /status/customer-health.
+Names use 1–63 letters, numbers, or hyphens and ignore case. They start and end with a letter or number. Generated 40-character hexadecimal addresses are reserved.
+Availability feedback is advisory. Saving atomically reserves the normalized name across the installation, including other projects and concurrent saves. No other project's identity is disclosed by the availability check.
+A saved draft reserves its name but does not make the page public. Publishing activates the saved vanity address. Changing a draft leaves the currently published URL working until publication.
+Publishing a changed name retires the previous vanity address. The permanent generated URL continues working. Retired names stay reserved for the original page, including after deletion, so an existing embed cannot be taken over by another page.
+Unpublishing withdraws both addresses. The sharing controls show the currently published vanity URL and embed code; the permanent generated URL remains available under its disclosure.
+
 ## Availability
 
 Availability is estimated time up divided by known monitored time. It is not the percentage of checks that passed.
@@ -21,7 +30,8 @@ The history calculation traverses retained project history without the private o
 
 ## Publishing
 
-Create a private draft. Choose appearance, ordered probes and public text, then review and save.
+Create a private draft on the dedicated setup page. Choose appearance, ordered probes and public text, then review and save. Saving returns to the status-page detail screen. Use Edit status page for the focused editing workflow.
+Review publication opens a separate preview and confirmation page. The detail screen stays focused on configuration summary, sharing, and saved preview.
 Preview the saved draft before Publish. Publishing makes only the reviewed snapshot public; later draft edits stay private until published.
 The public projection contains public titles, descriptions, statuses, observation times, and duration aggregates.
 It contains no target URLs, project or user identifiers, run links, request data, diagnostics, credentials, or private evidence.

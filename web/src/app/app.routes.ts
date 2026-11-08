@@ -12,7 +12,9 @@ import type { AssignmentsPage } from './features/access/assignments.page'
 import type { Routes } from '@angular/router'
 
 const projectRoutes: Routes = [
- { path: 'projects/:projectId/status-pages/new', canDeactivate: [(page: StatusEditorPage) => page.canLeave()], data: { helpTopic: 'status-pages' }, loadComponent: () => import('./features/status-pages/status-editor.page').then(m => m.StatusEditorPage) },
+ { path: 'projects/:projectId/status-pages/new', canDeactivate: [(page: StatusEditorPage) => page.canLeave()], data: { helpTopic: 'status-pages', mode: 'create' }, loadComponent: () => import('./features/status-pages/status-editor.page').then(m => m.StatusEditorPage) },
+ { path: 'projects/:projectId/status-pages/:pageId/edit', canDeactivate: [(page: StatusEditorPage) => page.canLeave()], data: { helpTopic: 'status-pages', mode: 'edit' }, loadComponent: () => import('./features/status-pages/status-editor.page').then(m => m.StatusEditorPage) },
+ { path: 'projects/:projectId/status-pages/:pageId/publish', data: { helpTopic: 'status-pages', mode: 'publish' }, loadComponent: () => import('./features/status-pages/status-editor.page').then(m => m.StatusEditorPage) },
  { path: 'projects/:projectId/status-pages/:pageId', canDeactivate: [(page: StatusEditorPage) => page.canLeave()], data: { helpTopic: 'status-pages' }, loadComponent: () => import('./features/status-pages/status-editor.page').then(m => m.StatusEditorPage) },
  { path: 'projects/:projectId/status-pages', data: { helpTopic: 'status-pages' }, loadComponent: () => import('./features/status-pages/status-pages.page').then(m => m.StatusPagesPage) },
   { path: 'projects/:projectId/applications/:applicationId/members', canDeactivate: [(page: AssignmentsPage) => page.canLeave()], data: { helpTopic: 'application-members' }, loadComponent: () => import('./features/access/assignments.page').then(m => m.AssignmentsPage) },
