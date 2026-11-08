@@ -1,5 +1,5 @@
 import { isPlatformBrowser } from '@angular/common'
-import { HttpClient, HttpErrorResponse } from '@angular/common/http'
+import { HttpBackend, HttpClient, HttpErrorResponse } from '@angular/common/http'
 import { inject, Injectable, PLATFORM_ID } from '@angular/core'
 import { catchError, finalize, map, Observable, of, shareReplay, startWith, switchMap, timer } from 'rxjs'
 import type { StatusLoadError, StatusReport, StatusSource } from './models'
@@ -8,7 +8,8 @@ export interface StatusLoadState { report: StatusReport | null; loading: boolean
 
 @Injectable({ providedIn: 'root' })
 export class TestStudioStatusClient {
-  private readonly http = inject(HttpClient, { optional: true })
+  private readonly backend = inject(HttpBackend, { optional: true })
+  private readonly http = this.backend ? new HttpClient(this.backend) : null
   private readonly browser = isPlatformBrowser(inject(PLATFORM_ID))
   private readonly requests = new Map<string, Observable<StatusLoadState>>()
   publicURL(baseURL: string, page: string): string { return baseURL.replace(/\/$/, '') + '/api/v1/public/status-pages/' + encodeURIComponent(page) }
@@ -26,7 +27,7 @@ export class TestStudioStatusClient {
     const key = JSON.stringify([url, seconds]), existing = this.requests.get(key)
     if (existing) return existing
     const ticks = seconds ? timer(0, seconds * 1000) : of(0)
-    const request = ticks.pipe(switchMap(() => this.http!.get<StatusReport>(url, { withCredentials: false }).pipe(
+    const request = ticks.pipe(switchMap(() => this.http!.get<StatusReport>(url, { withCredentials: false, credentials: 'omit' }).pipe(
       map(report => ({ report, loading: false, error: null } as StatusLoadState)),
       catchError((error: HttpErrorResponse) => of<StatusLoadState>({ report: null, loading: false, error: { status: error.status, withdrawn: [401, 403, 404, 410].includes(error.status), message: [401, 403, 404, 410].includes(error.status) ? 'This status report is unavailable or no longer published.' : 'Status information is temporarily unavailable.' } })),
       startWith<StatusLoadState>({ report: null, loading: true, error: null })

@@ -65,6 +65,7 @@ readonly source = {
 ```
 
 Sources accept public status-report endpoints only. They send no browser cookies.
+The public client bypasses host authentication interceptors and explicitly omits Fetch credentials.
 The server permits cross-origin reads of that public projection. Private endpoints retain their normal restrictions.
 The public URL must already be published. Installing this library does not publish checks.
 Withdrawal or access rejection clears the displayed report on the next refresh.
