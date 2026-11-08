@@ -37,9 +37,10 @@ The reviewed foundation change set adds 29 resources. The reviewed core change s
 Neither change set modifies existing resources. The core change set creates no cluster.
 ECS reports one desired and one running teststudioapi task with a completed rollout.
 Both API and artifact target groups report healthy. The existing testing-server remains at one running task.
-The ARM64 image is sha256:c0d43724e049e75681280abd7b502aea46bfff3dee852cb12aee93efca0f56b1.
-It is published in teststudioapi/service. The current release is 0.4.0-dev, displayed as 0.4.0.dev. Build 8f7db1066f2e uses committed source 3fc524f.
-Its UTC build creation date is 2026-11-07T22:37:40.930Z. The task starts at 2026-11-07T22:42:06.853Z and UI publication occurs at 2026-11-07T22:46:28Z. The API, UI, and image labels share that immutable identity.
+The ARM64 image is sha256:e801ea09f23c383293fb79be86aea36c429ef417a47c1a9fcb166162521942e3.
+It is published in teststudioapi/service. The current release is 0.5.0-dev, displayed as 0.5.0.dev. Build a21537b24309 uses committed source 29f5400.
+Its UTC build creation date is 2026-11-08T02:38:53.301Z. The task starts at 2026-11-08T02:41:02.341Z and UI publication occurs at 2026-11-08T02:44:15Z. The API, UI, and image labels share that immutable identity.
+Release 0.5.0-dev adds focused status-page management and installation-wide vanity names. Its ordinary image-only change set modifies Service and Task; the existing public CloudFront policy is reused. Twelve package checks and thirty-four hosted checks pass. The owned generic verification page is unpublished and its session closes. Receipts are output/aws-mmdev/status-vanity-050.
 The unchanged trace viewer is reused. Native image storage uses the existing private database. The image retains the reviewed public RDS trust bundle.
 
 Initial core verification retains actual Cognito sign-in, catalog publication, and one native HTTPS probe through the public installation.

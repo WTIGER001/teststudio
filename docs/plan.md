@@ -16,11 +16,23 @@ Use the mm_dev profile and preserve existing services. Azure implementation and 
 Do not repeat broad test suites or fixture builds without a specific unresolved failure or changed behavior.
 The full product scope remains required. This direction supersedes the testing sequence in the historical checkpoint below.
 
-## Current user direction: focused status-page management and vanity URLs
+## Current user direction: shared reliability history for all checks
+
+On 2026-11-07 the user approves hourly and daily summaries, longer-range bucketed pills, and shared reliability reporting for all existing and future probe and test types.
+Follow [the shared reliability design](trends.md#planned-shared-reliability-capture). Capture canonical logical observations through the common result lifecycle, then process durable aggregation work with safe replay.
+Every runner supports outcome and timing history. Time-based availability additionally requires an explicit monitoring policy; occasional tests do not imply continuous uptime.
+Start with hourly and daily storage, combine durations and counts for larger periods, preserve unknown coverage and configuration boundaries, and retain authorization through summaries and caches.
+The user also requests reusable Angular components. Deliver a versioned library with a stylable status bar and complete status page, typed report inputs, an optional reporting client, host-owned navigation, and scoped styling tokens. Use those components inside TestStudio too. Follow [the component contract](trends.md#reusable-angular-components).
+Verify a built package in an independent Angular consumer, including host styling, multiple instances, public cross-origin reads, authenticated data supplied by the host, revocation, and refresh cleanup. Package publication remains a separate delivery step.
+The first implementation milestone is shared durable capture and summary primitives across HTTP, Go, browser, and API paths. Its smallest meaningful checks compare direct results and rollups on SQLite and PostgreSQL, including duplicate delivery and distinct timeout outcomes.
+This documentation milestone records scope and delivery steps only. It extends 34, 35, 36, 37, 39, 40, 41, and 47, with supporting access and UI requirements. The total stays 50 verified of 57.
+Keep the pending status-page release below separate. This plan does not change its artifact, publication state, or retained evidence.
+
+## Completed user direction: focused status-page management and vanity URLs
 
 Use Create project as the shared model for substantial create and edit workflows. The detail page summarizes configuration and sharing; dedicated create, edit, and publication-review routes preserve clear back and cancel paths. The shared [UI rules](ui.md#choose-a-page-dialog-or-inline-control) distinguish pages, bounded dialogs, and small inline controls.
 Status pages can reserve an optional installation-wide vanity name. Normalize case, reject duplicate reservations atomically, and activate only the published snapshot. Keep permanent generated links working. Retire old vanity addresses without allowing another page to take over their links.
-The focused API checks pass on SQLite and PostgreSQL. STUDIO-STATUS-PAGES-001 passes in 6.497 seconds, including duplicate feedback and narrow authoring screens. Release 0.5.0-dev is prepared; publication and MMDev verification remain pending.
+The focused API checks pass on SQLite and PostgreSQL. STUDIO-STATUS-PAGES-001 passes in 6.497 seconds, including duplicate feedback and narrow authoring screens. Release 0.5.0-dev from committed 29f5400 is pushed and deployed as build a21537b24309. Twelve package checks and thirty-four hosted checks pass. The actual requesting browser verifies the new editor without changing the existing page. Temporary verification publication and session are withdrawn; both services remain healthy.
 This milestone refines 05, 12, 13, 25, 49, and 50. Acceptance stays 50 verified of 57.
 
 ## Completed user direction: public status pages

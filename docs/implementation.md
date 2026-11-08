@@ -6,19 +6,39 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user now authorizes MMDev ECS deployment. Azure remains deferred.
 
+## Shared reliability history: approved scope — 2026-11-07
+
+The user approves the rollup and bucketed-pill approach for every existing and future probe and test type as part of common result capture.
+The [shared design](trends.md#planned-shared-reliability-capture) defines canonical logical observations, durable aggregation work, hourly and daily summaries, longer-range display buckets, safe replay, retention, and access boundaries.
+Every runner supports outcome and timing history. Continuous availability requires an explicit monitoring policy and freshness limit. Sparse test executions do not imply uptime.
+The user extends the plan to a reusable [Angular component library](trends.md#reusable-angular-components) with a stylable status bar and complete page for other Angular sites. The planned contract includes typed data inputs, an optional client, scoped styling tokens, internal reuse, explicit public and private access, lifecycle cleanup, and independent-consumer verification.
+The active plan and continuation notes retain the delivery sequence and distinguish this request from the pending status-page release.
+This is a documentation milestone. Local consistency and link checks apply; it establishes no runtime, deployment, or cross-profile evidence.
+Scope extends 34, 35, 36, 37, 39, 40, 41, and 47, with supporting 12, 13, 49, 50, 56, and 57. Acceptance stays **50 verified of 57**; no item advances to verified from planning.
+
+## Focused status-page management and vanity URLs: MMDev delivery — 2026-11-07
+
+Release 0.5.0-dev uses committed 29f540058510e5646d59b202b94094907a95355f, build a21537b24309, created 2026-11-08T02:38:53.301Z with modified false. Its ARM64 digest is sha256:e801ea09f23c383293fb79be86aea36c429ef417a47c1a9fcb166162521942e3. All branch commits are pushed.
+The twelve portable-package checks pass. The reviewed CloudFormation change set modifies only TestStudio Service and Task. Existing foundation resources and testing-server remain unchanged.
+Task startup is 2026-11-08T02:41:02.341Z; UI publication is 2026-11-08T02:44:15Z. CloudFormation reaches UPDATE_COMPLETE, CloudFront invalidation completes, and both services retain one healthy completed rollout. The API, published index, scripts, and new editor bundle match the selected artifact.
+Thirty-four hosted checks pass through normal bootstrap OIDC and independent anonymous HTTP requests. They verify normalized names, private draft reservations, explicit publication, global duplicate rejection, availability checks from another project, live alias reports, no-store responses, iframe document access, rename snapshot isolation, permanent generated links, retired-name protection, and immediate unpublishing.
+The owned generic page reuses the earlier explicit verification probe; no new test execution occurs. Its publication is withdrawn, its session is revoked, and the temporary helper is removed. Private receipts are output/aws-mmdev/status-vanity-050.
+The requesting account’s actual browser shows the saved FoodMarketMaker page with separate Edit and Review publication links. Edit opens the focused Appearance step with the new vanity field and preserves the saved title and default period. No values are changed or published. The temporary verification tab closes and both original user tabs remain.
+This refines 05, 12, 13, 25, 49, and 50. Acceptance stays **50 verified of 57**; broad worker and cross-profile requirements remain open. The port 8040 demo, existing probes, schedules, memberships, and page publication remain unchanged.
+
 ## Focused status-page management and vanity URLs: local delivery — 2026-11-07
 
 Status-page details now summarize configuration, publication, sharing, and a saved draft preview. Dedicated create, edit, and publication-review routes follow Create project, with back and cancel destinations, step validation, preserved edits, and revision recovery.
 The shared UI guide now defines when to use dedicated pages, short dialogs, and small inline controls. Page help and the status-page guide describe the current controls.
 Optional vanity names normalize case and reserve globally in the same transaction as the page and audit. A competing save returns an explicit conflict. The advisory availability endpoint reveals only whether a name is available.
 Publication activates the saved alias; draft renames preserve the current published address. Republishing retires the old alias. Permanent generated links remain compatible. Reservations bind the original page token, so deletion and recreation cannot take over old links.
-Canonical OpenAPI 0.39.0 and the generated client describe the optional name and availability endpoint. Product release 0.5.0-dev is prepared for publication.
+Canonical OpenAPI 0.39.0 and the generated client describe the optional name and availability endpoint. Separate release and target evidence appears above.
 
 The focused SQLite HTTP cases pass. The same PostgreSQL cases pass with race detection in 3.360 seconds, including concurrent claims with one winner, global duplicates, normalization, invalid names, draft and publication isolation, generated-link compatibility, and deleted-page takeover rejection.
 The UI build and client synchronization check pass. STUDIO-STATUS-PAGES-001 passes through normal local execution in 6.497 seconds, run 20261108T023727.088360000-03fb9e6133bcc031ea0886d4.
 It covers duplicate-name feedback and correction, dedicated authoring and publication routes, saved draft details, a 390-pixel authoring view, help and unsaved navigation, independent anonymous pages, actual cross-origin embedding, all availability periods, privacy, themes, rename activation, permanent links, revision conflicts, recovery, and unpublishing.
 Screenshot review corrects stale duplicate feedback after a valid replacement. Owned local controllers, database containers, execution containers, and browsers exit; the port 8040 demo and user data remain unchanged.
-Retained evidence is output/selftest/20261108T023727.088360000-03fb9e6133bcc031ea0886d4. Release publication and hosted acceptance remain pending.
+Retained evidence is output/selftest/20261108T023727.088360000-03fb9e6133bcc031ea0886d4. Release publication and hosted checks are recorded above.
 This refines 05, 12, 13, 25, 49, and 50. Acceptance stays **50 verified of 57**; the seven broad open criteria remain unchanged.
 
 ## Status-page sidebar access repair — 2026-11-07
