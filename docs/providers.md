@@ -202,3 +202,8 @@ Provider-owned group mapping permits one project's private reports. Foreign-proj
 Existing-session and previously granted artifact access reject while the project role is removed.
 The role is restored after verification. No test runs are repeated.
 See [local hosted identity](local-kubernetes-identity.md) for evidence, issuer configuration, and remaining cross-profile scope.
+
+## Hosted selection
+
+On 2026-11-09 the user selects SSO-only automatic Organization sign-in for MMDev. Local password sign-in is off. The duplicate TestStudio sign-in provider is hidden from the page. Organization is the automatic SSO target. Recovery after cancellation, expiry, or sign-out shows one Organization button.
+Release 0.12.1-dev verifies the actual hosted redirect, protocol parameters, cancelled transaction, preserved destination, reload, mobile help, and complete owned cleanup. The hidden provider's explicit recovery flow remains available to operators. See [MMDev](aws-mmdev.md).
