@@ -12,6 +12,7 @@ Help and page reload preserve the live session. Refresh browser view recovers an
 Finish waits for queued input. Cancel closes the owned browser.
 Operators can select the separate [private recording worker](recording-worker.md) or the loopback-only local preview.
 Websites can load scripts, images, or startup APIs from other addresses. Operators approve those exact resource origins in the private worker's per-website policy. An unavailable startup dependency can leave the embedded website on its loading screen.
+Development and production starting addresses need separate approvals when they use different origins or startup APIs. After an operator changes the policy and restarts the worker, start a new recording. Refresh browser view does not expand an existing recording's approved origins.
 The private worker is enabled in MMDev release 0.10.0-dev. Hosted News capture, story assertion, review, saving, cancellation, and owned cleanup pass.
 Hosted browser test execution and actual application acceptance remain separate work.
 

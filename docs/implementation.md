@@ -6,6 +6,13 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user authorizes MMDev ECS deployment and now plans a first installation into their own Azure subscription.
 
+## Production recording startup policy — 2026-11-09
+
+The reported production URL differs from the development starting origin approved earlier. Its separate startup API is denied by the default single-origin policy. A real browser probe shows a loading screen with zero News links under that policy, then no loader and one News link with the reviewed production dependencies. The private map retains development and adds production independently. Analytics stays blocked.
+The operator map validates through the worker's normal command. Its installed canonical SHA256 is 8d6fb0684b258315c22a513264245fbdebece6b244d23b8ace30079a3bcec4b5, with two starting origins and four dependencies each. The controlled upgrade builds committed 3d943e7 and preserves the existing host, capacity, immutable images, sandbox, transport identities, and database. Frozen earlier sessions retain their captured source and require fresh interactive recording.
+The actual hosted production homepage and News stories render. The owned check captures the News click and an at-least-one assertion. It cancels, archives its temporary project, and signs out. Host inspection verifies zero recording containers and volumes; all seven owned automation processes exit. Both existing ECS services retain one desired and running task and completed rollouts. Temporary helpers are removed.
+Receipts are output/aws-mmdev/recording-prod-startup and screenshots are output/playwright/recording-prod-startup. This configuration-only correction leaves API/UI 0.12.1-dev, build 9875b5cc8762, and SSO settings unchanged. No target test executes. Items 12, 13, 21, 45, and 51 retain their existing scope; acceptance stays 50 verified of 57. Broad target execution stays open. No Git push occurs.
+
 ## Sign-in choices and optional SSO bypass — 2026-11-09
 
 The user requests conditional local password and SSO choices, removes the duplicate TestStudio provider button, and explicitly selects SSO-only automatic Organization sign-in for MMDev.

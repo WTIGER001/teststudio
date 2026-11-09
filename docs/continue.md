@@ -3,6 +3,14 @@
 Last reviewed: 2026-11-09. These notes describe the last verified state, not a live infrastructure inventory.
 Read this guide before historical continuation commands elsewhere in the plan.
 
+## Completed correction: production recording startup
+
+The latest loading-screen report uses the production website. The earlier private policy covers only its development starting origin. Production uses a different startup API. A browser probe reproduces the loading screen with single-origin access and renders News with its reviewed dependencies.
+The private map now retains development and adds a separate production starting origin, each with four observed dependency origins. Analytics remains blocked. The installed canonical policy hash is 8d6fb0684b258315c22a513264245fbdebece6b244d23b8ace30079a3bcec4b5. Preserve the complete ignored map at .data/recording-site-loading/origins.json for future upgrades.
+A controlled worker upgrade installs committed 3d943e7 on the same host with unchanged immutable browser and gateway images, sandbox policy, transport identities, and capacity. Existing source is retained; interactive recording requires a fresh session. The API and UI remain 0.12.1-dev, build 9875b5cc8762. SSO settings stay unchanged.
+An actual owned hosted recording renders the production homepage and News stories, records the News click, and adds an at-least-one assertion. The check cancels its recording, archives its temporary project, and closes its application session. Host inspection finds no recording containers or volumes. All seven owned automation processes exit. Both existing ECS services retain completed healthy rollouts.
+Reuse output/aws-mmdev/recording-prod-startup and output/playwright/recording-prod-startup. This is an operator configuration correction; no application release or target test execution occurs. Items 12, 13, 21, 45, and 51 retain their existing scope. Acceptance remains 50 verified of 57; broad hosted execution remains open. No Git push occurs.
+
 ## Completed delivery: SSO-only automatic sign-in
 
 The user explicitly selects SSO-only automatic Organization sign-in. Product 0.12.1-dev from committed a8f9432 is deployed as build 9875b5cc8762. UTC build creation is 2026-11-09T16:24:26.667Z, task startup is 2026-11-09T16:27:41.783Z, and UI publication is 2026-11-09T16:30:34Z. Both reviewed change sets modify only Service and Task; LocalAccounts=false is explicit. Both existing services retain completed healthy rollouts. The recording worker stays unchanged.

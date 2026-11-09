@@ -5,6 +5,12 @@ Track verified delivery in `implementation.md`.
 Start resumed work with [the continuation guide](continue.md). It summarizes the current release, remaining priorities, boundaries, and retained evidence.
 The user authorizes targeted tests and frequent feature commits. Remote pushes remain separate operations.
 
+## Completed correction: production recording startup
+
+The production starting origin needs its own reviewed startup API policy. The earlier development entry does not apply to production. A focused browser probe reproduces the stalled loader and verifies that the exact approved dependencies restore News.
+The complete private map now contains separate development and production entries. A controlled same-host worker upgrade installs it without changing the core release, SSO, browser images, transport identities, or sandbox. A fresh hosted production recording renders News, captures its click, and adds an at-least-one assertion. Owned recording resources, application session, and seven automation processes close; the verification project is archived. Both existing ECS services remain healthy.
+Reuse output/aws-mmdev/recording-prod-startup and output/playwright/recording-prod-startup. See the continuation guide for the installed policy hash and preserved private map. Acceptance remains 50 verified of 57. Hosted target execution stays open.
+
 ## Completed delivery: SSO-only automatic sign-in
 
 The user explicitly selects SSO-only automatic Organization sign-in. Product 0.12.1-dev from committed a8f9432 is deployed as build 9875b5cc8762. UTC build creation is 2026-11-09T16:24:26.667Z, task startup is 2026-11-09T16:27:41.783Z, and UI publication is 2026-11-09T16:30:34Z. Both reviewed change sets modify only Service and Task; LocalAccounts=false is explicit. Both existing services retain completed healthy rollouts. The recording worker stays unchanged.
