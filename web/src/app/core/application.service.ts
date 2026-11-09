@@ -1,3 +1,4 @@
+import { authenticationReturnPath } from '../features/auth/auth-navigation.utils'
 import { inject, Injectable, signal } from '@angular/core'
 import { Router } from '@angular/router'
 import { SessionService } from './session.service'
@@ -43,7 +44,7 @@ export class ApplicationService {
   }
   async refreshAuthentication(): Promise<void> { await this.session.loadProviders(); await this.session.refresh(); this.workspace.reset(); if (this.session.ready()) await this.loadWorkspace() }
 
-  private async clearAuthenticationFeedback(): Promise<void> { await this.router.navigate([], {queryParams:{signIn:null,providerLogout:null},queryParamsHandling:'merge',preserveFragment:true,replaceUrl:true}) }
+  private async clearAuthenticationFeedback(): Promise<void> { await this.router.navigateByUrl(authenticationReturnPath(window.location.pathname + window.location.search + window.location.hash), { replaceUrl: true }) }
 
   private async loadWorkspace(): Promise<void> {
     try { await this.workspace.load() }

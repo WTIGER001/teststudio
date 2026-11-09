@@ -70,8 +70,13 @@ test('Show configured local and SSO choices and bypass only for SSO-only install
       expect((await (await page.request.get('/api/v1/projects')).json()).items).toEqual([])
       await page.getByRole('button', { name: 'Sign out', exact: true }).click()
       await expect(page.getByRole('heading', { name: 'Signed out of TestStudio', exact: true })).toBeVisible()
+      let delayedChunks = 0
+      await page.route('**/chunk-*.js', async route => { delayedChunks++; const response = await route.fetch(); await new Promise(resolve => setTimeout(resolve, 750)); await route.fulfill({ response }) })
       await page.reload()
+      await page.waitForLoadState('networkidle')
       await choices(false, true)
+      expect(delayedChunks).toBeGreaterThan(0)
+      await page.unroute('**/chunk-*.js')
     })
     await test.step('Keep expired sign-in recovery visible instead of redirecting repeatedly', async () => {
       await page.goto('/auth/callback/organization?code=expired&state=expired')

@@ -3,13 +3,13 @@ import { toSignal } from '@angular/core/rxjs-interop'
 import { NavigationEnd, Router } from '@angular/router'
 import { filter, map } from 'rxjs'
 import { SessionService } from '../../core/session.service'
-import { authenticationFeedback, providerLoginPath } from './auth-navigation.utils'
+import { authenticationFeedback, authenticationReturnPath, providerLoginPath } from './auth-navigation.utils'
 
 @Injectable({ providedIn: 'root' })
 export class AuthNavigationService {
   private readonly router = inject(Router)
   readonly session = inject(SessionService)
-  private readonly route = toSignal(this.router.events.pipe(filter(event => event instanceof NavigationEnd), map(event => event.urlAfterRedirects)), { initialValue: this.router.url })
+  private readonly route = toSignal(this.router.events.pipe(filter(event => event instanceof NavigationEnd), map(event => event.urlAfterRedirects)), { initialValue: window.location.pathname + window.location.search + window.location.hash })
   private readonly navigationFailed = signal(false)
   private readonly manualSignIn = signal(false)
   readonly redirecting = computed(() => {
@@ -28,5 +28,5 @@ export class AuthNavigationService {
   }
   readonly feedback = computed(() => authenticationFeedback(this.route()))
   providerPath(id: string): string { return providerLoginPath(id, this.route()) }
-  async dismiss(): Promise<void> { this.manualSignIn.set(true); this.session.dismissLogout(); await this.router.navigate([], { queryParams: { signIn: null, providerLogout: null }, queryParamsHandling: 'merge', preserveFragment: true, replaceUrl: true }) }
+  async dismiss(): Promise<void> { this.manualSignIn.set(true); this.session.dismissLogout(); await this.router.navigateByUrl(authenticationReturnPath(this.route()), { replaceUrl: true }) }
 }

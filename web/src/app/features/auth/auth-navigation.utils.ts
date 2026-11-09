@@ -1,8 +1,11 @@
-export function providerLoginPath(provider: string, route: string): string {
+export function authenticationReturnPath(route: string): string {
   const destination = new URL(route, 'http://teststudio.local')
   destination.searchParams.delete('signIn'); destination.searchParams.delete('providerLogout')
-  const returnTo = destination.pathname + destination.search + destination.hash
-  return `/auth/login/${encodeURIComponent(provider)}?${new URLSearchParams({ returnTo })}`
+  return destination.pathname + destination.search + destination.hash
+}
+
+export function providerLoginPath(provider: string, route: string): string {
+  return `/auth/login/${encodeURIComponent(provider)}?${new URLSearchParams({ returnTo: authenticationReturnPath(route) })}`
 }
 
 export function authenticationFeedback(route: string): { message: string; error: boolean } {
