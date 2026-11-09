@@ -22,7 +22,7 @@ export class ProviderEditorService {
   readonly busy = signal(false)
   readonly conflict = signal(false)
   readonly error = signal('')
-  readonly form = new FormGroup({ id: text(), name: text(), issuer: text(), clientId: text(), secretRef: text(), scopes: text(), disabled: new FormControl(true, { nonNullable: true }), autoProvision: new FormControl(false, { nonNullable: true }), groupClaim: text(), membershipTtlSeconds: new FormControl(1800, { nonNullable: true }), logoutEndpoint:text(), reason: text(), mappings: new FormArray<ReturnType<typeof mapping>>([]) })
+  readonly form = new FormGroup({ id: text(), name: text(), issuer: text(), clientId: text(), secretRef: text(), scopes: text(), hiddenFromSignIn: new FormControl(false, { nonNullable: true }), loginBypassEnabled: new FormControl(false, { nonNullable: true }), disabled: new FormControl(true, { nonNullable: true }), autoProvision: new FormControl(false, { nonNullable: true }), groupClaim: text(), membershipTtlSeconds: new FormControl(1800, { nonNullable: true }), logoutEndpoint:text(), reason: text(), mappings: new FormArray<ReturnType<typeof mapping>>([]) })
   private readonly values = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() })
   readonly credentials = computed(() => providerCredentialChoices(this.providers.credentialRefs(), this.values().secretRef ?? ''))
   private generation = 0

@@ -22,6 +22,8 @@ import (
 )
 
 type Provider struct {
+	HiddenFromSignIn     bool `json:"hiddenFromSignIn,omitempty"`
+	LoginBypassEnabled   bool `json:"loginBypassEnabled,omitempty"`
 	revision             int64
 	ID                   string            `json:"id"`
 	Name                 string            `json:"name"`
@@ -54,6 +56,9 @@ var environmentReference = regexp.MustCompile(`^env:[A-Za-z_][A-Za-z0-9_]{0,127}
 func ValidSecretReference(value string) bool { return environmentReference.MatchString(value) }
 
 func ValidateProvider(p Provider) error {
+	if p.HiddenFromSignIn && p.LoginBypassEnabled {
+		return errors.New("automatic SSO sign-in requires a provider shown on the sign-in page")
+	}
 	if !domain.ValidID(p.ID) || strings.TrimSpace(p.Name) == "" || len(p.Name) > 200 || p.ClientID == "" || len(p.ClientID) > 512 || len(p.Issuer) > 2048 {
 		return errors.New("provider identifier, name, and client identifier are required")
 	}

@@ -779,3 +779,8 @@ This check uses headed Chromium on a private Xvfb display inside its isolated te
 Its browser selects the dedicated fixture tab through a test-only capture switch. It uses the real browser capture API.
 The fixture closes the extra tab and stops the display at teardown. Capture assertions verify that sharing tracks have ended.
 Other self-tests keep their existing headless browser configuration.
+
+## Configured sign-in choices
+
+STUDIO-SIGNIN-001 uses the normal local runtime with actual OIDC fixture flows and server restarts for local-only, mixed, SSO-only, and unavailable sign-in configurations. It verifies the provider editor, hidden recovery choices, optional automatic SSO, password-form precedence, cancellation, expiry, sign-out and reload, deep-link fragments, no automatic role grants, help, focus, themes, and narrow layouts.
+Run bash scripts/test-self.sh --test=STUDIO-SIGNIN-001 after changing this workflow. The first passing run is 20261109T155858.637858000-f24e3b1ba8b1ad9913824b03 and takes 10.300 seconds with complete evidence. Its owned verification controller and runner shut down. Reuse output/selftest/20261109T155858.637858000-f24e3b1ba8b1ad9913824b03.

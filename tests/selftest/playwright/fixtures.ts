@@ -82,7 +82,9 @@ export const test = base.extend<{ api: API }>({
   },
   api: async ({ page }, use) => {
     await page.goto('/projects')
-    await page.getByRole('button', { name: 'Open local workspace' }).click()
+    const options = await (await page.request.get('/auth/providers')).json()
+    if (options.localAccountsEnabled) { expect((await page.request.post('/auth/local', { data: {}, headers: { Origin: 'http://127.0.0.1:8040' } })).ok()).toBe(true); await page.reload() }
+    else await page.getByRole('button', { name: 'Open local workspace' }).click()
     await expect(page.getByRole('heading', { name: 'Projects', exact: true })).toBeVisible()
     const session = await (await page.request.get('/auth/session')).json()
     await use(new API(page.request, session.session.csrfToken))

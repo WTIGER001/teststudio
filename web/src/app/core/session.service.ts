@@ -1,11 +1,10 @@
 import { computed, inject, Injectable, signal } from '@angular/core'
 import { ApiError, ApiService } from './api.service'
 import { AccessClientService } from './access-client.service'
-import type { PasswordChange, PasswordLogin, ProviderLogoutOffer } from './generated/access.types'
+import type { PasswordChange, PasswordLogin, ProviderLogoutOffer, SignInOptions } from './generated/access.types'
 
 export interface User { id: string; name: string; email?: string }
 interface SessionResponse { user: User | null; session: { csrfToken: string; expiresAt: string; mustChangePassword?: boolean; authenticationMethod?: string } | null }
-interface ProviderList { providers: { id: string; name: string }[]; localEnabled: boolean; localAccountsEnabled: boolean }
 export class SessionRefreshError extends Error {}
 
 @Injectable({ providedIn: 'root' })
@@ -23,7 +22,7 @@ export class SessionService {
   readonly providerLogout = signal<ProviderLogoutOffer | null>(null)
   readonly providerLogoutUnavailable = signal(false)
   readonly signOutCompleted = signal(false)
-  readonly providers = signal<ProviderList>({ providers: [], localEnabled: false, localAccountsEnabled: false })
+  readonly providers = signal<SignInOptions>({ providers: [], localEnabled: false, localAccountsEnabled: false, autoRedirectProvider: '' })
   onAuthenticationChanged: (() => void) | undefined
   private generation = 0
   private providerGeneration = 0
@@ -43,7 +42,7 @@ export class SessionService {
     catch (error) { if (!(error instanceof ApiError && error.status === 401)) this.error.set(error instanceof Error ? error.message : 'Sign-in could not be loaded.') }
     finally { this.loading.set(false) }
   }
-  async loadProviders(): Promise<void> { const generation = ++this.providerGeneration, providers = await this.api.request<ProviderList>('/auth/providers'); if (generation === this.providerGeneration) this.providers.set(providers) }
+  async loadProviders(): Promise<void> { const generation = ++this.providerGeneration, providers = await this.client.call('readSignInOptions', {}); if (generation === this.providerGeneration) this.providers.set(providers) }
   async refresh(): Promise<void> {
     const generation = ++this.generation
     const response = await this.api.request<SessionResponse>('/auth/session')

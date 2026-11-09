@@ -36,6 +36,8 @@ import { HelpComponent } from './features/help/help.component'
     </header>
     @if (app.session.loading()) {
       <main id="main" class="signin"><p role="status">Loading your workspace…</p></main>
+    } @else if (authentication.redirecting()) {
+      <main id="main" class="signin"><p role="status">Opening organization sign-in…</p></main>
     } @else if (!app.session.signedIn()) {
       <main id="main" class="signin">
         <section class="signin-card" aria-labelledby="signin-title">
@@ -49,7 +51,7 @@ import { HelpComponent } from './features/help/help.component'
           @for (provider of app.session.providers().providers; track provider.id) {
             <a class="button primary full" [href]="authentication.providerPath(provider.id)" [attr.aria-disabled]="app.session.authenticating()" (click)="app.session.guardProviderNavigation($event)">Continue with {{ provider.name }}</a>
           }
-          @if (app.session.providers().localEnabled) {
+          @if (app.session.providers().localEnabled && !app.session.providers().localAccountsEnabled) {
             <button type="button" class="button primary full" [disabled]="app.session.authenticating()" (click)="app.signInLocally()">Open local workspace <span aria-hidden="true">→</span></button>
             <p class="small muted">Local administrator access on this computer.</p>
           } @else if (app.session.providers().providers.length === 0 && !app.session.providers().localAccountsEnabled && !app.session.error()) {

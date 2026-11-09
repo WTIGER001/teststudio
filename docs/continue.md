@@ -1,7 +1,14 @@
 # Continue TestStudio implementation
 
-Last reviewed: 2026-11-08. These notes describe the last verified state, not a live infrastructure inventory.
+Last reviewed: 2026-11-09. These notes describe the last verified state, not a live infrastructure inventory.
 Read this guide before historical continuation commands elsewhere in the plan.
+
+## Current delivery: sign-in choices and SSO-only bypass
+
+The user requests a clean conditional login page and explicitly chooses SSO-only automatic Organization sign-in on MMDev. Product 0.12.0-dev adds provider visibility and optional automatic sign-in. A unique enabled, visible bypass provider redirects only when local password and loopback development sign-in are both disabled. Recovery, sign-out, public pages, existing sessions, and embedded views stay manual.
+STUDIO-SIGNIN-001 passes in 10.300 seconds with actual OIDC flows, configuration restarts, dark and light themes, narrow layout, help and keyboard behavior, cancellation, expiry, sign-out and reload, destination fragments, and no automatic role grants. Reuse output/selftest/20261109T155858.637858000-f24e3b1ba8b1ad9913824b03. Existing STUDIO-AUTH-001 and STUDIO-LOCAL-001 pass in output/selftest/20261109T160037.116291000-778806795fd9a10ba5d07cd0. Focused race, utility, contract, and UI build checks pass. Owned runtimes close.
+Deployment remains pending. Use scripts/publish-aws-core.py prepare with --local-accounts=false and a new receipt. Review the concrete change set. Preserve the recording worker and all other services. After rollout, use normal authorized provider edits to hide cognito and enable Organization bypass. Provider saves invalidate earlier authentication; retain explicit /auth/login/cognito as operator recovery without a public button. Keep all accounts and permissions unchanged.
+This refines 09, 16, 19, 20, 49, 50, and 55. API contract is 0.46.0; acceptance stays 50 verified of 57. Preserve the demo, recording state, and deferred Azure work.
 
 ## Completed delivery: recording checks and workspace
 

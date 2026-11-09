@@ -2,21 +2,22 @@ import type { ProviderMutation, ProviderRecord } from '../../core/generated/acce
 import { reasonValidation } from './access.utils'
 
 export interface ProviderMappingFields { external: string; groupId: string }
-export interface ProviderFields { id: string; name: string; issuer: string; clientId: string; secretRef: string; scopes: string; disabled: boolean; autoProvision: boolean; groupClaim: string; membershipTtlSeconds: number; logoutEndpoint: string; reason: string; mappings: ProviderMappingFields[] }
+export interface ProviderFields { id: string; name: string; issuer: string; clientId: string; secretRef: string; scopes: string; disabled: boolean; hiddenFromSignIn: boolean; loginBypassEnabled: boolean; autoProvision: boolean; groupClaim: string; membershipTtlSeconds: number; logoutEndpoint: string; reason: string; mappings: ProviderMappingFields[] }
 const identifier = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/
 const bytes = (value: string) => new TextEncoder().encode(value).length
 
 export function providerFields(record?: ProviderRecord): ProviderFields {
   const p = record?.data
-  return { id: record?.id ?? '', name: p?.name ?? '', issuer: p?.issuer ?? '', clientId: p?.clientId ?? '', secretRef: p?.secretRef ?? '', scopes: p?.scopes.join(' ') ?? 'openid profile email', disabled: p?.disabled ?? true, autoProvision: p?.autoProvision ?? false, groupClaim: p?.groupClaim ?? '', membershipTtlSeconds: p?.membershipTtlSeconds ?? 1800, logoutEndpoint:p?.logoutEndpoint ?? "", reason: '', mappings: providerMappings(p?.groupMappings ?? {}) }
+  return { id: record?.id ?? '', name: p?.name ?? '', issuer: p?.issuer ?? '', clientId: p?.clientId ?? '', secretRef: p?.secretRef ?? '', scopes: p?.scopes.join(' ') ?? 'openid profile email', disabled: p?.disabled ?? true, hiddenFromSignIn: p?.hiddenFromSignIn ?? false, loginBypassEnabled: p?.loginBypassEnabled ?? false, autoProvision: p?.autoProvision ?? false, groupClaim: p?.groupClaim ?? '', membershipTtlSeconds: p?.membershipTtlSeconds ?? 1800, logoutEndpoint:p?.logoutEndpoint ?? "", reason: '', mappings: providerMappings(p?.groupMappings ?? {}) }
 }
 export function providerMappings(mappings: Record<string, string>): ProviderMappingFields[] { return Object.entries(mappings).sort(([a], [b]) => a.localeCompare(b)).map(([external, groupId]) => ({ external, groupId })) }
-export function providerDefinition(fields: ProviderFields): ProviderMutation { return { id: fields.id.trim(), name: fields.name.trim(), issuer: fields.issuer.trim(), clientId: fields.clientId.trim(), secretRef: fields.secretRef, scopes: fields.scopes.trim().split(/\s+/).filter(Boolean), disabled: fields.disabled, autoProvision: fields.autoProvision, groupClaim: fields.groupClaim, groupMappings: Object.fromEntries(fields.mappings.map(mapping => [mapping.external, mapping.groupId.trim()])), membershipTtlSeconds: fields.membershipTtlSeconds, logoutEndpoint:fields.logoutEndpoint.trim(), reason: fields.reason.trim() } }
+export function providerDefinition(fields: ProviderFields): ProviderMutation { return { id: fields.id.trim(), name: fields.name.trim(), issuer: fields.issuer.trim(), clientId: fields.clientId.trim(), secretRef: fields.secretRef, scopes: fields.scopes.trim().split(/\s+/).filter(Boolean), disabled: fields.disabled, hiddenFromSignIn: fields.hiddenFromSignIn, loginBypassEnabled: fields.loginBypassEnabled, autoProvision: fields.autoProvision, groupClaim: fields.groupClaim, groupMappings: Object.fromEntries(fields.mappings.map(mapping => [mapping.external, mapping.groupId.trim()])), membershipTtlSeconds: fields.membershipTtlSeconds, logoutEndpoint:fields.logoutEndpoint.trim(), reason: fields.reason.trim() } }
 export function providerIssuerValid(value: string): boolean {
   try { const url = new URL(value); return !url.username && !url.password && !value.includes('?') && !value.includes('#') && (url.protocol === 'https:' || url.protocol === 'http:' && (['localhost', '[::1]'].includes(url.hostname) || /^127(?:\.\d{1,3}){3}$/.test(url.hostname))) } catch { return false }
 }
 export function providerValidation(fields: ProviderFields, refs: string[], selected: ProviderRecord | null): string {
   const p = providerDefinition(fields)
+  if (p.hiddenFromSignIn && p.loginBypassEnabled) return 'Show this provider on the sign-in page before enabling automatic SSO sign-in.'
   if (!identifier.test(p.id) || !p.name || bytes(p.name) > 200 || !p.clientId || bytes(p.clientId) > 512 || bytes(p.issuer) > 2048 || !providerIssuerValid(p.issuer)) return 'Enter a valid identifier, bounded name and client identifier, and an HTTPS issuer or loopback HTTP issuer.'
   if (p.logoutEndpoint && !providerLogoutEndpointValid(p.logoutEndpoint)) return "Enter an HTTPS or loopback logout endpoint without reserved authentication parameters."
   if (p.secretRef && !refs.includes(p.secretRef) && !(selected?.data.secretRef === p.secretRef && p.disabled)) return 'Choose an operator-approved credential reference, or no client secret.'

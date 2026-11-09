@@ -97,3 +97,18 @@ func TestOIDCDifferentSubjectsAtTheSameIssuerDoNotTransferAccessForEqualEmails(t
 		t.Fatal("fixture did not provide equal verified emails")
 	}
 }
+
+func TestHiddenProviderKeepsExplicitRecoverySignIn(t *testing.T) {
+	service, store := fixture(t)
+	issuer := newIssuer(t)
+	register(t, service, issuer, "recovery")
+	changeProvider(t, store, "recovery", func(provider *authoidc.Provider) { provider.HiddenFromSignIn = true })
+	request := httptest.NewRequest("GET", service.Origin+"/auth/login/recovery?returnTo=/account", nil)
+	response := httptest.NewRecorder()
+	if err := service.Login(response, request, "recovery"); err != nil {
+		t.Fatal(err)
+	}
+	if response.Code != 302 {
+		t.Fatal("explicit recovery sign-in failed")
+	}
+}

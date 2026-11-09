@@ -6,6 +6,16 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user authorizes MMDev ECS deployment and now plans a first installation into their own Azure subscription.
 
+## Sign-in choices and optional SSO bypass — 2026-11-09
+
+The user requests conditional local password and SSO choices, removes the duplicate TestStudio provider button, and explicitly selects SSO-only automatic Organization sign-in for MMDev.
+Managed providers now expose Hide from sign-in page and Automatically open this SSO provider. Hidden providers retain explicit recovery sign-in, identities, and permissions. Disabled providers remain unavailable. Public choices omit private provider configuration. A unique enabled and visible bypass provider becomes the automatic target only when both local sign-in modes are disabled. Ambiguous targets retain manual choices.
+The UI keeps the local password form only when managed local accounts are enabled. Password mode omits the development shortcut. Optional SSO navigation keeps the login form out of the automatic redirect path. Existing sessions, public status pages, and embedded views do not redirect. Cancellation, expiry, provider failures, sign-out and reload, and dismissed feedback preserve manual recovery without loops. Local paths, queries, and fragments survive sign-in and recovery. Authentication grants no project membership.
+Normal STUDIO-SIGNIN-001 passes in 10.300 seconds, run 20261109T155858.637858000-f24e3b1ba8b1ad9913824b03, with complete evidence. It uses actual OIDC fixture flows and runtime restarts for the login combinations. Dark, light, narrow layouts, keyboard help, editor changes, saved local input, account scope, and recovery pass. Normal STUDIO-AUTH-001 and STUDIO-LOCAL-001 also pass in run 20261109T160037.116291000-778806795fd9a10ba5d07cd0. Reuse their output/selftest directories. Owned controllers and runner containers stop.
+Focused race checks pass for public options, ambiguity, hidden recovery, configuration revisions, and generated contract synchronization. Six affected pure utility checks and UI compilation pass. The first browser attempts expose a same-fragment fixture navigation and a dropped destination fragment; the fixture now forces a document navigation and recovery preserves fragments. API contract 0.46.0 includes the bounded public options and provider settings.
+Product 0.12.0-dev is prepared. The release helper can explicitly select LocalAccounts=false in its concrete change set while preserving other parameters and resources. Target deployment and enabling the selected managed provider settings are pending.
+This refines 09, 16, 19, 20, 49, 50, and 55. Acceptance remains 50 verified of 57; cross-profile identity and deployment acceptance remain open.
+
 ## Recording checks and workspace — 2026-11-08
 
 The recorder adds At least, Exactly, Contains text, and current page-address checks. Testers select an item, review its matching group and count, then add the assertion. Article grouping counts stories independently of their headlines. A mismatched expected count stays in review for correction.

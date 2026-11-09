@@ -29,7 +29,7 @@ export class ApplicationService {
     try {
       await this.session.signOut()
       this.workspace.reset(); this.message.set('')
-      await this.router.navigate(['/projects'])
+      await this.router.navigate(['/projects'], { queryParams: { signIn: 'signed-out' } })
     } catch (error) { this.error.set(error instanceof Error ? error.message : 'Sign-out failed.') }
   }
 
@@ -43,7 +43,7 @@ export class ApplicationService {
   }
   async refreshAuthentication(): Promise<void> { await this.session.loadProviders(); await this.session.refresh(); this.workspace.reset(); if (this.session.ready()) await this.loadWorkspace() }
 
-  private async clearAuthenticationFeedback(): Promise<void> { await this.router.navigate([], {queryParams:{signIn:null,providerLogout:null},queryParamsHandling:'merge',replaceUrl:true}) }
+  private async clearAuthenticationFeedback(): Promise<void> { await this.router.navigate([], {queryParams:{signIn:null,providerLogout:null},queryParamsHandling:'merge',preserveFragment:true,replaceUrl:true}) }
 
   private async loadWorkspace(): Promise<void> {
     try { await this.workspace.load() }

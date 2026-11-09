@@ -409,3 +409,9 @@ The focused TestStudio browser check uses real native recording and verifies pri
 ## Shared visual help examples
 
 HTTPS help renders Request, Review, HTTP diagnostics, and schedule Review with shared presentation components and isolated example data. Examples perform no API requests or mutations. Current-page highlights close the modal drawer before focusing a visible semantic anchor. Return to help restores scroll. Examples and highlights preserve edits, keyboard focus, themes, narrow layouts, and reduced motion.
+
+## Sign-in choices
+
+Show the local username and password form only when managed local accounts are enabled. Show enabled SSO providers that are not hidden from the sign-in page. Keep development recovery access separate from the password form.
+An explicitly selected SSO provider can bypass the login page only when both local sign-in modes are disabled. Keep the form out of the redirect path. Existing sessions, public status documents, embedded views, sign-out, and failed or cancelled authentication do not start a new automatic login. Preserve local destinations, queries, and fragments.
+Recovery messages retain manual sign-in controls. Dismissing them does not restart authentication. Hiding a duplicate provider removes its button while preserving accounts and explicit operator recovery links.

@@ -140,6 +140,7 @@ export const helpPages: Record<string, HelpPage> = {
     id: 'providers', title: 'Identity providers',
     introduction: ['Configure installation OpenID Connect providers. Sign-in establishes a user identity. Project roles and group assignments remain separate.'],
     concepts: [
+      { title: 'Sign-in page controls', description: 'Hide from sign-in page removes a provider button while preserving explicit sign-in links, existing accounts, and permissions. Automatically open this SSO provider skips the sign-in page only when local sign-in is off. Enable bypass for one visible provider. Ambiguous choices keep the normal page. Saving still invalidates earlier provider authentication.' },
       { title: 'Stored configuration', description: 'Providers have permanent identifiers and exact issuer URLs. The callback URL follows the installation origin. Disabled providers do not start sign-in.' },
       { title: 'Credentials stay on the server', description: 'Select an operator-approved credential reference. Public clients can use no client secret. The UI accepts no credential values.' },
       { title: 'Authentication changes', description: 'Every save invalidates earlier provider transactions, sessions, and memberships. Fresh validated sign-in is required. The last usable administrator remains protected.' },
@@ -381,6 +382,7 @@ export const helpPages: Record<string, HelpPage> = {
     concepts: [
       { title: 'Your workspace', description: 'Projects organize applications, suites, test definitions, and run history. Your permissions control which actions are available.' },
       { title: 'Provider sign-out', description: 'Sign out closes the current TestStudio session first. A configured provider can offer a separate Sign out of provider action. Confirm it at the provider. Failure or cancellation leaves the TestStudio session closed.' },
+      { title: 'SSO choices and automatic sign-in', description: 'Your operator can show local username and password sign-in, organization SSO, or both. Hidden providers have no button. When automatic SSO is enabled and all local sign-in is off, TestStudio opens the selected identity provider directly. Cancelled, failed, expired, and signed-out pages keep manual recovery available.' },
       { title: 'Local sign-in', description: 'Sign in with a password uses a managed local account and its internal user identifier. Open local workspace is a separate development administrator option that appears only when explicitly enabled.' },
       { title: 'Session', description: 'If your session expires, sign in again. The page address still identifies the work you were viewing.' }
     ],

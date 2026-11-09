@@ -36,6 +36,18 @@ Enter Provider change reason and select Register provider.
 Open the saved provider. Register its displayed Callback URL with the external provider.
 The callback follows the configured public installation origin and permanent provider identifier.
 
+## Sign-in page and automatic SSO
+
+Local password sign-in appears only when the operator enables managed local accounts with --local-accounts. Disabled local password sign-in has no username or password form.
+Enabled providers appear as SSO buttons unless Hide from sign-in page is selected. Use that setting to remove a duplicate or recovery-provider button. Hiding preserves existing identities and permissions and permits an explicit /auth/login/PROVIDER sign-in link. Disabling the provider also blocks that explicit sign-in.
+The loopback --local development administrator is a separate operator mode. Its shortcut is omitted when the password form is enabled. Keep it out of hosted installations.
+
+Open the normal organization provider and select Automatically open this SSO provider. Save with a reason. When managed local passwords and the loopback administrator are both disabled, a new unauthenticated visit opens this provider directly without displaying the TestStudio login form.
+Choose one visible, enabled provider for automatic sign-in. With no selection or multiple automatic selections, the normal choices remain. Local password sign-in always keeps the login form visible, even when SSO bypass is selected.
+Cancellation, expired requests, provider failures, and sign-out keep manual sign-in and readable feedback. Dismissing feedback does not automatically start another sign-in. The requested local path, query, and fragment survive recovery. Existing sessions never trigger an automatic login.
+Public status documents and embedded pages never start automatic SSO. Provider tokens and credentials stay on the server. Bypass changes navigation only; it grants no access or membership.
+Provider edits retain current authority checks, audit reasons, revision conflicts, and authentication invalidation. Editing your current provider requires a fresh sign-in.
+
 ## Server credentials
 
 The browser accepts no client secret values.

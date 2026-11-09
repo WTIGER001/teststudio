@@ -13,6 +13,8 @@ import (
 )
 
 type ProviderInput struct {
+	HiddenFromSignIn     bool              `json:"hiddenFromSignIn,omitempty"`
+	LoginBypassEnabled   bool              `json:"loginBypassEnabled,omitempty"`
 	ID                   string            `json:"id"`
 	Name                 string            `json:"name"`
 	Issuer               string            `json:"issuer"`

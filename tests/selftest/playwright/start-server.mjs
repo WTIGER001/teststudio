@@ -15,9 +15,10 @@ const recordingWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').t
 const repositoryWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-GIT-001'
 const bundleWorkflow = ['@STUDIO-BUNDLES-001', '@STUDIO-EDITOR-001', '@STUDIO-CREATE-001', '@STUDIO-API-AUTHOR-001'].includes(JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector)
 const linkingWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-LINKS-001'
+const signInWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-SIGNIN-001'
 const localWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-LOCAL-001'
 const cliWorkflow = JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-CLI-001'
-const providerWorkflow = cliWorkflow || JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-PROVIDERS-001' || linkingWorkflow || JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-PENDING-001' || JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-AUTH-001'
+const providerWorkflow = signInWorkflow || cliWorkflow || JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-PROVIDERS-001' || linkingWorkflow || JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-PENDING-001' || JSON.parse(process.env.TESTSTUDIO_WORK_ITEM ?? '{}').test?.selector === '@STUDIO-AUTH-001'
 const oidcSecret = randomBytes(24).toString('hex'), oidcFixture = providerWorkflow ? createOIDCFixture(oidcSecret) : null
 const token = randomBytes(24).toString('hex'), requests = [], counts = new Map()
 const bindingsPath = '/tmp/teststudio-notification-bindings.json'
@@ -54,7 +55,7 @@ const server = createServer(async (request, response) => {
     }
     const body = JSON.parse(Buffer.concat(chunks).toString() || '{}')
     if (stopping) { response.writeHead(503).end(); return }
-    if (localWorkflow && request.method === 'POST' && request.url === '/local/mode') {
+    if ((localWorkflow || signInWorkflow) && request.method === 'POST' && request.url === '/local/mode') {
       if (typeof body.development !== 'boolean' || typeof body.enabled !== 'boolean' || restarting) { response.writeHead(400).end(); return }
       restarting = true
       try {

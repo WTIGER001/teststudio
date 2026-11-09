@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.45.0"
+export const accessContractVersion = "0.46.0"
 
 export type APIAuthentication = { "binding": string; "header"?: string; "scheme": "bearer" | "basic" | "header" }
 export type APIRequestPolicy = { "authentication"?: APIAuthentication; "maxRequests": number; "maxResponseBytes": number; "redactFields"?: (string)[]; "rules": (APIRequestRule)[] }
@@ -108,10 +108,10 @@ export type ProbeSchedule = { "cron"?: string; "enabled": boolean; "id": string;
 export type ProbeSummary = { "active"?: ProbeObservation; "activeReleaseId"?: string; "applicationId"?: string; "archived": boolean; "availability": string; "draftChanged"?: boolean; "endpoint": string; "environmentId": string; "executionLocation": string; "freshness": string; "history": (ProbeObservation)[]; "id": string; "latest"?: ProbeObservation; "name": string; "other": number; "partial": boolean; "passed": number; "revision": number; "samples": number; "scheduleState": string; "schedules": (ProbeSchedule)[]; "stage"?: string; "state": string; "successRate"?: number; "suiteId": string; "testId": string; "url"?: string }
 export type Problem = { "message": string; "status"?: number }
 export type Profile = { "identities": ExternalIdentityPage; "localAccount": boolean; "user": User }
-export type Provider = { "autoProvision": boolean; "callbackUrl": string; "canManage": boolean; "clientId": string; "disabled": boolean; "groupClaim"?: string; "groupMappings": ProviderMappings; "id": string; "issuer": string; "logoutCallbackUrl": string; "logoutEndpoint"?: string; "membershipTtlSeconds": number; "name": string; "scopes": (string)[]; "secretRef"?: string }
+export type Provider = { "autoProvision": boolean; "callbackUrl": string; "canManage": boolean; "clientId": string; "disabled": boolean; "groupClaim"?: string; "groupMappings": ProviderMappings; "hiddenFromSignIn"?: boolean; "id": string; "issuer": string; "loginBypassEnabled"?: boolean; "logoutCallbackUrl": string; "logoutEndpoint"?: string; "membershipTtlSeconds": number; "name": string; "scopes": (string)[]; "secretRef"?: string }
 export type ProviderLogoutOffer = { "expiresAt": string; "providerName": string; "url": string }
 export type ProviderMappings = { [key: string]: string }
-export type ProviderMutation = { "autoProvision": boolean; "clientId": string; "disabled": boolean; "groupClaim"?: string; "groupMappings": ProviderMappings; "id": string; "issuer": string; "logoutEndpoint"?: string; "membershipTtlSeconds": number; "name": string; "reason": string; "scopes": (string)[]; "secretRef"?: string }
+export type ProviderMutation = { "autoProvision": boolean; "clientId": string; "disabled": boolean; "groupClaim"?: string; "groupMappings": ProviderMappings; "hiddenFromSignIn"?: boolean; "id": string; "issuer": string; "loginBypassEnabled"?: boolean; "logoutEndpoint"?: string; "membershipTtlSeconds": number; "name": string; "reason": string; "scopes": (string)[]; "secretRef"?: string }
 export type ProviderPage = { "canCreate": boolean; "credentialRefs": (string)[]; "cursor"?: string; "items": (ProviderRecord)[]; "partial": boolean }
 export type ProviderRecord = { "data": Provider; "id": string; "revision": number; "updatedAt": string }
 export type PublicationChange = { "action": "added" | "changed" | "removed"; "after"?: SourceCatalogTest; "before"?: SourceCatalogTest; "fields": (string)[]; "id": string; "safetyChanged": boolean; "title": string }
@@ -160,6 +160,8 @@ export type SavedSelectionSpec = { "filter"?: SavedSelectionFilter; "kind": "exp
 export type Session = { "authenticationUntil": string; "client"?: string; "clientName"?: string; "createdAt": string; "current": boolean; "expiresAt": string; "id": string; "lastSeen": string; "provider": string }
 export type SessionPage = { "cursor"?: string; "items": (SessionRecord)[]; "partial": boolean }
 export type SessionRecord = { "data": Session; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type SignInOptions = { "autoRedirectProvider": string; "localAccountsEnabled": boolean; "localEnabled": boolean; "providers": (SignInProvider)[] }
+export type SignInProvider = { "id": string; "name": string }
 export type SourceBuild = { "finishedAt": string; "image": string; "log"?: string; "logTruncated"?: boolean; "sourceDigest": string; "startedAt": string }
 export type SourceCapturePolicy = { "failureRetentionDays"?: number; "kindRetentionDays"?: { [key: string]: number }; "logs": boolean; "maxBytes"?: number; "maxFileBytes"?: number; "retentionDays"?: number; "screenshots": string; "trace": string; "video": string }
 export type SourceCatalogArtifact = { "browser"?: { "endpoint": string; "requests"?: APIRequestPolicy }; "discoveredSelectors"?: { [key: string]: string }; "image"?: string; "provenance"?: SourceOrigin; "sourceProjectId"?: string; "sourceRevision"?: string; "sourceSnapshotId"?: string }
@@ -410,6 +412,7 @@ export interface AccessRequests {
   signOut: {  }
   signInWithPassword: { body: PasswordLogin }
   changeLocalPassword: { body: PasswordChange }
+  readSignInOptions: {  }
 }
 
 export interface AccessResponses {
@@ -602,6 +605,7 @@ export interface AccessResponses {
   signOut: LogoutResponse
   signInWithPassword: PasswordSignedIn
   changeLocalPassword: PasswordChanged
+  readSignInOptions: SignInOptions
 }
 
 export const accessOperations = {
@@ -793,5 +797,6 @@ export const accessOperations = {
   confirmCLISignInRequest: { method: "POST", path: "/auth/cli/requests/{request}" },
   signOut: { method: "POST", path: "/auth/logout" },
   signInWithPassword: { method: "POST", path: "/auth/password" },
-  changeLocalPassword: { method: "POST", path: "/auth/password/change" }
+  changeLocalPassword: { method: "POST", path: "/auth/password/change" },
+  readSignInOptions: { method: "GET", path: "/auth/providers" }
 } as const
