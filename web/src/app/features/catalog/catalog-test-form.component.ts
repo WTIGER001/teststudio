@@ -20,7 +20,7 @@ import { CatalogTestEditorService } from './catalog-test-editor.service'
           </div>
           @if (service.editingHTTP()) { <ts-http-check-editor /> }
           <ts-timing-policy-editor />
-          <button class="button primary" type="submit" [disabled]="service.saving() || service.form.invalid || !service.timingEditor.valid() || (service.editingHTTP() && !service.checkEditor.valid())">{{ service.saving() ? 'Saving…' : 'Save draft changes' }}</button>
+          <button class="button primary" type="submit" [disabled]="service.saving() || service.form.invalid || !service.timingEditor.valid() || (service.editingHTTP() && !service.checkEditor.valid())">{{ service.saving() ? 'Saving…' : 'Save changes' }}</button>
         </form>
   `
 })

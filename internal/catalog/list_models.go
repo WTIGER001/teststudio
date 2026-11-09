@@ -24,13 +24,14 @@ type ListQuery struct {
 }
 
 type ListEntry struct {
-	ID        string          `json:"id"`
-	Project   string          `json:"projectId"`
-	Suite     string          `json:"suiteId"`
-	SuiteName string          `json:"suiteName"`
-	Revision  int64           `json:"revision"`
-	Data      json.RawMessage `json:"data"`
-	Updated   time.Time       `json:"updatedAt"`
+	SourceReady bool            `json:"sourceReady"`
+	ID          string          `json:"id"`
+	Project     string          `json:"projectId"`
+	Suite       string          `json:"suiteId"`
+	SuiteName   string          `json:"suiteName"`
+	Revision    int64           `json:"revision"`
+	Data        json.RawMessage `json:"data"`
+	Updated     time.Time       `json:"updatedAt"`
 }
 
 type CategoryNode struct {

@@ -92,9 +92,7 @@ test('Guided setup and HTTPS creation preserve entries and recover without dupli
   expect(keys).toHaveLength(2); expect(keys[0]).toBe(keys[1])
   expect((await api.call('GET', `${path}/runs`)).items).toHaveLength(1)
   const suitePath = `${path}/suites/availability-${suffix}`, suite = (await api.call('GET', `${path}/suites`)).items.find((row: any) => row.id === `availability-${suffix}`)
-  expect(suite.data.activeReleaseId || '').toBe('')
-  const run = (await api.call('GET', `${path}/runs/${page.url().split('/').at(-1)}`)).data
-  await api.call('POST', `${suitePath}/releases/${run.release.id}/activate`, {}, suite.revision)
+  expect(suite.data.activeReleaseId).toBeTruthy()
   await followNavigation(page, 'Test runs')
   await page.getByRole('button', { name: '+ New run', exact: true }).click()
   const form = page.getByRole('region', { name: 'Start a run', exact: true })

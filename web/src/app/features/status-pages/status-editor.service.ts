@@ -33,12 +33,12 @@ export class StatusEditorService {
   readonly embed = computed(() => '<iframe src="' + this.publicURL() + '" title="Service status" style="width:100%;height:600px;border:0" loading="lazy" referrerpolicy="no-referrer"></iframe>')
   readonly logoMode = signal<'none' | 'upload' | 'url'>('none'); readonly logoUploading = signal(false); readonly logoError = signal('')
   private readonly logoProcessing = inject(StatusLogoProcessingService)
-  readonly form = new FormGroup({ logoHeight: new FormControl<number | null>(null), logo: new FormControl('', { nonNullable: true }), logoAlt: new FormControl('', { nonNullable: true }), slug: new FormControl('', { nonNullable: true }), title: new FormControl('', { nonNullable: true }), background: new FormControl('#ffffff', { nonNullable: true }), defaultWindow: new FormControl('24h', { nonNullable: true }), maxAgeSeconds: new FormControl(900, { nonNullable: true }) })
+  readonly form = new FormGroup({ enabled: new FormControl(false, { nonNullable: true }), logoHeight: new FormControl<number | null>(null), logo: new FormControl('', { nonNullable: true }), logoAlt: new FormControl('', { nonNullable: true }), slug: new FormControl('', { nonNullable: true }), title: new FormControl('', { nonNullable: true }), background: new FormControl('#ffffff', { nonNullable: true }), defaultWindow: new FormControl('24h', { nonNullable: true }), maxAgeSeconds: new FormControl(900, { nonNullable: true }) })
   readonly flow = new WizardController(3, step => this.validate(step))
   private generation = 0; private entriesDirty = false; private attempted = false; private slugGeneration = 0; private logoGeneration = 0
   constructor() {
-    const route = inject(ActivatedRoute); this.mode.set(route.snapshot.data['mode'] || 'view')
-    route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => { this.checksLoaded=false; this.checks.set([]); this.checksCursor.set(''); this.environments.set([]); this.project.set(params.get('projectId') || ''); this.id.set(params.get('pageId') || randomId()); this.record.set(null); this.preview.set(null); this.entries.set([]); this.flow.reset(); this.entriesDirty = false; this.attempted = false; this.logoMode.set('none'); this.logoError.set(''); this.form.reset({ logoHeight: null, logo: '', logoAlt: '', slug: '', title: '', background: '#ffffff', defaultWindow: '24h', maxAgeSeconds: 900 }); void this.load(params.has('pageId')) })
+    const route = inject(ActivatedRoute); this.mode.set(route.snapshot.data['mode'] === 'publish' ? 'edit' : route.snapshot.data['mode'] || 'view')
+    route.paramMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(params => { this.checksLoaded=false; this.checks.set([]); this.checksCursor.set(''); this.environments.set([]); this.project.set(params.get('projectId') || ''); this.id.set(params.get('pageId') || randomId()); this.record.set(null); this.preview.set(null); this.entries.set([]); this.flow.reset(); this.entriesDirty = false; this.attempted = false; this.logoMode.set('none'); this.logoError.set(''); this.form.reset({ enabled: false, logoHeight: null, logo: '', logoAlt: '', slug: '', title: '', background: '#ffffff', defaultWindow: '24h', maxAgeSeconds: 900 }); void this.load(params.has('pageId')) })
     this.form.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(() => { this.preview.set(null) })
     this.form.controls.slug.valueChanges.pipe(takeUntilDestroyed(this.destroy)).subscribe(() => { this.slugGeneration++; this.slugState.set('idle'); this.slugMessage.set(''); if (this.error().toLowerCase().includes('vanity url')) this.error.set('') })
     this.form.controls.slug.valueChanges.pipe(debounceTime(300), takeUntilDestroyed(this.destroy)).subscribe(() => { void this.checkSlug() })
@@ -100,7 +100,7 @@ export class StatusEditorService {
       do { const page = await this.api.request<ProbePage>('/api/v1/projects/' + this.project() + '/probes?limit=100&hours=24' + (cursor ? '&cursor=' + encodeURIComponent(cursor) : '')); choices.push(...page.items); cursor = page.cursor || '' } while (cursor && generation === this.generation)
       if (generation !== this.generation) return
       this.probes.set(choices)
-      if (existing) { const row = await this.client.call('readStatusPage', { project: this.project(), page: this.id() }); if (generation !== this.generation) return; this.record.set(row); this.form.reset(row.data); this.logoMode.set(row.data.logo?.startsWith('data:') ? 'upload' : row.data.logo ? 'url' : 'none'); this.logoError.set(''); this.entries.set(row.data.probes); this.entriesDirty = false; if (!this.editing()) { const preview = await this.client.call('previewStatusPage', { project: this.project(), page: this.id() }); if (generation === this.generation) this.preview.set(preview) } }
+      if (existing) { const row = await this.client.call('readStatusPage', { project: this.project(), page: this.id() }); if (generation !== this.generation) return; this.record.set(row); this.form.reset({ ...row.data, enabled: !!row.data.published }); this.logoMode.set(row.data.logo?.startsWith('data:') ? 'upload' : row.data.logo ? 'url' : 'none'); this.logoError.set(''); this.entries.set(row.data.probes); this.entriesDirty = false; if (!this.editing()) { const preview = await this.client.call('previewStatusPage', { project: this.project(), page: this.id() }); if (generation === this.generation) this.preview.set(preview) } }
     } catch (error) { if (generation === this.generation) this.error.set(error instanceof Error ? error.message : 'The status page could not be loaded.') }
     finally { if (generation === this.generation) this.busy.set(false) }
   }
@@ -118,7 +118,7 @@ export class StatusEditorService {
     if (this.busy() || this.locked() || !this.canManage() || !this.flow.ready()) return
     this.attempted = true
     await this.request(() => this.client.call('saveStatusPage', { project: this.project(), page: this.id(), revision: this.record()?.revision || 0, body: this.definition() }), async row => {
-      this.record.set(row); this.form.markAsPristine(); this.entriesDirty = false; this.attempted = false; this.message.set('Private draft saved. Publish separately to update the public page.')
+      this.record.set(row); this.form.markAsPristine(); this.entriesDirty = false; this.attempted = false; this.message.set('Status page saved.')
       await this.router.navigate(['/projects', this.project(), 'status-pages', this.id()], { replaceUrl: this.mode() === 'create' })
     })
   }
@@ -126,13 +126,9 @@ export class StatusEditorService {
     if (!this.record() || this.dirty() || this.busy()) return
     await this.request(() => this.client.call('previewStatusPage', { project: this.project(), page: this.id(), query: { window } }), report => { this.preview.set(report) }, false)
   }
-  async publish(): Promise<void> {
-    if (!this.record() || this.dirty() || this.busy() || this.locked() || !this.canPublish() || this.mode() !== 'publish' || !this.preview()) return
-    await this.request(() => this.client.call('publishStatusPage', { project: this.project(), page: this.id(), revision: this.record()!.revision }), async row => { this.record.set(row); await this.router.navigate(['/projects', this.project(), 'status-pages', this.id()]) })
-  }
-  async unpublish(): Promise<void> {
-    if (!this.record() || this.busy() || this.locked() || !this.canPublish() || !window.confirm('Unpublish this page? Existing embeds will stop showing status on their next refresh.')) return
-    await this.request(() => this.client.call('unpublishStatusPage', { project: this.project(), page: this.id(), revision: this.record()!.revision }), row => { this.record.set(row); this.message.set('Public access withdrawn. Your draft remains.') })
+  async setEnabled(enabled: boolean): Promise<void> {
+    if (!this.record() || this.dirty() || this.busy() || this.locked() || !this.canManage() || !this.canPublish()) return
+    await this.request(() => this.client.call('saveStatusPage', { project: this.project(), page: this.id(), revision: this.record()!.revision, body: { ...this.definition(), enabled } }), row => { this.record.set(row); this.form.controls.enabled.setValue(!!row.data.published); this.form.markAsPristine(); this.message.set(enabled ? 'Status page enabled.' : 'Status page disabled.') })
   }
   async delete(): Promise<void> {
     if (!this.record() || this.busy() || this.locked() || !this.canDelete() || !window.confirm('Delete this status page and withdraw its public URL?')) return

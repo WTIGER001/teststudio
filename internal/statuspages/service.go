@@ -175,6 +175,29 @@ func (s *Service) Save(ctx context.Context, user, project string, d Definition, 
 	} else if !errors.Is(err, storage.ErrNotFound) || revision != 0 {
 		return storage.Record{}, err
 	}
+	if d.Enabled != nil {
+		if *d.Enabled || page.Published != nil {
+			if err := s.authority(ctx, user, project, d.ID, "publish"); err != nil {
+				return storage.Record{}, err
+			}
+		}
+		if *d.Enabled {
+			now := time.Now().UTC()
+			snapshot := d
+			page.Published, page.Publisher, page.PublishedAt = &snapshot, user, &now
+		} else {
+			page.Published, page.Publisher, page.PublishedAt = nil, "", nil
+		}
+		token, err := s.Store.Get(ctx, "public-status-pages", page.Token)
+		if err != nil && !errors.Is(err, storage.ErrNotFound) {
+			return storage.Record{}, err
+		}
+		link, err := storage.Put("public-status-pages", page.Token, project, token.Revision, map[string]string{"pageId": d.ID})
+		if err != nil {
+			return storage.Record{}, err
+		}
+		assertions = append(assertions, link)
+	}
 	reservation, err := s.slugReservation(ctx, project, page)
 	if err != nil {
 		return storage.Record{}, err

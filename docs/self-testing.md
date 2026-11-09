@@ -4,6 +4,13 @@ TestStudio owns a new Playwright suite in `tests/selftest/playwright`.
 The suite runs through the normal catalog, publication, execution, timing, and evidence APIs.
 It copies no tests or configuration from another application.
 
+## Direct save workflows
+
+The normal STUDIO-HOSTED-RECORDER-001 now saves two recordings directly, finds both in the catalog, preserves the earlier immutable version, and explicitly replays only the first News test against a different local environment. Save creates no run. The complete focused harness passes in 57.39 seconds; replay passes in 192 ms. Reuse output/playwright/direct-save-two-tests-complete. The harness closes its recording containers and owned processes.
+STUDIO-STATUS-PAGES-001 covers Save, Enabled, immediate public edits, disable, conflict recovery, and existing public privacy and embedding. Run 20261109T203907.419224000-477dd1bd42d1da5d446999b2 passes.
+STUDIO-WIZARD-001 covers direct native test saving and an explicit Save and run with lost-response recovery. The current version is set automatically. Run 20261109T211244.341838000-5e32188f67da513fc9cbb86c passes without a manual activation before a later unpinned run.
+Legacy publication workflow checks below remain API compatibility evidence. They do not describe additional tester steps.
+
 ## In-page browser recording
 
 The focused harness packages exactly STUDIO-EMBEDDED-RECORDER-001 and executes it through TestStudio's normal source preparation, publication, environment-backed runner, timing, and private evidence.

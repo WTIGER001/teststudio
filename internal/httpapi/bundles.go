@@ -24,7 +24,7 @@ func (s *Server) bundleRoutes(m *http.ServeMux, service *sources.Service) {
 			problem(w, errors.New("source bundle exceeds its 32 MiB limit or cannot be read"))
 			return
 		}
-		row, err := service.EnqueueBundle(r.Context(), actor(r), r.PathValue("project"), r.PathValue("suite"), r.Header.Get("Idempotency-Key"), r.URL.Query().Get("name"), r.URL.Query().Get("manifest"), data)
+		row, err := service.EnqueueBundle(r.Context(), actor(r), r.PathValue("project"), r.PathValue("suite"), r.Header.Get("Idempotency-Key"), r.URL.Query().Get("name"), r.URL.Query().Get("manifest"), data, r.URL.Query().Get("save") == "true")
 		if err != nil {
 			problem(w, err)
 			return

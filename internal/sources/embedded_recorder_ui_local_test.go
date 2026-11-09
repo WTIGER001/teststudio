@@ -86,6 +86,18 @@ func runRecordingAuthoringUI(t *testing.T, hosted bool) {
 	s.Inspectors = map[string]preparation.ArtifactInspector{"playwright": &localcontainer.Executor{Runner: "playwright", AllowProjectImages: true, RequireProject: true}}
 	s.RecoveryInspectors = s.Inspectors
 	t.Cleanup(func() { cleanupRepositoryUIJobs(t, s, root) })
+	betaRow, err := s.Store.Get(t.Context(), projects.Bucket("suites", "beta"), "health")
+	if err != nil {
+		t.Fatal(err)
+	}
+	betaSuite, err := storage.Decode[projects.Suite](betaRow)
+	if err != nil {
+		t.Fatal(err)
+	}
+	betaSuite.RequiresTarget = true
+	if err := (&projects.Service{Store: s.Store, Auth: s.Auth}).SaveSuite(t.Context(), "admin", "beta", betaSuite, betaRow.Revision); err != nil {
+		t.Fatal(err)
+	}
 	var fixtureReady atomic.Int64
 	dependencyOrigin := ""
 	if hosted {
@@ -272,6 +284,8 @@ func runRecordingAuthoringUI(t *testing.T, hosted bool) {
 	})
 	workerCtx, cancelWorkers := context.WithCancel(t.Context())
 	done := runService.Start(workerCtx)
+	saveDone := s.StartBuildPreparation(workerCtx)
+	t.Cleanup(func() { cancelWorkers(); <-saveDone })
 	t.Cleanup(func() { cancelWorkers(); <-done })
 	run, err := runService.Create(t.Context(), "admin", "alpha", runs.Request{Suite: "ui", Environment: "studio", TimeoutSeconds: 110}, "recorder-ui-run", "manual")
 	if err != nil {
@@ -296,14 +310,14 @@ func runRecordingAuthoringUI(t *testing.T, hosted bool) {
 		t.Fatalf("UI execution state=%s outcome=%s results=%+v evidence=%v", run.State, run.Outcome, run.Results, run.EvidenceErrors)
 	}
 	rows, err := recordings.List(t.Context(), "admin", "beta", "health", "", 30)
-	if err != nil || len(rows.Items) != 2 {
+	if err != nil || len(rows.Items) != 3 {
 		t.Fatal("recording history did not retain the finished and cancelled sessions", err)
 	}
 	var captured recording.Session
 	cancelled := 0
 	for _, row := range rows.Items {
 		value, _ := storage.Decode[recording.Session](row)
-		if value.State == "ready" {
+		if value.State == "ready" && strings.Contains(value.Code, "toBeVisible()") {
 			captured = value
 		}
 		if value.State == "cancelled" {
@@ -317,8 +331,8 @@ func runRecordingAuthoringUI(t *testing.T, hosted bool) {
 		t.Fatal("embedded recording did not retain News navigation and a story assertion")
 	}
 	drafts, err := s.Drafts(t.Context(), "admin", "beta", "health", "", 30)
-	if err != nil || len(drafts.Items) != 1 {
-		t.Fatal("reviewed recording did not save exactly one source draft", err)
+	if err != nil || len(drafts.Items) != 2 {
+		t.Fatal("saved recordings were not retained independently", err)
 	}
 	data, _ = json.MarshalIndent(map[string]any{"run": run, "recordingId": captured.ID, "recordingState": captured.State, "savedDrafts": len(drafts.Items)}, "", "  ")
 	os.WriteFile(filepath.Join(root, "summary.json"), data, 0600)

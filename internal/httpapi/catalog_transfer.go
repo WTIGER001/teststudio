@@ -81,7 +81,12 @@ func (s *Server) catalogTransferRoutes(m *http.ServeMux) {
 			return
 		}
 		p, suite := r.PathValue("project"), r.PathValue("suite")
-		plan, err := s.Catalog.ApplyImport(r.Context(), actor(r), p, suite, r.PathValue("id"), rev)
+		var plan catalog.ImportPlan
+		if r.URL.Query().Get("save") == "true" {
+			plan, err = s.Catalog.SaveImport(r.Context(), actor(r), p, suite, r.PathValue("id"), rev)
+		} else {
+			plan, err = s.Catalog.ApplyImport(r.Context(), actor(r), p, suite, r.PathValue("id"), rev)
+		}
 		if err != nil {
 			problem(w, err)
 			return

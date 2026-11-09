@@ -1,15 +1,20 @@
 # Catalog management
 
-Each suite owns permanent test identifiers, revision history, drafts, and immutable releases.
-Catalog edits affect future publications. Existing releases and run snapshots keep their original definitions.
+Each suite owns permanent test identifiers, revision history, and immutable saved versions.
+Save updates future runs automatically. Existing versions and run snapshots keep their original definitions. Source tests appear immediately while setup completes in the background. Saving never starts a run.
 Current lifecycle and safety restrictions still apply before dispatch and each attempt.
-Selected dependencies must remain enabled. Protected targets require safe published and current labels throughout the dependency closure.
+Selected dependencies must remain enabled. Protected targets require safe saved and current labels throughout the dependency closure.
 See [Dispatch safety](results.md#dispatch-safety-and-frozen-runs) for concurrent edits, blocked runs, and retained attempt observations.
 Use explicit lifecycle actions to enable, disable, archive, or restore a test.
-Duplication creates a new identifier in draft state and starts independent history.
+Duplication creates a new disabled identifier and starts independent history.
 
 Open a test title or More > History to inspect its [retained history](test-history.md).
 Revisions under More opens the compact definition history beside its catalog row.
+
+## Save API
+
+`POST /api/v1/projects/{project}/suites/{suite}/tests/{test}/save` saves a definition and its current execution version atomically. Use `If-Match: 0` for creation or the current revision for edits. The response includes `savedVersionId` when that exact definition is ready. GET on the test recovers this confirmation after an interrupted response.
+Lifecycle actions and import-plan apply accept `save=true` to update the current version in the same transaction. Legacy mutation and publication endpoints remain available for existing API clients; normal UI workflows use direct saving. Existing save authority still applies.
 
 ## JSON transfer
 
@@ -26,7 +31,7 @@ Use these routes below `/api/v1/projects/{projectId}/suites/{suiteId}`:
 | `/catalog-imports/{id}` | GET | Read the current actor's preview. |
 | `/catalog-imports/{id}/apply` | POST | Apply the preview with its `If-Match` revision. |
 | `/tests/bulk-preview` | POST | Preview explicit lifecycle actions with test revisions. |
-| `/tests/{id}/actions/duplicate` | POST | Create a new draft identity with `If-Match` and a new `id`. |
+| `/tests/{id}/actions/duplicate` | POST | Create a new disabled identity with `If-Match` and a new `id`. |
 
 Each import or bulk request accepts 1 through 30 tests within the 2 MiB request limit.
 The limit keeps definitions, history, audit records, and guards in one bounded transaction.
@@ -43,9 +48,8 @@ Plans expire after 30 minutes and belong to the actor who creates them.
 Apply checks current permissions, suite revision, catalog revision, and each test revision.
 A changed catalog returns a conflict. Create a new preview before retrying.
 The transaction applies all changes or none. Repeating an applied plan does not add revisions.
-Publication remains a separate, explicit action.
-Validate and preview compares the draft with the active release before Publish release or Publish and activate.
-The review shows safety, policy, and readable schedule effects and rejects stale publication. See [Publication review](publication-review.md).
+Save applies the reviewed changes and makes the current version available in one transaction. There is no separate publication step.
+Existing immutable history, validation, safety, schedule pins, and revision conflicts remain. See [Saved versions](publication-review.md).
 
 ## Interface workflows
 
@@ -67,7 +71,7 @@ Include child categories is on by default. Turn it off to match only the exact c
 A source filter matches either the executable source or its registered definition source identifier.
 Filters combine. An empty result explains how to recover. Clear filters restores the active catalog across suites.
 Application options use readable registered names when the user can read application records.
-The UI uses the shared server list contract. Published release selections remain separate.
+The UI uses the shared server list contract. Historical version selections remain separate.
 Load more tests appends the next page. Counts and category branches cover every authorized match.
 See [Catalog lists](catalog-list.md) for query fields, cursor scope, permissions, and recovery.
 
@@ -76,7 +80,7 @@ Select visible tests replaces the selection with the current filtered list. Clea
 Review the complete selection before applying a bulk action.
 Edit and applicable Enable, Disable, or Restore actions stay visible on each row.
 More contains History, Duplicate, and Archive. Normal removal uses Archive and retains history.
-Changing lifecycle does not publish a release or rewrite an existing run.
+Lifecycle saves update future runs automatically and preserve existing runs.
 Bulk actions preview one suite at a time. Review the proposed states before applying changes.
 The import panel loads a JSON file or accepts pasted definitions. File reading disables transfer actions until the selected content is ready.
 Export fills the document field and provides a local JSON download. It covers the complete suite, including unloaded list pages.
@@ -84,7 +88,7 @@ Export requires current read and export permission for every included definition
 An export access rejection clears the old download link and document. Transfer limits still apply when importing an exported document.
 Validation errors identify the test and field. Invalid plans cannot apply.
 History shows retained definitions, actor, timestamp, and revision number.
-Duplicate asks for a new permanent identifier and creates a draft entry.
+Duplicate asks for a new permanent identifier and creates a disabled entry.
 Opening a preview or history panel moves keyboard focus to its heading.
 Saved selections support explicit identifiers and versioned filters through the same catalog permissions.
 The catalog manages their definitions, previews, archive, and restoration.
@@ -99,7 +103,7 @@ Unselected fields keep their values. Empty optional text clears the selected fie
 The UI accepts comma-separated tags. Tags require distinct values and remain limited to 30 entries of 64 bytes each.
 Titles, categories, and owners accept up to 200 bytes. Descriptions, rationales, and conditions accept up to 4096 bytes.
 Titles, categories, and selected rationales require nonempty text.
-Select an explicit rationale when selecting a safety label. A changed label requires current publishing permission.
+Select an explicit rationale when selecting a safety label. A changed label requires current save permission.
 
 Select **Preview bulk changes** and inspect the visible before and after values.
 The preview retains the full definitions for optional inspection.
@@ -125,7 +129,7 @@ The existing `POST /tests/bulk-preview` route accepts this request:
 Omitted or null metadata fields remain unchanged. Use an empty string or array for an explicit supported clear.
 Metadata cannot include executable fields, selectors, source identities, dependencies, runner settings, or lifecycle state.
 Prepared source facts stay unchanged. Future source synchronization preserves the service-managed metadata.
-Metadata edits do not publish a release, start a run, or rewrite retained results.
+Metadata saves update future runs automatically. They never start a run or rewrite retained results.
 After a conflict, select Reload catalog and create a new preview. Reload preserves the import document.
 The API request, plan read, and apply operations are recorded in OpenAPI and the generated TypeScript client.
 

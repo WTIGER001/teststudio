@@ -1,15 +1,15 @@
 # Suite settings and lifecycle
 
-A suite owns permanent test identities and retained releases within one project.
+A suite owns permanent test identities and retained versions within one project.
 Its identifier stays fixed. Display settings can change without editing test definitions.
 
 ## Interface
 
 Open **Project settings**, choose **Suites**, and select **Inspect suite**.
-The panel shows the permanent identifier, active release, lifecycle, and current management authority.
+The panel shows the permanent identifier, current version, lifecycle, and current management authority.
 Edit the name, description, supported applications, or target requirement. Select **Save suite settings**.
-The update preserves capture policies, timing policies, and the active release.
-It does not publish a release or start tests.
+The update preserves capture policies, timing policies, and the current version.
+Saving suite settings needs no publication step and never starts tests. Tests saved in this suite become current automatically when ready.
 
 Read **Affected schedules** before archiving a suite.
 The list includes only schedules you can read. It preserves pinned release identifiers.
@@ -18,7 +18,7 @@ Select **Archive suite** to block new run dispatch and new attempts.
 Existing run snapshots, results, artifacts, releases, and schedule pins remain retained.
 Already executing attempts use the normal completion and evidence flow. Archive does not cancel them.
 An enabled schedule remains enabled. Its dispatch checks the archived suite and records the normal blocked firing.
-Select **Restore suite** to reuse its identifier and active release.
+Select **Restore suite** to reuse its identifier and current version.
 Restoration does not start a run. An enabled schedule can dispatch at its next eligible firing.
 
 Conflicts require **Reload suite settings** before another save or lifecycle change.
@@ -34,7 +34,7 @@ Use these routes below `/api/v1/projects/{project}/suites/{suite}`:
 | GET | `/lifecycle` | Read settings, revision, authority, and readable affected schedules. |
 | PATCH | `/settings` | Replace editable display settings and target requirements. |
 | POST | `/actions/archive` | Archive the suite and preserve retained history. |
-| POST | `/actions/restore` | Restore the same suite and active release. |
+| POST | `/actions/restore` | Restore the same suite and current version. |
 
 Settings accept `name`, `description`, `applications`, and `requiresTarget`.
 Applications require distinct registered identifiers. Names and descriptions have bounded lengths.

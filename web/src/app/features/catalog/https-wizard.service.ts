@@ -2,13 +2,12 @@ import { randomId } from '../../core/random-id'
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { Router, ActivatedRoute } from '@angular/router'
-import { ApiService, RecordValue } from '../../core/api.service'
+import { ApiService } from '../../core/api.service'
 import { WorkspaceService } from '../../core/workspace.service'
 import { WizardController } from '../../shared/wizard/wizard-controller'
 import { suggestedIdentifier } from '../../shared/wizard/creation.utils'
 import { CatalogTestEditorService } from './catalog-test-editor.service'
 import { CreateTestService } from './create-test.service'
-import type { Draft, Issue } from './catalog.models'
 import { ProbeTargetService } from './probe-target.service'
 import { parseProbeAddress } from './probe-address.utils'
 
@@ -36,9 +35,7 @@ export class HTTPSWizardService {
   readonly progress = signal('')
   readonly canRun = computed(() => this.workspace.can('catalog.publish') && this.workspace.can('runs.create'))
   private readonly suffix = randomId().slice(0, 8)
-  private draft: RecordValue<Draft> | undefined
   private release = ''
-  private readonly publishKey = randomId()
   private readonly runKey = randomId()
   private disposed = false
 
@@ -75,8 +72,8 @@ export class HTTPSWizardService {
     if (this.route.snapshot.queryParamMap.get('from') === 'probes' && !this.targets.target() && !this.targets.needsTarget()) { this.error.set('Choose a target before adding this probe to the overview.'); return }
     const issue = this.targets.issue(run)
     if (issue) { this.error.set(issue); return }
-    if (run && !this.canRun()) { this.error.set('Publication and run permissions are required.'); return }
-    if (run && (this.target()?.data.protected || this.targets.needsTarget() && this.targets.protected.value) && (this.editor.form.controls.safety.value !== 'safe' || !this.workspace.can('runs.execute-protected'))) { this.error.set('This target is protected. A safe label with an accurate rationale and protected execution permission are required. You can still save a draft.'); return }
+    if (run && !this.canRun()) { this.error.set('Save and run permissions are required.'); return }
+    if (run && (this.target()?.data.protected || this.targets.needsTarget() && this.targets.protected.value) && (this.editor.form.controls.safety.value !== 'safe' || !this.workspace.can('runs.execute-protected'))) { this.error.set('This target is protected. A safe label with an accurate rationale and protected execution permission are required. You can still save a test.'); return }
     this.busy.set(true); this.error.set('')
     const project = this.creation.sources.project(), value = this.editor.form.getRawValue()
     try {
@@ -94,16 +91,8 @@ export class HTTPSWizardService {
       }
       if (!run) { this.creation.afterCreate(); return }
       if (this.disposed || project !== this.creation.sources.project()) return
-      const base = `/api/v1/projects/${project}/suites/${value.suite}/catalog-drafts`
-      if (!this.release) {
-        this.progress.set('Validating a release…')
-        this.draft ??= await this.api.request<RecordValue<Draft>>(base, 'POST', {})
-        const validation = await this.api.request<{ valid: boolean; issues: Issue[] }>(`${base}/${this.draft.id}/validate`, 'POST', {})
-        if (!validation.valid) throw new Error(validation.issues.map(issue => `${issue.testId || 'Suite'}: ${issue.message}`).join('; ') || 'Release validation failed. Open the catalog to review this saved test.')
-        this.progress.set('Publishing without changing the active release…')
-        const release = await this.api.request<{ id: string }>(`${base}/${this.draft.id}/publish`, 'POST', { activate: false }, this.draft.revision, this.publishKey)
-        this.release = release.id
-      }
+      this.release ||= this.editor.savedVersion()
+      if (!this.release) throw new Error('The test is saved, but setup is not complete. Open the test catalog to inspect its readiness.')
       this.progress.set('Starting local run…')
       const result = await this.api.request<{ id: string }>(`/api/v1/projects/${project}/runs`, 'POST', { applicationId: this.workspace.applicationId() || undefined, suiteId: value.suite, releaseId: this.release, environmentId: this.targets.environmentId(), testIds: [value.id], timeoutSeconds: 900, retries: 0 }, undefined, this.runKey)
       if (!this.disposed && project === this.creation.sources.project()) await this.router.navigate(this.workspace.path('runs', result.id))

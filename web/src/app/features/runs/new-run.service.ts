@@ -91,7 +91,7 @@ export class NewRunService {
   suiteName(): string { const id = this.form.controls.suite.value; return this.lookups.suites().find(row => row.id === id)?.data.name || id }
   environmentName(): string { const id = this.form.controls.environment.value; const target = this.lookups.environments().find(row => row.id === id); return target ? `${target.data.name} · ${target.data.stage}${target.data.protected ? ' · Protected' : ''}` : id || 'No target' }
   endpointReview() { const id = this.form.controls.environment.value; return registeredEndpoints(this.lookups.environments().find(row => row.id === id)?.data.endpoints) }
-  targetWarning(): string { const target = this.lookups.environments().find(row => row.id === this.form.controls.environment.value); return target?.data.protected ? 'Protected target: only safe tests can run, with protected execution permission.' : target?.data.stage === 'production' ? 'Production target: this environment is not protected. Review the selected tests before starting.' : 'Starting creates a run from the published release. Review the target and selected tests before continuing.' }
+  targetWarning(): string { const target = this.lookups.environments().find(row => row.id === this.form.controls.environment.value); return target?.data.protected ? 'Protected target: only safe tests can run, with protected execution permission.' : target?.data.stage === 'production' ? 'Production target: this environment is not protected. Review the selected tests before starting.' : 'Starting creates a run from the saved version. Review the target and selected tests before continuing.' }
 
   async create(): Promise<void> {
     if (!this.flow.ready() || this.saving()) return

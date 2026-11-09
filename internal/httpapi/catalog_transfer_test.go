@@ -36,7 +36,7 @@ func TestCatalogTransferBulkAndDuplicateThroughAPI(t *testing.T) {
 			t.Fatalf("apply: %d %v", status, data)
 		}
 	}
-	if status, data := c.call("POST", base+"/tests/HEALTH-1/actions/duplicate", map[string]string{"id": "COPY-1"}, map[string]string{"If-Match": "2"}); status != 200 || data["data"].(map[string]any)["state"] != "draft" {
+	if status, data := c.call("POST", base+"/tests/HEALTH-1/actions/duplicate", map[string]string{"id": "COPY-1"}, map[string]string{"If-Match": "2"}); status != 200 || data["data"].(map[string]any)["state"] != "disabled" {
 		t.Fatalf("duplicate: %d %v", status, data)
 	}
 	status, preview = c.call("POST", base+"/tests/bulk-preview", map[string]any{"action": "archive", "tests": []any{map[string]any{"id": "HEALTH-1", "revision": 2}, map[string]any{"id": "HEALTH-2", "revision": 1}}}, nil)

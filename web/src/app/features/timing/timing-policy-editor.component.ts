@@ -6,7 +6,7 @@ import { TimingPolicyEditorService } from './timing-policy-editor.service'
   selector: 'ts-timing-policy-editor', standalone: true, imports: [ReactiveFormsModule], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <fieldset class="timing-fieldset"><legend>Duration and slowdown rules</legend>
-      <label class="checkbox-field"><input type="checkbox" [formControl]="service.override"> Override the published suite timing defaults for this test</label>
+      <label class="checkbox-field"><input type="checkbox" [formControl]="service.override"> Override the saved suite timing defaults for this test</label>
       <p class="small muted">Defaults use five clean observations, a 2× slowdown threshold with a 100 ms noise guard, and a bounded adaptive timeout. Suite or project settings can change these defaults.</p>
       @if (service.enabled()) {
         <div [formGroup]="service.form" class="form-grid">

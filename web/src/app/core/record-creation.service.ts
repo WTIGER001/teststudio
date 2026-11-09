@@ -7,7 +7,7 @@ export class RecordCreationService {
   private readonly api = inject(ApiService)
   private readonly uncertain = new Map<string, string>()
 
-  async create<T>(path: string, data: T, method: 'POST' | 'PUT', recordPath: string): Promise<RecordValue<T>> {
+  async create<T>(path: string, data: T, method: 'POST' | 'PUT', recordPath: string, revision?: number): Promise<RecordValue<T>> {
     const fingerprint = JSON.stringify(data)
     if (this.uncertain.has(recordPath)) {
       if (this.uncertain.get(recordPath) !== fingerprint) throw new Error('A previous save has an unknown outcome. Restore its entries or refresh and review the saved record before changing them.')
@@ -24,7 +24,7 @@ export class RecordCreationService {
       } catch (error) { if (!(error instanceof ApiError && error.status === 404)) throw error }
     }
     try {
-      const record = await this.api.request<RecordValue<T>>(path, method, data, method === 'PUT' ? 0 : undefined)
+      const record = await this.api.request<RecordValue<T>>(path, method, data, revision ?? (method === 'PUT' ? 0 : undefined))
       this.uncertain.delete(recordPath)
       return record
     } catch (error) {

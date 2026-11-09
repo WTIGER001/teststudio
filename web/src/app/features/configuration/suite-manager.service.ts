@@ -51,7 +51,7 @@ export class SuiteManagerService {
     try {
       const updated = await this.client.call('updateSuiteSettings', { ...this.scope(), revision: state.revision, body: this.form.getRawValue() })
       if (generation !== this.generation) return
-      this.apply(updated); this.message.set('Suite settings saved. Releases, history, and evidence remain unchanged.')
+      this.apply(updated); this.message.set('Suite settings saved. Versions, history, and evidence remain unchanged.')
     } catch (error) { if (generation === this.generation) this.fail(error) }
     finally { if (generation === this.generation) this.busy.set(false) }
   }
@@ -63,7 +63,7 @@ export class SuiteManagerService {
     try {
       const updated = await this.client.call('changeSuiteLifecycle', { ...this.scope(), action, revision: state.revision })
       if (generation !== this.generation) return
-      this.apply(updated); this.message.set(action === 'archive' ? 'Suite archived. New dispatch is blocked. Retained releases, results, evidence, and schedule pins remain available.' : 'Suite restored with the same identifier, active release, and schedule pins.')
+      this.apply(updated); this.message.set(action === 'archive' ? 'Suite archived. New dispatch is blocked. Retained versions, results, evidence, and schedule pins remain available.' : 'Suite restored with the same identifier, active version, and schedule pins.')
     } catch (error) { if (generation === this.generation) this.fail(error) }
     finally { if (generation === this.generation) this.busy.set(false) }
   }

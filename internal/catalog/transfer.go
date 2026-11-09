@@ -414,6 +414,6 @@ func (s *Service) Duplicate(ctx context.Context, user, project, suite, id, newID
 	t.ID = newID
 	t.DefinitionSource = ""
 	t.Title += " (copy)"
-	t.State = "draft"
+	t.State = "disabled"
 	return s.SaveTest(ctx, user, project, suite, t, 0)
 }

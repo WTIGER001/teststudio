@@ -102,7 +102,7 @@ export class ProbeTargetService {
     if (!this.parsed()) return 'Enter a complete HTTP or HTTPS URL without credentials or a fragment. HTTPS needs no port; it uses 443 automatically.'
     if (!this.loaded()) return this.error() || 'Wait for target options to load, or retry loading them.'
     if (this.matches().length && !this.match()) return 'Several registered targets match this address. Choose which target and its protection settings to use.'
-    if (run && this.target()?.data.disabled) return 'This registered target is disabled. Save a draft or choose an enabled registered target.'
+    if (run && this.target()?.data.disabled) return 'This registered target is disabled. Save a test or choose an enabled registered target.'
     if (this.needsTarget()) {
       if (!this.workspace.can('environments.manage')) return 'Saving this new address requires environment management permission. Choose an existing registered target instead.'
       if (this.needsApplication() && !this.workspace.can('projects.manage')) return 'Saving a new application for this address requires project management permission.'

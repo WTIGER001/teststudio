@@ -24,7 +24,7 @@ export class ProbeBulkService {
     const current=await this.api.request<RecordValue<ProbeBinding>>(`/api/v1/projects/${project}/probes/${row.probe.id}`)
     if(current.revision!==row.probe.revision||current.data.archived)throw new Error('A selected probe changed. Refresh the overview and select it again.')
     if(kind==='run'){
-     if(!row.probe.activeReleaseId)throw new Error('Publish and activate each selected suite before running its probes.')
+     if(!row.probe.activeReleaseId)throw new Error('Save each selected test and wait for setup before running its probes.')
      await this.api.request(`/api/v1/projects/${project}/runs/estimate`,'POST',this.request(row.probe))
     }
    }

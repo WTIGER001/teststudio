@@ -250,3 +250,43 @@ func TestStatusPagesEnforceContributorAndApplicationBoundaries(t *testing.T) {
 	accessCall(t, app, "PUT", base, d, "3", 403)
 	accessCall(t, manager, "GET", "/api/v1/projects/foreign/status-pages/managed-page", nil, "", 404)
 }
+
+func TestStatusPageSaveAppliesEnabledStateAndUpdatesAtomically(t *testing.T) {
+	c, _, binding := probeFixture(t)
+	base := "/api/v1/projects/example/status-pages/enabled-health"
+	enabled := true
+	definition := statuspages.Definition{Enabled: &enabled, ID: "enabled-health", Title: "Current health", Background: "#ffffff", Window: "24h", MaxAge: 900, Probes: []statuspages.Entry{{Probe: binding.ID, Title: "Website"}}}
+	row := accessCall(t, c, "PUT", base, definition, "0", 200)
+	token := row["data"].(map[string]any)["publicToken"].(string)
+	public := "/api/v1/public/status-pages/" + token
+	anon := *c
+	anon.http = &http.Client{}
+	if accessCall(t, &anon, "GET", public, nil, "", 200)["title"] != "Current health" {
+		t.Fatal("enabled save was not immediately public")
+	}
+	definition.Title = "Updated health"
+	accessCall(t, c, "PUT", base, definition, "1", 200)
+	if accessCall(t, &anon, "GET", public, nil, "", 200)["title"] != "Updated health" {
+		t.Fatal("save kept an older public version")
+	}
+	definition.Title = "Stale update"
+	accessCall(t, c, "PUT", base, definition, "1", 409)
+	if accessCall(t, &anon, "GET", public, nil, "", 200)["title"] != "Updated health" {
+		t.Fatal("stale update changed the public page")
+	}
+	enabled = false
+	accessCall(t, c, "PUT", base, definition, "2", 200)
+	accessCall(t, &anon, "GET", public, nil, "", 404)
+	enabled = true
+	accessCall(t, c, "PUT", base, definition, "3", 200)
+	accessCall(t, &anon, "GET", public, nil, "", 200)
+	if err := c.api.Auth.Engine.CreateGrant(t.Context(), permissions.Grant{OwnerKind: permissions.PrincipalUser, OwnerID: "admin", TeamScope: "example", PermissionName: "teststudio.statuspages.publish", Effect: permissions.EffectDeny}); err != nil {
+		t.Fatal(err)
+	}
+	definition.Title = "Not permitted"
+	accessCall(t, c, "PUT", base, definition, "4", 403)
+	retained := accessCall(t, c, "GET", base, nil, "", 200)
+	if retained["data"].(map[string]any)["title"] == definition.Title {
+		t.Fatal("save bypassed the existing sharing authority")
+	}
+}

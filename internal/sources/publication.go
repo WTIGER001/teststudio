@@ -86,6 +86,19 @@ func (s *Service) Publish(ctx context.Context, user, project, suite, id string, 
 		if _, err := bound.Content(ctx, user, project, suite, id); err != nil {
 			return err
 		}
+		if upload.Job != "" {
+			jobRow, err := bound.Store.Get(ctx, JobBucket(project, suite), upload.Job)
+			if err != nil {
+				return err
+			}
+			job, err := storage.Decode[Job](jobRow)
+			if err != nil {
+				return err
+			}
+			if err = bound.checkSavedTestJob(ctx, job); err != nil {
+				return err
+			}
+		}
 		catalogs := &catalog.Service{Store: bound.Store, Auth: auth}
 		if _, err := catalogs.ApplySourceImport(ctx, user, project, suite, upload.PlanID, 1, upload.ID); err != nil {
 			return err

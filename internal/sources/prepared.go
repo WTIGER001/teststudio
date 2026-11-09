@@ -21,6 +21,9 @@ func (s *Service) stagePrepared(ctx context.Context, job Job, result preparation
 	if result.Image != job.Image || result.Project != job.Project || result.Discovery.Manifest.Suite != job.Suite || result.Discovery.Manifest.Runner != job.Runner {
 		return upload, errors.New("inspection does not match its project, suite, or image")
 	}
+	if err := s.checkSavedTestJob(ctx, job); err != nil {
+		return upload, err
+	}
 	if err := s.checkRepositoryJob(ctx, job, false); err != nil {
 		return upload, err
 	}

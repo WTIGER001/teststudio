@@ -42,7 +42,7 @@ export class RepositoriesService {
     reference: new FormControl('main', { nonNullable: true, validators: [Validators.required, Validators.maxLength(256)] }),
     credential: new FormControl('', { nonNullable: true }),
     enabled: new FormControl(true, { nonNullable: true }),
-    autoActivate: new FormControl(false, { nonNullable: true }),
+    autoActivate: new FormControl(true, { nonNullable: true }),
     push: new FormControl(false, { nonNullable: true }),
     webhookCredential: new FormControl('', { nonNullable: true }),
     intervalSeconds: new FormControl(0, { nonNullable: true, validators: [Validators.min(0), Validators.max(86400)] }),
@@ -99,7 +99,7 @@ export class RepositoriesService {
     this.selected.set(row ?? null); this.editor.set(true); this.error.set(''); this.message.set('')
     const config = row?.data.configuration, reference = repositoryReference(config?.reference ?? 'heads/main')
     this.form.controls.id.enable()
-    this.form.reset({ id: row?.id ?? '', name: config?.name ?? '', repository: config?.repository ?? '', referenceKind: reference.kind, reference: reference.value, credential: config?.credentialReference ?? '', enabled: config?.enabled ?? true, autoActivate: config?.autoActivate ?? false, push: config?.pushEnabled ?? false, webhookCredential: config?.webhookCredentialReference ?? '', intervalSeconds: config?.syncIntervalSeconds ?? 0 })
+    this.form.reset({ id: row?.id ?? '', name: config?.name ?? '', repository: config?.repository ?? '', referenceKind: reference.kind, reference: reference.value, credential: config?.credentialReference ?? '', enabled: config?.enabled ?? true, autoActivate: true, push: config?.pushEnabled ?? false, webhookCredential: config?.webhookCredentialReference ?? '', intervalSeconds: config?.syncIntervalSeconds ?? 0 })
     this.form.controls.bindings.clear()
     if (config) for (const binding of config.bindings) this.addBinding(binding.suiteId, binding.manifestPath, binding.runner)
     else this.addBinding(this.sources.form.controls.suite.value)

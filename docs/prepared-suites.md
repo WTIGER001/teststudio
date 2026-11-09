@@ -4,7 +4,7 @@ TestStudio has a versioned manifest and a local isolated artifact inspector.
 The Import and sync tests page, API, and publisher CLI enqueue inspection jobs and publish reviewed catalogs.
 The local worker supports locally available immutable Go and Playwright images.
 Optional [hosted preparation](hosted-discovery.md) supports registry distribution images through the Kubernetes provider and private exchange.
-Inspection does not start tests. Publication and activation remain explicit actions.
+Inspection does not start tests. Normal UI saves select the current version automatically after successful setup. Legacy API and CLI publication operations remain compatible.
 The Import and sync tests page also uploads offline Go or Playwright ZIP bundles for a separate preparation worker.
 The CLI can assemble those bundles outside the API.
 Registered GitHub sources use the same durable preparation and reviewed publication workflow.
@@ -122,9 +122,9 @@ The [website execution profile](browser-execution.md) supports registered target
 The worker does not pull images or install source dependencies.
 
 Open Import and sync tests, select the destination suite, and enter the image digest and runner.
-Select Prepare image, inspect progress and retained logs, then open Review prepared source.
-Review catalog changes and validation issues before publication.
-Activation starts unchecked. Publication does not run tests.
+Select Save image or Save source ZIP. Inspect progress, retained logs, and validation issues. Successful setup saves and selects the current test version automatically.
+Review native definition uploads and select Save tests. Saving never starts a test run.
+Playwright source and recordings register tests immediately. Setup combines saved sources in the suite, preserves earlier tests and versions, and rejects setup superseded by a newer source save. Without a worker, source and catalog entries remain saved with pending readiness.
 
 Image jobs move from `received` to `discovering`, then `ready`, `failed`, or `cancelled`.
 Bundle jobs add a `preparing` stage before discovery. Expired unpublished bundles cannot dispatch or publish.

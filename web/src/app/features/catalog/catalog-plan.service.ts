@@ -31,10 +31,10 @@ export class CatalogPlanService {
     const generation = ++this.generation
     this.saving.set(true); this.error.set('')
     try {
-      await this.api.request(`/api/v1/projects/${encodeURIComponent(row.data.projectId)}/suites/${encodeURIComponent(row.data.suiteId)}/catalog-imports/${encodeURIComponent(row.id)}/apply`, 'POST', {}, row.revision)
+      await this.api.request(`/api/v1/projects/${encodeURIComponent(row.data.projectId)}/suites/${encodeURIComponent(row.data.suiteId)}/catalog-imports/${encodeURIComponent(row.id)}/apply?save=true`, 'POST', {}, row.revision)
       if (generation !== this.generation) return
-      this.plan.set(null); this.catalog.draft.set(null)
-      this.catalog.success.set('Catalog changes applied with revision history. Publish a release to use new definitions. Lifecycle restrictions apply immediately.')
+      this.plan.set(null)
+      this.catalog.success.set('Catalog changes saved. Current definitions and lifecycle settings are updated.')
       await this.catalog.load()
     } catch (error) { if (generation === this.generation) this.error.set(error instanceof Error ? error.message : 'The catalog plan could not be applied.') }
     finally { if (generation === this.generation) this.saving.set(false) }

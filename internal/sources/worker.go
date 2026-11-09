@@ -50,6 +50,12 @@ func (s *Service) startPreparation(ctx context.Context, builds, publish bool) <-
 			}
 
 			var err error
+			if _, saveErr := s.ProcessSavedTests(ctx); saveErr != nil && ctx.Err() == nil {
+				slog.Error("saved test setup could not persist its outcome")
+			}
+			if _, saveErr := s.ProcessSavedTestPublication(ctx); saveErr != nil && ctx.Err() == nil {
+				slog.Error("saved test setup could not finish")
+			}
 			if publish {
 				if _, publishErr := s.ProcessRepositoryPublication(ctx); publishErr != nil && ctx.Err() == nil {
 					slog.Error("repository publication could not persist its outcome")

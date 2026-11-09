@@ -25,7 +25,7 @@ import { CreateTestService } from './create-test.service'
       <p class="type-return"><a [routerLink]="service.sources.workspace.path('tests', 'new')" queryParamsHandling="preserve">← Choose another test type</a></p>
       @if (service.sources.error()) { <p class="notice error" role="alert">{{ service.sources.error() }}</p> }
       @if (service.sources.loading()) { <p role="status">Loading suites…</p> }
-      @else if (!service.sources.suites().length) { <section class="panel"><h2>Create a suite first</h2><p class="muted">Tests belong to a suite, which holds their releases and run settings.</p><a class="button primary" [routerLink]="service.sources.workspace.path('suites')">Create or manage suites</a></section> }
+      @else if (!service.sources.suites().length) { <section class="panel"><h2>Create a suite first</h2><p class="muted">Tests belong to a suite, which holds their versions and run settings.</p><a class="button primary" [routerLink]="service.sources.workspace.path('suites')">Create or manage suites</a></section> }
       @else if (service.kind() === 'https') {
         @if (service.sources.workspace.can('catalog.create')) { <section class="panel" aria-labelledby="create-probe-title"><h2 id="create-probe-title">Configure an HTTPS probe</h2><p class="muted">Name the test, configure its request, then review before saving.</p><ts-https-wizard /></section> }
         @else { <p class="notice">You need catalog creation permission to add an HTTPS probe.</p> }

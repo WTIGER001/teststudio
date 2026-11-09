@@ -11,7 +11,7 @@ import { SourcePreviewComponent } from './source-preview.component'
 @Component({
   standalone: true, imports: [DatePipe, ReactiveFormsModule, RouterLink, SourceUploadComponent, SourcePreviewComponent, PreparationComponent, RepositoriesComponent], providers: [SourcesService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Import and sync tests</h1><p class="muted">Write Playwright tests, upload HTTP definitions or source ZIPs, or sync a GitHub repository. Review before publishing.</p></div>
+    <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Import and sync tests</h1><p class="muted">Write Playwright tests, upload HTTP definitions or source ZIPs, or sync a GitHub repository. Review before saving.</p></div>
       @if (service.workspace.can('sources.manage') && service.workspace.can('catalog.import')) { <button type="button" class="button primary" [disabled]="!service.form.controls.suite.value || service.saving()" (click)="service.openEditor()">+ Upload tests</button> }
     </div>
     @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }
@@ -28,10 +28,10 @@ import { SourcePreviewComponent } from './source-preview.component'
       <section class="panel" aria-labelledby="source-history-title"><div class="section-top"><h2 id="source-history-title">Upload history</h2><button type="button" class="button secondary" [disabled]="service.loading() || service.saving()" (click)="service.list()">Refresh uploads</button></div>
         @if (service.loading()) { <p role="status">Loading uploads…</p> }
         @if (service.items().length) {
-          <div class="table-scroll"><table><caption class="sr-only">Retained uploads for the selected suite</caption><thead><tr><th>Source</th><th>State</th><th>Uploaded</th><th>Release</th><th>Action</th></tr></thead><tbody>
-            @for (item of service.items(); track item.id) { <tr><td><strong>{{ item.data.name }}</strong><div class="small muted">{{ item.data.format }} · {{ item.data.bytes }} bytes</div></td><td>{{ item.data.state }}</td><td><time [attr.datetime]="item.data.createdAt">{{ item.data.createdAt | date:'medium':'UTC' }} UTC</time></td><td class="release-id">{{ item.data.releaseId || 'Not published' }}</td><td><button type="button" class="button small secondary" [disabled]="service.saving()" (click)="service.inspect(item)" [attr.aria-label]="'Inspect ' + item.data.name">Inspect</button></td></tr> }
+          <div class="table-scroll"><table><caption class="sr-only">Retained uploads for the selected suite</caption><thead><tr><th>Source</th><th>State</th><th>Uploaded</th><th>Version</th><th>Action</th></tr></thead><tbody>
+            @for (item of service.items(); track item.id) { <tr><td><strong>{{ item.data.name }}</strong><div class="small muted">{{ item.data.format }} · {{ item.data.bytes }} bytes</div></td><td>{{ item.data.state === 'published' ? 'Saved' : item.data.state === 'staged' ? 'Ready to save' : item.data.state }}</td><td><time [attr.datetime]="item.data.createdAt">{{ item.data.createdAt | date:'medium':'UTC' }} UTC</time></td><td class="release-id">{{ item.data.releaseId || 'Not saved' }}</td><td><button type="button" class="button small secondary" [disabled]="service.saving()" (click)="service.inspect(item)" [attr.aria-label]="'Inspect ' + item.data.name">Inspect</button></td></tr> }
           </tbody></table></div>
-        } @else if (!service.loading()) { <div class="empty-state"><h3>No uploads in this suite.</h3><p>Prepare a Playwright draft or source ZIP, or upload native HTTP checks to preview a versioned release.</p></div> }
+        } @else if (!service.loading()) { <div class="empty-state"><h3>No uploads in this suite.</h3><p>Prepare a Playwright test or source ZIP, or upload native HTTP checks to review and save tests.</p></div> }
         @if (service.cursor()) { <button type="button" class="button secondary" [disabled]="service.loading()" (click)="service.list(true)">More uploads</button> }
       </section>
     }
@@ -40,5 +40,5 @@ import { SourcePreviewComponent } from './source-preview.component'
 })
 export class SourcesPage {
   readonly service = inject(SourcesService)
-  canLeave(): boolean { return !this.service.draftDirty() && !this.service.creationDirty() || window.confirm('This source draft has unsaved changes. Leave without saving?') }
+  canLeave(): boolean { return !this.service.draftDirty() && !this.service.creationDirty() || window.confirm('This source has unsaved changes. Leave without saving?') }
 }

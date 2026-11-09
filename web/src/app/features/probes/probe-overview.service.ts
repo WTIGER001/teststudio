@@ -63,7 +63,7 @@ export class ProbeOverviewService {
   async review(row: ProbeSummary, kind: 'run' | 'archive' | 'restore'): Promise<void> {
     this.action.set(row); this.kind.set(kind); this.key = randomId(); this.ready.set(false); this.error.set('')
     if (kind !== 'run') { this.ready.set(true); return }
-    if (!row.activeReleaseId) { this.error.set('Publish and activate a reviewed suite release first, or use Save and run from test creation.'); return }
+    if (!row.activeReleaseId) { this.error.set('Save the test and wait for setup first, or use Save and run from test creation.'); return }
     this.request = { suiteId: row.suiteId, environmentId: row.environmentId, testIds: [row.testId], executionLocation: row.executionLocation, releaseId: row.activeReleaseId, timeoutSeconds: 60, retries: 0 }
     this.busy.set(true)
     try { await this.api.request(`/api/v1/projects/${this.project()}/runs/estimate`, 'POST', this.request); this.ready.set(true) }

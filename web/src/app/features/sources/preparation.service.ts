@@ -57,7 +57,7 @@ export class PreparationService {
     this.detailGeneration++; this.reading = false
     this.busy.set(true); this.error.set(''); this.clearDownload()
     try {
-      const row = await this.client.call('enqueuePrebuiltPreparation', { ...this.scope(), key: this.key, body: this.form.getRawValue() })
+      const row = await this.client.call('enqueuePrebuiltPreparation', { ...this.scope(), key: this.key, body: { ...this.form.getRawValue(), saveAsTest: true } })
       if (generation !== this.generation) return
       this.selected.set(row); this.jobs.update(items => [row, ...items.filter(item => item.id !== row.id)])
     } catch (error) { if (generation === this.generation) this.fail(error) }
@@ -70,7 +70,7 @@ export class PreparationService {
     this.detailGeneration++; this.reading = false
     this.busy.set(true); this.error.set(''); this.clearDownload()
     try {
-      const row = await this.client.call('uploadSourceBundle', { ...this.scope(), key, query: { name: file.name, manifest }, body: file })
+      const row = await this.client.call('uploadSourceBundle', { ...this.scope(), key, query: { name: file.name, manifest, save: true }, body: file })
       if (generation !== this.generation) return
       this.selected.set(row); this.jobs.update(items => [row, ...items.filter(item => item.id !== row.id)])
     } catch (error) { if (generation === this.generation) this.fail(error) }

@@ -42,7 +42,7 @@ The self-test registrar follows suite cursors before updating existing definitio
 | `uncategorized` | Select definitions without a category. Do not combine it with a category path. |
 | `tag`, `owner`, `type`, `runner`, `safety` | Match an exact metadata value. |
 | `source` | Match the executable source or registered definition source identifier. |
-| `state` | Use all, active, draft, enabled, disabled, or archived. API requests default to all; the UI starts with active. |
+| `state` | Use all, active, draft, enabled, disabled, or archived. API requests default to all; the UI starts with active. The legacy draft value remains API-compatible and is displayed as Disabled. |
 | `sort` | Use title, title-desc, id, category, or updated. The default is title. |
 | `limit` | Return 1 through 100 records per page. The default is 30. |
 | `cursor` | Continue the same query. Treat the value as opaque. |
@@ -67,4 +67,5 @@ OpenAPI 0.28 and the generated client describe both list operations.
 Use the sidebar Application selector for scope. The catalog has no second application selector.
 Application routes preserve context in creation and retained history links. Clear filters keeps the active application.
 HTTPS probes uses /projects/{project}/probes. Clearing its filters keeps the HTTPS type.
-Shared suites retain one complete draft and release. Publication, import, export, and saved selections operate on that complete suite.
+Shared suites retain one current saved version and immutable history. Saves, import, export, and saved selections operate on that complete suite. There is no separate publication step.
+Source tests appear immediately after Save. The `sourceReady` list field reports whether the saved source revision is available in the current artifact. The UI shows Getting ready until setup finishes. Native HTTP definitions need no source setup.

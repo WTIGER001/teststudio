@@ -10,7 +10,7 @@ import { RepositoriesService } from './repositories.service'
   template: `
     <section class="panel" aria-labelledby="repository-editor-title">
       <h3 id="repository-editor-title">{{ service.selected() ? 'Edit repository source' : 'Register repository source' }}</h3>
-      <p class="small muted">Connect a repository, choose its suites, then review synchronization and publication before saving.</p>
+      <p class="small muted">Connect a repository, choose its suites, then review synchronization and save before saving.</p>
       <ts-wizard-stepper [steps]="['Repository', 'Suites', 'Review']" [current]="service.flow.step()" [reached]="service.flow.reached()" [disabled]="service.busy()" (selected)="service.flow.go($event); feedback.reveal()" />
       <form [formGroup]="service.form" tsWizardForm #feedback="tsWizardForm" (ngSubmit)="service.advance(); feedback.reveal()">
         <ts-wizard-heading [step]="service.flow.step()" [title]="titles[service.flow.step()]" />
@@ -59,8 +59,7 @@ import { RepositoriesService } from './repositories.service'
             </details>
             <div class="source-policies">
               <label class="checkbox-field"><input type="checkbox" formControlName="enabled">Enable repository synchronization</label>
-              <label class="checkbox-field"><input type="checkbox" formControlName="autoActivate">Publish and activate successful preparations automatically</label>
-              <p class="small muted">Automatic publication changes the active release for future runs and requires current publishing authority. With it disabled, review and publish each preparation yourself.</p>
+              <p class="small muted">Automatic save changes the active version for future runs and requires current saving authority. With it disabled, review and save each preparation yourself.</p>
               <p class="small muted">Saving does not start a manual sync, build, or test. Enabled push and periodic policies can queue future preparations. Synchronization never starts tests.</p>
             </div>
           }
@@ -77,7 +76,7 @@ import { RepositoriesService } from './repositories.service'
 })
 export class RepositoryEditorComponent {
   readonly service = inject(RepositoriesService)
-  readonly titles = ['Choose a repository', 'Choose suites and manifests', 'Review synchronization and publication']
+  readonly titles = ['Choose a repository', 'Choose suites and manifests', 'Review synchronization and save']
   constructor() {
     const host: ElementRef<HTMLElement> = inject(ElementRef)
     afterNextRender(() => host.nativeElement.querySelector<HTMLElement>('ts-wizard-heading h3')?.focus())

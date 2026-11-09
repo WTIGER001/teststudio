@@ -312,7 +312,7 @@ func TestPrebuiltOwnershipCannotBeAssignedByEditingOrDuplication(t *testing.T) {
 		t.Fatal(err)
 	}
 	detached, err := storage.Decode[catalog.Test](row)
-	if err != nil || detached.DefinitionSource != "" || detached.State != "draft" {
+	if err != nil || detached.DefinitionSource != "" || detached.State != "disabled" {
 		t.Fatal("duplicate inherited source ownership", err)
 	}
 	original, err := s.Store.Get(t.Context(), catalog.Bucket("tests", "alpha", "health"), "CODE-000")

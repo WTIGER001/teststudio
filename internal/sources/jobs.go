@@ -36,6 +36,11 @@ func (s *Service) EnqueuePrebuilt(ctx context.Context, user, project, suite, key
 		if err := auth.Check(ctx, user, project, "suite/"+suite, "catalog.import"); err != nil {
 			return err
 		}
+		if input.SaveAsTest {
+			if err := auth.Check(ctx, user, project, "suite/"+suite, "catalog.publish"); err != nil {
+				return err
+			}
+		}
 		if _, err := (&catalog.Service{Store: bound.Store, Auth: auth}).Tests(ctx, user, project, suite); err != nil {
 			return err
 		}
@@ -45,7 +50,7 @@ func (s *Service) EnqueuePrebuilt(ctx context.Context, user, project, suite, key
 			if err != nil {
 				return err
 			}
-			if job.Image != input.Image || job.Runner != input.Runner {
+			if job.Image != input.Image || job.Runner != input.Runner || job.AutoSave != input.SaveAsTest {
 				return errors.New("idempotency key reused for another preparation")
 			}
 			result = existing
@@ -54,7 +59,7 @@ func (s *Service) EnqueuePrebuilt(ctx context.Context, user, project, suite, key
 		if !errors.Is(err, storage.ErrNotFound) {
 			return err
 		}
-		job := Job{ID: id, Project: project, Suite: suite, Actor: user, Image: input.Image, Runner: input.Runner, Location: s.Location, State: "received", Phase: "validating", CreatedAt: time.Now().UTC()}
+		job := Job{AutoSave: input.SaveAsTest, ID: id, Project: project, Suite: suite, Actor: user, Image: input.Image, Runner: input.Runner, Location: s.Location, State: "received", Phase: "validating", CreatedAt: time.Now().UTC()}
 		row, err := storage.Put(JobBucket(project, suite), id, project, 0, job)
 		if err != nil {
 			return err

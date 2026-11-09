@@ -21,7 +21,7 @@ export function compareReleases(before: SourceCatalogRelease | undefined, after:
     if (!old) changes.push({ id: test.id, title: test.title, action: 'Added', fields: 'New definition' })
     else { const fields = testChanges(old, test); if (fields) changes.push({ id: test.id, title: test.title, action: 'Changed', fields }) }
   }
-  for (const test of before.catalog.tests) if (!next.has(test.id)) changes.push({ id: test.id, title: test.title, action: 'Removed', fields: 'Absent from selected release' })
+  for (const test of before.catalog.tests) if (!next.has(test.id)) changes.push({ id: test.id, title: test.title, action: 'Removed', fields: 'Absent from selected version' })
   return { changes: changes.sort((a, b) => a.id.localeCompare(b.id)), artifactChanged: stable(before.catalog.artifact) !== stable(after.catalog.artifact), timingChanged: stable(before.catalog.timing) !== stable(after.catalog.timing), captureChanged: stable(before.catalog.capture) !== stable(after.catalog.capture) }
 }
 export function filterReleases(releases: SourceCatalogRelease[], query: string): SourceCatalogRelease[] {

@@ -10,6 +10,30 @@ import (
 
 func (s *Server) catalogRoutes(m *http.ServeMux) {
 	base := "/api/v1/projects/{project}/suites/{suite}"
+	m.HandleFunc("POST "+base+"/tests/{test}/save", s.authorized(func(w http.ResponseWriter, r *http.Request) {
+		var value catalog.Test
+		if err := body(r, &value); err != nil {
+			problem(w, err)
+			return
+		}
+		if value.ID != r.PathValue("test") {
+			problem(w, errors.New("the test identifier is permanent"))
+			return
+		}
+		rev, err := revision(r)
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		project, suite := r.PathValue("project"), r.PathValue("suite")
+		saved, err := s.Catalog.SaveCurrentTestRecord(r.Context(), actor(r), project, suite, value, rev)
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		JSON(w, 200, saved)
+	}))
+
 	m.HandleFunc("GET /api/v1/projects/{project}/tests", s.authorized(s.projectTests))
 	m.HandleFunc("GET "+base+"/tests", s.authorized(s.catalogList))
 	m.HandleFunc("POST "+base+"/tests", s.authorized(func(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +55,12 @@ func (s *Server) catalogRoutes(m *http.ServeMux) {
 			problem(w, err)
 			return
 		}
-		s.record(w, r, catalog.Bucket("tests", p, suite), id)
+		saved, err := s.Catalog.ReadSavedTest(r.Context(), actor(r), p, suite, id)
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		JSON(w, 200, saved)
 	}))
 	m.HandleFunc("PUT "+base+"/tests/{test}", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		var v catalog.Test
@@ -76,7 +105,13 @@ func (s *Server) catalogRoutes(m *http.ServeMux) {
 			return
 		}
 		state := map[string]string{"enable": "enabled", "disable": "disabled", "archive": "archived", "restore": "enabled"}[r.PathValue("action")]
-		if err := s.Catalog.ChangeState(r.Context(), actor(r), p, suite, id, state, rev); err != nil {
+		var stateErr error
+		if r.URL.Query().Get("save") == "true" {
+			stateErr = s.Catalog.SaveLifecycle(r.Context(), actor(r), p, suite, id, state, rev)
+		} else {
+			stateErr = s.Catalog.ChangeState(r.Context(), actor(r), p, suite, id, state, rev)
+		}
+		if err := stateErr; err != nil {
 			problem(w, err)
 			return
 		}

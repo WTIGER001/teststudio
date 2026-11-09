@@ -20,8 +20,8 @@ import { ProbeTargetService } from './probe-target.service'
         </details>
       }
     } @else {
-      <div class="field"><label for="probe-target">Target environment</label><select id="probe-target" [formControl]="targets.environment"><option value="">Choose later — save a draft</option>@for (environment of targets.environments(); track environment.id) { <option [value]="environment.id">{{ environment.data.name }} · {{ environment.data.stage }}{{ environment.data.protected ? ' · Protected' : '' }}</option> }</select><small>The test keeps its endpoint alias for use in other environments.</small></div>
-      @if (targets.loaded() && !targets.environments().length) { <p class="notice">No readable enabled target environments. Enter a website URL above, or save a draft with an endpoint name.</p> }
+      <div class="field"><label for="probe-target">Target environment</label><select id="probe-target" [formControl]="targets.environment"><option value="">Choose later — save a test</option>@for (environment of targets.environments(); track environment.id) { <option [value]="environment.id">{{ environment.data.name }} · {{ environment.data.stage }}{{ environment.data.protected ? ' · Protected' : '' }}</option> }</select><small>The test keeps its endpoint alias for use in other environments.</small></div>
+      @if (targets.loaded() && !targets.environments().length) { <p class="notice">No readable enabled target environments. Enter a website URL above, or save a test with an endpoint name.</p> }
     }
     @if (targets.loading()) { <p role="status">Loading target options…</p> }
     @if (targets.error()) { <p class="notice error" role="alert">{{ targets.error() }}</p><button type="button" class="button secondary" [disabled]="targets.loading()" (click)="targets.load()">Retry target options</button> }

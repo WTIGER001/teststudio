@@ -19,6 +19,7 @@ export class CatalogTestEditorService {
   readonly editorOpen = signal(false)
   readonly editing = signal<CatalogItem | null>(null)
   readonly editingHTTP = computed(() => !this.editing() || this.editing()?.data.runner === 'http')
+  readonly savedVersion = signal('')
   readonly saving = signal(false)
   readonly error = signal('')
   private project = ''
@@ -35,7 +36,7 @@ export class CatalogTestEditorService {
   configure(project: string, suites: RecordValue<Suite>[]): void { this.project = project; this.suites.set(suites) }
   dirty(): boolean { return this.form.dirty || this.checkEditor.form.dirty || this.timingEditor.form.dirty || this.timingEditor.override.dirty }
   create(): void {
-    this.editing.set(null)
+    this.savedVersion.set(''); this.editing.set(null)
     this.timingEditor.reset()
     this.checkEditor.reset()
     this.form.reset({ suite: this.suites()[0]?.id ?? '', id: '', title: '', category: 'Availability', timeout: 10, safety: 'needs-review', rationale: 'Production safety has not been reviewed.' })
@@ -44,7 +45,7 @@ export class CatalogTestEditorService {
   }
 
   edit(item: CatalogItem): void {
-    this.editing.set(item)
+    this.savedVersion.set(''); this.editing.set(item)
     this.timingEditor.reset(item.data.timing)
     this.checkEditor.reset(item.data.check)
     this.form.reset({ suite: item.suiteId, id: item.id, title: item.data.title, category: item.data.category, timeout: item.data.timeoutSeconds, safety: item.data.safety, rationale: item.data.rationale })
@@ -66,8 +67,8 @@ export class CatalogTestEditorService {
       }
       if (this.editingHTTP()) test.check = { ...test.check, ...this.checkEditor.check()! }
       const base = `/api/v1/projects/${this.project}/suites/${value.suite}/tests`
-      if (existing) await this.api.request(`${base}/${value.id}`, 'PUT', test, existing.revision)
-      else await this.creation.create(base, test, 'POST', `${base}/${value.id}`)
+      const saved = existing ? await this.api.request<RecordValue<TestDefinition>>(`${base}/${value.id}/save`, 'POST', test, existing.revision) : await this.creation.create(`${base}/${value.id}/save`, test, 'POST', `${base}/${value.id}`, 0)
+      this.savedVersion.set(saved.savedVersionId ?? '')
       this.editorOpen.set(false); this.form.markAsPristine(); this.checkEditor.form.markAsPristine(); this.timingEditor.form.markAsPristine(); this.timingEditor.override.markAsPristine()
       return true
     } catch (error) { this.error.set(error instanceof Error ? error.message : 'The test could not be saved.'); return false }

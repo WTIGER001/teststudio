@@ -211,23 +211,25 @@ test('Record News and a visible story inside TestStudio without desktop setup', 
       await route.abort('failed')
     } else await route.continue()
   })
-  await recorder.getByRole('button', { name: 'Save test draft', exact: true }).click()
-  await expect(recorder.getByRole('status').filter({ hasText: 'Test draft saved.' })).toBeVisible()
+  await recorder.getByRole('button', { name: 'Save test', exact: true }).click()
+  await expect(recorder.getByRole('status').filter({ hasText: 'Test saved.' })).toBeVisible()
   await recorder.getByRole('button', { name: 'Advanced: review source', exact: true }).click()
   await expect(page.getByRole('textbox', { name: 'Source code: checks/recording.spec.ts', exact: true })).toContainText('toBeVisible()')
   await page.getByText('Advanced source editing', { exact: true }).click()
   await page.reload()
   await recorder.getByText('Your recording history', { exact: true }).click()
   await recorder.getByRole('button', { name: 'News lists stories · Ready for review', exact: true }).click()
-  await recorder.getByRole('button', { name: 'Save test draft', exact: true }).click()
-  await expect(recorder.getByRole('status').filter({ hasText: 'Test draft saved.' })).toBeVisible()
-  await expect(recorder.getByRole('region', { name: 'Next step for saved recording', exact: true })).toBeVisible()
-  await recorder.getByRole('button', { name: 'Prepare saved test', exact: true }).click()
-  await expect(page.getByRole('heading', { name: 'Suite preparation', exact: true })).toBeFocused()
-  await expect(recorder.getByRole('status').filter({ hasText: 'Revision 1 queued.' })).toBeVisible()
+  await recorder.getByRole('button', { name: 'Save test', exact: true }).click()
+  await expect(recorder.getByRole('status').filter({ hasText: 'Test saved.' })).toBeVisible()
+  await expect(recorder.getByRole('region', { name: 'Saved test', exact: true })).toBeVisible()
+  await expect(recorder.getByRole('button', { name: 'Prepare saved test', exact: true })).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: 'Suite preparation', exact: true })).toHaveCount(0)
   const drafts = await (await page.request.get('/api/v1/projects/beta/suites/health/playwright-drafts')).json()
   expect(drafts.items).toHaveLength(1)
   expect(drafts.items[0].revision).toBe(1)
+  expect(drafts.items[0].data.saveAsTest).toBe(true)
+  const catalog = await (await page.request.get('/api/v1/projects/beta/suites/health/tests')).json()
+  expect(catalog.items.map((item: { data: {title: string} }) => item.data.title)).toContain('News lists stories')
   const savedSource = drafts.items[0].data.files.find((file: { path: string }) => file.path === 'checks/recording.spec.ts').content
   for (const expected of ['toBeGreaterThanOrEqual(1)', 'toHaveCount(2)', 'toContainText(\"Regional harvest\")', 'toHaveURL(', 'setViewportSize({ width: 800, height: 600 })']) expect(savedSource).toContain(expected)
   expect(savedSource).not.toContain('teststudio_')
@@ -235,6 +237,42 @@ test('Record News and a visible story inside TestStudio without desktop setup', 
   await page.setViewportSize({ width: 1440, height: 1000 })
   await page.getByLabel('Color theme', { exact: true }).selectOption('light')
   await testInfo.attach('embedded-news-saved', { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' })
+  const setupURL = page.url()
+  const navigationErrors: string[] = []
+  const captureNavigationError = (message: import('@playwright/test').ConsoleMessage) => { if (message.type() === 'error') navigationErrors.push(message.text()) }
+  let leavePrompt = ''
+  const captureLeavePrompt = async (dialog: import('@playwright/test').Dialog) => { leavePrompt = dialog.message(); await dialog.dismiss() }
+  page.on('console', captureNavigationError); page.on('dialog', captureLeavePrompt)
+  await recorder.getByRole('link', { name: 'View tests', exact: true }).click()
+  try { await expect(page.getByRole('heading', { name: 'Test catalog', exact: true })).toBeVisible() }
+  catch { throw new Error('Saved-test navigation failed: ' + JSON.stringify({ url: page.url(), leavePrompt, navigationErrors })) }
+  finally { page.off('console', captureNavigationError); page.off('dialog', captureLeavePrompt) }
+
+  await expect(page.getByText('News lists stories', { exact: true }).first()).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Publish a release', exact: true })).toHaveCount(0)
+  await page.goto(setupURL + '&recording=' + drafts.items[0].id)
+  await expect.poll(async () => {
+    const current = await (await page.request.get('/api/v1/projects/beta/tests?suite=health')).json()
+    return current.items.filter((item: { sourceReady?: boolean }) => item.sourceReady).length
+  }, { timeout: 20000 }).toBe(1)
+  const firstSuites = await (await page.request.get('/api/v1/projects/beta/suites')).json()
+  const firstVersion = firstSuites.items.find((row: {id:string}) => row.id === 'health').data.activeReleaseId
+  await recorder.getByRole('button', { name: 'New recording', exact: true }).click()
+  await recorder.getByLabel('Recorded test title', { exact: true }).fill('Second saved browser test')
+  await recorder.getByRole('button', { name: 'Start recording', exact: true }).click()
+  await expect(browser).toBeVisible({ timeout: 15000 })
+  await recorder.getByRole('button', { name: 'Finish recording', exact: true }).click()
+  await recorder.getByRole('button', { name: 'Save test', exact: true }).click()
+  await expect(recorder.getByRole('status').filter({ hasText: 'Test saved.' })).toBeVisible()
+  await expect.poll(async () => {
+    const current = await (await page.request.get('/api/v1/projects/beta/tests?suite=health')).json()
+    return current.items.filter((item: { sourceReady?: boolean }) => item.sourceReady).length
+  }, { timeout: 20000 }).toBe(2)
+  const previous = await (await page.request.get('/api/v1/projects/beta/suites/health/releases/' + firstVersion)).json()
+  expect(previous.data.catalog.tests).toHaveLength(1)
+  expect(previous.data.catalog.tests[0].title).toBe('News lists stories')
+  const currentSuites = await (await page.request.get('/api/v1/projects/beta/suites')).json()
+  expect(currentSuites.items.find((row: {id:string}) => row.id === 'health').data.activeReleaseId).not.toBe(firstVersion)
   await recorder.getByRole('button', { name: 'New recording', exact: true }).click()
   await recorder.getByRole('button', { name: 'Start recording', exact: true }).click()
   await expect(browser).toBeVisible({ timeout: 15000 })

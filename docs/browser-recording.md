@@ -6,8 +6,9 @@ The user selects browser recording without tester installation as the next deliv
 The [hosted recording plan](hosted-recording-plan.md) separates the local proof, isolated hosted worker, preparation and execution, and actual tester acceptance.
 The recording browser appears inside TestStudio. Testers install no companion or development tools.
 Select Start recording, click News on a generic website, select Check something appears, and select a story.
-Finish recording opens a plain-language step review. Save test draft reuses the existing source draft service.
-Advanced source editing remains available. Saving does not prepare, publish, or execute.
+Finish recording opens a plain-language step review. Select Save test, then View tests to find it in the catalog.
+The test appears immediately in the selected suite and application. Source setup runs automatically. Getting ready means setup has not finished. An installation without a preparation worker retains the source and test until a worker is available. Saving never executes the test.
+Advanced source editing remains available. Saving a second recording preserves earlier tests and immutable history.
 Help and page reload preserve the live session. Refresh browser view recovers an uncertain input without repeating it.
 Finish waits for queued input. Cancel closes the owned browser.
 Operators can select the separate [private recording worker](recording-worker.md) or the loopback-only local preview.
@@ -39,19 +40,19 @@ Use those windows to record actions and add assertions.
 Select Stop and keep recording to close the owned windows and retain generated source.
 Closing the recording browser also ends the session. The page detects that change during polling.
 Select Review recorded test to open an unsaved source workspace.
-Saving that workspace creates a durable source draft.
+Save test stores the source and registers the test immediately.
 
 ## Review and execution
 
 The source converter adds the permanent test tag and matching catalog selector.
 It retains actions and assertions and uses the needs-review safety label.
 Supported start-origin navigation receives a visible runtime target expression. The original code stays in private recording history.
-Review code, assertions, timeouts, capture settings, and safety metadata before publication.
+Review code, assertions, timeouts, capture settings, and safety metadata before saving.
 Raw generated code remains readable when conversion cannot identify one standard recorded test.
 
-Recording, draft saving, publication, and execution remain separate operations.
-Recorded drafts use the separate [local website execution profile](browser-execution.md).
-Review and save the source, prepare it, publish a release, then select a registered environment for execution.
+Recording and explicit execution remain separate operations.
+Recorded tests use the separate [local website execution profile](browser-execution.md).
+Review and save the source. Setup makes the current test version available automatically. Select a registered environment when starting a run.
 The offline starter retains its existing isolated profile. It cannot reach a website.
 The current native recorder requires a local desktop.
 Installations configured for desktop recording use the [desktop companion](recorder-companion.md) through the guided connection step.
@@ -67,7 +68,7 @@ The desktop command, guided wizard, and real Chromium capture now have focused l
 The wizard shows the desktop command and a temporary connection code. Its First-time desktop setup disclosure describes the operator-provided archive and setup script.
 Get new connection code rotates an unclaimed code. The page clears the code after pairing and hides it after expiry.
 Reload restores the active recording status. It does not restore a connection code.
-The final review opens the existing source editor. Saving does not prepare, publish, activate, or execute the test.
+The final review opens the existing source editor. Save test registers the test and queues source setup without executing it.
 
 A hosted session starts in pairing state. Its owner requests a five-minute connection token.
 The desktop supplies a separate random device token before pairing. The server stores only credential hashes.
@@ -87,7 +88,7 @@ The client uses outbound HTTPS. No local HTTP listener or browser connection bri
 
 Only the recording owner can read a session and its generated code.
 Current suite source permissions also apply to each request.
-Saving a source draft makes that draft available through normal suite source permissions.
+Saving source makes it available through normal suite source permissions.
 The recording history shows the current actor's sessions for the selected suite.
 Reopening a page resumes polling for an active session.
 Repeated identical session identifiers do not open another recording browser.
@@ -136,7 +137,7 @@ Routes use /api/v1/projects/{project}/suites/{suite}/browser-recordings.
 | POST | /{id}/pairing | Issue or rotate an unclaimed hosted connection token. |
 | POST | /{id}/actions/stop | Close the recorder and retain generated source. |
 | POST | /{id}/actions/cancel | Cancel the recording and close its browser. |
-| GET | /{id}/source | Convert a finished recording into an unsaved source draft. |
+| GET | /{id}/source | Convert a finished recording into an unsaved source workspace. |
 
 Managed sessions protect all routes. Mutations require Origin and request-forgery protection.
 Starting and stopping require current source management permission.

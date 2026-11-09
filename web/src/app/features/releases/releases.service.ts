@@ -74,14 +74,14 @@ export class ReleasesService {
     try {
       await this.client.call('activateRetainedRelease', { project: this.project(), suite: registry.suiteId, id: release.id, revision: registry.suiteRevision })
       if (generation !== this.generation) return
-      this.message.set('Release activated for future runs. Existing runs and pinned schedules retain their releases.'); await this.refresh()
+      this.message.set('Version activated for future runs. Existing runs and pinned schedules retain their versions.'); await this.refresh()
     } catch (error) { if (generation === this.generation) this.fail(error) }
     finally { if (generation === this.generation) this.busy.set(false) }
   }
 
   private fail(error: unknown): void {
-    if (error instanceof ApiError && error.status === 409) { this.conflict.set(true); this.error.set('Suite settings or the active release changed. Refresh retained releases before activating again.'); return }
-    this.error.set(error instanceof Error ? error.message : 'Retained releases could not be loaded.')
+    if (error instanceof ApiError && error.status === 409) { this.conflict.set(true); this.error.set('Suite settings or the active version changed. Refresh retained versions before activating again.'); return }
+    this.error.set(error instanceof Error ? error.message : 'Retained versions could not be loaded.')
     if (error instanceof ApiError && (error.status === 401 || error.status === 403)) { this.registry.set(null); this.selected.set(null) }
   }
 }

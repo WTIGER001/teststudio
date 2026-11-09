@@ -74,6 +74,10 @@ func (s *Service) ListTests(ctx context.Context, user, project, routeSuite strin
 		} else if err != nil {
 			return result, err
 		}
+		readiness, err := s.savedSourceReadiness(ctx, project, suite)
+		if err != nil {
+			return result, err
+		}
 		rows, err := s.Store.All(ctx, Bucket("tests", project, suite.ID), project)
 		if err != nil {
 			return result, err
@@ -94,7 +98,11 @@ func (s *Service) ListTests(ctx context.Context, user, project, routeSuite strin
 			if q.Application != "" && (test.Application != "" && test.Application != q.Application || test.Application == "" && !slices.Contains(suite.Applications, q.Application)) {
 				continue
 			}
-			all = append(all, listItem{Entry: ListEntry{ID: row.ID, Project: project, Suite: suite.ID, SuiteName: suite.Name, Revision: row.Revision, Data: row.Data, Updated: row.Updated}, Test: test})
+			ready, err := s.sourceReady(ctx, project, suite.ID, test, &readiness)
+			if err != nil {
+				return result, err
+			}
+			all = append(all, listItem{Entry: ListEntry{SourceReady: ready, ID: row.ID, Project: project, Suite: suite.ID, SuiteName: suite.Name, Revision: row.Revision, Data: row.Data, Updated: row.Updated}, Test: test})
 		}
 	}
 	if routeSuite != "" {

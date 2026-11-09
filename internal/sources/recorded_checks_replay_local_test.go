@@ -50,40 +50,52 @@ func replayRecordedChecks(t *testing.T, service *sources.Service, runner *runs.S
 	if err != nil {
 		t.Fatal(err)
 	}
+	var job sources.Job
+	for deadline := time.Now().Add(25 * time.Second); time.Now().Before(deadline); {
+		jobs, err := service.ListJobs(t.Context(), "admin", "beta", "health", "", 30)
+		if err != nil {
+			t.Fatal(err)
+		}
+		latestSuite, err := service.Store.Get(t.Context(), suiteRow.Bucket, suiteRow.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		currentSuite, err := storage.Decode[projects.Suite](latestSuite)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, record := range jobs.Items {
+			value, err := storage.Decode[sources.Job](record)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if value.State == "published" && value.Release == currentSuite.ActiveRelease {
+				job = value
+				break
+			}
+		}
+		if job.State == "published" {
+			break
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	if job.State != "published" || job.SavedDraftRevisions[recorded.ID] == 0 || !job.AutoSave {
+		t.Fatalf("save did not automatically make both tests ready: %+v", job)
+	}
+	suiteRow, err = service.Store.Get(t.Context(), suiteRow.Bucket, suiteRow.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
 	suite, err := storage.Decode[projects.Suite](suiteRow)
 	if err != nil {
 		t.Fatal(err)
 	}
-	suite.RequiresTarget = true
+	if suite.ActiveRelease != job.Release {
+		t.Fatal("saving required an additional activation step")
+	}
 	suite.Applications = []string{"replay"}
 	if err := registry.SaveSuite(t.Context(), "admin", "beta", suite, suiteRow.Revision); err != nil {
 		t.Fatal(err)
-	}
-	jobs, err := service.ListJobs(t.Context(), "admin", "beta", "health", "", 30)
-	if err != nil || len(jobs.Items) != 1 {
-		t.Fatal("saved recording preparation was not queued once", err)
-	}
-	queued, err := storage.Decode[sources.Job](jobs.Items[0])
-	if err != nil || queued.Draft != recorded.ID {
-		t.Fatal("preparation selected another recording", err)
-	}
-	if done, err := service.ProcessBuildNext(t.Context(), "recorded-checks-builder"); err != nil || !done {
-		t.Fatal("saved recording did not prepare", done, err)
-	}
-	row, err := service.ReadJob(t.Context(), "admin", "beta", "health", queued.ID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	job, err := storage.Decode[sources.Job](row)
-	if err != nil || job.State != "ready" {
-		t.Fatalf("saved recording preparation state=%s error=%s: %v", job.State, job.Error, err)
-	}
-	release, err := service.Publish(t.Context(), "admin", "beta", "health", job.Upload, 1, true)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(release.Draft.Tests) != 1 || release.Draft.Tests[0].ID != recorded.TestID {
-		t.Fatal("publication changed the recorded test identity")
 	}
 	policy := capture.DefaultPolicy()
 	policy.Screenshots = "always"

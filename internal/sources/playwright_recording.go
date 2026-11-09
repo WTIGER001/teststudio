@@ -31,7 +31,7 @@ func RecordedDraft(value recording.Session) (PlaywrightDraft, error) {
 	}
 	draft := StarterDraft()
 	draft.ID, draft.Name, draft.TargetURL = domain.NewID(), value.Title, value.URL
-	if value.Mode == "embedded" {
+	if domain.ValidID(value.ID) {
 		draft.ID = value.ID
 	}
 	draft.Files[0] = EditorFile{Path: "checks/recording.spec.ts", Content: code}

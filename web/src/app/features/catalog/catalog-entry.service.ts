@@ -50,7 +50,7 @@ export class CatalogEntryService {
       const id = this.newID.value
       await this.api.request(`${this.base(item)}/actions/duplicate`, 'POST', { id }, item.revision)
       if (generation !== this.generation) return
-      this.close(); this.catalog.draft.set(null); this.catalog.success.set(`Created ${id} as a new draft identity with independent history.`)
+      this.close(); this.catalog.success.set(`Created ${id} as a new test identity with independent history.`)
       await this.catalog.load()
     } catch (error) { if (generation === this.generation) this.error.set(error instanceof Error ? error.message : 'The test could not be duplicated.') }
     finally { if (generation === this.generation) this.loading.set(false) }

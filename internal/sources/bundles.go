@@ -46,11 +46,11 @@ func jobQueue(job Job) string {
 }
 func activeJob(state string) bool { return state == "preparing" || state == "discovering" }
 
-func (s *Service) EnqueueBundle(ctx context.Context, user, project, suite, key, name, manifest string, data []byte) (storage.Record, error) {
-	return s.enqueueBundle(ctx, user, project, suite, key, name, manifest, data, nil, nil)
+func (s *Service) EnqueueBundle(ctx context.Context, user, project, suite, key, name, manifest string, data []byte, saveAsTest ...bool) (storage.Record, error) {
+	return s.enqueueBundle(ctx, user, project, suite, key, name, manifest, data, nil, nil, nil, len(saveAsTest) > 0 && saveAsTest[0])
 }
 
-func (s *Service) enqueueBundle(ctx context.Context, user, project, suite, key, name, manifest string, data []byte, repository *repositoryPreparation, draft *storage.Record) (result storage.Record, err error) {
+func (s *Service) enqueueBundle(ctx context.Context, user, project, suite, key, name, manifest string, data []byte, repository *repositoryPreparation, draft *storage.Record, savedDrafts map[string]int64, autoSave bool) (result storage.Record, err error) {
 	if err := s.check(ctx, user, project, suite, "manage"); err != nil {
 		return result, err
 	}
@@ -84,6 +84,11 @@ func (s *Service) enqueueBundle(ctx context.Context, user, project, suite, key, 
 		if err := auth.Check(ctx, user, project, "suite/"+suite, "catalog.import"); err != nil {
 			return err
 		}
+		if autoSave {
+			if err := auth.Check(ctx, user, project, "suite/"+suite, "catalog.publish"); err != nil {
+				return err
+			}
+		}
 		if _, err := (&catalog.Service{Store: bound.Store, Auth: auth}).Tests(ctx, user, project, suite); err != nil {
 			return err
 		}
@@ -112,7 +117,7 @@ func (s *Service) enqueueBundle(ctx context.Context, user, project, suite, key, 
 			if err != nil {
 				return err
 			}
-			if (repository == nil && job.SourceDigest != snapshot.Digest) || job.Manifest != manifest || job.SourceName != name || (draft != nil && (job.Draft != draft.ID || job.DraftRevision != draft.Revision)) || (repository != nil && (job.RepositorySource != repository.Source || job.SourceGeneration != repository.Generation || job.Origin == nil || job.Origin.Commit != repository.Origin.Commit)) {
+			if (repository == nil && job.SourceDigest != snapshot.Digest || job.AutoSave != autoSave) || job.Manifest != manifest || job.SourceName != name || (draft != nil && (job.Draft != draft.ID || job.DraftRevision != draft.Revision)) || (repository != nil && (job.RepositorySource != repository.Source || job.SourceGeneration != repository.Generation || job.Origin == nil || job.Origin.Commit != repository.Origin.Commit)) {
 				return errors.New("idempotency key reused for another source bundle")
 			}
 			if repository != nil && job.State != "published" && job.SourceSequence < repository.Sequence {
@@ -139,8 +144,18 @@ func (s *Service) enqueueBundle(ctx context.Context, user, project, suite, key, 
 		}
 		now := time.Now().UTC()
 		expires := now.Add(StagingLifetime)
-		job := Job{Kind: "bundle", Bundle: id, SourceDigest: snapshot.Digest, SourceName: name, Manifest: manifest, ID: id, Project: project, Suite: suite, Actor: user, Runner: snapshot.Manifest.Runner, Location: s.Location, State: "received", Phase: "validating", CreatedAt: now}
+		job := Job{AutoSave: autoSave, Kind: "bundle", Bundle: id, SourceDigest: snapshot.Digest, SourceName: name, Manifest: manifest, ID: id, Project: project, Suite: suite, Actor: user, Runner: snapshot.Manifest.Runner, Location: s.Location, State: "received", Phase: "validating", CreatedAt: now}
 		if draft != nil {
+			job.SavedDraftRevisions = savedDrafts
+			for id, rev := range savedDrafts {
+				record, err := bound.Store.Get(ctx, draftBucket(project, suite), id)
+				if err != nil {
+					return err
+				}
+				if record.Revision != rev {
+					return storage.ErrConflict
+				}
+			}
 			job.Draft, job.DraftRevision = draft.ID, draft.Revision
 		}
 		bundle := Bundle{ID: id, Project: project, Suite: suite, Name: name, Manifest: manifest, Digest: snapshot.Digest, Content: data, ExpiresAt: expires}

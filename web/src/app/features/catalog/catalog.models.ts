@@ -32,6 +32,6 @@ export interface TestDefinition {
   check?: HTTPCheck
 }
 
-export interface CatalogItem extends RecordValue<TestDefinition> { suiteId: string; suiteName: string }
+export interface CatalogItem extends RecordValue<TestDefinition> { suiteId: string; suiteName: string; sourceReady?: boolean }
 export interface Draft { id: string; tests: TestDefinition[]; publishedReleaseId?: string }
 export interface Issue { testId?: string; field: string; message: string }

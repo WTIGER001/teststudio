@@ -1,7 +1,7 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio API"
-  "version": "0.47.0"
+  "version": "0.48.0"
   "description": "Implemented user, group, membership, current-profile, and session administration. Includes cumulative Reader, Member, Developer, Contributor, and Owner roles at Project and Application scope, System Admin naming, atomic standard-role replacement, usable-Owner safeguards, scoped capability and explanation queries, and reviewed role conversions with rollback previews. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Includes optional client-identifier RP-initiated provider logout after local session revocation. Includes staged native JSON and YAML sources with atomic catalog publication and retained source provenance. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
@@ -10,6 +10,7 @@
   -
     "SessionCookie": []
 "paths":
+  "/api/v1/projects/{project}/suites/{suite}/tests/{test}/save": {"post":{"operationId":"saveCurrentCatalogTest","summary":"Save a test and use its current runnable definition without a separate publication step. Preserves execution history and never starts a run.","parameters":[{"in":"path","name":"project","required":true,"schema":{"type":"string"}},{"in":"path","name":"suite","required":true,"schema":{"type":"string"}},{"in":"path","name":"test","required":true,"schema":{"type":"string"}},{"in":"header","name":"If-Match","required":true,"schema":{"type":"string"}}],"security":[{"SessionCookie":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/SourceCatalogTest"}}}},"responses":{"200":{"description":"Saved test record","content":{"application/json":{"schema":{"$ref":"#/components/schemas/CatalogTestRecord"}}}}}}}
   "/auth/providers": {"get":{"operationId":"readSignInOptions","summary":"Public sign-in choices and an optional SSO-only automatic redirect. No provider credentials are exposed.","security":[],"responses":{"200":{"description":"Current sign-in choices. Never cache.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/SignInOptions"}}}}}}}
   "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/input": {"post":{"operationId":"sendBrowserRecordingInput","summary":"Send one sequenced browser action. Exact retries are idempotent; refresh the view after an uncertain response. Requires current owner authority and an active suite.","parameters":[{"in":"path","name":"project","required":true,"schema":{"type":"string"}},{"in":"path","name":"suite","required":true,"schema":{"type":"string"}},{"in":"path","name":"id","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"Private browser view. Never cache.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/BrowserRecordingView"}}}},"401":{"$ref":"#/components/responses/Problem"},"403":{"$ref":"#/components/responses/Problem"},"409":{"$ref":"#/components/responses/Problem"},"422":{"$ref":"#/components/responses/Problem"}},"security":[{"SessionCookie":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/BrowserRecordingAction"}}}}}}
   "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/view": {"post":{"operationId":"readBrowserRecordingView","summary":"Read an owner-private live browser frame and plain-language steps. Requires current source management authority. Uses the configured embedded recorder backend. Selected-element details and bounded outlines are owner-private.","parameters":[{"in":"path","name":"project","required":true,"schema":{"type":"string"}},{"in":"path","name":"suite","required":true,"schema":{"type":"string"}},{"in":"path","name":"id","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"Private browser view. Never cache.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/BrowserRecordingView"}}}},"401":{"$ref":"#/components/responses/Problem"},"403":{"$ref":"#/components/responses/Problem"},"409":{"$ref":"#/components/responses/Problem"},"422":{"$ref":"#/components/responses/Problem"}},"security":[{"SessionCookie":[]}]}}
@@ -2080,6 +2081,7 @@
     "post": {
       "operationId": "changeCatalogTestState",
       "parameters": [
+        {"in":"query","name":"save","schema":{"type":"boolean"},"description":"Use the changed definitions for future runs automatically."},
         {
           "in": "path",
           "name": "project",
@@ -4674,6 +4676,7 @@
     "post":
       "operationId": "applyCatalogPlan"
       "parameters":
+        - {"in":"query","name":"save","schema":{"type":"boolean"},"description":"Save the imported definitions as the current version automatically."}
         -
           "in": "path"
           "name": "project"
@@ -8050,6 +8053,10 @@
     "post":
       "operationId": "uploadSourceBundle"
       "parameters":
+        - "in": "query"
+          "name": "save"
+          "schema":
+            "type": "boolean"
         - "in": "path"
           "name": "project"
           "required": true
@@ -8568,8 +8575,8 @@
     "ReliabilityCheck": {"type":"object","properties":{"at":{"type":"string"},"state":{"type":"string"},"durationMs":{"type":["number","null"]},"censored":{"type":"boolean"},"runId":{"type":"string"}},"required":["at","state","durationMs","censored"]}
     "StatusPageSlugAvailability": {"type":"object","properties":{"slug":{"type":"string"},"available":{"type":"boolean"}},"required":["slug","available"]}
     "StatusPageEntry": {"type":"object","additionalProperties":false,"properties":{"probeId":{"type":"string"},"title":{"type":"string","minLength":1,"maxLength":256},"description":{"type":"string","maxLength":2048},"suiteId":{"type":"string"},"testId":{"type":"string"},"environmentId":{"type":"string"},"executionLocation":{"type":"string"},"monitor":{"type":"boolean"}},"required":["title","description"],"description":"Select either probeId or suiteId and testId with an explicit target scope. Direct checks default to outcome metrics; monitor enables the page freshness policy."}
-    "StatusPageDefinition": {"type":"object","additionalProperties":false,"properties":{"id":{"type":"string"},"title":{"type":"string"},"background":{"type":"string","pattern":"^#[0-9a-fA-F]{6}$"},"defaultWindow":{"type":"string","enum":["24h","7d","1m","1y","all"]},"maxAgeSeconds":{"type":"integer","minimum":60,"maximum":86400},"probes":{"type":"array","minItems":1,"maxItems":100,"items":{"$ref":"#/components/schemas/StatusPageEntry"}},"slug":{"type":"string","maxLength":63,"description":"Optional installation-wide vanity name. Normalized to lowercase and reserved atomically on save. Retired names cannot be assigned to another page."},"logo":{"type":"string","maxLength":262144,"description":"Optional public HTTPS image URL up to 2048 characters or validated PNG/JPEG data URL up to 256 KiB. Public only in the published snapshot. The server does not fetch referenced URLs."},"logoAlt":{"type":"string","maxLength":256,"description":"Optional accessible alternative text. Defaults to the page title plus logo in the viewer."},"logoHeight":{"type":"integer","minimum":0,"maximum":1024,"description":"Optional height in CSS pixels. Omit or use 0 for automatic sizing. Positive heights preserve proportions and shrink to fit narrow containers."}},"required":["id","title","background","defaultWindow","maxAgeSeconds","probes"]}
-    "StatusPage": {"type":"object","additionalProperties":false,"properties":{"id":{"type":"string"},"title":{"type":"string"},"background":{"type":"string","pattern":"^#[0-9a-fA-F]{6}$"},"defaultWindow":{"type":"string","enum":["24h","7d","1m","1y","all"]},"maxAgeSeconds":{"type":"integer","minimum":60,"maximum":86400},"probes":{"type":"array","minItems":1,"maxItems":100,"items":{"$ref":"#/components/schemas/StatusPageEntry"}},"publicToken":{"type":"string"},"published":{"$ref":"#/components/schemas/StatusPageDefinition"},"publisher":{"type":"string"},"publishedAt":{"type":"string","format":"date-time"},"slug":{"type":"string","maxLength":63,"description":"Optional installation-wide vanity name. Normalized to lowercase and reserved atomically on save. Retired names cannot be assigned to another page."},"logo":{"type":"string","maxLength":262144,"description":"Optional public HTTPS image URL up to 2048 characters or validated PNG/JPEG data URL up to 256 KiB. Public only in the published snapshot. The server does not fetch referenced URLs."},"logoAlt":{"type":"string","maxLength":256,"description":"Optional accessible alternative text. Defaults to the page title plus logo in the viewer."},"logoHeight":{"type":"integer","minimum":0,"maximum":1024,"description":"Optional height in CSS pixels. Omit or use 0 for automatic sizing. Positive heights preserve proportions and shrink to fit narrow containers."}},"required":["id","title","background","defaultWindow","maxAgeSeconds","probes","publicToken"]}
+    "StatusPageDefinition": {"type":"object","additionalProperties":false,"properties":{"enabled":{"type":"boolean","description":"Save the current definition as the active public page when true. False disables public access. Existing callers may omit this field."},"id":{"type":"string"},"title":{"type":"string"},"background":{"type":"string","pattern":"^#[0-9a-fA-F]{6}$"},"defaultWindow":{"type":"string","enum":["24h","7d","1m","1y","all"]},"maxAgeSeconds":{"type":"integer","minimum":60,"maximum":86400},"probes":{"type":"array","minItems":1,"maxItems":100,"items":{"$ref":"#/components/schemas/StatusPageEntry"}},"slug":{"type":"string","maxLength":63,"description":"Optional installation-wide vanity name. Normalized to lowercase and reserved atomically on save. Retired names cannot be assigned to another page."},"logo":{"type":"string","maxLength":262144,"description":"Optional public HTTPS image URL up to 2048 characters or validated PNG/JPEG data URL up to 256 KiB. Public only in the published snapshot. The server does not fetch referenced URLs."},"logoAlt":{"type":"string","maxLength":256,"description":"Optional accessible alternative text. Defaults to the page title plus logo in the viewer."},"logoHeight":{"type":"integer","minimum":0,"maximum":1024,"description":"Optional height in CSS pixels. Omit or use 0 for automatic sizing. Positive heights preserve proportions and shrink to fit narrow containers."}},"required":["id","title","background","defaultWindow","maxAgeSeconds","probes"]}
+    "StatusPage": {"type":"object","additionalProperties":false,"properties":{"enabled":{"type":"boolean"},"id":{"type":"string"},"title":{"type":"string"},"background":{"type":"string","pattern":"^#[0-9a-fA-F]{6}$"},"defaultWindow":{"type":"string","enum":["24h","7d","1m","1y","all"]},"maxAgeSeconds":{"type":"integer","minimum":60,"maximum":86400},"probes":{"type":"array","minItems":1,"maxItems":100,"items":{"$ref":"#/components/schemas/StatusPageEntry"}},"publicToken":{"type":"string"},"published":{"$ref":"#/components/schemas/StatusPageDefinition"},"publisher":{"type":"string"},"publishedAt":{"type":"string","format":"date-time"},"slug":{"type":"string","maxLength":63,"description":"Optional installation-wide vanity name. Normalized to lowercase and reserved atomically on save. Retired names cannot be assigned to another page."},"logo":{"type":"string","maxLength":262144,"description":"Optional public HTTPS image URL up to 2048 characters or validated PNG/JPEG data URL up to 256 KiB. Public only in the published snapshot. The server does not fetch referenced URLs."},"logoAlt":{"type":"string","maxLength":256,"description":"Optional accessible alternative text. Defaults to the page title plus logo in the viewer."},"logoHeight":{"type":"integer","minimum":0,"maximum":1024,"description":"Optional height in CSS pixels. Omit or use 0 for automatic sizing. Positive heights preserve proportions and shrink to fit narrow containers."}},"required":["id","title","background","defaultWindow","maxAgeSeconds","probes","publicToken"]}
     "StatusPageRecord": {"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"revision":{"type":"integer"},"updatedAt":{"type":"string"},"data":{"$ref":"#/components/schemas/StatusPage"}},"required":["id","revision","data"]}
     "StatusPageList": {"type":"object","properties":{"items":{"type":"array","items":{"$ref":"#/components/schemas/StatusPageRecord"}},"cursor":{"type":"string"}},"required":["items"]}
     "StatusPagePoint": {"type":"object","properties":{"at":{"type":"string"},"state":{"type":"string"}},"required":["at","state"]}
@@ -9278,6 +9285,7 @@
     "CatalogTestRecord": {
       "type": "object",
       "properties": {
+        "savedVersionId": {"type":"string"},
         "id": {
           "type": "string"
         },
@@ -9508,6 +9516,7 @@
     "CatalogListEntry": {
       "type": "object",
       "properties": {
+        "sourceReady": {"type":"boolean"},
         "id": {
           "type": "string"
         },
@@ -10227,6 +10236,8 @@
       "type": "object",
       "additionalProperties": false,
       "properties": {
+        "saveAsTest": {"type":"boolean","description":"Save as a catalog test and automatically prepare and use the saved source. Never starts a test run."},
+        "applicationId": {"type":"string"},
         "id": {
           "type": "string"
         },
@@ -11099,6 +11110,12 @@
       "type": "object"
     "SourcePreparationJob":
       "properties":
+        "autoSave":
+          "type": "boolean"
+        "savedSourceRevisions":
+          "type": "object"
+          "additionalProperties":
+            "type": "integer"
         "assemblyReference":
           "$ref": "#/components/schemas/SourcePreparationReference"
         "assemblyComplete":
@@ -11234,6 +11251,8 @@
       "type": "object"
     "SourcePrebuiltInput":
       "properties":
+        "saveAsTest":
+          "type": "boolean"
         "image":
           "type": "string"
         "runner":
@@ -11448,7 +11467,8 @@
         - "timing"
         - "capture"
       "type": "object"
-    "APIRequestRule": {"type": "object", "additionalProperties": false, "properties": {"method": {"type": "string", "enum": ["GET", "HEAD", "OPTIONS", "POST", "PUT", "PATCH", "DELETE"]}, "pathPrefix": {"type": "string", "minLength": 1, "maxLength": 2048, "pattern": "^/", "description": "Canonical path prefix without encoded separators, dot segments, repeated separators, or trailing slash except root."}, "readOnly": {"type": "boolean", "default": false}, "maxBodyBytes": {"type": "integer", "minimum": 0, "maximum": 1048576, "default": 0}}, "required": ["method", "pathPrefix"], "allOf": [{"if": {"properties": {"method": {"enum": ["GET", "HEAD", "OPTIONS"]}}, "required": ["method"]}, "then": {"properties": {"maxBodyBytes": {"const": 0}}}}, {"if": {"properties": {"method": {"enum": ["PUT", "PATCH", "DELETE"]}}, "required": ["method"]}, "then": {"properties": {"readOnly": {"const": false}}}}]}
+    "APIRequestRule": {"type": "object", "additionalProperties": false, "properties": {
+"method": {"type": "string", "enum": ["GET", "HEAD", "OPTIONS", "POST", "PUT", "PATCH", "DELETE"]}, "pathPrefix": {"type": "string", "minLength": 1, "maxLength": 2048, "pattern": "^/", "description": "Canonical path prefix without encoded separators, dot segments, repeated separators, or trailing slash except root."}, "readOnly": {"type": "boolean", "default": false}, "maxBodyBytes": {"type": "integer", "minimum": 0, "maximum": 1048576, "default": 0}}, "required": ["method", "pathPrefix"], "allOf": [{"if": {"properties": {"method": {"enum": ["GET", "HEAD", "OPTIONS"]}}, "required": ["method"]}, "then": {"properties": {"maxBodyBytes": {"const": 0}}}}, {"if": {"properties": {"method": {"enum": ["PUT", "PATCH", "DELETE"]}}, "required": ["method"]}, "then": {"properties": {"readOnly": {"const": false}}}}]}
     "APIAuthentication": {"type":"object","additionalProperties":false,"properties":{"binding":{"type":"string","pattern":"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"},"scheme":{"type":"string","enum":["bearer","basic","header"]},"header":{"type":"string","pattern":"^(?:[Xx]-[A-Za-z0-9][A-Za-z0-9-]{0,61}|[Aa][Pp][Ii]-[Kk][Ee][Yy])$"}},"required":["binding","scheme"],"allOf":[{"if":{"properties":{"scheme":{"const":"header"}},"required":["scheme"]},"then":{"required":["header"]},"else":{"not":{"required":["header"]}}}]}
     "APIRequestPolicy": {"type": "object", "additionalProperties": false, "properties": {"authentication":{"$ref":"#/components/schemas/APIAuthentication"},"rules": {"type": "array", "minItems": 1, "maxItems": 64, "items": {"$ref": "#/components/schemas/APIRequestRule"}}, "maxRequests": {"type": "integer", "minimum": 1, "maximum": 1000}, "maxResponseBytes": {"type": "integer", "minimum": 1, "maximum": 4194304}, "redactFields": {"type": "array", "maxItems": 32, "uniqueItems": true, "items": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,63}$"}, "description": "Additional sensitive diagnostic field names. Defaults always redact authorization, cookies, passwords, tokens, credentials, and sessions. API evidence permits only bounded UTF-8 text and JSON."}}, "required": ["rules", "maxRequests", "maxResponseBytes"]}
     "SourceCatalogArtifact":

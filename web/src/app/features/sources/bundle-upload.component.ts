@@ -13,7 +13,7 @@ import { BundleUploadService } from './bundle-upload.service'
         <div class="field"><label for="source-bundle-file">Source ZIP</label><input id="source-bundle-file" type="file" accept=".zip,application/zip" required (change)="choose($event)"><small>Maximum 32 MiB compressed and 128 MiB expanded. Links and paths outside the source context are rejected.</small></div>
         <div class="field"><label for="source-bundle-manifest">Suite manifest path</label><input id="source-bundle-manifest" formControlName="manifest" required placeholder="teststudio-suite.json"><small>Paths in this manifest refer to the ZIP root. Select a different manifest to prepare another suite from the same repository.</small></div>
       </div><button type="submit" class="button primary" [disabled]="service.form.invalid || !service.file() || service.preparation.busy()">Upload and prepare bundle</button></fieldset></form>
-      <p class="small muted">A separate preparation worker processes queued builds. Review the discovered catalog below before publishing a release.</p>
+      <p class="small muted">A separate preparation worker processes queued builds. Review the discovered catalog below before saving a version.</p>
     </section>
   `,
   styles: [`fieldset { border: 0; padding: 0; margin: 0; min-width: 0; } button { margin-top: 1rem; }`]

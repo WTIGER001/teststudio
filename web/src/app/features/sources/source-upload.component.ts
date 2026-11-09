@@ -7,7 +7,7 @@ import { SourcesService } from './sources.service'
   template: `
     <section class="panel" aria-labelledby="upload-title">
       <div class="section-top"><h2 id="upload-title">Upload native checks</h2><button class="button subtle" type="button" [disabled]="service.saving()" (click)="service.editor.set(false)">Close upload</button></div>
-      <p class="muted">Upload JSON or YAML in the TestStudio catalog format. Review changes before publication. Omitted tests remain in the suite.</p>
+      <p class="muted">Upload JSON or YAML in the TestStudio catalog format. Review changes before save. Omitted tests remain in the suite.</p>
       <p class="small muted">Each upload accepts up to 30 native HTTP checks and 1 MiB of UTF-8 source. Staging expires after 30 minutes. For Playwright code, use the editor below. ZIP bundles and GitHub sources support complete coded suites.</p>
       <form [formGroup]="service.form" (ngSubmit)="service.stage()">
         <fieldset [disabled]="service.saving()">

@@ -9,6 +9,13 @@ import (
 
 func publicationQueue(location string) string { return "repository-publication-queue/" + location }
 func (s *Service) queueRepositoryPublication(ctx context.Context, job Job) ([]storage.Change, error) {
+	if job.AutoSave && job.State == "ready" {
+		if err := s.checkSavedTestJob(ctx, job); err != nil {
+			return nil, err
+		}
+		change, err := storage.Put(savedPublicationQueue(job.Location), job.ID, job.Project, 0, jobIndex{Job: job.ID, Suite: job.Suite, Location: job.Location})
+		return []storage.Change{change}, err
+	}
 	if job.RepositorySource == "" || job.State != "ready" {
 		return nil, nil
 	}
@@ -34,7 +41,14 @@ func (s *Service) queueRepositoryPublication(ctx context.Context, job Job) ([]st
 	return []storage.Change{change}, err
 }
 func (s *Service) ProcessRepositoryPublication(ctx context.Context) (bool, error) {
-	page, err := s.Store.List(ctx, publicationQueue(s.Location), "", "", 25)
+	return s.processPublication(ctx, publicationQueue(s.Location))
+}
+func savedPublicationQueue(location string) string { return "saved-test-publication-queue/" + location }
+func (s *Service) ProcessSavedTestPublication(ctx context.Context) (bool, error) {
+	return s.processPublication(ctx, savedPublicationQueue(s.Location))
+}
+func (s *Service) processPublication(ctx context.Context, bucket string) (bool, error) {
+	page, err := s.Store.List(ctx, bucket, "", "", 25)
 	if err != nil {
 		return false, err
 	}
@@ -67,7 +81,7 @@ func (s *Service) ProcessRepositoryPublication(ctx context.Context) (bool, error
 					return false, err
 				}
 				if current.State == "ready" && current.Upload == job.Upload && current.SourceSequence == job.SourceSequence {
-					current.Error = "Automatic publication did not complete. Review source settings, access, and the catalog before retrying."
+					current.Error = "Automatic source setup did not complete. Review source settings, access, and the catalog before retrying."
 					updated, err := storage.Put(latest.Bucket, latest.ID, latest.Project, latest.Revision, current)
 					if err != nil {
 						return false, err

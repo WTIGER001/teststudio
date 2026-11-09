@@ -11,9 +11,9 @@ import { sourceDefinition } from './source.utils'
     @if (service.preview(); as preview) {
       <section class="panel" aria-labelledby="source-review-title">
         <h2 id="source-review-title">Source review</h2>
-        <dl class="detail-grid"><dt>File</dt><dd>{{ preview.upload.data.name }}</dd><dt>Suite</dt><dd>{{ preview.upload.data.suiteId }}</dd><dt>State</dt><dd>{{ preview.upload.data.state }}</dd><dt>Source digest</dt><dd class="code-input">{{ preview.upload.data.digest }}</dd><dt>Staging expires</dt><dd><time [attr.datetime]="preview.upload.data.expiresAt">{{ preview.upload.data.expiresAt | date:'medium':'UTC' }} UTC</time></dd>
+        <dl class="detail-grid"><dt>File</dt><dd>{{ preview.upload.data.name }}</dd><dt>Suite</dt><dd>{{ preview.upload.data.suiteId }}</dd><dt>State</dt><dd>{{ preview.upload.data.state === 'published' ? 'Saved' : preview.upload.data.state === 'staged' ? 'Ready to save' : preview.upload.data.state }}</dd><dt>Source digest</dt><dd class="code-input">{{ preview.upload.data.digest }}</dd><dt>Staging expires</dt><dd><time [attr.datetime]="preview.upload.data.expiresAt">{{ preview.upload.data.expiresAt | date:'medium':'UTC' }} UTC</time></dd>
           @if (preview.upload.data.artifact; as artifact) { <dt>Prepared image</dt><dd>{{ artifact.image }}</dd>@if (artifact.provenance; as origin) { <dt>Image-reported source</dt><dd>{{ origin.repository || origin.snapshotDigest }} @if (origin.reference) { <span>· {{ origin.reference }}</span> } @if (origin.commit) { <div>{{ origin.commit }}</div> }</dd> } }
-          @if (preview.upload.data.releaseId) { <dt>Immutable release</dt><dd class="code-input">{{ preview.upload.data.releaseId }}</dd><dt>Activated on publication</dt><dd>{{ preview.upload.data.activated ? 'Yes' : 'No' }}</dd> }
+          @if (preview.upload.data.releaseId) { <dt>Immutable version</dt><dd class="code-input">{{ preview.upload.data.releaseId }}</dd><dt>Current version</dt><dd>{{ preview.upload.data.activated ? 'Yes' : 'No' }}</dd> }
         </dl>
         @for (issue of preview.upload.data.issues; track $index) { <p class="notice warning">{{ issue.testId }} · {{ issue.field }}: {{ issue.message }}</p> }
         @if (preview.plan; as plan) {
@@ -29,9 +29,8 @@ import { sourceDefinition } from './source.utils'
         </div>
         @if (service.content()) { <div class="field"><label for="retained-source">Retained source document</label><textarea id="retained-source" class="code-input" [value]="service.content()" rows="10" readonly spellcheck="false"></textarea></div> }
         @if (preview.upload.data.state === 'staged' && preview.upload.data.actor === service.session.user()?.id && service.workspace.can('sources.manage') && service.workspace.can('catalog.publish')) {
-          <p class="notice">Publication freezes an executable catalog. It does not mean the checks passed. Tests start only through a separate run action.</p>
-          <label class="checkbox-field"><input type="checkbox" [ngModel]="service.activate()" (ngModelChange)="service.activate.set($event)" [disabled]="service.saving()">Activate this release for future runs</label>
-          <button class="button primary" type="button" (click)="service.publish()" [disabled]="service.saving()">Publish source release</button>
+          <p class="notice">Save adds these definitions to the test catalog and uses them for future runs. Saving does not mean the tests passed and never starts a run.</p>
+          <button class="button primary" type="button" (click)="service.publish()" [disabled]="service.saving()">Save tests</button>
         }
       </section>
     }

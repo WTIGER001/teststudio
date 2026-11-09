@@ -19,7 +19,7 @@ export class PublicStatusService {
     this.request?.abort(); clearTimeout(this.timer); const generation = ++this.generation; this.request = new AbortController(); this.busy.set(true); this.error.set('')
     try {
       const response = await fetch('/api/v1/public/status-pages/' + encodeURIComponent(this.token) + (this.window ? '?window=' + encodeURIComponent(this.window) : ''), { credentials: 'omit', cache: 'no-store', signal: this.request.signal })
-      if (!response.ok) throw new Error(response.status === 404 ? 'This status page is unavailable or no longer published.' : 'Status information is temporarily unavailable. Try again shortly.')
+      if (!response.ok) throw new Error(response.status === 404 ? 'This status page is unavailable or no longer saved.' : 'Status information is temporarily unavailable. Try again shortly.')
       const report = await response.json() as StatusPageReport
       if (generation === this.generation) this.report.set(report)
     } catch (error) { if (generation === this.generation) { this.report.set(null); this.error.set(error instanceof Error ? error.message : 'Status information is unavailable.') } }

@@ -5,7 +5,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { RouterLink } from '@angular/router'
 import { CatalogService } from './catalog.service'
 import { CatalogEntryService } from './catalog-entry.service'
-import { CatalogPublicationReviewComponent } from './catalog-publication-review.component'
 import { CatalogTableComponent } from './catalog-table.component'
 import { CatalogFiltersComponent } from './catalog-filters.component'
 import { CatalogCategoryNodesComponent } from './catalog-category-nodes.component'
@@ -24,21 +23,21 @@ import { CatalogTestFormComponent } from './catalog-test-form.component'
 
 @Component({
   standalone: true,
-  imports: [CatalogPublicationReviewComponent, CatalogTableComponent, CatalogFiltersComponent, CatalogCategoryNodesComponent, FormsModule, ReactiveFormsModule, RouterLink, CatalogEntryComponent, CatalogPlanComponent, CatalogBulkComponent, CatalogTransferComponent, CatalogSavedSelectionsComponent, CatalogTestFormComponent],
+  imports: [CatalogTableComponent, CatalogFiltersComponent, CatalogCategoryNodesComponent, FormsModule, ReactiveFormsModule, RouterLink, CatalogEntryComponent, CatalogPlanComponent, CatalogBulkComponent, CatalogTransferComponent, CatalogSavedSelectionsComponent, CatalogTestFormComponent],
   providers: [RecordCreationService, CatalogTestEditorService, HTTPCheckEditorService, TimingPolicyEditorService, CatalogService, CatalogEntryService, CatalogPlanService, CatalogSelectionService, CatalogBulkMetadataService, CatalogSavedSelectionsService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>{{ service.probeOverview ? 'HTTPS probes' : 'Test catalog' }}</h1><p class="muted">{{ service.probeOverview ? 'Website and endpoint probes across all applications in this project.' : 'Know what you test. Keep every release accountable.' }}</p></div>
+    <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>{{ service.probeOverview ? 'HTTPS probes' : 'Test catalog' }}</h1><p class="muted">{{ service.probeOverview ? 'Website and endpoint probes across all applications in this project.' : 'Know what you test. Keep every version accountable.' }}</p></div>
       @if (service.workspace.can('catalog.create')) { <a class="button primary" [routerLink]="service.workspace.path('tests', 'new')" [queryParams]="{ suite: service.suiteFilter() || undefined }">+ Create test</a> }
     </div>
     @if (!service.probeOverview) { <section class="metrics" aria-label="Catalog summary">
       <article class="metric"><span class="eyebrow">Catalog entries</span><strong>{{ service.counts().total }}</strong><span class="small muted">{{ service.applicationId() ? 'In this application' : 'Across all applications' }}</span></article>
-      <article class="metric"><span class="eyebrow">Enabled</span><strong>{{ service.counts().enabled }}</strong><span class="small muted">Available for selection</span></article>
+      <article class="metric"><span class="eyebrow">Enabled</span><strong>{{ service.counts().enabled }}</strong><span class="small muted">Readiness is shown in the list.</span></article>
       <article class="metric"><span class="eyebrow">Labeled safe</span><strong>{{ service.counts().safe }}</strong><span class="small muted">Declared operating conditions apply</span></article>
-      <article class="metric"><span class="eyebrow">Suites with tests</span><strong>{{ service.counts().suites }}</strong><span class="small muted">Independent releases</span></article>
+      <article class="metric"><span class="eyebrow">Suites with tests</span><strong>{{ service.counts().suites }}</strong><span class="small muted">Independent versions</span></article>
     </section>
     }
-    @if (service.hasSharedSuites()) { <p class="notice">Shared suites have one draft and release. Publication, import, export, and saved selections apply to the complete suite.</p> }
+    @if (service.hasSharedSuites()) { <p class="notice">Shared suites keep tests together across applications. Import, export, and saved selections apply to the complete suite.</p> }
     @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }
     @if (service.success()) { <p class="notice success" role="status">{{ service.success() }}</p> }
     <ts-catalog-entry />
@@ -63,21 +62,16 @@ import { CatalogTestFormComponent } from './catalog-test-form.component'
       @else if (service.visible().length) {
         <ts-catalog-table />
       } @else if (service.error()) { <p class="notice">Catalog results are unavailable. <button class="button small secondary" type="button" (click)="service.load()">Reload results</button><button class="button small subtle" type="button" (click)="service.workspace.refreshAccess()">Refresh access</button></p> } @else {
-        <div class="empty-state"><span class="empty-icon" aria-hidden="true">✓</span><h3>{{ service.page().total ? 'No matching tests.' : 'Your next good answer starts here.' }}</h3><p>{{ service.page().total ? 'Try another category or clear filters to see all active tests.' : 'Create a suite, then add checks or publish a versioned test catalog.' }}</p>@if (!service.suites().length) { <a class="button secondary" [routerLink]="service.workspace.path('suites')">Set up a suite</a> }</div>
+        <div class="empty-state"><span class="empty-icon" aria-hidden="true">✓</span><h3>{{ service.page().total ? 'No matching tests.' : 'Your next good answer starts here.' }}</h3><p>{{ service.page().total ? 'Try another category or clear filters to see all active tests.' : 'Create a suite, then save your tests.' }}</p>@if (!service.suites().length) { <a class="button secondary" [routerLink]="service.workspace.path('suites')">Set up a suite</a> }</div>
       }
         </div>
       </div>
       @if (service.page().cursor && !service.error()) { <button class="button secondary more-button" type="button" [disabled]="service.loading() || service.loadingMore()" (click)="service.load(true)">{{ service.loadingMore() ? 'Loading more tests…' : 'Load more tests' }}</button> }
     </section>
     @if (service.suites().length && (service.workspace.can('catalog.import') || service.workspace.can('catalog.export'))) { <ts-catalog-transfer /> }
-    @if (service.suites().length) { <p><a class="button secondary" [routerLink]="['/projects', service.projectId(), 'releases']">Browse retained releases</a></p> }
+    @if (service.suites().length) { <p><a class="button secondary" [routerLink]="['/projects', service.projectId(), 'releases']">Version history</a></p> }
     @if (service.suites().length) { <ts-catalog-saved-selections /> }
-    @if (service.suites().length && service.workspace.can('catalog.update')) {
-    <section class="panel release-panel" aria-labelledby="release-title"><div><h2 id="release-title">Publish a release</h2><p class="small muted">Validate draft definitions and freeze an executable catalog.</p></div>
-        <div class="inline-form"><label class="sr-only" for="release-suite">Suite to publish</label><select id="release-suite" [ngModel]="service.releaseSuite()" [disabled]="service.saving() || service.publicationUncertain()" (ngModelChange)="service.changeReleaseSuite($event)">@for (suite of service.suites(); track suite.id) { <option [value]="suite.id">{{ suite.data.name }}</option> }</select><button class="button secondary" type="button" (click)="service.prepareRelease()" [disabled]="service.saving() || service.publicationUncertain()">Validate and preview</button></div>
-      </section>
-    }
-    <ts-catalog-publication-review />
+
   `,
   styles: [`:host { display: block; } .catalog-layout { min-width: 0; } .with-categories { display: grid; grid-template-columns: minmax(180px, 240px) minmax(0, 1fr); gap: 20px; } .category-navigation { min-width: 0; border-right: 1px solid var(--border); padding-right: 12px; } .catalog-results { min-width: 0; } @media (max-width: 1000px) { .with-categories { grid-template-columns: minmax(0, 1fr); } .category-navigation { border-right: 0; border-bottom: 1px solid var(--border); padding: 0 0 16px; } }`]
 })

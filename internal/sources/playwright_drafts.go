@@ -22,6 +22,8 @@ type EditorFile struct {
 }
 
 type PlaywrightDraft struct {
+	SaveAsTest   bool         `json:"saveAsTest,omitempty"`
+	Application  string       `json:"applicationId,omitempty"`
 	ID           string       `json:"id"`
 	Name         string       `json:"name"`
 	ManifestPath string       `json:"manifestPath,omitempty"`
@@ -32,6 +34,9 @@ type PlaywrightDraft struct {
 func draftBucket(project, suite string) string { return "playwright-drafts/" + project + "/" + suite }
 
 func validateDraft(value PlaywrightDraft) error {
+	if value.Application != "" && !domain.ValidID(value.Application) {
+		return errors.New("choose a valid application")
+	}
 	if value.TargetURL != "" && !recording.ValidURL(value.TargetURL) {
 		return errors.New("recorded source requires a valid HTTP or HTTPS start address")
 	}
@@ -101,7 +106,7 @@ func (s *Service) SaveDraft(ctx context.Context, user, project, suite string, va
 		return result, err
 	}
 	err = s.Auth.WithAssignmentTransaction(ctx, func(auth *authorization.Service) error {
-		bound := &Service{Store: auth.Directory.Store, Auth: auth}
+		bound := &Service{Store: auth.Directory.Store, Auth: auth, Location: s.Location}
 		for _, permission := range []string{"read", "manage"} {
 			if err := bound.check(ctx, user, project, suite, permission); err != nil {
 				return err
@@ -126,7 +131,15 @@ func (s *Service) SaveDraft(ctx context.Context, user, project, suite string, va
 		if err != nil {
 			return err
 		}
-		if err := bound.Store.Commit(ctx, change, audit); err != nil {
+		changes := []storage.Change{change, audit}
+		if value.SaveAsTest {
+			extra, err := bound.registerSavedTests(ctx, user, project, suite, value, revision+1)
+			if err != nil {
+				return err
+			}
+			changes = append(changes, extra...)
+		}
+		if err := bound.Store.Commit(ctx, changes...); err != nil {
 			return err
 		}
 		result, err = bound.Store.Get(ctx, change.Bucket, change.ID)
@@ -169,5 +182,5 @@ func (s *Service) PrepareDraft(ctx context.Context, user, project, suite, id, ke
 	if err != nil {
 		return storage.Record{}, err
 	}
-	return s.enqueueBundle(ctx, user, project, suite, key, "playwright-"+id+".zip", draftManifestPath(value), data, nil, &row)
+	return s.enqueueBundle(ctx, user, project, suite, key, "playwright-"+id+".zip", draftManifestPath(value), data, nil, &row, nil, false)
 }

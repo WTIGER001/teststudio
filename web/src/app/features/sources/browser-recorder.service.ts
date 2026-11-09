@@ -85,14 +85,14 @@ export class BrowserRecorderService {
   async saveRecording(): Promise<void> {
     const row = this.selected()
     if (!row || row.data.state !== 'ready' || this.editor.busy() || this.savedRecording()) return
-    if (this.sources.draftDirty() && !this.recordingDraftId) { this.error.set('Save or discard the open source draft before saving this recording.'); return }
+    if (this.sources.draftDirty() && !this.recordingDraftId) { this.error.set('Save or discard the open source changes before saving this recording.'); return }
     if (!this.recordingDraftId) {
       await this.editor.importRecording(row.id)
       if (!this.editor.error()) this.recordingDraftId = this.editor.document()?.id ?? ''
     }
-    if (this.editor.document()?.id !== this.recordingDraftId) { this.error.set('Reopen this recording before saving its draft.'); return }
+    if (this.editor.document()?.id !== this.recordingDraftId) { this.error.set('Reopen this recording before saving the test.'); return }
     if (!this.editor.document()) return
-    if (this.editor.saved()?.id === this.recordingDraftId && !this.sources.draftDirty()) { this.savedRecording.set(true); return }
+    if (this.editor.saved()?.id === this.recordingDraftId && this.editor.saved()?.data.saveAsTest && !this.sources.draftDirty()) { this.savedRecording.set(true); return }
     await this.editor.save(true)
     if (!this.editor.error() && this.editor.saved()) this.savedRecording.set(true)
   }

@@ -29,6 +29,9 @@ func assembleDraft(suite string, value PlaywrightDraft) ([]byte, error) {
 	if err := validateDraft(value); err != nil {
 		return nil, err
 	}
+	return assembleSourceFiles(suite, value)
+}
+func assembleSourceFiles(suite string, value PlaywrightDraft) ([]byte, error) {
 	files := slices.Clone(value.Files)
 	if value.ManifestPath == "" {
 		generated := generatedEditorFiles(suite)

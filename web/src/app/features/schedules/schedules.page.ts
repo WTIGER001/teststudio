@@ -12,7 +12,7 @@ import { ScheduleHistoryComponent } from './schedule-history.component'
   standalone: true, imports: [DatePipe, FormsModule, RouterLink, ScheduleEditorComponent, ScheduleHistoryComponent],
   providers: [SchedulesService, ScheduleEditorService, RunLookupsService], changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Schedules</h1><p class="muted">Repeat published tests and keep a record of every firing.</p></div>
+    <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>Schedules</h1><p class="muted">Repeat saved tests and keep a record of every firing.</p></div>
       @if (service.workspace.can('schedules.create')) { <button type="button" class="button primary" [disabled]="editor.busy()" (click)="editor.open()">+ New schedule</button> }
     </div>
     @if (editor.opened()) { <ts-schedule-editor /> }
@@ -24,7 +24,7 @@ import { ScheduleHistoryComponent } from './schedule-history.component'
       @if (service.rows().length) {
         <div class="table-scroll"><table><caption class="sr-only">Project schedules and next execution</caption><thead><tr><th scope="col">Schedule / selection</th><th scope="col">State / cadence</th><th scope="col">Next occurrence</th><th scope="col">Last firing</th><th scope="col">Actions</th></tr></thead><tbody>
           @for (item of service.rows(); track item.id) {
-            <tr><td><strong>{{ item.data.name }}</strong><span class="table-subtitle muted">{{ item.id }} · {{ item.data.request.suiteId }}</span><span class="table-subtitle muted">{{ item.data.request.environmentId || 'No target' }} · {{ item.data.request.executionLocation }}</span><span class="table-subtitle muted">{{ item.data.request.releaseId ? 'Pinned release' : 'Follows active release' }} · {{ item.data.owner }}</span></td>
+            <tr><td><strong>{{ item.data.name }}</strong><span class="table-subtitle muted">{{ item.id }} · {{ item.data.request.suiteId }}</span><span class="table-subtitle muted">{{ item.data.request.environmentId || 'No target' }} · {{ item.data.request.executionLocation }}</span><span class="table-subtitle muted">{{ item.data.request.releaseId ? 'Pinned version' : 'Follows active version' }} · {{ item.data.owner }}</span></td>
               <td><span class="badge" [class.success]="item.data.enabled" [class.warning]="item.data.archived">{{ item.status }}</span><span class="table-subtitle">{{ item.cadence }}</span><span class="table-subtitle muted">{{ item.data.overlap === 'skip' ? 'Skips overlapping firings' : 'Allows overlapping runs' }}</span></td>
               <td>@if (item.data.nextAt; as next) { <time [attr.datetime]="next">{{ next | date:'medium':'UTC' }} UTC</time> } @else { <span class="muted">Not scheduled</span> }</td>
               <td>@if (item.data.lastAt; as last) { <span class="badge" [class.warning]="item.data.lastState === 'blocked'">{{ item.data.lastState }}</span><time class="table-subtitle muted" [attr.datetime]="last">{{ last | date:'medium':'UTC' }} UTC</time> } @else { <span class="muted">No firing yet</span> }@if (item.data.lastRunId) { <a class="table-subtitle wrap-anywhere" [routerLink]="['/projects', service.projectId(), 'runs', item.data.lastRunId]">Latest run</a> }@if (item.data.lastError) { <span class="table-subtitle">{{ item.data.lastError }}</span> }</td>
@@ -35,7 +35,7 @@ import { ScheduleHistoryComponent } from './schedule-history.component'
             </tr>
           }
         </tbody></table></div>
-      } @else if (!service.loading()) { <div class="empty-state"><h3>No schedules found</h3><p>Create a schedule for a published suite, or include archived schedules.</p></div> }
+      } @else if (!service.loading()) { <div class="empty-state"><h3>No schedules found</h3><p>Create a schedule for a saved suite, or include archived schedules.</p></div> }
       @if (service.loading()) { <p class="small" role="status">Loading schedules…</p> }
       @if (service.cursor()) { <button type="button" class="button secondary more-button" [disabled]="service.loading()" (click)="service.load(true)">Load more schedules</button> }
     </section>

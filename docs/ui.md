@@ -25,7 +25,7 @@ Empty states explain the next available action. Access failures and unavailable 
 
 Use a dedicated route for creation or editing that spans several decisions, needs a review, or has meaningful unsaved work. Follow Create project: a focused page up to 56rem wide, a labeled stepper, a clear Back destination, and Cancel setup or Cancel editing.
 A detail page summarizes the resource and its current state. It provides explicit Edit and relevant actions. Do not leave its full creation wizard permanently expanded below the heading.
-Save returns to the resource detail page. Saving a draft and publishing remain separate. A publication review that contains a substantial preview uses its own route, with one primary confirmation and an obvious cancel destination.
+Save returns to the saved resource. Normal users save tests and suites directly. Internal preparation and immutable execution versions require no separate draft or publication action. Saving never starts a test run. Substantial save reviews use a dedicated route with one primary confirmation and an obvious cancel destination.
 Use a dialog for a short bounded action or confirmation with one clear target and impact. Use inline controls only for small local changes such as ordering or toggling selected rows. Help drawers explain the current task and preserve its state.
 Keep one primary action at each step. Hide uncommon settings under named Advanced sections. Preserve values across steps, guard unfinished navigation, focus new headings, and keep revision and uncertain-response recovery available.
 
@@ -49,13 +49,13 @@ Keep common controls visible. Put uncommon filters, tuning, pins, and identifier
 Keep target protection, safety, enable state, and execution or notification consequences visible on review.
 Do not hide consequences under Advanced options.
 Show the final resources and effects before saving related configuration or starting execution.
-Keep Save draft, publish, activate, run, and enable actions distinct. Label combined actions explicitly.
+Use Save for definition changes and Run for explicit execution. Status pages use Save and Enabled; enabled pages update publicly on Save. Preserve existing authority checks and make public visibility clear before saving.
 Do not add a confirmation to every ordinary action. Use review where it resolves a meaningful decision or consequence.
 
 Repository configuration uses Repository, Suites, and Review steps through the shared wizard components.
 Generate its permanent identifier from the source name. Keep identifier and reference-type settings under Advanced repository options.
 Keep push and periodic settings under Advanced synchronization options.
-Review shows every suite binding, enabled state, automatic publication, and effects on future releases and test execution.
+Review shows every suite binding, enabled state, automatic saving, and effects on future versions and test execution.
 
 Use the shared core randomId helper for generated UUIDs and idempotency keys.
 It uses native UUID generation when available and secure random bytes otherwise.

@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core'
 
-export interface RecordValue<T> { id: string; revision: number; data: T; updatedAt: string; projectId?: string }
+export interface RecordValue<T> { savedVersionId?: string; id: string; revision: number; data: T; updatedAt: string; projectId?: string }
 export interface Page<T> { items: T[]; cursor?: string }
 
 export class ApiError extends Error {

@@ -133,12 +133,12 @@ export class SourcesService {
     this.saving.set(true); this.error.set('')
     const args = { project: this.project(), suite: preview.upload.data.suiteId, id: preview.upload.id }
     try {
-      await this.client.call('publishSourceUpload', { ...args, revision: preview.upload.revision, body: { activate: this.activate() } })
+      await this.client.call('publishSourceUpload', { ...args, revision: preview.upload.revision, body: { activate: true } })
       if (generation !== this.generation) return
       const stored = await this.client.call('readSourceUpload', args)
       if (generation !== this.generation) return
-      this.preview.set(stored); this.editor.set(false); this.message.set('Source release published. No tests were started.'); await this.list()
-    } catch (error) { if (generation === this.generation) this.error.set(error instanceof ApiError && error.status === 409 ? 'The catalog, suite, or access changed. Review current data and validate the source again.' : error instanceof Error ? error.message : 'Publication failed. Review the stored upload before retrying.') }
+      this.preview.set(stored); this.editor.set(false); this.message.set('Source version saved. No tests were started.'); await this.list()
+    } catch (error) { if (generation === this.generation) this.error.set(error instanceof ApiError && error.status === 409 ? 'The catalog, suite, or access changed. Review current data and validate the source again.' : error instanceof Error ? error.message : 'Save failed. Review the stored upload before retrying.') }
     finally { if (generation === this.generation) this.saving.set(false) }
   }
 }

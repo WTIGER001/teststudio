@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.47.0"
+export const accessContractVersion = "0.48.0"
 
 export type APIAuthentication = { "binding": string; "header"?: string; "scheme": "bearer" | "basic" | "header" }
 export type APIRequestPolicy = { "authentication"?: APIAuthentication; "maxRequests": number; "maxResponseBytes": number; "redactFields"?: (string)[]; "rules": (APIRequestRule)[] }
@@ -37,7 +37,7 @@ export type CatalogDocument = { "exportedAt"?: string; "originProjectId"?: strin
 export type CatalogDraftPage = { "items": (CatalogDraftRecord)[] }
 export type CatalogDraftRecord = { "data": SourceCatalogDraft; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
 export type CatalogDuplicateInput = { "id": string }
-export type CatalogListEntry = { "data": SourceCatalogTest; "id": string; "projectId": string; "revision": number; "suiteId": string; "suiteName": string; "updatedAt": string }
+export type CatalogListEntry = { "data": SourceCatalogTest; "id": string; "projectId": string; "revision": number; "sourceReady"?: boolean; "suiteId": string; "suiteName": string; "updatedAt": string }
 export type CatalogListOptions = { "application": (string)[]; "owner": (string)[]; "runner": (string)[]; "safety": (string)[]; "source": (string)[]; "tag": (string)[]; "type": (string)[] }
 export type CatalogListPage = { "categories": (CatalogCategoryNode)[]; "counts": CatalogCounts; "cursor"?: string; "items": (CatalogListEntry)[]; "matched": number; "options": CatalogListOptions; "total": number }
 export type CatalogPlanRecord = { "data": SourceCatalogImportPlan; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
@@ -45,7 +45,7 @@ export type CatalogReleasePage = { "items": (CatalogReleaseRecord)[] }
 export type CatalogReleaseRecord = { "data": SourceCatalogRelease; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
 export type CatalogRevisionPage = { "items": (CatalogRevisionRecord)[] }
 export type CatalogRevisionRecord = { "data": CatalogTestRevision; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
-export type CatalogTestRecord = { "data": SourceCatalogTest; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type CatalogTestRecord = { "data": SourceCatalogTest; "id": string; "projectId"?: string; "revision": number; "savedVersionId"?: string; "updatedAt": string }
 export type CatalogTestRevision = { "actor": string; "at": string; "test": SourceCatalogTest }
 export type CatalogValidation = { "issues": (SourceCatalogIssue)[]; "valid": boolean }
 export type EditorFile = { "content": string; "executable"?: boolean; "path": string }
@@ -93,7 +93,7 @@ export type PermissionComparison = { "after": boolean; "before": boolean; "permi
 export type PermissionDefinition = { "action": string; "area": string; "description": string; "id": string; "installationOnly": boolean }
 export type PermissionExplanation = { "allowed": boolean; "applicationId"?: string; "canInspectOthers": boolean; "checkedAt": string; "cursor"?: string; "items": (PermissionSource)[]; "object": string; "partial": boolean; "permission": string; "permissions": (PermissionDefinition)[]; "projectId": string; "reason": "allowed" | "explicit-deny" | "no-matching-allow" | "user-disabled"; "userDisabled": boolean; "userId": string; "userName": string }
 export type PermissionSource = { "assignedRoleId"?: string; "assignedRoleName"?: string; "assignmentApplication"?: string; "assignmentProject"?: string; "effect": "allow" | "deny"; "expiresAt"?: string; "grantId"?: string; "id": string; "kind": "direct" | "role"; "objectScope"?: string; "principalId"?: string; "principalKind"?: "user" | "group"; "principalName"?: string; "projectId"?: string; "restricted": boolean; "restrictedFields"?: (string)[]; "roleId"?: string; "roleName"?: string; "scopeKnown": boolean; "status": "matching" | "expired"; "teamScope"?: string }
-export type PlaywrightDraft = { "files": (EditorFile)[]; "id": string; "manifestPath"?: string; "name": string; "targetUrl"?: string }
+export type PlaywrightDraft = { "applicationId"?: string; "files": (EditorFile)[]; "id": string; "manifestPath"?: string; "name": string; "saveAsTest"?: boolean; "targetUrl"?: string }
 export type PlaywrightDraftPage = { "cursor"?: string; "items": (PlaywrightDraftRecord)[] }
 export type PlaywrightDraftRecord = { "data": PlaywrightDraft; "id": string; "revision": number; "updatedAt": string }
 export type PredefinedRole = { "canManage": boolean; "disabled": boolean; "id": string; "name": string; "permissions": (string)[]; "scope": "project" | "installation" }
@@ -177,8 +177,8 @@ export type SourceContent = { "content": string; "digest": string }
 export type SourceCredentialReference = { "id": string; "name": string }
 export type SourceJSONValue = null | string | number | boolean | (SourceJSONValue)[] | { [key: string]: SourceJSONValue }
 export type SourceOrigin = { "commit"?: string; "reference"?: string; "repository"?: string; "snapshotDigest"?: string }
-export type SourcePrebuiltInput = { "image": string; "runner": string }
-export type SourcePreparationJob = { "actor": string; "assemblyComplete"?: boolean; "assemblyReference"?: SourcePreparationReference; "build"?: SourceBuild; "cancelRequested": boolean; "cleanupPending": boolean; "createdAt": string; "error"?: string; "executionLocation": string; "finishedAt"?: string; "id": string; "image": string; "kind"?: string; "leaseUntil"?: string; "localImageId"?: string; "log"?: string; "logTruncated"?: boolean; "manifestPath"?: string; "phase": string; "projectId": string; "reference"?: SourcePreparationReference; "releaseId"?: string; "repositorySourceId"?: string; "repositorySyncId"?: string; "runner": string; "runtime"?: string; "sourceBundleId"?: string; "sourceDigest"?: string; "sourceDraftId"?: string; "sourceDraftRevision"?: number; "sourceExpired"?: boolean; "sourceGeneration"?: number; "sourceName"?: string; "sourceOrigin"?: SourceOrigin; "sourceSequence"?: number; "startedAt"?: string; "state": string; "suiteId": string; "uploadId"?: string; "worker"?: string }
+export type SourcePrebuiltInput = { "image": string; "runner": string; "saveAsTest"?: boolean }
+export type SourcePreparationJob = { "actor": string; "assemblyComplete"?: boolean; "assemblyReference"?: SourcePreparationReference; "autoSave"?: boolean; "build"?: SourceBuild; "cancelRequested": boolean; "cleanupPending": boolean; "createdAt": string; "error"?: string; "executionLocation": string; "finishedAt"?: string; "id": string; "image": string; "kind"?: string; "leaseUntil"?: string; "localImageId"?: string; "log"?: string; "logTruncated"?: boolean; "manifestPath"?: string; "phase": string; "projectId": string; "reference"?: SourcePreparationReference; "releaseId"?: string; "repositorySourceId"?: string; "repositorySyncId"?: string; "runner": string; "runtime"?: string; "savedSourceRevisions"?: { [key: string]: number }; "sourceBundleId"?: string; "sourceDigest"?: string; "sourceDraftId"?: string; "sourceDraftRevision"?: number; "sourceExpired"?: boolean; "sourceGeneration"?: number; "sourceName"?: string; "sourceOrigin"?: SourceOrigin; "sourceSequence"?: number; "startedAt"?: string; "state": string; "suiteId": string; "uploadId"?: string; "worker"?: string }
 export type SourcePreparationOptions = { "bundleRunners": (string)[]; "executionLocation": string; "runners": (string)[] }
 export type SourcePreparationPage = { "cursor"?: string; "items": (SourcePreparationRecord)[] }
 export type SourcePreparationRecord = { "data": SourcePreparationJob; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
@@ -202,9 +202,9 @@ export type SourceUploadPage = { "cursor"?: string; "items": (SourceUploadRecord
 export type SourceUploadPreview = { "plan"?: SourceCatalogImportPlan; "upload": SourceUploadRecord }
 export type SourceUploadRecord = { "data": SourceUpload; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
 export type StandardAssignmentReplacement = { "previousRoleId"?: string; "reason": string; "roleId": "builtin.teststudio.reader" | "builtin.teststudio.member" | "builtin.teststudio.developer" | "builtin.teststudio.contributor" | "builtin.teststudio.owner" }
-export type StatusPage = { "background": string; "defaultWindow": "24h" | "7d" | "1m" | "1y" | "all"; "id": string; "logo"?: string; "logoAlt"?: string; "logoHeight"?: number; "maxAgeSeconds": number; "probes": (StatusPageEntry)[]; "publicToken": string; "published"?: StatusPageDefinition; "publishedAt"?: string; "publisher"?: string; "slug"?: string; "title": string }
+export type StatusPage = { "background": string; "defaultWindow": "24h" | "7d" | "1m" | "1y" | "all"; "enabled"?: boolean; "id": string; "logo"?: string; "logoAlt"?: string; "logoHeight"?: number; "maxAgeSeconds": number; "probes": (StatusPageEntry)[]; "publicToken": string; "published"?: StatusPageDefinition; "publishedAt"?: string; "publisher"?: string; "slug"?: string; "title": string }
 export type StatusPageAvailability = { "coveragePercent": number; "downSeconds": number; "percent": number | null; "since": string; "unknownSeconds": number; "upSeconds": number }
-export type StatusPageDefinition = { "background": string; "defaultWindow": "24h" | "7d" | "1m" | "1y" | "all"; "id": string; "logo"?: string; "logoAlt"?: string; "logoHeight"?: number; "maxAgeSeconds": number; "probes": (StatusPageEntry)[]; "slug"?: string; "title": string }
+export type StatusPageDefinition = { "background": string; "defaultWindow": "24h" | "7d" | "1m" | "1y" | "all"; "enabled"?: boolean; "id": string; "logo"?: string; "logoAlt"?: string; "logoHeight"?: number; "maxAgeSeconds": number; "probes": (StatusPageEntry)[]; "slug"?: string; "title": string }
 export type StatusPageEntry = { "description": string; "environmentId"?: string; "executionLocation"?: string; "monitor"?: boolean; "probeId"?: string; "suiteId"?: string; "testId"?: string; "title": string }
 export type StatusPageList = { "cursor"?: string; "items": (StatusPageRecord)[] }
 export type StatusPagePoint = { "at": string; "state": string }
@@ -329,7 +329,7 @@ export interface AccessRequests {
   exportCatalogDocument: { "project": string; "suite": string }
   previewCatalogImport: { "project": string; "suite": string; body: CatalogDocument }
   readCatalogPlan: { "project": string; "suite": string; "id": string }
-  applyCatalogPlan: { "project": string; "suite": string; "id": string; revision: number }
+  applyCatalogPlan: { "project": string; "suite": string; "id": string; revision: number; query?: { "save"?: boolean } }
   readSuiteLifecycle: { "project": string; "suite": string }
   listPlaywrightDrafts: { "project": string; "suite": string; query?: { "cursor"?: string; "limit"?: number } }
   readPlaywrightStarter: { "project": string; "suite": string; query?: { "type"?: "browser" | "api" } }
@@ -348,7 +348,7 @@ export interface AccessRequests {
   changeSavedSelectionState: { "project": string; "suite": string; "id": string; "action": "archive" | "restore"; revision: number }
   previewSavedSelection: { "project": string; "suite": string; "id": string; body: SavedSelectionPreviewInput }
   updateSuiteSettings: { "project": string; "suite": string; revision: number; body: SuiteSettings }
-  uploadSourceBundle: { "project": string; "suite": string; key: string; query: { "name": string; "manifest": string }; body: Blob }
+  uploadSourceBundle: { "project": string; "suite": string; key: string; query: { "save"?: boolean; "name": string; "manifest": string }; body: Blob }
   readPreparationOptions: { "project": string; "suite": string }
   listSourcePreparations: { "project": string; "suite": string; query?: { "limit"?: number; "cursor"?: string } }
   enqueuePrebuiltPreparation: { "project": string; "suite": string; key: string; body: SourcePrebuiltInput }
@@ -367,12 +367,13 @@ export interface AccessRequests {
   readCatalogTest: { "project": string; "suite": string; "test": string }
   updateCatalogTest: { "project": string; "suite": string; "test": string; revision: number; body: SourceCatalogTest }
   duplicateCatalogTest: { "project": string; "suite": string; "test": string; revision: number; body: CatalogDuplicateInput }
-  changeCatalogTestState: { "project": string; "suite": string; "test": string; "action": "disable" | "enable" | "archive" | "restore"; revision: number }
+  changeCatalogTestState: { "project": string; "suite": string; "test": string; "action": "disable" | "enable" | "archive" | "restore"; revision: number; query?: { "save"?: boolean } }
   readTestReliability: { "project": string; "suite": string; "test": string; query?: { "environment"?: string; "location"?: string; "window"?: string; "resolution"?: string; "since"?: string; "until"?: string; "maxAgeSeconds"?: number } }
   readTestReliabilityChecks: { "project": string; "suite": string; "test": string; query: { "environment"?: string; "location"?: string; "since": string; "until": string; "cursor"?: string; "limit"?: number } }
   readRetainedTest: { "project": string; "suite": string; "test": string }
   listCatalogTestRevisions: { "project": string; "suite": string; "test": string }
   readTestRunHistory: { "project": string; "suite": string; "test": string; query?: { "environment"?: string; "location"?: string; "application"?: string; "cursor"?: string; "limit"?: number } }
+  saveCurrentCatalogTest: { "project": string; "suite": string; "test": string; revision: number; body: SourceCatalogTest }
   listProjectCatalog: { "project": string; query?: { "query"?: string; "suite"?: string; "application"?: string; "category"?: string; "tag"?: string; "owner"?: string; "type"?: string; "runner"?: string; "state"?: string; "safety"?: string; "source"?: string; "sort"?: string; "cursor"?: string; "descendants"?: boolean; "uncategorized"?: boolean; "limit"?: number } }
   readPublicStatusPage: { "token": string; query?: { "window"?: string } }
   readPublicStatusChecks: { "token": string; query: { "row": number; "since": string; "until": string; "cursor"?: string; "limit"?: number } }
@@ -566,6 +567,7 @@ export interface AccessResponses {
   readRetainedTest: RetainedTest
   listCatalogTestRevisions: CatalogRevisionPage
   readTestRunHistory: TestHistoryPage
+  saveCurrentCatalogTest: CatalogTestRecord
   listProjectCatalog: CatalogListPage
   readPublicStatusPage: StatusPageReport
   readPublicStatusChecks: ReliabilityCheckPage
@@ -759,6 +761,7 @@ export const accessOperations = {
   readRetainedTest: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/retained" },
   listCatalogTestRevisions: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/revisions" },
   readTestRunHistory: { method: "GET", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/run-history" },
+  saveCurrentCatalogTest: { method: "POST", path: "/api/v1/projects/{project}/suites/{suite}/tests/{test}/save" },
   listProjectCatalog: { method: "GET", path: "/api/v1/projects/{project}/tests" },
   readPublicStatusPage: { method: "GET", path: "/api/v1/public/status-pages/{token}" },
   readPublicStatusChecks: { method: "GET", path: "/api/v1/public/status-pages/{token}/checks" },

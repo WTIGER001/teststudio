@@ -132,7 +132,7 @@ func TestBulkLifecycleAndDuplicateKeepIndependentHistory(t *testing.T) {
 		t.Fatal(err)
 	}
 	copy, err := storage.Decode[catalog.Test](r)
-	if err != nil || r.Revision != 1 || copy.State != "draft" || copy.ID != "COPY-1" {
+	if err != nil || r.Revision != 1 || copy.State != "disabled" || copy.ID != "COPY-1" {
 		t.Fatalf("duplicate identity: %+v %v", copy, err)
 	}
 	if _, err := s.PreviewBulk(t.Context(), "admin", "alpha", "health", input); !errors.Is(err, storage.ErrConflict) {

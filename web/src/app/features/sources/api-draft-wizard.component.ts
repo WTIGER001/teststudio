@@ -11,7 +11,7 @@ import { APIDraftWizardService } from './api-draft-wizard.service'
     <section aria-labelledby="api-setup-title"><h3 id="api-setup-title">Set up an API test</h3>
     <ts-wizard-stepper [steps]="['Name', 'Request', 'Review']" [current]="wizard.flow.step()" [reached]="wizard.flow.reached()" [disabled]="wizard.editor.busy()" (selected)="wizard.flow.go($event); feedback.reveal()" />
     <form [formGroup]="wizard.form" tsWizardForm #feedback="tsWizardForm" (ngSubmit)="advance(); feedback.reveal()">
-      <ts-wizard-heading [title]="titles[wizard.flow.step()]" [step]="wizard.flow.step()">Create a source draft first. Save, prepare, publish, and run separately.</ts-wizard-heading>
+      <ts-wizard-heading [title]="titles[wizard.flow.step()]" [step]="wizard.flow.step()">Create a source first. Save, prepare, save, and run separately.</ts-wizard-heading>
       @if (wizard.error()) { <p class="notice error" role="alert">{{ wizard.error() }}</p> }
       <fieldset [disabled]="wizard.editor.busy()">
       @if (wizard.flow.step() === 0) {
@@ -38,15 +38,15 @@ import { APIDraftWizardService } from './api-draft-wizard.service'
         </details>
       }
       @if (wizard.flow.step() === 2) {
-        <dl><dt>Test</dt><dd>{{ wizard.form.controls.title.value }} <span class="small muted">{{ wizard.form.controls.id.value }}</span></dd><dt>Request</dt><dd class="wrap-anywhere">{{ wizard.form.controls.method.value }} {{ wizard.form.controls.path.value }}</dd><dt>Expected status</dt><dd>{{ wizard.form.controls.status.value }}</dd><dt>Endpoint</dt><dd>{{ wizard.form.controls.endpoint.value }} in the environment selected at run time</dd><dt>Allowed path prefix</dt><dd class="wrap-anywhere">{{ wizard.form.controls.prefix.value }}</dd><dt>Target policy</dt><dd>{{ wizard.form.controls.readOnly.value ? 'Reviewed read-only requests. Protected execution still requires safe test labels and permission.' : 'Unprotected targets only.' }}</dd><dt>Safety label</dt><dd>Needs review. Inspect the generated code and catalog before publication.</dd><dt>Request budget</dt><dd>{{ wizard.form.controls.maxRequests.value }} per attempt</dd><dt>Redirects</dt><dd>Disabled</dd></dl>
+        <dl><dt>Test</dt><dd>{{ wizard.form.controls.title.value }} <span class="small muted">{{ wizard.form.controls.id.value }}</span></dd><dt>Request</dt><dd class="wrap-anywhere">{{ wizard.form.controls.method.value }} {{ wizard.form.controls.path.value }}</dd><dt>Expected status</dt><dd>{{ wizard.form.controls.status.value }}</dd><dt>Endpoint</dt><dd>{{ wizard.form.controls.endpoint.value }} in the environment selected at run time</dd><dt>Allowed path prefix</dt><dd class="wrap-anywhere">{{ wizard.form.controls.prefix.value }}</dd><dt>Target policy</dt><dd>{{ wizard.form.controls.readOnly.value ? 'Reviewed read-only requests. Protected execution still requires safe test labels and permission.' : 'Unprotected targets only.' }}</dd><dt>Safety label</dt><dd>Needs review. Inspect the generated code and catalog before save.</dd><dt>Request budget</dt><dd>{{ wizard.form.controls.maxRequests.value }} per attempt</dd><dt>Redirects</dt><dd>Disabled</dd></dl>
         @if (wizard.form.controls.body.value.trim()) { <h4>JSON request data</h4><pre>{{ wizard.form.controls.body.value }}</pre> }
 		<p>Authentication: {{ wizard.form.controls.authScheme.value === 'none' ? 'No credential' : wizard.form.controls.authScheme.value + ' with environment binding ' + wizard.form.controls.credentialBinding.value }}.</p>
 		@if (wizard.form.controls.authScheme.value !== 'none') { <p class="notice">The selected environment must map this binding to an approved credential reference. Its exact origin must be approved by the operator. HTTPS is required outside local environments.</p> }
         <p class="small muted">Request body limit: {{ wizard.bodyMethod(wizard.form.controls.method.value) ? wizard.form.controls.maxBodyBytes.value : 0 }} bytes. Response limit: {{ wizard.form.controls.maxResponseBytes.value }} bytes.</p>
-        <p class="notice">Create source draft opens the editor. It does not save, publish, or run the test.</p>
+        <p class="notice">Create source opens the editor. It does not save, save, or run the test.</p>
       }
       </fieldset>
-      <div class="row-actions wrap-actions">@if (wizard.flow.step() > 0) { <button type="button" class="button secondary" [disabled]="wizard.editor.busy()" (click)="wizard.flow.back()">Back</button> }<button class="button primary" type="submit" [disabled]="wizard.editor.busy()">{{ wizard.editor.busy() ? 'Creating…' : wizard.flow.step() === 2 ? 'Create source draft' : 'Continue' }}</button><button class="button secondary" type="button" [disabled]="wizard.editor.busy()" (click)="cancelled.emit()">Cancel API setup</button></div>
+      <div class="row-actions wrap-actions">@if (wizard.flow.step() > 0) { <button type="button" class="button secondary" [disabled]="wizard.editor.busy()" (click)="wizard.flow.back()">Back</button> }<button class="button primary" type="submit" [disabled]="wizard.editor.busy()">{{ wizard.editor.busy() ? 'Creating…' : wizard.flow.step() === 2 ? 'Create source' : 'Continue' }}</button><button class="button secondary" type="button" [disabled]="wizard.editor.busy()" (click)="cancelled.emit()">Cancel API setup</button></div>
     </form></section>
   `,
   styles: `fieldset { border: 0; padding: 0; margin: 0; min-width: 0; } details { margin: 1rem 0; } summary { cursor: pointer; padding: .75rem 0; } dt { font-weight: 650; } dd { margin: .3rem 0 1rem; overflow-wrap: anywhere; } textarea { width: 100%; box-sizing: border-box; } pre { white-space: pre-wrap; overflow-wrap: anywhere; max-width: 100%; }`
@@ -55,7 +55,7 @@ export class APIDraftWizardComponent {
   readonly wizard = inject(APIDraftWizardService)
   readonly created = output<void>()
   readonly cancelled = output<void>()
-  readonly titles = ['Name the API test', 'Configure its first request', 'Review the API source draft']
+  readonly titles = ['Name the API test', 'Configure its first request', 'Review the API source']
   readonly methods = ['GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE']
   async advance(): Promise<void> { if (this.wizard.flow.step() < 2) this.wizard.flow.next(); else if (await this.wizard.submit()) this.created.emit() }
 }

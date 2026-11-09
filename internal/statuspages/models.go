@@ -16,6 +16,7 @@ type Entry struct {
 	Monitor     bool   `json:"monitor,omitempty"`
 }
 type Definition struct {
+	Enabled    *bool   `json:"enabled,omitempty"`
 	Logo       string  `json:"logo,omitempty"`
 	LogoHeight int     `json:"logoHeight,omitempty"`
 	LogoAlt    string  `json:"logoAlt,omitempty"`
