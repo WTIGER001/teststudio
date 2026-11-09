@@ -39,7 +39,7 @@ func TestEmbeddedRecordingCapturesNewsAssertionAndClosesBrowser(t *testing.T) {
 		w.Header().Set("Content-Type", "text/html")
 		_, _ = w.Write([]byte(`<!doctype html><style>body{margin:0}a{display:block;padding:15px}h2{margin:20px}</style><nav><a href="/news">News</a></nav>`))
 		if r.URL.Path == "/news" {
-			_, _ = w.Write([]byte(`<main><article><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></article><article><h2>Second independent story</h2></article></main>`))
+			_, _ = w.Write([]byte(`<main><div class="story-card"><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></div><div class="story-card"><h2>Second independent story</h2><p>Another independent fixture.</p></div><div class="story-card" hidden><h2>Hidden draft story</h2><p>This draft must not count as a displayed story.</p></div></main>`))
 		}
 	}))
 	t.Cleanup(target.Close)
@@ -99,7 +99,11 @@ func TestEmbeddedRecordingCapturesNewsAssertionAndClosesBrowser(t *testing.T) {
 		{Action: "assert-add", Key: "exactly", Count: 2},
 		{Action: "assert-pick"}, {Action: "click", X: 120, Y: 85},
 		{Action: "assert-add", Key: "text", Text: "Regional harvest"},
-		{Action: "assert-url"},
+		{Action: "assert-pick"}, {Action: "click", X: 120, Y: 85},
+		{Action: "assert-add", Key: "at-most", Count: 2},
+		{Action: "assert-pick"}, {Action: "click", X: 120, Y: 85},
+		{Action: "assert-add", Key: "exact-text", Text: "Regional harvest begins"},
+		{Action: "assert-url"}, {Action: "assert-title"},
 	}
 	for index, action := range actions {
 		action.Sequence = index + 4
@@ -126,7 +130,7 @@ func TestEmbeddedRecordingCapturesNewsAssertionAndClosesBrowser(t *testing.T) {
 		t.Fatalf("recorded outcome state=%s steps=%+v code=%s", snapshot.State, snapshot.Steps, snapshot.Code)
 	}
 
-	for _, expected := range []string{"setViewportSize({ width: 390, height: 844 })", "toBeGreaterThanOrEqual(1)", "toHaveCount(2)", "toContainText(\"Regional harvest\")", "toHaveURL("} {
+	for _, expected := range []string{"setViewportSize({ width: 390, height: 844 })", "toBeGreaterThanOrEqual(1)", "toHaveCount(2)", "toContainText(\"Regional harvest\")", "toHaveURL(", "toHaveTitle(", "toBeLessThanOrEqual(2)", "toHaveText(\"Regional harvest begins\")"} {
 		if !strings.Contains(snapshot.Code, expected) {
 			t.Fatalf("missing generated assertion %s: %s", expected, snapshot.Code)
 		}

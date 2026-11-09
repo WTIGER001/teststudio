@@ -3,6 +3,13 @@
 Last reviewed: 2026-11-09. These notes describe the last verified state, not a live infrastructure inventory.
 Read this guide before historical continuation commands elsewhere in the plan.
 
+## Current delivery: selecting elements and recording checks
+
+Product 0.13.0-dev adds visible outlines, explicit item-or-group counts, and repeated-card detection for ordinary containers. A story needs no special HTML label. Group counts include displayed items outside the current viewport and exclude hidden items. Check selection never activates a link or changes a control; Interact with website restores ordinary recording. Disabled controls can be selected through the same bounded point selection.
+Checks now include visible, minimum, maximum and exact counts, contained and exact text, field value, enabled and disabled controls, checked and unchecked inputs, page address, and page title. The menu limits control checks to compatible elements. Current text, value, count, and state mismatches remain in review. Password values are not offered for inspection. Existing source review, one-draft saving, explicit preparation and execution, uncertainty recovery, and tab ownership remain.
+Normal STUDIO-HOSTED-RECORDER-001 passes in 13.969 seconds, run 20261109T185138.923030000-84a33498a8efbfe67326a97c. Its saved draft prepares, publishes, and passes an explicitly selected replay against a different local environment in 222 ms. The complete harness takes 45.00 seconds. The fixture uses unlabeled div cards, a hidden draft card, form values, disabled controls, and checkbox changes. Reuse output/playwright/recording-selection-checks-final. All owned recording resources and three observed host processes close. Focused native capture, bounded action validation, generated contract synchronization, and UI compilation pass. API contract is 0.47.0.
+The first UI check exposes disabled-control selection relying on native click dispatch. Point selection now resolves the element without clicking it. The normal workflow passes after that correction. Existing recording origin policy, sandbox, identities, and source-retaining cleanup remain. Hosted release verification follows. This refines 21, 49, 50, and 51; acceptance remains 50 verified of 57. Broad hosted target execution remains open.
+
 ## Completed correction: production recording startup
 
 The latest loading-screen report uses the production website. The earlier private policy covers only its development starting origin. Production uses a different startup API. A browser probe reproduces the loading screen with single-origin access and renders News with its reviewed dependencies.

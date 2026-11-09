@@ -14,7 +14,32 @@ export class EmbeddedRecorderService {
   readonly uncertain = signal(false)
   readonly checking = computed(() => ['assertingVisibility', 'inspecting'].includes(this.view()?.mode ?? ''))
   readonly external = signal(false)
-  readonly checkKind = signal<'at-least' | 'exactly' | 'text'>('at-least')
+  readonly checkKind = signal('at-least')
+  readonly countScope = signal<'element' | 'group'>('group')
+  readonly countCheck = computed(() => ['at-least', 'at-most', 'exactly'].includes(this.checkKind()))
+  readonly textCheck = computed(() => ['text', 'exact-text', 'value'].includes(this.checkKind()))
+  readonly checkOptions = computed(() => {
+    const capabilities = this.view()?.target?.capabilities ?? ['visible', 'text']
+    return [
+      { id: 'at-least', label: 'At least this many items' }, { id: 'at-most', label: 'At most this many items' }, { id: 'exactly', label: 'Exactly this many items' },
+      { id: 'visible', label: 'Item is visible' }, { id: 'text', label: 'Selected item contains text' }, { id: 'exact-text', label: 'Selected text equals' },
+      ...(capabilities.includes('value') ? [{ id: 'value', label: 'Field value equals' }] : []),
+      ...(capabilities.includes('enabled') ? [{ id: 'enabled', label: 'Control is enabled' }, { id: 'disabled', label: 'Control is disabled' }] : []),
+      ...(capabilities.includes('checked') ? [{ id: 'checked', label: 'Checkbox or radio is checked' }, { id: 'unchecked', label: 'Checkbox or radio is unchecked' }] : [])
+    ]
+  })
+  readonly canAddCheck = computed(() => {
+    if (this.countCheck()) { const count = Number(this.count()); return Number.isInteger(count) && count >= (this.checkKind() === 'at-least' ? 1 : 0) && count <= 10000 }
+    return !this.textCheck() || this.expectedText().length <= 2048 && (this.checkKind() === 'value' || this.expectedText().length > 0)
+  })
+  readonly highlights = computed(() => {
+    const view = this.view(), target = view?.target
+    if (!view || !target) return []
+    return ((this.countCheck() && this.countScope() === 'group' ? target.bounds : target.elementBounds) ?? []).map(box => {
+      const x = Math.max(0, box.x), y = Math.max(0, box.y)
+      return { x: 100 * x / view.width, y: 100 * y / view.height, width: 100 * Math.max(0, Math.min(view.width, box.x + box.width) - x) / view.width, height: 100 * Math.max(0, Math.min(view.height, box.y + box.height) - y) / view.height }
+    }).filter(box => box.width > 0 && box.height > 0)
+  })
   readonly count = signal(1)
   readonly expectedText = signal('')
   readonly width = signal(1280)
@@ -112,8 +137,12 @@ export class EmbeddedRecorderService {
     this.external.set(true)
   }
 
-  chooseCheck(): void { this.expectedText.set(''); this.send({ action: 'assert-pick' }) }
-  addCheck(): void { this.send({ action: 'assert-add', key: this.checkKind(), ...(this.checkKind() === 'text' ? { text: this.expectedText() } : { count: Number(this.count()) }) }) }
+  chooseCheck(): void { this.expectedText.set(''); this.checkKind.set('at-least'); this.countScope.set('group'); this.send({ action: 'assert-pick' }) }
+  setCheckKind(kind: string): void { this.checkKind.set(kind); if (kind === 'value') this.expectedText.set(this.view()?.target?.value ?? '') }
+  addCheck(): void {
+    if (!this.canAddCheck()) return
+    this.send({ action: 'assert-add', key: this.checkKind(), ...(this.textCheck() ? { text: this.expectedText() } : this.countCheck() ? { count: Number(this.count()), scope: this.countScope() } : {}) })
+  }
   resize(): void {
     const width = Number(this.width()), height = Number(this.height())
     if (!Number.isInteger(width) || width < 320 || width > 1920 || !Number.isInteger(height) || height < 240 || height > 1200) { this.sizeError.set('Use whole numbers: width 320–1920 and height 240–1200.'); return }

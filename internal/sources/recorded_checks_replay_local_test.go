@@ -28,9 +28,9 @@ func replayRecordedChecks(t *testing.T, service *sources.Service, runner *runs.S
 	}
 	target := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		io.WriteString(w, `<!doctype html><style>body{margin:0}a{display:block;padding:15px}h2{margin:20px}</style><div id="application"><nav><a href="/news">News</a></nav>`)
+		io.WriteString(w, `<!doctype html><title>Independent News</title><style>body{margin:0}a{display:block;padding:15px}h2{margin:20px}</style><div id="application"><nav><a href="/news">News</a></nav>`)
 		if r.URL.Path == "/news" {
-			io.WriteString(w, `<main><article><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></article><article><h2>A different story in the selected environment</h2></article></main>`)
+			io.WriteString(w, `<main><div class="story-card"><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></div><div class="story-card"><h2>A different story in the selected environment</h2><p>Another independent news fixture.</p></div><div class="story-card" hidden><h2>Hidden draft story</h2><p>This draft must not count as a displayed story.</p></div></main><aside style="position:fixed;right:10px;top:300px;width:240px;display:grid;gap:8px"><input aria-label="Search stories" value="Harvest" style="height:32px;box-sizing:border-box"><button disabled style="height:32px">Unavailable action</button><label style="height:32px"><input aria-label="Include archived" type="checkbox" checked> Include archived</label></aside>`)
 		}
 		io.WriteString(w, `</div>`)
 	}))

@@ -16,6 +16,14 @@ Development and production starting addresses need separate approvals when they 
 The private worker is enabled in MMDev release 0.10.0-dev. Hosted News capture, story assertion, review, saving, cancellation, and owned cleanup pass.
 Hosted browser test execution and actual application acceptance remain separate work.
 
+## Select an item and add a check
+
+Click links and buttons, type in fields, and change checkboxes in the website preview to record normal actions. Select Add an element check to inspect an item without following its link or changing its value. The pointer changes to a crosshair. Interact with website returns to normal recording.
+For a News list, select a headline or story card. Review the outlined group, choose At least this many items, leave Expected item count at 1, and select Add check. This checks that stories exist without requiring one particular headline. Special labels are not required. Semantic articles and lists help identify groups; ordinary repeated cards are also recognized. Review the group because unrelated page structures can look similar.
+Count what? switches between the selected item and its similar items. Matching counts include displayed items on the rest of the page, including cards below the current view. Hidden items are excluded. Two visible cards do not imply exactly two total stories. Outlines show up to thirty matching items in the current viewport.
+Use the check type menu for visibility, minimum, maximum or exact counts, contained or exact text, field values, control enablement, and checkbox or radio states. Field and control checks appear only for compatible elements. Password values are not offered. A mismatched current expectation stays in review so it can be corrected before capture. Check page address and Check page title need no element selection.
+These checks generate ordinary Playwright assertions. Labels and accessible names make individual controls easier to identify; testers do not need to write selectors. Inspect the captured steps before saving. Hidden-item selection, arbitrary attributes, screenshots as assertions, hover, drag, and popup recording remain outside this milestone.
+
 ## Existing desktop recording
 
 The local recorder uses Playwright codegen to capture browser actions and assertions.

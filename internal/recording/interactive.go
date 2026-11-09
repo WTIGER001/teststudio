@@ -18,9 +18,21 @@ type Step struct {
 }
 
 type CheckTarget struct {
-	Label   string `json:"label"`
-	Matches int    `json:"matches"`
-	Text    string `json:"text"`
+	Label         string         `json:"label"`
+	Matches       int            `json:"matches"`
+	Text          string         `json:"text"`
+	ElementLabel  string         `json:"elementLabel,omitempty"`
+	Value         string         `json:"value,omitempty"`
+	Capabilities  []string       `json:"capabilities,omitempty"`
+	Bounds        []TargetBounds `json:"bounds,omitempty"`
+	ElementBounds []TargetBounds `json:"elementBounds,omitempty"`
+}
+
+type TargetBounds struct {
+	X      float64 `json:"x"`
+	Y      float64 `json:"y"`
+	Width  float64 `json:"width"`
+	Height float64 `json:"height"`
 }
 
 type View struct {
@@ -45,6 +57,7 @@ type Action struct {
 	Y        float64 `json:"y,omitempty"`
 	Text     string  `json:"text,omitempty"`
 	Key      string  `json:"key,omitempty"`
+	Scope    string  `json:"scope,omitempty"`
 }
 
 type InteractiveDriver interface {
@@ -60,6 +73,9 @@ func (a Action) Valid() bool {
 	if a.Action != "resize" && (a.Width != 0 || a.Height != 0) || a.Action != "assert-add" && a.Count != 0 {
 		return false
 	}
+	if a.Scope != "" && (a.Action != "assert-add" || !slices.Contains([]string{"at-least", "at-most", "exactly"}, a.Key) || !slices.Contains([]string{"element", "group"}, a.Scope)) {
+		return false
+	}
 	switch a.Action {
 	case "click":
 		return a.X >= 0 && a.X < 1920 && a.Y >= 0 && a.Y < 1200 && a.Text == "" && a.Key == ""
@@ -72,8 +88,17 @@ func (a Action) Valid() bool {
 	case "resize":
 		return a.Width >= 320 && a.Width <= 1920 && a.Height >= 240 && a.Height <= 1200 && a.X == 0 && a.Y == 0 && a.Text == "" && a.Key == ""
 	case "assert-add":
-		return a.X == 0 && a.Y == 0 && (a.Key == "text" && a.Count == 0 && len(a.Text) > 0 && len(a.Text) <= 2048 && utf8.ValidString(a.Text) || a.Text == "" && (a.Key == "at-least" && a.Count >= 1 || a.Key == "exactly" && a.Count >= 0) && a.Count <= 10000)
-	case "assert-visible", "assert-pick", "assert-url", "record":
+		if a.X != 0 || a.Y != 0 {
+			return false
+		}
+		if slices.Contains([]string{"text", "exact-text", "value"}, a.Key) {
+			return a.Count == 0 && (a.Key == "value" || len(a.Text) > 0) && len(a.Text) <= 2048 && utf8.ValidString(a.Text)
+		}
+		if slices.Contains([]string{"visible", "enabled", "disabled", "checked", "unchecked"}, a.Key) {
+			return a.Count == 0 && a.Text == ""
+		}
+		return a.Text == "" && (a.Key == "at-least" && a.Count >= 1 || slices.Contains([]string{"exactly", "at-most"}, a.Key) && a.Count >= 0) && a.Count <= 10000
+	case "assert-visible", "assert-pick", "assert-url", "assert-title", "record":
 		return a.X == 0 && a.Y == 0 && a.Text == "" && a.Key == ""
 	}
 	return false

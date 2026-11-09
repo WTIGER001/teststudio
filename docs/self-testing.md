@@ -35,6 +35,8 @@ Reuse output/playwright/recording-workspace-final. The normal run is 20261108T20
 
 Set TESTSTUDIO_REPLAY_RECORDED_CHECKS=1 with the same focused hosted-recorder command to explicitly prepare, publish, and execute the saved recording against a second local News environment. This verifies actual count and text assertions, address rebinding, viewport steps, and private evidence. The fixture retains its group structure while changing the second headline. Reuse output/playwright/recorded-checks-replay-verified: the combined harness takes 46.90 seconds and the selected recorded test passes in 198 ms. This is local execution evidence; hosted execution remains separate.
 
+The selection-and-check expansion uses ordinary repeated div cards without article or list labels. It verifies outlines, single-item versus group selection, maximum counts, exact text, field values, disabled controls, checkbox states and recorded changes, page title, invalid expectations, and the existing full authoring recovery workflow. Normal STUDIO-HOSTED-RECORDER-001 passes in 13.969 seconds, run 20261109T185138.923030000-84a33498a8efbfe67326a97c. The exact saved draft passes selected replay against a different local environment in 222 ms. The 45.00-second harness closes all owned resources. Reuse output/playwright/recording-selection-checks-final.
+
 ## Private recording worker
 
 STUDIO-HOSTED-RECORDER-001 uses the same News authoring flow through a mutually authenticated HTTPS worker and the actual sandboxed recording container and gateway.

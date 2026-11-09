@@ -7,6 +7,7 @@ import { EmbeddedRecorderService } from './embedded-recorder.service'
   selector: 'ts-embedded-recorder', standalone: true, imports: [FormsModule, NgTemplateOutlet], changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './embedded-recorder.component.html',
   styles: [`
+    .browser-frame { position: relative; } .selection-layer { position: absolute; inset: 2px; pointer-events: none; overflow: hidden; } .browser-view.selecting { cursor: crosshair; } .selection-outline { position: absolute; pointer-events: none; border: 3px solid var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); box-sizing: border-box; }
     .browser-view { display: block; width: 100%; height: auto; border: 2px solid var(--border); border-radius: .5rem; cursor: pointer; }
     .browser-view:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
     .browser-address { overflow-wrap: anywhere; } .row-actions { margin: 1rem 0; } li { margin: .5rem 0; } details { margin: 1rem 0; }
@@ -20,7 +21,6 @@ export class EmbeddedRecorderComponent {
   readonly service = inject(EmbeddedRecorderService)
   readonly workspace = input(false)
   readonly expanded = signal(false)
-  validCount(): boolean { const count = Number(this.service.count()); return Number.isInteger(count) && count >= (this.service.checkKind() === 'at-least' ? 1 : 0) && count <= 10000 }
   open(dialog: HTMLDialogElement): void { dialog.showModal(); this.expanded.set(true) }
   close(dialog: HTMLDialogElement): void { dialog.close(); this.expanded.set(false) }
 }

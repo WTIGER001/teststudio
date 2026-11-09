@@ -3,6 +3,7 @@ import { createRequire } from 'node:module'
 import { writeFileSync } from 'node:fs'
 import { createInterface } from 'node:readline'
 import { recordingProxy } from './recording-proxy.mjs'
+import { inspectRecordingTarget, recordingTargetView, recordingCheck, recordingSelectorAtPoint } from './recording-target.mjs'
 
 const [cli, output, address] = process.argv.slice(2)
 if (!cli || !output || !address) throw new Error('Embedded recording requires a trusted runtime, private output, and start address')
@@ -63,8 +64,13 @@ try {
 }
 
 async function view() {
+  let selected
+  if (target) {
+    try { selected = await recordingTargetView(page, target) }
+    catch { target = null; check = 'That item is no longer available. Choose it again.' }
+  }
   const image = await page.screenshot({ type: 'jpeg', quality: 65, timeout: 10000 })
-  return { image: image.toString('base64'), width, height, url: page.url(), mode, sequence, steps, ...(target ? { target: { label: target.label, matches: target.matches, text: target.text } } : {}), ...(check ? { message: check } : {}) }
+  return { image: image.toString('base64'), width, height, url: page.url(), mode, sequence, steps, ...(selected ? { target: selected } : {}), ...(check ? { message: check } : {}) }
 }
 
 
@@ -78,26 +84,7 @@ async function addExtension(kind, description, statement) {
 
 async function pick(selector) {
   try {
-    const picked = page.locator(selector)
-    const details = await picked.evaluate(element => {
-      const item = element.closest('article,li,tr,[role="listitem"],[role="row"]') ?? element
-      const segments = []
-      let parent = item.parentElement
-      while (parent && parent.tagName !== 'HTML') {
-        if (parent.id) { segments.unshift('#' + CSS.escape(parent.id)); break }
-        const tag = parent.tagName.toLowerCase()
-        const siblings = parent.parentElement ? [...parent.parentElement.children].filter(child => child.tagName === parent.tagName) : []
-        segments.unshift(tag + (siblings.length > 1 ? ':nth-of-type(' + (siblings.indexOf(parent) + 1) + ')' : ''))
-        parent = parent.parentElement
-      }
-      const role = item.getAttribute('role')
-      const tag = item.tagName.toLowerCase()
-      segments.push(tag + (role ? '[role=' + JSON.stringify(role) + ']' : ''))
-      return { selector: segments.join(' > '), label: ({ article: 'News articles', li: 'List items', tr: 'Table rows' })[tag] ?? 'Matching ' + tag + ' items', text: (element.textContent ?? '').trim().slice(0, 200) }
-    }, { timeout: 5000 })
-    const parts = selector.split(' >> internal:control=enter-frame >> ')
-    const grouped = [...parts.slice(0, -1), details.selector].join(' >> internal:control=enter-frame >> ')
-    target = { ...details, selector, grouped, matches: await page.locator(grouped).count() }
+    target = await inspectRecordingTarget(page, selector)
     check = null
   } catch { target = null; check = 'That item is no longer available. Choose it again.' }
 }
@@ -132,7 +119,8 @@ input.on('line', line => {
         if (command.action === 'click') {
           if (!Number.isFinite(command.x) || !Number.isFinite(command.y) || command.x < 0 || command.x >= width || command.y < 0 || command.y >= height) throw new Error('Choose an item inside the recording browser')
           await page.mouse.move(command.x, command.y)
-          await page.mouse.click(command.x, command.y)
+          if (mode === 'inspecting') picking = pick(await recordingSelectorAtPoint(page, playwright, server.nullProgress, command.x, command.y))
+          else await page.mouse.click(command.x, command.y)
         } else if (command.action === 'text') {
           if (typeof command.text !== 'string' || command.text.length > 2048) throw new Error('Enter up to 2048 characters at a time')
           await page.keyboard.insertText(command.text)
@@ -149,23 +137,15 @@ input.on('line', line => {
           await controller.setRecorderMode(server.nullProgress, { mode: 'inspecting' })
         } else if (command.action === 'assert-add') {
           check = null
-          if (!target || !['at-least', 'exactly', 'text'].includes(command.key)) throw new Error('Choose the items to check first')
-          const locator = `page.locator(${JSON.stringify(command.key === 'text' ? target.selector : target.grouped)})`
-          if (command.key === 'text') {
-            if (typeof command.text !== 'string' || !command.text.length || command.text.length > 2048) throw new Error('Enter the expected text')
-            await addExtension('assertText', `Check the selected item contains “${command.text}”`, `await expect(${locator}).toContainText(${JSON.stringify(command.text)});`)
-          } else {
-            if (!Number.isInteger(command.count) || command.count < 0 || command.count > 10000 || command.key === 'at-least' && command.count < 1) throw new Error('Enter a valid item count')
-            const matches = await page.locator(target.grouped).count()
-            if (command.key === 'at-least' ? matches < command.count : matches !== command.count) {
-              check = `There are ${matches} matching items now. Change the expected count or choose different items before adding this check.`
-            } else {
-              await addExtension('assertCount', `Check ${target.label.toLowerCase()}: ${command.key === 'at-least' ? 'at least' : 'exactly'} ${command.count}`, command.key === 'at-least' ? `await expect.poll(() => ${locator}.count()).toBeGreaterThanOrEqual(${command.count});` : `await expect(${locator}).toHaveCount(${command.count});`)
-            }
-          }
+          if (!target) throw new Error('Choose the item to check first')
+          const result = await recordingCheck(page, target, command)
+          if (result.message) check = result.message
+          else await addExtension(result.kind, result.description, result.statement)
           if (!check) { target = null; await controller.setRecorderMode(server.nullProgress, { mode: 'recording' }) }
         } else if (command.action === 'assert-url') {
           await addExtension('assertURL', 'Check the current page address', `await expect(page).toHaveURL(${JSON.stringify(page.url())});`)
+        } else if (command.action === 'assert-title') {
+          await addExtension('assertTitle', 'Check the current page title', `await expect(page).toHaveTitle(${JSON.stringify(await page.title())});`)
         } else if (command.action === 'resize') {
           if (!Number.isInteger(command.width) || command.width < 320 || command.width > 1920 || !Number.isInteger(command.height) || command.height < 240 || command.height > 1200) throw new Error('Choose a supported browser size')
           await page.setViewportSize({ width: command.width, height: command.height })

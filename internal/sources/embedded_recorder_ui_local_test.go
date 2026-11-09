@@ -92,7 +92,7 @@ func runRecordingAuthoringUI(t *testing.T, hosted bool) {
 		dependency := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "text/javascript")
 			w.Header().Set("Access-Control-Allow-Origin", "*")
-			io.WriteString(w, `document.querySelector('#application').innerHTML='<nav><a href="/news">News</a></nav>'+(location.pathname==='/news'?'<main><article><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></article><article><h2>Second independent story</h2></article></main>':'');fetch('/fixture-ready',{method:'POST'});`)
+			io.WriteString(w, `document.querySelector('#application').innerHTML='<nav><a href="/news">News</a></nav>'+(location.pathname==='/news'?'<main><div class="story-card"><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></div><div class="story-card"><h2>Second independent story</h2><p>Another independent news fixture.</p></div><div class="story-card" hidden><h2>Hidden draft story</h2><p>This draft must not count as a displayed story.</p></div></main><aside style="position:fixed;right:10px;top:300px;width:240px;display:grid;gap:8px"><input aria-label="Search stories" value="Harvest" style="height:32px;box-sizing:border-box"><button disabled style="height:32px">Unavailable action</button><label style="height:32px"><input aria-label="Include archived" type="checkbox" checked> Include archived</label></aside>':'');fetch('/fixture-ready',{method:'POST'});`)
 		}))
 		listener, err := net.Listen("tcp", "0.0.0.0:0")
 		if err != nil {
@@ -112,13 +112,13 @@ func runRecordingAuthoringUI(t *testing.T, hosted bool) {
 		}
 		w.Header().Set("Content-Type", "text/html")
 		if hosted {
-			fmt.Fprintf(w, `<!doctype html><style>body{margin:0}a{display:block;padding:15px}h2{margin:20px}</style><div id="application">Loading the independent News application...</div><script type="module" src="%s/bootstrap.js"></script>`, dependencyOrigin)
+			fmt.Fprintf(w, `<!doctype html><title>Independent News</title><style>body{margin:0}a{display:block;padding:15px}h2{margin:20px}</style><div id="application">Loading the independent News application...</div><script type="module" src="%s/bootstrap.js"></script>`, dependencyOrigin)
 			return
 		}
 		fixtureReady.Add(1)
-		io.WriteString(w, `<!doctype html><style>body{margin:0}a{display:block;padding:15px}h2{margin:20px}</style><nav><a href="/news">News</a></nav>`)
+		io.WriteString(w, `<!doctype html><title>Independent News</title><style>body{margin:0}a{display:block;padding:15px}h2{margin:20px}</style><nav><a href="/news">News</a></nav>`)
 		if r.URL.Path == "/news" {
-			io.WriteString(w, `<main><article><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></article><article><h2>Second independent story</h2></article></main>`)
+			io.WriteString(w, `<main><div class="story-card"><h2>Regional harvest begins</h2><p>A new independent news fixture.</p></div><div class="story-card"><h2>Second independent story</h2><p>Another independent news fixture.</p></div><div class="story-card" hidden><h2>Hidden draft story</h2><p>This draft must not count as a displayed story.</p></div></main><aside style="position:fixed;right:10px;top:300px;width:240px;display:grid;gap:8px"><input aria-label="Search stories" value="Harvest" style="height:32px;box-sizing:border-box"><button disabled style="height:32px">Unavailable action</button><label style="height:32px"><input aria-label="Include archived" type="checkbox" checked> Include archived</label></aside>`)
 		}
 	}))
 	targetAddress := "127.0.0.1:0"

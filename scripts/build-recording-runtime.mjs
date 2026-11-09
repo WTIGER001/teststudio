@@ -30,7 +30,7 @@ if (!fs.existsSync(policy) || hash(fs.readFileSync(policy)) !== policyHash) {
   fs.writeFileSync(policy, derived, { mode: 0o600 })
 }
 if (hash(fs.readFileSync(policy)) !== policyHash) throw new Error('The installed Chromium sandbox policy checksum does not match')
-const files = ['scripts/record-browser-embedded.mjs', 'scripts/recording-proxy.mjs', 'deploy/recording/Dockerfile', 'scripts/build-recording-runtime.mjs']
+const files = ['scripts/record-browser-embedded.mjs', 'scripts/recording-proxy.mjs', 'scripts/recording-target.mjs', 'deploy/recording/Dockerfile', 'scripts/build-recording-runtime.mjs']
 const key = hash(JSON.stringify([base, ...files.map(file => hash(fs.readFileSync(file)))]))
 const cachePath = path.join(directory, 'runtime.json')
 let cache
@@ -40,7 +40,7 @@ if (cache?.key === key) {
 }
 const context = fs.mkdtempSync(path.join(directory, 'context-'))
 try {
-  for (const file of files.slice(0, 2)) fs.copyFileSync(file, path.join(context, path.basename(file)))
+  for (const file of files.slice(0, 3)) fs.copyFileSync(file, path.join(context, path.basename(file)))
   const tag = 'teststudio/recording-base:' + base.slice(7)
   execFileSync('docker', ['tag', base, tag], { stdio: ['ignore', 'ignore', 2] })
   execFileSync('docker', ['build', '--network=none', '--pull=false', '--build-arg', 'RUNTIME_IMAGE='+tag, '-f', path.resolve('deploy/recording/Dockerfile'), '-t', 'teststudio/recording-runtime:local', context], { stdio: ['ignore', 2, 2] })
