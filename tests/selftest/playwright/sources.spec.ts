@@ -26,7 +26,7 @@ tests:
 `
 }
 
-test('Native source upload, atomic publication, immutable snapshots, and stale review', { tag: '@STUDIO-SOURCES-001' }, async ({ page, api }, testInfo) => {
+test('Native source upload, direct saving, immutable snapshots, and stale review', { tag: '@STUDIO-SOURCES-001' }, async ({ page, api }, testInfo) => {
   const { project, path } = await api.scaffold()
   const base = `${path}/suites/health`
   const readSuite = async () => (await api.call('GET', `${path}/suites`)).items.find((item: { id: string }) => item.id === 'health')
@@ -50,22 +50,20 @@ test('Native source upload, atomic publication, immutable snapshots, and stale r
   expect((await page.request.get(`${base}/tests/UPLOADED-HEALTH`)).status()).toBe(404)
   await review.getByText('Inspect changes', { exact: true }).click()
   await expect(review.getByRole('heading', { name: 'After', exact: true })).toBeVisible()
-  await expect(review.getByRole('checkbox', { name: 'Activate this release for future runs' })).not.toBeChecked()
+  await expect(review.getByRole('checkbox', { name: /Activate/ })).toHaveCount(0)
   await testInfo.attach('source-review-light', { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' })
-  await review.getByRole('button', { name: 'Publish source release', exact: true }).click()
-  await expect(page.getByRole('status').filter({ hasText: 'Source release published. No tests were started.' })).toBeVisible()
+  await review.getByRole('button', { name: 'Save tests', exact: true }).click()
+  await expect(page.getByRole('status').filter({ hasText: 'Source version saved. No tests were started.' })).toBeVisible()
   const published = await api.call('GET', `${base}/source-uploads/${first.upload.id}`)
   expect(published.upload.data.state).toBe('published')
   const firstRelease = published.upload.data.releaseId
   expect((await api.call('GET', `${base}/releases/${firstRelease}`)).data.catalog.artifact.sourceSnapshotId).toBe(first.upload.id)
-  expect((await readSuite()).data.activeReleaseId).toBeUndefined()
+  expect((await readSuite()).data.activeReleaseId).toBe(firstRelease)
   expect((await api.call('GET', `${path}/runs`)).items).toEqual([])
   await review.getByRole('button', { name: 'View retained source', exact: true }).click()
   await expect(page.getByLabel('Retained source document', { exact: true })).toHaveValue(nativeYAML())
 
   await test.step('Preserve the active release after an intervening catalog edit', async () => {
-    const suite = await readSuite()
-    await api.call('POST', `${base}/releases/${firstRelease}/activate`, {}, suite.revision)
     await page.getByRole('button', { name: '+ Upload tests', exact: true }).click()
     await page.getByLabel('Source document', { exact: true }).fill(nativeYAML('Revised source health'))
     const response = page.waitForResponse(response => response.request().method() === 'POST' && response.url().endsWith('/source-uploads'))
@@ -74,18 +72,17 @@ test('Native source upload, atomic publication, immutable snapshots, and stale r
     await expect(review.getByRole('cell', { name: 'update', exact: true })).toBeVisible()
     const test = await api.call('GET', `${base}/tests/UPLOADED-HEALTH`)
     await api.call('PUT', `${base}/tests/UPLOADED-HEALTH`, { ...test.data, title: 'Concurrent catalog edit' }, test.revision)
-    await expectHTTPFailure(page, 'POST', `${base}/source-uploads/${second.upload.id}/publish`, 409, () => review.getByRole('button', { name: 'Publish source release', exact: true }).click())
+    await expectHTTPFailure(page, 'POST', `${base}/source-uploads/${second.upload.id}/publish`, 409, () => review.getByRole('button', { name: 'Save tests', exact: true }).click())
     await expect(page.getByRole('alert')).toContainText('Review current data and validate the source again.')
     expect((await readSuite()).data.activeReleaseId).toBe(firstRelease)
     expect((await api.call('GET', `${base}/tests/UPLOADED-HEALTH`)).data.title).toBe('Concurrent catalog edit')
     expect((await api.call('GET', `${base}/releases/${firstRelease}`)).data.catalog.tests[0].title).toBe('Uploaded health check')
   })
 
-  await test.step('Publish a fresh preview and execute it through normal run contracts', async () => {
+  await test.step('Save a fresh preview and execute it through normal run contracts', async () => {
     await page.getByRole('button', { name: 'Validate source and preview', exact: true }).click()
-    await review.getByRole('checkbox', { name: 'Activate this release for future runs' }).check()
-    await review.getByRole('button', { name: 'Publish source release', exact: true }).click()
-    await expect(page.getByRole('status').filter({ hasText: 'Source release published.' })).toBeVisible()
+    await review.getByRole('button', { name: 'Save tests', exact: true }).click()
+    await expect(page.getByRole('status').filter({ hasText: 'Source version saved.' })).toBeVisible()
     expect((await api.call('GET', `${path}/runs`)).items).toEqual([])
     const run = await api.run(path)
     expect(run.tests[0].id).toBe('UPLOADED-HEALTH')
@@ -98,7 +95,7 @@ test('Native source upload, atomic publication, immutable snapshots, and stale r
     await page.getByLabel('Source document', { exact: true }).fill('schemaVersion: teststudio.catalog/v1\ntests: []\ntests: []\n')
     await page.getByRole('button', { name: 'Validate source and preview', exact: true }).click()
     await expect(review.getByText(/source contains duplicate object keys/)).toBeVisible()
-    await expect(review.getByRole('button', { name: 'Publish source release', exact: true })).toHaveCount(0)
+    await expect(review.getByRole('button', { name: 'Save tests', exact: true })).toHaveCount(0)
     await page.getByLabel('Color theme').selectOption('dark')
     await page.setViewportSize({ width: 390, height: 844 })
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy()
@@ -111,6 +108,6 @@ test('Native source upload, atomic publication, immutable snapshots, and stale r
     await testInfo.attach('sources-mobile-dark', { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' })
     await page.reload()
     await page.getByLabel('Suite for sources', { exact: true }).selectOption('health')
-    await expect(page.getByRole('region', { name: 'Upload history', exact: true }).getByRole('cell', { name: 'published', exact: true })).toHaveCount(2)
+    await expect(page.getByRole('region', { name: 'Upload history', exact: true }).getByRole('cell', { name: 'Saved', exact: true })).toHaveCount(2)
   })
 })

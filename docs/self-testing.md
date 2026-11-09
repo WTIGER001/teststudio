@@ -643,14 +643,12 @@ It covers nested and sibling categories, combined metadata filters, readable app
 It also covers duplicate, enable, disable, archive, restore, revision history, keyboard category disclosure, and mobile themes.
 This workflow does not execute the HTTP definitions. Execution and publication retain their existing focused workflows.
 
-## Reviewed publication workflow
+## Direct save workflow
 
-Run `bash scripts/test-self.sh --test=STUDIO-PUBLISH-001` after reviewed publication changes.
-The workflow publishes and executes a new local HTTP check before editing its working definition.
-It reviews changes and pinned or unpinned schedules, rejects a concurrent catalog edit, and creates a fresh review.
-It simulates a lost response after publication commits, then verifies same-key recovery without another release.
-It also checks the preserved earlier run, mobile layout, and publication without activation.
-Schedules remain disabled. No hosted services or cloud verification run.
+Run `bash scripts/test-self.sh --test=STUDIO-PUBLISH-001` after changing current-version catalog saving. The stable ID now covers direct saving rather than a separate publication panel.
+The workflow rejects an outdated edit while preserving the entered title, saves the reviewed current revision, and confirms that the new version is selected automatically. The prior run and pinned schedule retain their original definitions. Saving creates no run; a later explicit run uses the new saved version. It also checks the narrow dark layout and absence of publication controls.
+Run 20261109T212119.481148000-037295a1991f02c6f36ac6dd passes this workflow and STUDIO-SOURCES-001, including direct source saving, current selection, retained source, stale previews, malformed diagnostics, and separate execution. STUDIO-RELEASES-001 passes comparison, rollback, revision conflicts, history, and pinned schedules in run 20261109T212200.844868000-e1fbc588e5d72f5beb140189.
+Legacy reviewed publication endpoints retain focused Go compatibility tests.
 
 ## Paged catalog and transfer workflow
 

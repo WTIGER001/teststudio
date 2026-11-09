@@ -16,7 +16,7 @@
     {"id": "STUDIO-API-STEPS-001", "title": "API steps preserve one logical test and retained native results", "selector": "@STUDIO-API-STEPS-001", "category": "Runner contracts", "type": "api"},
     {"id": "STUDIO-HISTORY-001", "title": "Retained test history, archived suites, removed working definitions and private evidence", "selector": "@STUDIO-HISTORY-001", "category": "Results"},
     {"id": "STUDIO-TRANSFER-001", "title": "Catalog pagination, retained selection, full export, reviewed file import and stale recovery", "selector": "@STUDIO-TRANSFER-001", "category": "Catalog"},
-    {"id": "STUDIO-PUBLISH-001", "title": "Publication change review, schedule impact, stale conflicts and response-loss recovery", "selector": "@STUDIO-PUBLISH-001", "category": "Catalog"},
+    {"id": "STUDIO-PUBLISH-001", "title": "Direct test saves, immutable history, schedule pins and stale conflicts", "selector": "@STUDIO-PUBLISH-001", "category": "Catalog"},
     {"id": "STUDIO-BROWSE-001", "title": "Category browsing, metadata filters, sorting, retained selections and lifecycle actions", "selector": "@STUDIO-BROWSE-001", "category": "Catalog"},
     {"id": "STUDIO-TRACE-001", "title": "Private installation-hosted trace actions, DOM snapshots, access expiry and local download fallback", "selector": "@STUDIO-TRACE-001", "category": "Results"},
     {"id": "STUDIO-DIAGNOSTICS-001", "title": "Scoped failure steps, retry logs, private screenshots, evidence gaps and rerun response recovery", "selector": "@STUDIO-DIAGNOSTICS-001", "category": "Results"},

@@ -7,6 +7,12 @@ Use AWS profile mm_dev, account 253455159142, and region us-west-2.
 The existing cluster is marketmaker-testing-dev. Preserve its testing-server service.
 Azure implementation and verification remain deferred.
 
+## Current direct-save release
+
+Product 0.14.0-dev from committed 042780f is deployed as build 14cc815281d1. UTC build creation is 2026-11-09T21:13:45.177Z, task startup is 2026-11-09T21:16:30.391000Z, and UI publication is 2026-11-09T21:19:54Z. The reviewed change set modifies only Service and Task with LocalAccounts=false. Both existing ECS services retain completed healthy rollouts. Hosted API metadata and actual index and main bundle match the selected release. SSO-only automatic Organization sign-in and the private recording worker remain unchanged.
+The user's two existing saved recordings are recovered through normal exact-revision suite source APIs. Both appear under Simple Browser and retain their application context. Existing project catalog definitions and revisions remain unchanged. No target run starts. The hosted catalog and help expose no draft or publication controls. The hosted Enabled switch withdraws and restores access, enabled editing updates public content on Save, and narrow dark layout passes.
+The temporary public status page is disabled and its verification project archived. Owned application sessions close and all seven owned browser processes exit. Local owned recording resources and test controllers close. User browsers, the port 8040 demo, and unrelated containers remain intact. Private credential state and temporary verification helpers are removed. Reuse output/aws-mmdev/direct-save-0140 and output/playwright/direct-save-0140. Hosted coded preparation and execution workers remain absent; the two saved browser tests honestly show Getting ready. Do not describe them as runnable on MMDev.
+
 ## Concepts
 
 ### Installation boundaries
@@ -129,12 +135,13 @@ ECR authentication uses a temporary private Docker configuration, removed after 
 
 ### Sign in after deployment
 
-Open https://teststudio.devfoodmarketmaker.com and choose TestStudio sign-in.
+Open https://teststudio.devfoodmarketmaker.com. This installation automatically redirects to Organization sign-in.
+The hidden /auth/login/cognito route remains available for authorized operator recovery.
 Retrieve the initial credential through the MMDev Secrets Manager console. Select teststudioapi/initial-administrator.
 Use username studioadmin and the stored password. Rotate the password through authorized Cognito administration after handoff.
 The evidence origin is https://teststudio-evidence.devfoodmarketmaker.com.
 Native HTTPS probes are available in the core profile. Coded workers require the separate worker installation.
-The desktop companion can record and save a draft independently of coded execution.
+Browser recording can save tests independently of coded execution. Tests remain visible with pending readiness until the preparation and execution workers are installed.
 A healthy core deployment does not prove all hosted execution, storage, timing, identity, or recovery criteria.
 Keep all seven open acceptance items unchanged until their complete requirements pass.
 
