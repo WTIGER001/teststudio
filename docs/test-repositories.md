@@ -6,6 +6,7 @@ Keep application tests in their own repository. TestStudio manages their catalog
 A repository requires explicit suite declarations. A Playwright configuration or the older platform's catalog alone does not establish compatibility.
 Use this contract for new repositories and for adapters that preserve existing tests.
 See [source bundles](source-bundles.md) for packaging and [repository sources](repository-sources.md) for GitHub access.
+The agreed [Git test source extensions](git-test-sources.md) add onboarding without these declarations, database or Git metadata ownership, and run-start synchronization. Those extensions remain unimplemented.
 
 ## Concepts
 

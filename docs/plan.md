@@ -5,6 +5,15 @@ Track verified delivery in `implementation.md`.
 Start resumed work with [the continuation guide](continue.md). It summarizes the current release, remaining priorities, boundaries, and retained evidence.
 The user authorizes targeted tests and frequent feature commits. Remote pushes remain separate operations.
 
+## Agreed direction: Git test sources
+
+The user selects read-only Git connections with metadata JSON in the database and read/write connections that commit metadata changes back to Git on 2026-11-10.
+Capture onboarding without manifests or tags, self-managed GitLab, GitHub credential lifecycle, and source acquisition at run start in the [Git test source specification](git-test-sources.md).
+This is a specification milestone, not implemented behavior. Current GitHub sync prepares immutable versions; run creation does not refresh Git.
+New runs following a branch or tag must resolve it at run-start preparation, then pin source and metadata for every test and retry. Reuse matching immutable artifacts; never silently run stale source after a refresh failure.
+Implementation must cover acceptance 21–29 and the affected authority and configuration checks. No acceptance number advances. The verified total remains 50 of 57.
+Documentation consistency and local links are the smallest check for this milestone. Runtime, UI, provider, release, and deployment verification remain pending.
+
 ## Deployed delivery: application ownership and environment configuration
 
 The user requests commit, MMDev deployment, and manual migration of the existing shared suite on 2026-11-10.

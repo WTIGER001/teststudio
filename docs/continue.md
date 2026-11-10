@@ -3,6 +3,14 @@
 Last reviewed: 2026-11-10. These notes describe the last verified state, not a live infrastructure inventory.
 Read this guide before historical continuation commands elsewhere in the plan.
 
+## Agreed direction: Git test sources
+
+The 2026-11-10 discussion selects read-only connections with metadata JSON in TestStudio's database and read/write connections that commit changes to Git.
+The [Git test source specification](git-test-sources.md) also captures metadata-free onboarding, untagged test mapping, self-managed GitLab, credential lifecycle, and source freshness at run start.
+These extensions are not implemented. Current runs use previously prepared immutable versions and do not refresh Git at creation.
+Implement a fresh branch or tag resolution for each new run, then pin its source and metadata. Preserve explicit retained-version reruns, retries, history, permissions, and environment requirements. A failed latest-source refresh must not silently run an old version.
+The specification milestone changes documentation only. Acceptance remains 50 verified of 57; 21–29 need additional coverage for this scope. MMDev remains 0.15.0-dev, build b000dd1ba166, with hosted coded workers still absent.
+
 ## Deployed delivery: application ownership and environment configuration
 
 The user requests commit, MMDev deployment, and manual migration of the existing shared suite on 2026-11-10.

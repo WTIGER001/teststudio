@@ -6,6 +6,14 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user authorizes MMDev ECS deployment and now plans a first installation into their own Azure subscription.
 
+## Specification: Git metadata modes and run-start source acquisition — 2026-11-10
+
+The user agrees to onboarding existing repositories and requests read-only database metadata, read/write Git commits, and correct source acquisition when tests start.
+The [Git test source specification](git-test-sources.md) records authority, missing-metadata discovery, untagged identities, provider credential lifecycle, commit conflict recovery, fresh reference resolution, immutable reuse, retry pins, and explicit stale-source blocking.
+This entry records requirements only. The new modes, arbitrary repository onboarding, self-managed GitLab, managed credential rollover, and run-start source synchronization remain unimplemented.
+Documentation consistency and local links pass. No runtime, UI, provider, release, deployment, or target test executes for this milestone.
+The new scope extends acceptance 21–29 and affects 12, 13, 20, and 38. No item advances; the total remains 50 verified of 57. Existing deployed behavior remains 0.15.0-dev, build b000dd1ba166.
+
 ## Deployed delivery: application ownership and environment configuration
 
 The user requests commit, MMDev deployment, and manual migration of the existing shared suite on 2026-11-10.
