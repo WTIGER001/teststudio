@@ -27,6 +27,9 @@ import { CatalogTestFormComponent } from './catalog-test-form.component'
   providers: [RecordCreationService, CatalogTestEditorService, HTTPCheckEditorService, TimingPolicyEditorService, CatalogService, CatalogEntryService, CatalogPlanService, CatalogSelectionService, CatalogBulkMetadataService, CatalogSavedSelectionsService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    @if (!service.applicationId() && !service.probeOverview) {
+      <section class="panel"><h1>Choose an application</h1><p>Each application has its own test catalog and suites.</p>@for (application of service.workspace.applications(); track application.id) { <p><a class="button secondary" [routerLink]="['/projects', service.projectId(), 'applications', application.id, 'catalog']">{{ application.data.name }}</a></p> }<a [routerLink]="['/projects', service.projectId(), 'applications']">Manage applications</a></section>
+    } @else {
     <div class="page-heading"><div><span class="eyebrow">{{ service.workspace.project()?.name || 'Project' }}</span><h1>{{ service.probeOverview ? 'HTTPS probes' : 'Test catalog' }}</h1><p class="muted">{{ service.probeOverview ? 'Website and endpoint probes across all applications in this project.' : 'Know what you test. Keep every version accountable.' }}</p></div>
       @if (service.workspace.can('catalog.create')) { <a class="button primary" [routerLink]="service.workspace.path('tests', 'new')" [queryParams]="{ suite: service.suiteFilter() || undefined }">+ Create test</a> }
     </div>
@@ -37,7 +40,7 @@ import { CatalogTestFormComponent } from './catalog-test-form.component'
       <article class="metric"><span class="eyebrow">Suites with tests</span><strong>{{ service.counts().suites }}</strong><span class="small muted">Independent versions</span></article>
     </section>
     }
-    @if (service.hasSharedSuites()) { <p class="notice">Shared suites keep tests together across applications. Import, export, and saved selections apply to the complete suite.</p> }
+
     @if (service.error()) { <p class="notice error" role="alert">{{ service.error() }}</p> }
     @if (service.success()) { <p class="notice success" role="status">{{ service.success() }}</p> }
     <ts-catalog-entry />
@@ -72,6 +75,7 @@ import { CatalogTestFormComponent } from './catalog-test-form.component'
     @if (service.suites().length) { <p><a class="button secondary" [routerLink]="['/projects', service.projectId(), 'releases']">Version history</a></p> }
     @if (service.suites().length) { <ts-catalog-saved-selections /> }
 
+    }
   `,
   styles: [`:host { display: block; } .catalog-layout { min-width: 0; } .with-categories { display: grid; grid-template-columns: minmax(180px, 240px) minmax(0, 1fr); gap: 20px; } .category-navigation { min-width: 0; border-right: 1px solid var(--border); padding-right: 12px; } .catalog-results { min-width: 0; } @media (max-width: 1000px) { .with-categories { grid-template-columns: minmax(0, 1fr); } .category-navigation { border-right: 0; border-bottom: 1px solid var(--border); padding: 0 0 16px; } }`]
 })

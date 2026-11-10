@@ -7,9 +7,9 @@ import type { SuiteLifecycle } from '../../core/generated/access.types'
 import { credentialBindings, replaceConfiguredSuite, type CredentialReference } from './configuration.utils'
 import { WorkspaceService } from '../../core/workspace.service'
 
-export interface Application { id: string; name: string; description: string }
+export interface Application { id: string; name: string; description: string; defaultSuiteId?: string; requirements?: import("./application-configuration.models").Requirement[] }
 export interface Suite { id: string; name: string; description: string; applications: string[]; requiresTarget: boolean; activeReleaseId?: string; archived: boolean }
-export interface Environment { id: string; name: string; applicationId: string; stage: string; protected: boolean; disabled: boolean; endpoints: Record<string, string>; credentialBindings?: Record<string, string> }
+export interface Environment { id: string; name: string; applicationId: string; stage: string; protected: boolean; disabled: boolean; endpoints: Record<string, string>; parameters?: Record<string, string>; credentialBindings?: Record<string, string> }
 export type Kind = 'applications' | 'suites' | 'environments'
 
 @Injectable()

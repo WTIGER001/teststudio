@@ -89,7 +89,8 @@ try {
   const operatorRolePath = '/api/v1/predefined-roles/builtin.teststudio.operator'
   const operatorDefault = await request('GET', operatorRolePath)
   const disabledOperator = await request('PUT', operatorRolePath, { disabled: true, reason: 'Verify a durable installation-wide disabled override' }, operatorDefault.revision)
-  for (const id of ['health', 'another']) await request('PUT', '/api/v1/projects/access-example/suites/' + id, { id, name: id, applications: [], requiresTarget: false }, 0)
+  await request('PUT', '/api/v1/projects/access-example/applications/app', { id: 'app', name: 'Access fixture' }, 0)
+  for (const id of ['health', 'another']) await request('PUT', '/api/v1/projects/access-example/suites/' + id, { id, name: id, applications: ['app'], requiresTarget: false }, 0)
   const role = { id: 'health-reader', name: 'Health reader', description: 'New exact-object verification', projectId: 'access-example', disabled: false, rules: [{ permission: 'teststudio.catalog.read', effect: 'allow', object: 'suite/health' }], inherits: [], reason: 'Verify durable object rules' }
   const reader = await request('POST', '/api/v1/roles', role)
   const composite = await request('POST', '/api/v1/roles', { ...role, id: 'composite-reader', name: 'Composite reader', rules: [], inherits: [role.id] })

@@ -65,7 +65,7 @@ test('Create tests through dedicated typed routes and review recorded browser so
   await followNavigation(page, 'Projects')
   await expect(page.getByRole('heading', { name: 'Projects', exact: true })).toBeVisible()
 
-  await api.call('PUT', `${path}/suites/browser-bundles`, { id: 'browser-bundles', name: 'Imported browser checks', applications: [], requiresTarget: false }, 0)
+  await api.call('PUT', `${path}/suites/browser-bundles`, { id: 'browser-bundles', name: 'Imported browser checks', applications: ['app'], requiresTarget: false }, 0)
   await page.goto(newTest+'/go')
   await page.getByLabel('Suite for this test', { exact: true }).selectOption('browser-bundles')
   await expect(page.getByRole('heading', { name: 'Import a Go suite', exact: true })).toBeVisible()

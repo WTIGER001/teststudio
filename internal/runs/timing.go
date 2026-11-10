@@ -23,8 +23,12 @@ func timingContext(run Run, test catalog.Test) timing.Context {
 		Bindings                                    []string
 		Check                                       *catalog.HTTPCheck
 	}{test.Application, test.Runner, test.Type, test.Source, test.Selector, bindings, test.Check}
-	target := struct{ Endpoints, Credentials map[string]string }{}
+	target := struct {
+		Endpoints, Credentials map[string]string
+		Parameters             map[string]string `json:",omitempty"`
+	}{}
 	if run.Environment != nil {
+		target.Parameters = run.Environment.Parameters
 		target.Endpoints = run.Environment.Endpoints
 		target.Credentials = run.Environment.Credentials
 	}

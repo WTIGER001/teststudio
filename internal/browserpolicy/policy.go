@@ -17,12 +17,13 @@ type Spec struct {
 }
 
 type Target struct {
-	Authenticated       bool            `json:"authenticated,omitempty"`
-	AllowCredentialHTTP bool            `json:"allowCredentialHttp,omitempty"`
-	Origin              string          `json:"origin"`
-	AdditionalOrigins   []string        `json:"additionalOrigins,omitempty"`
-	AllowPrivate        bool            `json:"allowPrivateNetwork,omitempty"`
-	Requests            *apipolicy.Spec `json:"requests,omitempty"`
+	Parameters          map[string]string `json:"parameters,omitempty"`
+	Authenticated       bool              `json:"authenticated,omitempty"`
+	AllowCredentialHTTP bool              `json:"allowCredentialHttp,omitempty"`
+	Origin              string            `json:"origin"`
+	AdditionalOrigins   []string          `json:"additionalOrigins,omitempty"`
+	AllowPrivate        bool              `json:"allowPrivateNetwork,omitempty"`
+	Requests            *apipolicy.Spec   `json:"requests,omitempty"`
 }
 
 func Validate(spec *Spec) error {

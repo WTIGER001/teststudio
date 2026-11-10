@@ -23,7 +23,7 @@ func retainedBrowserSource(t *testing.T, additions map[string][]byte) (*sources.
 	t.Helper()
 	s, _, _ := preparedService(t)
 	s.BundleRunners = []string{"playwright"}
-	if err := (&projects.Service{Store: s.Store, Auth: s.Auth}).SaveSuite(t.Context(), "admin", "alpha", projects.Suite{ID: "browser-bundles", Name: "Browser", Applications: []string{}, RequiresTarget: false}, 0); err != nil {
+	if err := (&projects.Service{Store: s.Store, Auth: s.Auth}).SaveSuite(t.Context(), "admin", "alpha", projects.Suite{ID: "browser-bundles", Name: "Browser", Applications: []string{"app"}, RequiresTarget: false}, 0); err != nil {
 		t.Fatal(err)
 	}
 	data, err := os.ReadFile(filepath.Join("..", "..", "tests", "selftest", "playwright", "fixtures", "bundle-browser.zip"))

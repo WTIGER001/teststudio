@@ -90,7 +90,7 @@ func repositorySetup(t *testing.T, second, automatic bool) (*sources.Service, *c
 	s.Providers = map[string]sourceprovider.Provider{"github": provider}
 	config := sources.RepositoryConfig{Name: "Independent repository", Provider: "github", Repository: "owner/suite", Reference: "heads/main", Enabled: true, AutoActivate: automatic, Bindings: []sources.RepositoryBinding{{Suite: "health", Manifest: "suites/health.json", Runner: "go", Profile: "go-module"}}}
 	if second {
-		if err := (&projects.Service{Store: s.Store, Auth: s.Auth}).SaveSuite(t.Context(), "admin", "alpha", projects.Suite{ID: "math", Name: "Math", RequiresTarget: false}, 0); err != nil {
+		if err := (&projects.Service{Store: s.Store, Auth: s.Auth}).SaveSuite(t.Context(), "admin", "alpha", projects.Suite{ID: "math", Name: "Math", Applications: []string{"app"}, RequiresTarget: false}, 0); err != nil {
 			t.Fatal(err)
 		}
 		config.Bindings = append(config.Bindings, sources.RepositoryBinding{Suite: "math", Manifest: "suites/math.json", Runner: "go", Profile: "go-module"})

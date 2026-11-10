@@ -1,10 +1,12 @@
-export const accessContractVersion = "0.48.0"
+export const accessContractVersion = "0.49.0"
 
 export type APIAuthentication = { "binding": string; "header"?: string; "scheme": "bearer" | "basic" | "header" }
 export type APIRequestPolicy = { "authentication"?: APIAuthentication; "maxRequests": number; "maxResponseBytes": number; "redactFields"?: (string)[]; "rules": (APIRequestRule)[] }
 export type APIRequestRule = { "maxBodyBytes"?: number; "method": "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | "DELETE"; "pathPrefix": string; "readOnly"?: boolean }
-export type Application = { "description": string; "id": string; "name": string }
+export type Application = { "defaultSuiteId"?: string; "description": string; "id": string; "name": string; "requirements"?: (ConfigurationRequirement)[] }
+export type ApplicationConfiguration = { "application": ApplicationRecord; "environments": (EnvironmentConfiguration)[]; "requirements": (ConfigurationRequirement)[] }
 export type ApplicationRecord = { "data": Application; "id": string; "projectId": string; "revision": number; "updatedAt": string }
+export type ApplicationRequirementsInput = { "requirements": (ConfigurationRequirement)[] }
 export type Assignment = { "bindingValues": AssignmentBindings; "canRevoke": boolean; "managed": boolean; "principalActive": boolean; "principalId": string; "principalKind": "user" | "group"; "principalName": string; "roleDisabled": boolean; "roleId": string; "roleName": string }
 export type AssignmentBindings = { "application"?: string; "team"?: string }
 export type AssignmentDefinition = { "principalId": string; "principalKind": "user" | "group"; "reason": string; "roleId": string }
@@ -48,7 +50,14 @@ export type CatalogRevisionRecord = { "data": CatalogTestRevision; "id": string;
 export type CatalogTestRecord = { "data": SourceCatalogTest; "id": string; "projectId"?: string; "revision": number; "savedVersionId"?: string; "updatedAt": string }
 export type CatalogTestRevision = { "actor": string; "at": string; "test": SourceCatalogTest }
 export type CatalogValidation = { "issues": (SourceCatalogIssue)[]; "valid": boolean }
+export type ConfigurationItem = { "kind": string; "message"?: string; "name": string; "status": "ready" | "configured" | "missing" | "invalid" | "unavailable" }
+export type ConfigurationRequirement = { "defaultValue"?: string; "description"?: string; "kind": "endpoint" | "parameter" | "secret"; "name": string; "required": boolean; "valueType"?: "text" | "url" | "integer" | "boolean" }
 export type EditorFile = { "content": string; "executable"?: boolean; "path": string }
+export type EnvironmentConfiguration = { "data": EnvironmentDefinition; "id": string; "projectId"?: string; "readiness": EnvironmentReadiness; "revision": number; "updatedAt"?: string }
+export type EnvironmentConfigurationInput = { "credentialBindings": { [key: string]: string }; "endpoints": { [key: string]: string }; "parameters": { [key: string]: string } }
+export type EnvironmentDefinition = { "allowHttp"?: boolean; "allowPrivateNetwork"?: boolean; "applicationId": string; "credentialBindings"?: { [key: string]: string }; "disabled": boolean; "endpoints": { [key: string]: string }; "executionLocations"?: (string)[]; "id": string; "name": string; "parameters"?: { [key: string]: string }; "protected": boolean; "stage": string }
+export type EnvironmentReadiness = { "items": (ConfigurationItem)[]; "ready": boolean }
+export type EnvironmentRecord = { "data": EnvironmentDefinition; "id": string; "projectId"?: string; "revision": number; "updatedAt"?: string }
 export type ExternalIdentity = { "issuer": string; "subject": string; "userId": string }
 export type ExternalIdentityPage = { "cursor"?: string; "items": (ExternalIdentityRecord)[]; "partial": boolean }
 export type ExternalIdentityRecord = { "data": ExternalIdentity; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
@@ -172,7 +181,7 @@ export type SourceCatalogImportPlan = { "actor": string; "appliedAt"?: string; "
 export type SourceCatalogIssue = { "field": string; "message": string; "testId"?: string }
 export type SourceCatalogPlannedTest = { "action": string; "before"?: SourceCatalogTest; "expectedRevision": number; "test": SourceCatalogTest }
 export type SourceCatalogRelease = { "activatedOnPublication": boolean; "actor": string; "catalog": SourceCatalogDraft; "createdAt": string; "draftRevision": number; "id": string; "projectId": string; "suiteId": string }
-export type SourceCatalogTest = { "applicationId"?: string; "capture"?: SourceCapturePolicy; "category": string; "check"?: SourceCatalogHTTPCheck; "conditions"?: string; "definitionSourceId"?: string; "dependencies": (string)[] | null; "description": string; "id": string; "owner"?: string; "rationale": string; "requiredBindings": (string)[] | null; "runner": string; "safety": string; "selector"?: string; "source"?: string; "state": string; "tags": (string)[] | null; "timeoutSeconds": number; "timing"?: SourceTimingPolicy; "title": string; "type": string }
+export type SourceCatalogTest = { "applicationId"?: string; "capture"?: SourceCapturePolicy; "category": string; "check"?: SourceCatalogHTTPCheck; "conditions"?: string; "definitionSourceId"?: string; "dependencies": (string)[] | null; "description": string; "id": string; "owner"?: string; "rationale": string; "requiredBindings": (string)[] | null; "requiredParameters"?: (string)[]; "runner": string; "safety": string; "selector"?: string; "source"?: string; "state": string; "tags": (string)[] | null; "timeoutSeconds": number; "timing"?: SourceTimingPolicy; "title": string; "type": string }
 export type SourceContent = { "content": string; "digest": string }
 export type SourceCredentialReference = { "id": string; "name": string }
 export type SourceJSONValue = null | string | number | boolean | (SourceJSONValue)[] | { [key: string]: SourceJSONValue }
@@ -212,10 +221,10 @@ export type StatusPageRecord = { "data": StatusPage; "id": string; "projectId"?:
 export type StatusPageReport = { "asOf": string; "background": string; "logo"?: string; "logoAlt"?: string; "logoHeight"?: number; "maxAgeSeconds": number; "probes": (StatusPageRow)[]; "title": string; "window": string }
 export type StatusPageRow = { "availability": StatusPageAvailability; "buckets": (ReliabilityBucket)[]; "contextCount": number; "description": string; "history": (StatusPagePoint)[]; "metric": "availability" | "outcomes"; "passRate": number | null; "state": string; "title": string; "totals": ReliabilityTotals }
 export type StatusPageSlugAvailability = { "available": boolean; "slug": string }
-export type SuiteDefinition = { "activeReleaseId"?: string; "applications": (string)[] | null; "archived": boolean; "capture"?: SourceCapturePolicy; "description": string; "id": string; "name": string; "requiresTarget": boolean; "timing"?: SourceTimingPolicy }
+export type SuiteDefinition = { "activeReleaseId"?: string; "applications": (string)[]; "archived": boolean; "capture"?: SourceCapturePolicy; "description": string; "id": string; "name": string; "requiresTarget": boolean; "timing"?: SourceTimingPolicy }
 export type SuiteLifecycle = { "canManage": boolean; "revision": number; "schedules": (SuiteSchedule)[]; "suite": SuiteDefinition; "updatedAt": string }
 export type SuiteSchedule = { "enabled": boolean; "id": string; "name": string; "releaseId"?: string }
-export type SuiteSettings = { "applications": (string)[] | null; "description": string; "name": string; "requiresTarget": boolean }
+export type SuiteSettings = { "applications": (string)[]; "description": string; "name": string; "requiresTarget": boolean }
 export type TestHistoryItem = { "attempt": number; "createdAt": string; "durationMs"?: number; "environmentName"?: string; "error"?: string; "evidenceState": string; "executionLocation": string; "finishedAt"?: string; "releaseId": string; "runId": string; "runOutcome": string; "runState": string; "testState": string; "title": string }
 export type TestHistoryPage = { "cursor"?: string; "items": (TestHistoryItem)[]; "partial": boolean; "scanned": number }
 export type User = { "createdAt": string; "disabled": boolean; "email"?: string; "emailVerified": boolean; "id": string; "lastSignIn"?: string; "name": string; "sessionEpoch": number }
@@ -258,6 +267,12 @@ export interface AccessRequests {
   setPredefinedRoleState: { "role": string; revision: number; body: PredefinedRoleUpdate }
   listAPICredentialReferences: { "project": string }
   readApplication: { "project": string; "application": string }
+  listApplicationCatalog: { "project": string; "application": string; query?: { "query"?: string; "suite"?: string; "application"?: string; "category"?: string; "tag"?: string; "owner"?: string; "type"?: string; "runner"?: string; "state"?: string; "safety"?: string; "source"?: string; "sort"?: string; "cursor"?: string; "descendants"?: boolean; "uncategorized"?: boolean; "limit"?: number } }
+  readApplicationConfiguration: { "project": string; "application": string }
+  saveApplicationRequirements: { "project": string; "application": string; revision: number; body: ApplicationRequirementsInput }
+  listApplicationCredentialReferences: { "project": string; "application": string }
+  createApplicationDefaultSuite: { "project": string; "application": string; revision: number }
+  saveEnvironmentConfiguration: { "project": string; "application": string; "environment": string; revision: number; body: EnvironmentConfigurationInput }
   readApplicationMemberCandidate: { "project": string; "application": string; "user": string }
   readApplicationOwnership: { "project": string; "application": string }
   listApplicationAssignments: { "project": string; "application": string; query?: { "limit"?: number; "cursor"?: string } }
@@ -452,6 +467,12 @@ export interface AccessResponses {
   setPredefinedRoleState: PredefinedRoleRecord
   listAPICredentialReferences: { "items": ({ "allowedOrigins"?: (string)[]; "id": string; "name": string })[] }
   readApplication: ApplicationRecord
+  listApplicationCatalog: CatalogListPage
+  readApplicationConfiguration: ApplicationConfiguration
+  saveApplicationRequirements: ApplicationRecord
+  listApplicationCredentialReferences: { "items": ({ "allowedOrigins"?: (string)[]; "id": string; "name": string })[] }
+  createApplicationDefaultSuite: ApplicationRecord
+  saveEnvironmentConfiguration: EnvironmentRecord
   readApplicationMemberCandidate: MemberCandidate
   readApplicationOwnership: OwnershipStatus
   listApplicationAssignments: AssignmentPage
@@ -646,6 +667,12 @@ export const accessOperations = {
   setPredefinedRoleState: { method: "PUT", path: "/api/v1/predefined-roles/{role}" },
   listAPICredentialReferences: { method: "GET", path: "/api/v1/projects/{project}/api-credential-references" },
   readApplication: { method: "GET", path: "/api/v1/projects/{project}/applications/{application}" },
+  listApplicationCatalog: { method: "GET", path: "/api/v1/projects/{project}/applications/{application}/catalog" },
+  readApplicationConfiguration: { method: "GET", path: "/api/v1/projects/{project}/applications/{application}/configuration" },
+  saveApplicationRequirements: { method: "PUT", path: "/api/v1/projects/{project}/applications/{application}/configuration" },
+  listApplicationCredentialReferences: { method: "GET", path: "/api/v1/projects/{project}/applications/{application}/credential-references" },
+  createApplicationDefaultSuite: { method: "POST", path: "/api/v1/projects/{project}/applications/{application}/default-suite" },
+  saveEnvironmentConfiguration: { method: "PUT", path: "/api/v1/projects/{project}/applications/{application}/environments/{environment}/configuration" },
   readApplicationMemberCandidate: { method: "GET", path: "/api/v1/projects/{project}/applications/{application}/member-candidates/{user}" },
   readApplicationOwnership: { method: "GET", path: "/api/v1/projects/{project}/applications/{application}/ownership" },
   listApplicationAssignments: { method: "GET", path: "/api/v1/projects/{project}/applications/{application}/role-assignments" },

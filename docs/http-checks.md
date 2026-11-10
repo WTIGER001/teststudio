@@ -3,13 +3,13 @@
 Native checks run in the Go service without a browser worker or a test image.
 The [HTTPS probes guide](https-probes.md) covers the target-specific overview, visual help, reviewed setup, execution, and scheduling. The [delivery plan](https-probes-plan.md) records local and deployed verification separately.
 Select Create test from the catalog, then choose HTTPS probe on the dedicated creation page.
-Edit existing checks from the catalog. Validate and publish the suite release after saving.
+Edit existing checks from the application catalog. Save updates future runs without starting execution.
 Each run retains its selected definition and target snapshot.
 Later edits and publications do not change existing runs.
 
 ## Request settings
 
-Choose a registered environment endpoint and a relative path beginning with one slash.
+Choose a registered environment endpoint and a relative path beginning with one slash. The endpoint is the environment base URL. The same check can run against another environment of its application.
 The path can include a query string. It cannot select another origin or include a fragment.
 Plain HTTP requires an explicitly permitted environment, including the local stage.
 
@@ -154,3 +154,12 @@ New target configuration appears on Review before Save draft or Save and run.
 Creating new target configuration uses the existing application and environment API contracts and current permissions.
 No website request occurs during URL entry or Save draft.
 Save and run uses the normal local execution path and retains its release snapshot.
+
+## Parameters
+
+Declare nonsecret names in Application > Environment configuration, then enter values for each environment.
+In the test editor, Advanced configuration requirements lists comma-separated required parameter names.
+Use `{{name}}` in the relative path, required text, or forbidden text.
+TestStudio escapes path and query replacements separately. Environment URLs continue to control the origin.
+Missing or invalid required values block review and execution with the affected names.
+Saving an incomplete environment is allowed. Saving configuration never starts a request.

@@ -71,6 +71,34 @@ func (s *Service) SaveApplication(ctx context.Context, user, project string, a A
 	if _, err := s.Store.Get(ctx, "projects", project); err != nil {
 		return err
 	}
+	if err := ValidateRequirements(a.Requirements); err != nil {
+		return err
+	}
+	if revision == 0 {
+		a.DefaultSuite = DefaultSuiteID(a.ID)
+		app, err := storage.Put(Bucket("applications", project), a.ID, project, 0, a)
+		if err != nil {
+			return err
+		}
+		suite, err := storage.Put(Bucket("suites", project), a.DefaultSuite, project, 0, Suite{ID: a.DefaultSuite, Name: "Default", Applications: []string{a.ID}})
+		if err != nil {
+			return err
+		}
+		audit, err := domain.Audit(user, project, "application.create", a.ID, nil, a)
+		if err != nil {
+			return err
+		}
+		return s.Store.Commit(ctx, append([]storage.Change{app, suite, audit}, authorization.AuthorityAssertions(ctx)...)...)
+	}
+	old, err := s.Store.Get(ctx, Bucket("applications", project), a.ID)
+	if err != nil {
+		return err
+	}
+	previous, err := storage.Decode[Application](old)
+	if err != nil {
+		return err
+	}
+	a.DefaultSuite = previous.DefaultSuite
 	return s.save(ctx, user, Bucket("applications", project), a.ID, project, revision, a)
 }
 
@@ -79,7 +107,7 @@ func (s *Service) SaveEnvironment(ctx context.Context, user, project string, e E
 	if authorityErr != nil {
 		return authorityErr
 	}
-	if err := s.Auth.CheckApplication(ctx, user, project, e.Application, "", "environments.manage"); err != nil {
+	if err := s.Auth.CheckApplication(ctx, user, project, e.Application, "environment/"+e.ID, "environments.manage"); err != nil {
 		return err
 	}
 	if !domain.ValidID(e.ID) || e.Name == "" || e.Stage == "" {
@@ -94,6 +122,9 @@ func (s *Service) SaveEnvironment(ctx context.Context, user, project string, e E
 			return errors.New("endpoints require named HTTP or HTTPS URLs without embedded credentials")
 		}
 	}
+	if err := ValidateParameters(e.Parameters); err != nil {
+		return err
+	}
 	if len(e.Credentials) > 16 {
 		return errors.New("an environment supports at most 16 API credential bindings")
 	}
@@ -103,7 +134,7 @@ func (s *Service) SaveEnvironment(ctx context.Context, user, project string, e E
 		}
 		refs, err := s.Secrets.References(ctx, project, secrets.APICredential)
 		if err != nil {
-			return err
+			return errors.New("API credential references are unavailable")
 		}
 		for binding, id := range e.Credentials {
 			if !domain.ValidID(binding) || !domain.ValidID(id) || !slices.ContainsFunc(refs, func(ref secrets.Reference) bool { return ref.ID == id }) {
@@ -211,6 +242,14 @@ func (s *Service) saveSuite(ctx context.Context, user, project string, v Suite, 
 			return err
 		}
 		v.ActiveRelease = old.ActiveRelease
+		if len(old.Applications) == 1 && !slices.Equal(old.Applications, v.Applications) {
+			return errors.New("suite application is permanent")
+		}
+		if len(old.Applications) != 1 {
+			if err := s.validateSuiteAssignment(ctx, project, v); err != nil {
+				return err
+			}
+		}
 		if !slices.Equal(old.Applications, v.Applications) {
 			if err := s.Auth.Check(ctx, user, project, "", "suites.manage"); err != nil {
 				return err

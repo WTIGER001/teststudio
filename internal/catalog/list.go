@@ -95,6 +95,9 @@ func (s *Service) ListTests(ctx context.Context, user, project, routeSuite strin
 			if test.ID != row.ID || suite.ID != suiteRow.ID {
 				return result, storage.ErrNotFound
 			}
+			if q.Application != "" && (len(suite.Applications) != 1 || suite.Applications[0] != q.Application) {
+				continue
+			}
 			if q.Application != "" && (test.Application != "" && test.Application != q.Application || test.Application == "" && !slices.Contains(suite.Applications, q.Application)) {
 				continue
 			}

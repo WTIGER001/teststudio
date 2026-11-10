@@ -1,7 +1,9 @@
+import { applicationConfigurationHelp } from './help.configuration'
 import { probeHelp } from './help.probes'
 import type { HelpPage } from './help.models'
 
 export const helpPages: Record<string, HelpPage> = {
+  'application-configuration': applicationConfigurationHelp,
   'application-members': {
     id: 'application-members', title: 'Application members',
     introduction: ['Assign registered users and groups to one application. Project roles and group membership can add inherited access.'],
@@ -389,7 +391,7 @@ export const helpPages: Record<string, HelpPage> = {
   },
   projects: {
     id: 'projects', title: 'Projects',
-    introduction: ['Projects keep related applications, test suites, and results together. Open a project to manage its catalog and runs.'],
+    introduction: ['Projects keep related applications, test suites, and results together. Open a project, then choose an application to manage its catalog and runs.'],
     concepts: [
       { title: 'Version and build', description: 'The sidebar footer shows Major.Minor.Patch.Tag, the immutable build identifier, and its UTC creation date. Expand Build for the source commit and source state. On a narrow screen, open Navigation to see the footer. The build date stays unchanged when a server restarts.' },
       { title: 'Project images', description: 'Projects use square tiles. Image opens an optional background editor for project managers. Upload an image or capture a website tab through your browser sharing prompt. Review before saving. Saved images are visible only to people with project read access.' },
@@ -430,14 +432,14 @@ export const helpPages: Record<string, HelpPage> = {
     introduction: ['Applications identify the systems tested by this project. Open an application to see its environments and linked test suites.'],
     concepts: [
       { title: 'Active application', description: 'The sidebar Application switcher scopes Suites, Test catalog, Test runs, and Trends. The context above the page shows the active application. Choose All applications for project-wide work. Project overviews contains All applications and HTTPS probes. Switching applications keeps the main destination and clears the previous filters.' },
-      { title: 'Ownership and links', description: 'An environment belongs to one application. Suites belong to the project and can link to several applications. A suite without an application link remains available in the project catalog.' },
+      { title: 'Ownership and links', description: 'Environments and suites belong to one application. New applications include an empty Default suite. The catalog contains only the selected application. Existing shared or unassigned suites need reviewed assignment in Project settings.' },
       { title: 'API authentication', description: 'When registering an environment, expand Advanced credentials to map a test binding to an approved reference. The endpoint origin must match the operator approval. HTTPS is required outside local environments. Secret values stay on the execution host and gateway.' },
       { title: 'Environment targets', description: 'The environment list shows the current application only. Stage and protection describe its target. Endpoint names remain part of environment registration.' },
-      { title: 'Linked suites', description: 'View tests opens the catalog filtered to a suite. Create test carries that suite into the test-type chooser. Archived suites retain their visible history and do not offer new test creation here.' },
+      { title: 'Suites', description: 'View tests opens the catalog filtered to a suite. Create test carries that suite into the test-type chooser. Archived suites retain their visible history and do not offer new test creation here.' },
       { title: 'Current access', description: 'Application visibility requires project read permission. Read permissions control the environment and suite lists. Management permissions control registration buttons. Missing read permission does not imply that the application has no resources.' }
     ],
     tutorials: [
-      { title: 'Find an application', steps: ['Choose a project, then select All applications under Project overviews. Open an application or use the Application switcher.', 'Select Open application on its card.', 'Review Environments and Linked suites. Select View tests to inspect one suite in the catalog.'] },
+      { title: 'Find an application', steps: ['Choose a project, then select All applications under Project overviews. Open an application or use the Application switcher.', 'Select Open application on its card.', 'Review Environments and Suites. Select View tests to inspect one suite in the catalog.'] },
       { title: 'Register related resources', steps: ['Select Add application on the application list. Enter its name and select Continue. Identifiers are generated under Advanced details.', 'Review Options, continue to Review, then select Create.', 'On its detail page, select Add environment or Add suite. The application is already selected.', 'Follow Name, Options, and Review. Use Back to change entries before selecting Create. Unsaved registration changes require confirmation before leaving.'] }
     ]
   },
@@ -446,7 +448,7 @@ export const helpPages: Record<string, HelpPage> = {
     introduction: ['Suites group related tests and their saved versions. Choose View tests to open the catalog for one suite.'],
     concepts: [
       { title: 'Active application', description: 'The sidebar Application switcher scopes Suites, Test catalog, Test runs, and Trends. The context above the page shows the active application. Choose All applications for project-wide work. Project overviews contains All applications and HTTPS probes. Switching applications keeps the main destination and clears the previous filters.' },
-      { title: 'Applications and suites', description: 'Suites belong to a project and can link to several applications. Shared suite badges identify these links. Unassigned tests inherit suite links. Shared suites keep one test and version, including imports, exports, and saved selections.' },
+      { title: 'Applications and suites', description: 'Each suite has one application owner. New applications include an empty Default suite. Tests inherit the suite owner. Existing shared or unassigned suites need reviewed assignment before new catalog writes or execution. Retained history stays unchanged.' },
       { title: 'Tests and versions', description: 'Test tests can change. A saved version freezes definitions for runs. Ready to run means an active version exists.' },
       { title: 'Advanced settings', description: 'Suite settings provides application associations, target requirements, and archive or restore controls. These use the same settings as Project settings.' }
     ],

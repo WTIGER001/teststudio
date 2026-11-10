@@ -2,25 +2,29 @@
 
 Choose a project, then select All applications under Project overviews.
 The page lists the applications registered in that project.
-Each card shows readable environment and linked suite counts.
+Each card shows readable environment and suite counts.
 Select Open application to make it the active application.
 The sidebar starts with Projects, followed by the Project and Application selectors.
 Use the Application selector to switch quickly.
 Your account stays in the global header. It applies across TestStudio, with project access assigned separately.
 The context above the page shows the project and active application.
 Suites, Test catalog, Test runs, and Trends follow this selection.
-Choose All applications for project-wide work. HTTPS probes provides a separate project overview.
+Choose an application before opening its catalog. All applications provides project navigation and reporting. HTTPS probes provides a separate project overview.
 
 ## Relationships
 
 Applications belong to projects. Environments belong to applications.
-Suites belong to projects and can link to zero, one, or several applications.
-An application's Linked suites section shows those associations without changing suite ownership.
-An unassigned suite remains available under All applications.
-A test with an explicit application appears only in that application.
-A test without an explicit application inherits its suite links.
-Shared suites keep one draft and release. Publication and transfer affect the complete suite.
-Archived suites retain their visible history and show an Archived badge.
+Each suite belongs to exactly one application. New applications include an empty Default suite.
+The catalog contains that application's tests across its suites.
+Tests inherit their application's identity from the owning suite. An explicit different test application is rejected.
+Existing shared or unassigned suites need a reviewed application assignment in Project settings.
+The server rejects an assignment when active tests, probes, or schedules select another application.
+Assignment preserves identifiers, retained versions, runs, and evidence. A single application owner is permanent.
+Archived suites retain their history and show an Archived badge.
+
+Environment configuration defines named base URLs, typed nonsecret parameters, and approved secret references.
+Its readiness matrix compares the application's readable environments.
+See [Environment configuration](environment-configuration.md) for requirements, defaults, review, and execution enforcement.
 
 Select View tests to open the catalog filtered to that suite.
 Select Create test to carry an active suite into the test-type chooser.
@@ -63,8 +67,8 @@ Management permissions control the environment and suite registration buttons.
 | /projects/{project}/applications/{application}/members | Direct application roles and inherited project access. |
 | /projects/{project}/applications/{application}/explain-access | Effective permission decisions in this exact application. |
 | /projects/{project}/applications | Application list and registration. |
-| /projects/{project}/applications/{application} | Active application overview, environments, and linked suites. |
-| /projects/{project}/applications/{application}/suites | Suites linked to the active application. |
+| /projects/{project}/applications/{application} | Active application overview, environments, and suites. |
+| /projects/{project}/applications/{application}/suites | Suites owned by the active application. |
 | /projects/{project}/applications/{application}/catalog | Tests and summary counts for the active application. |
 | /projects/{project}/applications/{application}/runs | Application run history and creation. |
 | /projects/{project}/applications/{application}/trends | Application result trends. |

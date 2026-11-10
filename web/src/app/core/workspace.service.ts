@@ -6,7 +6,7 @@ import { applicationFromURL, scopePath, switchApplicationPath } from './applicat
 import { projectFromURL } from './theme.utils'
 import { SessionService } from './session.service'
 
-export interface WorkspaceApplication { id: string; name: string; description: string }
+export interface WorkspaceApplication { id: string; name: string; description: string; defaultSuiteId?: string }
 
 export interface Project { id: string; name: string; description: string; archived: boolean }
 

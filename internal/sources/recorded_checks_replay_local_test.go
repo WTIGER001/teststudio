@@ -43,7 +43,7 @@ func replayRecordedChecks(t *testing.T, service *sources.Service, runner *runs.S
 	if err := registry.SaveApplication(t.Context(), "admin", "beta", projects.Application{ID: "replay", Name: "Recorded checks replay"}, 0); err != nil {
 		t.Fatal(err)
 	}
-	if err := registry.SaveEnvironment(t.Context(), "admin", "beta", projects.Environment{ID: "replay", Application: "replay", Name: "Different local News target", Stage: "local", Endpoints: map[string]string{"api": origin}, Locations: []string{"local"}}, 0); err != nil {
+	if err := registry.SaveEnvironment(t.Context(), "admin", "beta", projects.Environment{ID: "replay", Application: "app", Name: "Different local News target", Stage: "local", Endpoints: map[string]string{"api": origin}, Locations: []string{"local"}}, 0); err != nil {
 		t.Fatal(err)
 	}
 	suiteRow, err := service.Store.Get(t.Context(), projects.Bucket("suites", "beta"), "health")
@@ -93,7 +93,7 @@ func replayRecordedChecks(t *testing.T, service *sources.Service, runner *runs.S
 	if suite.ActiveRelease != job.Release {
 		t.Fatal("saving required an additional activation step")
 	}
-	suite.Applications = []string{"replay"}
+	suite.Applications = []string{"app"}
 	if err := registry.SaveSuite(t.Context(), "admin", "beta", suite, suiteRow.Revision); err != nil {
 		t.Fatal(err)
 	}

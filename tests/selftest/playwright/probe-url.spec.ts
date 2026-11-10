@@ -22,7 +22,8 @@ test('Quick URL probes reuse protected targets or review new target configuratio
 
   const emptyProject = `url-${Date.now()}`, emptyPath = `/api/v1/projects/${emptyProject}`
   await api.call('POST', '/api/v1/projects', { id: emptyProject, name: 'Quick URL checks' })
-  await api.call('PUT', `${emptyPath}/suites/quick`, { id: 'quick', name: 'Quick checks', applications: [], requiresTarget: true }, 0)
+  await api.call('PUT', `${emptyPath}/applications/app`, { id: 'app', name: 'Website' }, 0)
+  await api.call('PUT', `${emptyPath}/suites/quick`, { id: 'quick', name: 'Quick checks', applications: ['app'], requiresTarget: true }, 0)
   await page.goto(`/projects/${emptyProject}/tests/new/https?suite=quick`)
   await wizard.getByLabel('Title', { exact: true }).fill('Quick website availability')
   await wizard.getByRole('button', { name: 'Continue', exact: true }).click()

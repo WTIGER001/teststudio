@@ -24,7 +24,7 @@ const arguments_ = discovery
   : ['test', `--config=${config}`, '--grep', `${escaped}(?:\\s|$)`, '--workers=1', '--retries=0', `--timeout=${input.timeoutMs}`, '--reporter=/runner/reporter.cjs']
 if (context.project) arguments_.push(`--project=${context.project}`)
 const child = spawn(process.execPath, ['/runner/node_modules/@playwright/test/cli.js', ...arguments_], {
-  cwd: context.module, stdio: 'inherit', detached: true, env: { ...process.env, ...egress?.env, TESTSTUDIO_WORK_ITEM: JSON.stringify(input) }
+  cwd: context.module, stdio: 'inherit', detached: true, env: { ...process.env, ...egress?.env, TESTSTUDIO_PARAMETERS: JSON.stringify(input.browser?.parameters ?? {}), TESTSTUDIO_WORK_ITEM: JSON.stringify(input) }
 })
 let stopped = false
 const stop = () => {

@@ -324,6 +324,7 @@ func run() error {
 	oidc := &authoidc.Service{Store: db, Directory: directory, Sessions: sessionService, Origin: *public, SecretRefs: approvedOIDCSecrets, Client: oidcClient}
 	catalogService := &catalog.Service{Store: db, Auth: auth}
 	runService := &runs.Service{Store: db, Auth: auth, Catalog: catalogService, Evidence: evidenceService, HTTP: &execution.HTTP{Trust: httpTrust}, Location: *location}
+	runService.Secrets = secretProvider
 	workerExchange := &workerexchange.Service{Store: db, Blobs: blobs, Authorize: runService.AuthorizeWorkerAttempt, Secrets: secretProvider}
 	sourceService := &sources.Service{Store: db, Auth: auth, Location: *location, RecoveryInspectors: map[string]preparation.ArtifactInspector{
 		"go": &localcontainer.Executor{Runner: "go"}, "playwright": &localcontainer.Executor{Runner: "playwright"},

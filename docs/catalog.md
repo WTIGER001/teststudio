@@ -1,6 +1,6 @@
 # Catalog management
 
-Each suite owns permanent test identifiers, revision history, and immutable saved versions.
+Each application owns its catalog. Every suite has one application owner and owns permanent test identifiers, revision history, and immutable saved versions.
 Save updates future runs automatically. Existing versions and run snapshots keep their original definitions. Source tests appear immediately while setup completes in the background. Saving never starts a run.
 Current lifecycle and safety restrictions still apply before dispatch and each attempt.
 Selected dependencies must remain enabled. Protected targets require safe saved and current labels throughout the dependency closure.
@@ -57,7 +57,7 @@ Create test opens a dedicated route and offers Playwright browser tests, HTTPS p
 Each type opens its focused creation workflow. See create-tests.md.
 
 
-Search, suite, application, and test type stay visible above the catalog.
+Choose an application before opening the catalog. Search, suite, and test type stay visible above the catalog.
 Table shows a flat list. By category adds a hierarchical category navigator beside the same test list.
 Category paths use `/` between levels. Spaces beside separators do not change the path.
 Expand or collapse a branch with its native disclosure control. Select View all in a parent to include its children.
@@ -178,3 +178,14 @@ The [source upload guide](sources.md) describes provenance, retention, permissio
 OpenAPI 0.28 and the generated client describe lists, test creation and updates, revision history, lifecycle actions, duplication, JSON transfer, drafts, validation, and retained release reads.
 Reviewed publication and activation retain their documented operations.
 Catalog changes still require current context-specific permissions, Origin, CSRF protection, and mutation revisions where applicable.
+
+## Environment requirements
+
+Tests can declare `requiredParameters` using names from their application's configuration contract.
+Existing `requiredBindings` names declare secret references for reviewed API execution.
+HTTP probes require their named endpoint automatically. Environment browser profiles require their prepared endpoint.
+Required configuration includes the selected dependency closure. Optional requirements of unrelated tests do not block a run.
+HTTP paths, required text, and forbidden text support `{{parameterName}}` references declared in `requiredParameters`.
+Path substitutions are escaped as path data; query substitutions are escaped as query data. They cannot choose another origin.
+Run snapshots retain parameter values and secret reference identifiers. They retain no resolved secret bytes.
+See [Environment configuration](environment-configuration.md).

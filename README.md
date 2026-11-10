@@ -30,7 +30,7 @@ Normal local development still starts with an empty project registry.
 
 | Task or audience | Guides |
 | --- | --- |
-| Start and organize testing | [Demo](docs/demo.md), [Applications](docs/applications.md), [Project images](docs/project-images.md), [Suites](docs/suites.md). |
+| Start and organize testing | [Demo](docs/demo.md), [Applications](docs/applications.md), [Environment configuration](docs/environment-configuration.md), [Project images](docs/project-images.md), [Suites](docs/suites.md). |
 | Create tests | [Test repository contract](docs/test-repositories.md), [Create test](docs/create-tests.md), [HTTPS probes](docs/https-probes.md), [HTTPS assertions](docs/http-checks.md), [Browser recording](docs/browser-recording.md), [Website execution](docs/browser-execution.md), [Playwright editor](docs/playwright-editor.md), [Go testing](docs/go-testing.md). |
 | Author request-based suites | [Coded API policies](docs/api-testing.md). The API wizard, shared source editor, and guarded local worker support request suites. API diagnostics redact sensitive text and JSON. [Environment credentials](docs/api-credentials.md) support Bearer, Basic, and API-key headers. [Go API suites](docs/go-testing.md#guarded-go-api-execution) use the same guarded transport and result contracts. |
 | Manage test definitions | [Catalog](docs/catalog.md), [Saved selections](docs/saved-selections.md), [Releases](docs/releases.md). |
@@ -38,6 +38,7 @@ Normal local development still starts with an empty project registry.
 | Automate testing | [Schedules](docs/schedules.md), [Notifications](docs/notifications.md). |
 | Import and synchronize | [Native uploads](docs/sources.md), [Source bundles](docs/source-bundles.md), [Prepared suites](docs/prepared-suites.md), [Repositories](docs/repository-sources.md), [CLI sign-in](docs/cli-sign-in.md). |
 | Administer and operate | [Desktop recorder setup](docs/recorder-companion.md), [Deployment readiness](docs/deployment-readiness.md), [Access](docs/access.md), [Artifact storage](docs/artifact-storage.md), [Backup and database transfer](docs/data-transfer.md), [Versions and builds](docs/versioning.md), [Service image](docs/service-image.md), [Kubernetes profile](docs/kubernetes.md), [Identity providers](docs/providers.md), [Notification transports](docs/notification-transports.md). Current installation commands appear below. |
+| Configure environments | [Application requirements, parameters, secret references, and readiness](docs/environment-configuration.md). |
 | Use the API | [OpenAPI contract](contracts/openapi.yaml), [Source webhook contract](contracts/source-webhooks.openapi.yaml), and the affected feature guide. |
 | Contribute | [Continue implementation](docs/continue.md), [Plan](docs/plan.md), [Acceptance ledger](docs/implementation.md), [UI contract](docs/ui.md), [Help maintenance](docs/help.md), [Self-testing](docs/self-testing.md). |
 

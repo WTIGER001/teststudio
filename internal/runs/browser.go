@@ -35,7 +35,7 @@ func browserTarget(environment *projects.Environment, artifact catalog.Artifact,
 	if u.Scheme == "http" && !environment.AllowHTTP && environment.Stage != "local" {
 		return nil, errors.New("the selected browser environment does not permit HTTP")
 	}
-	target := &browserpolicy.Target{Origin: origin, AllowPrivate: environment.AllowPrivate || environment.Stage == "local", Requests: artifact.Browser.Requests}
+	target := &browserpolicy.Target{Parameters: environment.Parameters, Origin: origin, AllowPrivate: environment.AllowPrivate || environment.Stage == "local", Requests: artifact.Browser.Requests}
 	if len(test.RequiredBindings) > 0 {
 		if !domain.ValidID(environment.Credentials[test.RequiredBindings[0]]) {
 			return nil, errors.New("the selected environment needs the declared API credential reference")

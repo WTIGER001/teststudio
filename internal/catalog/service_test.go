@@ -37,7 +37,10 @@ func setup(t *testing.T) (*catalog.Service, *projects.Service) {
 		if err := p.SaveProject(t.Context(), "admin", projects.Project{ID: project, Name: project}, 0); err != nil {
 			t.Fatal(err)
 		}
-		if err := p.SaveSuite(t.Context(), "admin", project, projects.Suite{ID: "health", Name: "Health", RequiresTarget: true}, 0); err != nil {
+		if err := p.SaveApplication(t.Context(), "admin", project, projects.Application{ID: "app", Name: "Application"}, 0); err != nil {
+			t.Fatal(err)
+		}
+		if err := p.SaveSuite(t.Context(), "admin", project, projects.Suite{ID: "health", Name: "Health", Applications: []string{"app"}, RequiresTarget: true}, 0); err != nil {
 			t.Fatal(err)
 		}
 	}

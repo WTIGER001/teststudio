@@ -10,7 +10,7 @@ import { RecordCreationService } from '../../core/record-creation.service'
 
 @Injectable()
 export class CatalogTestEditorService {
-  private readonly workspace = inject(WorkspaceService)
+  readonly workspace = inject(WorkspaceService)
   private readonly api = inject(ApiService)
   private readonly creation = inject(RecordCreationService)
   readonly timingEditor = inject(TimingPolicyEditorService)
@@ -30,6 +30,7 @@ export class CatalogTestEditorService {
     category: new FormControl('Availability', { nonNullable: true, validators: Validators.required }),
     timeout: new FormControl(10, { nonNullable: true, validators: [Validators.required, Validators.min(1), Validators.max(3600), Validators.pattern(/^\d+$/)] }),
     safety: new FormControl('needs-review', { nonNullable: true }),
+    parameters: new FormControl('', { nonNullable: true }),
     rationale: new FormControl('', { nonNullable: true, validators: Validators.required })
   })
 
@@ -39,7 +40,7 @@ export class CatalogTestEditorService {
     this.savedVersion.set(''); this.editing.set(null)
     this.timingEditor.reset()
     this.checkEditor.reset()
-    this.form.reset({ suite: this.suites()[0]?.id ?? '', id: '', title: '', category: 'Availability', timeout: 10, safety: 'needs-review', rationale: 'Production safety has not been reviewed.' })
+    this.form.reset({ parameters: '', suite: this.suites().find(row => row.id === this.workspace.application()?.defaultSuiteId)?.id ?? this.suites().find(row => row.data.name === 'Default')?.id ?? this.suites()[0]?.id ?? '', id: '', title: '', category: 'Availability', timeout: 10, safety: 'needs-review', rationale: 'Production safety has not been reviewed.' })
     this.form.controls.id.enable(); this.form.controls.suite.enable()
     this.editorOpen.set(true); this.error.set('')
   }
@@ -48,7 +49,7 @@ export class CatalogTestEditorService {
     this.savedVersion.set(''); this.editing.set(item)
     this.timingEditor.reset(item.data.timing)
     this.checkEditor.reset(item.data.check)
-    this.form.reset({ suite: item.suiteId, id: item.id, title: item.data.title, category: item.data.category, timeout: item.data.timeoutSeconds, safety: item.data.safety, rationale: item.data.rationale })
+    this.form.reset({ parameters: item.data.requiredParameters?.join(', ') ?? '', suite: item.suiteId, id: item.id, title: item.data.title, category: item.data.category, timeout: item.data.timeoutSeconds, safety: item.data.safety, rationale: item.data.rationale })
     this.form.controls.id.disable(); this.form.controls.suite.disable()
     this.editorOpen.set(true); this.error.set('')
   }
@@ -63,7 +64,7 @@ export class CatalogTestEditorService {
       const existing = this.editing()
       const test: TestDefinition = {
         ...(existing?.data ?? { description: '', tags: [], dependencies: [], requiredBindings: [], type: 'https', runner: 'http', state: 'enabled', timeoutSeconds: 10 }),
-        applicationId: (existing ? existing.data.applicationId : this.workspace.applicationId()) || undefined, id: value.id, title: value.title, category: value.category, timeoutSeconds: value.timeout, timing: this.timingEditor.policy(), safety: value.safety, rationale: value.rationale
+        requiredParameters: value.parameters.trim() ? value.parameters.split(',').map(name => name.trim()).filter(Boolean) : undefined, applicationId: (existing ? existing.data.applicationId : this.workspace.applicationId()) || undefined, id: value.id, title: value.title, category: value.category, timeoutSeconds: value.timeout, timing: this.timingEditor.policy(), safety: value.safety, rationale: value.rationale
       }
       if (this.editingHTTP()) test.check = { ...test.check, ...this.checkEditor.check()! }
       const base = `/api/v1/projects/${this.project}/suites/${value.suite}/tests`

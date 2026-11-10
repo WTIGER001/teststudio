@@ -161,8 +161,11 @@ func TestCatalogWorkflowThroughAuthenticatedAPI(t *testing.T) {
 	if status, data := c.call("POST", "/api/v1/projects", projects.Project{ID: "example", Name: "Example"}, nil); status != 200 {
 		t.Fatalf("project %d: %v", status, data)
 	}
+	if err := c.api.Projects.SaveApplication(t.Context(), "admin", "example", projects.Application{ID: "app", Name: "Application"}, 0); err != nil {
+		t.Fatal(err)
+	}
 	base := "/api/v1/projects/example/suites/health"
-	if status, data := c.call("PUT", base, projects.Suite{ID: "health", Name: "Health", RequiresTarget: true}, map[string]string{"If-Match": "0"}); status != 200 {
+	if status, data := c.call("PUT", base, projects.Suite{ID: "health", Name: "Health", Applications: []string{"app"}, RequiresTarget: true}, map[string]string{"If-Match": "0"}); status != 200 {
 		t.Fatalf("suite %d: %v", status, data)
 	}
 	test := catalog.Test{ID: "HEALTH-1", Title: "Availability", Category: "Health", Type: "https", Runner: "http", State: "enabled", Safety: "safe", Rationale: "Reads the registered health endpoint.", TimeoutSeconds: 10, Check: &catalog.HTTPCheck{Endpoint: "api", Path: "/healthz", Method: "GET", StatusCodes: []int{200}}}

@@ -41,6 +41,8 @@ See [API transport](api-testing.md#direct-request-transport) for worker and endp
 
 ## Configure an environment
 
+For existing environments, open Application > Environment configuration. Review requirements, choose Configure, select the approved secret reference, then review and save. Readiness identifies missing mappings; run review and every attempt recheck availability. Values remain operator-managed. See [Environment configuration](environment-configuration.md).
+
 1. Open an application and select Add environment, or open Project settings and choose Environments.
 2. Enter a name, then select Continue. Choose the application, stage, endpoint, and protection.
 3. Expand Advanced credentials. Select Add credential binding.
@@ -83,7 +85,7 @@ Credentials apply only to the selected origin and reviewed methods and paths. Re
 
 Manifest requests.authentication declares binding, scheme, and an optional header.
 Manifest requiredBindings and authenticated test requiredBindings declare the same single binding. Preparation validates these declarations together.
-Save, prepare, review, publish, and run remain separate operations.
+Save registers the test and prepares its executable version automatically when workers are available. Saving never starts a run.
 A missing-credential test can omit its test-level requiredBindings while retaining the manifest authentication declaration.
 That test receives no injected credential and can assert the expected unauthorized response.
 

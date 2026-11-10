@@ -1,13 +1,13 @@
 # Suite settings and lifecycle
 
-A suite owns permanent test identities and retained versions within one project.
+A suite owns permanent test identities and retained versions within one application. A new application includes an empty Default suite.
 Its identifier stays fixed. Display settings can change without editing test definitions.
 
 ## Interface
 
 Open **Project settings**, choose **Suites**, and select **Inspect suite**.
 The panel shows the permanent identifier, current version, lifecycle, and current management authority.
-Edit the name, description, supported applications, or target requirement. Select **Save suite settings**.
+Edit the name, description, or target requirement. Existing shared or unassigned suites also need one reviewed application owner. Select **Save suite settings**.
 The update preserves capture policies, timing policies, and the current version.
 Saving suite settings needs no publication step and never starts tests. Tests saved in this suite become current automatically when ready.
 
@@ -37,7 +37,7 @@ Use these routes below `/api/v1/projects/{project}/suites/{suite}`:
 | POST | `/actions/restore` | Restore the same suite and current version. |
 
 Settings accept `name`, `description`, `applications`, and `requiresTarget`.
-Applications require distinct registered identifiers. Names and descriptions have bounded lengths.
+Applications contains exactly one registered identifier. The owner is permanent after assignment. Existing shared or unassigned suites require review; incompatible current tests, probes, and schedules block assignment. Names and descriptions have bounded lengths.
 Mutations require Origin, session protection, and an explicit `If-Match` revision.
 Read and management permissions apply to the exact suite object.
 Permission checks, mutation, audit, and response construction share one transaction.
@@ -65,7 +65,7 @@ The checks cover revision conflicts, exact denials, schedule visibility, archive
 
 Choose Suites in the Testing sidebar section.
 Suite cards provide View tests, Create test, and Suite settings actions.
-View tests filters the project catalog. Create test carries the selected suite through the type chooser.
+View tests filters the application catalog. Create test carries the selected suite through the type chooser.
 New suite opens the shared Name, Options, and Review registration wizard.
 Settings reuse the existing suite manager and lifecycle controls.
 Unsaved creation or settings changes require a choice before route navigation.

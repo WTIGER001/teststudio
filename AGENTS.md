@@ -29,7 +29,7 @@ This file applies to TestStudio. Read separate repository instructions before ed
 - Components handle rendering and local interaction. Services own APIs, state, workflows, and side effects. Pure utilities handle transformations and validation.
 - Use shared components and semantic HTML. Preserve light, dark, and system themes, keyboard focus, accessible feedback, and narrow layouts.
 - Follow docs/ui.md. Use dedicated routes for substantial creation, labeled steppers for related decisions, and named Advanced sections for uncommon controls.
-- Keep project and application context explicit. Suites remain project-owned and can link to multiple applications. Environments belong to applications.
+- Keep project and application context explicit. Suites belong to exactly one application. Create an empty Default suite with each new application. Existing shared or unassigned suites require reviewed assignment. Environments belong to applications.
 - Every current page needs a right-hand help drawer with Introduction, Concepts, and Tutorials. Help must preserve edits.
 - Preserve review, unsaved changes, revision conflicts, explicit execution, and partial-save recovery. Do not replace them with parallel workflows.
 - Record test durations and preserve frozen timing criteria. Timeouts remain a distinct result status; failure reruns include them. State trends use stacked area charts.

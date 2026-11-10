@@ -41,7 +41,7 @@ func prepareDiagnostics(ctx context.Context, db *storage.Store, auth *authorizat
 	if len(screenshot) > 4<<20 || len(trace) > 8<<20 {
 		return errors.New("diagnostic fixture media is oversized")
 	}
-	if err := (&projects.Service{Store: db, Auth: auth}).SaveSuite(ctx, "local-administrator", project, projects.Suite{ID: "diagnostics", Name: "Diagnostic UI fixtures", RequiresTarget: false}, 0); err != nil {
+	if err := (&projects.Service{Store: db, Auth: auth}).SaveSuite(ctx, "local-administrator", project, projects.Suite{ID: "diagnostics", Name: "Diagnostic UI fixtures", Applications: []string{"app"}, RequiresTarget: false}, 0); err != nil {
 		return err
 	}
 	now := time.Now().UTC()

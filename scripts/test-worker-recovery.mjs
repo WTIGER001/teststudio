@@ -33,7 +33,8 @@ try {
   await start(true)
   const base = '/api/v1/projects/recovery-verification'
   await client.call('POST', '/api/v1/projects', { id: 'recovery-verification', name: 'Worker recovery verification' })
-  await client.call('PUT', `${base}/suites/browser`, { id: 'browser', name: 'Interruption verification', applications: [], requiresTarget: false }, 0)
+  await client.call('PUT', `${base}/applications/browser`, { id: 'browser', name: 'Recovery fixture' }, 0)
+  await client.call('PUT', `${base}/suites/browser`, { id: 'browser', name: 'Interruption verification', applications: ['browser'], requiresTarget: false }, 0)
   await client.call('POST', `${base}/suites/browser/tests`, { id: 'ADAPTER-TIMEOUT', title: 'Interrupted browser work', source: 'teststudio-selftests', selector: '@ADAPTER-TIMEOUT', category: 'Recovery', type: 'browser', runner: 'playwright', state: 'enabled', safety: 'safe', rationale: 'Runs only in an isolated disposable instance', timeoutSeconds: 60, dependencies: [], requiredBindings: [], tags: [] })
   const draft = await client.call('POST', `${base}/suites/browser/catalog-drafts`, { image, discoveredSelectors: { 'ADAPTER-TIMEOUT': '@ADAPTER-TIMEOUT' } })
   await client.call('POST', `${base}/suites/browser/catalog-drafts/${draft.id}/publish`, { activate: true }, draft.revision)

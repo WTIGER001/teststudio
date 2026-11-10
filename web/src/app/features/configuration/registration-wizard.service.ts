@@ -27,9 +27,9 @@ export class RegistrationWizardService {
       const problem = credentialBindingProblem(form.controls.credentials.getRawValue(), this.registration.credentialReferences(), form.controls.url.value)
       if (problem) { const control = form.controls.credentials.at(problem.index).controls[problem.field]; control.markAsTouched(); control.setErrors({ credentialBinding: true }); this.error.set(problem.message); return false }
     }
-    const fields = step === 0 ? [form.controls.name, form.controls.id] : kind === 'environments' ? [form.controls.application, form.controls.url, form.controls.endpoint, form.controls.stage] : []
+    const fields = step === 0 ? [form.controls.name, form.controls.id] : kind === 'environments' ? [form.controls.application, form.controls.url, form.controls.endpoint, form.controls.stage] : kind === 'suites' ? [form.controls.application] : []
     for (const field of fields) field.markAsTouched()
-    const valid = fields.every(field => field.disabled || field.valid) && (step !== 0 || !!form.controls.name.value.trim()) && (step !== 1 || kind !== 'environments' || !!form.controls.application.value && validWebAddress(form.controls.url.value))
+    const valid = fields.every(field => field.disabled || field.valid) && (step !== 0 || !!form.controls.name.value.trim()) && (step !== 1 || kind === 'applications' || !!form.controls.application.value) && (step !== 1 || kind !== 'environments' || !!form.controls.application.value && validWebAddress(form.controls.url.value))
     if (!valid) this.error.set(step === 0 ? 'Enter a name and a valid identifier. Identifier options are under Advanced details.' : 'Choose an application and enter a valid HTTP or HTTPS address and endpoint name.')
     return valid
   }

@@ -20,7 +20,8 @@ export class SuiteManagerService {
   readonly form = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(200), Validators.pattern(/\S/)] }),
     description: new FormControl('', { nonNullable: true, validators: Validators.maxLength(4096) }),
-    applications: new FormControl<string[]>([], { nonNullable: true }),
+    assignmentReviewed: new FormControl(false, { nonNullable: true }),
+    application: new FormControl('', { nonNullable: true, validators: Validators.required }),
     requiresTarget: new FormControl(true, { nonNullable: true })
   })
   private suite = ''
@@ -46,10 +47,10 @@ export class SuiteManagerService {
 
   async save(): Promise<void> {
     const state = this.state(), generation = this.generation
-    if (!state?.canManage || state.suite.archived || this.form.invalid || this.busy() || this.conflict()) return
+    if (!state?.canManage || state.suite.archived || this.form.invalid || state.suite.applications?.length !== 1 && !this.form.controls.assignmentReviewed.value || this.busy() || this.conflict()) return
     this.busy.set(true); this.error.set(''); this.message.set('')
     try {
-      const updated = await this.client.call('updateSuiteSettings', { ...this.scope(), revision: state.revision, body: this.form.getRawValue() })
+      const updated = await this.client.call('updateSuiteSettings', { ...this.scope(), revision: state.revision, body: { name: this.form.controls.name.value, description: this.form.controls.description.value, requiresTarget: this.form.controls.requiresTarget.value, applications: [this.form.controls.application.value] } })
       if (generation !== this.generation) return
       this.apply(updated); this.message.set('Suite settings saved. Versions, history, and evidence remain unchanged.')
     } catch (error) { if (generation === this.generation) this.fail(error) }
@@ -70,7 +71,7 @@ export class SuiteManagerService {
 
   private scope() { return { project: this.configuration.projectId(), suite: this.suite } }
   private apply(state: SuiteLifecycle): void {
-    this.state.set(state); this.conflict.set(false); this.form.reset({ name: state.suite.name, description: state.suite.description, applications: state.suite.applications ?? [], requiresTarget: state.suite.requiresTarget }); this.configuration.applySuite(state)
+    this.state.set(state); this.conflict.set(false); this.form.reset({ assignmentReviewed: false, name: state.suite.name, description: state.suite.description, application: state.suite.applications?.length === 1 ? state.suite.applications[0] : '', requiresTarget: state.suite.requiresTarget }); this.configuration.applySuite(state)
   }
   private fail(error: unknown): void {
     if (error instanceof ApiError && error.status === 409) { this.conflict.set(true); this.error.set('The suite changed. Reload suite settings and review the current values before saving or changing its lifecycle.'); return }

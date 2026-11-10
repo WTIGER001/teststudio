@@ -2,6 +2,7 @@
   "schemaVersion": "teststudio.selftest/v1",
   "source": "teststudio-selftests",
   "tests": [
+    {"id": "STUDIO-CONFIG-001", "title": "Application requirements, environment readiness, reviewed saves, and conflicts", "selector": "@STUDIO-CONFIG-001", "category": "Interface"},
     {"id":"STUDIO-RELIABILITY-001","title":"Shared reliability rollups and independent stylable Angular status components","selector":"@STUDIO-RELIABILITY-001","category":"Reliability"},
     {"id":"STUDIO-STATUS-PAGES-001","title":"Public status draft publication, anonymous embeds, time ranges and private-data boundaries","selector":"@STUDIO-STATUS-PAGES-001","category":"Public status"},
     {"id": "STUDIO-APPLICATION-ACCESS-001", "title": "Reviewed standard roles, inherited application access, conversion and scoped Contributor navigation", "selector": "@STUDIO-APPLICATION-ACCESS-001", "category": "Administration"},
@@ -23,7 +24,7 @@
     {"id": "STUDIO-OWNER-001", "title": "Ordinary creator onboarding, scoped administration, publication and local execution", "selector": "@STUDIO-OWNER-001", "category": "Access"},
     {"id": "STUDIO-URL-001", "title": "Quick URL probe entry, reviewed target registration, protected reuse and local execution", "selector": "@STUDIO-URL-001", "category": "Catalog"},
     {"id": "STUDIO-WIZARD-001", "title": "Guided setup, advanced validation, reviewed probes and recoverable local runs", "selector": "@STUDIO-WIZARD-001", "category": "Interface"},
-    {"id": "STUDIO-APPS-001", "title": "Applications navigation, linked suites, environment registration, and scoped views", "selector": "@STUDIO-APPS-001", "category": "Interface"},
+    {"id": "STUDIO-APPS-001", "title": "Application ownership, default suites, environment registration, and scoped catalogs", "selector": "@STUDIO-APPS-001", "category": "Interface"},
     {"id": "STUDIO-CREATE-001", "title": "Dedicated typed creation, browser recording drafts, native probes, and retained source copies", "selector": "@STUDIO-CREATE-001", "category": "Catalog"},
     {"id": "STUDIO-EDITOR-001", "title": "Playwright editor, persistent drafts, conflicts, and immutable preparation", "selector": "@STUDIO-EDITOR-001", "category": "Sources"},
     {"id": "STUDIO-NAV-001", "title": "Grouped sidebar, administration disclosure, and responsive navigation", "selector": "@STUDIO-NAV-001", "category": "Interface"},

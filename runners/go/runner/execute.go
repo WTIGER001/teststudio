@@ -100,6 +100,8 @@ func Execute(ctx context.Context, input Input, suite, outputDirectory string) Re
 		}
 		defer relay.Close()
 		processEnvironment = requestEnvironment(environment, relay.URL())
+		parameters, _ := json.Marshal(input.Browser.Parameters)
+		processEnvironment = append(processEnvironment, "TESTSTUDIO_PARAMETERS="+string(parameters))
 	}
 	events := NewEvents(*selected, func(at time.Time) {
 		message, _ := json.Marshal(map[string]any{"event": "test.started", "testId": input.Test.ID, "selector": input.Test.Selector, "at": at})

@@ -37,7 +37,9 @@ const suiteRows = await call('GET', `${base}/suites`)
 const previousSuite = suiteRows.items.find(item => item.id === suite)
 const suiteDescription = 'Managed by the TestStudio self-test registrar.'
 if (previousSuite && (previousSuite.data.archived || previousSuite.data.requiresTarget || previousSuite.data.description !== suiteDescription)) throw new Error('The existing self-test suite needs review before registration')
-if (!previousSuite) await call('PUT', `${base}/suites/${suite}`, { id: suite, name: suite === 'browser-workflows' ? 'TestStudio browser workflows' : 'Runner diagnostics', description: suiteDescription, applications: [], requiresTarget: false }, 0)
+const selftestApplications = await call('GET', `${base}/applications`)
+if (!selftestApplications.items.some(row => row.id === 'teststudio')) await call('PUT', `${base}/applications/teststudio`, { id: 'teststudio', name: 'TestStudio' }, 0)
+if (!previousSuite) await call('PUT', `${base}/suites/${suite}`, { id: suite, name: suite === 'browser-workflows' ? 'TestStudio browser workflows' : 'Runner diagnostics', description: suiteDescription, applications: ['teststudio'], requiresTarget: false }, 0)
 const selected = diagnostic ? catalog.diagnostics.filter(test => test.id === 'ADAPTER-FAIL') : timeoutProbe ? catalog.diagnostics.filter(test => test.id === 'ADAPTER-TIMEOUT') : catalog.tests.filter(test => !selectedIds.size || selectedIds.has(test.id))
 if (!selected.length || selectedIds.size && selected.length !== selectedIds.size) throw new Error('Unknown self-test identifier')
 const existing = []

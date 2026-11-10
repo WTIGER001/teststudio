@@ -175,6 +175,12 @@ func (s *Service) preview(ctx context.Context, user, project, suite, kind string
 				change.Action = "unchanged"
 			}
 		}
+		if len(v.Applications) != 1 {
+			return plan, errors.New("assign this suite to one application before importing tests")
+		}
+		if err := s.validateRequirements(ctx, project, v.Applications[0], test); err != nil {
+			plan.Issues = append(plan.Issues, Issue{TestID: test.ID, Field: "requiredParameters", Message: err.Error()})
+		}
 		if test.Application != "" && !slices.Contains(v.Applications, test.Application) {
 			plan.Issues = append(plan.Issues, Issue{TestID: test.ID, Field: "applicationId", Message: "test application is outside the suite"})
 		}

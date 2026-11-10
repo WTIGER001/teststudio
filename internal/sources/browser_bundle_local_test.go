@@ -89,7 +89,7 @@ func verifyBrowserSourceWorkflow(t *testing.T, editor bool, website ...bool) {
 		if err := projectService.SaveApplication(t.Context(), "admin", "alpha", projects.Application{ID: "website", Name: "Website fixture"}, 0); err != nil {
 			t.Fatal(err)
 		}
-		if err := projectService.SaveEnvironment(t.Context(), "admin", "alpha", projects.Environment{ID: "website", Name: "Local browser fixture", Application: "website", Stage: "local", Endpoints: map[string]string{"api": target}, Locations: []string{"local"}}, 0); err != nil {
+		if err := projectService.SaveEnvironment(t.Context(), "admin", "alpha", projects.Environment{ID: "website", Name: "Local browser fixture", Application: "app", Stage: "local", Endpoints: map[string]string{"api": target}, Locations: []string{"local"}}, 0); err != nil {
 			t.Fatal(err)
 		}
 		suiteRow, err := s.Store.Get(t.Context(), projects.Bucket("suites", "alpha"), "health")
@@ -98,7 +98,7 @@ func verifyBrowserSourceWorkflow(t *testing.T, editor bool, website ...bool) {
 		}
 		suite, _ := storage.Decode[projects.Suite](suiteRow)
 		suite.RequiresTarget = true
-		suite.Applications = []string{"website"}
+		suite.Applications = []string{"app"}
 		if err := projectService.SaveSuite(t.Context(), "admin", "alpha", suite, suiteRow.Revision); err != nil {
 			t.Fatal(err)
 		}

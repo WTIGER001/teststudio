@@ -141,7 +141,7 @@ func TestSuiteLifecycleHonorsExactReadManageAndScheduleDenies(t *testing.T) {
 				if status, _ := c.call("GET", base+"/lifecycle", nil, nil); status != 403 {
 					t.Fatal("exact read deny exposed lifecycle")
 				}
-				if status, listing := c.call("GET", "/api/v1/projects/example/suites", nil, nil); status != 200 || len(listing["items"].([]any)) != 0 {
+				if status, listing := c.call("GET", "/api/v1/projects/example/suites", nil, nil); status != 200 || len(listing["items"].([]any)) != 1 || listing["items"].([]any)[0].(map[string]any)["id"] != "app-default" {
 					t.Fatal("suite listing exposed denied metadata", status, listing)
 				}
 			}

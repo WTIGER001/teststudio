@@ -92,12 +92,12 @@ func testGuardedAPIWorkspace(t *testing.T, kind string) {
 	if err := projectService.SaveApplication(t.Context(), "admin", "alpha", projects.Application{ID: "requests", Name: "Owned request fixture"}, 0); err != nil {
 		t.Fatal(err)
 	}
-	if err := projectService.SaveEnvironment(t.Context(), "admin", "alpha", projects.Environment{ID: "requests", Name: "Guarded local API", Application: "requests", Stage: "local", Protected: true, Endpoints: map[string]string{"api": origin}, Credentials: map[string]string{"api-login": "api-reader"}}, 0); err != nil {
+	if err := projectService.SaveEnvironment(t.Context(), "admin", "alpha", projects.Environment{ID: "requests", Name: "Guarded local API", Application: "app", Stage: "local", Protected: true, Endpoints: map[string]string{"api": origin}, Credentials: map[string]string{"api-login": "api-reader"}}, 0); err != nil {
 		t.Fatal(err)
 	}
 	row, _ := s.Store.Get(t.Context(), projects.Bucket("suites", "alpha"), "health")
 	suite, _ := storage.Decode[projects.Suite](row)
-	suite.RequiresTarget, suite.Applications = true, []string{"requests"}
+	suite.RequiresTarget, suite.Applications = true, []string{"app"}
 	if err := projectService.SaveSuite(t.Context(), "admin", "alpha", suite, row.Revision); err != nil {
 		t.Fatal(err)
 	}

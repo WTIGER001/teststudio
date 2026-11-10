@@ -19,6 +19,7 @@ func (s *Server) projectRoutes(m *http.ServeMux) {
 		}
 		s.record(w, r, projects.Bucket("applications", project), app)
 	}))
+	s.applicationConfigurationRoutes(m)
 	s.suiteLifecycleRoutes(m)
 	s.projectCoverRoutes(m)
 	m.HandleFunc("GET /api/v1/projects/{project}/api-credential-references", s.authorized(func(w http.ResponseWriter, r *http.Request) {

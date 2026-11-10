@@ -43,6 +43,23 @@ func ValidateTest(t Test) error {
 			return err
 		}
 	}
+	for _, name := range HTTPParameterNames(t.Check) {
+		if !slices.Contains(t.RequiredParameters, name) {
+			return fmt.Errorf("declare parameter %s in requiredParameters", name)
+		}
+	}
+	for _, names := range [][]string{t.RequiredParameters, t.RequiredBindings} {
+		if len(names) > 64 {
+			return errors.New("tests support at most 64 required parameters or secret bindings")
+		}
+		seen := map[string]bool{}
+		for _, name := range names {
+			if !domain.ValidID(name) || seen[name] {
+				return errors.New("required configuration names must be valid and distinct")
+			}
+			seen[name] = true
+		}
+	}
 	if t.Capture != nil {
 		if err := capture.Validate(*t.Capture, capture.DefaultLimits()); err != nil {
 			return err

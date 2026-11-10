@@ -415,3 +415,13 @@ HTTPS help renders Request, Review, HTTP diagnostics, and schedule Review with s
 Show the local username and password form only when managed local accounts are enabled. Show enabled SSO providers that are not hidden from the sign-in page. Keep development recovery access separate from the password form.
 An explicitly selected SSO provider can bypass the login page only when both local sign-in modes are disabled. Keep the form out of the redirect path. Existing sessions, public status documents, embedded views, sign-out, and failed or cancelled authentication do not start a new automatic login. Preserve local destinations, queries, and fragments.
 Recovery messages retain manual sign-in controls. Dismissing them does not restart authentication. Hiding a duplicate provider removes its button while preserving accounts and explicit operator recovery links.
+
+## Application configuration and ownership
+
+Each suite belongs to one application. New applications include an empty Default suite.
+Choose an application before opening its test catalog. Project settings retains reviewed assignment for legacy suites.
+Show environments as deployments of the application, with a visible Base URL and a link to Environment configuration.
+The configuration matrix compares named requirements across environments. Missing, invalid, unavailable, ready, and configured states include text.
+Keep parameters and approved secret references distinct. Never render resolved secret values.
+Allow incomplete environment saves. Review changes, retain unsaved edits and conflicts, and explain which selected test requirements block execution.
+See [Environment configuration](environment-configuration.md).

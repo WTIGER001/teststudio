@@ -69,6 +69,12 @@ func (s *Service) SaveTest(ctx context.Context, user, project, suite string, t T
 			return err
 		}
 	}
+	if len(v.Applications) != 1 {
+		return errors.New("assign this suite to one application before saving tests")
+	}
+	if err := s.validateRequirements(ctx, project, v.Applications[0], t); err != nil {
+		return err
+	}
 	if t.Application != "" {
 		found := false
 		for _, id := range v.Applications {

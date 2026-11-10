@@ -141,8 +141,8 @@ func (s *Service) withSuiteUpdate(ctx context.Context, user, project, id string,
 	return result, err
 }
 func validSuiteSettings(value Suite) error {
-	if !domain.ValidID(value.ID) || strings.TrimSpace(value.Name) == "" || len(value.Name) > 200 || len(value.Description) > 4096 || len(value.Applications) > 100 {
-		return errors.New("suite requires a permanent identifier, bounded name and description, and at most 100 applications")
+	if !domain.ValidID(value.ID) || strings.TrimSpace(value.Name) == "" || len(value.Name) > 200 || len(value.Description) > 4096 || len(value.Applications) != 1 {
+		return errors.New("suite requires a permanent identifier, bounded name and description, and exactly one application")
 	}
 	seen := map[string]bool{}
 	for _, id := range value.Applications {

@@ -20,6 +20,7 @@ import (
 	"github.com/wtiger001/teststudio/internal/evidence"
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/projects"
+	"github.com/wtiger001/teststudio/internal/secrets"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
 
@@ -30,6 +31,7 @@ type HTTPExecutor interface {
 }
 
 type Service struct {
+	Secrets           secrets.Provider
 	Completion        CompletionHook
 	Store             *storage.Store
 	Auth              *authorization.Service
@@ -203,13 +205,16 @@ func (s *Service) prepare(ctx context.Context, user, project string, req Request
 	if err != nil {
 		return Run{}, nil, err
 	}
+	if err := ownedSuite(suite); err != nil {
+		return Run{}, nil, err
+	}
 	if suite.Archived {
 		return Run{}, nil, errors.New("suite is archived")
 	}
 	admission := []storage.Record{projectRow, suiteRow}
 	if req.Application != "" {
 		if !domain.ValidID(req.Application) || !slices.Contains(suite.Applications, req.Application) {
-			return Run{}, nil, errors.New("application must be linked to this suite")
+			return Run{}, nil, errors.New("application must own this suite")
 		}
 		applicationRow, err := s.Store.Get(ctx, projects.Bucket("applications", project), req.Application)
 		if err != nil {
@@ -289,6 +294,9 @@ func (s *Service) prepare(ctx context.Context, user, project string, req Request
 	}
 	eligible := []catalog.Test{}
 	for _, test := range release.Draft.Tests {
+		if test.Application != "" && test.Application != suite.Applications[0] {
+			continue
+		}
 		if req.Application != "" && test.Application != "" && test.Application != req.Application || environment != nil && test.Application != "" && test.Application != environment.Application {
 			continue
 		}
@@ -306,6 +314,20 @@ func (s *Service) prepare(ctx context.Context, user, project string, req Request
 		slices.Sort(actual)
 		if !slices.Equal(actual, resolved) {
 			return Run{}, nil, errors.New("run tests differ from the reviewed saved selection")
+		}
+	}
+	if environment != nil {
+		configured, row, err := s.checkConfiguration(ctx, project, *environment, tests, release.Draft.Artifact)
+		if err != nil {
+			return Run{}, nil, err
+		}
+		environment = &configured
+		admission = append(admission, row)
+	} else {
+		for _, test := range tests {
+			if len(test.RequiredParameters) > 0 || len(test.RequiredBindings) > 0 {
+				return Run{}, nil, errors.New("selected tests require an environment for their parameters and secrets")
+			}
 		}
 	}
 	guards, err := s.Catalog.ExecutionGuards(ctx, project, req.Suite, tests, protected)

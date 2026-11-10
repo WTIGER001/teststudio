@@ -45,6 +45,11 @@ func (e *HTTP) Execute(ctx context.Context, project string, test catalog.Test, e
 		}
 		return r
 	}
+	resolved, err := catalog.ResolveHTTPParameters(test, environment.Parameters)
+	if err != nil {
+		return fail("configuration", err)
+	}
+	test = resolved
 	if issues := catalog.ValidateHTTPCheck(test.Check); len(issues) > 0 {
 		return fail("configuration", errors.New(issues[0].Message))
 	}
@@ -64,8 +69,9 @@ func (e *HTTP) Execute(ctx context.Context, project string, test catalog.Test, e
 		return fail("configuration", err)
 	}
 	relative, _ := url.Parse(check.Path)
+	rawPath := strings.TrimRight(base.EscapedPath(), "/") + relative.EscapedPath()
 	base.Path = strings.TrimRight(base.Path, "/") + relative.Path
-	base.RawPath = ""
+	base.RawPath = rawPath
 	base.RawQuery = relative.RawQuery
 	base.Fragment = ""
 	limit := time.Duration(test.TimeoutSeconds) * time.Second

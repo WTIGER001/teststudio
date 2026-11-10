@@ -16,9 +16,11 @@ type Project struct {
 }
 
 type Application struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	ID           string        `json:"id"`
+	Name         string        `json:"name"`
+	Description  string        `json:"description"`
+	Requirements []Requirement `json:"requirements,omitempty"`
+	DefaultSuite string        `json:"defaultSuiteId,omitempty"`
 }
 
 type Environment struct {
@@ -31,6 +33,7 @@ type Environment struct {
 	AllowHTTP    bool              `json:"allowHttp,omitempty"`
 	AllowPrivate bool              `json:"allowPrivateNetwork,omitempty"`
 	Endpoints    map[string]string `json:"endpoints"`
+	Parameters   map[string]string `json:"parameters,omitempty"`
 	Credentials  map[string]string `json:"credentialBindings,omitempty"`
 	Locations    []string          `json:"executionLocations,omitempty"`
 }

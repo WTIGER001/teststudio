@@ -604,6 +604,9 @@ func (s *Service) admitAttempt(ctx context.Context, run Run) error {
 	if err != nil {
 		return err
 	}
+	if err := ownedSuite(suite); err != nil {
+		return err
+	}
 	if suite.Archived {
 		return errors.New("suite is archived")
 	}
@@ -622,6 +625,10 @@ func (s *Service) admitAttempt(ctx context.Context, run Run) error {
 		}
 		if environment.Disabled {
 			return errors.New("environment is disabled")
+		}
+		environment, _, err = s.checkConfiguration(ctx, run.Project, environment, run.Tests, run.Release.Draft.Artifact)
+		if err != nil {
+			return err
 		}
 		if err := currentEnvironmentPolicy(run, environment, suite); err != nil {
 			return err

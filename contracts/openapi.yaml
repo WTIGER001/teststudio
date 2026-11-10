@@ -1,7 +1,7 @@
 "openapi": "3.1.0"
 "info":
   "title": "TestStudio API"
-  "version": "0.48.0"
+  "version": "0.49.0"
   "description": "Implemented user, group, membership, current-profile, and session administration. Includes cumulative Reader, Member, Developer, Contributor, and Owner roles at Project and Application scope, System Admin naming, atomic standard-role replacement, usable-Owner safeguards, scoped capability and explanation queries, and reviewed role conversions with rollback previews. Includes scoped predefined role assignments and managed local password authentication. Includes scoped custom role policies, inheritance, and custom assignments. Includes scoped direct user and group allow and deny grants, expiry updates, and revision-controlled removal. Includes guarded installation-wide predefined role disabling and restoration. Includes permission explanations with read-only engine checks, bounded source scans, and source privacy. Includes managed OIDC provider configuration, operator-approved credential references, and provider-owned group creation. Includes session-bound identity linking with fresh source authentication, fresh target proof, explicit confirmation, and session rotation. Includes project-owned pending access with verified provider email, current approval checks, cancellation, and audited role activation. Includes optional client-identifier RP-initiated provider logout after local session revocation. Includes staged native JSON and YAML sources with atomic catalog publication and retained source provenance. Other API families remain pending in this contract. Mutations require current permissions, Origin, and CSRF protection. Ordinary lifecycle changes preserve the last usable installation administrator. Filtered pages can be empty while their cursor permits another bounded scan."
 "servers":
   -
@@ -10,6 +10,11 @@
   -
     "SessionCookie": []
 "paths":
+  "/api/v1/projects/{project}/applications/{application}/default-suite": {"post":{"operationId":"createApplicationDefaultSuite","summary":"Create an empty default suite for an existing application without changing its tests or history.","parameters":[{"name":"project","in":"path","required":true,"schema":{"type":"string"}},{"name":"application","in":"path","required":true,"schema":{"type":"string"}},{"name":"If-Match","in":"header","required":true,"schema":{"type":"integer","minimum":1}}],"responses":{"200":{"description":"Operation completed.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ApplicationRecord"}}}},"401":{"$ref":"#/components/responses/Problem"},"403":{"$ref":"#/components/responses/Problem"},"404":{"$ref":"#/components/responses/Problem"},"409":{"$ref":"#/components/responses/Problem"},"422":{"$ref":"#/components/responses/Problem"}},"security":[{"SessionCookie":[]}]}}
+  "/api/v1/projects/{project}/applications/{application}/configuration": {"get":{"operationId":"readApplicationConfiguration","summary":"readApplicationConfiguration","parameters":[{"name":"project","in":"path","required":true,"schema":{"type":"string"}},{"name":"application","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"Operation completed.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ApplicationConfiguration"}}}},"401":{"$ref":"#/components/responses/Problem"},"403":{"$ref":"#/components/responses/Problem"},"404":{"$ref":"#/components/responses/Problem"},"409":{"$ref":"#/components/responses/Problem"},"422":{"$ref":"#/components/responses/Problem"}},"security":[{"SessionCookie":[]}]},"put":{"operationId":"saveApplicationRequirements","summary":"saveApplicationRequirements","parameters":[{"name":"project","in":"path","required":true,"schema":{"type":"string"}},{"name":"application","in":"path","required":true,"schema":{"type":"string"}},{"name":"If-Match","in":"header","required":true,"schema":{"type":"integer","minimum":1}}],"responses":{"200":{"description":"Operation completed.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ApplicationRecord"}}}},"401":{"$ref":"#/components/responses/Problem"},"403":{"$ref":"#/components/responses/Problem"},"404":{"$ref":"#/components/responses/Problem"},"409":{"$ref":"#/components/responses/Problem"},"422":{"$ref":"#/components/responses/Problem"}},"security":[{"SessionCookie":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/ApplicationRequirementsInput"}}}}}}
+  "/api/v1/projects/{project}/applications/{application}/environments/{environment}/configuration": {"put":{"operationId":"saveEnvironmentConfiguration","summary":"saveEnvironmentConfiguration","parameters":[{"name":"project","in":"path","required":true,"schema":{"type":"string"}},{"name":"application","in":"path","required":true,"schema":{"type":"string"}},{"name":"environment","in":"path","required":true,"schema":{"type":"string"}},{"name":"If-Match","in":"header","required":true,"schema":{"type":"integer","minimum":1}}],"responses":{"200":{"description":"Operation completed.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/EnvironmentRecord"}}}},"401":{"$ref":"#/components/responses/Problem"},"403":{"$ref":"#/components/responses/Problem"},"404":{"$ref":"#/components/responses/Problem"},"409":{"$ref":"#/components/responses/Problem"},"422":{"$ref":"#/components/responses/Problem"}},"security":[{"SessionCookie":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/EnvironmentConfigurationInput"}}}}}}
+  "/api/v1/projects/{project}/applications/{application}/credential-references": {"get":{"operationId":"listApplicationCredentialReferences","summary":"List operator-approved project API credential references. Requires environments.manage and returns no secret values.","parameters":[{"name":"project","in":"path","required":true,"schema":{"type":"string"}},{"name":"application","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"Approved API references","content":{"application/json":{"schema":{"type":"object","properties":{"items":{"type":"array","items":{"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"allowedOrigins":{"type":"array","items":{"type":"string"}}},"required":["id","name"]}}},"required":["items"]}}}},"403":{"description":"Permission denied"}}}}
+  "/api/v1/projects/{project}/applications/{application}/catalog": {"get":{"operationId":"listApplicationCatalog","parameters":[{"in":"path","name":"project","required":true,"schema":{"type":"string"}},{"in":"query","name":"query","required":false,"schema":{"type":"string"}},{"in":"query","name":"suite","required":false,"schema":{"type":"string"}},{"in":"query","name":"application","required":false,"schema":{"type":"string"}},{"in":"query","name":"category","required":false,"schema":{"type":"string"}},{"in":"query","name":"tag","required":false,"schema":{"type":"string"}},{"in":"query","name":"owner","required":false,"schema":{"type":"string"}},{"in":"query","name":"type","required":false,"schema":{"type":"string"}},{"in":"query","name":"runner","required":false,"schema":{"type":"string"}},{"in":"query","name":"state","required":false,"schema":{"type":"string"}},{"in":"query","name":"safety","required":false,"schema":{"type":"string"}},{"in":"query","name":"source","required":false,"schema":{"type":"string"}},{"in":"query","name":"sort","required":false,"schema":{"type":"string"}},{"in":"query","name":"cursor","required":false,"schema":{"type":"string"}},{"in":"query","name":"descendants","required":false,"schema":{"type":"boolean"}},{"in":"query","name":"uncategorized","required":false,"schema":{"type":"boolean"}},{"in":"query","name":"limit","required":false,"schema":{"type":"integer","minimum":1,"maximum":100,"default":30}},{"name":"application","in":"path","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"Authorized catalog page and complete authorized facets.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/CatalogListPage"}}}},"401":{"$ref":"#/components/responses/Problem"},"403":{"$ref":"#/components/responses/Problem"},"404":{"$ref":"#/components/responses/Problem"},"409":{"$ref":"#/components/responses/Problem"},"422":{"$ref":"#/components/responses/Problem"}},"security":[{"SessionCookie":[]}],"summary":"List current working definitions with combined filters, deterministic sorting, authorized facets, and opaque actor/query-bound cursors. Catalog or access changes require a fresh first page."}}
   "/api/v1/projects/{project}/suites/{suite}/tests/{test}/save": {"post":{"operationId":"saveCurrentCatalogTest","summary":"Save a test and use its current runnable definition without a separate publication step. Preserves execution history and never starts a run.","parameters":[{"in":"path","name":"project","required":true,"schema":{"type":"string"}},{"in":"path","name":"suite","required":true,"schema":{"type":"string"}},{"in":"path","name":"test","required":true,"schema":{"type":"string"}},{"in":"header","name":"If-Match","required":true,"schema":{"type":"string"}}],"security":[{"SessionCookie":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/SourceCatalogTest"}}}},"responses":{"200":{"description":"Saved test record","content":{"application/json":{"schema":{"$ref":"#/components/schemas/CatalogTestRecord"}}}}}}}
   "/auth/providers": {"get":{"operationId":"readSignInOptions","summary":"Public sign-in choices and an optional SSO-only automatic redirect. No provider credentials are exposed.","security":[],"responses":{"200":{"description":"Current sign-in choices. Never cache.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/SignInOptions"}}}}}}}
   "/api/v1/projects/{project}/suites/{suite}/browser-recordings/{id}/input": {"post":{"operationId":"sendBrowserRecordingInput","summary":"Send one sequenced browser action. Exact retries are idempotent; refresh the view after an uncertain response. Requires current owner authority and an active suite.","parameters":[{"in":"path","name":"project","required":true,"schema":{"type":"string"}},{"in":"path","name":"suite","required":true,"schema":{"type":"string"}},{"in":"path","name":"id","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"Private browser view. Never cache.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/BrowserRecordingView"}}}},"401":{"$ref":"#/components/responses/Problem"},"403":{"$ref":"#/components/responses/Problem"},"409":{"$ref":"#/components/responses/Problem"},"422":{"$ref":"#/components/responses/Problem"}},"security":[{"SessionCookie":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/BrowserRecordingAction"}}}}}}
@@ -8571,6 +8576,15 @@
           "schema":
             "$ref": "#/components/schemas/Problem"
   "schemas":
+    "ConfigurationRequirement": {"type":"object","properties":{"name":{"type":"string","maxLength":128},"kind":{"type":"string","enum":["endpoint","parameter","secret"]},"valueType":{"type":"string","enum":["text","url","integer","boolean"]},"description":{"type":"string","maxLength":4096},"required":{"type":"boolean"},"defaultValue":{"type":"string","maxLength":4096}},"required":["name","kind","required"]}
+    "ConfigurationItem": {"type":"object","properties":{"name":{"type":"string"},"kind":{"type":"string"},"status":{"type":"string","enum":["ready","configured","missing","invalid","unavailable"]},"message":{"type":"string"}},"required":["name","kind","status"]}
+    "EnvironmentReadiness": {"type":"object","properties":{"ready":{"type":"boolean"},"items":{"type":"array","items":{"$ref":"#/components/schemas/ConfigurationItem"}}},"required":["ready","items"]}
+    "EnvironmentDefinition": {"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"applicationId":{"type":"string"},"stage":{"type":"string"},"protected":{"type":"boolean"},"disabled":{"type":"boolean"},"allowHttp":{"type":"boolean"},"allowPrivateNetwork":{"type":"boolean"},"executionLocations":{"type":"array","items":{"type":"string"}},"endpoints":{"type":"object","additionalProperties":{"type":"string"}},"parameters":{"type":"object","additionalProperties":{"type":"string"}},"credentialBindings":{"type":"object","additionalProperties":{"type":"string"}}},"required":["id","name","applicationId","stage","protected","disabled","endpoints"]}
+    "EnvironmentRecord": {"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"revision":{"type":"integer"},"updatedAt":{"type":"string"},"data":{"$ref":"#/components/schemas/EnvironmentDefinition"}},"required":["id","revision","data"]}
+    "EnvironmentConfiguration": {"type":"object","properties":{"id":{"type":"string"},"projectId":{"type":"string"},"revision":{"type":"integer"},"updatedAt":{"type":"string"},"data":{"$ref":"#/components/schemas/EnvironmentDefinition"},"readiness":{"$ref":"#/components/schemas/EnvironmentReadiness"}},"required":["id","revision","data","readiness"]}
+    "ApplicationConfiguration": {"type":"object","properties":{"application":{"$ref":"#/components/schemas/ApplicationRecord"},"requirements":{"type":"array","items":{"$ref":"#/components/schemas/ConfigurationRequirement"}},"environments":{"type":"array","items":{"$ref":"#/components/schemas/EnvironmentConfiguration"}}},"required":["application","requirements","environments"]}
+    "ApplicationRequirementsInput": {"type":"object","properties":{"requirements":{"type":"array","maxItems":64,"items":{"$ref":"#/components/schemas/ConfigurationRequirement"}}},"required":["requirements"]}
+    "EnvironmentConfigurationInput": {"type":"object","properties":{"endpoints":{"type":"object","additionalProperties":{"type":"string"}},"parameters":{"type":"object","additionalProperties":{"type":"string"}},"credentialBindings":{"type":"object","additionalProperties":{"type":"string"}}},"required":["endpoints","parameters","credentialBindings"]}
     "ReliabilityCheckPage": {"type":"object","properties":{"items":{"type":"array","items":{"$ref":"#/components/schemas/ReliabilityCheck"}},"cursor":{"type":"string"},"partial":{"type":"boolean"}},"required":["items","partial"]}
     "ReliabilityCheck": {"type":"object","properties":{"at":{"type":"string"},"state":{"type":"string"},"durationMs":{"type":["number","null"]},"censored":{"type":"boolean"},"runId":{"type":"string"}},"required":["at","state","durationMs","censored"]}
     "StatusPageSlugAvailability": {"type":"object","properties":{"slug":{"type":"string"},"available":{"type":"boolean"}},"required":["slug","available"]}
@@ -8586,26 +8600,7 @@
     "ReliabilityBucket": {"type":"object","properties":{"since":{"type":"string"},"until":{"type":"string"},"state":{"type":"string"},"partial":{"type":"boolean"},"totals":{"$ref":"#/components/schemas/ReliabilityTotals"},"passRate":{"type":["number","null"]},"availability":{"oneOf":[{"$ref":"#/components/schemas/StatusPageAvailability"},{"type":"null"}]}},"required":["since","until","state","partial","totals","passRate","availability"]}
     "StatusPageRow": {"type":"object","properties":{"title":{"type":"string"},"description":{"type":"string"},"state":{"type":"string"},"history":{"type":"array","items":{"$ref":"#/components/schemas/StatusPagePoint"}},"availability":{"$ref":"#/components/schemas/StatusPageAvailability"},"metric":{"type":"string","enum":["availability","outcomes"]},"buckets":{"type":"array","items":{"$ref":"#/components/schemas/ReliabilityBucket"}},"totals":{"$ref":"#/components/schemas/ReliabilityTotals"},"passRate":{"type":["number","null"]},"contextCount":{"type":"integer"}},"required":["title","description","state","history","availability","metric","buckets","totals","passRate","contextCount"]}
     "StatusPageReport": {"type":"object","properties":{"title":{"type":"string"},"background":{"type":"string"},"window":{"type":"string"},"maxAgeSeconds":{"type":"integer"},"asOf":{"type":"string"},"probes":{"type":"array","items":{"$ref":"#/components/schemas/StatusPageRow"}},"logo":{"type":"string","maxLength":262144,"description":"Optional public HTTPS image URL up to 2048 characters or validated PNG/JPEG data URL up to 256 KiB. Public only in the published snapshot. The server does not fetch referenced URLs."},"logoAlt":{"type":"string","maxLength":256,"description":"Optional accessible alternative text. Defaults to the page title plus logo in the viewer."},"logoHeight":{"type":"integer","minimum":0,"maximum":1024,"description":"Optional height in CSS pixels. Omit or use 0 for automatic sizing. Positive heights preserve proportions and shrink to fit narrow containers."}},"required":["title","background","window","maxAgeSeconds","asOf","probes"]}
-    "Application": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "description"
-      ]
-    }
+    "Application": {"type":"object","additionalProperties":false,"properties":{"id":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},"requirements":{"type":"array","maxItems":64,"items":{"$ref":"#/components/schemas/ConfigurationRequirement"}},"defaultSuiteId":{"type":"string"}},"required":["id","name","description"]}
     "ApplicationRecord": {
       "type": "object",
       "additionalProperties": false,
@@ -10592,58 +10587,8 @@
         - "name"
         - "enabled"
       "type": "object"
-    "SuiteSettings":
-      "properties":
-        "applications":
-          "items":
-            "type": "string"
-          "type":
-            - "array"
-            - "null"
-        "description":
-          "type": "string"
-        "name":
-          "type": "string"
-        "requiresTarget":
-          "type": "boolean"
-      "required":
-        - "name"
-        - "description"
-        - "applications"
-        - "requiresTarget"
-      "type": "object"
-    "SuiteDefinition":
-      "properties":
-        "activeReleaseId":
-          "type": "string"
-        "applications":
-          "items":
-            "type": "string"
-          "type":
-            - "array"
-            - "null"
-        "archived":
-          "type": "boolean"
-        "capture":
-          "$ref": "#/components/schemas/SourceCapturePolicy"
-        "description":
-          "type": "string"
-        "id":
-          "type": "string"
-        "name":
-          "type": "string"
-        "requiresTarget":
-          "type": "boolean"
-        "timing":
-          "$ref": "#/components/schemas/SourceTimingPolicy"
-      "required":
-        - "id"
-        - "name"
-        - "description"
-        - "applications"
-        - "requiresTarget"
-        - "archived"
-      "type": "object"
+    "SuiteSettings": {"properties":{"applications":{"type":"array","items":{"type":"string"},"minItems":1,"maxItems":1,"description":"Exactly one application owner. Legacy shared and unassigned records require reviewed assignment before new catalog writes or execution."},"description":{"type":"string"},"name":{"type":"string"},"requiresTarget":{"type":"boolean"}},"required":["name","description","applications","requiresTarget"],"type":"object"}
+    "SuiteDefinition": {"properties":{"activeReleaseId":{"type":"string"},"applications":{"type":"array","items":{"type":"string"},"minItems":1,"maxItems":1,"description":"Exactly one application owner. Legacy shared and unassigned records require reviewed assignment before new catalog writes or execution."},"archived":{"type":"boolean"},"capture":{"$ref":"#/components/schemas/SourceCapturePolicy"},"description":{"type":"string"},"id":{"type":"string"},"name":{"type":"string"},"requiresTarget":{"type":"boolean"},"timing":{"$ref":"#/components/schemas/SourceTimingPolicy"}},"required":["id","name","description","applications","requiresTarget","archived"],"type":"object"}
     "SuiteLifecycle":
       "properties":
         "updatedAt":
@@ -11337,79 +11282,7 @@
         - "expiresAt"
         - "activated"
       "type": "object"
-    "SourceCatalogTest":
-      "properties":
-        "applicationId":
-          "type": "string"
-        "capture":
-          "$ref": "#/components/schemas/SourceCapturePolicy"
-        "category":
-          "type": "string"
-        "check":
-          "$ref": "#/components/schemas/SourceCatalogHTTPCheck"
-        "conditions":
-          "type": "string"
-        "dependencies":
-          "items":
-            "type": "string"
-          "type":
-            - "array"
-            - "null"
-        "description":
-          "type": "string"
-        "id":
-          "type": "string"
-        "owner":
-          "type": "string"
-        "rationale":
-          "type": "string"
-        "requiredBindings":
-          "items":
-            "type": "string"
-          "type":
-            - "array"
-            - "null"
-        "runner":
-          "type": "string"
-        "safety":
-          "type": "string"
-        "selector":
-          "type": "string"
-        "source":
-          "type": "string"
-        "state":
-          "type": "string"
-        "tags":
-          "items":
-            "type": "string"
-          "type":
-            - "array"
-            - "null"
-        "timeoutSeconds":
-          "type": "integer"
-        "timing":
-          "$ref": "#/components/schemas/SourceTimingPolicy"
-        "title":
-          "type": "string"
-        "type":
-          "type": "string"
-        "definitionSourceId":
-          "type": "string"
-      "required":
-        - "id"
-        - "title"
-        - "description"
-        - "category"
-        - "tags"
-        - "type"
-        - "runner"
-        - "state"
-        - "safety"
-        - "rationale"
-        - "dependencies"
-        - "requiredBindings"
-        - "timeoutSeconds"
-      "type": "object"
+    "SourceCatalogTest": {"properties":{"applicationId":{"type":"string"},"capture":{"$ref":"#/components/schemas/SourceCapturePolicy"},"category":{"type":"string"},"check":{"$ref":"#/components/schemas/SourceCatalogHTTPCheck"},"conditions":{"type":"string"},"dependencies":{"items":{"type":"string"},"type":["array","null"]},"description":{"type":"string"},"id":{"type":"string"},"owner":{"type":"string"},"rationale":{"type":"string"},"requiredBindings":{"items":{"type":"string"},"type":["array","null"]},"runner":{"type":"string"},"safety":{"type":"string"},"selector":{"type":"string"},"source":{"type":"string"},"state":{"type":"string"},"tags":{"items":{"type":"string"},"type":["array","null"]},"timeoutSeconds":{"type":"integer"},"timing":{"$ref":"#/components/schemas/SourceTimingPolicy"},"title":{"type":"string"},"type":{"type":"string"},"definitionSourceId":{"type":"string"},"requiredParameters":{"type":"array","maxItems":64,"uniqueItems":true,"items":{"type":"string"}}},"required":["id","title","description","category","tags","type","runner","state","safety","rationale","dependencies","requiredBindings","timeoutSeconds"],"type":"object"}
     "SourceTimingPolicy":
       "properties":
         "maxAgeDays":

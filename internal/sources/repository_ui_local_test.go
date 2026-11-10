@@ -72,7 +72,7 @@ func TestRegisteredGitHubSourceCompletesUIReviewPublicationAndExecution(t *testi
 	s.Inspectors = map[string]preparation.ArtifactInspector{"go": &localcontainer.Executor{Runner: "go", AllowProjectImages: true, RequireProject: true}, "playwright": &localcontainer.Executor{Runner: "playwright", AllowProjectImages: true, RequireProject: true}}
 	s.RecoveryInspectors = s.Inspectors
 	projectService := &projects.Service{Store: s.Store, Auth: s.Auth}
-	if err := projectService.SaveSuite(t.Context(), "admin", "beta", projects.Suite{ID: "health", Name: "Repository checks", RequiresTarget: false}, 1); err != nil {
+	if err := projectService.SaveSuite(t.Context(), "admin", "beta", projects.Suite{ID: "health", Name: "Repository checks", Applications: []string{"app"}, RequiresTarget: false}, 1); err != nil {
 		t.Fatal(err)
 	}
 	listener, err := net.Listen("tcp", "0.0.0.0:0")

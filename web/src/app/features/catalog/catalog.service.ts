@@ -2,7 +2,7 @@ import { computed, DestroyRef, effect, inject, Injectable, signal, untracked } f
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { combineLatest } from 'rxjs'
 import { applicationSuites } from '../../core/application-scope.utils'
-import { ActivatedRoute } from '@angular/router'
+import { ActivatedRoute, Router } from '@angular/router'
 import { ApiError, ApiService, type Page, type RecordValue } from '../../core/api.service'
 import { AccessClientService } from '../../core/access-client.service'
 import type { CatalogListPage } from '../../core/generated/access.types'
@@ -17,6 +17,7 @@ export class CatalogService {
   private readonly api = inject(ApiService)
   private readonly client = inject(AccessClientService)
   private readonly route = inject(ActivatedRoute)
+  private readonly router = inject(Router)
   private readonly destroy = inject(DestroyRef)
   readonly workspace = inject(WorkspaceService)
   readonly testEditor = inject(CatalogTestEditorService)
@@ -79,6 +80,10 @@ export class CatalogService {
         if (allowed) void this.loadApplications(project)
       })
     })
+    effect(() => {
+      const applications = this.workspace.applications(), application = this.applicationId(), project = this.projectId()
+      if (!application && applications.length === 1 && project === this.workspace.projectId()) untracked(() => { void this.router.navigate(['/projects', project, 'applications', applications[0].id, 'catalog'], { queryParams: this.route.snapshot.queryParams, replaceUrl: true }) })
+    })
     this.destroy.onDestroy(() => { this.generation++; this.applicationGeneration++; clearTimeout(this.loadTimer) })
   }
 
@@ -88,6 +93,7 @@ export class CatalogService {
   clearFilters(): void { this.query.set(''); this.state.set('active'); this.suiteFilter.set(''); this.typeFilter.set(this.probeOverview ? 'https' : ''); this.filters.set({}) }
 
   async load(more = false): Promise<void> {
+    if (!this.applicationId() && !this.probeOverview) { this.loading.set(false); return }
     if (more && (this.loading() || this.loadingMore() || !this.page().cursor)) return
     clearTimeout(this.loadTimer)
     const generation = ++this.generation, project = this.projectId()
@@ -95,7 +101,7 @@ export class CatalogService {
     this.loading.set(!more); this.loadingMore.set(more); this.error.set('')
     try {
       const [page, suites] = await Promise.all([
-        this.client.call('listProjectCatalog', { project, query }),
+        this.client.call('listApplicationCatalog', { project, application: this.applicationId(), query }),
         more ? Promise.resolve({ items: this.suites() }) : this.api.request<Page<RecordValue<Suite>>>(`/api/v1/projects/${project}/suites`)
       ])
       if (generation !== this.generation) return

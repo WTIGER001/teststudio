@@ -23,17 +23,17 @@ import { CredentialBindingsComponent } from './credential-bindings.component'
           }
           @if (wizard.flow.step() === 1) {
             @if (service.kind() !== 'applications') {
-              <div class="field"><label for="resource-application">Application {{ service.kind() === 'suites' ? '(optional)' : '' }}</label><select id="resource-application" formControlName="application" [required]="service.kind() === 'environments'"><option value="">Select an application</option>@for (app of service.applications(); track app.id) { <option [value]="app.id">{{ app.data.name }}</option> }</select></div>
+              <div class="field"><label for="resource-application">Application</label><select id="resource-application" formControlName="application" required><option value="">Select an application</option>@for (app of service.applications(); track app.id) { <option [value]="app.id">{{ app.data.name }}</option> }</select></div>
             }
             @if (service.kind() === 'suites') { <label class="checkbox-field"><input type="checkbox" formControlName="requiresTarget">Requires a target environment</label><p class="small muted">Turn this off for pure unit test suites.</p> }
             @if (service.kind() === 'environments') {
               <div class="field"><label for="environment-stage">Stage</label><select id="environment-stage" formControlName="stage"><option value="development">Development</option><option value="beta">Beta</option><option value="production">Production</option><option value="local">Local</option></select></div>
               <details><summary>Advanced endpoint options</summary><div class="field"><label for="endpoint-name">Endpoint name</label><input id="endpoint-name" formControlName="endpoint" required></div></details>
-              <div class="field"><label for="endpoint-url">Endpoint URL</label><input id="endpoint-url" type="url" formControlName="url" required placeholder="https://example.com"></div>
+              <div class="field"><label for="endpoint-url">Base URL</label><input id="endpoint-url" type="url" formControlName="url" required placeholder="https://example.com"></div>
               <label class="checkbox-field"><input type="checkbox" formControlName="protected">Require production-safe tests</label><p class="small muted">Protection is separate from the named stage.</p>
               <ts-credential-bindings />
             }
-            @if (service.kind() === 'applications') { <p>Applications group their target environments and related suites. You can add those after creating this application.</p> }
+            @if (service.kind() === 'applications') { <p>A new application includes an empty Default test suite. Add environments to configure where its tests run.</p> }
           }
           @if (wizard.flow.step() === 2) {
             <dl><dt>Name</dt><dd>{{ service.form.controls.name.value }}</dd><dt>Identifier</dt><dd class="wrap-anywhere">{{ service.form.controls.id.value }}</dd>

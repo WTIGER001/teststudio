@@ -7,8 +7,8 @@ const sourceFile = pathModule.join(__dirname, 'fixtures/bundle-go.zip')
 
 test('ZIP staging retains source and queues cancellable preparation', { tag: '@STUDIO-BUNDLES-001' }, async ({ page, api }) => {
   const { project, path } = await api.scaffold()
-  await api.call('PUT', `${path}/suites/browser-bundles`, { id: 'browser-bundles', name: 'Bundled browser checks', applications: [], requiresTarget: false }, 0)
-  await api.call('PUT', `${path}/suites/bundles`, { id: 'bundles', name: 'Bundled Go checks', applications: [], requiresTarget: false }, 0)
+  await api.call('PUT', `${path}/suites/browser-bundles`, { id: 'browser-bundles', name: 'Bundled browser checks', applications: ['app'], requiresTarget: false }, 0)
+  await api.call('PUT', `${path}/suites/bundles`, { id: 'bundles', name: 'Bundled Go checks', applications: ['app'], requiresTarget: false }, 0)
   await page.goto(`/projects/${project}/sources`)
   await page.getByLabel('Suite for sources', { exact: true }).selectOption('bundles')
   await page.getByLabel('Source ZIP', { exact: true }).setInputFiles(sourceFile)

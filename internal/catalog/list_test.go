@@ -18,7 +18,7 @@ import (
 func listFixture(t *testing.T) *catalog.Service {
 	t.Helper()
 	s, p := setup(t)
-	if err := p.SaveSuite(t.Context(), "admin", "alpha", projects.Suite{ID: "second", Name: "Second"}, 0); err != nil {
+	if err := p.SaveSuite(t.Context(), "admin", "alpha", projects.Suite{ID: "second", Name: "Second", Applications: []string{"app"}}, 0); err != nil {
 		t.Fatal(err)
 	}
 	for _, entry := range []struct{ id, suite, title, category string }{{"A", "health", "Same name", "Availability"}, {"B", "health", "Local check", "Availability / Local"}, {"C", "health", "Adjacent category", "AvailabilityExtra"}, {"A", "second", "Same name", "Availability/Local"}, {"HIDDEN", "health", "Private title", "Private"}} {
@@ -182,6 +182,16 @@ func TestCatalogExportRejectsExactExportDenyWithoutRestrictingListReads(t *testi
 
 func TestCatalogApplicationScopeIncludesInheritedTestsAndScopesCounts(t *testing.T) {
 	s := listFixture(t)
+	secondRow, err := s.Store.Get(t.Context(), projects.Bucket("suites", "alpha"), "second")
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, _ := storage.Decode[projects.Suite](secondRow)
+	second.Applications = []string{"other"}
+	secondChange, _ := storage.Put(secondRow.Bucket, secondRow.ID, "alpha", secondRow.Revision, second)
+	if err := s.Store.CommitAll(t.Context(), secondChange); err != nil {
+		t.Fatal(err)
+	}
 	row, err := s.Store.Get(t.Context(), projects.Bucket("suites", "alpha"), "health")
 	if err != nil {
 		t.Fatal(err)
@@ -190,7 +200,7 @@ func TestCatalogApplicationScopeIncludesInheritedTestsAndScopesCounts(t *testing
 	if err != nil {
 		t.Fatal(err)
 	}
-	suite.Applications = []string{"app", "other"}
+	suite.Applications = []string{"app"}
 	change, _ := storage.Put(row.Bucket, row.ID, "alpha", row.Revision, suite)
 	if err := s.Store.CommitAll(t.Context(), change); err != nil {
 		t.Fatal(err)
@@ -215,6 +225,19 @@ func TestCatalogApplicationScopeIncludesInheritedTestsAndScopesCounts(t *testing
 		if item.Suite != "health" || item.ID == "B" {
 			t.Fatal("foreign application entered the scope", item)
 		}
+	}
+	suite.Applications = []string{"app", "other"}
+	latest, err := s.Store.Get(t.Context(), projects.Bucket("suites", "alpha"), "health")
+	if err != nil {
+		t.Fatal(err)
+	}
+	shared, _ := storage.Put(latest.Bucket, latest.ID, "alpha", latest.Revision, suite)
+	if err := s.Store.CommitAll(t.Context(), shared); err != nil {
+		t.Fatal(err)
+	}
+	sharedPage, err := s.ListTests(t.Context(), "admin", "alpha", "", catalog.ListQuery{Application: "app"}, "")
+	if err != nil || sharedPage.Total != 0 {
+		t.Fatal("legacy shared suite leaked into application catalog", err)
 	}
 	none, err := s.ListTests(t.Context(), "admin", "alpha", "", catalog.ListQuery{Application: "missing"}, "")
 	if err != nil || none.Total != 0 || none.Counts.Total != 0 {

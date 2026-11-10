@@ -2,7 +2,7 @@ import { test, expect, expectHTTPFailure } from './fixtures'
 
 test('Playwright editor retains drafts and freezes reviewed preparation input', { tag: '@STUDIO-EDITOR-001' }, async ({ page, api }, testInfo) => {
   const { project, path } = await api.scaffold()
-  await api.call('PUT', `${path}/suites/browser`, { id: 'browser', name: 'Editor browser checks', applications: [], requiresTarget: false }, 0)
+  await api.call('PUT', `${path}/suites/browser`, { id: 'browser', name: 'Editor browser checks', applications: ['app'], requiresTarget: false }, 0)
   const base = `${path}/suites/browser/playwright-drafts`
   await page.goto(`/projects/${project}/sources`)
   await page.getByLabel('Suite for sources', { exact: true }).selectOption('browser')

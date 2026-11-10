@@ -24,7 +24,7 @@ export async function seedDemo({ root, origin, target, owner, save, progress }) 
     await ensure('environments', 'local', { name: 'Local demo target', applicationId: 'parcel-desk', stage: 'local', protected: false, disabled: false, endpoints: { api: target } })
     const timing = { mode: 'warn', slowdownFactor: 2, minimumIncreaseMs: 100, minimumSamples: 3, window: 20, maxAgeDays: 30, timeoutMode: 'adaptive', timeoutFactor: 3, timeoutMarginMs: 250, minimumTimeoutMs: 1000 }
     const native = await ensure('suites', 'availability', { name: 'Availability examples', description: 'Three checks show a healthy response, an unavailable service, and a timeout.', applications: ['parcel-desk'], requiresTarget: true, archived: false, timing })
-    await ensure('suites', 'browser', { name: 'Browser screenshot example', description: 'A new Playwright check captures the parcel summary as screenshot evidence.', applications: [], requiresTarget: false, archived: false })
+    await ensure('suites', 'browser', { name: 'Browser screenshot example', description: 'A new Playwright check captures the parcel summary as screenshot evidence.', applications: ['parcel-desk'], requiresTarget: false, archived: false })
     if (!native.data.activeReleaseId) {
       const tests = [
         { id: demoNativeIDs[0], title: 'Healthy service responds', path: '/health', description: 'A stable passing check for timing and history.', timeout: 3 },

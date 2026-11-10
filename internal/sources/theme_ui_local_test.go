@@ -40,7 +40,7 @@ func TestButtonThemesKeepFirstFrameContrastThroughStudioExecution(t *testing.T) 
 	s.RecoveryInspectors = s.Inspectors
 	t.Cleanup(func() { cleanupRepositoryUIJobs(t, s, root) })
 	projectService := &projects.Service{Store: s.Store, Auth: s.Auth}
-	if err := projectService.SaveSuite(t.Context(), "admin", "alpha", projects.Suite{ID: "ui", Name: "Button theme rendering", RequiresTarget: false}, 0); err != nil {
+	if err := projectService.SaveSuite(t.Context(), "admin", "alpha", projects.Suite{ID: "ui", Name: "Button theme rendering", Applications: []string{"app"}, RequiresTarget: false}, 0); err != nil {
 		t.Fatal(err)
 	}
 	specification, err := os.ReadFile("../../tests/authoring/button-themes.spec.ts")

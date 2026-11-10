@@ -2,7 +2,7 @@ import { test, expect } from './fixtures'
 
 test('repository sources register multiple suites and queue durable syncs', { tag: '@STUDIO-GIT-001' }, async ({ page, api }, testInfo) => {
   const { project, path } = await api.scaffold()
-  for (const suite of ['unit', 'math']) await api.call('PUT', `${path}/suites/${suite}`, { id: suite, name: `${suite} checks`, applications: [], requiresTarget: false }, 0)
+  for (const suite of ['unit', 'math']) await api.call('PUT', `${path}/suites/${suite}`, { id: suite, name: `${suite} checks`, applications: ['app'], requiresTarget: false }, 0)
   await page.goto(`/projects/${project}/sources`)
   await page.getByRole('button', { name: 'Register repository', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Choose a repository', exact: true })).toBeFocused()

@@ -24,6 +24,7 @@ export interface TestDefinition {
   safety: string
   rationale: string
   dependencies: string[] | null
+  requiredParameters?: string[]
   requiredBindings: string[] | null
   timing?: TimingPolicy
   timeoutSeconds: number

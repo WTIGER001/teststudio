@@ -255,7 +255,11 @@ func TestQueuedHTTPDispatchRechecksPolicyAndPreservesItsSnapshot(t *testing.T) {
 					t.Fatal(err)
 				}
 				suite.Applications = []string{"other"}
-				if err := p.SaveSuite(t.Context(), "admin", "project", suite, row.Revision); err != nil {
+				if err := p.SaveSuite(t.Context(), "admin", "project", suite, row.Revision); err == nil {
+					t.Fatal("single application ownership changed")
+				}
+				change, _ := storage.Put(row.Bucket, row.ID, "project", row.Revision, suite)
+				if err := s.Store.Commit(t.Context(), change); err != nil {
 					t.Fatal(err)
 				}
 			case "location":

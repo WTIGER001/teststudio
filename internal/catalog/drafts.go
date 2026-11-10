@@ -49,8 +49,20 @@ func (s *Service) SaveDraft(ctx context.Context, user, project, suite string, d 
 	if err := s.Auth.Check(ctx, user, project, "suite/"+suite, "catalog.update"); err != nil {
 		return err
 	}
-	if _, _, err := s.suite(ctx, project, suite); err != nil {
+	owner, _, err := s.suite(ctx, project, suite)
+	if err != nil {
 		return err
+	}
+	if len(owner.Applications) != 1 {
+		return errors.New("assign this suite to one application before saving tests")
+	}
+	for _, test := range d.Tests {
+		if test.Application != "" && test.Application != owner.Applications[0] {
+			return errors.New("test application is outside the suite")
+		}
+		if err := s.validateRequirements(ctx, project, owner.Applications[0], test); err != nil {
+			return err
+		}
 	}
 	if err := s.validateSourceSnapshot(ctx, user, project, suite, d.Artifact); err != nil {
 		return err

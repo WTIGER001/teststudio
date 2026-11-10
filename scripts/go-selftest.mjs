@@ -21,7 +21,8 @@ await call('POST', '/auth/local', {})
 csrf = (await call('GET', '/auth/session')).session.csrfToken
 const project = 'teststudio-go-selftests', suite = 'go-source', base = `/api/v1/projects/${project}`
 await call('POST', '/api/v1/projects', { id: project, name: 'TestStudio Go self-tests', description: 'New isolated source checks and runner diagnostics' })
-await call('PUT', `${base}/suites/${suite}`, { id: suite, name: 'Go source checks', applications: [], requiresTarget: false }, 0)
+await call('PUT', `${base}/applications/teststudio`, { id: 'teststudio', name: 'TestStudio' }, 0)
+await call('PUT', `${base}/suites/${suite}`, { id: suite, name: 'Go source checks', applications: ['teststudio'], requiresTarget: false }, 0)
 for (const entry of manifest.tests) {
   await call('POST', `${base}/suites/${suite}/tests`, {
     id: entry.id, title: entry.test, description: 'New Go runner verification', category: entry.package === './unit' ? 'unit' : 'diagnostics', tags: ['selftest'], runner: 'go', type: 'unit', state: 'enabled',

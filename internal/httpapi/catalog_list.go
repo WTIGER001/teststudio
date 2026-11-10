@@ -29,6 +29,17 @@ func (s *Server) catalogList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	q := catalog.ListQuery{Query: values.Get("query"), Suite: values.Get("suite"), Application: values.Get("application"), Category: values.Get("category"), Descendants: descendants, Uncategorized: uncategorized, Tag: values.Get("tag"), Owner: values.Get("owner"), Type: values.Get("type"), Runner: values.Get("runner"), State: values.Get("state"), Safety: values.Get("safety"), Source: values.Get("source"), Sort: values.Get("sort"), Limit: limit}
+	if application := r.PathValue("application"); application != "" {
+		if q.Application != "" && q.Application != application {
+			problem(w, errors.New("application filter must match the route"))
+			return
+		}
+		if err := s.Auth.CheckApplication(r.Context(), actor(r), r.PathValue("project"), application, "", "catalog.read"); err != nil {
+			problem(w, err)
+			return
+		}
+		q.Application = application
+	}
 	page, err := s.Catalog.ListTests(r.Context(), actor(r), r.PathValue("project"), r.PathValue("suite"), q, values.Get("cursor"))
 	if err != nil {
 		problem(w, err)

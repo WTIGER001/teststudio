@@ -27,28 +27,29 @@ type HTTPCheck struct {
 }
 
 type Test struct {
-	DefinitionSource string         `json:"definitionSourceId,omitempty"`
-	ID               string         `json:"id"`
-	Title            string         `json:"title"`
-	Description      string         `json:"description"`
-	Application      string         `json:"applicationId,omitempty"`
-	Category         string         `json:"category"`
-	Tags             []string       `json:"tags"`
-	Owner            string         `json:"owner,omitempty"`
-	Type             string         `json:"type"`
-	Runner           string         `json:"runner"`
-	State            string         `json:"state"`
-	Safety           string         `json:"safety"`
-	Rationale        string         `json:"rationale"`
-	Conditions       string         `json:"conditions,omitempty"`
-	Dependencies     []string       `json:"dependencies"`
-	RequiredBindings []string       `json:"requiredBindings"`
-	TimeoutSeconds   int            `json:"timeoutSeconds"`
-	Source           string         `json:"source,omitempty"`
-	Selector         string         `json:"selector,omitempty"`
-	Check            *HTTPCheck     `json:"check,omitempty"`
-	Timing           *timing.Policy `json:"timing,omitempty"`
-	Capture          *CapturePolicy `json:"capture,omitempty"`
+	DefinitionSource   string         `json:"definitionSourceId,omitempty"`
+	ID                 string         `json:"id"`
+	Title              string         `json:"title"`
+	Description        string         `json:"description"`
+	Application        string         `json:"applicationId,omitempty"`
+	Category           string         `json:"category"`
+	Tags               []string       `json:"tags"`
+	Owner              string         `json:"owner,omitempty"`
+	Type               string         `json:"type"`
+	Runner             string         `json:"runner"`
+	State              string         `json:"state"`
+	Safety             string         `json:"safety"`
+	Rationale          string         `json:"rationale"`
+	Conditions         string         `json:"conditions,omitempty"`
+	Dependencies       []string       `json:"dependencies"`
+	RequiredParameters []string       `json:"requiredParameters,omitempty"`
+	RequiredBindings   []string       `json:"requiredBindings"`
+	TimeoutSeconds     int            `json:"timeoutSeconds"`
+	Source             string         `json:"source,omitempty"`
+	Selector           string         `json:"selector,omitempty"`
+	Check              *HTTPCheck     `json:"check,omitempty"`
+	Timing             *timing.Policy `json:"timing,omitempty"`
+	Capture            *CapturePolicy `json:"capture,omitempty"`
 }
 
 type Provenance struct {

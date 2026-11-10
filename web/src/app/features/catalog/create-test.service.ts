@@ -19,12 +19,13 @@ export class CreateTestService {
   constructor() {
     effect(() => {
       const project = this.sources.project(), suites = this.sources.suites(), kind = this.kind()
+      const defaultSuiteId = this.sources.workspace.application()?.defaultSuiteId
       const key = `${project}:${this.sources.applicationId()}:${kind}`
       untracked(() => {
         this.native.configure(project, suites)
-        const preferred = this.route.snapshot.queryParamMap.get('suite')
+        const preferred = this.route.snapshot.queryParamMap.get('suite') || suites.find(row => row.id === defaultSuiteId)?.id || suites.find(row => row.data.name === 'Default')?.id
         if (preferred && suites.some(row => row.id === preferred) && !this.sources.form.controls.suite.value) this.sources.form.controls.suite.setValue(preferred)
-        if (key === this.initialized) { if (!this.native.form.controls.suite.value && suites.length) this.native.form.controls.suite.setValue(suites[0].id); return }
+        if (key === this.initialized) { if (!this.native.form.controls.suite.value && suites.length) this.native.form.controls.suite.setValue(preferred || suites[0].id); return }
         this.initialized = key
         this.native.create()
         if (preferred && suites.some(row => row.id === preferred)) this.native.form.controls.suite.setValue(preferred)
