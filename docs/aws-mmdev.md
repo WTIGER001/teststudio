@@ -7,6 +7,16 @@ Use AWS profile mm_dev, account 253455159142, and region us-west-2.
 The existing cluster is marketmaker-testing-dev. Preserve its testing-server service.
 Azure implementation and verification remain deferred.
 
+## Deployed delivery: GitHub API token access and repository wizard
+
+The user authorizes AWS token configuration and release deployment on 2026-11-10. Product 0.16.3-dev from committed f8a26b5 is deployed on MMDev as build be97bc2b528c. Build creation is 2026-11-10T21:07:03.658000-05:00, task startup is 2026-11-10T21:10:38.716000-05:00, and UI publication is 2026-11-10T21:13:32-05:00, all America/New_York. Keep these dates distinct.
+The owned Secrets Manager credential is exposed only as marketmaker-tests-github in project foodmarketmaker, for source-repository use. Its approved repository is foodmarketmaker/marketmaker-tests and metadata writes are disabled. ECS startup secret injection enables the GitHub provider and the same project-scoped binding format used by the API and preparation CLI. A GitHub App is not required.
+The reviewed CloudFormation change set modifies only ExecutionRole, Task, and Service. The exact template comparison confirms that the startup policy adds only the selected source secret and the runtime task role is unchanged. Both teststudioapi and testing-server retain completed healthy rollouts. The existing testing-server deployment identifier, SSO-only sign-in, recording transport reference, and all other template resources remain unchanged.
+All 27 hosted checks pass. The actual API and public index and main bundle match the committed release. CloudFront invalidation completes. The hosted wizard lists the approved credential; another project cannot list it. Hosted static inspection authenticates to the private repository, pins commit 9e587c291a356bcc9b93860f54735d35c5d966d5, and detects playwright.config.ts. Inspection creates no source connection, preparation job, or application test run. The owned operator session is revoked. Temporary credentials, helpers, package containers, and private Docker login state are removed. The user's demo, browsers, private snapshot, and unrelated workloads are not modified.
+Local environment-binding, worker role, and discovery flag checks pass. The CloudFormation schema and ten packaging checks pass; two changed service-package configuration checks pass. Reuse output/aws-mmdev/github-token-release for the release, secret reference, scope audit, package checks, and hosted verification. Secret values are absent from these receipts and Git.
+This refines 20, 22, 23, and 57. Acceptance remains 50 verified of 57; broad worker and cross-profile criteria stay open. GitHub authentication is ready on AWS. The separate marketmaker-tests adapter/export is still unpublished, and hosted coded preparation and execution workers remain absent. Do not describe that repository's application tests as runnable yet. No Git push, repository metadata write, application test execution, Kubernetes update, or Azure operation occurs.
+Use the [repository wizard](https://teststudio.devfoodmarketmaker.com/projects/foodmarketmaker/sources/repositories/new) with github, foodmarketmaker/marketmaker-tests, branch codex/initial-readonly-suite, and reference marketmaker-tests-github. Source publication and worker installation remain separate work. Rotating an ECS-injected token requires a reviewed new task rollout after updating its secret.
+
 ## Deployed delivery: application ownership and environment configuration
 
 The user requests commit, MMDev deployment, and manual migration of the existing shared suite on 2026-11-10.
@@ -53,9 +63,9 @@ The reviewed foundation change set adds 29 resources. The reviewed core change s
 Neither change set modifies existing resources. The core change set creates no cluster.
 ECS reports one desired and one running teststudioapi task with a completed rollout.
 Both API and artifact target groups report healthy. The existing testing-server remains at one running task.
-The current ARM64 image is sha256:c9abee103c48449e5d96f4c6b36721c709e168a3aa479ef8581528d11f1647ba.
-It is published in teststudioapi/service. The current release is 0.15.0-dev, displayed as 0.15.0.dev. Build b000dd1ba166 uses committed source 31ff80f.
-Its UTC build creation date is 2026-11-10T17:40:42.794Z. The task starts at 2026-11-10T17:56:29.945Z and UI publication occurs at 2026-11-10T17:59:33Z. The API, UI, and image labels share that immutable identity.
+The current ARM64 image is sha256:e1f627f80a69bea0251ea6520ce099a752bafa8aeabb1f8f4b2e2d6b611269f3.
+It is published in teststudioapi/service. The current release is 0.16.3-dev, displayed as 0.16.3.dev. Build be97bc2b528c uses committed source f8a26b5.
+Its UTC build creation date is 2026-11-11T02:07:03.658Z. The task starts at 2026-11-11T02:10:38.716000+00:00 and UI publication occurs at 2026-11-11T02:13:32Z. The API, UI, and image labels share that immutable identity.
 Release 0.5.0-dev adds focused status-page management and installation-wide vanity names. Its ordinary image-only change set modifies Service and Task; the existing public CloudFront policy is reused. Twelve package checks and thirty-four hosted checks pass. The owned generic verification page is unpublished and its session closes. Receipts are output/aws-mmdev/status-vanity-050.
 Patch 0.5.1-dev adds status-page sharing copy buttons. The focused browser workflow and sixteen hosted identity, asset, health, rollout, and invalidation checks pass. The image-only change set preserves the existing public response policy. Receipts are output/aws-mmdev/status-copy-051.
 The unchanged trace viewer is reused. Native image storage uses the existing private database. The image retains the reviewed public RDS trust bundle.
@@ -92,7 +102,7 @@ Store the approved token JSON envelope from [repository sources](repository-sour
 Use publish-aws-core.py prepare with --github-source-secret-arn, --github-source-project, and --github-source-reference to select the binding. The publisher checks secret ownership and freezes all three references in its receipt. Review permits the scoped ExecutionRole modification alongside Task and Service and checks the concrete parameters before execution.
 Secrets Manager values injected into ECS environment variables are startup snapshots. Replacing a secret requires a new task rollout before the process sees the replacement. Keep secret version creation and reviewed task rollout together during rotation.
 API tokens use validated credential replacement when expired or revoked. They do not receive App installation-token renewal. Existing identity and browser recording secrets remain separate.
-MMDev still runs 0.15.0-dev and lacks coded preparation and execution workers. The local authentication check alone copies no token to AWS and performs no deployment. The later authorized deployment has its own receipt. Source publication, authentication, preparation, and application execution are distinct acceptance steps.
+MMDev now runs 0.16.3-dev and still lacks coded preparation and execution workers. The local authentication check alone copies no token to AWS and performs no deployment. The later authorized deployment has its own receipt. Source publication, authentication, preparation, and application execution are distinct acceptance steps.
 
 ## Tutorials
 
