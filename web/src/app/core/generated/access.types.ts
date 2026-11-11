@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.50.0"
+export const accessContractVersion = "0.51.0"
 
 export type APIAuthentication = { "binding": string; "header"?: string; "scheme": "bearer" | "basic" | "header" }
 export type APIRequestPolicy = { "authentication"?: APIAuthentication; "maxRequests": number; "maxResponseBytes": number; "redactFields"?: (string)[]; "rules": (APIRequestRule)[] }
@@ -202,6 +202,7 @@ export type SourceRepositoryBinding = { "buildProfile": string; "config"?: strin
 export type SourceRepositoryCandidate = { "config": string; "moduleRoot": string }
 export type SourceRepositoryConfig = { "accessMode"?: "read-only" | "read-write"; "autoActivate": boolean; "bindings": (SourceRepositoryBinding)[]; "confirmModeChange"?: boolean; "credentialReference"?: string; "enabled": boolean; "name": string; "provider": string; "pushEnabled"?: boolean; "reference": string; "repository": string; "syncIntervalSeconds"?: number; "webhookCredentialReference"?: string }
 export type SourceRepositoryInspection = { "candidates": (SourceRepositoryCandidate)[]; "manifests": (string)[]; "revision": SourceRevision }
+export type SourceRepositoryInspectionRequest = { "accessMode"?: "read-only" | "read-write"; "credentialReference"?: string; "provider": string; "reference": string; "repository": string }
 export type SourceRepositoryMetadata = { "actor": string; "base"?: SourceRevision; "catalog": { [key: string]: SourceJSONValue }; "catalogRevision"?: number; "manifest": { [key: string]: SourceJSONValue }; "pending": boolean; "updatedAt": string }
 export type SourceRepositoryMetadataPage = { "cursor"?: string; "items": (SourceRepositoryMetadataRecord)[] }
 export type SourceRepositoryMetadataRecord = { "data": SourceRepositoryMetadata; "id": string; "revision": number; "updatedAt": string }
@@ -324,6 +325,7 @@ export interface AccessRequests {
   commitRepositoryMetadata: { "project": string; "source": string; "suite": string; revision: number; key: string }
   listRepositoryMetadataHistory: { "project": string; "source": string; "suite": string; query?: { "cursor"?: string; "limit"?: number } }
   readRemoteRepositoryMetadata: { "project": string; "source": string; "suite": string }
+  previewRepositorySource: { "project": string; "source": string; body: SourceRepositoryInspectionRequest }
   rotateRepositoryCredential: { "project": string; "source": string; key: string }
   listRepositorySyncs: { "project": string; "source": string; query?: { "limit"?: number; "cursor"?: string } }
   enqueueRepositorySync: { "project": string; "source": string; key: string; body: SourceSyncInput }
@@ -533,6 +535,7 @@ export interface AccessResponses {
   commitRepositoryMetadata: SourceRepositoryWrite
   listRepositoryMetadataHistory: SourceRepositoryMetadataPage
   readRemoteRepositoryMetadata: SourceRepositoryMetadata
+  previewRepositorySource: SourceRepositoryInspection
   rotateRepositoryCredential: SourceCredentialRotation
   listRepositorySyncs: SourceRepositorySyncPage
   enqueueRepositorySync: SourceRepositorySyncRecord
@@ -742,6 +745,7 @@ export const accessOperations = {
   commitRepositoryMetadata: { method: "POST", path: "/api/v1/projects/{project}/repository-sources/{source}/metadata/{suite}/commit" },
   listRepositoryMetadataHistory: { method: "GET", path: "/api/v1/projects/{project}/repository-sources/{source}/metadata/{suite}/history" },
   readRemoteRepositoryMetadata: { method: "GET", path: "/api/v1/projects/{project}/repository-sources/{source}/metadata/{suite}/remote" },
+  previewRepositorySource: { method: "POST", path: "/api/v1/projects/{project}/repository-sources/{source}/preview" },
   rotateRepositoryCredential: { method: "POST", path: "/api/v1/projects/{project}/repository-sources/{source}/rotate-credential" },
   listRepositorySyncs: { method: "GET", path: "/api/v1/projects/{project}/repository-sources/{source}/syncs" },
   enqueueRepositorySync: { method: "POST", path: "/api/v1/projects/{project}/repository-sources/{source}/syncs" },

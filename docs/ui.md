@@ -55,7 +55,8 @@ Do not add a confirmation to every ordinary action. Use review where it resolves
 Repository configuration uses Repository, Suites, and Review steps through the shared wizard components.
 Generate its permanent identifier from the source name. Keep identifier and reference-type settings under Advanced repository options.
 Keep push and periodic settings under Advanced synchronization options.
-Review shows every suite binding, enabled state, automatic saving, and effects on future versions and test execution.
+Check repository and continue inspects access and configuration paths before saving. Configure manually skips that read. Suites shows application owners and detected configurations. Generate discovered-test metadata paths; put manual locations and runner selection under Advanced test configuration.
+Review shows every suite binding, enabled state, automatic saving, and effects on future versions and test execution. Prepare tests after saving is an explicit option. Preserve the saved connection and recover the same setup request if preparation is interrupted.
 
 Use the shared core randomId helper for generated UUIDs and idempotency keys.
 It uses native UUID generation when available and secure random bytes otherwise.

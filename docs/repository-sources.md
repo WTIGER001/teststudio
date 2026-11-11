@@ -7,7 +7,8 @@ A repository can supply several suites. Each suite belongs to one application.
 Use existing [suite declarations](test-repositories.md) or discover existing Playwright tests without metadata or permanent tags.
 The [Git source specification](git-test-sources.md) records the ownership and execution rules.
 
-Connecting a repository saves settings. It does not fetch, build, or run tests.
+Check repository and continue verifies access and reads a pinned archive before saving. It finds configuration paths without evaluating test code.
+Saving a connection alone changes settings. Prepare tests after saving also queues source preparation. Neither action starts tests.
 Inspect repository files reads a pinned archive without evaluating test code.
 Sync now queues isolated preparation. Successful automatic setup makes a saved version available without starting tests.
 
@@ -115,17 +116,17 @@ Current source ownership, settings generation, suite permissions, and enabled st
 
 ### Connect and review tests
 
-1. Open Import and sync tests and select Register repository.
-2. Choose an enabled provider, metadata ownership, repository path, reference, and approved credential.
-3. Choose the destination suites. Use discovery for existing Playwright configurations or select existing manifest paths and runners.
-4. Review ownership, bindings, enabled state, and optional push or periodic settings. Save repository source returns to its details.
-5. Inspect repository files when configuration paths are unknown. Edit the saved binding if necessary.
-6. Select Sync now. Inspect its preparation and named diagnostics.
-7. Open Review metadata for the suite. Review each imported test, keep its changes, and review before Save metadata.
-8. Synchronize read-only metadata, or commit read/write metadata and merge its review request before synchronizing the configured branch.
-9. Start tests explicitly through the normal run workflow.
+1. Select Register repository. Enter a source name, approved provider, repository path, credential reference, metadata ownership, and branch.
+2. Select Check repository and continue. Access failures preserve entries on the Repository step. Inspection reads a pinned archive and creates no connection, preparation job, or test run. Configure manually skips inspection.
+3. In Suites, choose a destination with its application owner. Use an application's Default suite when a separate collection is unnecessary. Choose a detected Playwright configuration. A sole configuration is selected automatically.
+4. Metadata paths are generated from suite identifiers. Advanced test configuration contains manual locations, project filters, existing manifest paths, and runner selection. A repository can supply several destination suites.
+5. Set a named environment endpoint for environment-backed tests. Each environment supplies that endpoint's actual URL. Go Back when the wrong branch or repository was inspected; changing connection inputs clears the inspection result.
+6. In Review, inspect metadata ownership, application-owned destinations, source locations, connection check, and synchronization. Imported tests remain disabled until reviewed.
+7. Choose Prepare tests after saving to queue isolated source preparation. Leave it unchecked to save settings only and select Sync now later. Saving and preparation never start tests.
+8. If the connection saves but preparation is not confirmed, retry saving. It recovers the same queue request without rewriting an unchanged connection or duplicating preparation. An unsaved in-page retry ends on reload; use the saved connection's Sync now action afterward.
+9. Follow preparation, open Review metadata, and review imported tests before enabling them. Commit read/write metadata for Git review when applicable. Start tests explicitly through the normal run workflow.
 
-Help preserves edits. Creation and metadata editing use dedicated routes with unsaved-change protection.
+Help and Back preserve edits. Creation and metadata editing use dedicated routes with unsaved-change protection. Unsaved fields do not survive a reload.
 
 ### Configure providers and workers
 
@@ -216,3 +217,5 @@ Source with missing prerequisites stops with explicit diagnostics. Registration 
 Provider, storage, and execution checks use local fixtures and local runtimes.
 Live acceptance against the user's GitLab server, actual GitHub App permissions and rollover, and hosted worker installation remains separate.
 MMDev's deployed core still lacks coded preparation and execution workers. Do not describe saved browser tests as runnable there based on these local checks.
+
+The wizard preview API is POST /api/v1/projects/{project}/repository-sources/{source}/preview. It accepts provider, repository, reference, optional accessMode, and an approved credentialReference. It requires sources.manage on the named source plus the ordinary session, Origin, and CSRF checks. The source need not exist. It rechecks authority before returning configuration paths, validates the resolved commit, performs no writes, and is safe to retry. Preview is advisory; preparation and new run starts resolve the configured reference again.

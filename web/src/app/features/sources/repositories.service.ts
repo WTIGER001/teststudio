@@ -1,11 +1,12 @@
 import { randomId } from '../../core/random-id'
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
+import { distinctUntilChanged } from 'rxjs'
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
 import { AccessClientService } from '../../core/access-client.service'
 import { ApiError } from '../../core/api.service'
-import type { SourcePreparationRecord, SourceRepositoryOptions, SourceRepositoryRecord, SourceRepositorySyncRecord } from '../../core/generated/access.types'
+import type { SourcePreparationRecord, SourceRepositoryInspection, SourceRepositoryOptions, SourceRepositoryRecord, SourceRepositorySyncRecord } from '../../core/generated/access.types'
 import { SourcesService } from './sources.service'
 import { WizardController } from '../../shared/wizard/wizard-controller'
 import { suggestedIdentifier } from '../../shared/wizard/creation.utils'
@@ -34,6 +35,9 @@ export class RepositoriesService {
   readonly preparationLoading = signal(false)
   readonly error = signal('')
   readonly message = signal('')
+  readonly inspection = signal<SourceRepositoryInspection | null>(null)
+  readonly prepareAfterSave = new FormControl(false, { nonNullable: true })
+  private savedConfiguration = ''
   readonly flow = new WizardController(3, step => this.validate(step))
   readonly force = new FormControl(false, { nonNullable: true })
   readonly form = new FormGroup({
@@ -66,6 +70,9 @@ export class RepositoriesService {
     this.form.controls.name.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(name => {
       if (!this.selected() && this.form.controls.id.pristine) this.form.controls.id.setValue(suggestedIdentifier(name, this.identifierSuffix))
     })
+    for (const control of [this.form.controls.provider, this.form.controls.repository, this.form.controls.referenceKind, this.form.controls.reference, this.form.controls.credential, this.form.controls.mode, this.form.controls.id]) {
+      control.valueChanges.pipe(distinctUntilChanged(), takeUntilDestroyed(destroy)).subscribe(() => this.inspection.set(null))
+    }
     this.force.valueChanges.pipe(takeUntilDestroyed(destroy)).subscribe(() => { this.syncKey = randomId() })
     inject(ActivatedRoute).paramMap.pipe(takeUntilDestroyed(destroy)).subscribe(() => {
       this.generation++; this.detailGeneration++; this.rows.set([]); this.selected.set(null); this.history.set([]); this.sync.set(null); this.prepared.set(null); this.editor.set(false); this.cursor.set(''); this.syncCursor.set(''); this.options.set({ providers: [], credentials: [], webhookCredentials: [] }); this.busy.set(false); void this.load()
@@ -101,7 +108,7 @@ export class RepositoriesService {
 
   edit(row?: SourceRepositoryRecord): void {
  if (!this.route.snapshot.data['repositoryEditor']) { void this.router.navigate(['/projects', this.sources.project(), 'sources', 'repositories', row?.id ?? 'new', ...(row ? ['edit'] : [])]); return }
-    this.flow.reset(); this.identifierSuffix = randomId().slice(0, 8)
+    this.inspection.set(null); this.prepareAfterSave.setValue(false); this.savedConfiguration = ''; this.flow.reset(); this.identifierSuffix = randomId().slice(0, 8)
     this.detailGeneration++; this.sync.set(null); this.prepared.set(null); this.history.set([]); this.force.setValue(false)
     this.selected.set(row ?? null); this.editor.set(true); this.error.set(''); this.message.set('')
     const config = row?.data.configuration, reference = repositoryReference(config?.reference ?? 'heads/main')
@@ -109,7 +116,7 @@ export class RepositoriesService {
     this.form.reset({ provider: config?.provider ?? this.options().providers[0] ?? 'github', mode: config?.accessMode ?? 'read-only', confirmModeChange: false, id: row?.id ?? '', name: config?.name ?? '', repository: config?.repository ?? '', referenceKind: reference.kind, reference: reference.value, credential: config?.credentialReference ?? '', enabled: config?.enabled ?? true, autoActivate: true, push: config?.pushEnabled ?? false, webhookCredential: config?.webhookCredentialReference ?? '', intervalSeconds: config?.syncIntervalSeconds ?? 0 })
     this.form.controls.bindings.clear()
     if (config) for (const binding of config.bindings) this.addBinding(binding.suiteId, binding.manifestPath, binding.runner, binding.discover ?? false, binding.moduleRoot, binding.config, binding.project, binding.endpoint)
-    else this.addBinding(this.sources.form.controls.suite.value)
+    else this.addBinding(this.sources.form.controls.suite.value, 'teststudio-suite.json')
     if (row) this.form.controls.id.disable()
  const root = this.route.snapshot.queryParamMap.get('root'), detectedConfig = this.route.snapshot.queryParamMap.get('config'); if (root && detectedConfig && this.form.controls.bindings.length === 1) this.form.controls.bindings.at(0).patchValue({ discover: true, runner: 'playwright', moduleRoot: root, config: detectedConfig });
  this.form.markAsPristine()
@@ -121,9 +128,15 @@ export class RepositoriesService {
     const generation = this.generation, value = this.form.getRawValue()
     this.busy.set(true); this.error.set(''); this.message.set('')
     try {
-      const row = await this.client.call('saveRepositorySource', { ...this.scope(), source: value.id, revision: this.selected()?.revision ?? 0, body: repositoryConfig(value) })
+      const configuration = repositoryConfig(value), fingerprint = JSON.stringify(configuration)
+      const row = this.savedConfiguration === fingerprint && this.selected() ? this.selected()! : await this.client.call('saveRepositorySource', { ...this.scope(), source: value.id, revision: this.selected()?.revision ?? 0, body: configuration })
       if (generation !== this.generation) return
-      this.form.markAsPristine(); this.selected.set(row); this.editor.set(false); await this.router.navigate(['/projects', this.sources.project(), 'sources'], { queryParams: { repository: row.id } })
+      this.savedConfiguration = fingerprint; this.form.markAsPristine(); this.selected.set(row); this.form.controls.id.disable({ emitEvent: false })
+      if (this.prepareAfterSave.value && configuration.enabled) {
+        try { await this.client.call('enqueueRepositorySync', { ...this.scope(), source: row.id, key: this.syncKey, body: { force: false } }) }
+        catch (error) { this.error.set('Connection saved. Preparation was not confirmed. Retry saving to recover the same setup request. ' + (error instanceof Error ? error.message : '')); return }
+      }
+      this.editor.set(false); await this.router.navigate(['/projects', this.sources.project(), 'sources'], { queryParams: { repository: row.id } })
     } catch (error) { if (generation === this.generation) this.fail(error) }
     finally { if (generation === this.generation) this.busy.set(false) }
   }
@@ -132,7 +145,51 @@ export class RepositoriesService {
 
  closeEditor(): void { void this.router.navigate(['/projects', this.sources.project(), 'sources']) }
 
- advance(): void { if (this.flow.step() < 2) this.flow.next(); else void this.save() }
+  async advance(): Promise<void> {
+    if (this.busy()) return
+    if (this.flow.step() === 0 && !this.selected()) { if (!await this.findConfigurations()) return }
+    if (this.flow.step() < 2) this.flow.next(); else await this.save()
+  }
+
+  continueManually(): void { if (!this.busy()) this.flow.next() }
+
+  async findConfigurations(): Promise<boolean> {
+    if (!this.validate(0) || this.busy()) return false
+    if (this.inspection()) return true
+    const generation = this.generation, value = this.form.getRawValue(), config = repositoryConfig(value)
+    this.busy.set(true); this.error.set('')
+    try {
+      const inspection = await this.client.call('previewRepositorySource', { ...this.scope(), source: value.id, body: { provider: config.provider, repository: config.repository, reference: config.reference, credentialReference: config.credentialReference, accessMode: config.accessMode } })
+      if (generation !== this.generation) return false
+      this.inspection.set(inspection)
+      if (inspection.candidates.length === 1 && this.form.controls.bindings.length === 1 && !this.form.controls.bindings.at(0).controls.moduleRoot.dirty && !this.form.controls.bindings.at(0).controls.config.dirty) this.useConfiguration(0, 0)
+      return true
+    } catch (error) { if (generation === this.generation) this.fail(error); return false }
+    finally { if (generation === this.generation) this.busy.set(false) }
+  }
+
+  configurationIndex(index: number): number { const row = this.form.controls.bindings.at(index).getRawValue(); return this.inspection()?.candidates.findIndex(candidate => candidate.moduleRoot === row.moduleRoot && candidate.config === row.config) ?? -1 }
+
+  useConfiguration(binding: number, candidateIndex: number): void {
+    const candidate = this.inspection()?.candidates[candidateIndex], row = this.form.controls.bindings.at(binding)
+    if (!candidate || !row) return
+    row.patchValue({ runner: 'playwright', discover: true, moduleRoot: candidate.moduleRoot, config: candidate.config })
+    this.form.markAsDirty()
+  }
+
+  useManifest(binding: number, manifest: string): void {
+    if (!this.inspection()?.manifests.includes(manifest)) return
+    this.form.controls.bindings.at(binding).patchValue({ discover: false, manifest })
+    this.form.markAsDirty()
+  }
+
+  chooseSuite(index: number): void {
+    const binding = this.form.controls.bindings.at(index)
+    if (binding.controls.manifest.pristine && binding.controls.discover.value) binding.controls.manifest.setValue('testing/' + binding.controls.suite.value + '.json')
+  }
+
+  suiteLabel(id: string): string { const row = this.sources.suites().find(item => item.id === id); return row ? row.data.name + ' · Application: ' + (row.data.applications?.[0] || 'Unassigned') : id }
+  get saveLabel(): string { return this.prepareAfterSave.value && this.form.controls.enabled.value ? 'Save and prepare tests' : 'Save repository source' }
 
   private validate(step: number): boolean {
     this.error.set('')

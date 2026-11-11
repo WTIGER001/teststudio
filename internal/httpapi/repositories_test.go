@@ -179,3 +179,25 @@ func TestRepositoryWebhookRequiresSignatureWithoutBrowserSession(t *testing.T) {
 		t.Fatal("webhook executed tests")
 	}
 }
+
+func TestRepositoryWizardPreviewRequiresAuthorityAndCSRF(t *testing.T) {
+	provider := &apiRepositoryProvider{}
+	c := fixture(t, func(api *httpapi.Server) {
+		api.Sources = &sources.Service{Store: api.Store, Auth: api.Auth, Location: "local", Providers: map[string]sourceprovider.Provider{"github": provider}}
+	})
+	c.signIn()
+	if status, value := c.call("POST", "/api/v1/projects", map[string]string{"id": "wizard", "name": "Wizard"}, nil); status != 200 {
+		t.Fatal(value)
+	}
+	endpoint := "/api/v1/projects/wizard/repository-sources/new-source/preview"
+	input := sources.RepositoryInspectionRequest{Provider: "github", Repository: "owner/suite", Reference: "heads/main"}
+	if status, _ := c.call("POST", endpoint, input, map[string]string{"X-CSRF-Token": ""}); status != 403 || provider.calls != 0 {
+		t.Fatal("wizard preview bypassed CSRF", status)
+	}
+	if status, value := c.call("POST", endpoint, input, nil); status != 422 || provider.calls != 1 {
+		t.Fatal("wizard preview did not use the configured provider", status, value)
+	}
+	if status, value := c.call("GET", "/api/v1/projects/wizard/repository-sources", nil, nil); status != 200 || len(value["items"].([]any)) != 0 {
+		t.Fatal("failed inspection saved a connection", value)
+	}
+}

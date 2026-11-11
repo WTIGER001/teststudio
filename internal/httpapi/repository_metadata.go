@@ -8,6 +8,20 @@ import (
 
 func (s *Server) repositoryMetadataRoutes(m *http.ServeMux, service *sources.Service) {
 	base := "/api/v1/projects/{project}/repository-sources/{source}"
+	m.HandleFunc("POST "+base+"/preview", s.authorized(func(w http.ResponseWriter, r *http.Request) {
+		var input sources.RepositoryInspectionRequest
+		if err := body(r, &input); err != nil {
+			problem(w, err)
+			return
+		}
+		value, err := service.PreviewRepository(r.Context(), actor(r), r.PathValue("project"), r.PathValue("source"), input)
+		if err != nil {
+			problem(w, err)
+			return
+		}
+		JSON(w, 200, value)
+	}))
+
 	m.HandleFunc("GET "+base+"/metadata/{suite}/history", s.authorized(func(w http.ResponseWriter, r *http.Request) {
 		limit, err := pageLimit(r, 30)
 		if err != nil {

@@ -6,6 +6,16 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user authorizes MMDev ECS deployment and now plans a first installation into their own Azure subscription.
 
+## Local delivery: guided repository import and configuration
+
+Product 0.16.1-dev makes repository onboarding a guided Repository, Suites, and Review workflow. API contract is 0.51.0.
+Check repository and continue validates approved access and reads an exact commit archive before saving. It finds Playwright configurations and existing JSON suite declarations without evaluating code, creating a connection, queuing work, or starting tests. Configure manually preserves offline configuration. Source authority, approved project credentials, current permissions, Origin, and CSRF remain enforced.
+Suites shows the application owner beside each destination and offers detected configurations. A single configuration is selected automatically. Discovered-test metadata paths are generated from suite identifiers. Manual paths and runner selection move under Advanced test configuration. Back and Help preserve entries; changing connection inputs clears stale inspection evidence.
+Review explains metadata ownership, destinations, source locations, environment endpoint names, imported disabled tests, and synchronization. Prepare tests after saving explicitly queues setup; leaving it unchecked saves the connection only. An interrupted preparation response preserves the saved connection and recovers the same queue request without rewriting unchanged settings or duplicating work. Unsaved fields and the in-page continuation do not survive reload. The saved source remains available for Sync now afterward.
+Focused source and API checks pass for configuration detection without code evaluation or writes, credential approval, exact source denies, and CSRF. Generated-client checks and Angular compilation pass. Normal STUDIO-GIT-001 passes in 5.220 seconds, run 20261111T005701.455582000-a1c09522d310a9d3181ce5bb. It covers access failure recovery, multiple detected configurations, generated metadata paths, default selection, review, conflicts, Help, narrow dark layout, and recovery after saving and queueing when a response is interrupted. No target test run is created by import. The final workflow supersedes earlier failures involving inspection invalidation and initial native select values. Desktop review and narrow detected-configuration screenshots are visually reviewed. Owned controller, browser, execution container, and helper processes close. Reuse output/repository-wizard-0161 and the named output/selftest run.
+This refines 05, 12, 20, 21–23, 49, and 50. Acceptance remains 50 verified of 57. Provider fixture and local UI evidence do not establish live GitLab/GitHub or hosted worker acceptance. No push or deployment occurs. MMDev remains 0.15.0-dev, build b000dd1ba166. Preserve the user's port 8040 demo, its history and private UI snapshot, browsers, and unrelated workloads.
+See [repository sources](repository-sources.md) for the workflow and preview API.
+
 ## Local delivery: Git metadata modes and fresh run sources
 
 Product 0.16.0-dev implements GitHub and operator-approved self-managed GitLab sources. API contract is 0.50.0.
