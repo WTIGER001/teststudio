@@ -85,6 +85,10 @@ func Load(path string) (*Provider, error) {
 	if err != nil || len(data) > 1<<20 {
 		return nil, errors.New("secret binding configuration exceeds its read limit")
 	}
+	return decodeBindings(data)
+}
+
+func decodeBindings(data []byte) (*Provider, error) {
 	var bindings []Binding
 	decoder := json.NewDecoder(strings.NewReader(string(data)))
 	decoder.DisallowUnknownFields()
@@ -97,6 +101,23 @@ func Load(path string) (*Provider, error) {
 	}
 	return New(bindings)
 }
+func LoadConfiguration(path, environment string) (*Provider, error) {
+	if path != "" && environment != "" {
+		return nil, errors.New("choose a secret binding file or environment configuration")
+	}
+	if environment == "" {
+		return Load(path)
+	}
+	if !variable.MatchString(environment) {
+		return nil, errors.New("secret binding environment reference is invalid")
+	}
+	value, ok := os.LookupEnv(environment)
+	if !ok || len(value) == 0 || len(value) > 1<<20 {
+		return nil, errors.New("secret binding environment configuration is unavailable or exceeds its limit")
+	}
+	return decodeBindings([]byte(value))
+}
+
 func (p *Provider) References(ctx context.Context, project, purpose string) ([]secrets.Reference, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err

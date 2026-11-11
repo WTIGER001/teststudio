@@ -57,6 +57,7 @@ func run() error {
 	gitSourcesConfig := flag.String("git-sources-config", "", "Operator-approved self-managed GitLab servers, network scopes, and certificate authorities")
 	githubSources := flag.Bool("github-sources", false, "Process durable GitHub source synchronization")
 	secretBindings := flag.String("secret-bindings", "", "Project-scoped repository access credential bindings")
+	secretBindingsEnvironment := flag.String("secret-bindings-env", "", "Environment variable containing project-scoped repository credential bindings")
 	flag.Parse()
 	if err := validateDiscoveryOnlyFlags(flag.CommandLine, *discoveryOnly, *assemblyOnly, *location, *ecsConfig != "" || *ecsEnv != "", *kubernetesConfig != "" || *kubernetesEnv != ""); err != nil {
 		return err
@@ -208,7 +209,7 @@ func run() error {
 	}
 	var syncDone <-chan struct{}
 	if (*githubSources || *gitSourcesConfig != "") && len(service.Builders) > 0 {
-		provider, err := localsecrets.Load(*secretBindings)
+		provider, err := localsecrets.LoadConfiguration(*secretBindings, *secretBindingsEnvironment)
 		if err != nil {
 			return err
 		}

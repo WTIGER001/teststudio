@@ -1,5 +1,6 @@
 import argparse
 import json
+import re
 from pathlib import Path
 import subprocess
 import tempfile
@@ -28,7 +29,13 @@ def main():
     parser.add_argument('--status-logos', action='store_true', help='Include HTTPS and uploaded logo image sources in the UI and public status response policies.')
     parser.add_argument('--recording-worker-secret-arn', help='Select the dedicated private recording transport identity and disable desktop pairing.')
     parser.add_argument('--local-accounts', choices=['true', 'false'], help='Explicitly select hosted password sign-in; omission preserves the installed setting.')
+    parser.add_argument('--github-source-secret-arn', help='Select an owned GitHub API credential secret for one project.')
+    parser.add_argument('--github-source-project')
+    parser.add_argument('--github-source-reference', default='github-source')
     args = parser.parse_args()
+    assert bool(args.github_source_secret_arn) == bool(args.github_source_project), 'Supply both GitHub source secret and project'
+    if args.github_source_secret_arn:
+        assert all(re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]{0,127}', value) for value in [args.github_source_project, args.github_source_reference]), 'GitHub source scope must use valid identifiers'
     aws_base = ['aws', '--profile', args.profile, '--region', args.region, '--no-cli-pager']
 
     def aws(*items):
@@ -52,6 +59,7 @@ def main():
             receipt = json.loads(receipt_path.read_text())
             assert receipt['image'] == build['image'], 'Use a new receipt for a different release'
             assert args.local_accounts is None or receipt.get('localAccounts') == args.local_accounts, 'Use a new receipt for different local sign-in settings'
+            assert not args.github_source_secret_arn or receipt.get('githubSource') == {'secretArn': args.github_source_secret_arn, 'project': args.github_source_project, 'reference': args.github_source_reference}, 'Use a new receipt for different GitHub source settings'
             print(json.dumps({'reusedChangeSet': receipt['changeSet'], 'buildId': build['buildInfo']['buildId']}))
             return
         registry = args.account + '.dkr.ecr.' + args.region + '.amazonaws.com'
@@ -78,12 +86,22 @@ def main():
             assert any(v == {'Key': 'Application', 'Value': 'TestStudio'} for v in secret.get('Tags', [])), 'The recording identity must be TestStudio-owned'
             parameters = [v for v in parameters if v['ParameterKey'] not in ['RecordingCompanion', 'RecordingWorkerSecretArn']]
             parameters.extend([{'ParameterKey': 'RecordingCompanion', 'ParameterValue': 'false'}, {'ParameterKey': 'RecordingWorkerSecretArn', 'ParameterValue': args.recording_worker_secret_arn}])
+        github_source = None
+        if args.github_source_secret_arn:
+            assert args.github_source_secret_arn.startswith('arn:aws:secretsmanager:' + args.region + ':' + args.account + ':secret:'), 'GitHub source secret must belong to the selected account and region'
+            secret = aws('secretsmanager', 'describe-secret', '--secret-id', args.github_source_secret_arn)
+            assert {'Key': 'Application', 'Value': 'TestStudio'} in secret.get('Tags', []), 'GitHub source secret must be TestStudio-owned'
+            assert {'Key': 'Project', 'Value': args.github_source_project} in secret.get('Tags', []), 'GitHub source secret must belong to the selected project'
+            github_source = {'secretArn': args.github_source_secret_arn, 'project': args.github_source_project, 'reference': args.github_source_reference}
+            selected = {'GitHubSourceSecretArn': github_source['secretArn'], 'GitHubSourceProject': github_source['project'], 'GitHubSourceReference': github_source['reference']}
+            parameters = [v for v in parameters if v['ParameterKey'] not in selected]
+            parameters.extend({'ParameterKey': key, 'ParameterValue': value} for key, value in selected.items())
         with tempfile.TemporaryDirectory(prefix='teststudio-release-parameters-') as directory:
             path = Path(directory) / 'parameters.json'
             path.write_text(json.dumps(parameters)); path.chmod(0o600)
-            template = ['--template-body', 'file://deploy/aws/service.yaml'] if args.public_status or args.status_logos or args.recording_worker_secret_arn else ['--use-previous-template']
+            template = ['--template-body', 'file://deploy/aws/service.yaml'] if args.public_status or args.status_logos or args.recording_worker_secret_arn or github_source else ['--use-previous-template']
             result = aws('cloudformation', 'create-change-set', '--stack-name', args.stack, '--change-set-name', 'application-' + tag, '--change-set-type', 'UPDATE', *template, '--parameters', 'file://' + str(path), '--capabilities', 'CAPABILITY_IAM')
-        receipt = {**build, 'account': args.account, 'stack': args.stack, 'changeSet': result['Id'], 'registryDigest': details['imageDigest'], 'publicStatusPackage': args.public_status or args.status_logos, 'statusLogosPackage': args.status_logos, 'recordingWorkerPackage': bool(args.recording_worker_secret_arn), 'localAccounts': args.local_accounts, 'preparedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'outputs': outputs}
+        receipt = {**build, 'account': args.account, 'stack': args.stack, 'changeSet': result['Id'], 'registryDigest': details['imageDigest'], 'publicStatusPackage': args.public_status or args.status_logos, 'statusLogosPackage': args.status_logos, 'recordingWorkerPackage': bool(args.recording_worker_secret_arn), 'githubSource': github_source, 'localAccounts': args.local_accounts, 'preparedAt': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'outputs': outputs}
         receipt_path.write_text(json.dumps(receipt, indent=2) + '\n')
         print(json.dumps({'changeSet': receipt['changeSet'], 'digest': receipt['registryDigest'], 'buildId': build['buildInfo']['buildId'], 'privateDockerConfigurationRemoved': True}))
         return
@@ -94,10 +112,14 @@ def main():
         if receipt.get('localAccounts') is not None:
             selected = next(v for v in change['Parameters'] if v['ParameterKey'] == 'LocalAccounts')
             assert selected.get('ParameterValue') == receipt['localAccounts'], 'The concrete local sign-in selection differs from the release receipt'
+        if receipt.get('githubSource'):
+            concrete = {v['ParameterKey']: v.get('ParameterValue') for v in change['Parameters']}
+            expected = {'GitHubSourceSecretArn': receipt['githubSource']['secretArn'], 'GitHubSourceProject': receipt['githubSource']['project'], 'GitHubSourceReference': receipt['githubSource']['reference']}
+            assert all(concrete.get(key) == value for key, value in expected.items()), 'Concrete GitHub source scope differs from the reviewed selection'
         summary = [{'action': v['ResourceChange']['Action'], 'resource': v['ResourceChange']['LogicalResourceId'], 'type': v['ResourceChange']['ResourceType'], 'replacement': v['ResourceChange'].get('Replacement')} for v in change.get('Changes', [])]
         assert change['Status'] == 'CREATE_COMPLETE', 'The change set is not ready'
         allowed = {'Task': 'AWS::ECS::TaskDefinition', 'Service': 'AWS::ECS::Service'}
-        if receipt.get('recordingWorkerPackage'):
+        if receipt.get('recordingWorkerPackage') or receipt.get('githubSource'):
             allowed['ExecutionRole'] = 'AWS::IAM::Role'
         if receipt.get('statusLogosPackage'):
             allowed['UiHeaders'] = 'AWS::CloudFront::ResponseHeadersPolicy'
@@ -113,7 +135,7 @@ def main():
         if args.action == 'review':
             receipt['reviewedChanges'] = summary
             receipt_path.write_text(json.dumps(receipt, indent=2) + '\n')
-            print(json.dumps({'status': change['Status'], 'execution': change['ExecutionStatus'], 'changes': summary, 'localAccounts': receipt.get('localAccounts')}, indent=2))
+            print(json.dumps({'status': change['Status'], 'execution': change['ExecutionStatus'], 'changes': summary, 'localAccounts': receipt.get('localAccounts'), 'githubSource': receipt.get('githubSource')}, indent=2))
             return
         assert receipt.get('reviewedChanges') == summary, 'Run review and inspect the concrete changes before execution'
         assert change['ExecutionStatus'] == 'AVAILABLE', 'Preserve an existing or completed deployment'

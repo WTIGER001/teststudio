@@ -64,6 +64,18 @@ Parameters:
     Type: String
     Default: ''
     AllowedPattern: '^$|^arn:aws:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[A-Za-z0-9/_+=.@-]+$'
+  GitHubSourceSecretArn:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|^arn:aws:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[A-Za-z0-9/_+=.@-]+$'
+  GitHubSourceProject:
+    Type: String
+    Default: ''
+    AllowedPattern: '^$|^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$'
+  GitHubSourceReference:
+    Type: String
+    Default: github-source
+    AllowedPattern: '^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$'
   SecretKmsKeyArn:
     Type: String
     Default: ''
@@ -110,6 +122,10 @@ Parameters:
     MinValue: 1
     MaxValue: 10
 Rules:
+  GitHubSourceScope:
+    Assertions:
+      - Assert: !Or [!And [!Equals [!Ref GitHubSourceSecretArn, ''], !Equals [!Ref GitHubSourceProject, '']], !And [!Not [!Equals [!Ref GitHubSourceSecretArn, '']], !Not [!Equals [!Ref GitHubSourceProject, '']]]]
+        AssertDescription: Supply both a GitHub source secret reference and its project, or neither
   ExclusiveRecorder:
     RuleCondition: !Not [!Equals [!Ref RecordingWorkerSecretArn, '']]
     Assertions:
@@ -133,6 +149,7 @@ Rules:
       - Assert: !Not [!Equals [!Ref ArtifactHostname, !Ref OriginHostname]]
         AssertDescription: The load balancer origin requires a separate host
 Conditions:
+  GitHubSources: !Not [!Equals [!Ref GitHubSourceSecretArn, '']]
   CreateCluster: !Equals [!Ref ExistingClusterArn, '']
   NamedService: !Not [!Equals [!Ref ServiceName, '']]
   DatabaseIngress: !Not [!Equals [!Ref DatabaseSecurityGroupId, '']]
@@ -371,6 +388,7 @@ Resources:
                 Resource:
                   - !Ref DatabaseSecretArn
                   - !Ref OidcConfigurationSecretArn
+                  - !If [GitHubSources, !Ref GitHubSourceSecretArn, !Ref 'AWS::NoValue']
                   - !If [RecordingWorker, !Ref RecordingWorkerSecretArn, !Ref 'AWS::NoValue']
                   - !If [Workers, !Ref WorkerSettingsSecretArn, !Ref 'AWS::NoValue']
                   - !If [ClientOne, !Ref OidcClientOneSecretArn, !Ref 'AWS::NoValue']
@@ -443,6 +461,8 @@ Resources:
             - --oidc-config-env=TESTSTUDIO_OIDC_CONFIGURATION
             - --artifact-store-env=TESTSTUDIO_ARTIFACT_CONFIGURATION
             - --execution-location=ecs
+            - !If [GitHubSources, --github-sources, !Ref 'AWS::NoValue']
+            - !If [GitHubSources, --secret-bindings-env=TESTSTUDIO_SECRET_BINDINGS, !Ref 'AWS::NoValue']
             - !If [Workers, --ecs-workers-env=TESTSTUDIO_ECS_CONFIGURATION, !Ref 'AWS::NoValue']
             - !If [Workers, '--worker-addr=0.0.0.0:8042', !Ref 'AWS::NoValue']
             - !If [NewWorkerSources, --prepared-sources, !Ref 'AWS::NoValue']
@@ -459,11 +479,17 @@ Resources:
                 - !If [ClientOne, 'env:TESTSTUDIO_OIDC_CLIENT_ONE', '']
                 - !If [ClientTwo, ',env:TESTSTUDIO_OIDC_CLIENT_TWO', '']
           Environment:
+            - !If
+              - GitHubSources
+              - Name: TESTSTUDIO_SECRET_BINDINGS
+                Value: !Sub '[{"id":"${GitHubSourceReference}","name":"GitHub API token","projectId":"${GitHubSourceProject}","purpose":"source-repository","environmentVariable":"TESTSTUDIO_GITHUB_SOURCE_CREDENTIAL"}]'
+              - !Ref 'AWS::NoValue'
             - Name: TESTSTUDIO_ARTIFACT_CONFIGURATION
               Value: !Sub '{"driver":"s3","s3":{"region":"${AWS::Region}","bucket":"${EvidenceBucket}","prefix":"teststudio","expectedOwner":"${AWS::AccountId}"}}'
           Secrets:
             - {Name: TESTSTUDIO_DATABASE, ValueFrom: !Ref DatabaseSecretArn}
             - {Name: TESTSTUDIO_OIDC_CONFIGURATION, ValueFrom: !Ref OidcConfigurationSecretArn}
+            - !If [GitHubSources, {Name: TESTSTUDIO_GITHUB_SOURCE_CREDENTIAL, ValueFrom: !Ref GitHubSourceSecretArn}, !Ref 'AWS::NoValue']
             - !If [RecordingWorker, {Name: TESTSTUDIO_RECORDING_SETTINGS, ValueFrom: !Sub '${RecordingWorkerSecretArn}:configuration::'}, !Ref 'AWS::NoValue']
             - !If [RecordingWorker, {Name: TESTSTUDIO_RECORDING_CA, ValueFrom: !Sub '${RecordingWorkerSecretArn}:serverCA::'}, !Ref 'AWS::NoValue']
             - !If [RecordingWorker, {Name: TESTSTUDIO_RECORDING_CERTIFICATE, ValueFrom: !Sub '${RecordingWorkerSecretArn}:clientCertificate::'}, !Ref 'AWS::NoValue']

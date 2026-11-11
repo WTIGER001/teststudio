@@ -112,6 +112,17 @@ def main():
     assert runtime[0] == {'Effect': 'Allow', 'Action': 's3:ListBucket', 'Resource': {'Fn::GetAtt': ['EvidenceBucket', 'Arn']}}
     assert runtime[1]['Resource'] == {'Fn::Sub': '${EvidenceBucket.Arn}/teststudio/*'}
     checks.append('Database and two optional OIDC client credentials use startup-only secret references with separate runtime permissions')
+    github_secret = {'Fn::If': ['GitHubSources', {'Name': 'TESTSTUDIO_GITHUB_SOURCE_CREDENTIAL', 'ValueFrom': ref('GitHubSourceSecretArn')}, ref('AWS::NoValue')]}
+    assert github_secret in secrets
+    startup_secrets = next(statement for statement in execution if statement.get('Action') == 'secretsmanager:GetSecretValue')
+    assert {'Fn::If': ['GitHubSources', ref('GitHubSourceSecretArn'), ref('AWS::NoValue')]} in startup_secrets['Resource']
+    binding = next(item['Fn::If'][1] for item in container['Environment'] if item.get('Fn::If', [None])[0] == 'GitHubSources')
+    configuration = json.loads(binding['Value']['Fn::Sub'].replace('${GitHubSourceReference}', 'reader').replace('${GitHubSourceProject}', 'project'))
+    assert configuration == [{'id': 'reader', 'name': 'GitHub API token', 'projectId': 'project', 'purpose': 'source-repository', 'environmentVariable': 'TESTSTUDIO_GITHUB_SOURCE_CREDENTIAL'}]
+    assert template['Parameters']['GitHubSourceSecretArn']['Default'] == template['Parameters']['GitHubSourceProject']['Default'] == ''
+    assert 'GitHubSourceScope' in template['Rules']
+    checks.append('Optional GitHub startup secret is project scoped and never adds runtime Secrets Manager permissions')
+
     service = properties(template, 'Service')
     assert service['NetworkConfiguration']['AwsvpcConfiguration']['AssignPublicIp'] == 'DISABLED'
     assert service['NetworkConfiguration']['AwsvpcConfiguration']['Subnets'] == ref('PrivateSubnets')

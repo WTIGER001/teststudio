@@ -6,6 +6,13 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user authorizes MMDev ECS deployment and now plans a first installation into their own Azure subscription.
 
+## Active delivery: AWS GitHub token configuration and release
+
+The user authorizes configuring the existing GitHub API token on AWS and deploying the updated product on 2026-11-10. Use MMDev account 253455159142, region us-west-2, existing teststudioapi stack and service, and marketmaker-testing-dev cluster. Preserve testing-server and the private recording worker.
+The deployment adds project-scoped GitHub source secret injection through secret-bindings-env. GitHubSourceSecretArn, GitHubSourceProject, and GitHubSourceReference select one approved reference. Only the startup execution role can fetch that secret; the runtime task role receives no new permissions. Configure the foodmarketmaker project, repository foodmarketmaker/marketmaker-tests, reference marketmaker-tests-github, and read-only metadata access.
+Local environment-binding and CLI role checks pass. CloudFormation schema and packaging checks pass for the conditional secret and scoped IAM policy. Build only after committing this wiring. Review the concrete change set before execution. Verify exact API/UI release identity, authenticated repository inspection, secret reference visibility, current service health, and unchanged neighboring workloads. Keep source preparation and test execution separate; no application tests are authorized by this deployment request.
+This advances 20, 22, 23, and 57 without closing broad target criteria. Acceptance remains 50 verified of 57. AWS source authentication and release checks are in progress. Reuse output/aws-mmdev/github-token-release. No Git push is authorized. The source adapter/export in the separate marketmaker-tests checkout remains unpublished and coded preparation/execution workers remain absent.
+
 ## Local delivery: GitHub API token authentication
 
 The user selects ordinary GitHub API authentication, as used by gh api, without requiring a GitHub App. Product 0.16.2-dev adds direct Bearer token credentials to the existing source adapter. The API contract remains 0.51.0.

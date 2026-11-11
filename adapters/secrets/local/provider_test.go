@@ -82,3 +82,31 @@ func TestBindingsRejectAmbiguousSourcesAndBoundSecretReads(t *testing.T) {
 		}
 	}
 }
+
+func TestBindingEnvironmentConfigurationKeepsProjectAndPurposeScope(t *testing.T) {
+	t.Setenv("TESTSTUDIO_BINDING_CONFIG", `[{"id":"github","projectId":"alpha","purpose":"source-repository","environmentVariable":"TESTSTUDIO_SOURCE_VALUE"}]`)
+	t.Setenv("TESTSTUDIO_SOURCE_VALUE", `{"token":"fixture-private-value","repositories":["owner/repository"]}`)
+	provider, err := LoadConfiguration("", "TESTSTUDIO_BINDING_CONFIG")
+	if err != nil {
+		t.Fatal(err)
+	}
+	refs, err := provider.References(t.Context(), "alpha", "source-repository")
+	if err != nil || len(refs) != 1 {
+		t.Fatal("environment binding reference", err)
+	}
+	if value, err := provider.Resolve(t.Context(), "alpha", "github", "source-repository"); err != nil || len(value.Bytes) == 0 {
+		t.Fatal("bound value", err)
+	}
+	if _, err := provider.Resolve(t.Context(), "other", "github", "source-repository"); !errors.Is(err, secrets.ErrUnavailable) {
+		t.Fatal("foreign project resolved environment value", err)
+	}
+	for _, input := range []struct{ file, env string }{{"file", "TESTSTUDIO_BINDING_CONFIG"}, {"", "INVALID NAME"}, {"", "MISSING_BINDING_CONFIGURATION"}} {
+		if _, err := LoadConfiguration(input.file, input.env); err == nil {
+			t.Fatal("invalid binding configuration accepted")
+		}
+	}
+	t.Setenv("TESTSTUDIO_BINDING_CONFIG", `[{"id":"github","unexpected":"fixture-private-value"}]`)
+	if _, err := LoadConfiguration("", "TESTSTUDIO_BINDING_CONFIG"); err == nil || strings.Contains(err.Error(), "fixture-private-value") {
+		t.Fatal("invalid configuration exposed private details", err)
+	}
+}

@@ -95,6 +95,7 @@ func run() error {
 	executionWorker := flag.Bool("execution-worker", true, "Process queued test runs on this API instance; disable when using a separate controller")
 	notificationWorker := flag.Bool("notification-worker", true, "Process durable notification deliveries on this instance")
 	secretBindings := flag.String("secret-bindings", "", "Project and purpose scoped environment or mounted-file secret binding configuration")
+	secretBindingsEnvironment := flag.String("secret-bindings-env", "", "Environment variable containing approved project and purpose scoped secret binding configuration")
 	httpTrustBundles := flag.String("http-trust-bundles", "", "Project and exact-origin scoped private HTTPS certificate authority bindings")
 	localAccounts := flag.Bool("local-accounts", false, "Enable managed local password accounts alongside configured OIDC providers")
 	local := flag.Bool("local", false, "Enable explicit loopback-only local administrator sign-in")
@@ -124,7 +125,7 @@ func run() error {
 	if !role.Worker && (*workerOrigin != "" || *workerCertificate != "" || *workerKey != "") {
 		return errors.New("direct worker TLS settings require the worker service role")
 	}
-	if !role.API && !role.Worker && !role.Controller && (*workerAddr != "" || *local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *oidcCAFile != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *recordingEmbeddedCLI != "" || *recordingCompanion || *preparedSources || *sourceBundles || (*githubSources || *gitSourcesConfig != "") || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
+	if !role.API && !role.Worker && !role.Controller && (*workerAddr != "" || *local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *oidcCAFile != "" || (*secretBindings != "" || *secretBindingsEnvironment != "") || *httpTrustBundles != "" || *recordingCLI != "" || *recordingEmbeddedCLI != "" || *recordingCompanion || *preparedSources || *sourceBundles || (*githubSources || *gitSourcesConfig != "") || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
 		return errors.New("the artifact service role cannot configure identity bootstrap, sign-in, source preparation, recording, execution, or private worker transport")
 	}
 	if !role.API && !role.Worker && !role.Controller && (*kubernetesConfiguration != "" || *kubernetesEnvironment != "" || *ecsConfiguration != "" || *ecsEnvironment != "") {
@@ -168,7 +169,7 @@ func run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if role.Worker {
-		return runWorkerBackend(ctx, *workerAddr, *location, connection, *databaseEnvironment, *artifactConfiguration, *artifactEnvironment, *artifactDirectory, *secretBindings, workerTLSOptions{Origin: *workerOrigin, Certificate: *workerCertificate, Key: *workerKey})
+		return runWorkerBackend(ctx, *workerAddr, *location, connection, *databaseEnvironment, *artifactConfiguration, *artifactEnvironment, *artifactDirectory, *secretBindings, *secretBindingsEnvironment, workerTLSOptions{Origin: *workerOrigin, Certificate: *workerCertificate, Key: *workerKey})
 	}
 	if role.Controller {
 		return runController(ctx, controllerOptions{Address: *addr, Location: *location, Connection: connection, DatabaseEnvironment: *databaseEnvironment, ArtifactConfiguration: *artifactConfiguration, ArtifactEnvironment: *artifactEnvironment, ArtifactDirectory: *artifactDirectory, PublicOrigin: *public, TrustBundles: *httpTrustBundles, ECSConfiguration: *ecsConfiguration, ECSEnvironment: *ecsEnvironment, KubernetesConfiguration: *kubernetesConfiguration, KubernetesEnvironment: *kubernetesEnvironment})
@@ -185,7 +186,7 @@ func run() error {
 	if err := notifications.ValidateOrigin(*public); err != nil {
 		return err
 	}
-	secretProvider, err := localsecrets.Load(*secretBindings)
+	secretProvider, err := localsecrets.LoadConfiguration(*secretBindings, *secretBindingsEnvironment)
 	if err != nil {
 		return err
 	}

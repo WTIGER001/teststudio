@@ -170,6 +170,7 @@ See [source bundles](source-bundles.md) for runtimes and dependency preparation.
 
 An operator registers a project-scoped source-repository binding through the shared secret provider.
 Use a private file or server environment variable. The UI selects the reference and never accepts or returns its secret payload.
+Use --secret-bindings for a configuration file or --secret-bindings-env for an environment variable containing its JSON. Supply only one. Both the API and preparation worker support the same scoped configuration.
 Each credential requires an explicit approved repository list.
 GitHub entries use owner/repository. GitLab entries support group/subgroup/repository.
 
@@ -188,6 +189,7 @@ A GitHub token secret uses this shape:
 Use a repository-scoped token with Contents read permission for private source. Read/write metadata also needs Contents and Pull requests write permissions and write set to true in the binding payload. An organization may require approval of its token access. The TestStudio allowlist still limits which repositories a reference can access even when an existing token has broader permissions.
 expiresAt is optional operator-supplied metadata. Known expiry blocks expired credentials before a request and supports the fourteen-day warning. Provider revocation and permission errors still block later source access. Personal and CLI OAuth tokens do not use App installation-token renewal. Create a replacement token through GitHub, register it as an approved reference, validate and switch, then revoke the previous token when its consumers have moved. Token and App credential fields cannot be combined.
 For local checks, an operator can retrieve the existing CLI credential with gh auth token and write the JSON privately without displaying the token. Do not run that command directly into chat output or put its value in command arguments. TestStudio does not automatically read a user's keychain or adopt ambient GH_TOKEN credentials.
+Mounted-file replacements are read by the next source session. ECS-injected environment values remain fixed until a new task starts.
 AWS requires an explicitly approved server-side secret. Its payload is this JSON envelope, injected through a scoped environment or mounted-file binding for purpose source-repository. The workstation's CLI login does not configure ECS. Deploy only credential references and approved binding configuration; secret values stay outside templates, source, browser responses, and build artifacts.
 
 A GitHub App remains optional. Its secret uses clientId, installationId, privateKeyPem, and repositories.

@@ -30,7 +30,7 @@ func validateWorkerBackendFlags(flags *flag.FlagSet, address, location string) e
 	invalid := flags.NArg() != 0
 	flags.Visit(func(value *flag.Flag) {
 		switch value.Name {
-		case "serve-role", "worker-addr", "execution-location", "database", "database-env", "database-host", "require-postgres", "artifact-directory", "artifact-store-config", "artifact-store-env", "worker-origin", "worker-tls-certificate", "worker-tls-key", "secret-bindings":
+		case "serve-role", "worker-addr", "execution-location", "database", "database-env", "database-host", "require-postgres", "artifact-directory", "artifact-store-config", "artifact-store-env", "worker-origin", "worker-tls-certificate", "worker-tls-key", "secret-bindings", "secret-bindings-env":
 		default:
 			invalid = true
 		}
@@ -49,12 +49,12 @@ func validateWorkerBackendFlags(flags *flag.FlagSet, address, location string) e
 	return nil
 }
 
-func runWorkerBackend(ctx context.Context, address, location, connection, databaseEnvironment, artifactConfiguration, artifactEnvironment, artifactDirectory, secretBindings string, options workerTLSOptions) error {
+func runWorkerBackend(ctx context.Context, address, location, connection, databaseEnvironment, artifactConfiguration, artifactEnvironment, artifactDirectory, secretBindings, secretBindingsEnvironment string, options workerTLSOptions) error {
 	tlsConfig, authority, err := options.load(time.Now())
 	if err != nil {
 		return err
 	}
-	secretProvider, err := localsecrets.Load(secretBindings)
+	secretProvider, err := localsecrets.LoadConfiguration(secretBindings, secretBindingsEnvironment)
 	if err != nil {
 		return err
 	}
