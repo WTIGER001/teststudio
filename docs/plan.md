@@ -5,6 +5,13 @@ Track verified delivery in `implementation.md`.
 Start resumed work with [the continuation guide](continue.md). It summarizes the current release, remaining priorities, boundaries, and retained evidence.
 The user authorizes targeted tests and frequent feature commits. Remote pushes remain separate operations.
 
+## Selected private GitHub target: marketmaker-tests
+
+The user selects foodmarketmaker/marketmaker-tests on 2026-11-10. GitHub confirms it is private, not archived, and has default branch codex/initial-readonly-suite. The observed remote head is 9e587c291a356bcc9b93860f54735d35c5d966d5. Do not assume main.
+The workstation's GitHub CLI account can read that repository. This verifies developer access only. TestStudio requires a separate approved GitHub App credential reference scoped to this repository. The App client ID, installation ID, and private key remain server-side. Read-only metadata needs Contents read access. Read/write metadata also needs Contents and Pull requests write access. No personal CLI token is copied into TestStudio. A question about an existing App or new App setup remains pending; no usable server credential is verified.
+The remote tree currently has the original Playwright configuration and package files, without the TestStudio adapter or generated suite exports. The clean local separate checkout /Users/johnbauer/Dev/MarketMaker/marketmaker-tests is at f233b55, which adds the adapter. That commit has not been published to the observed remote branch. The controlled export remains required for its additional dependencies and application guards. Preserve all permanent IDs, production classifications, ownership, and environment requirements. Do not bypass its request guards or credential bridge requirements to make discovery or execution pass. Do not push the adapter or export without an explicit request.
+This is read-only target investigation under 20, 22, and 23. No product behavior changes, application test execution, GitHub App creation, push, or deployment occurs. Acceptance remains 50 verified of 57. App authentication, source publication, hosted preparation workers, browser origins, and managed browser credentials remain distinct target requirements. MMDev remains 0.15.0-dev, build b000dd1ba166. Reuse output/marketmaker-git-readiness/receipt.json and the separate repository's docs/teststudio.md before setup.
+
 ## Local delivery: guided repository import and configuration
 
 Product 0.16.1-dev makes repository onboarding a guided Repository, Suites, and Review workflow. API contract is 0.51.0.
