@@ -63,15 +63,9 @@
           "uniqueItems": true
         },
         "project": {
-          "anyOf": [
-            {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
-            },
-            {
-              "const": ""
-            }
-          ]
+          "type": "string",
+          "maxLength": 200,
+          "description": "One exact Playwright project name. Omit for discovery across projects."
         },
         "config": {
           "anyOf": [
@@ -137,6 +131,10 @@
       "required": [
         "endpoint"
       ]
+    },
+    "discover": {
+      "type": "boolean",
+      "description": "Discover and reconcile untagged Playwright tests against catalog framework mappings."
     }
   },
   "required": [

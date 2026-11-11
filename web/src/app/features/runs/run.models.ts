@@ -4,7 +4,7 @@ import type { Environment } from '../configuration/configuration.service'
 import type { SavedSelectionRunReference, SavedSelectionSnapshot } from '../../core/generated/access.types'
 
 export interface Counts { total: number; passed: number; failed: number; timedOut: number; flaky: number; skipped: number; completed: number }
-export interface RunRequest extends SavedSelectionRunReference { applicationId?: string; suiteId: string; environmentId?: string; releaseId?: string; testIds?: string[]; executionLocation: string; timeoutSeconds: number; retries?: number; parentRunId?: string }
+export interface RunRequest extends SavedSelectionRunReference { reviewedReleaseId?: string; applicationId?: string; suiteId: string; environmentId?: string; releaseId?: string; testIds?: string[]; executionLocation: string; timeoutSeconds: number; retries?: number; parentRunId?: string }
 export interface RunSummary {
   shared?: boolean; applicationId?: string
   id: string; projectId: string; suiteId: string; environmentId?: string; environmentName?: string; stage?: string; protected: boolean
@@ -25,9 +25,10 @@ export interface Attempt {
   go?: GoObservation
 }
 export interface Run {
+ sourceResolvedAt?: string
   savedSelection?: SavedSelectionSnapshot
   schedule?: { id: string; firingId: string; dueAt: string }
-  applicationIds?: string[]; id: string; projectId: string; request: RunRequest; release: { id: string }; environment?: Environment; tests: TestDefinition[]
+  applicationIds?: string[]; id: string; projectId: string; request: RunRequest; release: { id: string; catalog?: { artifact?: { image?: string; sourceRevision?: string; repositorySourceId?: string; originalSourceDigest?: string; metadataDigest?: string; metadataRevision?: number; provenance?: { repository?: string; reference?: string; commit?: string; snapshotDigest?: string } } } }; environment?: Environment; tests: TestDefinition[]
   timing?: TimingEstimate; currentTestStartedAt?: string; currentAttempt?: number
   actor: string; trigger: string; state: string; outcome: string; phase: string; currentTestId?: string; counts: Counts
   results: Attempt[]; createdAt: string; updatedAt: string; startedAt?: string; finishedAt?: string; deadline: string; workerId?: string

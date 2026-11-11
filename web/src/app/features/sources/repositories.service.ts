@@ -2,7 +2,7 @@ import { randomId } from '../../core/random-id'
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop'
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms'
-import { ActivatedRoute } from '@angular/router'
+import { ActivatedRoute, Router } from '@angular/router'
 import { AccessClientService } from '../../core/access-client.service'
 import { ApiError } from '../../core/api.service'
 import type { SourcePreparationRecord, SourceRepositoryOptions, SourceRepositoryRecord, SourceRepositorySyncRecord } from '../../core/generated/access.types'
@@ -14,6 +14,8 @@ import { repositoryConfig, repositoryPreparations, repositoryPreparationActive, 
 @Injectable()
 export class RepositoriesService {
   readonly sources = inject(SourcesService)
+ private readonly router = inject(Router)
+ private readonly route = inject(ActivatedRoute)
   private readonly client = inject(AccessClientService)
   readonly options = signal<SourceRepositoryOptions>({ providers: [], credentials: [], webhookCredentials: [] })
   readonly rows = signal<SourceRepositoryRecord[]>([])
@@ -21,7 +23,7 @@ export class RepositoriesService {
   readonly history = signal<SourceRepositorySyncRecord[]>([])
   readonly sync = signal<SourceRepositorySyncRecord | null>(null)
   readonly prepared = signal<SourcePreparationRecord | null>(null)
-  readonly webhookAddress = computed(() => repositoryWebhookAddress(location.origin, this.sources.project(), this.selected()?.id ?? ''))
+  readonly webhookAddress = computed(() => repositoryWebhookAddress(location.origin, this.sources.project(), this.selected()?.id ?? '', this.selected()?.data.configuration.provider ?? 'github'))
   readonly preparations = computed(() => repositoryPreparations(this.sync()?.data.preparations ?? {}))
   readonly cursor = signal('')
   readonly syncCursor = signal('')
@@ -35,9 +37,12 @@ export class RepositoriesService {
   readonly flow = new WizardController(3, step => this.validate(step))
   readonly force = new FormControl(false, { nonNullable: true })
   readonly form = new FormGroup({
-    id: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern('^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$')] }),
+    provider: new FormControl('github', { nonNullable: true, validators: Validators.required }),
+ mode: new FormControl('read-only', { nonNullable: true }),
+ confirmModeChange: new FormControl(false, { nonNullable: true }),
+ id: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern('^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$')] }),
     name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(200)] }),
-    repository: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(140), Validators.pattern('^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$')] }),
+    repository: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(512), Validators.pattern('^[A-Za-z0-9_.-]+(/[A-Za-z0-9_.-]+)+$')] }),
     referenceKind: new FormControl('branch', { nonNullable: true }),
     reference: new FormControl('main', { nonNullable: true, validators: [Validators.required, Validators.maxLength(256)] }),
     credential: new FormControl('', { nonNullable: true }),
@@ -46,7 +51,7 @@ export class RepositoriesService {
     push: new FormControl(false, { nonNullable: true }),
     webhookCredential: new FormControl('', { nonNullable: true }),
     intervalSeconds: new FormControl(0, { nonNullable: true, validators: [Validators.min(0), Validators.max(86400)] }),
-    bindings: new FormArray<FormGroup<{ suite: FormControl<string>; manifest: FormControl<string>; runner: FormControl<string> }>>([])
+    bindings: new FormArray<FormGroup<{ suite: FormControl<string>; manifest: FormControl<string>; runner: FormControl<string>; discover: FormControl<boolean>; moduleRoot: FormControl<string>; config: FormControl<string>; project: FormControl<string>; endpoint: FormControl<string> }>>([])
   })
   private generation = 0
   private listGeneration = 0
@@ -83,27 +88,31 @@ export class RepositoriesService {
       const [options, page] = await Promise.all([this.client.call('readRepositorySourceOptions', this.scope()), this.client.call('listRepositorySources', { ...this.scope(), query: { limit: 30, cursor: more ? this.cursor() : undefined } })])
       if (generation !== this.generation || request !== this.listGeneration) return
       this.options.set(options); this.rows.set(more ? [...this.rows(), ...page.items] : page.items); this.cursor.set(page.cursor ?? '')
+ if (!this.route.snapshot.data['repositoryEditor'] && !this.selected() && this.route.snapshot.queryParamMap.get('repository')) { const chosen = page.items.find(row => row.id === this.route.snapshot.queryParamMap.get('repository')); if (chosen) await this.inspect(chosen) }
     } catch (error) { if (generation === this.generation && request === this.listGeneration) this.fail(error) }
     finally { if (request === this.listGeneration) this.loading.set(false) }
   }
 
-  addBinding(suite = '', manifest = 'teststudio-suite.json', runner = 'go'): void {
-    this.form.controls.bindings.push(new FormGroup({ runner: new FormControl(runner, { nonNullable: true, validators: Validators.required }), suite: new FormControl(suite, { nonNullable: true, validators: Validators.required }), manifest: new FormControl(manifest, { nonNullable: true, validators: [Validators.required, Validators.maxLength(512)] }) }))
+  addBinding(suite = '', manifest = 'teststudio-suite.json', runner = 'playwright', discover = true, moduleRoot = '.', config = 'playwright.config.ts', project = '', endpoint = ''): void {
+    this.form.controls.bindings.push(new FormGroup({ discover: new FormControl(discover, { nonNullable: true }), moduleRoot: new FormControl(moduleRoot, { nonNullable: true }), config: new FormControl(config, { nonNullable: true }), project: new FormControl(project, { nonNullable: true }), endpoint: new FormControl(endpoint, { nonNullable: true }), runner: new FormControl(runner, { nonNullable: true, validators: Validators.required }), suite: new FormControl(suite, { nonNullable: true, validators: Validators.required }), manifest: new FormControl(manifest, { nonNullable: true, validators: [Validators.required, Validators.maxLength(512)] }) }))
   }
 
   removeBinding(index: number): void { if (this.form.controls.bindings.length > 1) this.form.controls.bindings.removeAt(index) }
 
   edit(row?: SourceRepositoryRecord): void {
+ if (!this.route.snapshot.data['repositoryEditor']) { void this.router.navigate(['/projects', this.sources.project(), 'sources', 'repositories', row?.id ?? 'new', ...(row ? ['edit'] : [])]); return }
     this.flow.reset(); this.identifierSuffix = randomId().slice(0, 8)
     this.detailGeneration++; this.sync.set(null); this.prepared.set(null); this.history.set([]); this.force.setValue(false)
     this.selected.set(row ?? null); this.editor.set(true); this.error.set(''); this.message.set('')
     const config = row?.data.configuration, reference = repositoryReference(config?.reference ?? 'heads/main')
     this.form.controls.id.enable()
-    this.form.reset({ id: row?.id ?? '', name: config?.name ?? '', repository: config?.repository ?? '', referenceKind: reference.kind, reference: reference.value, credential: config?.credentialReference ?? '', enabled: config?.enabled ?? true, autoActivate: true, push: config?.pushEnabled ?? false, webhookCredential: config?.webhookCredentialReference ?? '', intervalSeconds: config?.syncIntervalSeconds ?? 0 })
+    this.form.reset({ provider: config?.provider ?? this.options().providers[0] ?? 'github', mode: config?.accessMode ?? 'read-only', confirmModeChange: false, id: row?.id ?? '', name: config?.name ?? '', repository: config?.repository ?? '', referenceKind: reference.kind, reference: reference.value, credential: config?.credentialReference ?? '', enabled: config?.enabled ?? true, autoActivate: true, push: config?.pushEnabled ?? false, webhookCredential: config?.webhookCredentialReference ?? '', intervalSeconds: config?.syncIntervalSeconds ?? 0 })
     this.form.controls.bindings.clear()
-    if (config) for (const binding of config.bindings) this.addBinding(binding.suiteId, binding.manifestPath, binding.runner)
+    if (config) for (const binding of config.bindings) this.addBinding(binding.suiteId, binding.manifestPath, binding.runner, binding.discover ?? false, binding.moduleRoot, binding.config, binding.project, binding.endpoint)
     else this.addBinding(this.sources.form.controls.suite.value)
     if (row) this.form.controls.id.disable()
+ const root = this.route.snapshot.queryParamMap.get('root'), detectedConfig = this.route.snapshot.queryParamMap.get('config'); if (root && detectedConfig && this.form.controls.bindings.length === 1) this.form.controls.bindings.at(0).patchValue({ discover: true, runner: 'playwright', moduleRoot: root, config: detectedConfig });
+ this.form.markAsPristine()
   }
 
   async save(): Promise<void> {
@@ -114,12 +123,16 @@ export class RepositoriesService {
     try {
       const row = await this.client.call('saveRepositorySource', { ...this.scope(), source: value.id, revision: this.selected()?.revision ?? 0, body: repositoryConfig(value) })
       if (generation !== this.generation) return
-      this.selected.set(row); this.editor.set(false); this.message.set('Repository source saved. No remote sync, build, or test was started.'); await this.load()
+      this.form.markAsPristine(); this.selected.set(row); this.editor.set(false); await this.router.navigate(['/projects', this.sources.project(), 'sources'], { queryParams: { repository: row.id } })
     } catch (error) { if (generation === this.generation) this.fail(error) }
     finally { if (generation === this.generation) this.busy.set(false) }
   }
 
-  advance(): void { if (this.flow.step() < 2) this.flow.next(); else void this.save() }
+  async readEditor(id: string): Promise<SourceRepositoryRecord | undefined> { try { return await this.client.call('readRepositorySource', { ...this.scope(), source: id }) } catch (error) { this.fail(error); return undefined } }
+
+ closeEditor(): void { void this.router.navigate(['/projects', this.sources.project(), 'sources']) }
+
+ advance(): void { if (this.flow.step() < 2) this.flow.next(); else void this.save() }
 
   private validate(step: number): boolean {
     this.error.set('')

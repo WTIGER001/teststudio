@@ -14,12 +14,15 @@ import (
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/execution"
 	"github.com/wtiger001/teststudio/internal/preparation"
+	"github.com/wtiger001/teststudio/internal/sourcebundle"
 	"github.com/wtiger001/teststudio/internal/sources"
 	"github.com/wtiger001/teststudio/internal/storage"
 	"github.com/wtiger001/teststudio/internal/suitespec"
 )
 
 type bundleBuilder struct {
+	useSnapshot     bool
+	snapshot        sourcebundle.Snapshot
 	origin          suitespec.Origin
 	calls, cleanups int
 	digest          string
@@ -28,6 +31,7 @@ type bundleBuilder struct {
 
 func (b *bundleBuilder) Build(_ context.Context, input preparation.BuildRequest) (preparation.Build, error) {
 	b.calls++
+	b.snapshot = input.Snapshot
 	b.digest = input.Snapshot.Digest
 	b.origin = input.Origin
 	now := time.Now().UTC()
@@ -46,6 +50,14 @@ type bundleInspector struct {
 func (p *bundleInspector) Inspect(ctx context.Context, input preparation.InspectionRequest) (preparation.Inspection, error) {
 	result, err := p.inspector.Inspect(ctx, input)
 	result.Discovery.Origin = p.builder.origin
+	if p.builder.useSnapshot {
+		result.Discovery.Manifest = p.builder.snapshot.Manifest
+		result.Discovery.Catalog = p.builder.snapshot.Catalog
+		result.Discovery.Tests = nil
+		for _, test := range result.Discovery.Catalog.Tests {
+			result.Discovery.Tests = append(result.Discovery.Tests, suitespec.DiscoveredTest{ID: test.ID, Selector: test.Selector, File: test.Source, Line: 1})
+		}
+	}
 	return result, err
 }
 func bundleSetup(t *testing.T) (*sources.Service, *catalog.Service, *bundleBuilder) {

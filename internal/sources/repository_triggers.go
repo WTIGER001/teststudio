@@ -13,6 +13,7 @@ import (
 )
 
 type repositoryTrigger struct {
+	Revision   *sourceprovider.Revision
 	Kind       string
 	Generation int64
 	Delivery   string
@@ -48,6 +49,9 @@ func (s *Service) ReceiveRepositoryWebhook(ctx context.Context, project, source 
 		return WebhookReceipt{}, reject
 	}
 	config := registered.Configuration
+	if request.Provider != "" && request.Provider != config.Provider {
+		return WebhookReceipt{}, reject
+	}
 	verifier, ok := s.Providers[config.Provider].(sourceprovider.WebhookVerifier)
 	if !ok || !config.Enabled || !config.Push || registered.RepositoryID == "" {
 		return WebhookReceipt{}, reject

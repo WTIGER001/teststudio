@@ -26,7 +26,15 @@ type HTTPCheck struct {
 	MinCertificateDays int               `json:"minCertificateDays,omitempty"`
 }
 
+type FrameworkTest struct {
+	Project   string   `json:"project"`
+	TitlePath []string `json:"titlePath"`
+	Line      int      `json:"line"`
+}
+
 type Test struct {
+	RepositorySource   string         `json:"repositorySourceId,omitempty"`
+	Framework          *FrameworkTest `json:"framework,omitempty"`
 	DefinitionSource   string         `json:"definitionSourceId,omitempty"`
 	ID                 string         `json:"id"`
 	Title              string         `json:"title"`
@@ -60,13 +68,19 @@ type Provenance struct {
 }
 
 type Artifact struct {
-	Browser        *browserpolicy.Spec `json:"browser,omitempty"`
-	SourceProject  string              `json:"sourceProjectId,omitempty"`
-	Provenance     *Provenance         `json:"provenance,omitempty"`
-	SourceSnapshot string              `json:"sourceSnapshotId,omitempty"`
-	Image          string              `json:"image,omitempty"`
-	SourceRevision string              `json:"sourceRevision,omitempty"`
-	Discovered     map[string]string   `json:"discoveredSelectors,omitempty"`
+	MetadataAuthoritative bool                `json:"metadataAuthoritative,omitempty"`
+	OriginalSourceDigest  string              `json:"originalSourceDigest,omitempty"`
+	RepositorySource      string              `json:"repositorySourceId,omitempty"`
+	MetadataDigest        string              `json:"metadataDigest,omitempty"`
+	MetadataRevision      int64               `json:"metadataRevision,omitempty"`
+	GitMetadata           bool                `json:"gitMetadata,omitempty"`
+	Browser               *browserpolicy.Spec `json:"browser,omitempty"`
+	SourceProject         string              `json:"sourceProjectId,omitempty"`
+	Provenance            *Provenance         `json:"provenance,omitempty"`
+	SourceSnapshot        string              `json:"sourceSnapshotId,omitempty"`
+	Image                 string              `json:"image,omitempty"`
+	SourceRevision        string              `json:"sourceRevision,omitempty"`
+	Discovered            map[string]string   `json:"discoveredSelectors,omitempty"`
 }
 
 type Draft struct {

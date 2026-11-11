@@ -130,6 +130,7 @@ export class CatalogService {
   }
 
   edit(item: CatalogItem): void {
+ if (item.data.repositorySourceId) { void this.router.navigate(['/projects',this.projectId(),'sources','repositories',item.data.repositorySourceId,'metadata',item.suiteId]);return }
     this.testEditor.configure(this.projectId(), this.suites()); this.testEditor.edit(item); this.error.set(''); this.success.set('')
   }
 

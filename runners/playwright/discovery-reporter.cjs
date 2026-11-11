@@ -13,7 +13,7 @@ module.exports = class DiscoveryReporter {
       if (file === '..' || file.startsWith('../') || path.isAbsolute(file)) throw new Error('Discovered test source escapes the suite context')
       let parent = test.parent
       while (parent && parent.type !== 'project') parent = parent.parent
-      return { file, line: test.location.line, tags: test.tags, project: parent?.project()?.name ?? '' }
+      return { file, line: test.location.line, tags: test.tags, titlePath: test.titlePath().slice(test.titlePath()[0] === '' ? 3 : 2), title: test.title, project: parent?.project()?.name ?? '' }
     })
     if (tests.length > 10000) throw new Error('Discovery exceeds 10000 framework test instances')
     const report = JSON.stringify({ schemaVersion: 'teststudio.discovery/v1', manifest: context.manifest, origin: context.origin, catalogText: context.catalogText, tests })

@@ -111,7 +111,7 @@ func (s *Service) enqueueRepositorySync(ctx context.Context, user, project, id, 
 		}
 		source.Sequence++
 		now := time.Now().UTC()
-		sync := RepositorySync{Trigger: trigger.Kind, Delivery: trigger.Delivery, EventDigest: trigger.Digest, ID: syncID, Project: project, Source: id, Actor: source.Actor, RequestedBy: user, SourceGeneration: source.Generation, Sequence: source.Sequence, Configuration: source.Configuration, RepositoryID: source.RepositoryID, Force: input.Force, State: "received", CreatedAt: now, Preparations: map[string]string{}}
+		sync := RepositorySync{Revision: trigger.Revision, Trigger: trigger.Kind, Delivery: trigger.Delivery, EventDigest: trigger.Digest, ID: syncID, Project: project, Source: id, Actor: source.Actor, RequestedBy: user, SourceGeneration: source.Generation, Sequence: source.Sequence, Configuration: source.Configuration, RepositoryID: source.RepositoryID, Force: input.Force, State: "received", CreatedAt: now, Preparations: map[string]string{}}
 		row, err := storage.Put(syncBucket(project, id), syncID, project, 0, sync)
 		if err != nil {
 			return err

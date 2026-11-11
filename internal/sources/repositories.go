@@ -55,6 +55,15 @@ func (s *Service) SaveRepository(ctx context.Context, user, project, id string, 
 		return err
 	}
 
+	if input.Mode == "" {
+		input.Mode = "read-only"
+	}
+	if input.Mode != "read-only" && input.Mode != "read-write" {
+		return errors.New("repository access mode must be read-only or read-write")
+	}
+	if input.Mode == "read-write" && (!strings.HasPrefix(input.Reference, "heads/") || input.Credential == "") {
+		return errors.New("read/write metadata requires a branch and an approved write credential")
+	}
 	provider := s.Providers[input.Provider]
 	if provider == nil {
 		return errors.New("source provider is not enabled")
@@ -67,6 +76,33 @@ func (s *Service) SaveRepository(ctx context.Context, user, project, id string, 
 	}
 	if input.IntervalSeconds != 0 && (input.IntervalSeconds < 60 || input.IntervalSeconds > 86400 || !domain.ValidID(s.Location)) {
 		return errors.New("periodic source sync requires 60 through 86400 seconds, or zero to disable it")
+	}
+	if input.Mode == "read-write" {
+		if _, ok := provider.(sourceprovider.Writer); !ok {
+			return errors.New("provider does not support metadata commits")
+		}
+	}
+	if revision > 0 {
+		previousRow, err := s.ReadRepository(ctx, user, project, id)
+		if err != nil {
+			return err
+		}
+		previous, err := storage.Decode[RepositorySource](previousRow)
+		if err != nil {
+			return err
+		}
+		previousMode := previous.Configuration.Mode
+		if previousMode == "" {
+			previousMode = "read-only"
+		}
+		if previousMode != input.Mode && !input.ConfirmModeChange {
+			return errors.New("review and confirm the change of metadata authority before switching modes")
+		}
+		if previous.Configuration.Credential != input.Credential || previousMode != input.Mode {
+			if _, err := provider.Resolve(ctx, sourceprovider.Access{Project: project, Repository: input.Repository, RepositoryID: previous.RepositoryID, Credential: input.Credential, Write: input.Mode == "read-write"}, input.Reference); err != nil {
+				return errors.New("validate replacement repository access before saving the connection")
+			}
+		}
 	}
 	if input.Push {
 		if _, ok := provider.(sourceprovider.WebhookVerifier); !ok || input.WebhookCredential == "" || sourceprovider.ValidCommit(input.Reference) {
@@ -95,6 +131,7 @@ func (s *Service) SaveRepository(ctx context.Context, user, project, id string, 
 	if err := s.validateRepositoryBindings(ctx, user, project, input); err != nil {
 		return err
 	}
+	input.ConfirmModeChange = false
 	return s.Auth.WithAssignmentTransaction(ctx, func(auth *authorization.Service) error {
 		bound := &Service{Store: auth.Directory.Store, Auth: auth, BundleRunners: s.BundleRunners, Location: s.Location}
 		if err := bound.repositoryMutationAuthority(ctx, user, project, id, input, revision); err != nil {
@@ -168,7 +205,10 @@ func (s *Service) validateRepositoryBindings(ctx context.Context, user, project 
 		if err != nil {
 			return err
 		}
-		if suite.Archived || suite.RequiresTarget {
+		if binding.Discover && (binding.Runner != "playwright" || !sourcebundle.SafePath(binding.Config) || binding.ModuleRoot != "." && !sourcebundle.SafePath(binding.ModuleRoot) || len(binding.Project) > 200 || strings.ContainsAny(binding.Project, "[]\r\n›>\x00") || len(suite.Applications) != 1) {
+			return errors.New("discovery requires a Playwright config, source root, exact project, and one application owner")
+		}
+		if suite.Archived || suite.RequiresTarget && binding.Endpoint == "" {
 			return errors.New("current repository build profiles require an active targetless suite")
 		}
 		if input.AutoActivate {

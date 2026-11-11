@@ -17,17 +17,18 @@ import (
 )
 
 type Bundle struct {
-	Snapshot  string              `json:"repositorySnapshotId,omitempty"`
-	Root      string              `json:"archiveRoot,omitempty"`
-	Origin    *catalog.Provenance `json:"sourceOrigin,omitempty"`
-	ID        string              `json:"id"`
-	Project   string              `json:"projectId"`
-	Suite     string              `json:"suiteId"`
-	Name      string              `json:"name"`
-	Manifest  string              `json:"manifestPath"`
-	Digest    string              `json:"digest"`
-	Content   []byte              `json:"content"`
-	ExpiresAt time.Time           `json:"expiresAt"`
+	MetadataFiles map[string]string   `json:"metadataFiles,omitempty"`
+	Snapshot      string              `json:"repositorySnapshotId,omitempty"`
+	Root          string              `json:"archiveRoot,omitempty"`
+	Origin        *catalog.Provenance `json:"sourceOrigin,omitempty"`
+	ID            string              `json:"id"`
+	Project       string              `json:"projectId"`
+	Suite         string              `json:"suiteId"`
+	Name          string              `json:"name"`
+	Manifest      string              `json:"manifestPath"`
+	Digest        string              `json:"digest"`
+	Content       []byte              `json:"content"`
+	ExpiresAt     time.Time           `json:"expiresAt"`
 }
 
 type bundleIndex struct {
@@ -173,6 +174,7 @@ func (s *Service) enqueueBundle(ctx context.Context, user, project, suite, key, 
 			bundle.Snapshot = repository.Snapshot
 			bundle.Root = repository.Root
 			bundle.Origin = &repository.Origin
+			bundle.MetadataFiles = repository.MetadataFiles
 		}
 		changes := []storage.Change{}
 		if draft != nil {
@@ -258,7 +260,10 @@ func (s *Service) loadBundle(ctx context.Context, job Job) (Bundle, error) {
 		if err != nil {
 			return Bundle{}, err
 		}
-		bundle.Content = snapshot.Content
+		bundle.Content, err = sourcebundle.Overlay(snapshot.Content, snapshot.Root, bundle.MetadataFiles)
+		if err != nil {
+			return Bundle{}, err
+		}
 	}
 	if bundle.ID != job.Bundle || bundle.Project != job.Project || bundle.Suite != job.Suite || bundle.Digest != job.SourceDigest || digest(string(bundle.Content)) != bundle.Digest {
 		return Bundle{}, errors.New("stored source bundle does not match its preparation")

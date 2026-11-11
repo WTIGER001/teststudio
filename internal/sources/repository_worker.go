@@ -152,7 +152,17 @@ func (s *Service) fetchRepository(ctx context.Context, sync RepositorySync) (map
 		return jobs, sourceprovider.ErrUnavailable
 	}
 	access := sourceprovider.Access{Project: sync.Project, Repository: sync.Configuration.Repository, RepositoryID: sync.RepositoryID, Credential: sync.Configuration.Credential}
-	revision, err := provider.Resolve(ctx, access, sync.Configuration.Reference)
+	reference := sync.Configuration.Reference
+	if sync.Revision != nil {
+		reference = sync.Revision.Commit
+	}
+	revision, err := provider.Resolve(ctx, access, reference)
+	if sync.Revision != nil && err == nil {
+		if revision.Commit != sync.Revision.Commit || revision.RepositoryID != sync.Revision.RepositoryID {
+			return jobs, errors.New("pinned repository revision changed")
+		}
+		revision.Reference = sync.Configuration.Reference
+	}
 	if err != nil {
 		return jobs, err
 	}
@@ -199,8 +209,27 @@ func (s *Service) fetchRepository(ctx context.Context, sync RepositorySync) (map
 	if err != nil {
 		return jobs, err
 	}
+	raw, err := sourcebundle.ReadRoot(archive.Content, archive.Root)
+	if err != nil {
+		return jobs, err
+	}
+	for name, body := range raw.Files {
+		if name == ".gitmodules" || strings.HasPrefix(string(body), "version https://git-lfs.github.com/spec/v1\n") {
+			return jobs, errors.New("repository requires submodule or Git LFS assets; supply complete supported source")
+		}
+	}
+	overlays := map[string]map[string]string{}
 	for _, binding := range sync.Configuration.Bindings {
-		snapshot, err := sourcebundle.ValidateRoot(archive.Content, binding.Manifest, binding.Suite, archive.Root)
+		files, err := s.repositoryOverlay(ctx, sync, binding, archive)
+		if err != nil {
+			return jobs, err
+		}
+		overlays[binding.Suite] = files
+		content, err := sourcebundle.Overlay(archive.Content, archive.Root, files)
+		if err != nil {
+			return jobs, err
+		}
+		snapshot, err := sourcebundle.ValidateRoot(content, binding.Manifest, binding.Suite, archive.Root)
 		if err != nil {
 			return jobs, err
 		}
@@ -217,8 +246,14 @@ func (s *Service) fetchRepository(ctx context.Context, sync RepositorySync) (map
 		if _, ok := jobs[binding.Suite]; ok {
 			continue
 		}
-		_, name, _ := strings.Cut(revision.Repository, "/")
-		row, err := s.enqueueBundle(ctx, sync.Actor, sync.Project, binding.Suite, preparationKey(sync, binding), name+"-"+revision.Commit[:12]+".zip", binding.Manifest, archive.Content, &repositoryPreparation{Sync: sync.ID, Worker: sync.Worker, Source: sync.Source, Generation: sync.SourceGeneration, Sequence: sync.Sequence, Snapshot: sync.ID, Origin: origin, Root: archive.Root}, nil, nil, false)
+		name := revision.Repository[strings.LastIndex(revision.Repository, "/")+1:]
+		content, err := sourcebundle.Overlay(archive.Content, archive.Root, overlays[binding.Suite])
+		if err != nil {
+			return jobs, err
+		}
+		preparedOrigin := origin
+		preparedOrigin.SnapshotDigest = digest(string(content))
+		row, err := s.enqueueBundle(ctx, sync.Actor, sync.Project, binding.Suite, preparationKey(sync, binding), name+"-"+revision.Commit[:12]+".zip", binding.Manifest, content, &repositoryPreparation{MetadataFiles: overlays[binding.Suite], Sync: sync.ID, Worker: sync.Worker, Source: sync.Source, Generation: sync.SourceGeneration, Sequence: sync.Sequence, Snapshot: sync.ID, Origin: preparedOrigin, Root: archive.Root}, nil, nil, false)
 		if err != nil {
 			return jobs, err
 		}

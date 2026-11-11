@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: TestStudio source provider webhooks
-  version: 0.1.0
+  version: 0.2.0
 paths:
   /api/v1/projects/{project}/repository-sources/{source}/webhooks/github:
     post:
@@ -55,8 +55,41 @@ paths:
                   syncId: {type: string}
         '403': {description: Signature, source identity, settings, or current authority reject the delivery}
         '413': {description: The original request body exceeds 2 MiB}
+  /api/v1/projects/{project}/repository-sources/{source}/webhooks/{provider}:
+    post:
+      operationId: receiveGitLabSourceWebhook
+      summary: Authenticate a push event from an approved self-managed GitLab server
+      description: >-
+        Provider must match the configured server key. Compare X-Gitlab-Token
+        with the separate source-webhook secret in constant time before parsing.
+        HTTPS, a pinned repository identity, current authority, and enabled push
+        settings are required. Delivery UUID and body digest prevent replay with
+        a changed payload. Watched branch or tag pushes queue ordinary source
+        synchronization. Deletions and unsupported events start no work.
+      security:
+        - GitLabToken: []
+      parameters:
+        - {name: project, in: path, required: true, schema: {type: string}}
+        - {name: source, in: path, required: true, schema: {type: string}}
+        - {name: provider, in: path, required: true, schema: {type: string}}
+        - {name: X-Gitlab-Event-UUID, in: header, required: true, schema: {type: string, maxLength: 128}}
+        - {name: X-Gitlab-Event, in: header, required: true, schema: {type: string}}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {type: object, additionalProperties: true}
+      responses:
+        '202': {description: Authenticated and queued or ignored; synchronization never starts tests}
+        '403': {description: Authentication, identity, settings, or authority rejected}
+        '413': {description: Original request body exceeds 2 MiB}
 components:
   securitySchemes:
+    GitLabToken:
+      type: apiKey
+      in: header
+      name: X-Gitlab-Token
+      description: Separate server-side source-webhook secret; HTTPS is required.
     GitHubSignature:
       type: apiKey
       in: header

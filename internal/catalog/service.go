@@ -54,7 +54,10 @@ func (s *Service) SaveTest(ctx context.Context, user, project, suite string, t T
 	if err != nil {
 		return err
 	}
-	if revision == 0 && t.DefinitionSource != "" {
+	if err := s.guardGitMetadata(ctx, project, t); err != nil {
+		return err
+	}
+	if revision == 0 && (t.DefinitionSource != "" || t.RepositorySource != "") {
 		return errors.New("register source-owned definitions through source preparation")
 	}
 	if err := ValidateTest(t); err != nil {
@@ -150,6 +153,9 @@ func (s *Service) ChangeState(ctx context.Context, user, project, suite, id, sta
 	}
 	t, err := storage.Decode[Test](r)
 	if err != nil {
+		return err
+	}
+	if err := s.guardGitMetadata(ctx, project, t); err != nil {
 		return err
 	}
 	before := t

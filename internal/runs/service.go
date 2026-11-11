@@ -30,7 +30,12 @@ type HTTPExecutor interface {
 	Execute(context.Context, string, catalog.Test, projects.Environment) execution.Result
 }
 
+type SourceGate interface {
+	CheckRunSource(context.Context, string, string, string, catalog.Release) (*time.Time, []storage.Record, error)
+}
+
 type Service struct {
+	Sources           SourceGate
 	Secrets           secrets.Provider
 	Completion        CompletionHook
 	Store             *storage.Store
@@ -186,6 +191,7 @@ func (s *Service) create(ctx context.Context, user, project string, req Request,
 }
 
 func (s *Service) prepare(ctx context.Context, user, project string, req Request) (Run, []storage.Record, error) {
+	followingReference := req.Release == ""
 	projectRow, err := s.Store.Get(ctx, "projects", project)
 	if err != nil {
 		return Run{}, nil, err
@@ -254,7 +260,19 @@ func (s *Service) prepare(ctx context.Context, user, project string, req Request
 	if err != nil {
 		return Run{}, nil, err
 	}
+	if req.ReviewedRelease != "" && req.ReviewedRelease != release.ID {
+		return Run{}, nil, fmt.Errorf("%w: the source or catalog version changed; refresh run review before starting", storage.ErrConflict)
+	}
 	admission = append(admission, releaseRow)
+	var sourceResolvedAt *time.Time
+	if followingReference && s.Sources != nil {
+		checked, guards, err := s.Sources.CheckRunSource(ctx, user, project, req.Suite, release)
+		if err != nil {
+			return Run{}, nil, err
+		}
+		sourceResolvedAt = checked
+		admission = append(admission, guards...)
+	}
 	if req.Location != s.Location {
 		return Run{}, nil, errors.New("execution location is not configured on this installation")
 	}
@@ -322,7 +340,12 @@ func (s *Service) prepare(ctx context.Context, user, project string, req Request
 			return Run{}, nil, err
 		}
 		environment = &configured
-		admission = append(admission, row)
+		index := slices.IndexFunc(admission, func(guard storage.Record) bool { return guard.Bucket == row.Bucket && guard.ID == row.ID })
+		if index < 0 {
+			admission = append(admission, row)
+		} else if admission[index].Revision != row.Revision {
+			return Run{}, nil, storage.ErrConflict
+		}
 	} else {
 		for _, test := range tests {
 			if len(test.RequiredParameters) > 0 || len(test.RequiredBindings) > 0 {
@@ -398,6 +421,7 @@ func (s *Service) prepare(ctx context.Context, user, project string, req Request
 	}
 	now := time.Now().UTC()
 	v := Run{ID: domain.NewID(), Project: project, Request: req, Release: release, Environment: environment, Tests: tests, Capture: release.Draft.Capture, Actor: user, State: "requested", Outcome: "unknown", Phase: "queued", Counts: Counts{Total: len(tests)}, Results: []execution.Result{}, CreatedAt: now, UpdatedAt: now, Deadline: now.Add(time.Duration(req.TimeoutSeconds) * time.Second), EvidenceState: "pending", EvidenceErrors: []string{}}
+	v.SourceResolvedAt = sourceResolvedAt
 	v.Applications = slices.Clone(suite.Applications)
 	v.SavedSelection = saved
 	v.Capture = policy

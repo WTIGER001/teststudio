@@ -50,3 +50,13 @@ test('relocated configuration preserves source hooks and server working director
   assert.equal(suite.webServer.cwd, path.join(directory, 'tools'))
   assert.equal((await import(pathToFileURL(suite.globalSetup))).default(), 'source-hook')
 })
+
+test('untagged selection uses paths relative to the effective Playwright root', async t => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'teststudio-mapped-config-'))
+  t.after(() => fs.rm(directory, { recursive: true, force: true }))
+  const source = path.join(directory, 'suite.mjs'), selectionFile = path.join(directory, 'tests.txt')
+  await fs.writeFile(source, `export default ${JSON.stringify({ testDir: 'browser' })}`)
+  const config = executionConfig({ config: source, root: directory, selection: { source: 'browser/search.spec.ts', framework: { project: 'Desktop Chrome', titlePath: ['Search', 'Find a story'] } } }, { screenshots: 'off', trace: 'off', video: 'off' }, {}, { filename: path.join(directory, 'execution.mjs'), selectionFile })
+  await import(pathToFileURL(config))
+  assert.equal(await fs.readFile(selectionFile, 'utf8'), '[Desktop Chrome] › search.spec.ts › Search › Find a story\n')
+})

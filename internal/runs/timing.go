@@ -116,7 +116,9 @@ func (s *Service) Estimate(ctx context.Context, user, project string, req Reques
 	if !domain.ValidID(project) || !domain.ValidID(req.Suite) {
 		return timing.Estimate{}, errors.New("valid project and suite identifiers are required")
 	}
-	v, _, err := s.prepare(ctx, user, project, req)
+	reader := *s
+	reader.Sources = nil
+	v, _, err := reader.prepare(ctx, user, project, req)
 	if err == nil {
 		err = s.validateApplicationRun(ctx, user, v)
 	}

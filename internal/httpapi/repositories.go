@@ -10,14 +10,19 @@ import (
 
 func (s *Server) repositoryRoutes(m *http.ServeMux, service *sources.Service) {
 	base := "/api/v1/projects/{project}/repository-sources"
-	m.HandleFunc("POST "+base+"/{source}/webhooks/github", func(w http.ResponseWriter, r *http.Request) {
+	s.repositoryMetadataRoutes(m, service)
+	m.HandleFunc("POST "+base+"/{source}/webhooks/{provider}", func(w http.ResponseWriter, r *http.Request) {
 		r.Body = http.MaxBytesReader(w, r.Body, 2<<20)
 		data, err := io.ReadAll(r.Body)
 		if err != nil {
 			JSON(w, 413, map[string]string{"message": "Source webhook exceeds its body limit."})
 			return
 		}
-		receipt, err := service.ReceiveRepositoryWebhook(r.Context(), r.PathValue("project"), r.PathValue("source"), sourceprovider.WebhookRequest{Delivery: r.Header.Get("X-GitHub-Delivery"), Event: r.Header.Get("X-GitHub-Event"), Signature: r.Header.Get("X-Hub-Signature-256"), Body: data})
+		delivery, event, signature := r.Header.Get("X-GitHub-Delivery"), r.Header.Get("X-GitHub-Event"), r.Header.Get("X-Hub-Signature-256")
+		if r.PathValue("provider") != "github" {
+			delivery, event, signature = r.Header.Get("X-Gitlab-Event-UUID"), r.Header.Get("X-Gitlab-Event"), r.Header.Get("X-Gitlab-Token")
+		}
+		receipt, err := service.ReceiveRepositoryWebhook(r.Context(), r.PathValue("project"), r.PathValue("source"), sourceprovider.WebhookRequest{Provider: r.PathValue("provider"), Delivery: delivery, Event: event, Signature: signature, Body: data})
 		if err != nil {
 			JSON(w, 403, map[string]string{"message": "Source webhook authentication or current configuration does not permit this delivery."})
 			return

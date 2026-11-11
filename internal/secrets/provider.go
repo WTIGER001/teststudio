@@ -25,3 +25,8 @@ type Provider interface {
 	References(context.Context, string, string) ([]Reference, error)
 	Resolve(context.Context, string, string, string) (Value, error)
 }
+
+type Replacer interface {
+	Replace(context.Context, string, string, string, []byte, []byte) error
+	Replaceable(string, string, string) bool
+}

@@ -44,11 +44,11 @@ func Validate(data []byte, manifestPath, suite string) (Snapshot, error) {
 	return ValidateRoot(data, manifestPath, suite, "")
 }
 
-func ValidateRoot(data []byte, manifestPath, suite, root string) (snapshot Snapshot, err error) {
+func ReadRoot(data []byte, root string) (snapshot Snapshot, err error) {
 	if root != "" && (!SafePath(root) || strings.Contains(root, "/")) {
 		return snapshot, errors.New("repository archive root must identify one safe wrapper directory")
 	}
-	if len(data) < 1 || len(data) > CompressedLimit || !SafePath(manifestPath) {
+	if len(data) < 1 || len(data) > CompressedLimit {
 		return snapshot, errors.New("provide a ZIP of at most 32 MiB and a relative manifest path")
 	}
 	archive, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
@@ -114,6 +114,20 @@ func ValidateRoot(data []byte, manifestPath, suite, root string) (snapshot Snaps
 	}
 	if len(snapshot.Files) == 0 {
 		return Snapshot{}, errors.New("ZIP contains no source files")
+	}
+	sum := sha256.Sum256(data)
+	snapshot.Digest = "sha256:" + hex.EncodeToString(sum[:])
+	snapshot.ArchiveRoot = root
+	return snapshot, nil
+}
+
+func ValidateRoot(data []byte, manifestPath, suite, root string) (snapshot Snapshot, err error) {
+	if !SafePath(manifestPath) {
+		return snapshot, errors.New("invalid manifest path")
+	}
+	snapshot, err = ReadRoot(data, root)
+	if err != nil {
+		return snapshot, err
 	}
 	if err := decode(snapshot.Files, manifestPath, &snapshot.Manifest); err != nil {
 		return Snapshot{}, fmt.Errorf("suite manifest: %w", err)

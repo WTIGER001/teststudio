@@ -8,7 +8,7 @@ LABEL teststudio.runtime-kind="source-base/v1"
 LABEL teststudio.playwright-version="1.64.1"
 LABEL teststudio.api-policy="request-policy/v1"
 LABEL teststudio.work-item-bytes="4194304"
-COPY runners/playwright/run.mjs runners/playwright/reporter.cjs runners/playwright/suite-context.mjs runners/playwright/discovery-reporter.cjs runners/playwright/egress.mjs runners/playwright/execution-config.mjs ./
+COPY runners/playwright/run.mjs runners/playwright/reporter.cjs runners/playwright/suite-context.mjs runners/playwright/discovery-reporter.cjs runners/playwright/egress.mjs runners/playwright/selection.mjs runners/playwright/execution-config.mjs ./
 RUN mkdir -p /suite /output && ln -s /runner/node_modules /suite/node_modules && chmod 1777 /output
 ENV HOME=/tmp
 WORKDIR /suite

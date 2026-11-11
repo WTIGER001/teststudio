@@ -13,6 +13,10 @@ import type { AssignmentsPage } from './features/access/assignments.page'
 import type { Routes } from '@angular/router'
 
 const projectRoutes: Routes = [
+ { path: 'projects/:projectId/sources/repositories/:sourceId/metadata/:suiteId', canDeactivate: [(page: import('./features/sources/repository-metadata.page').RepositoryMetadataPage) => page.canLeave()], data: { helpTopic: 'sources' }, loadComponent: () => import('./features/sources/repository-metadata.page').then(m => m.RepositoryMetadataPage) },
+ { path: 'projects/:projectId/sources/repositories/new', canDeactivate: [(page: import('./features/sources/repository-setup.page').RepositorySetupPage) => page.canLeave()], data: { helpTopic: 'sources', repositoryEditor: true }, loadComponent: () => import('./features/sources/repository-setup.page').then(m => m.RepositorySetupPage) },
+ { path: 'projects/:projectId/sources/repositories/:sourceId/edit', canDeactivate: [(page: import('./features/sources/repository-setup.page').RepositorySetupPage) => page.canLeave()], data: { helpTopic: 'sources', repositoryEditor: true }, loadComponent: () => import('./features/sources/repository-setup.page').then(m => m.RepositorySetupPage) },
+
  { path: 'projects/:projectId/applications/:applicationId/configuration', canDeactivate: [(page: import('./features/configuration/application-configuration.page').ApplicationConfigurationPage) => page.canLeave()], data: { helpTopic: 'application-configuration' }, loadComponent: () => import('./features/configuration/application-configuration.page').then(m => m.ApplicationConfigurationPage) },
  { path: 'projects/:projectId/tests/recording/:suiteId/:recordingId', canDeactivate: [(page: RecordingWorkspacePage) => page.canLeave()], data: { helpTopic: 'create-test' }, loadComponent: () => import('./features/sources/recording-workspace.page').then(m => m.RecordingWorkspacePage) },
  { path: 'projects/:projectId/status-pages/new', canDeactivate: [(page: StatusEditorPage) => page.canLeave()], data: { helpTopic: 'status-pages', mode: 'create' }, loadComponent: () => import('./features/status-pages/status-editor.page').then(m => m.StatusEditorPage) },

@@ -26,7 +26,8 @@ export class NewRunService {
   private estimateGeneration = 0
   private readonly destroy = inject(DestroyRef)
   readonly error = signal('')
-  readonly flow = new WizardController(2, () => { this.form.markAllAsTouched(); if (this.form.invalid || this.needsSelectionPreview()) { this.error.set('Choose a suite, check the options, and preview any saved selection before continuing.'); return false }; this.error.set(''); return true })
+ readonly reviewedRelease = signal('')
+  readonly flow = new WizardController(2, () => { this.form.markAllAsTouched(); if (this.form.invalid || this.needsSelectionPreview()) { this.error.set('Choose a suite, check the options, and preview any saved selection before continuing.'); return false }; if (this.flow.step() === 0) this.reviewedRelease.set(this.selectionPreview()?.releaseId || this.lookups.suites().find(row => row.id === this.form.controls.suite.value)?.data.activeReleaseId || ''); this.error.set(''); return true })
   readonly selections = signal<SavedSelectionRecord[]>([])
   readonly selectionCursor = signal('')
   readonly selectionLoading = signal(false)
@@ -93,16 +94,18 @@ export class NewRunService {
   endpointReview() { const id = this.form.controls.environment.value; return registeredEndpoints(this.lookups.environments().find(row => row.id === id)?.data.endpoints) }
   targetWarning(): string { const target = this.lookups.environments().find(row => row.id === this.form.controls.environment.value); return target?.data.protected ? 'Protected target: only safe tests can run, with protected execution permission.' : target?.data.stage === 'production' ? 'Production target: this environment is not protected. Review the selected tests before starting.' : 'Starting creates a run from the saved version. Review the target and selected tests before continuing.' }
 
-  async create(): Promise<void> {
+  async refreshReview(): Promise<void> { this.error.set(''); try { await this.lookups.load(this.workspace.projectId(), this.workspace.applicationId()); this.flow.go(0); this.reviewedRelease.set('') } catch (error) { this.error.set(errorMessage(error, 'Run review could not be refreshed.')) } }
+
+ async create(): Promise<void> {
     if (!this.flow.ready() || this.saving()) return
     this.saving.set(true); this.error.set('')
     try {
-      const input = { ...requestFromForm(this.form.getRawValue(), this.selectionPreview()?.id), applicationId: this.workspace.applicationId() || undefined }
+      const input = { ...requestFromForm(this.form.getRawValue(), this.selectionPreview()?.id), applicationId: this.workspace.applicationId() || undefined, reviewedReleaseId: this.reviewedRelease() || undefined }
       const fingerprint = JSON.stringify(input)
       if (fingerprint !== this.fingerprint) { this.key = randomId(); this.fingerprint = fingerprint }
       const run = await this.api.request<RecordValue<Run>>(`/api/v1/projects/${encodeURIComponent(this.workspace.projectId())}/runs`, 'POST', input, undefined, this.key)
       await this.router.navigate(this.workspace.path('runs', run.id))
-    } catch (error) { if (this.selectionPreview() && error instanceof ApiError && error.status === 409) { this.selectionPreview.set(null); this.error.set('The saved selection changed. Preview the saved selection again before starting the run.') } else this.error.set(errorMessage(error, 'The run could not be started.')) }
+    } catch (error) { if (this.selectionPreview() && error instanceof ApiError && error.status === 409) { this.selectionPreview.set(null); this.error.set('The saved selection changed. Preview the saved selection again before starting the run.') } else { this.error.set(errorMessage(error, 'The run could not be started.')); if (error instanceof ApiError && error.status === 409) this.flow.go(0) } }
     finally { this.saving.set(false) }
   }
 }

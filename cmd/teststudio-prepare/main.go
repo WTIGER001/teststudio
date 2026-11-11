@@ -20,13 +20,12 @@ import (
 	permissionsqlite "github.com/wtiger001/teststudio/adapters/permissions/sqlite"
 	"github.com/wtiger001/teststudio/adapters/preparation/localimage"
 	localsecrets "github.com/wtiger001/teststudio/adapters/secrets/local"
-	githubsource "github.com/wtiger001/teststudio/adapters/sources/github"
+	sourceconfig "github.com/wtiger001/teststudio/adapters/sources/configuration"
 	"github.com/wtiger001/teststudio/internal/authorization"
 	"github.com/wtiger001/teststudio/internal/domain"
 	"github.com/wtiger001/teststudio/internal/identity"
 	"github.com/wtiger001/teststudio/internal/preparation"
 	"github.com/wtiger001/teststudio/internal/runtimeconfig"
-	"github.com/wtiger001/teststudio/internal/sourceprovider"
 	"github.com/wtiger001/teststudio/internal/sources"
 	"github.com/wtiger001/teststudio/internal/storage"
 )
@@ -55,6 +54,7 @@ func run() error {
 	browserRuntime := flag.String("playwright-runtime", "", "Trusted immutable local Playwright source runtime image ID")
 	runtime := flag.String("go-runtime", "", "Trusted immutable local Go source runtime image ID")
 	directory := flag.String("build-directory", ".data/source-builds", "Private local source context directory shared by this location's workers")
+	gitSourcesConfig := flag.String("git-sources-config", "", "Operator-approved self-managed GitLab servers, network scopes, and certificate authorities")
 	githubSources := flag.Bool("github-sources", false, "Process durable GitHub source synchronization")
 	secretBindings := flag.String("secret-bindings", "", "Project-scoped repository access credential bindings")
 	flag.Parse()
@@ -207,13 +207,16 @@ func run() error {
 		}
 	}
 	var syncDone <-chan struct{}
-	if *githubSources && len(service.Builders) > 0 {
+	if (*githubSources || *gitSourcesConfig != "") && len(service.Builders) > 0 {
 		provider, err := localsecrets.Load(*secretBindings)
 		if err != nil {
 			return err
 		}
 		service.Secrets = provider
-		service.Providers = map[string]sourceprovider.Provider{"github": &githubsource.Client{Secrets: provider}}
+		service.Providers, err = sourceconfig.Load(*gitSourcesConfig, *githubSources, provider)
+		if err != nil {
+			return err
+		}
 		syncDone = service.StartRepositorySynchronization(ctx)
 	}
 	var done <-chan struct{}

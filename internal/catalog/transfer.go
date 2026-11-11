@@ -137,6 +137,11 @@ func (s *Service) preview(ctx context.Context, user, project, suite, kind string
 	plan.ExpiresAt = plan.CreatedAt.Add(30 * time.Minute)
 	seen := map[string]bool{}
 	for _, test := range tests {
+		if kind != "prepared" {
+			if err := s.guardGitMetadata(ctx, project, test); err != nil {
+				return plan, err
+			}
+		}
 		if seen[test.ID] {
 			plan.Issues = append(plan.Issues, Issue{TestID: test.ID, Field: "id", Message: "duplicate identifier in request"})
 			continue
@@ -146,7 +151,7 @@ func (s *Service) preview(ctx context.Context, user, project, suite, kind string
 			plan.Issues = append(plan.Issues, Issue{TestID: test.ID, Field: "runner", Message: "declarative import accepts native HTTP definitions; use source preparation for coded tests"})
 		}
 		change := PlannedTest{Test: test, Revision: current[test.ID].Revision, Action: "create"}
-		if kind != "prepared" && change.Revision == 0 && test.DefinitionSource != "" {
+		if kind != "prepared" && change.Revision == 0 && (test.DefinitionSource != "" || test.RepositorySource != "") {
 			plan.Issues = append(plan.Issues, Issue{TestID: test.ID, Field: "source", Message: "register source ownership through source preparation"})
 		}
 		if row, ok := current[test.ID]; ok {
@@ -158,7 +163,9 @@ func (s *Service) preview(ctx context.Context, user, project, suite, kind string
 				if before.DefinitionSource != "" && before.DefinitionSource != source {
 					plan.Issues = append(plan.Issues, Issue{TestID: test.ID, Field: "source", Message: "test belongs to another registered source"})
 				}
-				test = MergeManagedMetadata(before, test)
+				if artifact == nil || !artifact.MetadataAuthoritative {
+					test = MergeManagedMetadata(before, test)
+				}
 				change.Test = test
 			} else if before.DefinitionSource != test.DefinitionSource || (before.DefinitionSource != "" && !SameSourceFacts(before, test)) {
 				plan.Issues = append(plan.Issues, Issue{TestID: test.ID, Field: "source", Message: "change source-owned definitions through their registered source"})
@@ -333,6 +340,11 @@ func (s *Service) applyImport(ctx context.Context, user, project, suite, id stri
 		}
 	}
 	for _, c := range plan.Changes {
+		if plan.Kind != "prepared" {
+			if err := s.guardGitMetadata(ctx, project, c.Test); err != nil {
+				return plan, err
+			}
+		}
 		if err := s.authorizeChange(ctx, user, project, suite, plan.Kind, c); err != nil {
 			return plan, err
 		}

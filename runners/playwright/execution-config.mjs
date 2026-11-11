@@ -13,11 +13,18 @@ export function executionConfig(context, capture, overrides = {}, options = {}) 
   const directory = path.dirname(context.config)
   fs.writeFileSync(filename, `import suite from ${JSON.stringify(context.config)}
 import path from 'node:path'
+import fs from 'node:fs'
 import { createRequire } from 'node:module'
 const use = ${JSON.stringify(use)}
 const restricted = ${restricted}
 const selectedUse = options => { const value = { ...options, ...use }; if (restricted) delete value.proxy; return value }
 const directory = ${JSON.stringify(directory)}
+const selection = ${JSON.stringify(context.selection ?? null)}
+if (selection?.framework) {
+ const mapping = selection.framework
+ const file = path.relative(path.resolve(directory, suite.testDir || '.'), path.resolve(${JSON.stringify(context.root ?? '')}, selection.source)).split(path.sep).join('/')
+ fs.writeFileSync(${JSON.stringify(options.selectionFile ?? '/tmp/teststudio-selection.txt')}, (mapping.project ? '[' + mapping.project + '] › ' : '') + file + ' › ' + mapping.titlePath.join(' › ') + String.fromCharCode(10), { mode: 0o600 })
+}
 const sourceConfig = ${JSON.stringify(context.config)}
 const resolveHook = value => Array.isArray(value) ? value.map(resolveHook) : typeof value === 'string' ? value.startsWith('.') || path.isAbsolute(value) ? path.resolve(directory, value) : createRequire(sourceConfig).resolve(value) : value
 const rooted = value => typeof value === 'string' ? path.resolve(directory, value) : value

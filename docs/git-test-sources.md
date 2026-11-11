@@ -1,15 +1,16 @@
 # Git test source specification
 
-Status: Agreed product direction on 2026-11-10. Implementation and target verification remain pending.
+Status: Implemented locally on 2026-11-10. Live provider and hosted deployment acceptance remain separate. See [repository sources](repository-sources.md) for the current workflow, configuration, and supported limits.
 
 ## Current behavior
 
-The current [repository source integration](repository-sources.md) reads GitHub repositories with explicit suite manifests and catalogs.
-Manual, push, and periodic synchronization resolve a commit and prepare an immutable source version.
-Runs execute a prepared version. Run creation does not refresh the repository.
-GitHub App authentication requests a fresh installation token for each authenticated source operation.
-Arbitrary repository onboarding, self-managed GitLab, metadata writeback, connection rotation management, and run-start synchronization are new work.
-The current Playwright runner supports TypeScript and JavaScript. Python needs another adapter.
+The [repository integration](repository-sources.md) supports GitHub and operator-approved self-managed GitLab servers.
+Connections select read-only database metadata or read/write Git metadata with review branches.
+Playwright discovery can generate metadata and exact untagged mappings. New tests start disabled with Needs review safety.
+New starts resolve their configured reference and reuse only matching immutable preparation. Changed source queues setup and blocks stale execution until ready and reviewed. Scheduled firings retain a blocked reason while setup is incomplete.
+Explicit retained versions and reruns preserve their original pin. A manual reviewed version also guards against a silently changed catalog.
+GitHub installation token renewal, validated key reference replacement, GitLab mounted-file project token self-rotation, and durable credential health are implemented.
+The Playwright runner supports TypeScript and JavaScript. Python, online dependency installation, submodules, and Git LFS preparation remain unsupported.
 
 ## Repository connections
 
@@ -27,12 +28,12 @@ GitLab rotation must account for the provider's permissions, version, immediate 
 | Mode | Authoritative metadata | Repository changes |
 | --- | --- | --- |
 | Read-only | TestStudio stores the suite manifest, catalog JSON, revision history, and permanent test mappings in its database. | Read source only. Never commit or push. |
-| Read/write | The configured Git branch stores the manifest and catalog JSON. TestStudio retains indexed copies, pending edits, and immutable history. | Commit reviewed metadata changes to the configured branch or submit a review branch and pull or merge request when branch policy requires it. |
+| Read/write | The configured Git branch stores the manifest and catalog JSON. TestStudio retains indexed copies, pending edits, and immutable history. | Commit reviewed metadata changes to a review branch and open a pull or merge request. |
 
 Both modes read executable test source from the repository. Metadata includes identity, descriptions, categories, safety, dependencies, required configuration names, timing, and capture policies.
 Environment values, credentials, result history, and evidence remain outside Git metadata.
 Existing repository metadata can seed read-only setup. Subsequent source synchronization preserves the database metadata and reports incompatible source changes.
-Read/write synchronization adopts committed metadata changes. This differs from today's unconditional preservation of service-managed metadata and needs explicit implementation.
+Read/write synchronization adopts committed metadata changes and preserves pending local edits separately.
 
 Read/write saves show a diff and expected base commit. Commit related metadata files atomically.
 Recheck TestStudio authority and provider access before writing. Preserve remote edits, branch protection, and revision conflicts. Never force-push to resolve a conflict.
@@ -41,7 +42,7 @@ Show pending local changes and pending review clearly. A database save does not 
 Normal runs use metadata committed to their selected source reference. Pending changes become runnable when their commit is explicitly selected or reaches that reference.
 Saving metadata, committing, and merging never start tests. A run never commits pending edits automatically.
 
-Switching modes requires review of the metadata diff and authority, with an explicit choice of the authoritative copy. Do not silently discard database or repository edits.
+Switching modes requires explicit confirmation of the new metadata authority. Review both copies in the metadata page before switching. Retained database revisions preserve earlier edits.
 
 ## Onboard repositories without metadata
 
@@ -57,7 +58,7 @@ Display missing setup separately from actual test outcomes. Repository registrat
 
 Read-only onboarding must work without editing source to add permanent tags.
 Persist a framework mapping using project, source location, title path, and case identity where available. Line numbers alone are not permanent identities.
-The future discovery and execution adapters must resolve each selected mapping to exactly one test. Today's exact-tag runner does not yet implement this path.
+The discovery and execution adapters resolve each selected mapping to exactly one test. Tagged suites keep their existing exact-tag execution path.
 Preserve reviewed IDs across unambiguous changes. Require review for ambiguous renames, moves, duplicate titles, and changed parameterized cases.
 Read/write metadata commits do not implicitly rewrite executable tests. Adding permanent tags or editing test bodies requires a separate reviewed source change.
 
@@ -76,7 +77,7 @@ Source credentials belong to acquisition workers and never enter the test runtim
 
 Combine the source commit with the selected metadata revision. In read-only mode, retain the database metadata snapshot and digest. In read/write mode, read committed metadata from that exact source version.
 Validate discovery, permanent mappings, selected tests and dependencies, application ownership, required environment configuration, safety, and current authority before dispatch.
-New or ambiguous mappings block affected selections until reviewed. An explicit ID selection cannot silently expand to newly discovered tests.
+Missing or ambiguous mappings block source preparation until reviewed. New discovered mappings remain disabled until reviewed. An explicit ID selection cannot silently expand to newly discovered tests.
 
 Reuse a retained source snapshot and prepared runtime only when repository identity, commit, metadata digest, dependency inputs, runtime profile, and preparation settings match.
 Reference resolution still happens for each new run following a branch or tag. A full clone or rebuild for every individual test is unnecessary.
@@ -92,7 +93,7 @@ Retained versions and earlier results remain immutable in both modes.
 
 ## Required verification
 
-These scenarios extend acceptance 21–29, with permission and environment coverage under 12, 13, 20, and 38. They do not advance the existing verified total until implementation passes.
+These scenarios extend acceptance 21–29, with permission and environment coverage under 12, 13, 20, and 38. Local evidence refines these numbers without closing broad live-provider or hosted deployment criteria.
 
 - Onboard an untagged repository without writing source; preserve permanent IDs through a reviewed rename and reject an ambiguous mapping.
 - Save and execute read-only metadata after restart while issuing no Git writes.

@@ -12,6 +12,7 @@ const CredentialPurpose = "source-repository"
 const WebhookPurpose = "source-webhook"
 
 type Access struct {
+	Write        bool
 	Project      string
 	Repository   string
 	RepositoryID string
@@ -60,6 +61,7 @@ func ValidReference(value string) bool {
 var ErrUnavailable = errors.New("source provider is unavailable")
 
 type WebhookRequest struct {
+	Provider  string
 	Delivery  string
 	Event     string
 	Signature string

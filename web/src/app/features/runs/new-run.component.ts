@@ -35,7 +35,7 @@ import { WizardFormDirective } from '../../shared/wizard/wizard-form.directive'
       }
       </fieldset>
         <p class="small muted">Execution location: local worker</p>
-        <div class="row-actions"><button class="button secondary" type="button" [disabled]="service.form.invalid || service.estimating() || service.saving() || service.needsSelectionPreview()" (click)="service.estimateTiming()">{{ service.estimating() ? 'Estimating…' : 'Estimate timing' }}</button>@if (service.flow.step() > 0) { <button class="button secondary" type="button" [disabled]="service.saving()" (click)="service.flow.back()">Back</button> }<button class="button primary" type="submit" [disabled]="service.saving()">{{ service.saving() ? 'Starting…' : service.flow.step() === 0 ? 'Review run' : 'Start run' }}</button></div>
+        <div class="row-actions"><button class="button secondary" type="button" [disabled]="service.form.invalid || service.estimating() || service.saving() || service.needsSelectionPreview()" (click)="service.estimateTiming()">{{ service.estimating() ? 'Estimating…' : 'Estimate timing' }}</button>@if (service.flow.step() > 0) { <button class="button secondary" type="button" [disabled]="service.saving()" (click)="service.flow.back()">Back</button> }<button class="button primary" type="submit" [disabled]="service.saving()">{{ service.saving() ? 'Starting…' : service.flow.step() === 0 ? 'Review run' : 'Start run' }}</button><button type="button" class="button secondary" [disabled]="service.saving()" (click)="service.refreshReview()">Refresh run review</button></div>
         <ts-timing-estimate [estimate]="service.estimate()" />
       </form>
     </section>

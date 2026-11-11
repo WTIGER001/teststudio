@@ -13,7 +13,12 @@ class TestStudioReporter {
   }
   onBegin(config, suite) {
     const tests = suite.allTests()
-    if (tests.length !== 1 || !tests[0].tags.includes(this.input.test.selector)) throw new Error('The selector must resolve to exactly one tagged test')
+    const mapping = this.input.test.framework
+    let project = tests[0]?.parent
+    while (project && project.type !== 'project') project = project.parent
+    const projectName = project?.project()?.name ?? ''
+    const matches = tests.length === 1 && (mapping ? JSON.stringify(tests[0].titlePath().slice(tests[0].titlePath()[0] === '' ? 3 : 2)) === JSON.stringify(mapping.titlePath) && path.relative('/suite', fs.realpathSync(tests[0].location.file)).split(path.sep).join('/') === this.input.test.source && projectName === mapping.project : tests[0].tags.includes(this.input.test.selector))
+    if (!matches) throw new Error('The permanent selector or framework mapping must resolve to exactly one test')
     if (config.projects.some(project => project.retries !== 0)) throw new Error('TestStudio owns retries')
   }
   onTestBegin(test, result) { console.log("TESTSTUDIO_EVENT " + JSON.stringify({ event: "test.started", testId: this.input.test.id, selector: this.input.test.selector, at: result.startTime.toISOString() })); console.log(`Starting ${this.input.test.id}`) }

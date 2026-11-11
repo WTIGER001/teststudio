@@ -3,10 +3,10 @@
 ## Introduction
 
 Keep application tests in their own repository. TestStudio manages their catalog, releases, execution, timing, and private evidence.
-A repository requires explicit suite declarations. A Playwright configuration or the older platform's catalog alone does not establish compatibility.
+Existing declared repositories use the manifest and catalog contract below. The Git onboarding workflow can generate these declarations for existing Playwright source and keep them in the database or commit them to Git. Discovery and preparation still validate the source before execution.
 Use this contract for new repositories and for adapters that preserve existing tests.
 See [source bundles](source-bundles.md) for packaging and [repository sources](repository-sources.md) for GitHub access.
-The agreed [Git test source extensions](git-test-sources.md) add onboarding without these declarations, database or Git metadata ownership, and run-start synchronization. Those extensions remain unimplemented.
+The [Git test source workflow](repository-sources.md) supports onboarding without these declarations, untagged framework mappings, database or Git metadata ownership, and start-time synchronization. Live provider and hosted worker acceptance remain separate.
 
 ## Concepts
 
@@ -52,7 +52,7 @@ Avoid top-level setup that depends on a target address. A targetless discovery o
 Do not submit the old platform's execution payload or upload its result manifest from test bodies.
 The trusted runner supplies execution selection, timeouts, capture, reporting, and evidence collection.
 Use Playwright's normal fixtures, assertions, steps, and attachments. Do not replace the platform reporter or upload results directly to S3.
-Discovery, review, publication, activation, and test execution remain separate actions.
+Saving and source preparation never start tests. A saved version becomes available after setup; execution remains explicit.
 A successful discovery proves source compatibility. It does not prove that the application assertions pass.
 
 ### Targets, credentials, and privacy
@@ -72,7 +72,7 @@ Retain application-specific safety guards. Protected environments also require s
 
 The installation needs an approved runtime, isolated discovery and execution workers, and source preparation before coded bundles become usable.
 The initial MMDev core deployment supports native HTTPS probes. Its separate coded worker and preparation installation remains pending.
-Current GitHub registration accepts targetless suite profiles. Environment-backed browser bundles use the ZIP preparation path.
+Git bindings support the declared offline profiles. Environment-backed bindings select their named endpoint and require an installed execution gateway.
 Private GitHub sources require an approved GitHub App reference with contents read access to the exact repository.
 The browser selects that reference. It never receives the App key or an installation token.
 Repository synchronization reads committed source. It does not run the repository's build script.
@@ -157,7 +157,7 @@ The gateway supplies the selected target during execution. Discovery needs no re
 3. Register the environment with the endpoint identifier declared in browser.endpoint.
 4. Open Import and sync tests. Select Source ZIP and the manifest path relative to the complete archive root.
 5. Select Upload and prepare bundle. Inspect diagnostics and the discovered test count.
-6. Review the source and catalog. Publish and activate only after the requirements and safety labels are correct.
+6. Review the source and catalog. Save after the requirements and safety labels are correct. Read/write Git metadata uses its separate commit and merge workflow.
 7. Start a separate run against the reviewed environment. Inspect timing, logs, and evidence.
 
 If preparation controls are unavailable, the operator must install or enable the source worker first.

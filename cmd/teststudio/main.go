@@ -31,7 +31,7 @@ import (
 	recordinglocal "github.com/wtiger001/teststudio/adapters/recording/localplaywright"
 	recordinghttp "github.com/wtiger001/teststudio/adapters/recording/workerhttp"
 	localsecrets "github.com/wtiger001/teststudio/adapters/secrets/local"
-	githubsource "github.com/wtiger001/teststudio/adapters/sources/github"
+	sourceconfig "github.com/wtiger001/teststudio/adapters/sources/configuration"
 	workerhttp "github.com/wtiger001/teststudio/adapters/workerexchange/http"
 	"github.com/wtiger001/teststudio/internal/catalog"
 	"github.com/wtiger001/teststudio/internal/cliauth"
@@ -47,7 +47,6 @@ import (
 	"github.com/wtiger001/teststudio/internal/runtimeconfig"
 	"github.com/wtiger001/teststudio/internal/schedules"
 	"github.com/wtiger001/teststudio/internal/sessions"
-	"github.com/wtiger001/teststudio/internal/sourceprovider"
 	"github.com/wtiger001/teststudio/internal/sources"
 	"github.com/wtiger001/teststudio/internal/storage"
 	"github.com/wtiger001/teststudio/internal/traceviewer"
@@ -90,6 +89,7 @@ func run() error {
 	preparedSources := flag.Bool("prepared-sources", false, "Enable source discovery and project-owned immutable suite images for the configured execution provider")
 	sourceBundles := flag.Bool("source-bundles", false, "Enable offline ZIP staging for the separate teststudio-prepare worker")
 	sourceBundleRunners := flag.String("source-bundle-runners", "go,playwright", "Available source builders: go, playwright, or both separated by a comma")
+	gitSourcesConfig := flag.String("git-sources-config", "", "Operator-approved self-managed GitLab servers, network scopes, and certificate authorities")
 	githubSources := flag.Bool("github-sources", false, "Enable GitHub repository registration and durable sync queues")
 	scheduler := flag.Bool("scheduler", true, "Process durable project schedules on this instance")
 	executionWorker := flag.Bool("execution-worker", true, "Process queued test runs on this API instance; disable when using a separate controller")
@@ -124,7 +124,7 @@ func run() error {
 	if !role.Worker && (*workerOrigin != "" || *workerCertificate != "" || *workerKey != "") {
 		return errors.New("direct worker TLS settings require the worker service role")
 	}
-	if !role.API && !role.Worker && !role.Controller && (*workerAddr != "" || *local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *oidcCAFile != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *recordingEmbeddedCLI != "" || *recordingCompanion || *preparedSources || *sourceBundles || *githubSources || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
+	if !role.API && !role.Worker && !role.Controller && (*workerAddr != "" || *local || *localAccounts || *recoverLocal || *bootstrapIssuer != "" || *bootstrapSubject != "" || *providers != "" || *providersEnvironment != "" || *oidcSecretRefs != "" || *oidcCAFile != "" || *secretBindings != "" || *httpTrustBundles != "" || *recordingCLI != "" || *recordingEmbeddedCLI != "" || *recordingCompanion || *preparedSources || *sourceBundles || (*githubSources || *gitSourcesConfig != "") || *goImages != "" || *playwrightImages != "" || *browserGateway != "") {
 		return errors.New("the artifact service role cannot configure identity bootstrap, sign-in, source preparation, recording, execution, or private worker transport")
 	}
 	if !role.API && !role.Worker && !role.Controller && (*kubernetesConfiguration != "" || *kubernetesEnvironment != "" || *ecsConfiguration != "" || *ecsEnvironment != "") {
@@ -329,12 +329,16 @@ func run() error {
 	sourceService := &sources.Service{Store: db, Auth: auth, Location: *location, RecoveryInspectors: map[string]preparation.ArtifactInspector{
 		"go": &localcontainer.Executor{Runner: "go"}, "playwright": &localcontainer.Executor{Runner: "playwright"},
 	}}
-	if *sourceBundles || *githubSources {
+	runService.Sources = sourceService
+	if *sourceBundles || (*githubSources || *gitSourcesConfig != "") {
 		sourceService.BundleRunners = bundleRunners
 	}
-	if *githubSources {
+	if *githubSources || *gitSourcesConfig != "" {
 		sourceService.Secrets = secretProvider
-		sourceService.Providers = map[string]sourceprovider.Provider{"github": &githubsource.Client{Secrets: secretProvider}}
+		sourceService.Providers, err = sourceconfig.Load(*gitSourcesConfig, *githubSources, secretProvider)
+		if err != nil {
+			return err
+		}
 	}
 	if *preparedSources {
 		sourceService.Inspectors = map[string]preparation.ArtifactInspector{
@@ -344,9 +348,9 @@ func run() error {
 	}
 	runService.RecoveryDriver = &localplaywright.Executor{}
 	runService.RecoveryDrivers = []execution.ManagedExecutor{&localcontainer.Executor{Runner: "go"}, &localcontainer.Executor{Runner: "playwright", Environment: true}, &localcontainer.Executor{Runner: "go", Environment: true}}
-	if strings.TrimSpace(*playwrightImages) != "" || *preparedSources || *sourceBundles || *githubSources {
+	if strings.TrimSpace(*playwrightImages) != "" || *preparedSources || *sourceBundles || (*githubSources || *gitSourcesConfig != "") {
 		driver := &localplaywright.Executor{Images: strings.Split(*playwrightImages, ",")}
-		if *preparedSources || *sourceBundles || *githubSources {
+		if *preparedSources || *sourceBundles || (*githubSources || *gitSourcesConfig != "") {
 			driver.ApproveArtifact = sourceService.ApproveArtifact
 		}
 		runService.Playwright = driver
@@ -357,9 +361,9 @@ func run() error {
 			runService.Browser = &browser
 		}
 	}
-	if strings.TrimSpace(*goImages) != "" || *preparedSources || *sourceBundles || *githubSources {
+	if strings.TrimSpace(*goImages) != "" || *preparedSources || *sourceBundles || (*githubSources || *gitSourcesConfig != "") {
 		driver := &localcontainer.Executor{Runner: "go", Images: strings.Split(*goImages, ",")}
-		if *preparedSources || *sourceBundles || *githubSources {
+		if *preparedSources || *sourceBundles || (*githubSources || *gitSourcesConfig != "") {
 			driver.ApproveArtifact = sourceService.ApproveArtifact
 		}
 		runService.Go = driver

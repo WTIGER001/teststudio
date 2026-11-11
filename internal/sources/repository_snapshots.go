@@ -10,14 +10,15 @@ import (
 )
 
 type repositoryPreparation struct {
-	Sync       string
-	Worker     string
-	Source     string
-	Generation int64
-	Sequence   int64
-	Snapshot   string
-	Origin     catalog.Provenance
-	Root       string
+	MetadataFiles map[string]string
+	Sync          string
+	Worker        string
+	Source        string
+	Generation    int64
+	Sequence      int64
+	Snapshot      string
+	Origin        catalog.Provenance
+	Root          string
 }
 type repositoryContent struct {
 	Content []byte `json:"content"`

@@ -38,7 +38,8 @@ The limit keeps definitions, history, audit records, and guards in one bounded t
 Imports update named definitions and preserve omitted tests.
 Existing lifecycle states require explicit actions. Imports do not change those states.
 Coded tests require source preparation and cannot enter through declarative import.
-Use Import and sync tests for reviewed JSON or YAML definitions, complete source ZIP uploads, and registered GitHub source preparation.
+Use Import and sync tests for reviewed JSON or YAML definitions, complete source ZIP uploads, and registered GitHub or self-managed GitLab source preparation.
+Git-managed test editing opens the repository metadata review. Read-only connections store reviewed JSON in TestStudio. Read/write connections commit metadata to a review branch; merging or explicitly selecting that branch makes committed changes available to preparation. Pending edits never change an executable version.
 
 ## Preview and apply
 

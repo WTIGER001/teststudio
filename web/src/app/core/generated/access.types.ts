@@ -1,4 +1,4 @@
-export const accessContractVersion = "0.49.0"
+export const accessContractVersion = "0.50.0"
 
 export type APIAuthentication = { "binding": string; "header"?: string; "scheme": "bearer" | "basic" | "header" }
 export type APIRequestPolicy = { "authentication"?: APIAuthentication; "maxRequests": number; "maxResponseBytes": number; "redactFields"?: (string)[]; "rules": (APIRequestRule)[] }
@@ -174,16 +174,20 @@ export type SignInOptions = { "autoRedirectProvider": string; "localAccountsEnab
 export type SignInProvider = { "id": string; "name": string }
 export type SourceBuild = { "finishedAt": string; "image": string; "log"?: string; "logTruncated"?: boolean; "sourceDigest": string; "startedAt": string }
 export type SourceCapturePolicy = { "failureRetentionDays"?: number; "kindRetentionDays"?: { [key: string]: number }; "logs": boolean; "maxBytes"?: number; "maxFileBytes"?: number; "retentionDays"?: number; "screenshots": string; "trace": string; "video": string }
-export type SourceCatalogArtifact = { "browser"?: { "endpoint": string; "requests"?: APIRequestPolicy }; "discoveredSelectors"?: { [key: string]: string }; "image"?: string; "provenance"?: SourceOrigin; "sourceProjectId"?: string; "sourceRevision"?: string; "sourceSnapshotId"?: string }
+export type SourceCatalogArtifact = { "browser"?: { "endpoint": string; "requests"?: APIRequestPolicy }; "discoveredSelectors"?: { [key: string]: string }; "gitMetadata"?: boolean; "image"?: string; "metadataAuthoritative"?: boolean; "metadataDigest"?: string; "metadataRevision"?: number; "originalSourceDigest"?: string; "provenance"?: SourceOrigin; "repositorySourceId"?: string; "sourceProjectId"?: string; "sourceRevision"?: string; "sourceSnapshotId"?: string }
 export type SourceCatalogDraft = { "artifact": SourceCatalogArtifact; "capture": SourceCapturePolicy; "id": string; "publishedReleaseId"?: string; "tests": (SourceCatalogTest)[]; "timing": SourceTimingPolicy }
 export type SourceCatalogHTTPCheck = { "endpoint": string; "forbiddenText"?: string; "headers"?: { [key: string]: string }; "json"?: { [key: string]: SourceJSONValue }; "maxResponseMs"?: number; "method": string; "minCertificateDays"?: number; "path": string; "requiredText"?: string; "statusCodes": (number)[] }
 export type SourceCatalogImportPlan = { "actor": string; "appliedAt"?: string; "artifact"?: SourceCatalogArtifact; "catalogRevision": number; "changes": (SourceCatalogPlannedTest)[]; "createdAt": string; "expiresAt": string; "id": string; "issues": (SourceCatalogIssue)[]; "kind": string; "projectId": string; "sourceSnapshotId"?: string; "suiteId": string; "suiteRevision": number }
 export type SourceCatalogIssue = { "field": string; "message": string; "testId"?: string }
 export type SourceCatalogPlannedTest = { "action": string; "before"?: SourceCatalogTest; "expectedRevision": number; "test": SourceCatalogTest }
 export type SourceCatalogRelease = { "activatedOnPublication": boolean; "actor": string; "catalog": SourceCatalogDraft; "createdAt": string; "draftRevision": number; "id": string; "projectId": string; "suiteId": string }
-export type SourceCatalogTest = { "applicationId"?: string; "capture"?: SourceCapturePolicy; "category": string; "check"?: SourceCatalogHTTPCheck; "conditions"?: string; "definitionSourceId"?: string; "dependencies": (string)[] | null; "description": string; "id": string; "owner"?: string; "rationale": string; "requiredBindings": (string)[] | null; "requiredParameters"?: (string)[]; "runner": string; "safety": string; "selector"?: string; "source"?: string; "state": string; "tags": (string)[] | null; "timeoutSeconds": number; "timing"?: SourceTimingPolicy; "title": string; "type": string }
+export type SourceCatalogTest = { "applicationId"?: string; "capture"?: SourceCapturePolicy; "category": string; "check"?: SourceCatalogHTTPCheck; "conditions"?: string; "definitionSourceId"?: string; "dependencies": (string)[] | null; "description": string; "framework"?: SourceFrameworkTest; "id": string; "owner"?: string; "rationale": string; "repositorySourceId"?: string; "requiredBindings": (string)[] | null; "requiredParameters"?: (string)[]; "runner": string; "safety": string; "selector"?: string; "source"?: string; "state": string; "tags": (string)[] | null; "timeoutSeconds": number; "timing"?: SourceTimingPolicy; "title": string; "type": string }
 export type SourceContent = { "content": string; "digest": string }
+export type SourceCredentialInfo = { "canRotate": boolean; "expiresAt"?: string; "fingerprint"?: string; "renewal": string }
 export type SourceCredentialReference = { "id": string; "name": string }
+export type SourceCredentialReplacement = { "credentialReference"?: string }
+export type SourceCredentialRotation = { "message": string; "state": string; "updatedAt": string }
+export type SourceFrameworkTest = { "line": number; "project": string; "titlePath": (string)[] }
 export type SourceJSONValue = null | string | number | boolean | (SourceJSONValue)[] | { [key: string]: SourceJSONValue }
 export type SourceOrigin = { "commit"?: string; "reference"?: string; "repository"?: string; "snapshotDigest"?: string }
 export type SourcePrebuiltInput = { "image": string; "runner": string; "saveAsTest"?: boolean }
@@ -193,8 +197,14 @@ export type SourcePreparationPage = { "cursor"?: string; "items": (SourcePrepara
 export type SourcePreparationRecord = { "data": SourcePreparationJob; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
 export type SourcePreparationReference = { "attempt": number; "container": string; "id": string; "installationId": string; "profile": string; "projectId": string; "runId": string; "testId": string; "volume": string; "workerId": string }
 export type SourcePublishInput = { "activate": boolean }
-export type SourceRepositoryBinding = { "buildProfile": string; "manifestPath": string; "runner": string; "suiteId": string }
-export type SourceRepositoryConfig = { "autoActivate": boolean; "bindings": (SourceRepositoryBinding)[]; "credentialReference"?: string; "enabled": boolean; "name": string; "provider": string; "pushEnabled"?: boolean; "reference": string; "repository": string; "syncIntervalSeconds"?: number; "webhookCredentialReference"?: string }
+export type SourceRepositoryAccessCheck = { "checkedAt": string; "credential": SourceCredentialInfo; "credentialReference": string; "current": boolean; "generation": number; "lastSuccessAt"?: string; "message": string; "revision": SourceRevision; "state": string }
+export type SourceRepositoryBinding = { "buildProfile": string; "config"?: string; "discover"?: boolean; "endpoint"?: string; "manifestPath": string; "moduleRoot"?: string; "project"?: string; "runner": string; "suiteId": string }
+export type SourceRepositoryCandidate = { "config": string; "moduleRoot": string }
+export type SourceRepositoryConfig = { "accessMode"?: "read-only" | "read-write"; "autoActivate": boolean; "bindings": (SourceRepositoryBinding)[]; "confirmModeChange"?: boolean; "credentialReference"?: string; "enabled": boolean; "name": string; "provider": string; "pushEnabled"?: boolean; "reference": string; "repository": string; "syncIntervalSeconds"?: number; "webhookCredentialReference"?: string }
+export type SourceRepositoryInspection = { "candidates": (SourceRepositoryCandidate)[]; "manifests": (string)[]; "revision": SourceRevision }
+export type SourceRepositoryMetadata = { "actor": string; "base"?: SourceRevision; "catalog": { [key: string]: SourceJSONValue }; "catalogRevision"?: number; "manifest": { [key: string]: SourceJSONValue }; "pending": boolean; "updatedAt": string }
+export type SourceRepositoryMetadataPage = { "cursor"?: string; "items": (SourceRepositoryMetadataRecord)[] }
+export type SourceRepositoryMetadataRecord = { "data": SourceRepositoryMetadata; "id": string; "revision": number; "updatedAt": string }
 export type SourceRepositoryOptions = { "credentials": (SourceCredentialReference)[]; "providers": (string)[]; "webhookCredentials": (SourceCredentialReference)[] }
 export type SourceRepositoryPage = { "cursor"?: string; "items": (SourceRepositoryRecord)[] }
 export type SourceRepositoryRecord = { "data": SourceRepositorySource; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
@@ -202,6 +212,8 @@ export type SourceRepositorySource = { "actor": string; "configuration": SourceR
 export type SourceRepositorySync = { "actor": string; "configuration": SourceRepositoryConfig; "createdAt": string; "deliveryId"?: string; "error"?: string; "eventDigest"?: string; "finishedAt"?: string; "force": boolean; "id": string; "leaseUntil"?: string; "preparations": { [key: string]: string }; "projectId": string; "repositoryId"?: string; "requestedBy": string; "revision"?: SourceRevision; "sequence": number; "snapshotId"?: string; "sourceGeneration": number; "sourceId": string; "state": string; "trigger"?: string; "worker"?: string }
 export type SourceRepositorySyncPage = { "cursor"?: string; "items": (SourceRepositorySyncRecord)[] }
 export type SourceRepositorySyncRecord = { "data": SourceRepositorySync; "id": string; "projectId"?: string; "revision": number; "updatedAt": string }
+export type SourceRepositoryWrite = { "error"?: string; "metadataRevision": number; "result"?: SourceRepositoryWriteResult; "startedAt": string; "state": string }
+export type SourceRepositoryWriteResult = { "branch": string; "commit": string; "reviewUrl": string }
 export type SourceRevision = { "commit": string; "private": boolean; "reference": string; "repository": string; "repositoryId": string; "url": string }
 export type SourceSyncInput = { "force": boolean }
 export type SourceTimingPolicy = { "maxAgeDays": number; "minimumIncreaseMs": number; "minimumSamples": number; "minimumTimeoutMs": number; "mode": string; "slowdownFactor": number; "timeoutFactor": number; "timeoutMarginMs": number; "timeoutMode": string; "window": number }
@@ -304,6 +316,15 @@ export interface AccessRequests {
   listRepositorySources: { "project": string; query?: { "limit"?: number; "cursor"?: string } }
   readRepositorySource: { "project": string; "source": string }
   saveRepositorySource: { "project": string; "source": string; revision: number; body: SourceRepositoryConfig }
+  checkRepositoryAccess: { "project": string; "source": string; body: SourceCredentialReplacement }
+  readRepositoryAccessStatus: { "project": string; "source": string }
+  inspectRepositorySource: { "project": string; "source": string }
+  readRepositoryMetadata: { "project": string; "source": string; "suite": string }
+  saveRepositoryMetadata: { "project": string; "source": string; "suite": string; revision: number; body: SourceRepositoryMetadata }
+  commitRepositoryMetadata: { "project": string; "source": string; "suite": string; revision: number; key: string }
+  listRepositoryMetadataHistory: { "project": string; "source": string; "suite": string; query?: { "cursor"?: string; "limit"?: number } }
+  readRemoteRepositoryMetadata: { "project": string; "source": string; "suite": string }
+  rotateRepositoryCredential: { "project": string; "source": string; key: string }
   listRepositorySyncs: { "project": string; "source": string; query?: { "limit"?: number; "cursor"?: string } }
   enqueueRepositorySync: { "project": string; "source": string; key: string; body: SourceSyncInput }
   readRepositorySync: { "project": string; "source": string; "sync": string }
@@ -504,6 +525,15 @@ export interface AccessResponses {
   listRepositorySources: SourceRepositoryPage
   readRepositorySource: SourceRepositoryRecord
   saveRepositorySource: SourceRepositoryRecord
+  checkRepositoryAccess: SourceRepositoryAccessCheck
+  readRepositoryAccessStatus: SourceRepositoryAccessCheck
+  inspectRepositorySource: SourceRepositoryInspection
+  readRepositoryMetadata: SourceRepositoryMetadataRecord
+  saveRepositoryMetadata: SourceRepositoryMetadataRecord
+  commitRepositoryMetadata: SourceRepositoryWrite
+  listRepositoryMetadataHistory: SourceRepositoryMetadataPage
+  readRemoteRepositoryMetadata: SourceRepositoryMetadata
+  rotateRepositoryCredential: SourceCredentialRotation
   listRepositorySyncs: SourceRepositorySyncPage
   enqueueRepositorySync: SourceRepositorySyncRecord
   readRepositorySync: SourceRepositorySyncRecord
@@ -704,6 +734,15 @@ export const accessOperations = {
   listRepositorySources: { method: "GET", path: "/api/v1/projects/{project}/repository-sources" },
   readRepositorySource: { method: "GET", path: "/api/v1/projects/{project}/repository-sources/{source}" },
   saveRepositorySource: { method: "PUT", path: "/api/v1/projects/{project}/repository-sources/{source}" },
+  checkRepositoryAccess: { method: "POST", path: "/api/v1/projects/{project}/repository-sources/{source}/access-check" },
+  readRepositoryAccessStatus: { method: "GET", path: "/api/v1/projects/{project}/repository-sources/{source}/access-status" },
+  inspectRepositorySource: { method: "POST", path: "/api/v1/projects/{project}/repository-sources/{source}/inspect" },
+  readRepositoryMetadata: { method: "GET", path: "/api/v1/projects/{project}/repository-sources/{source}/metadata/{suite}" },
+  saveRepositoryMetadata: { method: "PUT", path: "/api/v1/projects/{project}/repository-sources/{source}/metadata/{suite}" },
+  commitRepositoryMetadata: { method: "POST", path: "/api/v1/projects/{project}/repository-sources/{source}/metadata/{suite}/commit" },
+  listRepositoryMetadataHistory: { method: "GET", path: "/api/v1/projects/{project}/repository-sources/{source}/metadata/{suite}/history" },
+  readRemoteRepositoryMetadata: { method: "GET", path: "/api/v1/projects/{project}/repository-sources/{source}/metadata/{suite}/remote" },
+  rotateRepositoryCredential: { method: "POST", path: "/api/v1/projects/{project}/repository-sources/{source}/rotate-credential" },
   listRepositorySyncs: { method: "GET", path: "/api/v1/projects/{project}/repository-sources/{source}/syncs" },
   enqueueRepositorySync: { method: "POST", path: "/api/v1/projects/{project}/repository-sources/{source}/syncs" },
   readRepositorySync: { method: "GET", path: "/api/v1/projects/{project}/repository-sources/{source}/syncs/{sync}" },

@@ -10,6 +10,7 @@ export interface HTTPCheck {
 
 export interface TestDefinition {
   definitionSourceId?: string
+ repositorySourceId?: string
   id: string
   title: string
   description: string

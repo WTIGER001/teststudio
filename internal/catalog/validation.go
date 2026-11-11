@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/wtiger001/teststudio/internal/apipolicy"
 	"github.com/wtiger001/teststudio/internal/browserpolicy"
@@ -37,6 +38,17 @@ func ValidateTest(t Test) error {
 	}
 	if t.TimeoutSeconds < 1 || t.TimeoutSeconds > 3600 {
 		return errors.New("timeout must be between 1 and 3600 seconds")
+	}
+	if t.Framework != nil {
+		f := t.Framework
+		if t.Runner != "playwright" || f.Line < 1 || len(f.TitlePath) < 1 || len(f.TitlePath) > 40 || len(f.Project) > 200 || strings.ContainsAny(f.Project, "[]\r\n›>\x00") {
+			return errors.New("framework mapping requires Playwright, an exact project, source line, and bounded title path")
+		}
+		for _, title := range f.TitlePath {
+			if !utf8.ValidString(title) || len(title) < 1 || len(title) > 200 || strings.ContainsAny(title, "\r\n›>\x00") {
+				return errors.New("framework title paths require bounded single-line values")
+			}
+		}
 	}
 	if t.Timing != nil {
 		if err := timing.Validate(*t.Timing); err != nil {

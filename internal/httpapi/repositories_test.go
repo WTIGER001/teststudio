@@ -42,7 +42,10 @@ func TestRepositoryAPIRegistersAndQueuesWithoutRemoteRequests(t *testing.T) {
 		t.Fatal(value)
 	}
 	project := "/api/v1/projects/repository"
-	if status, value := c.call("PUT", project+"/suites/unit", map[string]any{"id": "unit", "name": "Unit", "requiresTarget": false, "applications": []string{}}, map[string]string{"If-Match": "0"}); status != 200 {
+	if status, value := c.call("PUT", project+"/applications/app", map[string]string{"id": "app", "name": "Application"}, map[string]string{"If-Match": "0"}); status != 200 {
+		t.Fatal(value)
+	}
+	if status, value := c.call("PUT", project+"/suites/unit", map[string]any{"id": "unit", "name": "Unit", "requiresTarget": false, "applications": []string{"app"}}, map[string]string{"If-Match": "0"}); status != 200 {
 		t.Fatal(value)
 	}
 	config := map[string]any{"name": "Project repository", "provider": "github", "repository": "owner/suite", "reference": "heads/main", "enabled": true, "autoActivate": false, "bindings": []map[string]string{{"suiteId": "unit", "manifestPath": "suites/unit.json", "runner": "go", "buildProfile": "go-module"}}}
@@ -113,7 +116,10 @@ func TestRepositoryWebhookRequiresSignatureWithoutBrowserSession(t *testing.T) {
 		t.Fatal(value)
 	}
 	base := "/api/v1/projects/repository"
-	if status, value := c.call("PUT", base+"/suites/unit", map[string]any{"id": "unit", "name": "Unit", "requiresTarget": false, "applications": []string{}}, map[string]string{"If-Match": "0"}); status != 200 {
+	if status, value := c.call("PUT", base+"/applications/app", map[string]string{"id": "app", "name": "Application"}, map[string]string{"If-Match": "0"}); status != 200 {
+		t.Fatal(value)
+	}
+	if status, value := c.call("PUT", base+"/suites/unit", map[string]any{"id": "unit", "name": "Unit", "requiresTarget": false, "applications": []string{"app"}}, map[string]string{"If-Match": "0"}); status != 200 {
 		t.Fatal(value)
 	}
 	config := sources.RepositoryConfig{Name: "Repository", Provider: "github", Repository: "owner/suite", Reference: "heads/main", Enabled: true, Push: true, WebhookCredential: "hook", Bindings: []sources.RepositoryBinding{{Suite: "unit", Manifest: "suite.json", Runner: "go", Profile: "go-module"}}}

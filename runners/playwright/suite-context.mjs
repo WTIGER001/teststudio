@@ -28,6 +28,6 @@ export function suiteContext(root = '/suite', required = false) {
   const module = file(root, manifest.moduleRoot, true)
   const config = file(module, manifest.tests.config || 'playwright.config.ts')
   const project = manifest.tests.project || ''
-  if (typeof project !== 'string' || project && !/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(project)) throw new Error('Playwright discovery requires one exact project identifier')
+  if (typeof project !== 'string' || project.length > 200 || /[\[\]\r\n›>\0]/.test(project)) throw new Error('Playwright discovery requires one exact project identifier')
   return { root: fs.realpathSync(root), module, config, project, manifest, origin, catalogText: text(root, manifest.catalog) }
 }

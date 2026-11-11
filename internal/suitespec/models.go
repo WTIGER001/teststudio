@@ -17,6 +17,7 @@ type Tests struct {
 }
 
 type Manifest struct {
+	Discover         bool                `json:"discover,omitempty"`
 	Browser          *browserpolicy.Spec `json:"browser,omitempty"`
 	Schema           int                 `json:"schemaVersion"`
 	Suite            string              `json:"suiteId"`

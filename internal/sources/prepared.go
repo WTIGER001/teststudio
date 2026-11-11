@@ -73,6 +73,57 @@ func (s *Service) stagePrepared(ctx context.Context, job Job, result preparation
 	if job.RepositorySource != "" {
 		channel = digest(job.Project + "/" + job.Suite + "/repository/" + job.RepositorySource)[7:]
 	}
+	if job.RepositorySource != "" {
+		artifact.RepositorySource = job.RepositorySource
+		bundleRow, err := s.Store.Get(ctx, bundleBucket(job.Project), job.Bundle)
+		if err != nil {
+			return upload, err
+		}
+		bundle, err := storage.Decode[Bundle](bundleRow)
+		if err != nil {
+			return upload, err
+		}
+		if bundle.Snapshot != "" {
+			snapshot, err := s.loadRepositorySnapshot(ctx, job.Project, bundle.Snapshot, job.RepositorySource)
+			if err != nil {
+				return upload, err
+			}
+			artifact.OriginalSourceDigest = snapshot.Digest
+		}
+		metadataRow, readErr := s.Store.Get(ctx, metadataBucket(job.Project, job.RepositorySource), job.Suite)
+		if readErr == nil {
+			artifact.MetadataRevision = metadataRow.Revision + 1
+			metadata, err := storage.Decode[RepositoryMetadata](metadataRow)
+			if err != nil {
+				return upload, err
+			}
+			artifact.MetadataDigest = metadataContentDigest(metadata)
+			artifact.MetadataAuthoritative = metadata.Pending
+		} else if !errors.Is(readErr, storage.ErrNotFound) {
+			return upload, readErr
+		}
+		sourceRow, err := s.Store.Get(ctx, repositoryBucket(job.Project), job.RepositorySource)
+		if err != nil {
+			return upload, err
+		}
+		registered, err := storage.Decode[RepositorySource](sourceRow)
+		if err != nil {
+			return upload, err
+		}
+		artifact.GitMetadata = registered.Configuration.Mode == "read-write"
+		if artifact.GitMetadata {
+			artifact.MetadataRevision = 0
+		} else if artifact.MetadataRevision == 0 {
+			artifact.MetadataRevision = 1
+		}
+		artifact.MetadataAuthoritative = artifact.MetadataAuthoritative || artifact.GitMetadata
+		artifact.MetadataDigest = metadataContentDigest(RepositoryMetadata{Manifest: result.Discovery.Manifest, Catalog: result.Discovery.Catalog})
+	}
+	if job.RepositorySource != "" {
+		for i := range result.Discovery.Catalog.Tests {
+			result.Discovery.Catalog.Tests[i].RepositorySource = job.RepositorySource
+		}
+	}
 	catalogs := &catalog.Service{Store: s.Store, Auth: s.Auth}
 	plan, err := catalogs.PreviewPreparedImport(ctx, job.Actor, job.Project, job.Suite, result.Discovery.Catalog, id, channel, artifact)
 	if err != nil {
@@ -106,6 +157,19 @@ func (s *Service) stagePrepared(ctx context.Context, job Job, result preparation
 		return upload, err
 	}
 	changes := []storage.Change{row, raw, staging, audit}
+	if job.RepositorySource != "" {
+		change, err := s.discoveredMetadata(ctx, job, result.Discovery)
+		if err != nil {
+			return upload, err
+		}
+		if change != nil {
+			history, err := metadataHistoryChange(job.Project, job.RepositorySource, job.Suite, *change)
+			if err != nil {
+				return upload, err
+			}
+			changes = append(changes, *change, history)
+		}
+	}
 	if job.Bundle != "" {
 		bundleRow, err := s.Store.Get(ctx, bundleBucket(job.Project), job.Bundle)
 		if err != nil {

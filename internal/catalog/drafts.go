@@ -57,6 +57,20 @@ func (s *Service) SaveDraft(ctx context.Context, user, project, suite string, d 
 		return errors.New("assign this suite to one application before saving tests")
 	}
 	for _, test := range d.Tests {
+		current, readErr := s.Store.Get(ctx, Bucket("tests", project, suite), test.ID)
+		if readErr == nil {
+			before, err := storage.Decode[Test](current)
+			if err != nil {
+				return err
+			}
+			if !reflect.DeepEqual(before, test) {
+				if err := s.guardGitMetadata(ctx, project, before); err != nil {
+					return err
+				}
+			}
+		} else if !errors.Is(readErr, storage.ErrNotFound) {
+			return readErr
+		}
 		if test.Application != "" && test.Application != owner.Applications[0] {
 			return errors.New("test application is outside the suite")
 		}

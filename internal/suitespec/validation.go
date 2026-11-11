@@ -94,7 +94,7 @@ func Validate(manifest Manifest) error {
 		if manifest.Tests.Config != "" && !RelativePath(manifest.Tests.Config, false) {
 			return errors.New("Playwright configuration must stay within its module root")
 		}
-		if !slices.Contains([]string{"browser", "api", "accessibility", "visual", "performance"}, manifest.Type) || len(manifest.Tests.Packages) != 0 || (manifest.Tests.Project != "" && !domain.ValidID(manifest.Tests.Project)) {
+		if !slices.Contains([]string{"browser", "api", "accessibility", "visual", "performance"}, manifest.Type) || len(manifest.Tests.Packages) != 0 || (len(manifest.Tests.Project) > 200 || strings.ContainsAny(manifest.Tests.Project, "[]\r\n›>\x00")) {
 			return errors.New("Playwright suites require a compatible type and at most one exact project")
 		}
 	default:
@@ -127,7 +127,7 @@ func ValidateCatalog(manifest Manifest, document catalog.Document) error {
 	if err := Validate(manifest); err != nil {
 		return err
 	}
-	if document.Schema != catalog.SchemaVersion || len(document.Tests) == 0 || len(document.Tests) > 1000 {
+	if document.Schema != catalog.SchemaVersion || len(document.Tests) == 0 && !manifest.Discover || len(document.Tests) > 1000 {
 		return errors.New("prepared catalog requires the supported schema and 1 through 1000 tests")
 	}
 	if document.Suite != "" && document.Suite != manifest.Suite {

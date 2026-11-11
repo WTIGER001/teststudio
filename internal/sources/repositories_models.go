@@ -7,13 +7,20 @@ import (
 )
 
 type RepositoryBinding struct {
-	Suite    string `json:"suiteId"`
-	Manifest string `json:"manifestPath"`
-	Runner   string `json:"runner"`
-	Profile  string `json:"buildProfile"`
+	Discover   bool   `json:"discover,omitempty"`
+	ModuleRoot string `json:"moduleRoot,omitempty"`
+	Config     string `json:"config,omitempty"`
+	Project    string `json:"project,omitempty"`
+	Endpoint   string `json:"endpoint,omitempty"`
+	Suite      string `json:"suiteId"`
+	Manifest   string `json:"manifestPath"`
+	Runner     string `json:"runner"`
+	Profile    string `json:"buildProfile"`
 }
 
 type RepositoryConfig struct {
+	ConfirmModeChange bool                `json:"confirmModeChange,omitempty"`
+	Mode              string              `json:"accessMode,omitempty"`
 	Push              bool                `json:"pushEnabled,omitempty"`
 	WebhookCredential string              `json:"webhookCredentialReference,omitempty"`
 	IntervalSeconds   int                 `json:"syncIntervalSeconds,omitempty"`

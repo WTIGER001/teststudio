@@ -29,7 +29,7 @@ import (
 )
 
 func TestWorkerBackendRejectsUnrelatedConfigurationBeforeStartup(t *testing.T) {
-	for _, option := range []string{"local", "local-accounts", "oidc-config", "http-trust-bundles", "scheduler", "notification-worker", "execution-worker", "prepared-sources", "source-bundles", "github-sources", "ecs-workers-env", "kubernetes-workers-env", "recording-cli", "recording-worker-config", "recording-worker-config-env", "recording-embedded-cli", "recording-embedded-helper", "recording-companion", "go-images", "playwright-images", "addr", "ui", "artifact-addr", "public-url", "trace-viewer-directory"} {
+	for _, option := range []string{"local", "local-accounts", "oidc-config", "http-trust-bundles", "scheduler", "notification-worker", "execution-worker", "prepared-sources", "source-bundles", "github-sources", "git-sources-config", "ecs-workers-env", "kubernetes-workers-env", "recording-cli", "recording-worker-config", "recording-worker-config-env", "recording-embedded-cli", "recording-embedded-helper", "recording-companion", "go-images", "playwright-images", "addr", "ui", "artifact-addr", "public-url", "trace-viewer-directory"} {
 		flags := flag.NewFlagSet("worker", flag.ContinueOnError)
 		flags.String(option, "", "")
 		if err := flags.Parse([]string{"--" + option + "=private-configuration-canary"}); err != nil {
@@ -90,7 +90,8 @@ func newBackendFixture(t *testing.T) backendFixture {
 	}
 	f := backendFixture{db, auth, workerBackendExchange(db, auth, blobs, "azure"), database, files}
 	f.put(t, "projects", "project", projects.Project{ID: "project", Name: "Backend fixture project"})
-	f.put(t, projects.Bucket("suites", "project"), "suite", projects.Suite{ID: "suite", Name: "Targetless checks"})
+	f.put(t, projects.Bucket("applications", "project"), "app", projects.Application{ID: "app", Name: "Backend fixture application"})
+	f.put(t, projects.Bucket("suites", "project"), "suite", projects.Suite{ID: "suite", Name: "Targetless checks", Applications: []string{"app"}})
 	return f
 }
 

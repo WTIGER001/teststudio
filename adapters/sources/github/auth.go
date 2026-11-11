@@ -20,6 +20,7 @@ import (
 )
 
 type appCredential struct {
+	Write        bool     `json:"write,omitempty"`
 	Repositories []string `json:"repositories"`
 	ClientID     string   `json:"clientId"`
 	Installation int64    `json:"installationId"`
@@ -56,12 +57,22 @@ func (c *Client) installationToken(ctx context.Context, session *session, access
 	if !allowed {
 		return "", errors.New("repository is not approved for this GitHub App credential")
 	}
+	if access.Write && !credential.Write {
+		return "", errors.New("GitHub App credential is not approved for metadata writes")
+	}
+	level := "read"
+	permissions := map[string]string{"contents": level}
+	if access.Write {
+		level = "write"
+		permissions["contents"] = level
+		permissions["pull_requests"] = "write"
+	}
 	token, err := appJWT(credential, time.Now())
 	if err != nil {
 		return "", err
 	}
 	_, name, _ := strings.Cut(access.Repository, "/")
-	response, err := session.request(ctx, "POST", session.api+"/app/installations/"+strconv.FormatInt(credential.Installation, 10)+"/access_tokens", map[string]any{"repositories": []string{name}, "permissions": map[string]string{"contents": "read"}}, token, "application/vnd.github+json")
+	response, err := session.request(ctx, "POST", session.api+"/app/installations/"+strconv.FormatInt(credential.Installation, 10)+"/access_tokens", map[string]any{"repositories": []string{name}, "permissions": permissions}, token, "application/vnd.github+json")
 	if err != nil {
 		return "", err
 	}
@@ -78,7 +89,7 @@ func (c *Client) installationToken(ctx context.Context, session *session, access
 		ExpiresAt   time.Time         `json:"expires_at"`
 		Permissions map[string]string `json:"permissions"`
 	}
-	if json.Unmarshal(data, &issued) != nil || len(issued.Token) < 1 || len(issued.Token) > 4096 || !time.Now().Before(issued.ExpiresAt) || issued.ExpiresAt.After(time.Now().Add(65*time.Minute)) || issued.Permissions["contents"] != "read" {
+	if json.Unmarshal(data, &issued) != nil || len(issued.Token) < 1 || len(issued.Token) > 4096 || !time.Now().Before(issued.ExpiresAt) || issued.ExpiresAt.After(time.Now().Add(65*time.Minute)) || issued.Permissions["contents"] != level {
 		return "", errors.New("GitHub installation authentication response is invalid")
 	}
 	for _, character := range issued.Token {
@@ -87,7 +98,7 @@ func (c *Client) installationToken(ctx context.Context, session *session, access
 		}
 	}
 	for permission, level := range issued.Permissions {
-		if (permission != "contents" && permission != "metadata") || level != "read" {
+		if !(permission == "metadata" && level == "read" || permission == "contents" && (level == "read" || access.Write && level == "write") || access.Write && permission == "pull_requests" && level == "write") {
 			return "", errors.New("GitHub installation token exceeds its read-only source permissions")
 		}
 	}

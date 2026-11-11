@@ -1,10 +1,11 @@
 import type { SourceRepositoryConfig } from '../../core/generated/access.types'
 
 export interface RepositoryFormValue {
-  id: string; name: string; repository: string; referenceKind: string; reference: string; credential: string; enabled: boolean; autoActivate: boolean; push: boolean; webhookCredential: string; intervalSeconds: number
-  bindings: { suite: string; manifest: string; runner: string }[]
+  provider: string; mode: string; confirmModeChange: boolean; id: string; name: string; repository: string; referenceKind: string; reference: string; credential: string; enabled: boolean; autoActivate: boolean; push: boolean; webhookCredential: string; intervalSeconds: number
+  bindings: { suite: string; manifest: string; runner: string; discover: boolean; moduleRoot: string; config: string; project: string; endpoint: string }[]
 }
-export function repositoryWizardProblem(value: RepositoryFormValue, step: number): { field: 'suite' | 'intervalSeconds' | 'webhookCredential'; binding?: number; message: string } | null {
+export function repositoryWizardProblem(value: RepositoryFormValue, step: number): { field: 'suite' | 'intervalSeconds' | 'webhookCredential' | 'credential'; binding?: number; message: string } | null {
+  if (step === 0 && value.mode === 'read-write' && !value.credential) return { field: 'credential', message: 'Read/write mode requires an approved write credential.' }
   if (step === 1) {
     const suites = new Set<string>()
     for (let index = 0; index < value.bindings.length; index++) {
@@ -19,7 +20,7 @@ export function repositoryWizardProblem(value: RepositoryFormValue, step: number
 }
 export function repositoryConfig(value: RepositoryFormValue): SourceRepositoryConfig {
   const reference = value.referenceKind === 'commit' ? value.reference : `${value.referenceKind === 'tag' ? 'tags' : 'heads'}/${value.reference}`
-  return { pushEnabled: value.push, webhookCredentialReference: value.webhookCredential || undefined, syncIntervalSeconds: value.intervalSeconds || undefined, name: value.name, provider: 'github', repository: value.repository, reference, credentialReference: value.credential || undefined, enabled: value.enabled, autoActivate: value.autoActivate, bindings: value.bindings.map(item => ({ suiteId: item.suite, manifestPath: item.manifest, runner: item.runner, buildProfile: item.runner === 'playwright' ? 'playwright-node' : 'go-module' })) }
+  return { confirmModeChange: value.confirmModeChange, pushEnabled: value.push, webhookCredentialReference: value.webhookCredential || undefined, syncIntervalSeconds: value.intervalSeconds || undefined, name: value.name, provider: value.provider, accessMode: value.mode as 'read-only' | 'read-write', repository: value.repository, reference, credentialReference: value.credential || undefined, enabled: value.enabled, autoActivate: value.autoActivate, bindings: value.bindings.map(item => ({ suiteId: item.suite, manifestPath: item.manifest, runner: item.runner, discover: item.runner === 'playwright' && item.discover, moduleRoot: item.moduleRoot || '.', config: item.config || 'playwright.config.ts', project: item.project || undefined, endpoint: item.endpoint || undefined, buildProfile: item.runner === 'playwright' ? item.endpoint ? 'playwright-environment' : 'playwright-node' : item.endpoint ? 'go-environment' : 'go-module' })) }
 }
 export function repositoryReference(reference: string): { kind: string; value: string } {
   if (reference.startsWith('heads/')) return { kind: 'branch', value: reference.slice(6) }
@@ -32,4 +33,4 @@ export function repositoryPreparations(values: Record<string, string>): { suite:
 export function repositorySyncActive(state: string | undefined): boolean { return state === 'received' || state === 'fetching' }
 export function repositoryPreparationActive(state: string | undefined, cleanupPending = false): boolean { return cleanupPending || state === 'received' || state === 'preparing' || state === 'discovering' }
 
-export function repositoryWebhookAddress(origin: string, project: string, source: string): string { return `${origin}/api/v1/projects/${encodeURIComponent(project)}/repository-sources/${encodeURIComponent(source)}/webhooks/github` }
+export function repositoryWebhookAddress(origin: string, project: string, source: string, provider = 'github'): string { return `${origin}/api/v1/projects/${encodeURIComponent(project)}/repository-sources/${encodeURIComponent(source)}/webhooks/${encodeURIComponent(provider)}` }
