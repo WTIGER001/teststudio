@@ -162,7 +162,7 @@ func (c *Client) session(ctx context.Context, access sourceprovider.Access) (*se
 	deadline, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	result := &session{api: strings.TrimSuffix(api, "/"), download: strings.TrimSuffix(download, "/"), transport: transport, cancel: cancel, ctx: deadline, client: &http.Client{Transport: transport, Timeout: 2 * time.Minute, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}}
 	if access.Credential != "" {
-		token, err := c.installationToken(deadline, result, access)
+		token, err := c.sourceToken(deadline, result, access)
 		if err != nil {
 			result.close()
 			return nil, err

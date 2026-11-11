@@ -43,6 +43,7 @@ type githubFixture struct {
 	archive                               []byte
 	commit                                string
 	permission                            string
+	apiToken                              string
 	redirected                            string
 	repositoryID                          int64
 	tokenRequests, downloads, apiRequests int
@@ -54,7 +55,7 @@ func fixture(t *testing.T) *githubFixture {
 	if err != nil {
 		t.Fatal(err)
 	}
-	f := &githubFixture{key: key, commit: strings.Repeat("a", 40), permission: "read", repositoryID: 42}
+	f := &githubFixture{key: key, commit: strings.Repeat("a", 40), permission: "read", repositoryID: 42, apiToken: "fixture-installation-token"}
 	var zipBytes bytes.Buffer
 	writer := zip.NewWriter(&zipBytes)
 	for name, data := range map[string]string{"owner-suite-fixed/teststudio-suite.json": `{"schemaVersion":1,"suiteId":"unit","type":"unit","runner":"go","applications":[],"moduleRoot":".","tests":{"packages":["./checks"]},"catalog":"catalog.json","buildProfile":"go-module"}`, "owner-suite-fixed/catalog.json": `{"schemaVersion":"teststudio.catalog/v1","tests":[{"id":"GITHUB-001","title":"Compute a value","category":"Unit","runner":"go","type":"unit","state":"enabled","safety":"safe","rationale":"Computes in memory","timeoutSeconds":5,"source":"checks/value_test.go","selector":"./checks::TestValue"}]}`, "owner-suite-fixed/go.mod": "module github-fixture.local/source\n\ngo 1.24\n", "owner-suite-fixed/checks/value_test.go": "package checks\nimport \"testing\"\nfunc TestValue(t *testing.T) {}\n"} {
@@ -120,9 +121,9 @@ func fixture(t *testing.T) *githubFixture {
 				t.Error("installation token was not repository-scoped and read-only")
 			}
 			w.WriteHeader(201)
-			json.NewEncoder(w).Encode(map[string]any{"token": "fixture-installation-token", "expires_at": time.Now().Add(time.Hour), "permissions": map[string]string{"contents": f.permission, "metadata": "read"}})
+			json.NewEncoder(w).Encode(map[string]any{"token": f.apiToken, "expires_at": time.Now().Add(time.Hour), "permissions": map[string]string{"contents": f.permission, "metadata": "read"}})
 		case "/repos/owner/suite":
-			if r.Header.Get("Authorization") != "" && r.Header.Get("Authorization") != "Bearer fixture-installation-token" {
+			if r.Header.Get("Authorization") != "" && r.Header.Get("Authorization") != "Bearer "+f.apiToken {
 				t.Error("repository received app assertion")
 			}
 			json.NewEncoder(w).Encode(map[string]any{"id": f.repositoryID, "full_name": "owner/suite", "private": r.Header.Get("Authorization") != ""})

@@ -84,6 +84,14 @@ Reuse output/aws-mmdev/recording-checks-0130 and output/playwright/recording-che
 Complete AWS acceptance remains open. Isolated coded workers, preparation, two-provider permission parity, lifecycle, and storage-policy scenarios require further work.
 The full cross-profile ledger remains 50 verified of 57. This milestone advances 41, 46, 54, 56, and 57 without closing them.
 
+### Private GitHub source authentication
+
+The user selects ordinary GitHub API token authentication for the private marketmaker-tests source. A GitHub App is optional.
+The workstation's gh login has verified read access. Product 0.16.2-dev also verifies the native source adapter's exact commit and private archive download using that token locally. This does not configure ECS.
+Store the approved token JSON envelope from [repository sources](repository-sources.md) in a dedicated TestStudio server secret. Wire its reference into the API and source worker's project-scoped source-repository binding, and enable github-sources on both processes. The current core template has no generic Git source binding parameter; that deployment wiring remains necessary. Do not put token values in stack parameters, tracked files, command arguments, UI configuration, or deployment receipts.
+API tokens use validated credential replacement when expired or revoked. They do not receive App installation-token renewal. Existing identity and browser recording secrets remain separate.
+MMDev still runs 0.15.0-dev and lacks coded preparation and execution workers. No token is copied to AWS and no service deployment occurs during the local authentication check. Source publication, authentication, preparation, and application execution are distinct acceptance steps.
+
 ## Tutorials
 
 ### Reproduce the deployment inputs

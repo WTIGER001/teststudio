@@ -111,7 +111,7 @@ func (s *Service) RotateRepositoryCredential(ctx context.Context, user, project,
 	config := registered.Configuration
 	provider, ok := s.Providers[config.Provider].(sourceprovider.CredentialRotator)
 	if !ok {
-		return CredentialRotation{}, errors.New("this connection renews tokens automatically or requires operator key replacement")
+		return CredentialRotation{}, errors.New("this provider uses approved credential replacement instead of native rotation")
 	}
 	if s.Secrets == nil {
 		return CredentialRotation{}, errors.New("credential provider is unavailable")

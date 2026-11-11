@@ -173,9 +173,26 @@ Use a private file or server environment variable. The UI selects the reference 
 Each credential requires an explicit approved repository list.
 GitHub entries use owner/repository. GitLab entries support group/subgroup/repository.
 
-A GitHub App secret uses clientId, installationId, privateKeyPem, and repositories.
+GitHub supports ordinary API tokens without a GitHub App. This uses the same Bearer token authentication as gh api; the server calls the REST API directly and does not require the gh executable or an interactive login.
+A GitHub token secret uses this shape:
+
+```json
+{
+  "token": "OPERATOR_SUPPLIED_GITHUB_TOKEN",
+  "repositories": ["owner/repository"],
+  "write": false,
+  "expiresAt": "2027-04-01T00:00:00Z"
+}
+```
+
+Use a repository-scoped token with Contents read permission for private source. Read/write metadata also needs Contents and Pull requests write permissions and write set to true in the binding payload. An organization may require approval of its token access. The TestStudio allowlist still limits which repositories a reference can access even when an existing token has broader permissions.
+expiresAt is optional operator-supplied metadata. Known expiry blocks expired credentials before a request and supports the fourteen-day warning. Provider revocation and permission errors still block later source access. Personal and CLI OAuth tokens do not use App installation-token renewal. Create a replacement token through GitHub, register it as an approved reference, validate and switch, then revoke the previous token when its consumers have moved. Token and App credential fields cannot be combined.
+For local checks, an operator can retrieve the existing CLI credential with gh auth token and write the JSON privately without displaying the token. Do not run that command directly into chat output or put its value in command arguments. TestStudio does not automatically read a user's keychain or adopt ambient GH_TOKEN credentials.
+AWS requires an explicitly approved server-side secret. Its payload is this JSON envelope, injected through a scoped environment or mounted-file binding for purpose source-repository. The workstation's CLI login does not configure ECS. Deploy only credential references and approved binding configuration; secret values stay outside templates, source, browser responses, and build artifacts.
+
+A GitHub App remains optional. Its secret uses clientId, installationId, privateKeyPem, and repositories.
 Set write to true only when the operator approves metadata commits and pull requests.
-Read operations still request a fresh repository-limited installation token with contents read access.
+For App credentials, read operations request a fresh repository-limited installation token with contents read access.
 
 A GitLab secret uses this shape:
 
@@ -206,7 +223,7 @@ The service durably records the attempt, stores the replacement atomically throu
 An interrupted or failed rotation is not blindly retried. It requires validation and operator replacement or recovery because the provider may already have revoked the old token.
 No secret values enter browser responses, logs, test runtimes, source bundles, or Git commits.
 
-See [GitHub App keys](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps), [GitLab project token rotation](https://docs.gitlab.com/api/project_access_tokens/#rotate-a-project-access-token), and [GitLab commits](https://docs.gitlab.com/api/commits/).
+See [GitHub API authentication](https://docs.github.com/en/rest/authentication/authenticating-to-the-rest-api), [GitHub CLI authentication](https://cli.github.com/manual/gh_help_environment), [GitHub App keys](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps), [GitLab project token rotation](https://docs.gitlab.com/api/project_access_tokens/#rotate-a-project-access-token), and [GitLab commits](https://docs.gitlab.com/api/commits/).
 
 ## Supported scope and target verification
 

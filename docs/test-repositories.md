@@ -73,8 +73,8 @@ Retain application-specific safety guards. Protected environments also require s
 The installation needs an approved runtime, isolated discovery and execution workers, and source preparation before coded bundles become usable.
 The initial MMDev core deployment supports native HTTPS probes. Its separate coded worker and preparation installation remains pending.
 Git bindings support the declared offline profiles. Environment-backed bindings select their named endpoint and require an installed execution gateway.
-Private GitHub sources require an approved GitHub App reference with contents read access to the exact repository.
-The browser selects that reference. It never receives the App key or an installation token.
+Private GitHub sources use an approved GitHub API token or optional GitHub App reference with Contents read access to the exact repository.
+The browser selects that reference. It never receives a token or App key.
 Repository synchronization reads committed source. It does not run the repository's build script.
 If a repository needs generated modules, publish those files at the declared source paths before synchronizing that commit.
 

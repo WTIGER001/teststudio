@@ -15,50 +15,26 @@ import (
 	"strings"
 	"time"
 
-	"github.com/wtiger001/teststudio/internal/definitions"
 	"github.com/wtiger001/teststudio/internal/sourceprovider"
 )
 
-type appCredential struct {
-	Write        bool     `json:"write,omitempty"`
-	Repositories []string `json:"repositories"`
-	ClientID     string   `json:"clientId"`
-	Installation int64    `json:"installationId"`
-	PrivateKey   string   `json:"privateKeyPem"`
+type repositoryCredential struct {
+	Token        string     `json:"token,omitempty"`
+	ExpiresAt    *time.Time `json:"expiresAt,omitempty"`
+	Write        bool       `json:"write,omitempty"`
+	Repositories []string   `json:"repositories"`
+	ClientID     string     `json:"clientId"`
+	Installation int64      `json:"installationId"`
+	PrivateKey   string     `json:"privateKeyPem"`
 }
 
-func (c *Client) installationToken(ctx context.Context, session *session, access sourceprovider.Access) (string, error) {
-	if c.Secrets == nil {
-		return "", errors.New("GitHub App credential reference is unavailable")
-	}
-	secret, err := c.Secrets.Resolve(ctx, access.Project, access.Credential, sourceprovider.CredentialPurpose)
+func (c *Client) sourceToken(ctx context.Context, session *session, access sourceprovider.Access) (string, error) {
+	credential, err := c.repositoryCredential(ctx, access)
 	if err != nil {
-		return "", errors.New("GitHub App credential reference is unavailable")
+		return "", err
 	}
-	var credential appCredential
-	if definitions.DecodeJSON(secret.Bytes, &credential, 65536, 8, 100) != nil || len(credential.ClientID) < 1 || len(credential.ClientID) > 128 || credential.Installation <= 0 || len(credential.PrivateKey) > 16384 {
-		return "", errors.New("GitHub App credential configuration is invalid")
-	}
-	for _, character := range credential.ClientID {
-		if !(character >= 'a' && character <= 'z' || character >= 'A' && character <= 'Z' || character >= '0' && character <= '9' || character == '.' || character == '_' || character == '-') {
-			return "", errors.New("GitHub App client identifier is invalid")
-		}
-	}
-	allowed := false
-	if len(credential.Repositories) < 1 || len(credential.Repositories) > 500 {
-		return "", errors.New("GitHub App credential requires an approved repository list")
-	}
-	for _, repository := range credential.Repositories {
-		if !repositoryName.MatchString(repository) {
-			return "", errors.New("GitHub App repository allowlist is invalid")
-		}
-		allowed = allowed || strings.EqualFold(repository, access.Repository)
-	}
-	if !allowed {
-		return "", errors.New("repository is not approved for this GitHub App credential")
-	}
-	if access.Write && !credential.Write {
-		return "", errors.New("GitHub App credential is not approved for metadata writes")
+	if credential.Token != "" {
+		return credential.Token, nil
 	}
 	level := "read"
 	permissions := map[string]string{"contents": level}
@@ -104,7 +80,7 @@ func (c *Client) installationToken(ctx context.Context, session *session, access
 	}
 	return issued.Token, nil
 }
-func appJWT(credential appCredential, now time.Time) (string, error) {
+func appJWT(credential repositoryCredential, now time.Time) (string, error) {
 	block, remaining := pem.Decode([]byte(credential.PrivateKey))
 	if block == nil || len(strings.TrimSpace(string(remaining))) != 0 {
 		return "", errors.New("GitHub App requires an RSA private key")

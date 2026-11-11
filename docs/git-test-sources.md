@@ -9,7 +9,7 @@ Connections select read-only database metadata or read/write Git metadata with r
 Playwright discovery can generate metadata and exact untagged mappings. New tests start disabled with Needs review safety.
 New starts resolve their configured reference and reuse only matching immutable preparation. Changed source queues setup and blocks stale execution until ready and reviewed. Scheduled firings retain a blocked reason while setup is incomplete.
 Explicit retained versions and reruns preserve their original pin. A manual reviewed version also guards against a silently changed catalog.
-GitHub installation token renewal, validated key reference replacement, GitLab mounted-file project token self-rotation, and durable credential health are implemented.
+GitHub API token authentication and validated replacement, optional App installation token renewal and key reference replacement, GitLab mounted-file project token self-rotation, and durable credential health are implemented.
 The Playwright runner supports TypeScript and JavaScript. Python, online dependency installation, submodules, and Git LFS preparation remain unsupported.
 
 ## Repository connections

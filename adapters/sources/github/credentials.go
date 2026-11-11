@@ -9,7 +9,6 @@ import (
 	"encoding/pem"
 	"errors"
 
-	"github.com/wtiger001/teststudio/internal/definitions"
 	"github.com/wtiger001/teststudio/internal/sourceprovider"
 )
 
@@ -19,16 +18,14 @@ func (c *Client) CredentialInfo(ctx context.Context, a sourceprovider.Access) (s
 		info.Renewal = "public access"
 		return info, nil
 	}
-	if c.Secrets == nil {
-		return info, errors.New("GitHub App credential is unavailable")
-	}
-	secret, err := c.Secrets.Resolve(ctx, a.Project, a.Credential, sourceprovider.CredentialPurpose)
+	credential, err := c.repositoryCredential(ctx, a)
 	if err != nil {
-		return info, errors.New("GitHub App credential is unavailable")
+		return info, err
 	}
-	var credential appCredential
-	if definitions.DecodeJSON(secret.Bytes, &credential, 65536, 8, 100) != nil {
-		return info, errors.New("GitHub App credential is invalid")
+	if credential.Token != "" {
+		info.Renewal = "operator token replacement"
+		info.ExpiresAt = credential.ExpiresAt
+		return info, nil
 	}
 	block, _ := pem.Decode([]byte(credential.PrivateKey))
 	if block == nil {
