@@ -15,7 +15,7 @@ export function navigationSections(project: string, capabilities: Capabilities, 
     const base = `/projects/${project}`
     const application = applicationFromURL(url)
     const testing = application ? `${base}/applications/${application}` : base
-    add('testing', application ? 'Application testing' : 'All application testing', false, [
+    if (application) add('testing', 'Application testing', false, [
       ...(application && allowed(capabilities, 'projects.read') ? [link('Application overview', testing, '▦', true)] : []),
       ...(allowed(capabilities, 'suites.read') ? [link('Suites', `${testing}/suites`, '▤')] : []),
       link('Test catalog', `${testing}/catalog`, '≡', false, [`${testing}/tests`]), link('Test runs', `${testing}/runs`, '▷'),
@@ -24,6 +24,7 @@ export function navigationSections(project: string, capabilities: Capabilities, 
     add('overviews', 'Project overviews', false, [
       ...(allowed(capabilities, 'projects.read') ? [link('All applications', `${base}/applications`, '▦', true)] : []),
       link('HTTPS probes', `${base}/probes`, '◎', true),
+      ...(!application ? [link('Project run history', `${base}/runs`, '▷'), link('Project trends', `${base}/trends`, '▥')] : []),
       ...(allowed(projectCapabilities, 'statuspages.read') ? [link('Status pages', `${base}/status-pages`, '◉')] : [])
     ])
     add('automation', 'Automation', true, [

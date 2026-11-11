@@ -9,7 +9,8 @@ Use the Application selector to switch quickly.
 Your account stays in the global header. It applies across TestStudio, with project access assigned separately.
 The context above the page shows the project and active application.
 Suites, Test catalog, Test runs, and Trends follow this selection.
-Choose an application before opening its catalog. All applications provides project navigation and reporting. HTTPS probes provides a separate project overview.
+Choose an application to reveal Application testing with Suites, Test catalog, Test runs, and Trends. The project view has no shared testing section or catalog link.
+All applications provides project navigation. Project run history and Project trends retain project reporting. HTTPS probes provides a separate project overview.
 
 ## Relationships
 

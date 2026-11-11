@@ -15,7 +15,7 @@ Public status URLs and their iframe embeds show status content without an applic
 Lead with the task: create a test, run it, understand its result, or inspect its evidence.
 Use the same visible names in navigation, headings, actions, help, and user guides.
 Keep project, application, suite, target, and protection context visible where they affect the task.
-Projects own applications and suites. Suites link to applications and contain tests. Environments belong to applications.
+Projects group applications. Each suite has one application owner and contains that application’s tests. Environments belong to applications.
 Carry the selected suite and application into the next workflow.
 Generate identifiers and retain sensible defaults. Keep identifier editing under a named Advanced section.
 Accept familiar input directly. A quick HTTPS check accepts a complete URL without requiring separate setup pages.
@@ -142,12 +142,11 @@ Application testing contains Application overview, Suites, Test catalog, Test ru
 These destinations use application routes and real server filters. Reload, browser Back, and shared links retain their context.
 Switching applications keeps the main destination and clears old suite, environment, test, cursor, and detail filters.
 Existing unsaved-work guards run before changing scope. A rejected change restores the selector value.
-All applications opens project-wide testing. Unassigned suites and unknown legacy run scopes remain available there.
-Project overviews contains All applications and HTTPS probes. Its destinations visibly use project scope.
+Application testing appears only when an application is selected. Project scope does not offer a shared testing section or a project catalog link.
+Project overviews contains All applications, HTTPS probes, and Status pages. With no active application, it also offers Project run history and Project trends. These retain historical cross-application observations without implying shared suites or catalogs.
 HTTPS probes has its own project route with target-specific observations, recent logical checks, freshness, TLS diagnostics, and matching schedules. Creation, explicit adoption, run review, and schedule handoff reuse existing workflows. Add multiple probes opens Addresses, Targets, and Review. Shared-schedule actions show their actual selection before confirmation.
-Shared suites keep project ownership. Their cards show a Shared suite badge.
-Application catalogs explain that publication, transfer, and saved selections operate on the complete shared suite.
-Run lists and trends count matching application tests. Shared run details explicitly show the complete saved run.
+Each current suite has one application owner. Project settings retains reviewed assignment for legacy shared or unassigned suites.
+Application catalogs contain only their application’s suites. Run lists and trends count matching application tests. Historical run details retain their complete saved snapshot.
 New runs freeze application context. Later suite changes cannot move their history between applications.
 Automation contains Schedules and Notifications.
 Advanced testing contains Import and sync tests and Suite releases.

@@ -6,6 +6,13 @@ Implementation resumes at the user's request on 2026-11-03.
 The acceptance count is 50 verified of 57.
 Focus on implementation and targeted checks. The user authorizes MMDev ECS deployment and now plans a first installation into their own Azure subscription.
 
+## Active delivery: application-scoped testing navigation
+
+The user reports the remaining All application testing sidebar heading after the GitHub deployment. The heading was still emitted whenever no application was selected; this was deployed code, not a stale browser-only state.
+Product 0.16.4-dev removes the project-level testing group. Application testing with Suites, Test catalog, Test runs, and Trends appears only after selecting an application. Project scope keeps clearly named Project run history and Project trends under Project overviews, alongside application selection, HTTPS probes, and status pages. Existing direct routes and retained history remain accessible. The selector and context band explain how to choose an application for its suites and catalog.
+Six navigation utility checks pass. Normal STUDIO-NAV-001 passes in 4.098 seconds, run 20261111T022244.201423000-a40259563965864c8cf70437. It verifies absent testing links at project scope, application isolation, project history, browser Back and reload, unsaved-change guards, keyboard navigation, dark and light narrow layouts, and account access. Its old shared-suite fixture is corrected to two independent application-owned suites. Angular compilation passes. The project-scope screenshot is visually reviewed. Owned browser, controller, execution container, and temporary unit loader close.
+This refines 21, 49, and 50. Acceptance remains 50 verified of 57. Deploy the committed correction to MMDev, review the ordinary Task and Service change set, and verify the hosted UI bundle. Preserve the GitHub secret binding, SSO settings, testing-server, recording worker, user browsers, and demo. No Git push or application test execution is requested. Reuse output/aws-mmdev/application-navigation-0164 and the named output/selftest run.
+
 ## Deployed delivery: GitHub API token access and repository wizard
 
 The user authorizes AWS token configuration and release deployment on 2026-11-10. Product 0.16.3-dev from committed f8a26b5 is deployed on MMDev as build be97bc2b528c. Build creation is 2026-11-10T21:07:03.658000-05:00, task startup is 2026-11-10T21:10:38.716000-05:00, and UI publication is 2026-11-10T21:13:32-05:00, all America/New_York. Keep these dates distinct.
