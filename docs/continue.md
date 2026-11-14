@@ -1,7 +1,17 @@
 # Continue TestStudio implementation
 
-Last reviewed: 2026-11-10. These notes describe the last verified state, not a live infrastructure inventory.
+Last reviewed: 2026-11-14. These notes describe the last verified state, not a live infrastructure inventory.
 Read this guide before historical continuation commands elsewhere in the plan.
+
+## Current scope and priority: acceptance 51
+
+The user retires acceptance 54 on 2026-11-14. Multiple OIDC providers across deployment profiles are no longer required acceptance scope.
+Preserve existing configurable OIDC, identity isolation, and project permissions. No authentication behavior changes.
+Current totals are 50 verified of 56 active criteria, six open, and one retired identifier. Open items are 41, 46, 51, 53, 56, and 57.
+Historical totals below retain their original scope. Keep stable identifiers 01–57 and do not renumber later criteria.
+Continue item 51 with the staged MMDev worker installation in [the worker guide](aws-workers-package.md).
+Start with current core inputs, local package admission, and a reviewed prepare-stage change set. Keep preparation and new builds disabled in that stage.
+Execution status, cancellation, deadlines, artifacts, and recovery need actual target verification after workers are connected and enabled. Azure stays deferred.
 
 ## Deployed correction: application-scoped testing navigation
 
@@ -134,7 +144,7 @@ This refines 21, 22, 25, 41, 42, 49, 50, 51, 56, and 57. Acceptance remains 50 v
 
 1. Read AGENTS.md and check the branch and working tree. The logo delivery branch is codex/status-page-logo. The original checkout retains codex/implementation and concurrent reliability edits.
 2. Read the active delivery sections at the start of [the plan](plan.md).
-3. Read the Acceptance criteria section in [the ledger](implementation.md). It contains the authoritative 57 checkboxes.
+3. Read the Acceptance criteria section in [the ledger](implementation.md). It contains 56 active criteria and retired identifier 54.
 4. Continue the latest user request first. Otherwise select one next milestone below and read its implementation before changing it.
 5. Implement the milestone, run targeted local checks, and update the ledger and these notes with verified results.
 
@@ -220,7 +230,7 @@ Open Project → Test catalog → History → Reliability history, then Individu
 ## Current product and release
 
 The application is usable locally and through the hosted UI. Complete product acceptance remains unfinished.
-The count is **50 verified of 57**. Open items are **41, 46, 51, 53, 54, 56, and 57**.
+The count is **50 verified of 56 active criteria**. Open items are **41, 46, 51, 53, 56, and 57**. Identifier 54 is retired.
 UI improvements refine existing accepted items. They do not close the remaining cross-profile requirements.
 
 | Item | Last verified value |
@@ -417,11 +427,10 @@ The ignored .data/aws-mmdev snippets remain convenience history. Use tracked tem
 | --- | --- | --- |
 | 1 | 51 | Consistent execution status, cancellation, deadlines, artifacts, and recovery on remaining profiles. |
 | 2 | 46 | Retention, quotas, pins, encryption, and identity behavior on remaining cloud evidence profiles. |
-| 3 | 54 | Equivalent configured OIDC and project-permission scenarios on remaining profiles. |
-| 4 | 41 | Common timing and timeout behavior across remaining runner and deployment profiles. |
-| 5 | 56 | Generic coded suites, progress, history, reports, and trends on each required target. |
-| 6 | 57 | Complete common scenarios across every required deployment profile. |
-| 7 | 53 | Independent Azure installation and coded execution after the user ends its deferral. |
+| 3 | 41 | Common timing and timeout behavior across remaining runner and deployment profiles. |
+| 4 | 56 | Generic coded suites, progress, history, reports, and trends on each required target. |
+| 5 | 57 | Complete common scenarios across every required deployment profile. |
+| 6 | 53 | Independent Azure installation and coded execution after the user ends its deferral. |
 
 Azure remains deferred for implementation and verification. Preserve its staged packages without adding inspectors or account requirements.
 Local Kubernetes already has retained execution, identity, failover, gateway, and recording evidence. Reuse it unless changed behavior requires another check.

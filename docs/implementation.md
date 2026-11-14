@@ -3,8 +3,17 @@
 The full plan remains required scope. Check an item only after its implementation and verification pass.
 
 Implementation resumes at the user's request on 2026-11-03.
-The acceptance count is 50 verified of 57.
+The acceptance count is 50 verified of 56 active criteria, with six open. Item 54 is retired.
 Focus on implementation and targeted checks. The user authorizes MMDev ECS deployment and now plans a first installation into their own Azure subscription.
+
+## Acceptance scope and worker delivery — 2026-11-14
+
+The user removes acceptance 54, which required multiple OIDC providers across deployment profiles, and selects item 51 next.
+Keep configurable OIDC, existing identity isolation, and project permissions. No authentication behavior changes.
+Stable identifiers remain 01–57, with 54 retired. Historical totals below describe their original scope.
+Current totals are 50 verified, six open, and one retired. Open items are 41, 46, 51, 53, 56, and 57.
+Begin 51 with the staged MMDev worker installation. Verify package admission locally and review a concrete change set before execution.
+Actual execution status, cancellation, deadlines, artifacts, and recovery remain separate target checks. Azure remains deferred.
 
 ## Deployed correction: application-scoped testing navigation
 
@@ -1254,6 +1263,7 @@ Acceptance items 49 and 50 retain their verified status. The total remains 48 of
 
 These stable numbers match the priority list supplied to the user.
 Report progress against these numbers. Keep broad criteria unchecked until their full scope is verified.
+There are 56 active criteria: 50 verified and six open. Item 54 was retired on 2026-11-14; do not renumber later items.
 
 - [x] **01.** The Go service and UI build from this repository without MarketMaker imports, packages, shared resources, or sibling checkouts.
 - [x] **02.** No existing tests, fixtures, catalog records, configuration, credentials, reports, or history are copied into the product.
@@ -1308,7 +1318,7 @@ Report progress against these numbers. Keep broad criteria unchecked until their
 - [ ] **51.** Provider adapters support execution status, cancellation, deadlines, artifacts, and recovery consistently.
 - [x] **52.** Replica failover creates no duplicate logical run. Notification retries retain their documented at-least-once behavior.
 - [ ] **53.** Local, Kubernetes, and Azure installations operate without AWS services or credentials.
-- [ ] **54.** Two newly configured OIDC providers work with the same internal directory and project-scoped permissions across deployment profiles.
+- **54. Retired.** The user removed the multiple-provider acceptance requirement on 2026-11-14.
 - [x] **55.** Hosted identity and private report access work through installation-specific configuration.
 - [ ] **56.** Newly written generic suites complete runs and produce progress, history, reports, and trends on each deployment target.
 - [ ] **57.** AWS ECS and CloudFront, Kubernetes, Azure Container Apps, and local-server profiles pass the common acceptance scenarios.

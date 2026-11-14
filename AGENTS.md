@@ -76,7 +76,7 @@ See docs/self-testing.md and tests/selftest/catalog.json before choosing browser
 - Keep build creation, deployment, and server startup dates distinct. Do not hand-edit generated build metadata.
 - API contract and dependency versions remain separate from the product version.
 - Update affected help, feature guides, API contracts, and operator instructions with behavior changes. Follow the plan's workflow completion checklist.
-- Track all 57 stable acceptance numbers in docs/implementation.md. Report verified totals and the item numbers advanced. Keep broad criteria open until their complete scope passes.
+- Preserve stable acceptance numbers 01–57 in docs/implementation.md. Item 54 is retired at the user's request; track 56 active criteria. Report verified totals and the item numbers advanced. Keep broad criteria open until their complete scope passes.
 - Update docs/continue.md when priorities, release state, deployment state, known gaps, or resume instructions materially change.
 - Commit verified features frequently; the user already authorizes these local commits. Do not push without an explicit request.
 - Keep secrets, local databases, generated metadata, temporary helpers, and raw evidence out of Git. Important resume knowledge belongs in tracked documentation.
