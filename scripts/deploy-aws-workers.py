@@ -188,7 +188,7 @@ def verify_stage(session, stack, receipt):
     fs = efs.describe_file_systems(FileSystemId=outputs['JournalFileSystemId'])['FileSystems'][0]
     require(fs['Encrypted'] and fs['LifeCycleState'] == 'available', 'Private journals must be encrypted and available')
     access = efs.describe_access_points(FileSystemId=fs['FileSystemId'])['AccessPoints']
-    require(len(access) == 1 and access[0]['PosixUser'] == {'Uid': 65532, 'Gid': 65532} and access[0]['RootDirectory']['CreationInfo']['Permissions'] == '0700', 'Journal access-point ownership changed')
+    validate_journal_access(access)
     mounts = efs.describe_mount_targets(FileSystemId=fs['FileSystemId'])['MountTargets']
     require(len(mounts) == 2 and all(item['LifeCycleState'] == 'available' for item in mounts), 'Both private journal mount targets must be available')
     checks.append('Encrypted journals and both mount targets are available with the dedicated non-root private access point')
@@ -199,6 +199,14 @@ def verify_stage(session, stack, receipt):
     require({item['RoleName'] for item in identities['PolicyRoles']} == {receipt['parameters']['ControllerTaskRoleName'], actual['PreparationRole']} and not identities['PolicyUsers'] and not identities['PolicyGroups'] and not identities.get('IsTruncated'), 'Worker controller authority must bind only the API and preparation roles')
     checks.append('Worker control authority is attached only to the selected API and preparation roles')
     return checks
+
+
+def validate_journal_access(access):
+    require(len(access) == 1, 'Exactly one private journal access point is required')
+    user = access[0]['PosixUser']
+    root = access[0]['RootDirectory']
+    creation = root['CreationInfo']
+    require(user['Uid'] == user['Gid'] == 65532 and not user.get('SecondaryGids') and root['Path'] == '/source-journals' and creation['OwnerUid'] == creation['OwnerGid'] == 65532 and creation['Permissions'] == '0700', 'Journal access-point ownership changed')
 
 
 def main():

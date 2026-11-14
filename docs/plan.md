@@ -11,8 +11,10 @@ The user removes acceptance 54 and selects item 51 next. Multiple OIDC providers
 Preserve configurable OIDC, identity isolation, and project permissions. Do not remove existing provider support.
 Track 50 verified and six open criteria out of 56 active requirements. Identifier 54 is retired; later identifiers remain unchanged.
 Historical totals and checkpoints below retain their original scope and do not restore the retired requirement.
-Begin 51 with one staged MMDev worker milestone: inspect current core inputs, verify local package admission, and review the prepare-stage change set before execution.
-Keep preparation and new builds disabled during that stage. Actual lifecycle acceptance follows connection and worker enablement. Azure remains deferred.
+The first 51 milestone completes on MMDev: the bootstrap and 46-resource worker prepare stage pass twelve hosted infrastructure checks after reviewed changes and retained-resource recovery.
+Ten helper tests, eleven local package checks, and the packaged ECS admission check pass. Reuse output/aws-mmdev/workers-051 and [the continuation notes](continue.md#verified-aws-worker-prepare-stage--2026-11-14).
+Preparation, new builds, and environment workers remain disabled. The core and testing-server retain their original completed deployments.
+Continue with existing-service private DNS verification, disabled DNS failure-open, and reviewed connect and ready stages. Actual lifecycle acceptance follows connection and worker enablement. Azure remains deferred.
 
 ## Deployed correction: application-scoped testing navigation
 

@@ -99,6 +99,13 @@ class WorkerChangeReviewTests(unittest.TestCase):
         state = deployment.service_state(ecs, {'outputs': {'ClusterArn': 'owned-cluster', 'ServiceName': 'studio'}})
         self.assertEqual(state, {'studio': {'deployment': 'owned-deployment', 'desired': 1}})
 
+    def test_live_journal_shape_accepts_empty_secondary_groups(self):
+        access = [{'PosixUser': {'Uid': 65532, 'Gid': 65532, 'SecondaryGids': []}, 'RootDirectory': {'Path': '/source-journals', 'CreationInfo': {'OwnerUid': 65532, 'OwnerGid': 65532, 'Permissions': '0700'}}}]
+        deployment.validate_journal_access(access)
+        access[0]['PosixUser']['SecondaryGids'] = [0]
+        with self.assertRaises(ValueError):
+            deployment.validate_journal_access(access)
+
     def test_recovery_preserves_only_exact_retained_inventory_after_rollback(self):
         cf = Mock()
         cf.describe_stacks.return_value = {'Stacks': [{'StackId': 'failed-stack', 'StackStatus': 'ROLLBACK_COMPLETE', 'Tags': [deployment.OWNERSHIP]}]}

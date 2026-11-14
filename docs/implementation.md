@@ -12,8 +12,20 @@ The user removes acceptance 54, which required multiple OIDC providers across de
 Keep configurable OIDC, existing identity isolation, and project permissions. No authentication behavior changes.
 Stable identifiers remain 01–57, with 54 retired. Historical totals below describe their original scope.
 Current totals are 50 verified, six open, and one retired. Open items are 41, 46, 51, 53, 56, and 57.
-Begin 51 with the staged MMDev worker installation. Verify package admission locally and review a concrete change set before execution.
+The first 51 milestone deploys the staged MMDev worker infrastructure through prepare, as recorded below.
 Actual execution status, cancellation, deadlines, artifacts, and recovery remain separate target checks. Azure remains deferred.
+
+## Verified MMDev worker infrastructure for acceptance 51 — 2026-11-14
+
+teststudioapi-workers-bootstrap reaches CREATE_COMPLETE. Its reviewed change set adds only private encrypted versioned package storage and the dedicated regional exchange certificate.
+The initial worker change set adds 46 owned resources with preparation, new builds, and environment workers disabled. The live DNS firewall association rejects priority 100 despite passing the pinned schema. Both association priorities now use 101. The package checker separately rejects reserved boundary priorities.
+Rollback completes before recovery. Recovery captures the exact retained inventory and verifies the original reviewed retain policies. It retires only the failed stack record, imports the two repositories, journal filesystem, journal access point, and preparation log group, and confirms every original physical identifier. No retained data is deleted.
+The corrected concrete change set adds 41 resources and applies ownership tags to the five imports. Review rejects replacements, changed physical identifiers, non-tag property edits, and unexpected resources. The stack reaches UPDATE_COMPLETE at Stage=prepare.
+Local evidence: ten deployment-helper tests pass, including isolated installation inventory, scope and stage gates, retained-resource recovery, tag-only updates, and live EFS response normalization. Eleven package checks pass across nine profiles and eleven rejected configurations. The bootstrap passes its regional schema check. The corrected packaged ECS admission check passes with race detection in 1.449 seconds.
+Target evidence: four bootstrap and eight worker infrastructure checks pass. The deployed resources match their reviewed parameters and inventory. Worker tasks, preparation services, settings secrets, and consumer exchange endpoints remain absent. Worker routes have no internet path; HTTPS egress remains limited to exchange, registry, and S3. The private TLS exchange has its dedicated certificate, no API targets, and only same-account PrivateLink permission. Encrypted journals, both private mount targets, non-root ownership, immutable repositories, and the two scoped controller-policy attachments pass inspection.
+Both existing ECS services retain their original completed deployments. Core inputs and the application release remain unchanged. No image build, core rollout, source preparation, or target test execution occurs as part of this milestone. No owned browser, container, or test-server process remains; no temporary credential files are created. The user's demo and unrelated workloads are preserved.
+Receipts are output/aws-mmdev/workers-051/bootstrap.json and workers.json. workers-failed.json and restore.json preserve recovery history. package-corrected contains the passing local fixture.
+Item 51 advances and remains open. Private DNS verification, fail-closed DNS setup, connection and sealing, enabled workers, and actual execution status, cancellation, deadlines, artifacts, and recovery remain separate checks. Azure stays deferred. Totals remain 50 verified, six open, 56 active criteria, and retired identifier 54. No Git push occurs.
 
 ## Deployed correction: application-scoped testing navigation
 

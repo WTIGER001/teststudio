@@ -9,9 +9,21 @@ The user retires acceptance 54 on 2026-11-14. Multiple OIDC providers across dep
 Preserve existing configurable OIDC, identity isolation, and project permissions. No authentication behavior changes.
 Current totals are 50 verified of 56 active criteria, six open, and one retired identifier. Open items are 41, 46, 51, 53, 56, and 57.
 Historical totals below retain their original scope. Keep stable identifiers 01–57 and do not renumber later criteria.
-Continue item 51 with the staged MMDev worker installation in [the worker guide](aws-workers-package.md).
-Start with current core inputs, local package admission, and a reviewed prepare-stage change set. Keep preparation and new builds disabled in that stage.
+The first item 51 milestone is complete: the staged MMDev worker infrastructure reaches prepare. Continue with private DNS verification, connection, and sealing in [the worker guide](aws-workers-package.md).
+Do not repeat the initial infrastructure deployment. Preparation and new builds remain disabled.
 Execution status, cancellation, deadlines, artifacts, and recovery need actual target verification after workers are connected and enabled. Azure stays deferred.
+
+## Verified AWS worker prepare stage — 2026-11-14
+
+The authorized MMDev account is verified before each mutation. teststudioapi-workers-bootstrap reaches CREATE_COMPLETE and teststudioapi-workers reaches UPDATE_COMPLETE with Stage=prepare.
+The bootstrap adds private encrypted versioned package storage and the issued regional exchange certificate. The worker stack contains 46 resources, including isolated networking, a private TLS exchange, bounded controller authority, immutable runtime repositories, and private encrypted journals.
+The initial worker attempt rolls back because CloudFormation rejects DNS firewall association priority 100. Both offline and environment associations now use 101, with an explicit package regression check. Existing internal allow and block rule priorities remain unchanged.
+Recovery preserves both repositories, the journal filesystem and access point, and the preparation log group. The failed stack record is retired only after rollback completes and the original retain policies and exact inventory match. A reviewed five-resource import retains every original physical identifier. The corrected reviewed update adds 41 resources and applies only ownership tags to the five imported resources, without replacement or data-property changes.
+Ten helper tests, eleven package checks, the bootstrap regional schema check, and the race-enabled packaged ECS admission check pass. The admission check takes 1.449 seconds. Twelve hosted infrastructure checks pass across bootstrap and workers. They verify private storage, certificate issuance, disabled capabilities, restricted routing and egress, private TLS, journal ownership and mount targets, immutable repositories, and scoped policy attachments.
+The core and testing-server retain their original completed ECS deployments. Core inputs, recording configuration, GitHub access, and the deployed application release remain unchanged. No service image is built, core rollout starts, source preparation queues, or target test starts. The port 8040 demo and user workloads remain untouched.
+Reuse output/aws-mmdev/workers-051. bootstrap.json and workers.json contain verified receipts; workers-failed.json and restore.json preserve the rollback and import history. package-corrected contains the passing package fixture. The local verifier accepts the EFS API's explicit empty secondary-group list while rejecting additional groups and changed private ownership.
+Next, configure the existing endpoint service's private DNS ownership and disable worker-VPC DNS failure-open. Then review the connect and ready change sets before linking the API or enabling preparation. The initial deployment helper deliberately stops at prepare; extend tracked tooling for later stages rather than restarting or duplicating these stacks. PrivateLink transport, mounted EFS access, runtime publication, source preparation, execution, cancellation, deadlines, artifacts, and recovery still need their relevant target checks.
+This advances 51 without closing it. Totals remain 50 verified of 56 active criteria, six open, and one retired identifier. Azure remains deferred. Local commits are retained without a Git push.
 
 ## Deployed correction: application-scoped testing navigation
 

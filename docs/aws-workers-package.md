@@ -21,6 +21,17 @@ The expanded template requires a private packaging bucket through aws cloudforma
 The package targets the standard aws partition and a dedicated installation in the authorized MMDev account.
 It imports no existing application's tests or infrastructure configuration.
 
+## Verified MMDev prepare stage — 2026-11-14
+
+teststudioapi-workers-bootstrap reaches CREATE_COMPLETE and teststudioapi-workers reaches UPDATE_COMPLETE at Stage=prepare.
+The bootstrap contains two resources. The worker stack contains 46 resources and enables no preparation, new builds, environment workers, or test tasks.
+The initial DNS association failure is corrected and the five retained resources are imported without deletion or replacement, as described in the recovery section below.
+Ten helper tests, eleven package checks, the regional bootstrap schema check, and the race-enabled packaged ECS admission check pass. Four bootstrap and eight worker infrastructure checks pass against AWS.
+Both existing ECS service deployments and the core inputs remain unchanged. Reuse output/aws-mmdev/workers-051, including its failed-attempt and restoration receipts.
+Next, perform private DNS verification and disable worker-VPC DNS failure-open. Then review connect and ready change sets before API linkage or preparation enablement.
+The initial deployment helper stops at prepare. Extend the tracked tooling for later stages and preserve this installation.
+This advances item 51 without closing it. The current ledger has 50 verified, six open, 56 active criteria, and retired identifier 54.
+
 ## Inputs and existing resources
 
 Use a current [service image](service-image.md) distribution digest and the same service architecture in both templates.
