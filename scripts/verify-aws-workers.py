@@ -41,6 +41,10 @@ def main():
     template = load('workers.yaml')
     core = load('service.yaml')
     checks = ['Both CloudFormation templates pass local schemas and dependency checks in two regions']
+    for resource in template['Resources'].values():
+        if resource['Type'] == 'AWS::Route53Resolver::FirewallRuleGroupAssociation':
+            assert 100 < resource['Properties']['Priority'] < 9900, 'DNS firewall association priorities exclude both boundary values'
+    checks.append('Offline and environment DNS firewall associations exclude reserved boundary priorities')
     default = preview(template)
     assert not any(resource['Type'] in ['AWS::EC2::InternetGateway', 'AWS::EC2::NatGateway', 'AWS::EC2::Route', 'AWS::EC2::VPCPeeringConnection', 'AWS::Lambda::Function'] and default.properties(name) is not None for name, resource in template['Resources'].items())
     snapshots = []

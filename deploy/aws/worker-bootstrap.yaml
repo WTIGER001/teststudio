@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: TestStudio private worker exchange certificate and deployment package storage
+Parameters:
+  ExchangeHostname:
+    Type: String
+    AllowedPattern: '^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+$'
+  HostedZoneId:
+    Type: AWS::Route53::HostedZone::Id
+Resources:
+  PackageBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules: [{ObjectOwnership: BucketOwnerEnforced}]
+      VersioningConfiguration: {Status: Enabled}
+  ExchangeCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref ExchangeHostname
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Ref ExchangeHostname
+          HostedZoneId: !Ref HostedZoneId
+Outputs:
+  PackageBucket:
+    Value: !Ref PackageBucket
+  ExchangeHostname:
+    Value: !Ref ExchangeHostname
+  ExchangeCertificateArn:
+    Value: !Ref ExchangeCertificate

@@ -574,7 +574,7 @@ Resources:
     Properties:
       VpcId: !Ref WorkerVpc
       FirewallRuleGroupId: !Ref DnsRules
-      Priority: 100
+      Priority: 101
       MutationProtection: ENABLED
   Deadlines:
     Type: AWS::Scheduler::ScheduleGroup
@@ -1274,7 +1274,7 @@ Resources:
         Ref: EnvironmentWorkerVpc
       FirewallRuleGroupId:
         Ref: EnvironmentDnsRules
-      Priority: 100
+      Priority: 101
       MutationProtection: ENABLED
     Condition: Environment
   GatewayVpc:
