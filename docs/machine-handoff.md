@@ -3,7 +3,9 @@
 ## Source and reading order
 
 Continue on branch codex/implementation. Transfer the current local Git history before starting from a new clone.
-The 2026-11-16 audit finds diverged cached origin tracking and a failed GitHub SSH check. The cached references do not establish the current remote state.
+The initial 2026-11-16 audit finds diverged cached origin tracking and a failed GitHub SSH check.
+GitHub access is then repaired for this checkout using HTTPS and the existing authenticated GitHub CLI credential helper. A normal fetch succeeds.
+That fetch confirms 44 local-only commits and one remote-only documentation commit before the authentication documentation update. The branches still need deliberate reconciliation before a push.
 Do not assume a GitHub clone includes the local work. Do not reset, force-push, or merge the divergence merely to start development.
 The source must include f08dbdf, ea5d4bc, and 048b3de, followed by this handoff documentation.
 These commits retire item 54, add the staged worker tooling, and record verified worker infrastructure.
@@ -24,7 +26,7 @@ The tracked deployment helper currently stops at prepare. Extend it for later st
 ## Portable source transfer
 
 A Git bundle transfers committed history without relying on GitHub authentication or publishing the branch.
-The prepared handoff files are under the old checkout's ignored output/handoff/2026-11-16 directory:
+The refreshed handoff files are under the old checkout's ignored output/handoff/2026-11-16-github directory. They supersede the earlier 2026-11-16 export:
 
 | File | Contents |
 | --- | --- |
@@ -50,13 +52,17 @@ git branch --show-current
 git log -4 --oneline
 ```
 
-The clone initially uses the bundle path as origin. After configuring GitHub access, restore the intended remote URL:
+The clone initially uses the bundle path as origin. Authenticate GitHub CLI on the new machine, then configure this checkout to use HTTPS and that credential helper:
 
 ```sh
-git remote set-url origin git@github.com:wtiger001/teststudio.git
+git remote set-url origin https://github.com/WTIGER001/teststudio.git
+git config --local --replace-all credential.https://github.com.helper ''
+git config --local --add credential.https://github.com.helper '!gh auth git-credential'
+git fetch origin
 ```
 
-A later fetch can inspect the real remote divergence. Reconcile it deliberately before any separately authorized push.
+The configuration stays local to this checkout and uses GitHub CLI's credential storage. It does not put a token in the remote URL or repository files.
+Inspect the fetched branch divergence and reconcile it deliberately before any separately authorized push. Do not force-push over the remote-only work.
 The export can be recreated from the current checkout with git bundle create and the same four receipt files. A later source change requires a new export.
 
 ## Local files and credentials
