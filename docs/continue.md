@@ -1,7 +1,15 @@
 # Continue TestStudio implementation
 
-Last reviewed: 2026-11-14. These notes describe the last verified state, not a live infrastructure inventory.
+Last reviewed: 2026-11-16. These notes describe the last verified state, not a live infrastructure inventory.
 Read this guide before historical continuation commands elsewhere in the plan.
+
+## Continue on another machine
+
+Follow [the machine handoff](machine-handoff.md) for source transfer, private receipts, local tools, credentials, and a starting prompt.
+The 2026-11-16 handoff audit confirms a clean local checkout at 048b3de before its documentation update. Cached origin tracking is diverged; a live GitHub SSH check fails. No push is performed.
+The prepared Git bundle includes the local implementation history. A separate private archive contains only bootstrap.json, workers.json, workers-failed.json, and restore.json from output/aws-mmdev/workers-051.
+Neither .data nor output is transferred by a normal clone. Do not assume old credentials, caches, local clusters, demo state, or raw evidence exist on the new machine.
+The next task remains acceptance 51: continue from the existing worker prepare stage with private DNS setup, connection, and sealing. No acceptance item advances from this documentation and transfer work.
 
 ## Current scope and priority: acceptance 51
 

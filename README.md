@@ -6,6 +6,7 @@ The [acceptance ledger](docs/implementation.md) records verified work and pendin
 The [UI contract](docs/ui.md) defines tester workflows, shared interaction patterns, and documentation requirements.
 The [help guide](docs/help.md) explains contextual guide maintenance.
 For agent work, start with [AGENTS.md](AGENTS.md) and the [continuation guide](docs/continue.md).
+To continue on another machine, follow [the machine handoff](docs/machine-handoff.md) for the current source history and private deployment receipts.
 Use the [workflow completion checklist](docs/plan.md#workflow-completion-checklist) for each behavior change.
 
 ## Local demonstration
@@ -44,14 +45,14 @@ Normal local development still starts with an empty project registry.
 
 ## Deployment coverage
 
-The acceptance ledger has 50 verified items of 57. The full product remains unfinished.
+The acceptance ledger has 50 verified items of 56 active criteria. Six remain open; identifier 54 is retired. The full product remains unfinished.
 The local application and dedicated local Kubernetes installation have retained workflow evidence.
 AWS ECS and CloudFront have service, execution, gateway, and optional desktop recorder packages with local contract checks.
 The MMDev ECS core now runs as teststudioapi with CloudFront, PostgreSQL, dedicated sign-in, and private evidence.
 See [deployment and sign-in](docs/aws-mmdev.md) for the address, initial credential reference, and verified scope.
 Complete AWS acceptance remains open until actual target verification passes.
 Azure implementation and verification remain deferred at the user's request.
-See [deployment readiness](docs/deployment-readiness.md) for the seven open criteria and their exact gates.
+See [deployment readiness](docs/deployment-readiness.md) for the six open criteria and their exact gates.
 Operator guides cover [AWS](docs/aws.md), [Kubernetes](docs/kubernetes.md), and the [staged Azure profile](docs/azure.md).
 
 ## Portable service image
