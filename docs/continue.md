@@ -7,7 +7,7 @@ Read this guide before historical continuation commands elsewhere in the plan.
 
 Follow [the machine handoff](machine-handoff.md) for source transfer, private receipts, local tools, credentials, and a starting prompt.
 The 2026-11-16 handoff audit confirms a clean local checkout at 048b3de before its documentation update. Cached origin tracking is diverged; a live GitHub SSH check fails. No push is performed.
-GitHub access is subsequently repaired for this checkout with HTTPS and the authenticated GitHub CLI credential helper. A normal fetch succeeds and confirms 44 local-only commits and one remote-only documentation commit before the authentication documentation update. No push or branch merge occurs.
+GitHub access is subsequently repaired for this checkout with HTTPS and the authenticated GitHub CLI credential helper. A normal fetch succeeds. On 2026-11-16, the user authorizes publication. The merge preserves the remote-only 0.8.2 deployment documentation and the later local product and worker history. The current release table reflects the retained 0.16.4 deployment receipts. Publication uses an ordinary push without rewriting remote history.
 The refreshed source and receipt export is output/handoff/2026-11-16-github. It supersedes the earlier export and includes the working HTTPS setup instructions. Authenticate the new machine separately.
 The prepared Git bundle includes the local implementation history. A separate private archive contains only bootstrap.json, workers.json, workers-failed.json, and restore.json from output/aws-mmdev/workers-051.
 Neither .data nor output is transferred by a normal clone. Do not assume old credentials, caches, local clusters, demo state, or raw evidence exist on the new machine.
@@ -258,26 +258,27 @@ UI improvements refine existing accepted items. They do not close the remaining 
 | Item | Last verified value |
 | --- | --- |
 | Hosted UI | https://teststudio.devfoodmarketmaker.com |
-| Product version | 0.13.0-dev; footer displays 0.13.0.dev |
-| API contract | 0.47.0 |
-| Build identifier | 5d81af4f2f8d |
-| Build creation | 2026-11-09T18:52:46.059Z |
-| Implementation commit | db131a541496623193f8eb24b0b20cdb88a4593f |
+| Product version | 0.16.4-dev; footer displays 0.16.4.dev |
+| API contract | 0.51.0 |
+| Build identifier | 7dbb3638289f |
+| Build creation | 2026-11-10T21:24:26.991000-05:00 |
+| Implementation commit | f41e2cd748bbdad6b1f3da41eb3a823d1abbf34d |
 | Source state at build | Committed source; modified is false |
-| Service image digest | sha256:4908079399d8398218145ab995b7c2f9c4c1670911e906de4ea48d4b3eb19e7f |
-| Task startup | 2026-11-09T18:55:59.529Z |
-| UI publication | 2026-11-09T18:59:41Z |
+| Service image digest | sha256:756dbd135dd4bbb0ed628e3643dd0ff0bde6a37f8f3bdd4f48b1767965cff394 |
+| Task startup | 2026-11-10T21:27:20.668000-05:00 |
+| UI publication | 2026-11-10T21:31:09-05:00 |
 | Live version metadata | GET /api/v1/version; public and no-store |
 
 Later documentation and operator-tooling commits do not change the deployed implementation commit or its immutable build date.
 The public API, UI bundle, and portable image labels match this release.
 The local user demo is separate. Do not assume it runs the same release as the hosted installation.
 
-## Active delivery: centered status-page content
+## Completed delivery: centered status-page content
 
 The status component now centers all content in a maximum width of 72rem, with --ts-status-content-width available to hosts. Background color fills the public viewport; automatic margins bound wide layouts without stretching pills. Existing responsive behavior and logo proportions remain.
 Normal STUDIO-STATUS-PAGES-001 passes in 7.131 seconds, run 20261108T145225.305888000-5d4d2bb3419d754f8564d43e, with cleaned execution. Checks cover centered widths at 1920, 1280, and 390 pixels, compact pills, no horizontal overflow, full-height background, and prior public/private workflows. The independent built consumer and SSR checks pass at library 0.2.1-dev.
-Release 0.8.2-dev deploys before the inspection release and is preserved in the combined 0.9.0-dev delivery. Its centered-layout checks remain valid. Reuse passing evidence; preserve user page configuration and the separate demo.
+Release 0.8.2-dev from committed d47c744 is pushed and deployed as build a3891c1ad13a. The reviewed change set modifies only Service and Task. Eighteen hosted checks pass for API/UI identity, centered component bytes, health, completed rollouts, selected digest, and invalidation. The requesting public page measures 1152 pixels wide with equal 56.5-pixel margins; its background fills the viewport and Help stays absent. No page configuration changes. Receipts and screenshot are output/aws-mmdev/status-centered-082. Library 0.2.1-dev is packed locally under output/angular-status; registry publication remains separate. Owned tabs, test servers, and temporary databases close; passing build caches remain reusable. Preserve the separate original-checkout work and port 8040 demo.
+This delivery precedes the combined 0.9.0-dev reliability release. Its centered-layout evidence remains valid; reuse passing checks.
 
 ## Completed delivery: remove public status Help
 

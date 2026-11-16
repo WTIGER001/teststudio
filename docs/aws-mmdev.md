@@ -318,6 +318,8 @@ Release 0.8.0-dev adds configurable logo height and incorporates the committed s
 
 Release 0.8.1-dev removes Help from public status documents and embeds, with management guidance retained. The local browser workflow and seventeen hosted release checks pass. Its reviewed image-only change set modifies Service and Task; no response policy or user page configuration changes. Receipts are output/aws-mmdev/status-no-help-081.
 
+Release 0.8.2-dev centers status-page content at a maximum width of 72rem with automatic margins, compact pills, and a full-viewport background. Build a3891c1ad13a uses committed d47c744. The reviewed image-only change set modifies Service and Task. Eighteen hosted checks and actual equal-margin public rendering pass; both services and the stack are healthy and invalidation completes. No user page configuration changes. Receipts are output/aws-mmdev/status-centered-082.
+
 ### Individual reliability inspection release
 
 Release 0.9.0-dev deploys the shared individual-check table and paginated observation API while retaining the completed centered-layout and logo releases. The ordinary reviewed change set modifies only Service and Task. Fifteen hosted checks cover authenticated and public history, exact observations, CORS, privacy, publication withdrawal, artifact identity, and healthy rollouts. The public browser verifies 50-to-100 pagination and exact-day pill inspection. Receipts and screenshots are output/aws-mmdev/reliability-090. The generic verification page is unpublished, its session closes, and no new target run or user configuration change occurs. The full acceptance count remains 50 of 57; coded workers and other profiles retain their separate open criteria.

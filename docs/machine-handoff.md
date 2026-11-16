@@ -2,11 +2,12 @@
 
 ## Source and reading order
 
-Continue on branch codex/implementation. Transfer the current local Git history before starting from a new clone.
+Continue on branch codex/implementation. Use the published branch after the authorized push, or transfer the committed source bundle as a fallback.
 The initial 2026-11-16 audit finds diverged cached origin tracking and a failed GitHub SSH check.
 GitHub access is then repaired for this checkout using HTTPS and the existing authenticated GitHub CLI credential helper. A normal fetch succeeds.
-That fetch confirms 44 local-only commits and one remote-only documentation commit before the authentication documentation update. The branches still need deliberate reconciliation before a push.
-Do not assume a GitHub clone includes the local work. Do not reset, force-push, or merge the divergence merely to start development.
+That fetch confirms 44 local-only commits and one remote-only documentation commit before the authentication documentation update. The user then authorizes merging and pushing on 2026-11-16.
+The merge preserves the remote 0.8.2 deployment documentation and the later local product and worker history. Publication uses an ordinary push without rewriting history.
+Verify the published branch before continuing. Do not reset or force-push over another machine's work.
 The source must include f08dbdf, ea5d4bc, and 048b3de, followed by this handoff documentation.
 These commits retire item 54, add the staged worker tooling, and record verified worker infrastructure.
 
@@ -25,8 +26,20 @@ The tracked deployment helper currently stops at prepare. Extend it for later st
 
 ## Portable source transfer
 
+After publication, authenticate GitHub CLI on the new machine and clone the branch directly:
+
+```sh
+git -c credential.helper= -c 'credential.helper=!gh auth git-credential' \
+  clone --branch codex/implementation https://github.com/WTIGER001/teststudio.git teststudio
+git -C teststudio config --local --replace-all credential.https://github.com.helper ''
+git -C teststudio config --local --add credential.https://github.com.helper '!gh auth git-credential'
+```
+
+Transfer the private receipt archive separately and extract it with tar -xzf teststudio-worker-receipts.tar.gz -C teststudio. GitHub does not contain these ignored receipts.
+
 A Git bundle transfers committed history without relying on GitHub authentication or publishing the branch.
-The refreshed handoff files are under the old checkout's ignored output/handoff/2026-11-16-github directory. They supersede the earlier 2026-11-16 export:
+The fallback handoff files are under the old checkout's ignored output/handoff/2026-11-16-github directory. Their source snapshot is db6d69b, before the publication merge. Fetch the published branch after restoring that snapshot to obtain the later merge documentation.
+The private receipt archive remains valid because publication changes no AWS resources or receipts. These files supersede the earlier 2026-11-16 export:
 
 | File | Contents |
 | --- | --- |
@@ -62,7 +75,7 @@ git fetch origin
 ```
 
 The configuration stays local to this checkout and uses GitHub CLI's credential storage. It does not put a token in the remote URL or repository files.
-Inspect the fetched branch divergence and reconcile it deliberately before any separately authorized push. Do not force-push over the remote-only work.
+Inspect the fetched branch state before continuing. The authorized publication incorporates the earlier remote-only documentation commit. Reconcile any later divergence deliberately before another separately authorized push.
 The export can be recreated from the current checkout with git bundle create and the same four receipt files. A later source change requires a new export.
 
 ## Local files and credentials
