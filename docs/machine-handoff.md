@@ -2,7 +2,8 @@
 
 ## Source and reading order
 
-Continue on branch codex/implementation. Use the published branch after the authorized push, or transfer the committed source bundle as a fallback.
+Continue on branch main, which is now the GitHub default. The user selects main on 2026-11-16. It starts from published implementation tip 465d2aa and includes the complete merged implementation and delivery history.
+The earlier codex/implementation and codex/status-page-logo branches remain preserved. Use main for a new clone, or restore the older committed source bundle and then fetch main.
 The initial 2026-11-16 audit finds diverged cached origin tracking and a failed GitHub SSH check.
 GitHub access is then repaired for this checkout using HTTPS and the existing authenticated GitHub CLI credential helper. A normal fetch succeeds.
 That fetch confirms 44 local-only commits and one remote-only documentation commit before the authentication documentation update. The user then authorizes merging and pushing on 2026-11-16.
@@ -26,11 +27,11 @@ The tracked deployment helper currently stops at prepare. Extend it for later st
 
 ## Portable source transfer
 
-After publication, authenticate GitHub CLI on the new machine and clone the branch directly:
+Authenticate GitHub CLI on the new machine and clone main directly:
 
 ```sh
 git -c credential.helper= -c 'credential.helper=!gh auth git-credential' \
-  clone --branch codex/implementation https://github.com/WTIGER001/teststudio.git teststudio
+  clone --branch main https://github.com/WTIGER001/teststudio.git teststudio
 git -C teststudio config --local --replace-all credential.https://github.com.helper ''
 git -C teststudio config --local --add credential.https://github.com.helper '!gh auth git-credential'
 ```
@@ -72,6 +73,7 @@ git remote set-url origin https://github.com/WTIGER001/teststudio.git
 git config --local --replace-all credential.https://github.com.helper ''
 git config --local --add credential.https://github.com.helper '!gh auth git-credential'
 git fetch origin
+git switch --track origin/main
 ```
 
 The configuration stays local to this checkout and uses GitHub CLI's credential storage. It does not put a token in the remote URL or repository files.

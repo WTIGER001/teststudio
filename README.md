@@ -1,6 +1,7 @@
 # TestStudio
 
 TestStudio is an independent test catalog, execution, and evidence platform.
+The primary development branch is main.
 The implementation follows [the product plan](docs/plan.md).
 The [acceptance ledger](docs/implementation.md) records verified work and pending requirements.
 The [UI contract](docs/ui.md) defines tester workflows, shared interaction patterns, and documentation requirements.

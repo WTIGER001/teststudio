@@ -5,6 +5,8 @@ Read this guide before historical continuation commands elsewhere in the plan.
 
 ## Continue on another machine
 
+The user selects main as the primary branch on 2026-11-16. No main or master branch existed, so main starts from the published implementation tip 465d2aa with its complete merged history. GitHub now defaults to main.
+Clone main on the new machine. The codex/implementation and codex/status-page-logo branches remain preserved; their committed implementation and delivery history is included in main.
 Follow [the machine handoff](machine-handoff.md) for source transfer, private receipts, local tools, credentials, and a starting prompt.
 The 2026-11-16 handoff audit confirms a clean local checkout at 048b3de before its documentation update. Cached origin tracking is diverged; a live GitHub SSH check fails. No push is performed.
 GitHub access is subsequently repaired for this checkout with HTTPS and the authenticated GitHub CLI credential helper. A normal fetch succeeds. On 2026-11-16, the user authorizes publication. The merge preserves the remote-only 0.8.2 deployment documentation and the later local product and worker history. The current release table reflects the retained 0.16.4 deployment receipts. Publication uses an ordinary push without rewriting remote history.
@@ -164,7 +166,7 @@ This refines 21, 22, 25, 41, 42, 49, 50, 51, 56, and 57. Acceptance remains 50 v
 
 ## Resume in this order
 
-1. Read AGENTS.md and check the branch and working tree. The logo delivery branch is codex/status-page-logo. The original checkout retains codex/implementation and concurrent reliability edits.
+1. Read AGENTS.md and check the branch and working tree. Start from main. Historical delivery branches remain preserved; do not treat their older continuation notes as the active queue.
 2. Read the active delivery sections at the start of [the plan](plan.md).
 3. Read the Acceptance criteria section in [the ledger](implementation.md). It contains 56 active criteria and retired identifier 54.
 4. Continue the latest user request first. Otherwise select one next milestone below and read its implementation before changing it.
